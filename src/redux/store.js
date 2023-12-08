@@ -10,8 +10,8 @@ import {
     REGISTER,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-// import { contactsReducer } from './contacts/slice';
 import { authReducer } from './auth/slice';
+import { settingsReducer } from './settings/slice';
 
 // const middleware = [
 //     ...getDefaultMiddleware({
@@ -28,9 +28,16 @@ const authPersistConfig = {
     whitelist: ['token'],
 };
 
+const settingsPersistConfig = {
+    key: 'settings',
+    storage,
+    whitelist: ['currentTheme'],
+};
+
 export const store = configureStore({
     reducer: {
         auth: persistReducer(authPersistConfig, authReducer),
+        settings: persistReducer(settingsPersistConfig, settingsReducer),
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

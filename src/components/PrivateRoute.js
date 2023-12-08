@@ -1,5 +1,5 @@
-import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from 'hooks';
+import { Navigate, useSearchParams } from 'react-router-dom';
 
 /**
  * - If the route is private and the user is logged in, render the component
@@ -12,8 +12,8 @@ export const PrivateRoute = ({
     redirectBack,
 }) => {
     const [searchParams] = useSearchParams();
-    const { isLoggedIn, isRefreshing } = useAuth();
-    const shouldRedirect = !isLoggedIn && !isRefreshing;
+    // const { isLoggedIn, isRefreshing } = useAuth();
+    const shouldRedirect = true;
 
     return shouldRedirect ? (
         <Navigate
