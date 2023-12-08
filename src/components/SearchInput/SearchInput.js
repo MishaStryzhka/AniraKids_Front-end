@@ -10,9 +10,9 @@ const SearchInput = () => {
     <>
       <Label>
         <Input
-          placeholder='Пошук'
+          placeholder="Пошук"
           // value={value}
-          onChange={(e) => handleInput(e)}
+          onChange={e => handleInput(e)}
         />
         {handleInput !== '' ? (
           <WrapIcon>

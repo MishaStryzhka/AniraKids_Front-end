@@ -4,6 +4,7 @@ import Logo from '../Logo/Logo';
 import SearchInput from '../SearchInput/SearchInput';
 import BoxNavigation from '../BoxNavigation/BoxNavigation';
 import SectionNavLinks from '../SectionNavLinks/SectionNavLinks';
+import { Container } from 'components/Container/Container';
 
 const AppBar = () => {
   const { pathname } = useLocation();
@@ -11,17 +12,19 @@ const AppBar = () => {
   console.log('pathname === `/`', pathname === `/`);
 
   return (
-    <ContainerAppBar $mainPage={pathname === `/`}>
-      <List>
-        <Item>Жінки</Item>
-        <Item>Чоловіки</Item>
-        <Item>Діти</Item>
-      </List>
-      <Logo />
-      <SearchInput />
-      <BoxNavigation />
-      <SectionNavLinks />
-    </ContainerAppBar>
+    <Container>
+      <ContainerAppBar $mainPage={pathname === `/`}>
+        <List>
+          <Item>Жінки</Item>
+          <Item>Чоловіки</Item>
+          <Item>Діти</Item>
+        </List>
+        <Logo />
+        <SearchInput />
+        <BoxNavigation />
+        <SectionNavLinks />
+      </ContainerAppBar>
+    </Container>
   );
 };
 

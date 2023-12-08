@@ -6,36 +6,33 @@ import AppBar from '../AppBar/AppBar';
 import { Container } from '../Container/Container';
 
 const SharedLayout = () => {
-    const [isOpenMenu, setIsOpenMenu] = useState(false);
+  const [isOpenMenu, setIsOpenMenu] = useState(false);
 
-    const closeMenu = (e) => {
-        if (
-            e.target.id !== 'btnNavMenu' &&
-            e.target.id !== 'navMenu' &&
-            e.target.id !== 'navContainer'
-        ) {
-            setIsOpenMenu(false);
-        }
-    };
+  const closeMenu = e => {
+    if (
+      e.target.id !== 'btnNavMenu' &&
+      e.target.id !== 'navMenu' &&
+      e.target.id !== 'navContainer'
+    ) {
+      setIsOpenMenu(false);
+    }
+  };
 
-    return (
-        <>
-            <ContainerLayout $isOpenMenu={isOpenMenu} onClick={closeMenu}>
-                <AppBar
-                    $isOpenMenu={isOpenMenu}
-                    setIsOpenMenu={setIsOpenMenu}
-                />
-                <StuledContainer>
-                    <Container>
-                        <Suspense fallback={null}>
-                            <Outlet />
-                        </Suspense>
-                    </Container>
-                </StuledContainer>
-                <Footer />
-            </ContainerLayout>
-        </>
-    );
+  return (
+    <>
+      <ContainerLayout $isOpenMenu={isOpenMenu} onClick={closeMenu}>
+        <AppBar $isOpenMenu={isOpenMenu} setIsOpenMenu={setIsOpenMenu} />
+        <StuledContainer>
+          <Container>
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
+          </Container>
+        </StuledContainer>
+        <Footer />
+      </ContainerLayout>
+    </>
+  );
 };
 
 export default SharedLayout;
