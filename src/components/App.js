@@ -10,8 +10,11 @@ import {
   ForMenPage,
   ForWomenPage,
   MainPage,
+  UserPage,
   NotFoundPage,
 } from '../pages';
+import { PrivateRoute } from './PrivateRoute';
+import { useSettings } from 'hooks/useSettings';
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
@@ -45,12 +48,12 @@ function App() {
                                 component={<RegisterPage />}
                             />
                         }
-                    />
+                    /> */}
                     <Route
                         path='/user'
                         element={
                             <PrivateRoute
-                                redirectTo='/login'
+                                redirectTo='/'
                                 redirectBack='/user'
                                 component={<UserPage />}
                             />

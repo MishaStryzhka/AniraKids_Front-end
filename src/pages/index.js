@@ -4,6 +4,7 @@ const { ForChildrenPage } = require('./ForChildrenPage/ForChildrenPage.styled');
 const { ForMenPage } = require('./ForMenPage/ForMenPage');
 const { ForWomenPage } = require('./ForWomenPage/ForWomenPage');
 const { MainPage } = require('./MainPage/MainPage');
+const { UserPage } = require('./UserPage/UserPage');
 const { NotFoundPage } = require('./NotFoundPage/NotFoundPage');
 
 module.exports = {
@@ -14,4 +15,5 @@ module.exports = {
   DecorAndToysPage,
   AboutUsPage,
   NotFoundPage,
+  UserPage,
 };
