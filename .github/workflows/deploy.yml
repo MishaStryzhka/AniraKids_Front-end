@@ -13,7 +13,7 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config --global user.email "mykhailo.stryzhka@seznam.cz"
+          git config --global user.email "misha.strizhcka@gmail.com"
           git config --global user.name "Mykhailo Stryzhka"
 
       - name: Install, build 🔧
