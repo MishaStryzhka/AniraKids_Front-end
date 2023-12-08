@@ -5,13 +5,15 @@ const { ForMenPage } = require('./ForMenPage/ForMenPage');
 const { ForWomenPage } = require('./ForWomenPage/ForWomenPage');
 const { MainPage } = require('./MainPage/MainPage');
 const { UserPage } = require('./UserPage/UserPage');
+const { NotFoundPage } = require('./NotFoundPage/NotFoundPage');
 
 module.exports = {
-    ForMenPage,
-    MainPage,
-    ForWomenPage,
-    ForChildrenPage,
-    DecorAndToysPage,
-    AboutUsPage,
-    UserPage,
+  ForMenPage,
+  MainPage,
+  ForWomenPage,
+  ForChildrenPage,
+  DecorAndToysPage,
+  AboutUsPage,
+  NotFoundPage,
+  UserPage,
 };
