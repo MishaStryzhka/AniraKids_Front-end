@@ -1,18 +1,18 @@
 import styled from 'styled-components';
 
 export const ContainerAppBar = styled.header`
-  /* background-color: ${({ $mainPage }) => ($mainPage ? 'red' : 'green')}; */
+  background-color: ${({ $mainPage }) =>
+    $mainPage ? '#77695E' : 'transparent'};
   display: flex;
   flex-wrap: wrap;
-  width: 1440px;
-  padding: 12px 80px 0 80px;
+  padding-top: 12px;
   align-items: center;
+  justify-content: space-between;
 `;
 
 export const List = styled.ul`
   display: flex;
   gap: 48px;
-  margin-right: 182px;
 `;
 
 export const Item = styled.li`
@@ -23,5 +23,5 @@ export const Item = styled.li`
   font-weight: 700;
   line-height: 1.43;
 
-  color: #000;
+  color: ${({ $mainPage }) => ($mainPage ? '#fff' : '#000')};
 `;

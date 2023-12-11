@@ -6,6 +6,7 @@ export const Input = styled.input`
   overflow: hidden;
   border-radius: 50px;
   position: relative;
+  background-color: transparent;
 
   border: 1px solid rgba(198, 165, 141, 1);
   color: rgba(198, 165, 141, 1);
@@ -25,7 +26,6 @@ export const Input = styled.input`
 export const Label = styled.label`
   position: relative;
   width: 305px;
-  margin: 0 158px;
   display: flex;
   align-items: center;
 `;
