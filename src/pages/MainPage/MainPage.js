@@ -1,3 +1,11 @@
+import { Container } from 'components/Container/Container';
+import { useTitle } from 'hooks';
+
 export const MainPage = () => {
-    return <p>MainPage</p>;
+  useTitle('AniraK');
+  return (
+    <Container>
+      <p>MainPage</p>
+    </Container>
+  );
 };
