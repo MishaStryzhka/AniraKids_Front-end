@@ -3,8 +3,8 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 const SideBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  //   console.log('location', location);
-  //   console.log('searchParams', searchParams);
+  console.log('location', location);
+  console.log('searchParams', searchParams);
 
   return (
     <>
