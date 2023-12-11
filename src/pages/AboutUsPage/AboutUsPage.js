@@ -1,3 +1,11 @@
+import { Container } from 'components/Container/Container';
+import NavigationOverlay from 'components/NavigationOverlay/NavigationOverlay';
+
 export const AboutUsPage = () => {
-    return <p>AboutUsPage</p>;
+  return (
+    <Container>
+      <NavigationOverlay />
+      <p>AboutUsPage</p>
+    </Container>
+  );
 };

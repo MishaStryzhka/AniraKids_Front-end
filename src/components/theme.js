@@ -1,9 +1,13 @@
 const darktheme = {
+  mainColor1: '#FFF',
+  mainColor5: '#000',
   // primary: '#FFC107',
   // secondary: '#111111',
 };
 
 const lightTheme = {
+  mainColor1: '#FFF',
+  mainColor5: '#000',
   // primary: '#FFC107',
   // secondary: '#111111',
 };
