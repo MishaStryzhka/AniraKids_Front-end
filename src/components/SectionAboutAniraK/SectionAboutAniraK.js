@@ -1,11 +1,13 @@
 import ButtonAdd from 'components/ButtonAdd/ButtonAdd';
 import {
+  AddWrap,
   Description,
   Item,
   List,
   Section,
   Title,
   TitleDescription,
+  WrapButton,
   WrapIcon,
 } from './SectionAboutAniraK.styled';
 import IconAboutFirst from 'images/icons/IconAboutFirst';
@@ -13,17 +15,18 @@ import IconAboutSecond from 'images/icons/IconAboutSecond';
 import IconAboutThird from 'images/icons/IconAboutThird';
 import IconAboutFour from 'images/icons/IconAboutFour';
 import IconAboutFive from 'images/icons/IconAboutFive';
+import Border from 'components/Border/Border';
 
 const SectionAboutAniraK = () => {
   return (
     <Section>
       <Title>ПЛАТФОРМА ANIRAK - ЦЕ</Title>
+      <Border />
       <List>
         <Item>
           <WrapIcon>
             <IconAboutFirst width="80" height="80" />
           </WrapIcon>
-
           <TitleDescription>Розширення гардеробу</TitleDescription>
           <Description>
             Можливість виглядати бездоганно при цьому, не витрачаючи багато
@@ -58,7 +61,9 @@ const SectionAboutAniraK = () => {
 
         <Item>
           <WrapIcon>
-            <IconAboutFour width="80" height="80" />
+            <AddWrap>
+              <IconAboutFour width="70" height="54" />
+            </AddWrap>
           </WrapIcon>
 
           <TitleDescription>Безпечне користування</TitleDescription>
@@ -80,7 +85,9 @@ const SectionAboutAniraK = () => {
           </Description>
         </Item>
       </List>
-      <ButtonAdd />
+      <WrapButton>
+        <ButtonAdd />
+      </WrapButton>
     </Section>
   );
 };

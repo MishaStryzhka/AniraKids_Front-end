@@ -10,7 +10,7 @@ export const Title = styled.h2`
   font-size: 32px;
   font-weight: 500;
   line-height: 1.25;
-  margin-bottom: 40px;
+  margin-bottom: 16px;
 
   color: #303130;
 `;
@@ -24,11 +24,21 @@ export const List = styled.ul`
 export const Item = styled.li`
   display: flex;
   flex-direction: column;
-  width: 240px;
+  align-items: center;
+
+  flex-basis: calc((100% - 80px) / 5);
+  width: 100%;
 `;
 
 export const WrapIcon = styled.div`
-  margin: 0 auto;
+  /* margin: 0 auto; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const AddWrap = styled.div`
+  margin: 12px 0;
 `;
 
 export const TitleDescription = styled.h3`
@@ -50,4 +60,9 @@ export const Description = styled.p`
   line-height: 1.43;
 
   color: #000;
+`;
+
+export const WrapButton = styled.div`
+  width: 305px;
+  margin: 0 auto;
 `;
