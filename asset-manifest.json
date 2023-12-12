@@ -1,15 +1,20 @@
 {
   "files": {
     "main.css": "/AniraKids_Front-end/static/css/main.d9890754.css",
-    "main.js": "/AniraKids_Front-end/static/js/main.12226c8b.js",
+    "main.js": "/AniraKids_Front-end/static/js/main.c828ecbb.js",
     "static/js/787.251c225c.chunk.js": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js",
+    "static/media/photo-about-us-2x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-2x.b223b6a721b523c063af.jpg",
+    "static/media/photo-about-us-2x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-2x-webp.7977842f87b2ca893536.webp",
+    "static/media/photo-about-us-1x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-1x.8bbe6521b2f6c505a1e2.jpg",
+    "static/media/photo-about-us-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-1x-webp.0a1fa2d2a445c87139c1.webp",
+    "static/media/bg-desktop-1x.jpg": "/AniraKids_Front-end/static/media/bg-desktop-1x.c07d4f2882a343bc3309.jpg",
     "index.html": "/AniraKids_Front-end/index.html",
     "main.d9890754.css.map": "/AniraKids_Front-end/static/css/main.d9890754.css.map",
-    "main.12226c8b.js.map": "/AniraKids_Front-end/static/js/main.12226c8b.js.map",
+    "main.c828ecbb.js.map": "/AniraKids_Front-end/static/js/main.c828ecbb.js.map",
     "787.251c225c.chunk.js.map": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d9890754.css",
-    "static/js/main.12226c8b.js"
+    "static/js/main.c828ecbb.js"
   ]
 }
