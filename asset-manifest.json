@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/AniraKids_Front-end/static/css/main.d9890754.css",
-    "main.js": "/AniraKids_Front-end/static/js/main.f3bfbaef.js",
+    "main.js": "/AniraKids_Front-end/static/js/main.b7f109a3.js",
     "static/js/787.251c225c.chunk.js": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js",
     "index.html": "/AniraKids_Front-end/index.html",
     "main.d9890754.css.map": "/AniraKids_Front-end/static/css/main.d9890754.css.map",
-    "main.f3bfbaef.js.map": "/AniraKids_Front-end/static/js/main.f3bfbaef.js.map",
+    "main.b7f109a3.js.map": "/AniraKids_Front-end/static/js/main.b7f109a3.js.map",
     "787.251c225c.chunk.js.map": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d9890754.css",
-    "static/js/main.f3bfbaef.js"
+    "static/js/main.b7f109a3.js"
   ]
 }
