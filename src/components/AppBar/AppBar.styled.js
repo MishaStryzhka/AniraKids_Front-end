@@ -1,13 +1,17 @@
 import styled from 'styled-components';
 
 export const ContainerAppBar = styled.header`
+  width: 1280px;
   background-color: ${({ $mainPage }) =>
-    $mainPage ? '#77695E' : 'transparent'};
+    $mainPage ? 'transparent' : 'transparent'};
   display: flex;
   flex-wrap: wrap;
   padding-top: 12px;
   align-items: center;
   justify-content: space-between;
+  position: ${({ $mainPage }) => ($mainPage ? 'absolute' : 'relative')};
+  top: 0;
+  z-index: 2;
 `;
 
 export const List = styled.ul`

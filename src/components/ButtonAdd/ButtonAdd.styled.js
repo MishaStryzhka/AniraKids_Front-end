@@ -4,6 +4,8 @@ export const Button = styled.button`
   padding: 14px 40px;
   background-color: #77695e;
   width: 304px;
+  border: none;
+  border-radius: 2px;
 
   text-align: center;
 
