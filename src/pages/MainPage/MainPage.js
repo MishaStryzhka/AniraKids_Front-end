@@ -1,11 +1,16 @@
+import SectionAboutAniraK from 'components/SectionAboutAniraK/SectionAboutAniraK';
+import SectionHero from 'components/SectionHero/SectionHero';
 import { Container } from 'components/Container/Container';
-import { useTitle } from 'hooks';
+// import { useTitle } from 'hooks';
 
 export const MainPage = () => {
-  useTitle('AniraK');
+  //   useTitle('AniraK');
   return (
-    <Container>
-      <p>MainPage</p>
-    </Container>
+    <>
+      <SectionHero />
+      <Container>
+        <SectionAboutAniraK />
+      </Container>
+    </>
   );
 };

@@ -3,10 +3,10 @@ import IconHeart from '../../images/icons/IconHeart';
 import IconPerson from '../../images/icons/IconPerson';
 import { Box } from './BoxNavigation.styled';
 
-const BoxNavigation = () => {
+const BoxNavigation = ({ $mainPage }) => {
   return (
     <Box>
-      <IconHeart />
+      <IconHeart fill={'none'} stroke={$mainPage ? '#fff' : '#000'} />
       <IconPerson />
       <IconBag />
     </Box>
