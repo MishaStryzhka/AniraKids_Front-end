@@ -6,7 +6,8 @@ export const WrapSection = styled.section`
   padding-bottom: 305px;
   display: flex;
   flex-direction: column;
-  margin: 0;
+  margin: 0 auto;
+  width: 1440px;
 `;
 
 export const MainTitle = styled.h1`

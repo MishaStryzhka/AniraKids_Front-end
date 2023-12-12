@@ -1,6 +1,6 @@
 import SectionAboutAniraK from 'components/SectionAboutAniraK/SectionAboutAniraK';
 import SectionHero from 'components/SectionHero/SectionHero';
-// import { Container } from 'components/Container/Container';
+import { Container } from 'components/Container/Container';
 // import { useTitle } from 'hooks';
 
 export const MainPage = () => {
@@ -8,7 +8,9 @@ export const MainPage = () => {
   return (
     <>
       <SectionHero />
-      <SectionAboutAniraK />
+      <Container>
+        <SectionAboutAniraK />
+      </Container>
     </>
   );
 };
