@@ -1,13 +1,21 @@
 import styled from 'styled-components';
+import BgPhotoUrl from 'images/bg-photo/bg-desktop-1x.jpg';
 
 export const WrapSection = styled.section`
-  background-color: #c6a58d;
-  padding-top: 128px;
+  background-color: #77695e;
+  padding-top: 306px;
   padding-bottom: 305px;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
   width: 1440px;
+  position: relative;
+  z-index: 1;
+
+  background-image: url(${BgPhotoUrl});
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 `;
 
 export const MainTitle = styled.h1`
