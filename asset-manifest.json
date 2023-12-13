@@ -1,20 +1,28 @@
 {
   "files": {
     "main.css": "/AniraKids_Front-end/static/css/main.d9890754.css",
-    "main.js": "/AniraKids_Front-end/static/js/main.c828ecbb.js",
+    "main.js": "/AniraKids_Front-end/static/js/main.330828db.js",
     "static/js/787.251c225c.chunk.js": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js",
     "static/media/photo-about-us-2x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-2x.b223b6a721b523c063af.jpg",
     "static/media/photo-about-us-2x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-2x-webp.7977842f87b2ca893536.webp",
+    "static/media/photo-open-closet-2x.jpg": "/AniraKids_Front-end/static/media/photo-open-closet-2x.bb02aaeaaab04bc4285a.jpg",
     "static/media/photo-about-us-1x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-1x.8bbe6521b2f6c505a1e2.jpg",
     "static/media/photo-about-us-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-1x-webp.0a1fa2d2a445c87139c1.webp",
+    "static/media/photo-are-you-ready-2x.jpg": "/AniraKids_Front-end/static/media/photo-are-you-ready-2x.c117d610faaf644ae140.jpg",
+    "static/media/photo-are-you-ready-2x-webp.webp": "/AniraKids_Front-end/static/media/photo-are-you-ready-2x-webp.eeab81c219f6a9dd2292.webp",
+    "static/media/photo-open-closet-2x-webp.webp": "/AniraKids_Front-end/static/media/photo-open-closet-2x-webp.c7e575d94cfa9b91bdc3.webp",
     "static/media/bg-desktop-1x.jpg": "/AniraKids_Front-end/static/media/bg-desktop-1x.c07d4f2882a343bc3309.jpg",
+    "static/media/photo-open-closet-1x.jpg": "/AniraKids_Front-end/static/media/photo-open-closet-1x.234b89c3726c3849e2ee.jpg",
+    "static/media/photo-are-you-ready-1x.jpg": "/AniraKids_Front-end/static/media/photo-are-you-ready-1x.84b83676f825375cb396.jpg",
+    "static/media/photo-open-closet-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-open-closet-1x-webp.49b9bc19ebc3657c1711.webp",
+    "static/media/photo-are-you-ready-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-are-you-ready-1x-webp.0e5bcb2eb8cc5ee2e62a.webp",
     "index.html": "/AniraKids_Front-end/index.html",
     "main.d9890754.css.map": "/AniraKids_Front-end/static/css/main.d9890754.css.map",
-    "main.c828ecbb.js.map": "/AniraKids_Front-end/static/js/main.c828ecbb.js.map",
+    "main.330828db.js.map": "/AniraKids_Front-end/static/js/main.330828db.js.map",
     "787.251c225c.chunk.js.map": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d9890754.css",
-    "static/js/main.c828ecbb.js"
+    "static/js/main.330828db.js"
   ]
 }
