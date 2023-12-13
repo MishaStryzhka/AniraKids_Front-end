@@ -15,8 +15,8 @@ import IconAboutSecond from 'images/icons/IconAboutSecond';
 import IconAboutThird from 'images/icons/IconAboutThird';
 import IconAboutFour from 'images/icons/IconAboutFour';
 import IconAboutFive from 'images/icons/IconAboutFive';
-import Border from 'components/Border/Border';
 import { Container } from 'components/Container/Container';
+import Border from 'components/Border/Border';
 
 const SectionAboutAniraK = () => {
   return (

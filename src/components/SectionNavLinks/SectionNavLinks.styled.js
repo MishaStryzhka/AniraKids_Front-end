@@ -3,9 +3,7 @@ import styled from 'styled-components';
 
 export const WrapLinks = styled.div`
   display: flex;
-  padding: 12px 0;
   gap: 48px;
-  margin: 28px auto 0;
 `;
 
 export const StyledNavLink = styled(NavLink)`
@@ -16,6 +14,7 @@ export const StyledNavLink = styled(NavLink)`
   text-decoration: none;
   text-transform: uppercase;
 
-  color: rgba(0, 0, 0, 1);
-  color: ${({ $mainPage }) => ($mainPage ? '#fff' : '#000')};
+  color: ${({ theme }) => theme.color.mainColor5};
+  color: ${({ $mainPage, theme }) =>
+    $mainPage ? theme.color.mainColor1 : theme.color.mainColor5};
 `;
