@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { ContainerAppBar, Item, List } from './AppBar.styled';
+import { ContainerAppBar, Item, List, Wrap } from './AppBar.styled';
 import Logo from '../Logo/Logo';
 import SearchInput from '../SearchInput/SearchInput';
 import BoxNavigation from '../BoxNavigation/BoxNavigation';
@@ -22,7 +22,9 @@ const AppBar = () => {
         <Logo />
         <SearchInput />
         <BoxNavigation $mainPage={pathname === `/`} />
-        <SectionNavLinks $mainPage={pathname === `/`} />
+        <Wrap>
+          <SectionNavLinks $mainPage={pathname === `/`} />
+        </Wrap>
       </ContainerAppBar>
     </Container>
   );

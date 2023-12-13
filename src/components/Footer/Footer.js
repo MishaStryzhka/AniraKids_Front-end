@@ -1,10 +1,15 @@
-import { Container } from 'components/Container/Container';
+import { Wrap, WrapFooter } from './Footer.styled';
+import Logo from 'components/Logo/Logo';
+import SectionNavLinks from 'components/SectionNavLinks/SectionNavLinks';
 
 const Footer = () => {
   return (
-    <Container>
-      <p>Footer</p>
-    </Container>
+    <WrapFooter>
+      <Wrap>
+        <Logo />
+        <SectionNavLinks />
+      </Wrap>
+    </WrapFooter>
   );
 };
 

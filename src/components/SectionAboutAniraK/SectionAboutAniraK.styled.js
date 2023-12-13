@@ -12,7 +12,7 @@ export const Title = styled.h2`
   line-height: 1.25;
   margin-bottom: 16px;
 
-  color: #303130;
+  color: ${({ theme }) => theme.color.mainColor4};
 `;
 
 export const List = styled.ul`
@@ -31,7 +31,6 @@ export const Item = styled.li`
 `;
 
 export const WrapIcon = styled.div`
-  /* margin: 0 auto; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +48,7 @@ export const TitleDescription = styled.h3`
   line-height: 1.43;
   margin: 16px 0 8px 0;
 
-  color: #000;
+  color: ${({ theme }) => theme.color.mainColor5};
 `;
 
 export const Description = styled.p`
@@ -59,7 +58,7 @@ export const Description = styled.p`
   font-weight: 400;
   line-height: 1.43;
 
-  color: #000;
+  color: ${({ theme }) => theme.color.mainColor5};
 `;
 
 export const WrapButton = styled.div`

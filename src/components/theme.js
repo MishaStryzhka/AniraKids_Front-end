@@ -1,15 +1,24 @@
 const darktheme = {
   mainColor1: '#FFF',
+  mainColor2: '#C6A58D',
+  mainColor4: '#303130',
   mainColor5: '#000',
+
   // primary: '#FFC107',
   // secondary: '#111111',
+  btnColorBG: '#77695e',
+  lightBGColor: '#EBDAD1',
 };
 
 const lightTheme = {
   mainColor1: '#FFF',
+  mainColor2: '#C6A58D',
+  mainColor4: '#303130',
   mainColor5: '#000',
   // primary: '#FFC107',
   // secondary: '#111111',
+  btnColorBG: '#77695e',
+  lightBGColor: '#EBDAD1',
 };
 
 const defaultTheme = {

@@ -8,8 +8,9 @@ export const Input = styled.input`
   position: relative;
   background-color: transparent;
 
-  border: 1px solid rgba(198, 165, 141, 1);
-  color: rgba(198, 165, 141, 1);
+  border: 1px solid;
+  border-color: ${({ theme }) => theme.color.mainColor2};
+  color: ${({ theme }) => theme.color.mainColor2};
 
   &::placeholder {
     font-family: 'Open Sans Hebrew', sans-serif;
@@ -19,7 +20,7 @@ export const Input = styled.input`
     position: absolute;
     left: 36px;
 
-    color: rgba(235, 218, 209, 1);
+    color: ${({ theme }) => theme.color.lightBGColor};
   }
 `;
 

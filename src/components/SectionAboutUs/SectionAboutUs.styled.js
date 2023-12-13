@@ -15,7 +15,7 @@ export const Title = styled.h2`
   margin-bottom: 16px;
   text-transform: uppercase;
 
-  color: #303130;
+  color: ${({ theme }) => theme.color.mainColor4};
 `;
 
 export const Picture = styled.picture`
@@ -30,7 +30,7 @@ export const Description = styled.p`
   font-weight: 400;
   line-height: 1.43;
 
-  color: #000;
+  color: ${({ theme }) => theme.color.mainColor5};
 `;
 
 export const Wrap = styled.div`

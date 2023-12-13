@@ -27,5 +27,11 @@ export const Item = styled.li`
   font-weight: 700;
   line-height: 1.43;
 
-  color: ${({ $mainPage }) => ($mainPage ? '#fff' : '#000')};
+  color: ${({ $mainPage, theme }) =>
+    $mainPage ? theme.color.mainColor1 : theme.color.mainColor5};
+`;
+
+export const Wrap = styled.div`
+  padding: 12px 0;
+  margin: 28px auto 0;
 `;

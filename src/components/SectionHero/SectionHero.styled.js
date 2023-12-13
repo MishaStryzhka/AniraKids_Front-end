@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import BgPhotoUrl from 'images/bg-photo/bg-desktop-1x.jpg';
 
 export const WrapSection = styled.section`
-  background-color: #77695e;
+  background-color: ${({ theme }) => theme.color.btnColorBG};
   padding-top: 306px;
   padding-bottom: 305px;
   display: flex;
@@ -26,7 +26,7 @@ export const MainTitle = styled.h1`
   text-transform: uppercase;
   margin-bottom: 16px;
 
-  color: #ffffff;
+  color: ${({ theme }) => theme.color.mainColor1};
 `;
 
 export const Span = styled.span`
@@ -43,5 +43,5 @@ export const Description = styled.p`
   max-width: 400px;
   margin-bottom: 48px;
 
-  color: #fff;
+  color: ${({ theme }) => theme.color.mainColor1};
 `;
