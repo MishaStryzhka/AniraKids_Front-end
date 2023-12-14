@@ -10,7 +10,7 @@ import PhotoReadyWoman1xWebp from 'images/photo-ready-woman/photo-are-you-ready-
 import PhotoReadyWoman2xWebp from 'images/photo-ready-woman/photo-are-you-ready-2x-webp.webp';
 import PhotoReadyWoman1x from 'images/photo-ready-woman/photo-are-you-ready-1x.jpg';
 import PhotoReadyWoman2x from 'images/photo-ready-woman/photo-are-you-ready-2x.jpg';
-import ButtonAdd from 'components/ButtonAdd/ButtonAdd';
+import Button from 'components/Button/Button';
 
 const SectionAreYouReady = () => {
   return (
@@ -36,7 +36,7 @@ const SectionAreYouReady = () => {
       </ImageWrap>
       <WrapText>
         <Title>ГОТОВІ ПОЧАТИ?</Title>
-        <ButtonAdd />
+        <Button>ОРЕНДУВАТИ</Button>
       </WrapText>
     </Section>
   );
