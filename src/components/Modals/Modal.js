@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { Backdrop, ModalContainer, BtnStyled } from './Modal.styled';
+import { Backdrop, ModalContainer } from './Modal.styled';
+import { createPortal } from 'react-dom';
 
 const Modal = ({ children, onClick }) => {
   const handleKeyDown = useCallback(
@@ -28,20 +29,11 @@ const Modal = ({ children, onClick }) => {
     };
   }, [handleKeyDown]);
 
-  return (
+  return createPortal(
     <Backdrop onClick={handleBackdropClick}>
-      <ModalContainer>
-        <BtnStyled
-          icon={'IconCross'}
-          transparent={true}
-          onClick={() => {
-            document.body.style.overflow = 'auto';
-            onClick();
-          }}
-        />
-        {children}
-      </ModalContainer>
-    </Backdrop>
+      <ModalContainer>{children}</ModalContainer>
+    </Backdrop>,
+    document.querySelector('#modal')
   );
 };
 export default Modal;
