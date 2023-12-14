@@ -1,4 +1,4 @@
-import ButtonAdd from 'components/ButtonAdd/ButtonAdd';
+import Button from 'components/Button/Button';
 import {
   AddWrap,
   Description,
@@ -88,7 +88,7 @@ const SectionAboutAniraK = () => {
           </Item>
         </List>
         <WrapButton>
-          <ButtonAdd />
+          <Button>ОРЕНДУВАТИ</Button>
         </WrapButton>
       </Container>
     </Section>

@@ -1,21 +1,21 @@
 import * as React from 'react';
-const IconBag = props => (
+const IconEmail = props => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={24}
     height={24}
     fill="none"
-    stroke="#000"
     {...props}
   >
     <g
+      stroke="#000"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}
       clipPath="url(#a)"
     >
-      <path d="M11.5 21H8.574a3 3 0 0 1-2.965-2.544l-1.255-8.152A2 2 0 0 1 6.331 8h11.34a2 2 0 0 1 1.976 2.304l-.5 3.248" />
-      <path d="M9 11V6a3 3 0 1 1 6 0v5M15 19l2 2 4-4" />
+      <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+      <path d="m3 7 9 6 9-6" />
     </g>
     <defs>
       <clipPath id="a">
@@ -24,4 +24,4 @@ const IconBag = props => (
     </defs>
   </svg>
 );
-export default IconBag;
+export default IconEmail;

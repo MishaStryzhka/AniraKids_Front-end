@@ -1,4 +1,4 @@
-import ButtonAdd from 'components/ButtonAdd/ButtonAdd';
+import Button from 'components/Button/Button';
 import {
   Description,
   MainTitle,
@@ -17,7 +17,7 @@ const SectionHero = () => {
         <Description>
           платформа оренди вишуканого вбрання та товарів для дітей і сімʼї{' '}
         </Description>
-        <ButtonAdd />
+        <Button>ОРЕНДУВАТИ</Button>
       </Container>
     </WrapSection>
   );
