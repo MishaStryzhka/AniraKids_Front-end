@@ -11,10 +11,10 @@ export const StyledNavLink = styled(NavLink)`
   color: ${({ theme }) => theme.color.mainColor5};
   text-align: center;
 
-  //   font-family: Open Sans Hebrew;
-  font-size: 14px;
+  font-family: 'Open Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
+  font-size: 14px;
   line-height: 20px; /* 142.857% */
   text-decoration-line: none;
   ${e => console.log('e', e)}

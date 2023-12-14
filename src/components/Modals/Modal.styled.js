@@ -15,14 +15,17 @@ export const Backdrop = styled.div`
 `;
 export const ModalContainer = styled.div`
   background-color: ${p => p.theme.color.cardBG};
-  width: 280px;
-  /* height: 300px; */
+  // min-width: 280px;
   padding: 14px;
   margin: 0 auto;
   border-radius: 20px;
   z-index: 2000;
   @media screen and (min-width: 768px) {
-    width: 580px;
+    // min-width: 580px;
+    /* height: 326px; */
+  }
+  @media screen and (min-width: 1440px) {
+    // min-width: 920px;
     /* height: 326px; */
   }
 `;
@@ -31,4 +34,6 @@ export const BtnStyled = styled.button`
   border: none;
   margin-left: auto;
   padding: 0;
+
+  background-color: transparent;
 `;
