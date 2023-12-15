@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 
 export const ContainerAppBar = styled.header`
-  width: 1280px;
+  width: ${({ $mainPage }) => ($mainPage ? '1280px' : '100%')};
+  margin: 0 auto;
   background-color: ${({ $mainPage }) =>
     $mainPage ? 'transparent' : 'transparent'};
   display: flex;
@@ -34,4 +35,11 @@ export const Item = styled.li`
 export const Wrap = styled.div`
   padding: 12px 0;
   margin: 28px auto 0;
+`;
+
+export const BorderShadow = styled.div`
+  width: 100%;
+  height: ${({ $mainPage }) => ($mainPage ? '0px' : '4px')};
+  /* height: 4px; */
+  box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
 `;
