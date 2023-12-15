@@ -31,6 +31,30 @@ export const Form = styled.div`
   gap: 24px;
 `;
 
+export const BoxButtonsNavigation = styled.div`
+  display: flex;
+`;
+
+export const ButtonNav = styled.button`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02px;
+  background-color: transparent;
+  border: transparent;
+  border-bottom: 2px solid #000;
+  width: 200px;
+  text-align: center;
+  padding: 8px 0;
+  text-transform: uppercase;
+
+  color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+  border-color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+
+  /* color: ${({ theme }) => theme.color.mainColor2}; */
+`;
+
 export const Description = styled.p`
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -73,6 +97,9 @@ export const Input = styled.input`
 
 export const Wrap = styled.div`
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `;
 
 export const Separation = styled.p`
@@ -83,7 +110,8 @@ export const Separation = styled.p`
   letter-spacing: 0.02px;
   position: relative;
   display: block;
-  height: 28px;
+  margin: 3px 0;
+  /* height: 28px; */
 
   color: ${({ theme }) => theme.color.mainColor5};
 
@@ -152,6 +180,41 @@ export const StyledNavLinkCondition = styled(NavLink)`
   line-height: 1.43;
   text-decoration: none;
   margin-left: 5px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const WrapButton = styled.div`
+  display: flex;
+`;
+
+export const ButtonContact = styled.button`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  border: transparent;
+  border-bottom: 2px solid;
+  background-color: transparent;
+  width: 200px;
+  text-align: center;
+  padding: 8px 0;
+
+  color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+  border-color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+`;
+
+export const TitleLogin = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  border: transparent;
+  border-bottom: 2px solid #000;
+  background-color: transparent;
+  padding: 8px 0;
+  width: 400px;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
