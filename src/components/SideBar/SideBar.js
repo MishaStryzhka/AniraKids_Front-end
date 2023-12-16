@@ -1,3 +1,4 @@
+import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/FilterForPregnantWomen';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
 const SideBar = () => {
@@ -9,6 +10,7 @@ const SideBar = () => {
   return (
     <>
       <title>ФІЛЬТРИ</title>
+      <FilterForPregnantWomen />
       <div>
         <p>ДЛЯ ВАГІТНИХ</p>
         <button
