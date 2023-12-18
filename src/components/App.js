@@ -30,6 +30,7 @@ function App() {
           <Route path="/forChildren" element={<ForChildrenPage />} />
           <Route path="/decorAndToys" element={<DecorAndToysPage />} />
           <Route path="/aboutUs" element={<AboutUsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
           {/* <Route
                         path='/login'
                         element={
@@ -49,17 +50,16 @@ function App() {
                         }
                     /> */}
           <Route
-            path="/user"
+            path="/my-account"
             element={
               <PrivateRoute
                 redirectTo="/"
-                redirectBack="/user"
+                redirectBack="/my-account"
                 component={<UserPage />}
               />
             }
           />
         </Route>
-        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </ThemeProvider>
   );
