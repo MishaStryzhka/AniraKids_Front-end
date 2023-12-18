@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const WrapLinks = styled.div`
+export const NavList = styled.ul`
   display: flex;
-  gap: 48px;
+  gap: 16px;
 `;
 
 export const StyledNavLink = styled(NavLink)`
@@ -13,6 +13,7 @@ export const StyledNavLink = styled(NavLink)`
   line-height: 1.43;
   text-decoration: none;
   text-transform: uppercase;
+  padding: 8px 16px;
 
   color: ${({ theme }) => theme.color.mainColor5};
   color: ${({ $mainPage, theme }) =>

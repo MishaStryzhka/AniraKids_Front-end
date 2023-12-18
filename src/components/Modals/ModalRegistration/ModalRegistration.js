@@ -124,6 +124,14 @@ const ModalRegistration = () => {
                   <Input placeholder="****" />
                 </Label>
               </Wrap>
+              <TextCondition>
+                Натискаючи Продовжити, Ви приймаєте
+                <StyledNavLinkCondition>
+                  Політику конфіденційності
+                </StyledNavLinkCondition>
+                .
+              </TextCondition>
+              <Button>Зареєструватися</Button>
             </>
           )}
           {typeNavigation === 'authorization' && (
@@ -144,9 +152,9 @@ const ModalRegistration = () => {
                   <Input placeholder="****" />
                 </Label>
               </Wrap>
+              <Button>Увійти</Button>
             </>
           )}
-          <Button>ПРОДОВЖИТИ</Button>
           <Separation>АБО</Separation>
           <WrapLinks>
             <StyledNavLink>
@@ -162,13 +170,6 @@ const ModalRegistration = () => {
               <DescriptionLink>Інше</DescriptionLink>
             </StyledNavLink>
           </WrapLinks>
-          <TextCondition>
-            Натискаючи Продовжити, Ви приймаєте
-            <StyledNavLinkCondition>
-              Політику конфіденційності
-            </StyledNavLinkCondition>
-            .
-          </TextCondition>
         </Form>
       </WrapForm>
     </ModalWindow>

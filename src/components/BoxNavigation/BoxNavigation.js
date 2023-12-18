@@ -5,7 +5,7 @@ import { Box, Button } from './BoxNavigation.styled';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { useState } from 'react';
-import ModalRegistration from 'components/Modal/ModalRegistration/ModalRegistration';
+import ModalRegistration from 'components/Modals/ModalRegistration/ModalRegistration';
 import Modal from 'components/Modals/Modal';
 
 const BoxNavigation = ({ $mainPage }) => {

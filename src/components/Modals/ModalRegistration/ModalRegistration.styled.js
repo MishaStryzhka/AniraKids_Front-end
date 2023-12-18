@@ -19,15 +19,16 @@ export const WrapForm = styled.div`
   background-color: rgba(255, 255, 255, 0.9);
   position: absolute;
   z-index: 3;
+  height: 588px;
   padding: 40px 48px;
 `;
 
 export const Form = styled.div`
   width: 400px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 24px;
 `;
 
@@ -82,6 +83,7 @@ export const Input = styled.input`
   border-radius: 2px;
   border: 1px solid;
   padding: 8px;
+  outline: none;
 
   border-color: ${({ theme }) => theme.color.mainColor2};
 
@@ -110,8 +112,6 @@ export const Separation = styled.p`
   letter-spacing: 0.02px;
   position: relative;
   display: block;
-  margin: 3px 0;
-  /* height: 28px; */
 
   color: ${({ theme }) => theme.color.mainColor5};
 
@@ -199,6 +199,7 @@ export const ButtonContact = styled.button`
   width: 200px;
   text-align: center;
   padding: 8px 0;
+  /* margin: 0 auto; */
 
   color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
   border-color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};

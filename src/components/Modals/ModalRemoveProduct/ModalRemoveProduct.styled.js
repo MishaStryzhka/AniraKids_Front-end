@@ -2,6 +2,7 @@ import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  width: 420px;
   display: flex;
   padding: 24px;
   gap: 24px;
@@ -30,28 +31,42 @@ export const ModalTitle = styled.h2`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const LabelModal = styled.label`
-  width: 400px;
+export const ButtonAgree = styled.button`
+  padding: 14px 40px;
+  width: 304px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  text-align: center;
+
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
+  font-style: normal;
   font-weight: 700;
   line-height: 1.43;
-  display: flex;
-  flex-direction: column;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};
+  background-color: ${({ theme }) => theme.color.additionalColorGray};
 `;
 
-export const InputModal = styled.input`
+export const ButtonReject = styled.button`
+  padding: 14px 40px;
+  width: 304px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  text-align: center;
+
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 700;
   line-height: 1.43;
-  border-radius: 2px;
-  border: 1px solid;
-  padding: 8px;
-  outline: none;
+  text-transform: uppercase;
 
-  border-color: ${({ theme }) => theme.color.mainColor2};
-  color: ${({ theme }) => theme.color.lightBGColor};
+  color: ${({ theme }) => theme.color.mainColor1};
+  background-color: ${({ theme }) => theme.color.mainColor3};
 `;

@@ -1,15 +1,16 @@
 import { useLocation } from 'react-router-dom';
 import {
-  BorderShadow,
+  BoxShadow,
   ContainerAppBar,
+  FirstHeader,
   Item,
   List,
-  Wrap,
+  SecondHeader,
 } from './AppBar.styled';
 import Logo from '../Logo/Logo';
 import SearchInput from '../SearchInput/SearchInput';
 import BoxNavigation from '../BoxNavigation/BoxNavigation';
-import SectionNavLinks from '../SectionNavLinks/SectionNavLinks';
+import BoxNavLinks from '../BoxNavLinks/BoxNavLinks';
 import { Container } from 'components/Container/Container';
 
 const AppBar = () => {
@@ -19,22 +20,25 @@ const AppBar = () => {
 
   return (
     <>
-      <Container>
-        <ContainerAppBar $mainPage={pathname === `/`}>
-          <List>
-            <Item $mainPage={pathname === `/`}>Жінки</Item>
-            <Item $mainPage={pathname === `/`}>Чоловіки</Item>
-            <Item $mainPage={pathname === `/`}>Діти</Item>
-          </List>
-          <Logo />
-          <SearchInput />
-          <BoxNavigation $mainPage={pathname === `/`} />
-          <Wrap>
-            <SectionNavLinks $mainPage={pathname === `/`} />
-          </Wrap>
-        </ContainerAppBar>
-      </Container>
-      <BorderShadow $mainPage={pathname === `/`} />
+      <BoxShadow $mainPage={pathname === `/`}>
+        <Container>
+          <ContainerAppBar $mainPage={pathname === `/`}>
+            <FirstHeader>
+              <List>
+                <Item $mainPage={pathname === `/`}>Жінки</Item>
+                <Item $mainPage={pathname === `/`}>Чоловіки</Item>
+                <Item $mainPage={pathname === `/`}>Діти</Item>
+              </List>
+              <Logo />
+              <SearchInput />
+              <BoxNavigation $mainPage={pathname === `/`} />
+            </FirstHeader>
+            <SecondHeader>
+              <BoxNavLinks $mainPage={pathname === `/`} />
+            </SecondHeader>
+          </ContainerAppBar>
+        </Container>
+      </BoxShadow>
     </>
   );
 };

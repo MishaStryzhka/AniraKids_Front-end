@@ -5,6 +5,7 @@ export const StyleButton = styled.button`
   width: 304px;
   border: none;
   border-radius: 2px;
+  cursor: pointer;
 
   text-align: center;
 

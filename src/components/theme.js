@@ -1,8 +1,10 @@
 const darktheme = {
   mainColor1: '#FFF',
   mainColor2: '#C6A58D',
+  mainColor3: '#6C6158',
   mainColor4: '#303130',
   mainColor5: '#000',
+  additionalColorGray: '#EFEFEF',
 
   // primary: '#FFC107',
   // secondary: '#111111',
@@ -13,8 +15,10 @@ const darktheme = {
 const lightTheme = {
   mainColor1: '#FFF',
   mainColor2: '#C6A58D',
+  mainColor3: '#6C6158',
   mainColor4: '#303130',
   mainColor5: '#000',
+  additionalColorGray: '#EFEFEF',
   // primary: '#FFC107',
   // secondary: '#111111',
   btnColorBG: '#77695e',
