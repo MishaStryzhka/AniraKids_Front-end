@@ -42,10 +42,16 @@ export const FilterTitle = styled.h3`
 
 export const List = styled.ul`
   display: flex;
-
   flex-direction: column;
   gap: 4px;
+
   border-bottom: 1px solid #ebdad1;
+`;
+
+export const WrapButtons = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 export const Button = styled.button`
@@ -55,10 +61,10 @@ export const Button = styled.button`
   width: 305px;
 
   font-family: 'Open Sans Hebrew', sans-serif;
-  text-align: start;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.43;
+  text-align: start;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
