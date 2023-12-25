@@ -7,12 +7,22 @@ export const ContainerAppBar = styled.header`
     $mainPage ? 'transparent' : 'transparent'};
   display: flex;
   flex-wrap: wrap;
-  padding-top: 12px;
-  align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   position: ${({ $mainPage }) => ($mainPage ? 'absolute' : 'relative')};
   top: 0;
   z-index: 2;
+`;
+
+export const FirstHeader = styled.div`
+  width: inherit;
+  display: flex;
+  padding: 12px 0;
+  justify-content: space-between;
+  align-items: center;
+`;
+export const SecondHeader = styled.div`
+  padding: 12px 0;
+  margin: 0 auto;
 `;
 
 export const List = styled.ul`
@@ -32,14 +42,8 @@ export const Item = styled.li`
     $mainPage ? theme.color.mainColor1 : theme.color.mainColor5};
 `;
 
-export const Wrap = styled.div`
-  padding: 12px 0;
-  margin: 28px auto 0;
-`;
-
-export const BorderShadow = styled.div`
-  width: 100%;
-  height: ${({ $mainPage }) => ($mainPage ? '0px' : '4px')};
-  /* height: 4px; */
+export const BoxShadow = styled.div`
+  /* width: 100%; */
+  /* height: ${({ $mainPage }) => ($mainPage ? '0px' : '4px')}; */
   box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
 `;

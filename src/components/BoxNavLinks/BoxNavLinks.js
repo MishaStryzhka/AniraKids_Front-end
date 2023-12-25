@@ -1,8 +1,8 @@
-import { StyledNavLink, WrapLinks } from './SectionNavLinks.styled';
+import { NavList, StyledNavLink } from './BoxNavLinks.styled';
 
-const SectionNavLinks = ({ $mainPage }) => {
+const BoxNavLinks = ({ $mainPage }) => {
   return (
-    <WrapLinks>
+    <NavList>
       <StyledNavLink $mainPage={$mainPage} to="./forWomen">
         Жіночі наряди
       </StyledNavLink>
@@ -18,8 +18,8 @@ const SectionNavLinks = ({ $mainPage }) => {
       <StyledNavLink $mainPage={$mainPage} to="./aboutUs">
         Про нас
       </StyledNavLink>
-    </WrapLinks>
+    </NavList>
   );
 };
 
-export default SectionNavLinks;
+export default BoxNavLinks;

@@ -42,25 +42,30 @@ export const FilterTitle = styled.h3`
 
 export const List = styled.ul`
   display: flex;
-
   flex-direction: column;
   gap: 4px;
-  border-bottom: 1px solid #ebdad1;
+`;
+
+export const WrapButtons = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 export const Button = styled.button`
-  border: none;
+  border: 1px solid;
+
   background-color: transparent;
-  padding: 2px 12px;
-  width: 305px;
+  padding: 2px 8px;
 
   font-family: 'Open Sans Hebrew', sans-serif;
-  text-align: start;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 400;
-  line-height: 1.43;
+  line-height: 1.4;
+  letter-spacing: 0.02px;
 
   color: ${({ theme }) => theme.color.mainColor5};
+  border-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 
 export const StyledIconArrowUp = styled(IconArrow)`

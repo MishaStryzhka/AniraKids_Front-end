@@ -1,5 +1,5 @@
 import { Container } from 'components/Container/Container';
-import GeneralTitle from 'components/GeneralTitle/GeneralTitle';
+import GeneralTitle from 'components/PageTitle/PageTitle';
 import MainContent from 'components/MainContent/MainContent';
 import NavigationOverlay from 'components/NavigationOverlay/NavigationOverlay';
 import SideBar from 'components/SideBar/SideBar';

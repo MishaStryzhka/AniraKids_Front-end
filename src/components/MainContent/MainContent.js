@@ -1,5 +1,7 @@
+import ProductCard from 'components/ProductCard/ProductCard';
+
 const MainContent = () => {
-  return <p>MainContent</p>;
+  return <ProductCard />;
 };
 
 export default MainContent;

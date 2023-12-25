@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import PhotoBgClothes from 'images/clothes.jpg';
 import { NavLink } from 'react-router-dom';
+import { Field } from 'formik';
 
 export const ModalWindow = styled.div`
   width: 992px;
@@ -19,16 +20,21 @@ export const WrapForm = styled.div`
   background-color: rgba(255, 255, 255, 0.9);
   position: absolute;
   z-index: 3;
+  height: 588px;
   padding: 40px 48px;
 `;
 
-export const Form = styled.div`
+export const Form = styled.form`
   width: 400px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 24px;
+`;
+
+export const WrapIcon = styled.div`
+  position: absolute;
 `;
 
 export const BoxButtonsNavigation = styled.div`
@@ -49,8 +55,8 @@ export const ButtonNav = styled.button`
   padding: 8px 0;
   text-transform: uppercase;
 
-  color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
-  border-color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+  color: ${({ $isActive }) => ($isActive ? '#000' : '#C6A58D')};
+  border-color: ${({ $isActive }) => ($isActive ? '#000' : '#C6A58D')};
 
   /* color: ${({ theme }) => theme.color.mainColor2}; */
 `;
@@ -70,6 +76,7 @@ export const Label = styled.label`
   font-size: 14px;
   font-weight: 700;
   line-height: 1.43;
+  position: relative;
 
   color: ${({ theme }) => theme.color.mainColor5};
 
@@ -78,10 +85,11 @@ export const Label = styled.label`
   width: 100%;
 `;
 
-export const Input = styled.input`
+export const FieldStyled = styled(Field)`
   border-radius: 2px;
   border: 1px solid;
   padding: 8px;
+  outline: none;
 
   border-color: ${({ theme }) => theme.color.mainColor2};
 
@@ -110,8 +118,6 @@ export const Separation = styled.p`
   letter-spacing: 0.02px;
   position: relative;
   display: block;
-  margin: 3px 0;
-  /* height: 28px; */
 
   color: ${({ theme }) => theme.color.mainColor5};
 
@@ -199,9 +205,10 @@ export const ButtonContact = styled.button`
   width: 200px;
   text-align: center;
   padding: 8px 0;
+  /* margin: 0 auto; */
 
-  color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
-  border-color: ${({ isActive }) => (isActive ? '#000' : '#C6A58D')};
+  color: ${({ $isActive }) => ($isActive ? '#000' : '#C6A58D')};
+  border-color: ${({ $isActive }) => ($isActive ? '#000' : '#C6A58D')};
 `;
 
 export const TitleLogin = styled.p`

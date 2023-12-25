@@ -1,17 +1,25 @@
+import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
 import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/FilterForPregnantWomen';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
+import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
+import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
+import { useLocation } from 'react-router-dom';
 
 const SideBar = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   console.log('location', location);
-  console.log('searchParams', searchParams);
 
   return (
     <>
       <title>ФІЛЬТРИ</title>
       <FilterForPregnantWomen />
-      <div>
+      <FilterFamilyLook />
+      <FilterPrice />
+      <FilterSizeAdult />
+      <FilterSizeChildren />
+
+      {/* <div>
         <p>ДЛЯ ВАГІТНИХ</p>
         <button
           onClick={() => {
@@ -27,7 +35,7 @@ const SideBar = () => {
         >
           Ні
         </button>
-      </div>
+      </div> */}
     </>
   );
 };
