@@ -15,6 +15,7 @@ import { useSearchParams } from 'react-router-dom';
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  console.log('searchParams', searchParams);
 
   const handleOpenList = () => {
     return setIsSizeAdultList(true);

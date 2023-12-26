@@ -14,6 +14,7 @@ import { useSearchParams } from 'react-router-dom';
 const FilterFamilyLook = () => {
   const [isFamilyLookList, setIsFamilyLookList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  console.log('searchParams', searchParams);
 
   const handleOpenList = () => {
     return setIsFamilyLookList(true);

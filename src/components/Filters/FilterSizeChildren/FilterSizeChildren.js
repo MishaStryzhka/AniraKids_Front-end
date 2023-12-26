@@ -15,6 +15,7 @@ import { useSearchParams } from 'react-router-dom';
 const FilterSizeChildren = () => {
   const [isSizeChildrenList, setIsSizeChildrenList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  console.log('searchParams', searchParams);
 
   const handleOpenList = () => {
     return setIsSizeChildrenList(true);
