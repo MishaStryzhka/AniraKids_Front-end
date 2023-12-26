@@ -14,6 +14,7 @@ import { useSearchParams } from 'react-router-dom';
 const FilterForPregnantWomen = () => {
   const [isPragnancyList, setIsPragnancyList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  console.log('searchParams', searchParams);
 
   // const newSetSearchParams = (key, value) => {
   //   setSearchParams(pref => {

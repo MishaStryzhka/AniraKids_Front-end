@@ -1,4 +1,6 @@
 import IconArrow from 'images/icons/IconArrow';
+import Slider from 'rc-slider';
+
 import styled from 'styled-components';
 
 export const MainItem = styled.li`
@@ -62,11 +64,6 @@ export const StyledSliderMax = styled.input`
   outline: none;
   cursor: pointer;
   opacity: 0.7;
-  /* transition: opacity 0.2s;  */
-
-  /* &:hover {
-    opacity: 1;
-  } */
 `;
 
 export const StyledSliderMin = styled.input`
@@ -88,58 +85,71 @@ export const StyledValue = styled.div`
   font-size: 14px;
 `;
 
-// export const Input = styled.input`
-//   width: 272px;
-//   height: 2px;
-//   border-radius: 5px;
-//   outline: none;
-//   opacity: 0.7;
-//   transition: opacity 0.2s;
-
-//   background-color: ${({ theme }) => theme.color.mainColor5};
-
-//   &:hover {
-//     opacity: 1;
-//   }
-
-//   &::-webkit-slider-thumb {
-//     -webkit-appearance: none;
-//     appearance: none;
-//     width: 20px;
-//     height: 20px;
-//     border-radius: 50%;
-//     background: #4caf50;
-//     cursor: pointer;
-//   }
-
-//   &::-moz-range-thumb {
-//     width: 20px;
-//     height: 20px;
-//     border-radius: 50%;
-//     background: #4caf50;
-//     cursor: pointer;
-//   }
-// `;
-
-// export const Button = styled.button`
-//   border: none;
-//   background-color: transparent;
-//   padding: 2px 12px;
-//   width: 305px;
-
-//   font-family: 'Open Sans Hebrew', sans-serif;
-//   text-align: start;
-//   font-size: 14px;
-//   font-weight: 400;
-//   line-height: 1.43;
-
-//   color: ${({ theme }) => theme.color.mainColor5};
-// `;
-
 export const StyledIconArrowUp = styled(IconArrow)`
   transform: rotate(90deg);
 `;
 
 export const StyledIconArrowDown = styled(IconArrow)`
   transform: rotate(270deg);
+`;
+
+export const WrapSlider = styled.div``;
+
+export const StyledSlider = styled(Slider)`
+  width: 272px;
+  position: relative;
+
+  .rc-slider-track {
+    /* Трек */
+    background-color: #000;
+    height: 3px;
+    border-radius: 0;
+  }
+
+  .rc-slider-handle {
+    /*  бігунок */
+    width: 1px;
+    height: 10px;
+    margin-top: -3.5px;
+    overflow: hidden;
+    border: 1px solid #000;
+    opacity: 1;
+    border-radius: 0;
+  }
+
+  .rc-slider-rail {
+    /* Основна лінія */
+    height: 1px;
+    background-color: #000;
+    top: 6px;
+    border-radius: 0;
+  }
+
+  .rc-slider-tooltip {
+    /* Стилі для Tooltip */
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(-50%);
+  }
+`;
+
+export const MinValue = styled.p`
+  display: block;
+
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const MaxValue = styled.p`
+  display: block;
+
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+
+  color: ${({ theme }) => theme.color.mainColor5};
 `;
