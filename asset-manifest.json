@@ -1,11 +1,12 @@
 {
   "files": {
-    "main.css": "/AniraKids_Front-end/static/css/main.c11f00a7.css",
-    "main.js": "/AniraKids_Front-end/static/js/main.a7be8387.js",
+    "main.css": "/AniraKids_Front-end/static/css/main.a6793712.css",
+    "main.js": "/AniraKids_Front-end/static/js/main.780b3bcf.js",
     "static/js/787.251c225c.chunk.js": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js",
     "static/media/clothes.jpg": "/AniraKids_Front-end/static/media/clothes.197b20f186b6a89e5a21.jpg",
     "static/media/photo-about-us-2x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-2x.b223b6a721b523c063af.jpg",
     "static/media/photo-about-us-2x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-2x-webp.7977842f87b2ca893536.webp",
+    "static/media/photo-product.jpg": "/AniraKids_Front-end/static/media/photo-product.05ddff84978162e19204.jpg",
     "static/media/photo-open-closet-2x.jpg": "/AniraKids_Front-end/static/media/photo-open-closet-2x.bb02aaeaaab04bc4285a.jpg",
     "static/media/photo-about-us-1x.jpg": "/AniraKids_Front-end/static/media/photo-about-us-1x.8bbe6521b2f6c505a1e2.jpg",
     "static/media/photo-about-us-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-about-us-1x-webp.0a1fa2d2a445c87139c1.webp",
@@ -18,12 +19,12 @@
     "static/media/photo-open-closet-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-open-closet-1x-webp.49b9bc19ebc3657c1711.webp",
     "static/media/photo-are-you-ready-1x-webp.webp": "/AniraKids_Front-end/static/media/photo-are-you-ready-1x-webp.0e5bcb2eb8cc5ee2e62a.webp",
     "index.html": "/AniraKids_Front-end/index.html",
-    "main.c11f00a7.css.map": "/AniraKids_Front-end/static/css/main.c11f00a7.css.map",
-    "main.a7be8387.js.map": "/AniraKids_Front-end/static/js/main.a7be8387.js.map",
+    "main.a6793712.css.map": "/AniraKids_Front-end/static/css/main.a6793712.css.map",
+    "main.780b3bcf.js.map": "/AniraKids_Front-end/static/js/main.780b3bcf.js.map",
     "787.251c225c.chunk.js.map": "/AniraKids_Front-end/static/js/787.251c225c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c11f00a7.css",
-    "static/js/main.a7be8387.js"
+    "static/css/main.a6793712.css",
+    "static/js/main.780b3bcf.js"
   ]
 }
