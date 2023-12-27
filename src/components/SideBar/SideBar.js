@@ -1,3 +1,6 @@
+import FilterAge from 'components/Filters/FilterAge/FilterAge';
+import FilterColor from 'components/Filters/FilterColor/FilterColor';
+import FilterDecor from 'components/Filters/FilterDecor/FilterDecor';
 import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
 import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/FilterForPregnantWomen';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
@@ -18,6 +21,9 @@ const SideBar = () => {
       <FilterPrice />
       <FilterSizeAdult />
       <FilterSizeChildren />
+      <FilterAge />
+      <FilterDecor />
+      <FilterColor />
 
       {/* <div>
         <p>ДЛЯ ВАГІТНИХ</p>
