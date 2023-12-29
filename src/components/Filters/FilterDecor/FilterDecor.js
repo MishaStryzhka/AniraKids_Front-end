@@ -5,99 +5,67 @@ import {
   FilterTitle,
   List,
   MainItem,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   Wrap,
-  WrapInsideList,
 } from './FilterDecor.styled';
+
+const ArrayofDecor = [
+  { id: 1, variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
+  { id: 2, variantOfDecor: 'День народження', searchDecor: 'birthday' },
+  { id: 3, variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
+  {
+    id: 4,
+    variantOfDecor: 'Тематичні свята',
+    searchDecor: 'thematic-holidays',
+  },
+  {
+    id: 5,
+    variantOfDecor: 'Текстиль',
+    searchDecor: 'textile',
+  },
+  {
+    id: 6,
+    variantOfDecor: 'Пледи для малюків',
+    searchDecor: 'blankets-for-baby',
+  },
+  {
+    id: 7,
+    variantOfDecor: 'Постільна білизна',
+    searchDecor: 'linens',
+  },
+];
 
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
-  const handleOpenList = () => {
-    return setIsFilterDecorList(true);
+  const handleToggleList = () => {
+    setIsFilterDecorList(prevIsFilterDecorList => !prevIsFilterDecorList);
   };
 
-  const handleCloseList = () => {
-    return setIsFilterDecorList(false);
-  };
   return (
-    <MainItem $list={isFilterDecorList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openDecorList={isFilterDecorList === true}>
         <FilterTitle>ДЕКОР</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          onClick={handleToggleList}
+          $openDecorList={isFilterDecorList === true}
+        />
       </Wrap>
       {isFilterDecorList && (
         <List>
-          <WrapInsideList>
-            <FilterTitle>ДЕКОР</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'accessuries' });
-              }}
-            >
-              Аксесуари
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'birthday' });
-              }}
-            >
-              День народження
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'Christmas' });
-              }}
-            >
-              Різдво
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'thematic-holidays' });
-              }}
-            >
-              Тематичні свята
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'textile' });
-              }}
-            >
-              Текстиль
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'blankets-for-baby' });
-              }}
-            >
-              Пледи для малюків
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Decor: 'linens' });
-              }}
-            >
-              Постільна білизна
-            </Button>
-          </li>
+          {ArrayofDecor.map(({ id, variantOfDecor, searchDecor }) => (
+            <li key={id}>
+              <Button
+                onClick={() => {
+                  setSearchParams({ Decor: searchDecor });
+                }}
+              >
+                {variantOfDecor}
+              </Button>
+            </li>
+          ))}
         </List>
       )}
     </MainItem>

@@ -5,190 +5,129 @@ import {
   FilterTitle,
   List,
   MainItem,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   Wrap,
-  WrapInsideList,
 } from './FilterAge.styled';
+
+const ageArray = [
+  {
+    id: 1,
+    descriptionAge: 'для передчасно народжених',
+    searchAge: 'premature',
+  },
+  {
+    id: 2,
+    descriptionAge: 'для новонароджених',
+    searchAge: 'newborns',
+  },
+  {
+    id: 2,
+    descriptionAge: '0-3 місяці',
+    searchAge: '0-3-months',
+  },
+  {
+    id: 3,
+    descriptionAge: '4-6 місяців',
+    searchAge: '4-6-months',
+  },
+  {
+    id: 4,
+    descriptionAge: '7-9 місяців',
+    searchAge: '7-9-months',
+  },
+  {
+    id: 5,
+    descriptionAge: '10-12 місяців',
+    searchAge: '10-12-months',
+  },
+  {
+    id: 6,
+    descriptionAge: '13-18 місяців',
+    searchAge: '13-18-months',
+  },
+  {
+    id: 7,
+    descriptionAge: '1,5-2 роки',
+    searchAge: '1.5-2-years',
+  },
+  {
+    id: 8,
+    descriptionAge: '2-3 роки',
+    searchAge: '2-3-years',
+  },
+  {
+    id: 9,
+    descriptionAge: '3-4 роки',
+    searchAge: '3-4-years',
+  },
+  {
+    id: 10,
+    descriptionAge: '4-5 роки',
+    searchAge: '4-5-years',
+  },
+  {
+    id: 11,
+    descriptionAge: '6-7 років',
+    searchAge: '6-7-years',
+  },
+  {
+    id: 12,
+    descriptionAge: '8-9 років',
+    searchAge: '8-9-years',
+  },
+  {
+    id: 13,
+    descriptionAge: '10 років',
+    searchAge: '10-years',
+  },
+  {
+    id: 14,
+    descriptionAge: '11 років',
+    searchAge: '11-years',
+  },
+  {
+    id: 15,
+    descriptionAge: '12 років',
+    searchAge: '12-years',
+  },
+  {
+    id: 16,
+    descriptionAge: '13 років',
+    searchAge: '13-years',
+  },
+];
 
 const FilterAge = () => {
   const [isFilterAgeList, setIsFilterAgeList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
-  const handleOpenList = () => {
-    return setIsFilterAgeList(true);
-  };
-
-  const handleCloseList = () => {
-    return setIsFilterAgeList(false);
+  const handleToggleList = () => {
+    setIsFilterAgeList(prevIsFilterAgeList => !prevIsFilterAgeList);
   };
 
   return (
-    <MainItem $list={isFilterAgeList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openAgeList={isFilterAgeList === true}>
         <FilterTitle>ВІК</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          $openAgeList={isFilterAgeList === true}
+          onClick={handleToggleList}
+        />
       </Wrap>
       {isFilterAgeList && (
         <List>
-          <WrapInsideList>
-            <FilterTitle>ВІК</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: 'premature' });
-              }}
-            >
-              для передчасно народжених
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: 'newborns' });
-              }}
-            >
-              для новонароджених
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '0-3-months' });
-              }}
-            >
-              0-3 місяці
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '4-6-months' });
-              }}
-            >
-              4-6 місяців
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '7-9-months' });
-              }}
-            >
-              7-9 місяців
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '10-12-months' });
-              }}
-            >
-              10-12 місяців
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '13-18-months' });
-              }}
-            >
-              13-18 місяців
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '1.5-2-years' });
-              }}
-            >
-              1,5-2 роки
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '2-3-years' });
-              }}
-            >
-              2-3 роки
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '3-4-years' });
-              }}
-            >
-              3-4 роки
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '4-5-years' });
-              }}
-            >
-              4-5 роки
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '6-7-years' });
-              }}
-            >
-              6-7 років
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '8-9-years' });
-              }}
-            >
-              8-9 років
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '10-years' });
-              }}
-            >
-              10 років
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '11-years' });
-              }}
-            >
-              11 років
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '12-years' });
-              }}
-            >
-              12 років
-            </Button>
-          </li>
-          <li>
-            <Button
-              onClick={() => {
-                setSearchParams({ Age: '13-years' });
-              }}
-            >
-              13 років
-            </Button>
-          </li>
+          {ageArray.map(({ id, descriptionAge, searchAge }) => (
+            <li key={id}>
+              <Button
+                onClick={() => {
+                  setSearchParams({ Age: searchAge });
+                }}
+              >
+                {descriptionAge}
+              </Button>
+            </li>
+          ))}
         </List>
       )}
     </MainItem>

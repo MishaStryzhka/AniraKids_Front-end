@@ -7,29 +7,16 @@ export const MainItem = styled.li`
   width: 305px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  border: 1px dashed blue;
-  border-image: repeating-linear-gradient(
-    to right,
-    black 0,
-    black 10px,
-    transparent 10px,
-    transparent 20px
-  );
-  padding: ${({ $list }) => ($list ? '16px' : '0')};
+  gap: 4px;
 `;
 
 export const Wrap = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 12px;
-  border-bottom: 1px solid #ebdad1;
-`;
-
-export const WrapInsideList = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
+  border-bottom: ${({ $openPriceList }) =>
+    $openPriceList ? 'none' : '1px solid'};
+  border-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 
 export const FilterTitle = styled.h3`
@@ -40,13 +27,6 @@ export const FilterTitle = styled.h3`
   letter-spacing: 0.02px;
 
   color: ${({ theme }) => theme.color.mainColor5};
-`;
-
-export const List = styled.ul`
-  display: flex;
-
-  flex-direction: column;
-  gap: 4px;
 `;
 
 export const StyledRangeWrapper = styled.div`
@@ -86,11 +66,9 @@ export const StyledValue = styled.div`
 `;
 
 export const StyledIconArrowUp = styled(IconArrow)`
-  transform: rotate(90deg);
-`;
-
-export const StyledIconArrowDown = styled(IconArrow)`
-  transform: rotate(270deg);
+  transform: ${({ $openPriceList }) =>
+    $openPriceList ? 'rotate(270deg)' : 'rotate(90deg)'};
+  cursor: pointer;
 `;
 
 export const WrapSlider = styled.div``;
@@ -115,6 +93,7 @@ export const StyledSlider = styled(Slider)`
     border: 1px solid #000;
     opacity: 1;
     border-radius: 0;
+    cursor: pointer;
   }
 
   .rc-slider-rail {
