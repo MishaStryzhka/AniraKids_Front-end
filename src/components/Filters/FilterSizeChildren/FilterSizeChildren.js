@@ -4,229 +4,146 @@ import {
   FilterTitle,
   List,
   MainItem,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   Wrap,
   WrapButtons,
-  WrapInsideList,
 } from './FilterSizeChildren.styled';
 import { useSearchParams } from 'react-router-dom';
+
+const arraySizeChildren = [
+  {
+    id: 1,
+    descriptionSize: 'до 50',
+    searchSize: 'before-50',
+  },
+  {
+    id: 2,
+    descriptionSize: '50-56 ',
+    searchSize: '50-56',
+  },
+  {
+    id: 3,
+    descriptionSize: '62-68',
+    searchSize: '62-68',
+  },
+  {
+    id: 4,
+    descriptionSize: '68-74',
+    searchSize: '68-74',
+  },
+  {
+    id: 5,
+    descriptionSize: '74-80',
+    searchSize: '74-80',
+  },
+  {
+    id: 6,
+    descriptionSize: '80-86',
+    searchSize: '80-86',
+  },
+  {
+    id: 7,
+    descriptionSize: '86-92',
+    searchSize: '86-92',
+  },
+  {
+    id: 8,
+    descriptionSize: '92-98',
+    searchSize: '92-98',
+  },
+  {
+    id: 9,
+    descriptionSize: '98-104',
+    searchSize: '98-104',
+  },
+  {
+    id: 10,
+    descriptionSize: '104-110',
+    searchSize: '104-110',
+  },
+  {
+    id: 11,
+    descriptionSize: '110-116',
+    searchSize: '110-116',
+  },
+  {
+    id: 12,
+    descriptionSize: '116-122',
+    searchSize: '116-122',
+  },
+  {
+    id: 13,
+    descriptionSize: '122-128',
+    searchSize: '122-128',
+  },
+  {
+    id: 14,
+    descriptionSize: '128-134',
+    searchSize: '128-134',
+  },
+  {
+    id: 15,
+    descriptionSize: '134-140',
+    searchSize: '134-140',
+  },
+  {
+    id: 16,
+    descriptionSize: '140-146',
+    searchSize: '140-146',
+  },
+  {
+    id: 17,
+    descriptionSize: '146-152',
+    searchSize: '146-152',
+  },
+  {
+    id: 18,
+    descriptionSize: '152-158',
+    searchSize: '152-158',
+  },
+  {
+    id: 19,
+    descriptionSize: '158-164',
+    searchSize: '158-164',
+  },
+  {
+    id: 20,
+    descriptionSize: '164-170',
+    searchSize: '164-170',
+  },
+];
 
 const FilterSizeChildren = () => {
   const [isSizeChildrenList, setIsSizeChildrenList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
-  const handleOpenList = () => {
-    return setIsSizeChildrenList(true);
-  };
-
-  const handleCloseList = () => {
-    return setIsSizeChildrenList(false);
+  const handleToggleList = () => {
+    setIsSizeChildrenList(prevIsSizeChildrenList => !prevIsSizeChildrenList);
   };
   return (
-    <MainItem $list={isSizeChildrenList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openSizeChildrenList={isSizeChildrenList === true}>
         <FilterTitle>РОЗМІР</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          onClick={handleToggleList}
+          $openSizeChildrenList={isSizeChildrenList === true}
+        />
       </Wrap>
       {isSizeChildrenList && (
         <List>
-          <WrapInsideList>
-            <FilterTitle>РОЗМІР</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
           <WrapButtons>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'before-50' });
-                }}
-              >
-                до 50 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '50-56' });
-                }}
-              >
-                50-56 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '56-62' });
-                }}
-              >
-                56-62 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '62-68' });
-                }}
-              >
-                62-68 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '68-74' });
-                }}
-              >
-                68-74 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '74-80' });
-                }}
-              >
-                74-80 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '80-86' });
-                }}
-              >
-                80-86 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '86-92' });
-                }}
-              >
-                86-92 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '92-98' });
-                }}
-              >
-                92-98 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '98-104' });
-                }}
-              >
-                98-104 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '104-110' });
-                }}
-              >
-                104-110 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '110-116' });
-                }}
-              >
-                110-116 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '116-122' });
-                }}
-              >
-                {' '}
-                116-122 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '122-128' });
-                }}
-              >
-                122-128 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '128-134' });
-                }}
-              >
-                128-134 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '134-140' });
-                }}
-              >
-                134-140 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '140-146' });
-                }}
-              >
-                140-146 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '146-152' });
-                }}
-              >
-                146-152 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '152-158' });
-                }}
-              >
-                152-158 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '168-164' });
-                }}
-              >
-                158-164 см
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: '164-170' });
-                }}
-              >
-                164-170 см
-              </Button>
-            </li>
+            {arraySizeChildren.map(({ id, descriptionSize, searchSize }) => (
+              <li key={id}>
+                <Button
+                  onClick={() => {
+                    setSearchParams({ size: searchSize });
+                  }}
+                >
+                  {descriptionSize} см
+                </Button>
+              </li>
+            ))}
           </WrapButtons>
         </List>
       )}

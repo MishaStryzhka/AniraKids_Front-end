@@ -3,15 +3,12 @@ import { useState } from 'react';
 import 'rc-slider/assets/index.css';
 import {
   FilterTitle,
-  List,
   MainItem,
   MaxValue,
   MinValue,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   StyledSlider,
   Wrap,
-  WrapInsideList,
   WrapSlider,
 } from './FilterPrice.styled';
 
@@ -19,12 +16,8 @@ const FilterPrice = () => {
   const [isPriceList, setIsPriceList] = useState(false);
   const [rangeValues, setRangeValues] = useState([0, 3000]);
 
-  const handleOpenList = () => {
-    return setIsPriceList(true);
-  };
-
-  const handleCloseList = () => {
-    return setIsPriceList(false);
+  const handleToggleList = () => {
+    setIsPriceList(prevIsPriceList => !prevIsPriceList);
   };
 
   const handleRangeChange = values => {
@@ -33,32 +26,28 @@ const FilterPrice = () => {
   };
 
   return (
-    <MainItem $list={isPriceList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openPriceList={isPriceList === true}>
         <FilterTitle>ЦІНА</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          onClick={handleToggleList}
+          $openPriceList={isPriceList === true}
+        />
       </Wrap>
       {isPriceList && (
-        <List>
-          <WrapInsideList>
-            <FilterTitle>ЦІНА</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
-          <WrapSlider>
-            {/* <createSliderWithTooltip> */}
-            <StyledSlider
-              range
-              min={0}
-              max={3000}
-              step={10}
-              defaultValue={rangeValues}
-              onChange={handleRangeChange}
-              tipFormatter={value => `${value}%`}
-            />
-            <MinValue>{rangeValues[0]}</MinValue>
-            <MaxValue>{rangeValues[1]}</MaxValue>
-          </WrapSlider>
-        </List>
+        <WrapSlider>
+          <StyledSlider
+            range
+            min={0}
+            max={3000}
+            step={10}
+            defaultValue={rangeValues}
+            onChange={handleRangeChange}
+            tipFormatter={value => `${value}%`}
+          />
+          <MinValue>{rangeValues[0]}</MinValue>
+          <MaxValue>{rangeValues[1]}</MaxValue>
+        </WrapSlider>
       )}
     </MainItem>
   );

@@ -4,102 +4,81 @@ import {
   FilterTitle,
   List,
   MainItem,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   Wrap,
   WrapButtons,
-  WrapInsideList,
 } from './FilterSizeAdult.styled';
 import { useSearchParams } from 'react-router-dom';
+
+const arraySizeAdult = [
+  {
+    id: 1,
+    descriptionSize: 'XS',
+    searchSize: 'XS',
+  },
+  {
+    id: 2,
+    descriptionSize: 'S',
+    searchSize: 'S',
+  },
+  {
+    id: 3,
+    descriptionSize: 'M',
+    searchSize: 'M',
+  },
+  {
+    id: 4,
+    descriptionSize: 'L',
+    searchSize: 'L',
+  },
+  {
+    id: 5,
+    descriptionSize: 'XL',
+    searchSize: 'XL',
+  },
+  {
+    id: 5,
+    descriptionSize: 'XXL',
+    searchSize: 'XXL',
+  },
+  {
+    id: 5,
+    descriptionSize: 'XXXL',
+    searchSize: 'XXXL',
+  },
+];
 
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
-  const handleOpenList = () => {
-    return setIsSizeAdultList(true);
-  };
-
-  const handleCloseList = () => {
-    return setIsSizeAdultList(false);
+  const handleToggleList = () => {
+    setIsSizeAdultList(prevIsSizeAdultList => !prevIsSizeAdultList);
   };
   return (
-    <MainItem $list={isSizeAdultList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openSizeList={isSizeAdultList === true}>
         <FilterTitle>РОЗМІР</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          onClick={handleToggleList}
+          $openSizeList={isSizeAdultList === true}
+        />
       </Wrap>
       {isSizeAdultList && (
         <List>
-          <WrapInsideList>
-            <FilterTitle>РОЗМІР</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
           <WrapButtons>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'XS' });
-                }}
-              >
-                XS
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'S' });
-                }}
-              >
-                S
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'M' });
-                }}
-              >
-                M
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'L' });
-                }}
-              >
-                L
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'XL' });
-                }}
-              >
-                XL
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'XXL' });
-                }}
-              >
-                XXL
-              </Button>
-            </li>
-            <li>
-              <Button
-                onClick={() => {
-                  setSearchParams({ size: 'XXXL' });
-                }}
-              >
-                XXXL
-              </Button>
-            </li>
+            {arraySizeAdult.map(({ id, descriptionSize, searchSize }) => (
+              <li key={id}>
+                <Button
+                  onClick={() => {
+                    setSearchParams({ size: searchSize });
+                  }}
+                >
+                  {descriptionSize}
+                </Button>
+              </li>
+            ))}
           </WrapButtons>
         </List>
       )}

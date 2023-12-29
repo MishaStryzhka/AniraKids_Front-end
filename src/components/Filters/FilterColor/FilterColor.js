@@ -7,10 +7,8 @@ import {
   List,
   ListButtons,
   MainItem,
-  StyledIconArrowDown,
   StyledIconArrowUp,
   Wrap,
-  WrapInsideList,
 } from './FilterColor.styled';
 
 const colors = [
@@ -57,26 +55,20 @@ const FilterColor = () => {
     setSelectedColor(color);
   };
 
-  const handleOpenList = () => {
-    return setIsFilterColorList(true);
+  const handleToggleList = () => {
+    setIsFilterColorList(prevIsFilterColorList => !prevIsFilterColorList);
   };
-
-  const handleCloseList = () => {
-    return setIsFilterColorList(false);
-  };
-
   return (
-    <MainItem $list={isFilterColorList}>
-      <Wrap>
+    <MainItem>
+      <Wrap $openColorList={isFilterColorList === true}>
         <FilterTitle>КОЛІР</FilterTitle>
-        <StyledIconArrowUp onClick={handleOpenList} />
+        <StyledIconArrowUp
+          onClick={handleToggleList}
+          $openColorList={isFilterColorList === true}
+        />
       </Wrap>
       {isFilterColorList && (
         <List>
-          <WrapInsideList>
-            <FilterTitle>КОЛІР</FilterTitle>
-            <StyledIconArrowDown onClick={handleCloseList} />
-          </WrapInsideList>
           <ListButtons>
             {colors.map(({ color, id, colorCode }) => (
               <ItemButton key={id}>
