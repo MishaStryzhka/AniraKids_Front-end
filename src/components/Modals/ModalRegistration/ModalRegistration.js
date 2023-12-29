@@ -27,12 +27,15 @@ import { useState } from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import IconArrow from 'images/icons/IconArrow';
+import { useDispatch } from 'react-redux';
+import { register } from '../../../redux/auth';
+import { logIn } from '../../../redux/auth/operations';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .required('Field is required')
     .email('Enter a valid Email'),
-  phone: Yup.string().when('isPhone', {
+  primaryPhoneNumber: Yup.string().when('isPhone', {
     is: true,
     then: Yup.string().required('Field is required'),
   }),
@@ -50,6 +53,7 @@ const ModalRegistration = () => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
   const [isContact, setIsContact] = useState('email');
   const [openPassword, setOpenPassword] = useState(false);
+  const dispatch = useDispatch();
 
   const handleOpenPassword = () =>
     setOpenPassword(openPassword => !openPassword);
@@ -80,6 +84,19 @@ const ModalRegistration = () => {
   };
 
   const handleLogInSubmit = values => {
+    const { email, password, login, primaryPhoneNumber } = values;
+    console.log('typeNavigation', typeNavigation);
+
+    typeNavigation === 'registration' &&
+      dispatch(
+        register(
+          isContact === 'email'
+            ? { email, password }
+            : { primaryPhoneNumber, password }
+        )
+      );
+    typeNavigation === 'authorization' && dispatch(logIn({ login, password }));
+
     console.log('Form values:', values);
   };
 
@@ -89,7 +106,7 @@ const ModalRegistration = () => {
         <Formik
           initialValues={{
             email: '',
-            phone: '',
+            primaryPhoneNumber: '',
             password: '',
             login: '',
           }}
@@ -149,7 +166,7 @@ const ModalRegistration = () => {
                       $isActive={isActiveBtn.button2}
                       type="button"
                       onClick={() => {
-                        setIsContact('phone');
+                        setIsContact('primaryPhoneNumber');
                         handleButtonClick('button2', 'button1');
                       }}
                     >
@@ -157,18 +174,22 @@ const ModalRegistration = () => {
                     </ButtonContact>
                   </WrapButton>
                   <Wrap>
-                    {isContact === 'phone' && (
+                    {isContact === 'primaryPhoneNumber' && (
                       <Label>
                         Номер телефону
                         <FieldStyled
                           placeholder="+380"
                           type="tel"
-                          name="phone"
+                          name="primaryPhoneNumber"
                           onChange={handleChange}
-                          value={values.phone}
+                          value={values.primaryPhoneNumber}
                           required
                         />
-                        <p>{errors.phone && touched.phone && errors.phone}</p>
+                        <p>
+                          {errors.primaryPhoneNumber &&
+                            touched.primaryPhoneNumber &&
+                            errors.primaryPhoneNumber}
+                        </p>
                       </Label>
                     )}
                     {isContact === 'email' && (
@@ -205,7 +226,7 @@ const ModalRegistration = () => {
                   </Wrap>
                   <TextCondition>
                     Натискаючи Продовжити, Ви приймаєте
-                    <StyledNavLinkCondition>
+                    <StyledNavLinkCondition to="./">
                       Політику конфіденційності
                     </StyledNavLinkCondition>
                     .

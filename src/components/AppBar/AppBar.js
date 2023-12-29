@@ -15,8 +15,8 @@ import { Container } from 'components/Container/Container';
 
 const AppBar = () => {
   const { pathname } = useLocation();
-  console.log('pathname', pathname);
-  console.log('pathname === `/`', pathname === `/`);
+  // console.log('pathname', pathname);
+  // console.log('pathname === `/`', pathname === `/`);
 
   return (
     <>
