@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import theme from './theme';
 import { Route, Routes } from 'react-router-dom';
@@ -14,11 +14,20 @@ import {
   NotFoundPage,
 } from '../pages';
 import { PrivateRoute } from './PrivateRoute';
+import { useDispatch } from 'react-redux';
+import { refreshUser } from '../redux/auth/operations';
+import { useAuth } from 'hooks';
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
+  const dispatch = useDispatch();
+  const { token } = useAuth();
 
   if (false) setCurrentTheme('light');
+
+  useEffect(() => {
+    dispatch(refreshUser());
+  }, [dispatch, token]);
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
