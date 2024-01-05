@@ -1,7 +1,7 @@
-import ProductCard from 'components/ProductCard/ProductCard';
+import { StyledMainContent } from './MainContent.styled';
 
-const MainContent = () => {
-  return <ProductCard />;
+const MainContent = ({ children }) => {
+  return <StyledMainContent>{children}</StyledMainContent>;
 };
 
 export default MainContent;
