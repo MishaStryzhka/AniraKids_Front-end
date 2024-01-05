@@ -32,7 +32,7 @@ export const List = styled.ul`
 
 export const Item = styled.li`
   text-align: center;
-  font-family: 'Open Sans Hebrew', sans-serif;
+  font-family: Open Sans, sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 700;

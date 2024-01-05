@@ -17,12 +17,14 @@ const BoxNavigation = ({ $mainPage }) => {
   console.log('isModal', isModal);
 
   useEffect(() => {
-    isModal && user && navigate('/my-account', { replace: true });
+    isModal && user && navigate('/my-account/profile', { replace: true });
     isModal && user && setIsModal(false);
   }, [isModal, user, navigate]);
 
   const isOpenModal = () => {
-    user ? navigate('/my-account', { replace: true }) : setIsModal(true);
+    user
+      ? navigate('/my-account/profile', { replace: true })
+      : setIsModal(true);
   };
 
   const isCloseModal = () => {
@@ -31,7 +33,10 @@ const BoxNavigation = ({ $mainPage }) => {
   const { currentTheme } = useAuth();
   return (
     <Box>
-      <Button type="button">
+      <Button
+        type="button"
+        onClick={() => navigate('/my-account/favorite', { replace: true })}
+      >
         <IconHeart
           stroke={
             $mainPage
@@ -54,7 +59,10 @@ const BoxNavigation = ({ $mainPage }) => {
           <ModalRegistration />
         </Modal>
       )}
-      <Button type="button">
+      <Button
+        type="button"
+        onClick={() => navigate('/my-account/order1', { replace: true })}
+      >
         <IconBag
           stroke={
             $mainPage
