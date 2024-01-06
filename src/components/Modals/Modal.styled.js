@@ -16,7 +16,6 @@ export const Backdrop = styled.div`
 export const ModalContainer = styled.div`
   background-color: ${p => p.theme.color.cardBG};
   // min-width: 280px;
-  padding: 14px;
   margin: 0 auto;
   border-radius: 20px;
   z-index: 2000;
@@ -36,4 +35,26 @@ export const BtnStyled = styled.button`
   padding: 0;
 
   background-color: transparent;
+`;
+
+export const ModalTitle = styled.h2`
+  text-align: center;
+  font-family: Open Sans, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const ModalWindow = styled.div`
+  display: flex;
+  padding: 24px;
+  gap: 24px;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+
+  background-color: ${({ theme }) => theme.color.mainColor1};
 `;

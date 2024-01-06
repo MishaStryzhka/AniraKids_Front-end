@@ -4,7 +4,6 @@ import IconArrow from 'images/icons/IconArrow';
 
 const NavigationOverlay = () => {
   const location = useLocation();
-  console.log('location', location);
 
   return (
     <NavigationWrapper>

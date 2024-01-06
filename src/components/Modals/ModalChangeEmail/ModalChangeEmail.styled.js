@@ -21,7 +21,7 @@ export const StyledIconCross = styled(IconCross)`
 
 export const ModalTitle = styled.h2`
   text-align: center;
-  font-family: 'Open Sans Hebrew', sans-serif;
+  font-family: Open Sans, sans-serif;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;

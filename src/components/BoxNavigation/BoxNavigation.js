@@ -14,8 +14,6 @@ const BoxNavigation = ({ $mainPage }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  console.log('isModal', isModal);
-
   useEffect(() => {
     isModal && user && navigate('/my-account/profile', { replace: true });
     isModal && user && setIsModal(false);
