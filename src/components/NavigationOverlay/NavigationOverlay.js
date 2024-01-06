@@ -45,6 +45,43 @@ const NavigationOverlay = () => {
           <StyledNavLink to="/aboutUs">Про нас</StyledNavLink>
         </>
       )}
+
+      {/* ======Акаунт======= */}
+      {location.pathname.includes('my-account') && (
+        <>
+          <StyledNavLink $notActive to="/my-account/profile">
+            Акаунт
+          </StyledNavLink>
+          <IconArrow />
+          {location.pathname.includes('profile') && (
+            <StyledNavLink to="./profile">Профіль</StyledNavLink>
+          )}
+          {location.pathname.includes('chat') && (
+            <StyledNavLink to="./chat">Чат</StyledNavLink>
+          )}
+          {location.pathname.includes('favorite') && (
+            <StyledNavLink to="./favorite">Улюблене</StyledNavLink>
+          )}
+          {location.pathname.includes('rent-out') && (
+            <StyledNavLink to="./rent-out">Пропоную</StyledNavLink>
+          )}
+          {location.pathname.includes('rent-in') && (
+            <StyledNavLink to="./rent-in">Орендую</StyledNavLink>
+          )}
+          {location.pathname.includes('my-orders') && (
+            <StyledNavLink to="./my-orders">Мої покупки</StyledNavLink>
+          )}
+          {location.pathname.includes('my-purchases') && (
+            <StyledNavLink to="./my-purchases">Мої продажі</StyledNavLink>
+          )}
+          {location.pathname.includes('wallet') && (
+            <StyledNavLink to="./wallet">Мій гаманець</StyledNavLink>
+          )}
+          {location.pathname.includes('order1') && (
+            <StyledNavLink to="./order1">Кошик</StyledNavLink>
+          )}
+        </>
+      )}
     </NavigationWrapper>
   );
 };

@@ -21,6 +21,6 @@ export const StyledNavLink = styled(NavLink)`
   padding: 8px 16px;
 
   &.active {
-    font-weight: 700;
+    ${({ $notActive }) => !$notActive && 'font-weight: 700;'}
   }
 `;
