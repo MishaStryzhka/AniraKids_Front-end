@@ -44,4 +44,6 @@ export const StyledButton = styled.button`
   letter-spacing: 0.02px;
 
   color: ${({ theme }) => theme.color.mainColor5};
+
+  cursor: pointer;
 `;
