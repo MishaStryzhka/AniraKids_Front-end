@@ -3,7 +3,7 @@ import IconLogo from '../../images/icons/IconLogo';
 
 const Logo = () => {
   return (
-    <NavLink to="./">
+    <NavLink to="./" style={{ display: 'flex' }}>
       <IconLogo />
     </NavLink>
   );

@@ -1,3 +1,4 @@
+import Button from 'components/Button/Button';
 import { Form } from 'formik';
 import styled from 'styled-components';
 
@@ -78,4 +79,8 @@ export const ButtonShow = styled.button`
   position: absolute;
   right: 8px;
   bottom: 8px;
+`;
+
+export const StyledButton = styled(Button)`
+  margin: 0 auto;
 `;

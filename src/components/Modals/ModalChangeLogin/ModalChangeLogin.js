@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validUpdateLoginScheme } from 'schemas';
 
-const ModalChangeLogin = ({ isCloseModal }) => {
+const ModalChangeLogin = ({ onClick }) => {
   const dispatch = useDispatch();
 
   const handleSubmitLogin = values => {
@@ -25,7 +25,8 @@ const ModalChangeLogin = ({ isCloseModal }) => {
     <ModalWindow>
       <StyledIconCross
         onClick={() => {
-          isCloseModal();
+          document.body.style.overflow = 'auto';
+          onClick();
         }}
       />
       <Formik

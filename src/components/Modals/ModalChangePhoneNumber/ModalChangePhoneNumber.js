@@ -7,12 +7,13 @@ import {
   StyledIconCross,
 } from './ModalChangePhoneNumber.syled';
 
-const ModalChangePhoneNumber = ({ onClose }) => {
+const ModalChangePhoneNumber = ({ onClick }) => {
   return (
     <ModalWindow>
       <StyledIconCross
         onClick={() => {
-          onClose();
+          document.body.style.overflow = 'auto';
+          onClick();
         }}
       />
       <ModalTitle>Змінити номер телефону</ModalTitle>

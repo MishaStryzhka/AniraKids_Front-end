@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validUpdateEmailScheme } from 'schemas';
 
-const ModalChangeEmail = ({ isCloseModal }) => {
+const ModalChangeEmail = ({ onClick }) => {
   const dispatch = useDispatch();
 
   const handleSubmitEmail = values => {
@@ -26,7 +26,8 @@ const ModalChangeEmail = ({ isCloseModal }) => {
     <ModalWindow>
       <StyledIconCross
         onClick={() => {
-          isCloseModal();
+          document.body.style.overflow = 'auto';
+          onClick();
         }}
       />
       <Formik

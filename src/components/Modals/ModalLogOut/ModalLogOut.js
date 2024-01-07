@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { logOut } from '../../../redux/auth/operations';
 // import { logOut } from 'redux/auth/operations';
 
-const ModalLogOut = ({ isCloseModal }) => {
+const ModalLogOut = ({ onClick }) => {
   const dispatch = useDispatch();
 
   const handleSignOut = () => {
@@ -20,7 +20,8 @@ const ModalLogOut = ({ isCloseModal }) => {
     <ModalWindow>
       <StyledIconCross
         onClick={() => {
-          isCloseModal();
+          document.body.style.overflow = 'auto';
+          onClick();
         }}
       />
       <ModalTitle>Ви дійсно бажаєте вийти?</ModalTitle>
