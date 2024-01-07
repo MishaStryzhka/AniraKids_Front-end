@@ -12,6 +12,7 @@ const ModalChangeEmail = ({ onClick }) => {
     <ModalWindow>
       <StyledIconCross
         onClick={() => {
+          document.body.style.overflow = 'auto';
           onClick();
         }}
       />
