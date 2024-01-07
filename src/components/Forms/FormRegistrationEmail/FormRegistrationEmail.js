@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux';
 import { register } from '../../../redux/auth';
 import { Formik } from 'formik';
-import { validRegistrationEmailScheme } from 'components/ValidationSchemas/RegistrationSchemas';
+import { validRegistrationEmailScheme } from 'schemas';
 import { useState } from 'react';
 import {
   Button,
@@ -28,6 +28,9 @@ const FormRegistrationEmail = () => {
 
   const handleRegistrationEmailSubmit = values => {
     const { email, password } = values;
+
+    console.log(values);
+
     dispatch(register({ email, password }));
   };
 
@@ -56,7 +59,7 @@ const FormRegistrationEmail = () => {
               <FieldStyled
                 // type="email"
                 name="email"
-                onClick={handleChange}
+                onChange={e => handleChange(e)}
                 value={values.email}
                 placeholder="***@gmail"
                 required
@@ -69,7 +72,7 @@ const FormRegistrationEmail = () => {
                 placeholder="****"
                 type={openPassword ? 'text' : 'password'}
                 name="password"
-                onClick={handleChange}
+                onChange={e => handleChange(e)}
                 value={values.password}
                 required
               />

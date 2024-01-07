@@ -55,3 +55,8 @@ export const InputModal = styled.input`
   border-color: ${({ theme }) => theme.color.mainColor2};
   color: ${({ theme }) => theme.color.lightBGColor};
 `;
+
+export const WrapButton = styled.div`
+  display: flex;
+  justify-content: center;
+`;

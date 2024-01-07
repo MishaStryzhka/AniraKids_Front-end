@@ -38,6 +38,7 @@ export const LabelModal = styled.label`
   line-height: 1.43;
   display: flex;
   flex-direction: column;
+  margin-bottom: 24px;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -54,4 +55,9 @@ export const InputModal = styled.input`
 
   border-color: ${({ theme }) => theme.color.mainColor2};
   color: ${({ theme }) => theme.color.lightBGColor};
+`;
+
+export const WrapButton = styled.div`
+  display: flex;
+  justify-content: center;
 `;

@@ -1,4 +1,3 @@
-import validationAuthorizationScheme from 'components/ValidationSchemas/AuthorizationScheme';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -18,6 +17,7 @@ import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
+import { validationAuthorizationScheme } from 'schemas';
 
 const AuthForm = () => {
   const dispatch = useDispatch();
@@ -30,6 +30,8 @@ const AuthForm = () => {
 
   const handleAuthSubmit = values => {
     const { login, password } = values;
+
+    console.log(values);
     dispatch(logIn({ login, password }));
   };
   return (
@@ -62,9 +64,9 @@ const AuthForm = () => {
                 Логін
                 <FieldStyled
                   placeholder="Email / Номер телефону"
-                  onChange={handleChange}
+                  onChange={e => handleChange(e)}
                   name="login"
-                  value={values.login || ''}
+                  value={values.login}
                   required
                 />
                 <p>{errors.login && touched.login && errors.login}</p>
@@ -74,8 +76,8 @@ const AuthForm = () => {
                 <FieldStyled
                   type={openPassword ? 'text' : 'password'}
                   name="password"
-                  onChange={handleChange}
-                  value={values.password || ''}
+                  onChange={e => handleChange(e)}
+                  value={values.password}
                   placeholder="****"
                   required
                 />
@@ -92,9 +94,7 @@ const AuthForm = () => {
               </Label>
             </Wrap>
             <StyledNavLink>Я забув (-ла) свій пароль</StyledNavLink>
-            <Button type="submit" onSubmit={handleAuthSubmit}>
-              Увійти
-            </Button>
+            <Button type="submit">Увійти</Button>
           </Form>
         )}
       </Formik>
