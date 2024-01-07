@@ -32,7 +32,7 @@ const ModalLogOut = ({ onClick }) => {
       <ButtonBack
         type="button"
         onClick={() => {
-          isCloseModal();
+          onClick();
         }}
       >
         Назад
