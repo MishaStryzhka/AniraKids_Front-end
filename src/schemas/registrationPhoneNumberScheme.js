@@ -1,12 +1,9 @@
 import * as Yup from 'yup';
 
-const validationAuthorizationScheme = Yup.object().shape({
-  login: Yup.string()
+export const validRegistrationPhoneNumberScheme = Yup.object().shape({
+  primaryPhoneNumber: Yup.string()
     .required('Field is required')
-    .matches(
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$|^\+?[0-9]+$/,
-      'Enter a valid LogIn (email or valid phone number)'
-    ),
+    .matches(/^\+380[0-9]{9}$/, 'Invalid phone number format'),
   password: Yup.string()
     .required('Field is required')
     .min(6, 'Password must be at least 6 characters')
@@ -16,5 +13,3 @@ const validationAuthorizationScheme = Yup.object().shape({
       'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number'
     ),
 });
-
-export default validationAuthorizationScheme;

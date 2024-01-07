@@ -7,7 +7,9 @@ import { useAuth } from 'hooks';
 import { useEffect, useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
-import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
+import ModalChangeLogin from 'components/Modals/ModalChangeLogin/ModalChangeLogin';
+// import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
+// import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
 
 const BoxNavigation = ({ $mainPage }) => {
   const [isModal, setIsModal] = useState(false);
@@ -54,7 +56,8 @@ const BoxNavigation = ({ $mainPage }) => {
       </Button>
       {isModal && !user && (
         <Modal onClick={isCloseModal}>
-          <ModalRegister />
+          {/* <ModalChangeEmail isCloseModal={isCloseModal} /> */}
+          <ModalChangeLogin isCloseModal={isCloseModal} />
         </Modal>
       )}
       <Button

@@ -11,11 +11,11 @@ import {
   TextCondition,
   WrapIcon,
 } from './FormRegistrationPhoneNumber.styled';
-import { validRegistrationPhoneNomberScheme } from 'components/ValidationSchemas/RegistrationSchemas';
 import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
+import { validRegistrationPhoneNumberScheme } from 'schemas';
 
 const FormRegistrationPhoneNumber = () => {
   const dispatch = useDispatch();
@@ -28,6 +28,7 @@ const FormRegistrationPhoneNumber = () => {
   const handleRegistrationSubmit = values => {
     const { primaryPhoneNumber, password } = values;
 
+    console.log(values);
     dispatch(register({ primaryPhoneNumber, password }));
   };
   return (
@@ -37,7 +38,7 @@ const FormRegistrationPhoneNumber = () => {
           primaryPhoneNumber: '',
           password: '',
         }}
-        validationSchema={validRegistrationPhoneNomberScheme}
+        validationSchema={validRegistrationPhoneNumberScheme}
         validateOnChange={false}
         onSubmit={handleRegistrationSubmit}
       >
@@ -56,7 +57,7 @@ const FormRegistrationPhoneNumber = () => {
                 placeholder="+380"
                 type="tel"
                 name="primaryPhoneNumber"
-                onChange={handleChange}
+                onChange={e => handleChange(e)}
                 value={values.primaryPhoneNumber}
                 required
               />
@@ -72,7 +73,7 @@ const FormRegistrationPhoneNumber = () => {
                 placeholder="****"
                 type={openPassword ? 'text' : 'password'}
                 name="password"
-                onChange={handleChange}
+                onChange={e => handleChange(e)}
                 value={values.password}
                 required
               />
