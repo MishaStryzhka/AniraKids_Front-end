@@ -5,9 +5,9 @@ import { Box, Button } from './BoxNavigation.styled';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { useEffect, useState } from 'react';
-import ModalRegistration from 'components/Modals/ModalRegistration/ModalRegistration';
 import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
+import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
 
 const BoxNavigation = ({ $mainPage }) => {
   const [isModal, setIsModal] = useState(false);
@@ -51,7 +51,7 @@ const BoxNavigation = ({ $mainPage }) => {
       </Button>
       {isModal && !user && (
         <Modal onClick={isCloseModal}>
-          <ModalRegistration />
+          <ModalRegister />
         </Modal>
       )}
       <Button type="button">
