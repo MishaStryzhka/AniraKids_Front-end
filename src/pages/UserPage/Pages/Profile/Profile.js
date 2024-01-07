@@ -12,6 +12,7 @@ import {
   Label,
   Placeholder,
   ProfileForm,
+  StyledButton,
   Wrap,
   Wrapper,
 } from './Profile.styled';
@@ -24,11 +25,14 @@ import { InputField } from 'components/Forms/Form.styled';
 import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 import IconPencil from 'images/icons/IconPencil';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
-import IconEye from 'images/icons/IconEye';
-import IconEyeOff from 'images/icons/IconEyeOff';
+import IconEyeOpen from 'images/icons/IconEyeOpen';
+import IconEyeClosed from 'images/icons/IconEyeClosed';
+import theme from 'components/theme';
+import { useDispatch } from 'react-redux';
+import { updateUserInfo } from '../../../../redux/auth/operations';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, currentTheme } = useAuth();
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
@@ -38,6 +42,8 @@ const Profile = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
+  const dispatch = useDispatch();
+
   const isChangeAvatarUrl = e => {
     const { files } = e.currentTarget;
     setAvatar(files[0]);
@@ -46,103 +52,131 @@ const Profile = () => {
 
   const onSubmit = e => {
     console.log('e', e);
+    dispatch(updateUserInfo(e));
   };
 
   return (
     <Formik
       initialValues={{
-        avatarUrl: user.avatarUrl || '',
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        patronymic: user.patronymic || '',
-        nickname: user.nickname || '', //schemas
+        avatarUrl: user?.avatar || '',
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        patronymic: user?.patronymic || '',
+        companyName: user?.companyName || '',
+        nickname: user?.nickname || '',
         primaryPhoneNumber: '',
-        email: user.email || '',
-        newPassword: user.newPassword || '',
-        confirmNewPassword: user.confirmNewPassword || '',
+        email: user?.email || '',
+        newPassword: user?.newPassword || '',
+        confirmNewPassword: user?.confirmNewPassword || '',
       }}
       validationSchema={validationProfileSchema}
-      onSubmit={({ email, password, userType }) =>
-        onSubmit({
-          email,
-          password,
-        })
-      }
+      onSubmit={onSubmit}
     >
       {({
         values,
         errors,
         touched,
         setFieldValue,
+        setTouched,
         handleChange,
         handleBlur,
         handleSubmit,
       }) => {
-        console.log('values', values);
-
         return (
           <ProfileForm>
             <Wrap>
               <Label>
                 <Placeholder>Прізвище</Placeholder>
-                <InputField
-                  type="text"
-                  id="firstName"
-                  value={values.firstName}
-                  name="firstName"
-                  placeholder="Стрижка"
-                  onChange={handleChange}
-                />
+                {user.firstName ? (
+                  <InputText>{user?.firstName}</InputText>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="firstName"
+                    value={values.firstName}
+                    name="firstName"
+                    placeholder="Стрижка"
+                    onChange={handleChange}
+                  />
+                )}
               </Label>
 
               <Label>
                 <Placeholder>Ім'я</Placeholder>
-                <InputField
-                  type="text"
-                  id="lastName"
-                  value={values.lastName}
-                  name="lastName"
-                  placeholder="Каріна"
-                  onChange={handleChange}
-                />
+                {user.lastName ? (
+                  <InputText>{user?.lastName}</InputText>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="lastName"
+                    value={values.lastName}
+                    name="lastName"
+                    placeholder="Каріна"
+                    onChange={handleChange}
+                  />
+                )}
               </Label>
 
               <Label>
                 <Placeholder>Побатькові (необов'язково)</Placeholder>
-                <InputField
-                  type="text"
-                  id="patronymic"
-                  value={values.patronymic}
-                  name="patronymic"
-                  placeholder="Михайлівна"
-                  onChange={handleChange}
-                />
+                {user.patronymic ? (
+                  <InputText>{user?.patronymic}</InputText>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="patronymic"
+                    value={values.patronymic}
+                    name="patronymic"
+                    placeholder="Михайлівна"
+                    onChange={handleChange}
+                  />
+                )}
+              </Label>
+
+              <Label>
+                <Placeholder>Назва компанії</Placeholder>
+                {user.companyName ? (
+                  <InputText>{user?.companyName}</InputText>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="companyName"
+                    value={values.companyName}
+                    name="companyName"
+                    placeholder="aniraKids"
+                    onChange={handleChange}
+                  />
+                )}
               </Label>
 
               <Label>
                 <Placeholder>Nickname</Placeholder>
-                <InputField
-                  type="text"
-                  id="nickname"
-                  value={values.nickname}
-                  name="nickname"
-                  placeholder="@karina.s"
-                  onChange={e => {
-                    e.currentTarget.value =
-                      e.currentTarget.value.replaceAll('@', '').length < 1
-                        ? ''
-                        : `@${e.currentTarget.value.replaceAll('@', '')}`;
+                {user.nickname ? (
+                  <InputText>{user?.nickname}</InputText>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="nickname"
+                    value={values.nickname}
+                    name="nickname"
+                    placeholder="@karina.s"
+                    onChange={e => {
+                      e.currentTarget.value =
+                        e.currentTarget.value.replaceAll('@', '').length < 1
+                          ? ''
+                          : `@${e.currentTarget.value.replaceAll('@', '')}`;
 
-                    handleChange(e);
-                  }}
-                />
+                      handleChange(e);
+                    }}
+                  />
+                )}
               </Label>
 
               <Label>
                 <Placeholder>Номер телефону</Placeholder>
-                {user.primaryPhoneNumber ? (
+                {user?.primaryPhoneNumber ? (
                   <Wrapper>
-                    <InputText>{user.primaryPhoneNumber}</InputText>
+                    <InputText>{user?.primaryPhoneNumber}</InputText>
                     <ButtonEdit
                       type="button"
                       title="change phone number"
@@ -162,9 +196,9 @@ const Profile = () => {
                   />
                 )}
                 {isOpenModalChangePhoneNomber && (
-                  <Modal>
+                  <Modal onClick={() => setIsOpenModalChangePhoneNomber(false)}>
                     <ModalChangePhoneNumber
-                      onClose={() => setIsOpenModalChangePhoneNomber(false)}
+                      onClick={() => setIsOpenModalChangePhoneNomber(false)}
                     ></ModalChangePhoneNumber>
                   </Modal>
                 )}
@@ -172,9 +206,9 @@ const Profile = () => {
 
               <Label>
                 <Placeholder>Електронна пошта</Placeholder>
-                {user.email ? (
+                {user?.email ? (
                   <Wrapper>
-                    <InputText>{user.email}</InputText>
+                    <InputText>{user?.email}</InputText>
                     <ButtonEdit
                       type="button"
                       title="change email"
@@ -194,57 +228,83 @@ const Profile = () => {
                   />
                 )}
                 {isOpenModalChangeEmail && (
-                  <Modal>
+                  <Modal onClick={() => setIsOpenModalChangeEmail(false)}>
                     <ModalChangeEmail
-                      onClose={() => setIsOpenModalChangeEmail(false)}
+                      onClick={() => setIsOpenModalChangeEmail(false)}
                     ></ModalChangeEmail>
                   </Modal>
                 )}
               </Label>
 
-              <Label>
-                <Placeholder>Новий пароль</Placeholder>
-                <InputField
-                  type={showNewPassword ? 'password' : 'text'}
-                  id="newPassword"
-                  value={values.newPassword}
-                  name="newPassword"
-                  placeholder="********"
-                  onChange={handleChange}
-                />
-                {values.newPassword !== '' && (
-                  <ButtonShow
-                    type="button"
-                    title="show password"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                  >
-                    {showNewPassword ? <IconEye /> : <IconEyeOff />}
-                  </ButtonShow>
-                )}
-              </Label>
+              {user?.isFirstLogin && user?.provider === 'Google' && (
+                <>
+                  <Label>
+                    <Placeholder>Новий пароль</Placeholder>
+                    <InputField
+                      type={!showNewPassword ? 'password' : 'text'}
+                      id="newPassword"
+                      value={values.newPassword}
+                      name="newPassword"
+                      placeholder="********"
+                      onChange={handleChange}
+                    />
+                    {values.newPassword !== '' && (
+                      <ButtonShow
+                        type="button"
+                        title="show password"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {!showNewPassword ? (
+                          <IconEyeOpen
+                            fill={theme[currentTheme].color.mainColor2}
+                          />
+                        ) : (
+                          <IconEyeClosed
+                            fill={theme[currentTheme].color.mainColor2}
+                          />
+                        )}
+                      </ButtonShow>
+                    )}
+                  </Label>
 
-              <Label>
-                <Placeholder>Введіть новий пароль ще раз</Placeholder>
-                <InputField
-                  type={showConfirmNewPassword ? 'password' : 'text'}
-                  id="confirmNewPassword"
-                  value={values.confirmNewPassword}
-                  name="confirmNewPassword"
-                  placeholder="********"
-                  onChange={handleChange}
-                />
-                {values.confirmNewPassword !== '' && (
-                  <ButtonShow
-                    type="button"
-                    title="show password"
-                    onClick={() =>
-                      setShowConfirmNewPassword(!showConfirmNewPassword)
-                    }
-                  >
-                    {showConfirmNewPassword ? <IconEye /> : <IconEyeOff />}
-                  </ButtonShow>
-                )}
-              </Label>
+                  <Label>
+                    <Placeholder>Введіть новий пароль ще раз</Placeholder>
+                    <InputField
+                      type={!showConfirmNewPassword ? 'password' : 'text'}
+                      id="confirmNewPassword"
+                      value={values.confirmNewPassword}
+                      name="confirmNewPassword"
+                      placeholder="********"
+                      onChange={handleChange}
+                    />
+                    {values.confirmNewPassword !== '' && (
+                      <ButtonShow
+                        type="button"
+                        title="show password"
+                        onClick={() =>
+                          setShowConfirmNewPassword(!showConfirmNewPassword)
+                        }
+                      >
+                        {!showConfirmNewPassword ? (
+                          <IconEyeOpen
+                            fill={theme[currentTheme].color.mainColor2}
+                          />
+                        ) : (
+                          <IconEyeClosed
+                            fill={theme[currentTheme].color.mainColor2}
+                          />
+                        )}
+                      </ButtonShow>
+                    )}
+                  </Label>
+                </>
+              )}
+
+              {Object.entries(touched).length !== 0 && (
+                <StyledButton type="submit" title="ЗБЕРЕГТИ">
+                  ЗБЕРЕГТИ
+                </StyledButton>
+              )}
             </Wrap>
             <AvatarLabel>
               <Field
@@ -254,6 +314,7 @@ const Profile = () => {
                 value=""
                 name="avatarUrl"
                 onChange={e => {
+                  setTouched({ ...touched, avatarUrl: true });
                   isChangeAvatarUrl(e);
                 }}
               />

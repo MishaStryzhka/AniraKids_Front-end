@@ -101,18 +101,34 @@ export const refreshUser = createAsyncThunk(
 export const updateUserInfo = createAsyncThunk(
   'auth/update',
   async (
-    { avatar, name, email, phone, city, birthday, favorite },
+    {
+      avatarUrl: avatar,
+      firstName,
+      lastName,
+      patronymic,
+      companyName,
+      nickname,
+      primaryPhoneNumber,
+      email,
+      newPassword,
+      confirmNewPassword,
+    },
     thunkAPI
   ) => {
     try {
       const formData = new FormData();
-      favorite && formData.append('favorite', favorite);
       avatar && formData.append('avatar', avatar);
-      name && formData.append('name', name);
+      firstName && formData.append('firstName', firstName);
+      lastName && formData.append('lastName', lastName);
+      patronymic && formData.append('patronymic', patronymic);
+      companyName && formData.append('companyName', companyName);
+      nickname && formData.append('nickname', nickname);
+      primaryPhoneNumber &&
+        formData.append('primaryPhoneNumber', primaryPhoneNumber);
       email && formData.append('email', email);
-      phone && formData.append('phone', phone);
-      city && formData.append('city', city);
-      birthday && formData.append('birthday', birthday);
+      newPassword && formData.append('newPassword', newPassword);
+      confirmNewPassword &&
+        formData.append('confirmNewPassword', confirmNewPassword);
 
       const response = await axios.patch(
         `/api/users/current/update`,

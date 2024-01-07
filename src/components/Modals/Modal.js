@@ -17,6 +17,7 @@ const Modal = ({ children, onClick }) => {
 
   const handleBackdropClick = evt => {
     if (evt.currentTarget === evt.target) {
+      document.body.style.overflow = 'auto';
       onClick();
     }
   };

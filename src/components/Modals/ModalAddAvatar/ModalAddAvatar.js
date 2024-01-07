@@ -11,7 +11,10 @@ const ModalAddAvatar = ({ avatar, setFieldValue, setIsOpenModalAddAvatar }) => {
         image={avatar}
         name="avatar"
         setImage={e => setFieldValue('avatarUrl', e)}
-        onClose={() => setIsOpenModalAddAvatar(false)}
+        onClose={() => {
+          document.body.style.overflow = 'auto';
+          setIsOpenModalAddAvatar(false);
+        }}
       />
     </ModalWindow>
   );
