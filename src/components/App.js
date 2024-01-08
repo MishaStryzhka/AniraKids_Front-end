@@ -20,6 +20,9 @@ const ForMenPage = lazy(() => import('../pages/ForMenPage/ForMenPage'));
 const ForWomenPage = lazy(() => import('../pages/ForWomenPage/ForWomenPage'));
 const MainPage = lazy(() => import('../pages/MainPage/MainPage'));
 const UserPage = lazy(() => import('../pages/UserPage/UserPage'));
+const ConfirmEmailPage = lazy(() =>
+  import('../pages/ConfirmEmailPage/ConfirmEmailPage')
+);
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage/NotFoundPage'));
 
 const Profile = lazy(() => import('../pages/UserPage/Pages/Profile/Profile'));
@@ -59,6 +62,7 @@ function App() {
           <Route path="/forChildren" element={<ForChildrenPage />} />
           <Route path="/decorAndToys" element={<DecorAndToysPage />} />
           <Route path="/aboutUs" element={<AboutUsPage />} />
+          <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route
             path="/my-account"

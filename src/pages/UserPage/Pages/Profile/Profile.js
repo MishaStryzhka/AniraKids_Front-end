@@ -55,6 +55,10 @@ const Profile = () => {
     dispatch(updateUserInfo(e));
   };
 
+  const verifyEmail = () => {
+    console.log('verifyEmail');
+  };
+
   return (
     <Formik
       initialValues={{
@@ -216,6 +220,17 @@ const Profile = () => {
                     >
                       <IconPencil />
                     </ButtonEdit>
+                    {user.emailVerified ? (
+                      <p>qwe</p>
+                    ) : (
+                      <button
+                        type="buttom"
+                        title="Верифікувати пошту"
+                        onClick={() => verifyEmail()}
+                      >
+                        Верифікувати
+                      </button>
+                    )}
                   </Wrapper>
                 ) : (
                   <InputField
