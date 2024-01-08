@@ -87,7 +87,7 @@ const Profile = () => {
             <Wrap>
               <Label>
                 <Placeholder>Прізвище</Placeholder>
-                {user.firstName ? (
+                {user?.firstName ? (
                   <InputText>{user?.firstName}</InputText>
                 ) : (
                   <InputField
@@ -103,7 +103,7 @@ const Profile = () => {
 
               <Label>
                 <Placeholder>Ім'я</Placeholder>
-                {user.lastName ? (
+                {user?.lastName ? (
                   <InputText>{user?.lastName}</InputText>
                 ) : (
                   <InputField
@@ -119,7 +119,7 @@ const Profile = () => {
 
               <Label>
                 <Placeholder>Побатькові (необов'язково)</Placeholder>
-                {user.patronymic ? (
+                {user?.patronymic ? (
                   <InputText>{user?.patronymic}</InputText>
                 ) : (
                   <InputField
@@ -135,7 +135,7 @@ const Profile = () => {
 
               <Label>
                 <Placeholder>Назва компанії</Placeholder>
-                {user.companyName ? (
+                {user?.companyName ? (
                   <InputText>{user?.companyName}</InputText>
                 ) : (
                   <InputField
@@ -151,7 +151,7 @@ const Profile = () => {
 
               <Label>
                 <Placeholder>Nickname</Placeholder>
-                {user.nickname ? (
+                {user?.nickname ? (
                   <InputText>{user?.nickname}</InputText>
                 ) : (
                   <InputField
@@ -321,6 +321,8 @@ const Profile = () => {
               <AvatarWrap $avatar={values.avatarUrl} htmlFor="avatarUrl">
                 {values.avatarUrl ? (
                   <Avatar
+                    width={197}
+                    height={197}
                     src={
                       typeof values.avatarUrl === 'object'
                         ? URL.createObjectURL(values.avatarUrl)

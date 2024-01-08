@@ -1,5 +1,18 @@
+import NotFound from 'components/NotFound/NotFound';
+import { Outlet, useLocation } from 'react-router-dom';
+
 const RentOut = () => {
-  return <p>RentOut</p>;
+  const location = useLocation();
+
+  return (
+    <>
+      {location.pathname.includes('add-product') ? (
+        <Outlet />
+      ) : (
+        <NotFound>Тут поки пусто</NotFound>
+      )}
+    </>
+  );
 };
 
 export default RentOut;

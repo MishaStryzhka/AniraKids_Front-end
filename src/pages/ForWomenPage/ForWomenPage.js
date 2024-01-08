@@ -17,7 +17,7 @@ import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
 import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import ProductCard from 'components/ProductCard/ProductCard';
 
-export const ForWomenPage = () => {
+const ForWomenPage = () => {
   useTitle('ЖІНОЧІ НАРЯДИ');
 
   return (
@@ -44,3 +44,5 @@ export const ForWomenPage = () => {
     </Container>
   );
 };
+
+export default ForWomenPage;
