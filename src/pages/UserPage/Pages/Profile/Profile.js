@@ -29,7 +29,10 @@ import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useDispatch } from 'react-redux';
-import { updateUserInfo } from '../../../../redux/auth/operations';
+import {
+  confirmUserEmail,
+  updateUserInfo,
+} from '../../../../redux/auth/operations';
 
 const Profile = () => {
   const { user, currentTheme } = useAuth();
@@ -56,7 +59,7 @@ const Profile = () => {
   };
 
   const verifyEmail = () => {
-    console.log('verifyEmail');
+    dispatch(confirmUserEmail());
   };
 
   return (
