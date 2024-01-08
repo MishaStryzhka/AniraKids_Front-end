@@ -58,7 +58,7 @@ const AuthForm = () => {
               Авторизуйтеся за допомогою логіну (введіть номер телефону або
               електорнну пошту)
             </Description>
-            <TitleLogin>Login</TitleLogin>
+            <TitleLogin>Логін</TitleLogin>
             <Wrap>
               <Label>
                 Логін

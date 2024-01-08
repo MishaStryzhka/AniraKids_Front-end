@@ -50,6 +50,7 @@ export const ButtonNav = styled.button`
   text-align: center;
   padding: 8px 0;
   text-transform: uppercase;
+  cursor: pointer;
 
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.color.mainColor5 : theme.color.mainColor2};
@@ -82,6 +83,7 @@ export const ButtonContact = styled.button`
   width: 200px;
   text-align: center;
   padding: 8px 0;
+  cursor: pointer;
 
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.color.mainColor5 : theme.color.mainColor2};
@@ -139,6 +141,7 @@ export const StyledNavLink = styled(NavLink)`
   gap: 8px;
   text-decoration: none;
   align-items: center;
+  cursor: pointer;
 `;
 
 export const DescriptionLink = styled.p`

@@ -7,7 +7,6 @@ import {
 } from './ModalLogOut.styled';
 import { useDispatch } from 'react-redux';
 import { logOut } from '../../../redux/auth/operations';
-// import { logOut } from 'redux/auth/operations';
 
 const ModalLogOut = ({ onClick }) => {
   const dispatch = useDispatch();

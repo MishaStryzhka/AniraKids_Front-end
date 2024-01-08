@@ -6,10 +6,10 @@ export const validRegistrationPhoneNumberScheme = Yup.object().shape({
     .matches(/^\+380[0-9]{9}$/, 'Invalid phone number format'),
   password: Yup.string()
     .required('Field is required')
-    .min(6, 'Password must be at least 6 characters')
-    .max(16, 'Password must be less than 16 characters')
+    .min(8, 'Пароль має бути не менше 8 символів')
+    .max(32, 'Пароль має бути менше 32 символів')
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,16}$/,
-      'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number'
+      /^(?=.*[A-Z])(?=.*\d).{8,16}$/,
+      'Пароль повинен містити мінімум 8 латинських символів, одну велику літеру, одну цифру'
     ),
 });

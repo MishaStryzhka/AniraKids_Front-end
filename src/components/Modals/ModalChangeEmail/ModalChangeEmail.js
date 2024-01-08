@@ -1,11 +1,11 @@
 import Button from 'components/Button/Button';
 import {
+  Form,
   InputModal,
   LabelModal,
   ModalTitle,
   ModalWindow,
   StyledIconCross,
-  WrapButton,
 } from './ModalChangeEmail.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
@@ -45,7 +45,7 @@ const ModalChangeEmail = ({ onClick }) => {
           handleBlur,
           handleSubmit,
         }) => (
-          <form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit}>
             <ModalTitle>Змінити пошту</ModalTitle>
             <LabelModal>
               Введіть адресу електронної пошти
@@ -62,10 +62,8 @@ const ModalChangeEmail = ({ onClick }) => {
               />
               <p>{errors.email && touched.email && errors.email}</p>
             </LabelModal>
-            <WrapButton>
-              <Button type="submit">Зберегти</Button>
-            </WrapButton>
-          </form>
+            <Button type="submit">Зберегти</Button>
+          </Form>
         )}
       </Formik>
     </ModalWindow>

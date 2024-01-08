@@ -45,6 +45,7 @@ export const WrapIcon = styled.div`
   position: absolute;
   right: 10px;
   top: 25px;
+  cursor: pointer;
 `;
 
 export const Button = styled.button`
