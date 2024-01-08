@@ -6,7 +6,7 @@ import SectionOurMission from 'components/SectionOurMission/SectionOurMission';
 import SectionSimpleSteps from 'components/SectionSimpleSteps/SectionSimpleSteps';
 import SectionAreYouReady from 'components/SectionAreYouReady/SectionAreYouReady';
 
-export const MainPage = () => {
+const MainPage = () => {
   useTitle('AniraK');
   return (
     <>
@@ -19,3 +19,5 @@ export const MainPage = () => {
     </>
   );
 };
+
+export default MainPage;

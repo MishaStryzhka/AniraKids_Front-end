@@ -19,7 +19,7 @@ import IconCard from 'images/icons/IconCard';
 import IconBag from 'images/icons/IconBag';
 import IconExit from 'images/icons/IconExit';
 
-export const UserPage = () => {
+const UserPage = () => {
   const dispatch = useDispatch();
 
   useTitle('Акаунт');
@@ -75,3 +75,5 @@ export const UserPage = () => {
     </Container>
   );
 };
+
+export default UserPage;
