@@ -168,15 +168,10 @@ export const updateUserEmail = createAsyncThunk(
 export const confirmUserEmail = createAsyncThunk(
   'auth/confirmEmail',
   async ({ token }, thunkAPI) => {
-    console.log('token', token);
-
-    setAuthHeader(token);
+    token && setAuthHeader(token);
 
     try {
       const response = await axios.post(`/api/users/current/confirmEmail`);
-
-      console.log('response.data', response.data);
-
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
