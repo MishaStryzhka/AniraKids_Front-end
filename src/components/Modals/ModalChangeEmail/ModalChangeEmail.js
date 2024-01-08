@@ -17,6 +17,7 @@ import { TextDone } from '../Modal.styled';
 import { clearDone, clearError } from '../../../redux/auth/slice';
 import { TextError } from 'components/Forms/Form.styled';
 import { useEffect } from 'react';
+import { WrapButton } from '../ModalRegister/ModalRegister.styled';
 
 const ModalChangeEmail = ({ onClick }) => {
   const { isLoading, error, isDone } = useAuth();
@@ -62,7 +63,7 @@ const ModalChangeEmail = ({ onClick }) => {
           return isDone ? (
             <TextDone>Вітаємо, ваш емайл змінено "{values.email}"!</TextDone>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit}>
               <ModalTitle>Змінити пошту</ModalTitle>
               <LabelModal>
                 Введіть адресу електронної пошти
@@ -88,7 +89,7 @@ const ModalChangeEmail = ({ onClick }) => {
                   {!isLoading ? 'Зберегти' : <BeatLoader color="#fff" />}
                 </Button>
               </WrapButton>
-            </form>
+            </Form>
           );
         }}
       </Formik>
