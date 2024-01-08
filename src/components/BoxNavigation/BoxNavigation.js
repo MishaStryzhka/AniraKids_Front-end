@@ -11,7 +11,7 @@ import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
 
 const BoxNavigation = ({ $mainPage }) => {
   const [isModal, setIsModal] = useState(false);
-  const { user } = useAuth();
+  const { user, currentTheme } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,11 +24,6 @@ const BoxNavigation = ({ $mainPage }) => {
       ? navigate('/my-account/profile', { replace: true })
       : setIsModal(true);
   };
-
-  const isCloseModal = () => {
-    setIsModal(false);
-  };
-  const { currentTheme } = useAuth();
   return (
     <Box>
       <Button
@@ -53,7 +48,13 @@ const BoxNavigation = ({ $mainPage }) => {
         />
       </Button>
       {isModal && !user && (
-        <Modal onClick={isCloseModal}>{<ModalRegister />}</Modal>
+        <Modal
+          onClick={() => {
+            setIsModal(false);
+          }}
+        >
+          <ModalRegister />
+        </Modal>
       )}
 
       <Button

@@ -9,17 +9,32 @@ import {
 } from './ModalChangeEmail.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
-import { updateUserInfo } from '../../../redux/auth/operations';
+import { updateUserEmail } from '../../../redux/auth/operations';
 import { validUpdateEmailScheme } from 'schemas';
+import { useAuth } from 'hooks';
+import { BeatLoader } from 'react-spinners';
+import { TextDone } from '../Modal.styled';
+import { clearDone, clearError } from '../../../redux/auth/slice';
+import { TextError } from 'components/Forms/Form.styled';
+import { useEffect } from 'react';
+import { WrapButton } from '../ModalRegister/ModalRegister.styled';
 
 const ModalChangeEmail = ({ onClick }) => {
+  const { isLoading, error, isDone } = useAuth();
   const dispatch = useDispatch();
 
-  const handleSubmitEmail = values => {
-    const { email } = values;
+  useEffect(() => {
+    isDone &&
+      setTimeout(() => {
+        dispatch(clearDone());
+        document.body.style.overflow = 'auto';
+        onClick();
+      }, 2500);
+  }, [dispatch, isDone, onClick]);
 
-    console.log(values);
-    dispatch(updateUserInfo({ email }));
+  const handleSubmitEmail = async ({ email }) => {
+    dispatch(clearError());
+    await dispatch(updateUserEmail({ email }));
   };
 
   return (
@@ -44,27 +59,39 @@ const ModalChangeEmail = ({ onClick }) => {
           handleChange,
           handleBlur,
           handleSubmit,
-        }) => (
-          <Form onSubmit={handleSubmit}>
-            <ModalTitle>Змінити пошту</ModalTitle>
-            <LabelModal>
-              Введіть адресу електронної пошти
-              <InputModal
-                value={values.email}
-                type="email"
-                name="email"
-                onChange={e => {
-                  // console.log(e.target.value);
-                  handleChange(e);
-                }}
-                onBlur={handleBlur}
-                placeholder="exsample@gmail.com"
-              />
-              <p>{errors.email && touched.email && errors.email}</p>
-            </LabelModal>
-            <Button type="submit">Зберегти</Button>
-          </Form>
-        )}
+        }) => {
+          return isDone ? (
+            <TextDone>Вітаємо, ваш емайл змінено "{values.email}"!</TextDone>
+          ) : (
+            <Form onSubmit={handleSubmit}>
+              <ModalTitle>Змінити пошту</ModalTitle>
+              <LabelModal>
+                Введіть адресу електронної пошти
+                <InputModal
+                  value={values.email}
+                  type="email"
+                  name="email"
+                  onChange={e => {
+                    // console.log(e.target.value);
+                    handleChange(e);
+                  }}
+                  onBlur={handleBlur}
+                  placeholder="exsample@gmail.com"
+                />
+                <TextError>
+                  {(errors.email && touched.email && errors.email) ||
+                    (error?.message === 'Email in use' &&
+                      'Упс, ця пошта вже зайнята!')}
+                </TextError>
+              </LabelModal>
+              <WrapButton>
+                <Button type="submit">
+                  {!isLoading ? 'Зберегти' : <BeatLoader color="#fff" />}
+                </Button>
+              </WrapButton>
+            </Form>
+          );
+        }}
       </Formik>
     </ModalWindow>
   );

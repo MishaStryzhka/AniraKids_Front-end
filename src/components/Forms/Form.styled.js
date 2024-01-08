@@ -28,3 +28,7 @@ export const InputField = styled(Field)`
     display: none;
   }
 `;
+
+export const TextError = styled.p`
+  color: #ff0015;
+`;

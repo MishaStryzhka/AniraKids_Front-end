@@ -5,14 +5,15 @@ import {
   logOut,
   refreshUser,
   updateUserInfo,
-  addUserFavorite,
-  removeUserFavorite,
+  updateUserEmail,
 } from './operations';
 
 const initialState = {
   user: null,
   token: null,
   isLoggedIn: false,
+  isLoading: false,
+  isDone: null,
   isRefreshing: false,
   error: null,
   isFirstLogin: false,
@@ -21,6 +22,14 @@ const initialState = {
 const authSlice = createSlice({
   name: 'auth',
   initialState,
+  reducers: {
+    clearError: state => {
+      state.error = null;
+    },
+    clearDone: state => {
+      state.isDone = null;
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(register.fulfilled, (state, action) => {
@@ -65,21 +74,38 @@ const authSlice = createSlice({
       .addCase(updateUserInfo.rejected, (state, action) => {
         state.error = action.payload;
       })
-      .addCase(addUserFavorite.fulfilled, (state, action) => {
-        state.user.favorite.push(action.payload.id);
+      // =======updateUserEmail
+      .addCase(updateUserEmail.pending, state => {
+        state.isLoading = true;
       })
-      .addCase(addUserFavorite.rejected, (state, action) => {
+      .addCase(updateUserEmail.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.isLoading = false;
+        state.isDone = true;
+      })
+      .addCase(updateUserEmail.rejected, (state, action) => {
         state.error = action.payload;
-      })
-      .addCase(removeUserFavorite.fulfilled, (state, action) => {
-        state.user.favorite = [...state.user.favorite].filter(
-          el => el !== action.payload.id
-        );
-      })
-      .addCase(removeUserFavorite.rejected, (state, action) => {
-        state.error = action.payload;
+        state.isLoading = false;
       });
+
+    // .addCase(addUserFavorite.fulfilled, (state, action) => {
+    //   state.user.favorite.push(action.payload.id);
+    // })
+    // .addCase(addUserFavorite.rejected, (state, action) => {
+    //   state.error = action.payload;
+    // })
+    // .addCase(removeUserFavorite.fulfilled, (state, action) => {
+    //   state.user.favorite = [...state.user.favorite].filter(
+    //     el => el !== action.payload.id
+    //   );
+    // })
+    // .addCase(removeUserFavorite.rejected, (state, action) => {
+    //   state.error = action.payload;
+    // });
   },
 });
 
+console.log('authSlice', authSlice);
+
 export const authReducer = authSlice.reducer;
+export const { clearError, clearDone } = authSlice.actions;
