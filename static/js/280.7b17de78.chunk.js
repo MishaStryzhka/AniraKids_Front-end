@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[280],{7280:(a,s,e)=>{e.r(s),e.d(s,{default:()=>d});var n=e(184);const d=()=>(0,n.jsx)("p",{children:"NotFoundPage"})}}]);
+//# sourceMappingURL=280.7b17de78.chunk.js.map
