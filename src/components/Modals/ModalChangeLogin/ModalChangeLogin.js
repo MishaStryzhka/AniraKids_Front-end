@@ -1,11 +1,11 @@
 import Button from 'components/Button/Button';
 import {
+  Form,
   InputModal,
   LabelModal,
   ModalTitle,
   ModalWindow,
   StyledIconCross,
-  WrapButton,
 } from './ModalChangeLogin.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
@@ -44,7 +44,7 @@ const ModalChangeLogin = ({ onClick }) => {
           handleBlur,
           handleSubmit,
         }) => (
-          <form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit}>
             <ModalTitle>Змінити логін</ModalTitle>
             <LabelModal>
               Логін
@@ -59,10 +59,8 @@ const ModalChangeLogin = ({ onClick }) => {
               />
               <p>{errors.login && touched.login && errors.login}</p>
             </LabelModal>
-            <WrapButton>
-              <Button type="submit">Зберегти</Button>
-            </WrapButton>
-          </form>
+            <Button type="submit">Зберегти</Button>
+          </Form>
         )}
       </Formik>
     </ModalWindow>

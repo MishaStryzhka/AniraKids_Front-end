@@ -1,11 +1,11 @@
 import Button from 'components/Button/Button';
 import {
+  Form,
   InputModal,
   LabelModal,
   ModalTitle,
   ModalWindow,
   StyledIconCross,
-  WrapButton,
 } from './ModalChangeEmail.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';

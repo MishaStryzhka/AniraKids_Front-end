@@ -56,6 +56,7 @@ const BoxNavigation = ({ $mainPage }) => {
           <ModalRegister />
         </Modal>
       )}
+
       <Button
         type="button"
         onClick={() => navigate('/my-account/order1', { replace: true })}
