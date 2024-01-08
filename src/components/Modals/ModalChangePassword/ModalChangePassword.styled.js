@@ -2,14 +2,18 @@ import styled from 'styled-components';
 import IconCross from 'images/icons/IconCross';
 
 export const ModalWindow = styled.div`
-  display: flex;
   padding: 24px;
-  gap: 24px;
-  flex-direction: column;
-  align-items: center;
+
   position: relative;
 
   background-color: ${({ theme }) => theme.color.mainColor1};
+`;
+
+export const Form = styled.form`
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export const StyledIconCross = styled(IconCross)`
@@ -38,6 +42,7 @@ export const LabelModal = styled.label`
   line-height: 1.43;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -54,4 +59,12 @@ export const InputModal = styled.input`
 
   border-color: ${({ theme }) => theme.color.mainColor2};
   color: ${({ theme }) => theme.color.lightBGColor};
+`;
+
+export const WrapIcon = styled.div`
+  position: absolute;
+  top: 27px;
+  right: 10px;
+  /* top: -25px; */
+  cursor: pointer;
 `;

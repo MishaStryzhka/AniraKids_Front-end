@@ -1,13 +1,26 @@
 import Button from 'components/Button/Button';
 import {
-  InputModal,
-  LabelModal,
+  Form,
+  Input,
+  Label,
   ModalTitle,
   ModalWindow,
   StyledIconCross,
 } from './ModalChangePhoneNumber.syled';
+import { Formik } from 'formik';
+import { useDispatch } from 'react-redux';
+import { updateUserInfo } from '../../../redux/auth/operations';
+import { validPhoneNumberScheme } from 'schemas';
 
 const ModalChangePhoneNumber = ({ onClick }) => {
+  const dispatch = useDispatch();
+
+  const handlePhoneNumberSubmit = values => {
+    const { primaryPhoneNumber } = values;
+
+    console.log(values);
+    dispatch(updateUserInfo({ primaryPhoneNumber }));
+  };
   return (
     <ModalWindow>
       <StyledIconCross
@@ -16,12 +29,43 @@ const ModalChangePhoneNumber = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>Змінити номер телефону</ModalTitle>
-      <LabelModal>
-        Номер телефону
-        <InputModal placeholder="+380" />
-      </LabelModal>
-      <Button>Зберегти</Button>
+      <Formik
+        initialValues={{
+          primaryPhoneNumber: '',
+        }}
+        validationSchema={validPhoneNumberScheme}
+        onSubmit={handlePhoneNumberSubmit}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+        }) => (
+          <Form onSubmit={handleSubmit}>
+            <ModalTitle>Змінити номер телефону</ModalTitle>
+            <Label>
+              Номер телефону
+              <Input
+                type="tel"
+                name="primaryPhoneNumber"
+                onChange={e => handleChange(e)}
+                value={values.primaryPhoneNumber}
+                required
+                placeholder="+380"
+              />
+              <p>
+                {errors.primaryPhoneNumber &&
+                  touched.primaryPhoneNumber &&
+                  errors.primaryPhoneNumber}
+              </p>
+            </Label>
+            <Button type="submit">Зберегти</Button>
+          </Form>
+        )}
+      </Formik>
     </ModalWindow>
   );
 };
