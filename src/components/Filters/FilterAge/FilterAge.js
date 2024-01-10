@@ -8,6 +8,7 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterAge.styled';
+import { nanoid } from '@reduxjs/toolkit';
 
 const ageArray = [
   {
@@ -118,8 +119,9 @@ const FilterAge = () => {
       {isFilterAgeList && (
         <List>
           {ageArray.map(({ id, descriptionAge, searchAge }) => (
-            <li key={id}>
+            <li key={nanoid()}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Age: searchAge });
                 }}

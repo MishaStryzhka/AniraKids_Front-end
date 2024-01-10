@@ -1,3 +1,4 @@
+import { nanoid } from '@reduxjs/toolkit';
 import {
   Button,
   FilterTitle,
@@ -35,8 +36,9 @@ const FilterForPregnantWomen = () => {
       {isPregnancyList && (
         <List>
           {ArrayPregnancy.map(({ id, isPregnancy, searchVariant }) => (
-            <li key={id}>
+            <li key={nanoid()}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Pregnancy: searchVariant });
                 }}

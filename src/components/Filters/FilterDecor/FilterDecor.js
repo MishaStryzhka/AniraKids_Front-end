@@ -8,6 +8,7 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterDecor.styled';
+import { nanoid } from '@reduxjs/toolkit';
 
 const ArrayofDecor = [
   { id: 1, variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
@@ -56,8 +57,9 @@ const FilterDecor = () => {
       {isFilterDecorList && (
         <List>
           {ArrayofDecor.map(({ id, variantOfDecor, searchDecor }) => (
-            <li key={id}>
+            <li key={nanoid()}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Decor: searchDecor });
                 }}

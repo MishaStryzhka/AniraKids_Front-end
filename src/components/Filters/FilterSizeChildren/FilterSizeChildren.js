@@ -9,8 +9,9 @@ import {
   WrapButtons,
 } from './FilterSizeChildren.styled';
 import { useSearchParams } from 'react-router-dom';
+import { nanoid } from '@reduxjs/toolkit';
 
-const arraySizeChildren = [
+export const arraySizeChildren = [
   {
     id: 1,
     descriptionSize: 'до 50',
@@ -134,8 +135,9 @@ const FilterSizeChildren = () => {
         <List>
           <WrapButtons>
             {arraySizeChildren.map(({ id, descriptionSize, searchSize }) => (
-              <li key={id}>
+              <li key={nanoid()}>
                 <Button
+                  type="button"
                   onClick={() => {
                     setSearchParams({ size: searchSize });
                   }}

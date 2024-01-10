@@ -8,6 +8,7 @@ import {
   Wrap,
 } from './FilterOutfits.styled';
 import { useSearchParams } from 'react-router-dom';
+import { nanoid } from '@reduxjs/toolkit';
 
 const arrayOfOutfits = [
   {
@@ -47,8 +48,9 @@ const FilterOutfits = () => {
       {isFilterOutfitsList && (
         <List>
           {arrayOfOutfits.map(({ id, variantOfOutfits, searchOutfits }) => (
-            <li key={id}>
+            <li key={nanoid()}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Outfits: searchOutfits });
                 }}

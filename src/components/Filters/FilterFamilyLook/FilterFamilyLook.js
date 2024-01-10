@@ -8,6 +8,7 @@ import {
   Wrap,
 } from './FilterFamilyLook.styled';
 import { useSearchParams } from 'react-router-dom';
+import { nanoid } from '@reduxjs/toolkit';
 
 const ArrayFamilyLook = [
   {
@@ -47,8 +48,9 @@ const FilterFamilyLook = () => {
       {isFamilyLookList && (
         <List>
           {ArrayFamilyLook.map(({ id, variantOfFamilyLook, searchVariant }) => (
-            <li key={id}>
+            <li key={nanoid()}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ familyLook: searchVariant });
                 }}

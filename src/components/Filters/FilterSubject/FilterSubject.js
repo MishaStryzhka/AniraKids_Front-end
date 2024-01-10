@@ -9,7 +9,7 @@ import {
 } from './FilterSubject.styled';
 import { useSearchParams } from 'react-router-dom';
 
-const arrayOfSubjects = [
+export const arrayOfSubjects = [
   {
     id: 1,
     variantOfSubjects: 'Різдво',
@@ -76,6 +76,7 @@ const FilterSubject = () => {
           {arrayOfSubjects.map(({ id, variantOfSubjects, searchSubjects }) => (
             <li key={id}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Outfits: searchSubjects });
                 }}
