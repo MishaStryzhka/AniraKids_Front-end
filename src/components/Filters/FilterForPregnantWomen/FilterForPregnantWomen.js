@@ -1,4 +1,3 @@
-import { nanoid } from '@reduxjs/toolkit';
 import {
   Button,
   FilterTitle,
@@ -11,8 +10,8 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 const ArrayPregnancy = [
-  { id: 1, isPregnancy: 'Так', searchVariant: 'true' },
-  { id: 2, isPregnancy: 'Ні', searchVariant: 'false' },
+  { isPregnancy: 'Так', searchVariant: 'true' },
+  { isPregnancy: 'Ні', searchVariant: 'false' },
 ];
 
 const FilterForPregnantWomen = () => {
@@ -35,8 +34,8 @@ const FilterForPregnantWomen = () => {
       </Wrap>
       {isPregnancyList && (
         <List>
-          {ArrayPregnancy.map(({ id, isPregnancy, searchVariant }) => (
-            <li key={nanoid()}>
+          {ArrayPregnancy.map(({ isPregnancy, searchVariant }, index) => (
+            <li key={index}>
               <Button
                 type="button"
                 onClick={() => {

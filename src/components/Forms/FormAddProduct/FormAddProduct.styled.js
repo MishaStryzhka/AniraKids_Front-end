@@ -126,8 +126,14 @@ export const Button = styled.button`
   }
 `;
 
-export const ListSize = styled.ul`
+export const List = styled.ul`
   display: flex;
+  gap: 8px;
+  flex-direction: column;
+`;
+
+export const ListHorizont = styled(List)`
+  flex-direction: row;
   gap: 16px;
 `;
 export const ButtonSize = styled.button`
@@ -220,12 +226,95 @@ export const ListColor = styled.ul`
   gap: 8px;
 `;
 export const ItemButton = styled.li``;
-export const ButtonColor = styled.button`
+
+export const LabelColor = styled.label`
   border: none;
   background-color: transparent;
   width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
-export const ColorBox = styled.div`
-  width: 20px;
+// export const ColorBox = styled.div`
+//   width: 20px;
+// `;
+
+export const LabelSize = styled.label`
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid;
+
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+
+export const BoxColor = styled.div`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  background-color: ${({ color }) => color};
+  border-radius: 2px;
+`;
+
+export const WrapChildrenSize = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 660px;
+  gap: 16px;
+  column-count: 4;
+  margin-bottom: 48px;
+`;
+
+export const GeneralWrap = styled.div`
+  display: flex;
+  gap: 78px;
+`;
+
+export const WrapCondition = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const LabelStatus = styled.label`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const LabelPrice = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const InputPrice = styled.input`
+  width: 305px;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 2px;
+
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+  color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const Box = styled.div`
+  width: 24px;
+  height: 24px;
+  border: 1px solid;
+  display: inline-block;
+  border-radius: 2px;
+  background-color: transparent;
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;

@@ -11,27 +11,40 @@ import {
   FieldComments,
   GeneralList,
   Button,
-  ListSize,
-  // ButtonSize,
+  List,
+  LabelSize,
   WrapCategory,
   Description,
   BoxCategory,
   Wrap,
-  ButtonVariant,
-  ButtonColor,
+  BoxColor,
   ItemButton,
   ListColor,
   Input,
+  ListHorizont,
+  LabelColor,
+  WrapChildrenSize,
+  WrapCondition,
+  GeneralWrap,
+  LabelStatus,
+  LabelPrice,
+  InputPrice,
+  Box,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { arraySizeAdult } from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
-import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
-import { nanoid } from '@reduxjs/toolkit';
-import FilterAge from 'components/Filters/FilterAge/FilterAge';
-import { arrayOfSubjects } from 'components/Filters/FilterSubject/FilterSubject';
+// import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
+// import FilterAge from 'components/Filters/FilterAge/FilterAge';
 import { validationProductSchema } from 'schemas';
-import { colors } from 'components/Filters/FilterColor/FilterColor';
+import {
+  ArrayAgeProduct,
+  ArrayFamilyLookProduct,
+  ArrayPregnancyProduct,
+  ArraySizeChildrenProduct,
+  arrayOfSubjectsProduct,
+  colorsProduct,
+} from 'allDates';
 
 const FormAddProduct = () => {
   const [isParamsWoman, setIsParamsWoman] = useState(false);
@@ -50,12 +63,14 @@ const FormAddProduct = () => {
         description: '',
         brand: '',
         familyLook: '',
-        // familyLook1: '',
         size: '',
         isPregnancy: '',
         subject: '',
         age: '',
         childSize: '',
+        color: '',
+        salePrice: '',
+        rentalPrice: '',
       }}
       validationSchema={validationProductSchema}
       onSubmit={handleFormSubmit}
@@ -82,7 +97,6 @@ const FormAddProduct = () => {
                 onChange={handleChange}
                 name="videoUrl"
                 value={values.videoUrl}
-                // id="videoUrl"
                 type="text"
                 placeholder="https://www.youtube.com/watch?..."
               />
@@ -97,7 +111,6 @@ const FormAddProduct = () => {
                 onChange={handleChange}
                 name="name"
                 value={values.name}
-                // id="name"
                 type="text"
                 placeholder="Наприклад: Сукня H&M"
               />
@@ -110,7 +123,6 @@ const FormAddProduct = () => {
                 onChange={handleChange}
                 name="description"
                 value={values.description}
-                // id="description"
                 type="text"
                 placeholder="Наприклад: В цій сукні ви виглядатиме як зірка"
               />
@@ -192,128 +204,50 @@ const FormAddProduct = () => {
                 <BoxCategory>
                   <WrapCategory>
                     <Description>Family look</Description>
-                    <label>
-                      <input
-                        type="radio"
-                        name="familyLook"
-                        value="all-family"
-                        onChange={handleChange}
-                      />
-                      Так, для всієї сім’ї
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="familyLook"
-                        value="yes-and-girl"
-                        onChange={handleChange}
-                      />
-                      Так + дівчинка
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="familyLook"
-                        value="yes-and-boy"
-                        onChange={handleChange}
-                      />
-                      Так + хлопчик
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="familyLook"
-                        value="no"
-                        onChange={handleChange}
-                      />
-                      Ні
-                    </label>
+                    <List>
+                      {ArrayFamilyLookProduct.map(
+                        ({ valueVariant, variantOfFamilyLook }, index) => (
+                          <li key={index}>
+                            <label>
+                              {variantOfFamilyLook}
+                              <Input
+                                type="radio"
+                                name="familyLook"
+                                value={valueVariant}
+                                onChange={handleChange}
+                              />
+                            </label>
+                          </li>
+                        )
+                      )}
+                    </List>
                   </WrapCategory>
                   <WrapCategory>
                     <Description>Для вагітних</Description>
-                    <label>
-                      <input
-                        type="radio"
-                        name="isPregnancy"
-                        value="yes"
-                        onChange={handleChange}
-                      />
-                      Так
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="isPregnancy"
-                        value="no"
-                        onChange={handleChange}
-                      />
-                      Ні
-                    </label>
-                    {/* <label>
-                      <input
-                        type="radio"
-                        name="familyLook1"
-                        value="all-family"
-                        onChange={handleChange}
-                      />
-                      Так, для всієї сім’ї
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="familyLook1"
-                        value="yes-and-girl"
-                        onChange={handleChange}
-                      />
-                      Так + дівчинка
-                    </label> */}
+                    <List>
+                      {ArrayPregnancyProduct.map(
+                        ({ valueVariant, isPregnancy }, index) => (
+                          <li key={index}>
+                            <label>
+                              {isPregnancy}
+                              <Input
+                                type="radio"
+                                name="isPregnancy"
+                                value={valueVariant}
+                                onChange={handleChange}
+                              />
+                            </label>
+                          </li>
+                        )
+                      )}
+                    </List>
                   </WrapCategory>
                 </BoxCategory>
                 <Title>ВКАЖІТЬ РОЗМІР</Title>
-                {/* <ul>
-                  <li>
-                    <label>
-                      S
-                      <input
-                        type="radio"
-                        name="size"
-                        value="S"
-                        onChange={handleChange}
-                      />
-                    </label>
-                  </li>
-                  <li>
-                    {' '}
-                    <label>
-                      M
-                      <input
-                        type="radio"
-                        name="size"
-                        value="M"
-                        onChange={handleChange}
-                      />
-                    </label>
-                  </li>
-                  <li>
-                    <label>
-                      L
-                      <input
-                        type="radio"
-                        name="size"
-                        value="L"
-                        onChange={handleChange}
-                      />
-                    </label>
-                  </li>
-                </ul> */}
-
-                <ListSize>
-                  {arraySizeAdult.map(({ descriptionSize }) => (
-                    <li key={nanoid()}>
-                      {/* <ButtonSize onChange={handleChange}>
-                        {descriptionSize}
-                      </ButtonSize> */}
-                      <label>
+                <ListHorizont>
+                  {arraySizeAdult.map(({ descriptionSize }, index) => (
+                    <li key={index}>
+                      <LabelSize>
                         {descriptionSize}
                         <Input
                           type="radio"
@@ -321,10 +255,10 @@ const FormAddProduct = () => {
                           value={descriptionSize}
                           onChange={handleChange}
                         />
-                      </label>
+                      </LabelSize>
                     </li>
                   ))}
-                </ListSize>
+                </ListHorizont>
               </Wrap>
             )}
             {isParamsMan && (
@@ -332,28 +266,29 @@ const FormAddProduct = () => {
                 <Title>ОБЕРІТЬ КАТЕГОРІЮ</Title>
                 <WrapCategory $isParamsMan={isParamsMan}>
                   <Description>Family look</Description>
-                  <label>
-                    <input type="radio" name="color" value="red" />
-                    Так, для всієї сім’ї
-                  </label>
-                  <label>
-                    <input type="radio" name="color" value="white" />
-                    Так + дівчинка
-                  </label>
-                  <label>
-                    <input type="radio" name="color" value="green" />
-                    Так + хлопчик
-                  </label>
-                  <label>
-                    <input type="radio" name="color" value="green" />
-                    Ні
-                  </label>
+                  <List>
+                    {ArrayFamilyLookProduct.map(
+                      ({ valueSubject, variantOfFamilyLook }, index) => (
+                        <li key={index}>
+                          <label>
+                            {variantOfFamilyLook}
+                            <Input
+                              type="radio"
+                              name="familyLook"
+                              value={valueSubject}
+                              onChange={handleChange}
+                            />
+                          </label>
+                        </li>
+                      )
+                    )}
+                  </List>
                 </WrapCategory>
                 <Title>ВКАЖІТЬ РОЗМІР</Title>
-                <ListSize>
-                  {arraySizeAdult.map(({ descriptionSize }) => (
-                    <li key={nanoid()}>
-                      <label>
+                <ListHorizont>
+                  {arraySizeAdult.map(({ descriptionSize }, index) => (
+                    <li key={index}>
+                      <LabelSize>
                         {descriptionSize}
                         <Input
                           type="radio"
@@ -361,10 +296,10 @@ const FormAddProduct = () => {
                           value={descriptionSize}
                           onChange={handleChange}
                         />
-                      </label>
+                      </LabelSize>
                     </li>
                   ))}
-                </ListSize>
+                </ListHorizont>
               </Wrap>
             )}
             {isParamsChildren && (
@@ -373,35 +308,131 @@ const FormAddProduct = () => {
                 <BoxCategory>
                   <WrapCategory>
                     <Description>Тематика</Description>
-                    <ul>
-                      {arrayOfSubjects.map(
-                        ({ id, variantOfSubjects, searchSubjects }) => (
-                          <li key={id}>
-                            <ButtonVariant>{variantOfSubjects}</ButtonVariant>
+                    <List>
+                      {arrayOfSubjectsProduct.map(
+                        ({ valueSubject, variantOfSubjects }, index) => (
+                          <li key={index}>
+                            <label>
+                              {variantOfSubjects}
+                              <Input
+                                type="radio"
+                                name="subject"
+                                value={valueSubject}
+                                onChange={handleChange}
+                              />
+                            </label>
                           </li>
                         )
                       )}
-                    </ul>
+                    </List>
                   </WrapCategory>
                 </BoxCategory>
-                <Title>ВКАЖІТЬ ВІК І РОЗМІР</Title>
-                <FilterAge />
-                <FilterSizeChildren />
+                <Title>ВКАЖІТЬ ВІК</Title>
+                <WrapChildrenSize>
+                  {ArrayAgeProduct.map(
+                    ({ valueAge, descriptionAge }, index) => (
+                      <li key={index}>
+                        <LabelSize>
+                          {descriptionAge}
+                          <Input
+                            type="radio"
+                            name="age"
+                            value={valueAge}
+                            onChange={handleChange}
+                          />
+                        </LabelSize>
+                      </li>
+                    )
+                  )}
+                </WrapChildrenSize>
+                <Title>ВКАЖІТЬ РОЗМІР</Title>
+                <WrapChildrenSize>
+                  {ArraySizeChildrenProduct.map(
+                    ({ descriptionSize, valueSize }, index) => (
+                      <li key={index}>
+                        <LabelSize>
+                          {descriptionSize}см
+                          <Input
+                            type="radio"
+                            name="size"
+                            value={valueSize}
+                            onChange={handleChange}
+                          />
+                        </LabelSize>
+                      </li>
+                    )
+                  )}
+                </WrapChildrenSize>
               </Wrap>
             )}
           </div>
           <div>
             <Title>ВИБЕРІТЬ КОЛІР</Title>
             <ListColor>
-              {colors.map(({ color, nameColor, colorCode }) => (
-                <ItemButton key={nanoid()}>
-                  <ButtonColor color={colorCode}>{nameColor}</ButtonColor>
+              {colorsProduct.map(({ nameColor, colorCode, color }, index) => (
+                <ItemButton key={index}>
+                  <LabelColor color={colorCode}>
+                    <Input
+                      type="radio"
+                      name="color"
+                      value={color}
+                      onChange={handleChange}
+                    />
+                    <BoxColor color={colorCode} />
+                    {nameColor}
+                  </LabelColor>
                 </ItemButton>
               ))}
             </ListColor>
           </div>
           <div>
             <Title>УМОВИ ОРЕНДИ / ПРОДАЖУ</Title>
+            <GeneralWrap>
+              <WrapCondition>
+                <LabelStatus>
+                  <Box />
+                  Оренда
+                  <Input
+                    type="radio"
+                    name="rental"
+                    value="true"
+                    onChange={handleChange}
+                  />
+                </LabelStatus>
+                <LabelPrice>
+                  Ціна
+                  <InputPrice
+                    placeholder="1500 грн"
+                    type="text"
+                    name="rentalPrice"
+                    value={values.rentalPrice}
+                    onChange={handleChange}
+                  />
+                </LabelPrice>
+              </WrapCondition>
+              <WrapCondition>
+                <LabelStatus>
+                  <Box />
+                  Продаж
+                  <Input
+                    type="radio"
+                    name="sale"
+                    value="true"
+                    onChange={handleChange}
+                  />
+                </LabelStatus>
+                <LabelPrice>
+                  Ціна
+                  <InputPrice
+                    placeholder="1500 грн"
+                    type="text"
+                    name="salePrice"
+                    value={values.salePrice}
+                    onChange={handleChange}
+                  />
+                </LabelPrice>
+              </WrapCondition>
+            </GeneralWrap>
           </div>
           <button type="submit">Додати товар</button>
         </Form>
