@@ -11,17 +11,14 @@ import { useSearchParams } from 'react-router-dom';
 
 const ArrayFamilyLook = [
   {
-    id: 1,
     variantOfFamilyLook: 'Для всієї сім’ї',
     searchVariant: 'for-all-family',
   },
   {
-    id: 2,
     variantOfFamilyLook: 'Для мами і дівчинки',
     searchVariant: 'for-mother-and-girl',
   },
   {
-    id: 3,
     variantOfFamilyLook: 'Для мами і хлопчика',
     searchVariant: 'for-mother-and-boy',
   },
@@ -46,17 +43,20 @@ const FilterFamilyLook = () => {
       </Wrap>
       {isFamilyLookList && (
         <List>
-          {ArrayFamilyLook.map(({ id, variantOfFamilyLook, searchVariant }) => (
-            <li key={id}>
-              <Button
-                onClick={() => {
-                  setSearchParams({ familyLook: searchVariant });
-                }}
-              >
-                {variantOfFamilyLook}
-              </Button>
-            </li>
-          ))}
+          {ArrayFamilyLook.map(
+            ({ variantOfFamilyLook, searchVariant }, index) => (
+              <li key={index}>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setSearchParams({ familyLook: searchVariant });
+                  }}
+                >
+                  {variantOfFamilyLook}
+                </Button>
+              </li>
+            )
+          )}
         </List>
       )}
     </MainItem>

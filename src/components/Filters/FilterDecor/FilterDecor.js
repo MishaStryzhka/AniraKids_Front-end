@@ -10,26 +10,22 @@ import {
 } from './FilterDecor.styled';
 
 const ArrayofDecor = [
-  { id: 1, variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
-  { id: 2, variantOfDecor: 'День народження', searchDecor: 'birthday' },
-  { id: 3, variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
+  { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
+  { variantOfDecor: 'День народження', searchDecor: 'birthday' },
+  { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
   {
-    id: 4,
     variantOfDecor: 'Тематичні свята',
     searchDecor: 'thematic-holidays',
   },
   {
-    id: 5,
     variantOfDecor: 'Текстиль',
     searchDecor: 'textile',
   },
   {
-    id: 6,
     variantOfDecor: 'Пледи для малюків',
     searchDecor: 'blankets-for-baby',
   },
   {
-    id: 7,
     variantOfDecor: 'Постільна білизна',
     searchDecor: 'linens',
   },
@@ -55,9 +51,10 @@ const FilterDecor = () => {
       </Wrap>
       {isFilterDecorList && (
         <List>
-          {ArrayofDecor.map(({ id, variantOfDecor, searchDecor }) => (
-            <li key={id}>
+          {ArrayofDecor.map(({ variantOfDecor, searchDecor }, index) => (
+            <li key={index}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Decor: searchDecor });
                 }}

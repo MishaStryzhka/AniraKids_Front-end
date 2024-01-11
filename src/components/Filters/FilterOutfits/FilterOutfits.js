@@ -11,17 +11,14 @@ import { useSearchParams } from 'react-router-dom';
 
 const arrayOfOutfits = [
   {
-    id: 1,
     variantOfOutfits: 'Для дівчаток',
     searchOutfits: 'for-girls',
   },
   {
-    id: 2,
     variantOfOutfits: 'Для хлопчиків',
     searchOutfits: 'for-boys',
   },
   {
-    id: 3,
     variantOfOutfits: 'Для малюків',
     searchOutfits: 'for-babies',
   },
@@ -46,9 +43,10 @@ const FilterOutfits = () => {
       </Wrap>
       {isFilterOutfitsList && (
         <List>
-          {arrayOfOutfits.map(({ id, variantOfOutfits, searchOutfits }) => (
-            <li key={id}>
+          {arrayOfOutfits.map(({ variantOfOutfits, searchOutfits }, index) => (
+            <li key={index}>
               <Button
+                type="button"
                 onClick={() => {
                   setSearchParams({ Outfits: searchOutfits });
                 }}

@@ -11,36 +11,44 @@ import {
   Wrap,
 } from './FilterColor.styled';
 
-const colors = [
-  { color: 'white', colorCode: '#FFF', id: '1' },
-  { color: 'gray', colorCode: '#A7A7A7', id: '2' },
-  { color: 'orange', colorCode: '#FFB833', id: '3' },
-  { color: 'turquoise', colorCode: '#30D5C8', id: '4' },
-  { color: 'green', colorCode: '#59AF5F', id: '5' },
-  { color: 'black', colorCode: '#000000', id: '6' },
-  { color: 'bordo', colorCode: '#900020', id: '7' },
-  { color: 'lilac', colorCode: '#C8A2C8', id: '8' },
-  { color: 'silvery', colorCode: '#EDEEF0', id: '9' },
-  { color: 'yellow', colorCode: '#FFF633', id: '10' },
-  { color: 'pink', colorCode: '#FFC0CB', id: '11' },
-  { color: 'blue', colorCode: '#3395D2', id: '12' },
-  { color: 'violet', colorCode: '#9A339B', id: '13' },
+export const colors = [
+  { color: 'white', nameColor: 'Білий', colorCode: '#FFF' },
+  { color: 'gray', nameColor: 'Сірий', colorCode: '#A7A7A7' },
+  { color: 'orange', nameColor: 'Помаранчевий', colorCode: '#FFB833' },
+  { color: 'turquoise', nameColor: 'Бірюзовий', colorCode: '#30D5C8' },
+  { color: 'green', nameColor: 'Зелений', colorCode: '#59AF5F' },
+  { color: 'black', nameColor: 'Чорний', colorCode: '#000000' },
+  { color: 'bordo', nameColor: 'Бордовий', colorCode: '#900020' },
+  { color: 'lilac', nameColor: 'Бузковий', colorCode: '#C8A2C8' },
+  { color: 'silvery', nameColor: 'Сріблястий', colorCode: '#EDEEF0' },
+  { color: 'yellow', nameColor: 'Жовтий', colorCode: '#FFF633' },
+  { color: 'pink', nameColor: 'Рожевий', colorCode: '#FFC0CB' },
+  { color: 'blue', nameColor: 'Синій', colorCode: '#3395D2' },
+  { color: 'violet', nameColor: 'Фіолетовий', colorCode: '#9A339B' },
   {
     color: 'colorful',
+    nameColor: 'Різнокольоровий',
     colorCode:
       'linear-gradient(138deg, #FFF500 -16.67%, rgba(0, 74, 218, 0.70) 45.48%, #004E24 89.42%)',
-    id: '14',
   },
-  { color: 'light-green', colorCode: '#97FF32', id: '15' },
-  { color: 'coral', colorCode: '#FF7F50', id: '16' },
-  { color: 'beige', colorCode: '#F6E6D1', id: '17' },
-  { color: 'golden', colorCode: '#FFE133', id: '18' },
-  { color: 'red', colorCode: '#FF0000', id: '19' },
-  { color: 'khaki', colorCode: '#9E9B6B', id: '20' },
-  { color: 'brown', colorCode: '#855D33', id: '21' },
-  { color: 'light-blue', colorCode: '#00BFFF', id: '22' },
-  { color: 'peachy', colorCode: '#FFE5B4', id: '23' },
-  { color: 'mustard', colorCode: '#CAAC00', id: '24' },
+  {
+    color: 'light-green',
+    nameColor: 'Салатовий',
+    colorCode: '#97FF32',
+  },
+  { color: 'coral', nameColor: 'Кораловий', colorCode: '#FF7F50' },
+  { color: 'beige', nameColor: 'Бежевий', colorCode: '#F6E6D1' },
+  { color: 'golden', nameColor: 'Золотистий', colorCode: '#FFE133' },
+  { color: 'red', nameColor: 'Червоний', colorCode: '#FF0000' },
+  { color: 'khaki', nameColor: 'Хакі', colorCode: '#9E9B6B' },
+  { color: 'brown', nameColor: 'Коричневий', colorCode: '#855D33' },
+  {
+    color: 'light-blue',
+    nameColor: 'Блакитний',
+    colorCode: '#00BFFF',
+  },
+  { color: 'peachy', nameColor: 'Персиковий', colorCode: '#FFE5B4' },
+  { color: 'mustard', nameColor: 'Гірчичний', colorCode: '#CAAC00' },
 ];
 
 const FilterColor = () => {
@@ -70,8 +78,8 @@ const FilterColor = () => {
       {isFilterColorList && (
         <List>
           <ListButtons>
-            {colors.map(({ color, id, colorCode }) => (
-              <ItemButton key={id}>
+            {colors.map(({ color, colorCode }, index) => (
+              <ItemButton key={index}>
                 <Button
                   color={colorCode}
                   onClick={() => {

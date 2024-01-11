@@ -11,6 +11,7 @@ const { validUpdateEmailScheme } = require('./updateUserEmailScheme');
 const { validUpdateLoginScheme } = require('./updateUserLoginScheme');
 const { validPhoneNumberScheme } = require('./updateUserPhoneNumberScheme');
 const { validPasswordScheme } = require('./updateUserPasswordScheme');
+const { validationProductSchema } = require('./validationProductScheme');
 
 module.exports = {
   validationProfileSchema,
@@ -21,4 +22,5 @@ module.exports = {
   validUpdateLoginScheme,
   validPhoneNumberScheme,
   validPasswordScheme,
+  validationProductSchema,
 };
