@@ -250,3 +250,76 @@ export const ArraySizeChildrenProduct = [
     valueSize: '164-170',
   },
 ];
+
+export const ArrayofDecorProduct = [
+  { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
+  { variantOfDecor: 'День народження', searchDecor: 'birthday' },
+  { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
+  {
+    variantOfDecor: 'Тематичні свята',
+    searchDecor: 'thematic-holidays',
+  },
+  {
+    variantOfDecor: 'Текстиль',
+    searchDecor: 'textile',
+  },
+  {
+    variantOfDecor: 'Пледи для малюків',
+    searchDecor: 'blankets-for-baby',
+  },
+  {
+    variantOfDecor: 'Постільна білизна',
+    searchDecor: 'linens',
+  },
+];
+
+export const ArrayOfToysProduct = [
+  {
+    variantOfToys: 'Іграшки для малюків',
+    typeOfToys: 'toys-for-baby',
+  },
+  {
+    variantOfToys: 'Ляльки та пупси',
+    typeOfToys: 'dolls-and-pups',
+  },
+  {
+    variantOfToys: 'М’які іграшки',
+    typeOfToys: 'stuffed-toys',
+  },
+  {
+    variantOfToys: 'Конструктори',
+    typeOfToys: 'constructors',
+  },
+  {
+    variantOfToys: 'Машинки, моделі, техніка',
+    typeOfToys: 'car-model',
+  },
+  {
+    variantOfToys: 'Для активного відпочинку',
+    typeOfToys: 'for-recreation',
+  },
+  {
+    variantOfToys: 'Настільні ігри, пазли',
+    typeOfToys: 'puzzles',
+  },
+  {
+    variantOfToys: 'Іграшкова зброя',
+    typeOfToys: 'toys-weapon',
+  },
+  {
+    variantOfToys: 'Творчість і розвиток',
+    typeOfToys: 'creativity-and-development',
+  },
+  {
+    variantOfToys: 'Товари для школи',
+    typeOfToys: 'for-school',
+  },
+  {
+    variantOfToys: 'Дитячий транспорт',
+    typeOfToys: 'children`s-transport',
+  },
+  {
+    variantOfToys: 'Роботи і трансформери',
+    typeOfToys: 'robots-and-transformers',
+  },
+];
