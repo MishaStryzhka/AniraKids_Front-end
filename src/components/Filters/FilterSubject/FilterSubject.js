@@ -8,6 +8,7 @@ import {
   Wrap,
 } from './FilterSubject.styled';
 import { useSearchParams } from 'react-router-dom';
+import { arrayOfSubjectsProduct } from 'helpers';
 
 export const arrayOfSubjects = [
   {
@@ -65,13 +66,13 @@ const FilterSubject = () => {
       </Wrap>
       {isFilterSubjectsList && (
         <List>
-          {arrayOfSubjects.map(
-            ({ variantOfSubjects, searchSubjects }, index) => (
+          {arrayOfSubjectsProduct.map(
+            ({ variantOfSubjects, valueSubject }, index) => (
               <li key={index}>
                 <Button
                   type="button"
                   onClick={() => {
-                    setSearchParams({ Outfits: searchSubjects });
+                    setSearchParams({ Outfits: valueSubject });
                   }}
                 >
                   {variantOfSubjects}

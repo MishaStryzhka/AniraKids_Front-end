@@ -4,6 +4,7 @@ import PhotoOpenClosetUrl2xWebp from 'images/photo-mission/photo-open-closet-2x-
 import PhotoOpenClosetUrl1x from 'images/photo-mission/photo-open-closet-1x.jpg';
 import PhotoOpenClosetUrl2x from 'images/photo-mission/photo-open-closet-2x.jpg';
 import IconCheck from 'images/icons/IconCheck';
+import { useLocation } from 'react-router-dom';
 
 const {
   Section,
@@ -19,11 +20,12 @@ const {
 } = require('./SectionOurMission.styled');
 
 const SectionOurMission = () => {
+  const { pathname } = useLocation();
   return (
     <Section>
       <TextWrap>
         <Container>
-          <Title>Наша місія </Title>
+          <Title $mainPage={pathname === `/`}>Наша місія </Title>
           <ListMission>
             <Item>
               <IconCheck />
@@ -57,7 +59,7 @@ const SectionOurMission = () => {
               </AddWrap>
             </Item>
           </ListMission>
-          <Title>Унікальна циклічна модель</Title>
+          <Title $mainPage={pathname === `/`}>Унікальна циклічна модель</Title>
           <ListModel>
             <Item>
               <Description>

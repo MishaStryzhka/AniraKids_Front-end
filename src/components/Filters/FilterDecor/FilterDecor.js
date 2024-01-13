@@ -8,28 +8,7 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterDecor.styled';
-
-const ArrayofDecor = [
-  { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
-  { variantOfDecor: 'День народження', searchDecor: 'birthday' },
-  { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
-  {
-    variantOfDecor: 'Тематичні свята',
-    searchDecor: 'thematic-holidays',
-  },
-  {
-    variantOfDecor: 'Текстиль',
-    searchDecor: 'textile',
-  },
-  {
-    variantOfDecor: 'Пледи для малюків',
-    searchDecor: 'blankets-for-baby',
-  },
-  {
-    variantOfDecor: 'Постільна білизна',
-    searchDecor: 'linens',
-  },
-];
+import { arrayofDecorProduct } from 'helpers';
 
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);
@@ -51,7 +30,7 @@ const FilterDecor = () => {
       </Wrap>
       {isFilterDecorList && (
         <List>
-          {ArrayofDecor.map(({ variantOfDecor, searchDecor }, index) => (
+          {arrayofDecorProduct.map(({ variantOfDecor, searchDecor }, index) => (
             <li key={index}>
               <Button
                 type="button"

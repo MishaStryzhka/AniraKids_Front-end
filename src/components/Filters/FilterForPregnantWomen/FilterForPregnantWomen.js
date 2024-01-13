@@ -1,3 +1,4 @@
+import { arrayPregnancyProduct } from 'helpers';
 import {
   Button,
   FilterTitle,
@@ -8,11 +9,6 @@ import {
 } from './FilterForPregnantWomen.styled';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
-const ArrayPregnancy = [
-  { isPregnancy: 'Так', searchVariant: 'true' },
-  { isPregnancy: 'Ні', searchVariant: 'false' },
-];
 
 const FilterForPregnantWomen = () => {
   const [isPregnancyList, setIsPregnancyList] = useState(false);
@@ -34,12 +30,12 @@ const FilterForPregnantWomen = () => {
       </Wrap>
       {isPregnancyList && (
         <List>
-          {ArrayPregnancy.map(({ isPregnancy, searchVariant }, index) => (
+          {arrayPregnancyProduct.map(({ isPregnancy, valueVariant }, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Pregnancy: searchVariant });
+                  setSearchParams({ Pregnancy: valueVariant });
                 }}
               >
                 {isPregnancy}

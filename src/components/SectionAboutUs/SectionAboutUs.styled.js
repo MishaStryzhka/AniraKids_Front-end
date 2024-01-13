@@ -4,6 +4,8 @@ export const Section = styled.section`
   width: 1440px;
   margin: 0 auto;
   padding-bottom: 40px;
+
+  padding-top: ${({ $mainPage }) => ($mainPage ? '0' : '40px')};
 `;
 
 export const Title = styled.h2`

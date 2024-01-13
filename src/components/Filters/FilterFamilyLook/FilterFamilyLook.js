@@ -8,21 +8,7 @@ import {
   Wrap,
 } from './FilterFamilyLook.styled';
 import { useSearchParams } from 'react-router-dom';
-
-const ArrayFamilyLook = [
-  {
-    variantOfFamilyLook: 'Для всієї сім’ї',
-    searchVariant: 'for-all-family',
-  },
-  {
-    variantOfFamilyLook: 'Для мами і дівчинки',
-    searchVariant: 'for-mother-and-girl',
-  },
-  {
-    variantOfFamilyLook: 'Для мами і хлопчика',
-    searchVariant: 'for-mother-and-boy',
-  },
-];
+import { arrayFamilyLookProduct } from 'helpers';
 
 const FilterFamilyLook = () => {
   const [isFamilyLookList, setIsFamilyLookList] = useState(false);
@@ -43,13 +29,13 @@ const FilterFamilyLook = () => {
       </Wrap>
       {isFamilyLookList && (
         <List>
-          {ArrayFamilyLook.map(
-            ({ variantOfFamilyLook, searchVariant }, index) => (
+          {arrayFamilyLookProduct.map(
+            ({ variantOfFamilyLook, valueVariant }, index) => (
               <li key={index}>
                 <Button
                   type="button"
                   onClick={() => {
-                    setSearchParams({ familyLook: searchVariant });
+                    setSearchParams({ familyLook: valueVariant });
                   }}
                 >
                   {variantOfFamilyLook}

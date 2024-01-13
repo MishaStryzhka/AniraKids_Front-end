@@ -6,10 +6,11 @@ export const Section = styled.section`
   margin: 0 auto;
 `;
 export const Title = styled.h3`
-  font-family: 'Cormorant SC';
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 1.25;
+  font-family: ${({ $mainPage }) =>
+    $mainPage ? 'Cormorant SC' : 'Open Sans Hebrew'};
+  font-size: ${({ $mainPage }) => ($mainPage ? '32px' : '20px')};
+  font-weight: ${({ $mainPage }) => ($mainPage ? '500' : '700')};
+  line-height: ${({ $mainPage }) => ($mainPage ? '1.25' : '1.4')};
   margin-bottom: 16px;
   max-width: 626px;
 

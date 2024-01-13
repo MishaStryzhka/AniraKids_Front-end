@@ -1,4 +1,4 @@
-export const ArrayFamilyLookProduct = [
+export const arrayFamilyLookProduct = [
   {
     variantOfFamilyLook: 'Для всієї сім’ї',
     valueVariant: 'for-all-family',
@@ -17,7 +17,7 @@ export const ArrayFamilyLookProduct = [
   },
 ];
 
-export const ArrayPregnancyProduct = [
+export const arrayPregnancyProduct = [
   { isPregnancy: 'Так', valueVariant: 'true' },
   { isPregnancy: 'Ні', valueVariant: 'false' },
 ];
@@ -57,7 +57,7 @@ export const arrayOfSubjectsProduct = [
   },
 ];
 
-export const colorsProduct = [
+export const arrayColorsProduct = [
   { color: 'white', nameColor: 'Білий', colorCode: '#FFF' },
   { color: 'gray', nameColor: 'Сірий', colorCode: '#A7A7A7' },
   { color: 'orange', nameColor: 'Помаранчевий', colorCode: '#FFB833' },
@@ -97,7 +97,7 @@ export const colorsProduct = [
   { color: 'mustard', nameColor: 'Гірчичний', colorCode: '#CAAC00' },
 ];
 
-export const ArrayAgeProduct = [
+export const arrayAgeProduct = [
   {
     descriptionAge: 'для передчасно народжених',
     valueAge: 'premature',
@@ -168,7 +168,7 @@ export const ArrayAgeProduct = [
   },
 ];
 
-export const ArraySizeChildrenProduct = [
+export const arraySizeChildrenProduct = [
   {
     descriptionSize: 'до 50',
     valueSize: 'before-50',
@@ -251,7 +251,7 @@ export const ArraySizeChildrenProduct = [
   },
 ];
 
-export const ArrayofDecorProduct = [
+export const arrayofDecorProduct = [
   { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
   { variantOfDecor: 'День народження', searchDecor: 'birthday' },
   { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
@@ -273,7 +273,7 @@ export const ArrayofDecorProduct = [
   },
 ];
 
-export const ArrayOfToysProduct = [
+export const arrayOfToysProduct = [
   {
     variantOfToys: 'Іграшки для малюків',
     typeOfToys: 'toys-for-baby',
@@ -321,5 +321,36 @@ export const ArrayOfToysProduct = [
   {
     variantOfToys: 'Роботи і трансформери',
     typeOfToys: 'robots-and-transformers',
+  },
+];
+
+export const arraySizeAdult = [
+  {
+    descriptionSize: 'XS',
+    searchSize: 'XS',
+  },
+  {
+    descriptionSize: 'S',
+    searchSize: 'S',
+  },
+  {
+    descriptionSize: 'M',
+    searchSize: 'M',
+  },
+  {
+    descriptionSize: 'L',
+    searchSize: 'L',
+  },
+  {
+    descriptionSize: 'XL',
+    searchSize: 'XL',
+  },
+  {
+    descriptionSize: 'XXL',
+    searchSize: 'XXL',
+  },
+  {
+    descriptionSize: 'XXXL',
+    searchSize: 'XXXL',
   },
 ];

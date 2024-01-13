@@ -40,18 +40,18 @@ import {
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useState } from 'react';
-import { arraySizeAdult } from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
 import { validationProductSchema } from 'schemas';
 import {
-  ArrayAgeProduct,
-  ArrayFamilyLookProduct,
-  ArrayOfToysProduct,
-  ArrayPregnancyProduct,
-  ArraySizeChildrenProduct,
-  ArrayofDecorProduct,
+  arrayAgeProduct,
+  arrayFamilyLookProduct,
+  arrayOfToysProduct,
+  arrayPregnancyProduct,
+  arraySizeChildrenProduct,
+  arrayofDecorProduct,
   arrayOfSubjectsProduct,
-  colorsProduct,
-} from 'allDates';
+  arrayColorsProduct,
+  arraySizeAdult,
+} from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
 
@@ -226,7 +226,7 @@ const FormAddProduct = () => {
                   <WrapCategory>
                     <Description>Family look</Description>
                     <List>
-                      {ArrayFamilyLookProduct.map(
+                      {arrayFamilyLookProduct.map(
                         ({ valueVariant, variantOfFamilyLook }, index) => (
                           <li key={index}>
                             <Label>
@@ -251,7 +251,7 @@ const FormAddProduct = () => {
                   <WrapCategory>
                     <Description>Для вагітних</Description>
                     <List>
-                      {ArrayPregnancyProduct.map(
+                      {arrayPregnancyProduct.map(
                         ({ valueVariant, isPregnancy }, index) => (
                           <li key={index}>
                             <Label>
@@ -300,7 +300,7 @@ const FormAddProduct = () => {
                 <WrapCategory $isParamsMan={isParamsMan}>
                   <Description>Family look</Description>
                   <List>
-                    {ArrayFamilyLookProduct.map(
+                    {arrayFamilyLookProduct.map(
                       ({ valueVariant, variantOfFamilyLook }, index) => (
                         <li key={index}>
                           <Label>
@@ -370,7 +370,7 @@ const FormAddProduct = () => {
                 </BoxCategory>
                 <Title>ВКАЖІТЬ ВІК</Title>
                 <WrapChildrenParams>
-                  {ArrayAgeProduct.map(
+                  {arrayAgeProduct.map(
                     ({ valueAge, descriptionAge }, index) => (
                       <LabelChildren key={index}>
                         <BoxSize $check={values.age === valueAge}>
@@ -388,7 +388,7 @@ const FormAddProduct = () => {
                 </WrapChildrenParams>
                 <Title>ВКАЖІТЬ РОЗМІР</Title>
                 <WrapChildrenSize>
-                  {ArraySizeChildrenProduct.map(
+                  {arraySizeChildrenProduct.map(
                     ({ descriptionSize, valueSize }, index) => (
                       <LabelChildren key={index}>
                         <BoxSize $check={values.size === valueSize}>
@@ -414,7 +414,7 @@ const FormAddProduct = () => {
                   <WrapCategory>
                     <Description>Декор</Description>
                     <List>
-                      {ArrayofDecorProduct.map(
+                      {arrayofDecorProduct.map(
                         ({ variantOfDecor, searchDecor }, index) => (
                           <Label key={index}>
                             <Box>
@@ -435,7 +435,7 @@ const FormAddProduct = () => {
                   <WrapCategory>
                     <Description>Іграшки</Description>
                     <List>
-                      {ArrayOfToysProduct.map(
+                      {arrayOfToysProduct.map(
                         ({ variantOfToys, typeOfToys }, index) => (
                           <Label key={index}>
                             <Box>
@@ -462,22 +462,24 @@ const FormAddProduct = () => {
           <div>
             <Title>ВИБЕРІТЬ КОЛІР</Title>
             <ListColor>
-              {colorsProduct.map(({ nameColor, colorCode, color }, index) => (
-                <ItemButton key={index}>
-                  <LabelColor color={colorCode}>
-                    <Input
-                      type="radio"
-                      name="color"
-                      value={color}
-                      onChange={handleChange}
-                    />
-                    <WrapBoxColor $check={values.color === color}>
-                      <BoxColor color={colorCode} />
-                      {nameColor}
-                    </WrapBoxColor>
-                  </LabelColor>
-                </ItemButton>
-              ))}
+              {arrayColorsProduct.map(
+                ({ nameColor, colorCode, color }, index) => (
+                  <ItemButton key={index}>
+                    <LabelColor color={colorCode}>
+                      <Input
+                        type="radio"
+                        name="color"
+                        value={color}
+                        onChange={handleChange}
+                      />
+                      <WrapBoxColor $check={values.color === color}>
+                        <BoxColor color={colorCode} />
+                        {nameColor}
+                      </WrapBoxColor>
+                    </LabelColor>
+                  </ItemButton>
+                )
+              )}
             </ListColor>
             <TextInstruction>
               Ви можете обрати до двох відтінків
