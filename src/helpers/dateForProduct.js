@@ -1,4 +1,4 @@
-export const ArrayFamilyLookProduct = [
+export const arrayFamilyLookProduct = [
   {
     variantOfFamilyLook: 'Для всієї сім’ї',
     valueVariant: 'for-all-family',
@@ -17,7 +17,7 @@ export const ArrayFamilyLookProduct = [
   },
 ];
 
-export const ArrayPregnancyProduct = [
+export const arrayPregnancyProduct = [
   { isPregnancy: 'Так', valueVariant: 'true' },
   { isPregnancy: 'Ні', valueVariant: 'false' },
 ];
@@ -57,7 +57,7 @@ export const arrayOfSubjectsProduct = [
   },
 ];
 
-export const colorsProduct = [
+export const arrayColorsProduct = [
   { color: 'white', nameColor: 'Білий', colorCode: '#FFF' },
   { color: 'gray', nameColor: 'Сірий', colorCode: '#A7A7A7' },
   { color: 'orange', nameColor: 'Помаранчевий', colorCode: '#FFB833' },
@@ -97,7 +97,7 @@ export const colorsProduct = [
   { color: 'mustard', nameColor: 'Гірчичний', colorCode: '#CAAC00' },
 ];
 
-export const ArrayAgeProduct = [
+export const arrayAgeProduct = [
   {
     descriptionAge: 'для передчасно народжених',
     valueAge: 'premature',
@@ -168,7 +168,7 @@ export const ArrayAgeProduct = [
   },
 ];
 
-export const ArraySizeChildrenProduct = [
+export const arraySizeChildrenProduct = [
   {
     descriptionSize: 'до 50',
     valueSize: 'before-50',
@@ -248,5 +248,109 @@ export const ArraySizeChildrenProduct = [
   {
     descriptionSize: '164-170',
     valueSize: '164-170',
+  },
+];
+
+export const arrayofDecorProduct = [
+  { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
+  { variantOfDecor: 'День народження', searchDecor: 'birthday' },
+  { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
+  {
+    variantOfDecor: 'Тематичні свята',
+    searchDecor: 'thematic-holidays',
+  },
+  {
+    variantOfDecor: 'Текстиль',
+    searchDecor: 'textile',
+  },
+  {
+    variantOfDecor: 'Пледи для малюків',
+    searchDecor: 'blankets-for-baby',
+  },
+  {
+    variantOfDecor: 'Постільна білизна',
+    searchDecor: 'linens',
+  },
+];
+
+export const arrayOfToysProduct = [
+  {
+    variantOfToys: 'Іграшки для малюків',
+    typeOfToys: 'toys-for-baby',
+  },
+  {
+    variantOfToys: 'Ляльки та пупси',
+    typeOfToys: 'dolls-and-pups',
+  },
+  {
+    variantOfToys: 'М’які іграшки',
+    typeOfToys: 'stuffed-toys',
+  },
+  {
+    variantOfToys: 'Конструктори',
+    typeOfToys: 'constructors',
+  },
+  {
+    variantOfToys: 'Машинки, моделі, техніка',
+    typeOfToys: 'car-model',
+  },
+  {
+    variantOfToys: 'Для активного відпочинку',
+    typeOfToys: 'for-recreation',
+  },
+  {
+    variantOfToys: 'Настільні ігри, пазли',
+    typeOfToys: 'puzzles',
+  },
+  {
+    variantOfToys: 'Іграшкова зброя',
+    typeOfToys: 'toys-weapon',
+  },
+  {
+    variantOfToys: 'Творчість і розвиток',
+    typeOfToys: 'creativity-and-development',
+  },
+  {
+    variantOfToys: 'Товари для школи',
+    typeOfToys: 'for-school',
+  },
+  {
+    variantOfToys: 'Дитячий транспорт',
+    typeOfToys: 'children`s-transport',
+  },
+  {
+    variantOfToys: 'Роботи і трансформери',
+    typeOfToys: 'robots-and-transformers',
+  },
+];
+
+export const arraySizeAdult = [
+  {
+    descriptionSize: 'XS',
+    searchSize: 'XS',
+  },
+  {
+    descriptionSize: 'S',
+    searchSize: 'S',
+  },
+  {
+    descriptionSize: 'M',
+    searchSize: 'M',
+  },
+  {
+    descriptionSize: 'L',
+    searchSize: 'L',
+  },
+  {
+    descriptionSize: 'XL',
+    searchSize: 'XL',
+  },
+  {
+    descriptionSize: 'XXL',
+    searchSize: 'XXL',
+  },
+  {
+    descriptionSize: 'XXXL',
+    searchSize: 'XXXL',
   },
 ];

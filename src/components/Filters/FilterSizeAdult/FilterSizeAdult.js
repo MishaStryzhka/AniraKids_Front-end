@@ -9,37 +9,7 @@ import {
   WrapButtons,
 } from './FilterSizeAdult.styled';
 import { useSearchParams } from 'react-router-dom';
-
-export const arraySizeAdult = [
-  {
-    descriptionSize: 'XS',
-    searchSize: 'XS',
-  },
-  {
-    descriptionSize: 'S',
-    searchSize: 'S',
-  },
-  {
-    descriptionSize: 'M',
-    searchSize: 'M',
-  },
-  {
-    descriptionSize: 'L',
-    searchSize: 'L',
-  },
-  {
-    descriptionSize: 'XL',
-    searchSize: 'XL',
-  },
-  {
-    descriptionSize: 'XXL',
-    searchSize: 'XXL',
-  },
-  {
-    descriptionSize: 'XXXL',
-    searchSize: 'XXXL',
-  },
-];
+import { arraySizeAdult } from 'helpers';
 
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);

@@ -1,9 +1,11 @@
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 48px;
+  width: 688px;
 `;
 
 export const Title = styled.h2`
@@ -105,7 +107,7 @@ export const FieldComments = styled.textarea`
 
 export const GeneralList = styled.ul`
   display: flex;
-  gap: 20px;
+  gap: 8px;
 `;
 
 export const Button = styled.button`
@@ -117,13 +119,15 @@ export const Button = styled.button`
   padding: 16px;
   background-color: transparent;
   border: 1px dashed;
+  border-radius: 2px;
 
   color: ${({ theme }) => theme.color.mainColor2};
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 
-  :active {
-    border: 1px solid;
-  }
+  border: ${({ $isParamsWoman }) => $isParamsWoman && '1px solid'};
+  border: ${({ $isParamsMan }) => $isParamsMan && '1px solid'};
+  border: ${({ $isParamsChildren }) => $isParamsChildren && '1px solid'};
+  border: ${({ $isParamsDecor }) => $isParamsDecor && '1px solid'};
 `;
 
 export const List = styled.ul`
@@ -149,40 +153,18 @@ export const WrapCategory = styled.div`
   flex-direction: column;
   gap: 12px;
   margin-bottom: ${({ $isParamsMan }) => ($isParamsMan ? '48px' : '0')};
+`;
+export const Label = styled.label`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  display: flex;
+  gap: 4px;
+  align-items: center;
 
-  label {
-    font-family: 'Open Sans Hebrew', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.43;
-    display: flex;
-    gap: 4px;
-    margin-left: 30px;
-
-    color: ${({ theme }) => theme.color.mainColor5};
-    cursor: pointer;
-    position: relative;
-  }
-
-  input {
-    display: none;
-  }
-
-  label::before {
-    content: '';
-    width: 24px;
-    height: 24px;
-    border: 1px solid;
-    display: inline-block;
-    position: absolute;
-    border-radius: 2px;
-    left: -30px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: transparent;
-    border-color: ${({ theme }) => theme.color.additionalColorBrown};
-    /* background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_171_7028)'%3E%3Cpath d='M5 12L10 17L20 7' stroke='%2300542C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_171_7028'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E"); */
-  }
+  color: ${({ theme }) => theme.color.mainColor5};
+  cursor: pointer;
 `;
 
 export const Input = styled.input`
@@ -190,8 +172,6 @@ export const Input = styled.input`
 `;
 
 export const Description = styled.p`
-  margin-bottom: 10px;
-
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -208,7 +188,6 @@ export const BoxCategory = styled.div`
 
 export const Wrap = styled.div`
   margin-top: 48px;
-  margin-bottom: 48px;
 `;
 
 export const ButtonVariant = styled.button`
@@ -227,25 +206,43 @@ export const ListColor = styled.ul`
 `;
 export const ItemButton = styled.li``;
 
+export const LabelSize = styled.label`
+  border: 1px solid;
+  border-radius: 2px;
+  display: flex;
+  cursor: pointer;
+
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+
+export const LabelChildren = styled(LabelSize)`
+  width: 150px;
+  display: block;
+`;
+
+export const BoxSize = styled.div`
+  text-align: center;
+  padding: 2px 8px;
+  background-color: ${({ $check, theme }) =>
+    $check ? theme.color.additionalColorBrown : 'transparent'};
+`;
+
 export const LabelColor = styled.label`
   border: none;
   background-color: transparent;
   width: 200px;
+  cursor: pointer;
+`;
+
+export const WrapBoxColor = styled.div`
+  background-color: ${({ $check, theme }) =>
+    $check ? theme.color.additionalColorBrown : 'transparent'};
   display: flex;
   align-items: center;
   gap: 8px;
-`;
-
-// export const ColorBox = styled.div`
-//   width: 20px;
-// `;
-
-export const LabelSize = styled.label`
-  padding: 2px 8px;
+  width: inherit;
   border-radius: 2px;
-  border: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+  padding: 3px;
 `;
 
 export const BoxColor = styled.div`
@@ -256,13 +253,17 @@ export const BoxColor = styled.div`
   border-radius: 2px;
 `;
 
-export const WrapChildrenSize = styled.ul`
+export const WrapChildrenParams = styled.ul`
   display: flex;
   flex-wrap: wrap;
   max-width: 660px;
   gap: 16px;
   column-count: 4;
   margin-bottom: 48px;
+`;
+
+export const WrapChildrenSize = styled(WrapChildrenParams)`
+  margin-bottom: 0px;
 `;
 
 export const GeneralWrap = styled.div`
@@ -284,6 +285,7 @@ export const LabelStatus = styled.label`
   display: flex;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -292,6 +294,7 @@ export const LabelPrice = styled.label`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  cursor: pointer;
 `;
 
 export const InputPrice = styled.input`
@@ -304,6 +307,7 @@ export const InputPrice = styled.input`
   font-size: 14px;
   font-weight: 400;
   line-height: 1.43;
+  outline: none;
 
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
   color: ${({ theme }) => theme.color.mainColor3};
@@ -317,4 +321,30 @@ export const Box = styled.div`
   border-radius: 2px;
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+
+export const StyledNavLink = styled(NavLink)`
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const ButtonSubmit = styled.button`
+  text-align: center;
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  padding: 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+
+  cursor: pointer;
+  width: 305px;
+  background-color: transparent;
+  border: 1px solid;
+
+  color: ${({ theme }) => theme.color.mainColor3};
+  border-color: ${({ theme }) => theme.color.mainColor3};
 `;

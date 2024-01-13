@@ -11,12 +11,14 @@ import PhotoAbout2xWebp from 'images/photo-about-us/photo-about-us-2x-webp.webp'
 import PhotoAbout1x from 'images/photo-about-us/photo-about-us-1x.jpg';
 import PhotoAbout2x from 'images/photo-about-us/photo-about-us-2x.jpg';
 import { Container } from 'components/Container/Container';
+import { useLocation } from 'react-router-dom';
 
 const SectionAboutUs = () => {
+  const { pathname } = useLocation();
   return (
-    <Section>
+    <Section $mainPage={pathname === `/`}>
       <Container>
-        <Title>Про нас</Title>
+        {pathname === '/' && <Title>Про нас</Title>}
         <Border />
       </Container>
       <Picture>
