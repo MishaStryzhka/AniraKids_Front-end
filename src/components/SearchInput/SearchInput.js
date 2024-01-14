@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import IconSearch from '../../images/icons/IconSearch';
 import { Input, Label, WrapIcon } from './SearchInput.styled';
 
 const SearchInput = () => {
+  const { t } = useTranslation();
   const handleInput = ({ target }) => {
     console.log(target.value);
   };
@@ -10,7 +12,7 @@ const SearchInput = () => {
     <>
       <Label>
         <Input
-          placeholder="Пошук"
+          placeholder={t('Пошук')}
           // value={value}
           onChange={e => handleInput(e)}
         />

@@ -5,8 +5,13 @@ import { useTitle } from 'hooks';
 import SectionOurMission from 'components/SectionOurMission/SectionOurMission';
 import SectionSimpleSteps from 'components/SectionSimpleSteps/SectionSimpleSteps';
 import SectionAreYouReady from 'components/SectionAreYouReady/SectionAreYouReady';
+import { useLocation } from 'react-router-dom';
 
 const MainPage = () => {
+  const location = useLocation();
+
+  console.log('location', location);
+
   useTitle('AniraK');
   return (
     <>
