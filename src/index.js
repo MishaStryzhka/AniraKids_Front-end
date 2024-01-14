@@ -7,17 +7,44 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './redux/store';
+import { I18nextProvider } from 'react-i18next';
+import i18n from 'i18next';
+import { ComponentTranslationsUk } from 'components/translations/uk';
+import { ComponentTranslationsCs } from 'components/translations/cs';
+import { ComponentTranslationsEn } from 'components/translations/en';
+
+i18n.init({
+  interpolation: {
+    escapeValue: false, // реагує на HTML-теги у тексті
+  },
+  lng: 'uk', // встановлення початкової мови
+  resources: {
+    uk: {
+      translation: { ...ComponentTranslationsUk },
+    },
+    cs: {
+      translation: { ...ComponentTranslationsCs },
+    },
+    en: {
+      translation: { ...ComponentTranslationsEn },
+    },
+  },
+});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </PersistGate>
-    </Provider>
+    <I18nextProvider i18n={i18n}>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <BrowserRouter>
+            <React.Suspense fallback="loading...">
+              <App />
+            </React.Suspense>
+          </BrowserRouter>
+        </PersistGate>
+      </Provider>
+    </I18nextProvider>
   </React.StrictMode>
 );
 

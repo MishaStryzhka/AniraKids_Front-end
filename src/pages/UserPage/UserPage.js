@@ -18,8 +18,10 @@ import IconShopCart from 'images/icons/IconShopCart';
 import IconCard from 'images/icons/IconCard';
 import IconBag from 'images/icons/IconBag';
 import IconExit from 'images/icons/IconExit';
+import { useTranslation } from 'react-i18next';
 
 const UserPage = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
 
   useTitle('Акаунт');
@@ -30,42 +32,43 @@ const UserPage = () => {
       <WrapMainContent>
         <SideBar>
           <StyledNavLink to="./profile">
-            <IconPerson /> Профіль
+            <IconPerson />
+            {t('profile')}
           </StyledNavLink>
           <StyledNavLink to="./chat">
-            <IconChat /> Чат
+            <IconChat /> {t('chat')}
           </StyledNavLink>
           <StyledNavLink to="./favorite">
             <IconHeart />
-            Улюблене
+            {t('favorite')}
           </StyledNavLink>
           <StyledNavLink to="./rent-out">
-            <IconCloth /> Пропоную
+            <IconCloth /> {t('rentOut')}
           </StyledNavLink>
           <StyledNavLink to="./rent-in">
             <IconHanger />
-            Орендую
+            {t('rentIn')}
           </StyledNavLink>
           <StyledNavLink to="./my-orders">
             <IconBag2 />
-            Мої покупки
+            {t('myPurchases')}
           </StyledNavLink>
           <StyledNavLink to="./my-purchases">
-            <IconShopCart /> Мої продажі
+            <IconShopCart /> {t('mySales')}
           </StyledNavLink>
           <StyledNavLink to="./wallet">
-            <IconCard /> Мій гаманець
+            <IconCard /> {t('wallet')}
           </StyledNavLink>
           <StyledNavLink to="./order1">
-            <IconBag /> Кошик
+            <IconBag /> {t('basket')}
           </StyledNavLink>
           <StyledButton
             type="button"
-            title="LogOut"
+            title={t('logOut')}
             onClick={() => dispatch(logOut())}
           >
             <IconExit />
-            Вийти
+            {t('logOut')}
           </StyledButton>
         </SideBar>
         <MainContent>

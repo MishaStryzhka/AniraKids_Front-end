@@ -1,22 +1,24 @@
+import { useTranslation } from 'react-i18next';
 import { NavList, StyledNavLink } from './BoxNavLinks.styled';
 
 const BoxNavLinks = ({ $mainPage }) => {
+  const { t } = useTranslation();
   return (
     <NavList>
       <StyledNavLink $mainPage={$mainPage} to="./forWomen">
-        Жіночі наряди
+        {t("Women's Clothing")}
       </StyledNavLink>
       <StyledNavLink $mainPage={$mainPage} to="./forMen">
-        Чоловічі костюми
+        {t("Men's Suits")}
       </StyledNavLink>
       <StyledNavLink $mainPage={$mainPage} to="./forChildren">
-        Дитячі наряди
+        {t("Children's Clothing")}
       </StyledNavLink>
       <StyledNavLink $mainPage={$mainPage} to="./decorAndToys">
-        Декор та іграшки
+        {t('Decor and Toys')}
       </StyledNavLink>
       <StyledNavLink $mainPage={$mainPage} to="./aboutUs">
-        Про нас
+        {t('About Us')}
       </StyledNavLink>
     </NavList>
   );

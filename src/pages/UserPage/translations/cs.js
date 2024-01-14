@@ -1,0 +1,12 @@
+export const UserPageTranslationsCs = {
+  profile: 'Profil',
+  chat: 'Chat',
+  favorite: 'Oblíbené',
+  rentOut: 'Nabízím',
+  rentIn: 'Pronajímám',
+  myPurchases: 'Moje nákupy',
+  mySales: 'Moje prodeje',
+  wallet: 'Peněženka',
+  basket: 'Košík',
+  logOut: 'Odhlásit se',
+};
