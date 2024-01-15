@@ -1,21 +1,21 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    currentTheme: 'light',
+  currentTheme: 'light',
+  currentLanguage: 'uk',
 };
 
 const settingsSlice = createSlice({
-    name: 'settings',
-    initialState,
-    // extraReducers: (builder) => {
-    //     builder.addCase(register.fulfilled, (state, action) => {
-    //         state.user = action.payload.user;
-    //         state.token = action.payload.token;
-    //         state.isLoggedIn = true;
-    //         state.isFirstLogin = true;
-    //     });
-    // },
-    reducers: {},
+  name: 'settings',
+  initialState,
+  reducers: {
+    setLanguage: (state, action) => {
+      state.currentLanguage = action.payload;
+    },
+  },
 });
 
+export const { setLanguage } = settingsSlice.actions;
 export const settingsReducer = settingsSlice.reducer;
+
+export default settingsSlice.reducer;

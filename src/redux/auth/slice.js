@@ -87,21 +87,6 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.isLoading = false;
       });
-
-    // .addCase(addUserFavorite.fulfilled, (state, action) => {
-    //   state.user.favorite.push(action.payload.id);
-    // })
-    // .addCase(addUserFavorite.rejected, (state, action) => {
-    //   state.error = action.payload;
-    // })
-    // .addCase(removeUserFavorite.fulfilled, (state, action) => {
-    //   state.user.favorite = [...state.user.favorite].filter(
-    //     el => el !== action.payload.id
-    //   );
-    // })
-    // .addCase(removeUserFavorite.rejected, (state, action) => {
-    //   state.error = action.payload;
-    // });
   },
 });
 

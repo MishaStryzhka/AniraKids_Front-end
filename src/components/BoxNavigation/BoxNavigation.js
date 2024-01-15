@@ -8,17 +8,11 @@ import { useEffect, useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
 import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
-import { useTranslation } from 'react-i18next';
 
 const BoxNavigation = ({ $mainPage }) => {
   const [isModal, setIsModal] = useState(false);
   const { user, currentTheme } = useAuth();
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
-
-  const changeLanguage = language => {
-    i18n.changeLanguage(language);
-  };
 
   useEffect(() => {
     isModal && user && navigate('/my-account/profile', { replace: true });
@@ -75,9 +69,6 @@ const BoxNavigation = ({ $mainPage }) => {
           }
         />
       </Button>
-      <button onClick={() => changeLanguage('en')}>English</button>
-      <button onClick={() => changeLanguage('cs')}>Czech</button>
-      <button onClick={() => changeLanguage('uk')}>Українська</button>
     </Box>
   );
 };
