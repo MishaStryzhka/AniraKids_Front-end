@@ -33,7 +33,31 @@ const NavigationOverlay = () => {
             <StyledNavLink to="/forMen">{t('menSuits')}</StyledNavLink>
           </>
         )}
-        {/* Тут інші розділи із використанням t('ключ') */}
+        {location.pathname === '/forChildren' && (
+          <>
+            <StyledNavLink to="/">{t('home')}</StyledNavLink>
+            <IconArrow />
+            <StyledNavLink to="/forChildren">
+              {t('childrenClothing')}
+            </StyledNavLink>
+          </>
+        )}
+        {location.pathname === '/decorAndToys' && (
+          <>
+            <StyledNavLink to="/">{t('home')}</StyledNavLink>
+            <IconArrow />
+            <StyledNavLink to="/decorAndToys">
+              {t('decorAndToys')}
+            </StyledNavLink>
+          </>
+        )}
+        {location.pathname === '/aboutUs' && (
+          <>
+            <StyledNavLink to="/">{t('home')}</StyledNavLink>
+            <IconArrow />
+            <StyledNavLink to="/aboutUs">{t('aboutUs')}</StyledNavLink>
+          </>
+        )}
 
         {/* ======Акаунт======= */}
         {location.pathname.includes('my-account') && (
@@ -48,7 +72,18 @@ const NavigationOverlay = () => {
             {location.pathname.includes('chat') && (
               <StyledNavLink to="./chat">{t('chat')}</StyledNavLink>
             )}
-            {/* Тут інші розділи для акаунта */}
+            {location.pathname.includes('favorite') && (
+              <StyledNavLink to="./favorite">{t('favorite')}</StyledNavLink>
+            )}
+            {location.pathname.includes('rent-out') && (
+              <StyledNavLink to="./rent-out">{t('offer')}</StyledNavLink>
+            )}
+            {location.pathname.includes('rent-in') && (
+              <StyledNavLink to="./rent-in">{t('rentIn')}</StyledNavLink>
+            )}
+            {location.pathname.includes('my-orders') && (
+              <StyledNavLink to="./my-orders">{t('myOrders')}</StyledNavLink>
+            )}
           </>
         )}
       </NavigationWrapper>

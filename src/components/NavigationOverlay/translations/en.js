@@ -11,7 +11,6 @@ export const NavigationOverlayTranslationsEn = {
   favorite: 'Favorite',
   offer: 'Offer',
   addProduct: 'Add Product',
-  rentOut: 'Rent Out',
   rentIn: 'Rent In',
   myOrders: 'My Purchases',
   myPurchases: 'My Sales',
