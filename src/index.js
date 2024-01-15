@@ -13,12 +13,13 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { ComponentTranslationsUk } from 'components/translations/uk';
 import { ComponentTranslationsCs } from 'components/translations/cs';
 import { ComponentTranslationsEn } from 'components/translations/en';
+import { detectLanguageFromStore } from 'helpers/detectLanguageFromStore';
 
 i18n.use(LanguageDetector).init({
   interpolation: {
     escapeValue: false, // реагує на HTML-теги у тексті
   },
-  lng: 'uk', // встановлення початкової мови
+  lng: detectLanguageFromStore() || 'en',
   resources: {
     uk: {
       translation: { ...ComponentTranslationsUk },

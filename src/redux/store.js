@@ -13,14 +13,6 @@ import storage from 'redux-persist/lib/storage';
 import { authReducer } from './auth/slice';
 import { settingsReducer } from './settings/slice';
 
-// const middleware = [
-//     ...getDefaultMiddleware({
-//         serializableCheck: {
-//             ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-//         },
-//     }),
-// ];
-
 // Persisting token field from auth slice to localstorage
 const authPersistConfig = {
   key: 'auth',
@@ -31,7 +23,7 @@ const authPersistConfig = {
 const settingsPersistConfig = {
   key: 'settings',
   storage,
-  whitelist: ['currentTheme'],
+  whitelist: ['currentTheme', 'currentLanguage'],
 };
 
 export const store = configureStore({

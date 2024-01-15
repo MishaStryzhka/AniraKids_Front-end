@@ -9,6 +9,8 @@ const { arrayofDecorProduct } = require('./dateForProduct');
 const { arrayOfToysProduct } = require('./dateForProduct');
 const { arraySizeAdult } = require('./dateForProduct');
 const { arrayAnswers } = require('./arrayAnswers');
+const { detectLanguageFromStore } = require('./detectLanguageFromStore');
+
 module.exports = {
   getCroppedImg,
   arrayFamilyLookProduct,
@@ -21,4 +23,5 @@ module.exports = {
   arrayOfToysProduct,
   arraySizeAdult,
   arrayAnswers,
+  detectLanguageFromStore,
 };
