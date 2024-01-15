@@ -16,14 +16,16 @@ import FilterColor from 'components/Filters/FilterColor/FilterColor';
 import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
 import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import ProductCard from 'components/ProductCard/ProductCard';
+import { useTranslation } from 'react-i18next';
 
 const ForWomenPage = () => {
-  useTitle('ЖІНОЧІ НАРЯДИ');
+  const { t } = useTranslation();
+  useTitle(t("Women's Clothing"));
 
   return (
     <Container>
       <NavigationOverlay />
-      <GeneralTitle>ЖІНОЧІ НАРЯДИ</GeneralTitle>
+      <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>
       <WrapMainContent>
         <SideBar>
           <FilterForPregnantWomen />

@@ -13,7 +13,11 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { ComponentTranslationsUk } from 'components/translations/uk';
 import { ComponentTranslationsCs } from 'components/translations/cs';
 import { ComponentTranslationsEn } from 'components/translations/en';
+
 import { detectLanguageFromStore } from 'helpers/detectLanguageFromStore';
+import { PagesTranslationsCs } from 'pages/translations/cs';
+import { PagesTranslationsEn } from 'pages/translations/en';
+import { PagesTranslationsUk } from 'pages/translations/uk';
 
 i18n.use(LanguageDetector).init({
   interpolation: {
@@ -22,13 +26,13 @@ i18n.use(LanguageDetector).init({
   lng: detectLanguageFromStore() || 'en',
   resources: {
     uk: {
-      translation: { ...ComponentTranslationsUk },
+      translation: { ...ComponentTranslationsUk, ...PagesTranslationsUk },
     },
     cs: {
-      translation: { ...ComponentTranslationsCs },
+      translation: { ...ComponentTranslationsCs, ...PagesTranslationsCs },
     },
     en: {
-      translation: { ...ComponentTranslationsEn },
+      translation: { ...ComponentTranslationsEn, ...PagesTranslationsEn },
     },
   },
 });
