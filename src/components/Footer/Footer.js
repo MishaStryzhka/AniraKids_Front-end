@@ -18,12 +18,12 @@ const Footer = () => {
         <FooterNavigate>
           <Logo />
           <SectionNavLinks />
+          <FooterSelectLanguage />
         </FooterNavigate>
         <FooterWrap>
           <FooterCopyright>
             GlamGarb Rentals s.r.o © 2023 - 2024
           </FooterCopyright>
-          <FooterSelectLanguage />
         </FooterWrap>
       </FooterContainer>
     </StyledFooter>

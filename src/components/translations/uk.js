@@ -1,5 +1,5 @@
 import { BoxNavigationTranslationsUk } from 'components/BoxNavLinks/translations/uk';
-import { AuthFormTranslationsEn } from 'components/Forms/AuthForm/translations/en';
+import { AuthFormTranslationsUk } from 'components/Forms/AuthForm/translations/uk';
 import { FormRegistrationEmailTranslationsUk } from 'components/Forms/FormRegistrationEmail/translations/uk';
 import { FormRegistrationPhoneNumberTranslationsUk } from 'components/Forms/FormRegistrationPhoneNumber/translations/uk';
 import { ModalRegisterTranslationsUk } from 'components/Modals/ModalRegister/translations/uk';
@@ -15,5 +15,5 @@ export const ComponentTranslationsUk = {
   ...ModalRegisterTranslationsUk,
   ...FormRegistrationEmailTranslationsUk,
   ...FormRegistrationPhoneNumberTranslationsUk,
-  ...AuthFormTranslationsEn,
+  ...AuthFormTranslationsUk,
 };
