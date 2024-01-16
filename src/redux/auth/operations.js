@@ -112,6 +112,7 @@ export const updateUserInfo = createAsyncThunk(
       email,
       newPassword,
       confirmNewPassword,
+      ico,
     },
     thunkAPI
   ) => {
@@ -122,6 +123,7 @@ export const updateUserInfo = createAsyncThunk(
       lastName && formData.append('lastName', lastName);
       patronymic && formData.append('patronymic', patronymic);
       companyName && formData.append('companyName', companyName);
+      ico && formData.append('ico', ico);
       nickname && formData.append('nickname', nickname);
       primaryPhoneNumber &&
         formData.append('primaryPhoneNumber', primaryPhoneNumber);

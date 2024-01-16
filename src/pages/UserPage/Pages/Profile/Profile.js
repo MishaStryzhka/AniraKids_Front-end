@@ -75,6 +75,7 @@ const Profile = () => {
         email: user?.email || '',
         newPassword: user?.newPassword || '',
         confirmNewPassword: user?.confirmNewPassword || '',
+        ico: user?.ico || '',
       }}
       validationSchema={validationProfileSchema}
       onSubmit={onSubmit}
@@ -89,6 +90,8 @@ const Profile = () => {
         handleBlur,
         handleSubmit,
       }) => {
+        console.log('errors', errors);
+
         return (
           <ProfileForm>
             <Wrap>
@@ -151,6 +154,22 @@ const Profile = () => {
                     value={values.companyName}
                     name="companyName"
                     placeholder="aniraKids"
+                    onChange={handleChange}
+                  />
+                )}
+              </Label>
+
+              <Label>
+                <Placeholder>IČO</Placeholder>
+                {user?.ico ? (
+                  <InputText>{user?.ico}</InputText>
+                ) : (
+                  <InputField
+                    type="number"
+                    id="ico"
+                    value={values.ico}
+                    name="ico"
+                    placeholder="19970561"
                     onChange={handleChange}
                   />
                 )}
@@ -224,7 +243,7 @@ const Profile = () => {
                       <IconPencil />
                     </ButtonEdit>
                     {user.emailVerified ? (
-                      <p>qwe</p>
+                      <p>Верифіковано</p>
                     ) : (
                       <button
                         type="buttom"
