@@ -1,5 +1,5 @@
 import * as React from 'react';
-const IconArrow = props => (
+const IconArrow = ({ fill, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -9,7 +9,7 @@ const IconArrow = props => (
   >
     <g clipPath="url(#a)">
       <path
-        stroke="#000"
+        stroke={fill}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.5}

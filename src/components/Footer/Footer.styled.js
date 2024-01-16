@@ -12,7 +12,7 @@ export const StyledFooter = styled.footer`
 export const FooterContainer = styled(Container)`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 `;
 
 export const FooterNavigate = styled.div`
@@ -24,7 +24,7 @@ export const FooterNavigate = styled.div`
 
 export const FooterWrap = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 `;
 
 export const FooterCopyright = styled.p``;
