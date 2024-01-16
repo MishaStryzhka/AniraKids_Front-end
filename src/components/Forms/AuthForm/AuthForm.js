@@ -18,9 +18,11 @@ import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validationAuthorizationScheme } from 'schemas';
+import { useTranslation } from 'react-i18next';
 
 const AuthForm = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme } = useAuth();
 
@@ -54,16 +56,13 @@ const AuthForm = () => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Description>
-              Авторизуйтеся за допомогою логіну (введіть номер телефону або
-              електорнну пошту)
-            </Description>
-            <TitleLogin>Логін</TitleLogin>
+            <Description>{t('description')}</Description>
+            <TitleLogin>{t('login')}</TitleLogin>
             <Wrap>
               <Label>
-                Логін
+                {t('login')}
                 <FieldStyled
-                  placeholder="Email / Номер телефону"
+                  placeholder={t('placeholderLogin')}
                   onChange={e => handleChange(e)}
                   name="login"
                   value={values.login}
@@ -72,7 +71,7 @@ const AuthForm = () => {
                 <p>{errors.login && touched.login && errors.login}</p>
               </Label>
               <Label>
-                Пароль
+                {t('password')}
                 <FieldStyled
                   type={openPassword ? 'text' : 'password'}
                   name="password"
@@ -93,8 +92,8 @@ const AuthForm = () => {
                 </WrapIcon>
               </Label>
             </Wrap>
-            <StyledNavLink>Я забув (-ла) свій пароль</StyledNavLink>
-            <Button type="submit">Увійти</Button>
+            <StyledNavLink>{t('forgotPassword')}</StyledNavLink>
+            <Button type="submit">{t('submitButton')}</Button>
           </Form>
         )}
       </Formik>

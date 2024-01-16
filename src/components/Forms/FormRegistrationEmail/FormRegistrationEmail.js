@@ -16,8 +16,10 @@ import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
+import { useTranslation } from 'react-i18next';
 
 const FormRegistrationEmail = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme } = useAuth();
@@ -55,7 +57,7 @@ const FormRegistrationEmail = () => {
         }) => (
           <Form onSubmit={handleSubmit}>
             <Label>
-              Email
+              {t('email')}
               <FieldStyled
                 // type="email"
                 name="email"
@@ -67,7 +69,7 @@ const FormRegistrationEmail = () => {
               <p>{errors.email && touched.email && errors.email}</p>
             </Label>
             <Label>
-              Пароль
+              {t('password')}
               <FieldStyled
                 placeholder="****"
                 type={openPassword ? 'text' : 'password'}
@@ -86,13 +88,13 @@ const FormRegistrationEmail = () => {
               </WrapIcon>
             </Label>
             <TextCondition>
-              Натискаючи Зареєструватися, Ви приймаєте
+              {t('privacyPolicyText')}
               <StyledNavLinkCondition to="./">
-                Політику конфіденційності
+                {t('privacyPolicyLinkText')}
               </StyledNavLinkCondition>
               .
             </TextCondition>
-            <Button type="submit">Зареєструватися</Button>
+            <Button type="submit">{t('registration')}</Button>
           </Form>
         )}
       </Formik>

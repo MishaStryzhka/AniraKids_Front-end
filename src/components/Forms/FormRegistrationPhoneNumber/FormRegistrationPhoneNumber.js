@@ -16,8 +16,10 @@ import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validRegistrationPhoneNumberScheme } from 'schemas';
+import { useTranslation } from 'react-i18next';
 
 const FormRegistrationPhoneNumber = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme } = useAuth();
@@ -52,9 +54,9 @@ const FormRegistrationPhoneNumber = () => {
         }) => (
           <Form>
             <Label>
-              Номер телефону
+              {t('phoneNumberLabel')}
               <FieldStyled
-                placeholder="+380"
+                placeholder={t('phoneNumberPlaceholder')}
                 type="tel"
                 name="primaryPhoneNumber"
                 onChange={e => handleChange(e)}
@@ -64,20 +66,24 @@ const FormRegistrationPhoneNumber = () => {
               <p>
                 {errors.primaryPhoneNumber &&
                   touched.primaryPhoneNumber &&
-                  errors.primaryPhoneNumber}
+                  t('phoneNumberErrorMessage')}
               </p>
             </Label>
             <Label>
-              Пароль
+              {t('passwordLabel')}
               <FieldStyled
-                placeholder="****"
+                placeholder={t('passwordPlaceholder')}
                 type={openPassword ? 'text' : 'password'}
                 name="password"
                 onChange={e => handleChange(e)}
                 value={values.password}
                 required
               />
-              <p>{errors.password && touched.password && errors.password}</p>
+              <p>
+                {errors.password &&
+                  touched.password &&
+                  t('passwordErrorMessage')}
+              </p>
               <WrapIcon onClick={handleOpenPassword}>
                 {openPassword ? (
                   <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />
@@ -87,14 +93,14 @@ const FormRegistrationPhoneNumber = () => {
               </WrapIcon>
             </Label>
             <TextCondition>
-              Натискаючи Зареєструватися, Ви приймаєте
+              {t('privacyPolicyText')}
               <StyledNavLinkCondition to="./">
-                Політику конфіденційності
+                {t('privacyPolicyLinkText')}
               </StyledNavLinkCondition>
               .
             </TextCondition>
             <Button type="submit" onSubmit={handleSubmit}>
-              Зареєструватися
+              {t('registerButton')}
             </Button>
           </Form>
         )}

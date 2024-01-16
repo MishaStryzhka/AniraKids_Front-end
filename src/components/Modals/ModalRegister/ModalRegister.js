@@ -19,10 +19,12 @@ import AuthForm from 'components/Forms/AuthForm/AuthForm';
 import IconFacebook from 'images/icons/IconFacebook';
 import IconGoogle from 'images/icons/IconGoogle';
 import IconEmail from 'images/icons/IcomEmail';
+import { useTranslation } from 'react-i18next';
 
 const ModalRegister = () => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
   const [typeRegistration, setTypeRegistration] = useState('email');
+  const { t } = useTranslation();
 
   const [isActiveBtn, setIsActiveBtn] = useState({
     button1: true,
@@ -60,7 +62,7 @@ const ModalRegister = () => {
               handleButtonNavClick('button1', 'button2');
             }}
           >
-            Реєстрація
+            {t('Registration')}
           </ButtonNav>
           <ButtonNav
             $isActive={isActiveBtnNav.button2}
@@ -70,13 +72,13 @@ const ModalRegister = () => {
               handleButtonNavClick('button2', 'button1');
             }}
           >
-            Авторизація
+            {t('Authorization')}
           </ButtonNav>
         </BoxButtonsNavigation>
         {typeNavigation === 'registration' && (
           <>
             <Description>
-              Зареєструйтеся за допомогою номера телефону або електронної пошти
+              {t('Register with phone number or email')}
             </Description>
             <WrapButton>
               <ButtonContact
@@ -87,7 +89,7 @@ const ModalRegister = () => {
                   handleButtonClick('button1', 'button2');
                 }}
               >
-                Email
+                {t('Email')}
               </ButtonContact>
               <ButtonContact
                 $isActive={isActiveBtn.button2}
@@ -97,7 +99,7 @@ const ModalRegister = () => {
                   handleButtonClick('button2', 'button1');
                 }}
               >
-                Номер телефону
+                {t('Phone Number')}
               </ButtonContact>
             </WrapButton>
             <Wrap>
@@ -109,19 +111,19 @@ const ModalRegister = () => {
           </>
         )}
         {typeNavigation === 'authorization' && <AuthForm />}
-        <Separation>АБО</Separation>
+        <Separation>{t('Or')}</Separation>
         <WrapLinks>
           <StyledNavLink>
             <IconFacebook />
-            <DescriptionLink>Facebook</DescriptionLink>
+            <DescriptionLink>{t('Facebook')}</DescriptionLink>
           </StyledNavLink>
           <StyledNavLink>
             <IconGoogle />
-            <DescriptionLink>Google</DescriptionLink>
+            <DescriptionLink>{t('Google')}</DescriptionLink>
           </StyledNavLink>
           <StyledNavLink>
             <IconEmail />
-            <DescriptionLink>Інше</DescriptionLink>
+            <DescriptionLink>{t('Other')}</DescriptionLink>
           </StyledNavLink>
         </WrapLinks>
       </WrapForm>

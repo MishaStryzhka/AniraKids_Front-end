@@ -4,6 +4,9 @@ export const validationProfileSchema = Yup.object().shape({
   companyName: Yup.string()
     .min(3, 'Мінімальна довжина 3 символи')
     .max(50, 'Максимальна довжина 50 символів'),
+  ico: Yup.string()
+    .min(3, 'Мінімальна довжина 3 символи')
+    .max(16, 'Максимальна довжина 16 символів'),
   firstName: Yup.string()
     .matches(
       // eslint-disable-next-line no-useless-escape
