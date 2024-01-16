@@ -1,5 +1,5 @@
-import { useDispatch } from 'react-redux';
-import { setLanguage } from '../../redux/settings/slice';
+// import { useDispatch } from 'react-redux';
+// import { setLanguage } from '../../redux/settings/slice';
 import { useTranslation } from 'react-i18next';
 import {
   CurrentLanguage,
@@ -15,12 +15,12 @@ const FooterSelectLanguage = () => {
   const { currentTheme } = useAuth();
   const [isOpenMenuLanguage, setIsOpenMenuLanguage] = useState(false);
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const { i18n } = useTranslation();
 
-  const changeLanguage = language => {
-    i18n.changeLanguage(language);
-  };
+  // const changeLanguage = language => {
+  //   i18n.changeLanguage(language);
+  // };
 
   const currentLanguage = i18n.language;
 
