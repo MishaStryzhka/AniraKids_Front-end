@@ -90,7 +90,5 @@ const authSlice = createSlice({
   },
 });
 
-console.log('authSlice', authSlice);
-
 export const authReducer = authSlice.reducer;
 export const { clearError, clearDone } = authSlice.actions;

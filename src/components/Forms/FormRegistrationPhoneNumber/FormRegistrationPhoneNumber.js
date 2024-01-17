@@ -51,59 +51,65 @@ const FormRegistrationPhoneNumber = () => {
           handleChange,
           handleBlur,
           handleSubmit,
-        }) => (
-          <Form>
-            <Label>
-              {t('phoneNumberLabel')}
-              <FieldStyled
-                placeholder={t('phoneNumberPlaceholder')}
-                type="tel"
-                name="primaryPhoneNumber"
-                onChange={e => handleChange(e)}
-                value={values.primaryPhoneNumber}
-                required
-              />
-              <p>
-                {errors.primaryPhoneNumber &&
-                  touched.primaryPhoneNumber &&
-                  t('phoneNumberErrorMessage')}
-              </p>
-            </Label>
-            <Label>
-              {t('passwordLabel')}
-              <FieldStyled
-                placeholder={t('passwordPlaceholder')}
-                type={openPassword ? 'text' : 'password'}
-                name="password"
-                onChange={e => handleChange(e)}
-                value={values.password}
-                required
-              />
-              <p>
-                {errors.password &&
-                  touched.password &&
-                  t('passwordErrorMessage')}
-              </p>
-              <WrapIcon onClick={handleOpenPassword}>
-                {openPassword ? (
-                  <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />
-                ) : (
-                  <IconEyeClosed fill={theme[currentTheme].color.mainColor2} />
-                )}
-              </WrapIcon>
-            </Label>
-            <TextCondition>
-              {t('privacyPolicyText')}
-              <StyledNavLinkCondition to="./">
-                {t('privacyPolicyLinkText')}
-              </StyledNavLinkCondition>
-              .
-            </TextCondition>
-            <Button type="submit" onSubmit={handleSubmit}>
-              {t('registerButton')}
-            </Button>
-          </Form>
-        )}
+        }) => {
+          console.log('errors', errors);
+
+          return (
+            <Form id="myForm">
+              <Label>
+                {t('phoneNumberLabel')}
+                <FieldStyled
+                  placeholder={t('phoneNumberPlaceholder')}
+                  type="tel"
+                  name="primaryPhoneNumber"
+                  onChange={e => handleChange(e)}
+                  value={values.primaryPhoneNumber}
+                  required
+                />
+                <p>
+                  {errors.primaryPhoneNumber &&
+                    touched.primaryPhoneNumber &&
+                    t('phoneNumberErrorMessage')}
+                </p>
+              </Label>
+              <Label>
+                {t('passwordLabel')}
+                <FieldStyled
+                  placeholder={t('passwordPlaceholder')}
+                  type={openPassword ? 'text' : 'password'}
+                  name="password"
+                  onChange={e => handleChange(e)}
+                  value={values.password}
+                  required
+                />
+                <p>
+                  {errors.password &&
+                    touched.password &&
+                    t('passwordErrorMessage')}
+                </p>
+                <WrapIcon onClick={handleOpenPassword}>
+                  {openPassword ? (
+                    <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />
+                  ) : (
+                    <IconEyeClosed
+                      fill={theme[currentTheme].color.mainColor2}
+                    />
+                  )}
+                </WrapIcon>
+              </Label>
+              <TextCondition>
+                {t('privacyPolicyText')}
+                <StyledNavLinkCondition to="./">
+                  {t('privacyPolicyLinkText')}
+                </StyledNavLinkCondition>
+                .
+              </TextCondition>
+              <Button type="button" onClick={handleSubmit}>
+                {t('registerButton')}
+              </Button>
+            </Form>
+          );
+        }}
       </Formik>
     </>
   );

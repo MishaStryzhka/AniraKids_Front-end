@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 export const validRegistrationPhoneNumberScheme = Yup.object().shape({
   primaryPhoneNumber: Yup.string()
     .required('Field is required')
-    .matches(/^\+380[0-9]{9}$/, 'Invalid phone number format'),
+    .matches(/^\+[0-9]{12,}$/, 'Invalid phone number format'),
   password: Yup.string()
     .required('Field is required')
     .min(8, 'Пароль має бути не менше 8 символів')

@@ -1,38 +1,26 @@
-// import { useDispatch } from 'react-redux';
-// import { setLanguage } from '../../redux/settings/slice';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setLanguage } from '../../redux/settings/slice';
 import { useTranslation } from 'react-i18next';
 import {
+  ButtonLanguage,
   CurrentLanguage,
+  MenuLanguage,
   StyledFooterSelectLanguage,
   StyledIconArrow,
 } from './FooterSelectLanguage.styled';
 import Iconlanguage from 'images/icons/Iconlanguage';
-import { useEffect, useRef, useState } from 'react';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 
 const FooterSelectLanguage = () => {
+  const dispatch = useDispatch();
   const { currentTheme } = useAuth();
   const [isOpenMenuLanguage, setIsOpenMenuLanguage] = useState(false);
-
-  // const dispatch = useDispatch();
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
   const { i18n } = useTranslation();
-
-  // const changeLanguage = language => {
-  //   i18n.changeLanguage(language);
-  // };
-
   const currentLanguage = i18n.language;
-
-  console.log('currentLanguage', currentLanguage);
-
   const menuRef = useRef(null);
-
-  const handleClickOutside = event => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setIsOpenMenuLanguage(false);
-    }
-  };
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
@@ -41,6 +29,28 @@ const FooterSelectLanguage = () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (selectedLanguage) {
+      setIsOpenMenuLanguage(false);
+    }
+  }, [selectedLanguage]);
+
+  const changeLanguage = language => {
+    i18n.changeLanguage(language);
+  };
+
+  const handleClickOutside = event => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setIsOpenMenuLanguage(false);
+    }
+  };
+
+  const handleLanguageClick = language => {
+    setSelectedLanguage(language);
+    dispatch(setLanguage(language));
+    changeLanguage(language);
+  };
 
   return (
     <StyledFooterSelectLanguage
@@ -57,30 +67,28 @@ const FooterSelectLanguage = () => {
         fill={theme[currentTheme].mainColor2}
         $isOpenMenuLanguage={isOpenMenuLanguage}
       />
-      {/* <button
-        onClick={() => {
-          dispatch(setLanguage('en'));
-          changeLanguage('en');
-        }}
-      >
-        English
-      </button>
-      <button
-        onClick={() => {
-          dispatch(setLanguage('cs'));
-          changeLanguage('cs');
-        }}
-      >
-        Czech
-      </button>
-      <button
-        onClick={() => {
-          dispatch(setLanguage('uk'));
-          changeLanguage('uk');
-        }}
-      >
-        Українська
-      </button> */}
+      {isOpenMenuLanguage && (
+        <MenuLanguage>
+          <ButtonLanguage
+            active={currentLanguage === 'en'}
+            onClick={() => handleLanguageClick('en')}
+          >
+            EN
+          </ButtonLanguage>
+          <ButtonLanguage
+            active={currentLanguage === 'cs'}
+            onClick={() => handleLanguageClick('cs')}
+          >
+            CZ
+          </ButtonLanguage>
+          <ButtonLanguage
+            active={currentLanguage === 'uk'}
+            onClick={() => handleLanguageClick('uk')}
+          >
+            UKR
+          </ButtonLanguage>
+        </MenuLanguage>
+      )}
     </StyledFooterSelectLanguage>
   );
 };
