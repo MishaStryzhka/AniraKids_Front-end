@@ -7,5 +7,5 @@ export const ContainerLayout = styled.div`
 `;
 
 export const StuledContainer = styled.main`
-  min-height: calc(100vh - 340px);
+  min-height: calc(100vh - 366px);
 `;

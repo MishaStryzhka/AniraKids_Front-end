@@ -143,7 +143,7 @@ const Profile = () => {
                 )}
               </Label>
 
-              <Label>
+              {/* <Label>
                 <Placeholder>Назва компанії</Placeholder>
                 {user?.companyName ? (
                   <InputText>{user?.companyName}</InputText>
@@ -157,9 +157,9 @@ const Profile = () => {
                     onChange={handleChange}
                   />
                 )}
-              </Label>
+              </Label> */}
 
-              <Label>
+              {/* <Label>
                 <Placeholder>IČO</Placeholder>
                 {user?.ico ? (
                   <InputText>{user?.ico}</InputText>
@@ -173,7 +173,7 @@ const Profile = () => {
                     onChange={handleChange}
                   />
                 )}
-              </Label>
+              </Label> */}
 
               <Label>
                 <Placeholder>Nickname</Placeholder>
