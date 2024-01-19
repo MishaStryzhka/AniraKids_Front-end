@@ -12,10 +12,11 @@ import {
 import Iconlanguage from 'images/icons/Iconlanguage';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
+import { updateLanguage } from '../../redux/settings/operations';
 
 const FooterSelectLanguage = () => {
   const dispatch = useDispatch();
-  const { currentTheme } = useAuth();
+  const { user, currentTheme } = useAuth();
   const [isOpenMenuLanguage, setIsOpenMenuLanguage] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const { i18n } = useTranslation();
@@ -48,7 +49,11 @@ const FooterSelectLanguage = () => {
 
   const handleLanguageClick = language => {
     setSelectedLanguage(language);
-    dispatch(setLanguage(language));
+
+    user
+      ? dispatch(updateLanguage({ language }))
+      : dispatch(setLanguage(language));
+
     changeLanguage(language);
   };
 

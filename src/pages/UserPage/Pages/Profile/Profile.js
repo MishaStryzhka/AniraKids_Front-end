@@ -8,6 +8,7 @@ import {
   AvaterTitle,
   ButtonEdit,
   ButtonShow,
+  ErrorMessage,
   InputText,
   Label,
   Placeholder,
@@ -33,9 +34,15 @@ import {
   confirmUserEmail,
   updateUserInfo,
 } from '../../../../redux/auth/operations';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.userPage.profilePage',
+  });
   const { user, currentTheme } = useAuth();
+  let { error } = useAuth();
+
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
@@ -54,13 +61,14 @@ const Profile = () => {
   };
 
   const onSubmit = e => {
-    console.log('e', e);
     dispatch(updateUserInfo(e));
   };
 
   const verifyEmail = () => {
     dispatch(confirmUserEmail());
   };
+
+  console.log('error', error);
 
   return (
     <Formik
@@ -195,6 +203,9 @@ const Profile = () => {
                       handleChange(e);
                     }}
                   />
+                )}
+                {error?.message === 'Nickname must be unique' && (
+                  <ErrorMessage>{t('Nickname must be unique')}</ErrorMessage>
                 )}
               </Label>
 

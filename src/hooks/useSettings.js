@@ -1,12 +1,12 @@
 import { useSelector } from 'react-redux';
 import {
-  selectCurrentLanguage,
+  selectLanguage,
   selectCurrentTheme,
 } from '../redux/settings/selectors';
 
 export const useSettings = () => {
   const currentTheme = useSelector(selectCurrentTheme);
-  const currentLanguage = useSelector(selectCurrentLanguage);
+  const currentLanguage = useSelector(selectLanguage);
 
   return {
     currentTheme,

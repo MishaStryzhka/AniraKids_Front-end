@@ -21,8 +21,11 @@ import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 
 const UserPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation('translation', { keyPrefix: 'pages.userPage' });
   const dispatch = useDispatch();
+
+  console.log('i18n', i18n);
+  console.log("{t('profile')}", t('profile'));
 
   useTitle('Акаунт');
 

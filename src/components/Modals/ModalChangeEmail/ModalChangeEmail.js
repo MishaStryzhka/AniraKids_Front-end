@@ -18,8 +18,12 @@ import { clearDone, clearError } from '../../../redux/auth/slice';
 import { TextError } from 'components/Forms/Form.styled';
 import { useEffect } from 'react';
 import { WrapButton } from '../ModalRegister/ModalRegister.styled';
+import { useTranslation } from 'react-i18next';
 
 const ModalChangeEmail = ({ onClick }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalChangeEmail',
+  });
   const { isLoading, error, isDone } = useAuth();
   const dispatch = useDispatch();
 
@@ -29,7 +33,7 @@ const ModalChangeEmail = ({ onClick }) => {
         dispatch(clearDone());
         document.body.style.overflow = 'auto';
         onClick();
-      }, 2500);
+      }, 5000);
   }, [dispatch, isDone, onClick]);
 
   const handleSubmitEmail = async ({ email }) => {
@@ -61,12 +65,14 @@ const ModalChangeEmail = ({ onClick }) => {
           handleSubmit,
         }) => {
           return isDone ? (
-            <TextDone>Вітаємо, ваш емайл змінено "{values.email}"!</TextDone>
+            <TextDone>
+              {t('changeEmailMessage', { email: values.email })}
+            </TextDone>
           ) : (
             <Form onSubmit={handleSubmit}>
-              <ModalTitle>Змінити пошту</ModalTitle>
+              <ModalTitle>{t('changeEmailTitle')}</ModalTitle>
               <LabelModal>
-                Введіть адресу електронної пошти
+                {t('enterEmailLabel')}
                 <InputModal
                   value={values.email}
                   type="email"
@@ -80,13 +86,12 @@ const ModalChangeEmail = ({ onClick }) => {
                 />
                 <TextError>
                   {(errors.email && touched.email && errors.email) ||
-                    (error?.message === 'Email in use' &&
-                      'Упс, ця пошта вже зайнята!')}
+                    (error?.message === 'Email in use' && t('Email in use'))}
                 </TextError>
               </LabelModal>
               <WrapButton>
                 <Button type="submit">
-                  {!isLoading ? 'Зберегти' : <BeatLoader color="#fff" />}
+                  {!isLoading ? t('saveButton') : <BeatLoader color="#fff" />}
                 </Button>
               </WrapButton>
             </Form>

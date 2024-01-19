@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { updateLanguage } from './operations';
 
 const initialState = {
   currentTheme: 'light',
-  currentLanguage: 'uk',
+  language: 'uk',
 };
 
 const settingsSlice = createSlice({
@@ -12,6 +13,21 @@ const settingsSlice = createSlice({
     setLanguage: (state, action) => {
       state.currentLanguage = action.payload;
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(updateLanguage.pending, state => {
+        state.isRefreshing = true;
+      })
+      .addCase(updateLanguage.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isLoggedIn = true;
+        state.isFirstLogin = true;
+      })
+      .addCase(updateLanguage.rejected, (state, action) => {
+        state.error = action.payload;
+      });
   },
 });
 
