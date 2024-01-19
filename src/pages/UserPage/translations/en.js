@@ -1,3 +1,5 @@
+import { ProfileTranslationsEn } from '../Pages/Profile/translations/en';
+
 export const UserPageTranslationsEn = {
   profile: 'Profile',
   chat: 'Chat',
@@ -9,4 +11,5 @@ export const UserPageTranslationsEn = {
   wallet: 'My Wallet',
   basket: 'Basket',
   logOut: 'Log Out',
+  profilePage: ProfileTranslationsEn,
 };

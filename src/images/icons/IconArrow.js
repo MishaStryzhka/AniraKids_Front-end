@@ -9,7 +9,7 @@ const IconArrow = ({ fill, ...props }) => (
   >
     <g clipPath="url(#a)">
       <path
-        stroke={fill}
+        stroke={fill || '#000'}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.5}

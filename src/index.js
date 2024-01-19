@@ -26,13 +26,25 @@ i18n.use(LanguageDetector).init({
   lng: detectLanguageFromStore() || 'en',
   resources: {
     uk: {
-      translation: { ...ComponentTranslationsUk, ...PagesTranslationsUk },
+      translation: {
+        ...ComponentTranslationsUk,
+        components: ComponentTranslationsUk,
+        pages: PagesTranslationsUk,
+      },
     },
     cs: {
-      translation: { ...ComponentTranslationsCs, ...PagesTranslationsCs },
+      translation: {
+        ...ComponentTranslationsCs,
+        components: ComponentTranslationsCs,
+        pages: PagesTranslationsCs,
+      },
     },
     en: {
-      translation: { ...ComponentTranslationsEn, ...PagesTranslationsEn },
+      translation: {
+        ...ComponentTranslationsEn,
+        components: ComponentTranslationsEn,
+        pages: PagesTranslationsEn,
+      },
     },
   },
 });
