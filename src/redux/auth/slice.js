@@ -39,6 +39,8 @@ const authSlice = createSlice({
         state.isFirstLogin = true;
       })
       .addCase(register.rejected, (state, action) => {
+        console.log('action.payload', action.payload);
+
         state.error = action.payload;
       })
       .addCase(logIn.fulfilled, (state, action) => {

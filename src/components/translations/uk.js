@@ -1,4 +1,4 @@
-import { BoxNavigationTranslationsUk } from 'components/BoxNavLinks/translations/uk';
+import { BoxNavLinksTranslationsUk } from 'components/BoxNavLinks/translations/uk';
 import { AuthFormTranslationsUk } from 'components/Forms/AuthForm/translations/uk';
 import { FormRegistrationEmailTranslationsUk } from 'components/Forms/FormRegistrationEmail/translations/uk';
 import { FormRegistrationPhoneNumberTranslationsUk } from 'components/Forms/FormRegistrationPhoneNumber/translations/uk';
@@ -9,13 +9,13 @@ import { SearchInputTranslationsUk } from 'components/SearchInput/translations/u
 import { UserPageTranslationsUk } from 'pages/UserPage/translations/uk';
 
 export const ComponentTranslationsUk = {
-  ...BoxNavigationTranslationsUk,
+  boxNavLinks: BoxNavLinksTranslationsUk,
   ...SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
   ...ModalRegisterTranslationsUk,
-  ...FormRegistrationEmailTranslationsUk,
-  ...FormRegistrationPhoneNumberTranslationsUk,
+  formRegistrationEmail: FormRegistrationEmailTranslationsUk,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
   ...AuthFormTranslationsUk,
   modalChangeEmail: ModalChangeEmailTranslationsUk,
 };

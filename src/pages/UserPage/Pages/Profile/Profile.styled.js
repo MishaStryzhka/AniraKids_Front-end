@@ -84,13 +84,3 @@ export const ButtonShow = styled.button`
 export const StyledButton = styled(Button)`
   margin: 0 auto;
 `;
-
-export const ErrorMessage = styled.p`
-  color: ${({ theme }) => theme.color.additionalColorRed};
-
-  font-family: 'Open Sans, sans-serif';
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 20px; /* 142.857% */
-`;

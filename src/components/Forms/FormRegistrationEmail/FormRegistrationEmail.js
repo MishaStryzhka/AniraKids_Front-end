@@ -17,12 +17,17 @@ import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { useTranslation } from 'react-i18next';
+import { ErrorMessage } from '../Form.styled';
 
-const FormRegistrationEmail = () => {
-  const { t } = useTranslation();
+const FormRegistrationEmail = ({ handleCloseModal }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.formRegistrationEmail',
+  });
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
-  const { currentTheme } = useAuth();
+  const { currentTheme, error } = useAuth();
+
+  console.log('error', error);
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -59,14 +64,17 @@ const FormRegistrationEmail = () => {
             <Label>
               {t('email')}
               <FieldStyled
-                // type="email"
+                type="email"
                 name="email"
                 onChange={e => handleChange(e)}
                 value={values.email}
                 placeholder="***@gmail"
                 required
               />
-              <p>{errors.email && touched.email && errors.email}</p>
+              <ErrorMessage>
+                {(errors?.email && touched?.email && t(errors?.email)) ||
+                  (error?.message === 'Email in use' && t(error?.message))}
+              </ErrorMessage>
             </Label>
             <Label>
               {t('password')}
@@ -78,7 +86,9 @@ const FormRegistrationEmail = () => {
                 value={values.password}
                 required
               />
-              <p>{errors.password && touched.password && errors.password}</p>
+              <ErrorMessage>
+                {errors.password && touched.password && t(errors.password)}
+              </ErrorMessage>
               <WrapIcon onClick={handleOpenPassword}>
                 {openPassword ? (
                   <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />
@@ -88,8 +98,12 @@ const FormRegistrationEmail = () => {
               </WrapIcon>
             </Label>
             <TextCondition>
-              {t('privacyPolicyText')}
-              <StyledNavLinkCondition to="./">
+              {t('privacyPolicyText')}:
+              <br />
+              <StyledNavLinkCondition
+                to="/privacy-policy"
+                onClick={() => handleCloseModal()}
+              >
                 {t('privacyPolicyLinkText')}
               </StyledNavLinkCondition>
               .

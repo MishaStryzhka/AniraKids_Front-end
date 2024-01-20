@@ -17,12 +17,17 @@ import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validRegistrationPhoneNumberScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
+import { ErrorMessage } from '../Form.styled';
 
 const FormRegistrationPhoneNumber = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.formRegistrationPhoneNumber',
+  });
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
-  const { currentTheme } = useAuth();
+  const { currentTheme, error } = useAuth();
+
+  console.log('error', error);
 
   const handleOpenPassword = () =>
     setOpenPassword(openPassword => !openPassword);
@@ -52,8 +57,6 @@ const FormRegistrationPhoneNumber = () => {
           handleBlur,
           handleSubmit,
         }) => {
-          console.log('errors', errors);
-
           return (
             <Form id="myForm">
               <Label>
@@ -66,11 +69,13 @@ const FormRegistrationPhoneNumber = () => {
                   value={values.primaryPhoneNumber}
                   required
                 />
-                <p>
-                  {errors.primaryPhoneNumber &&
+                <ErrorMessage>
+                  {(errors.primaryPhoneNumber &&
                     touched.primaryPhoneNumber &&
-                    t('phoneNumberErrorMessage')}
-                </p>
+                    t(errors.primaryPhoneNumber)) ||
+                    (error?.message === 'Phone number in use' &&
+                      t(error?.message))}
+                </ErrorMessage>
               </Label>
               <Label>
                 {t('passwordLabel')}
@@ -82,11 +87,9 @@ const FormRegistrationPhoneNumber = () => {
                   value={values.password}
                   required
                 />
-                <p>
-                  {errors.password &&
-                    touched.password &&
-                    t('passwordErrorMessage')}
-                </p>
+                <ErrorMessage>
+                  {errors.password && touched.password && t(errors.password)}
+                </ErrorMessage>
                 <WrapIcon onClick={handleOpenPassword}>
                   {openPassword ? (
                     <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />

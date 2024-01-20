@@ -29,6 +29,12 @@ export const InputField = styled(Field)`
   }
 `;
 
-export const TextError = styled.p`
-  color: #ff0015;
+export const ErrorMessage = styled.p`
+  color: ${({ theme }) => theme.color.additionalColorRed};
+
+  font-family: 'Open Sans, sans-serif';
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 20px; /* 142.857% */
 `;
