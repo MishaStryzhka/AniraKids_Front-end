@@ -27,8 +27,6 @@ export const register = createAsyncThunk(
       setAuthHeader(res.data.token);
       return res.data;
     } catch (error) {
-      console.log('error', error);
-
       return thunkAPI.rejectWithValue({
         status: error.response.status,
         message: error.response.data.message,
@@ -52,6 +50,8 @@ export const logIn = createAsyncThunk(
 
       return res.data;
     } catch (error) {
+      console.log('error', error);
+
       return thunkAPI.rejectWithValue({
         status: error.response.status,
         message: error.response.data.message,

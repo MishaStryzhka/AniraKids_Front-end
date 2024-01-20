@@ -9,6 +9,7 @@ import { refreshUser } from '../redux/auth/operations';
 import { useAuth } from 'hooks';
 import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
+import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -64,6 +65,7 @@ function App() {
           <Route path="/decorAndToys" element={<DecorAndToysPage />} />
           <Route path="/aboutUs" element={<AboutUsPage />} />
           <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
+          <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route

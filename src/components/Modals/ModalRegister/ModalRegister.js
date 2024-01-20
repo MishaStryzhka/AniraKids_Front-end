@@ -114,7 +114,9 @@ const ModalRegister = ({ handleCloseModal }) => {
             </Wrap>
           </>
         )}
-        {typeNavigation === 'authorization' && <AuthForm />}
+        {typeNavigation === 'authorization' && (
+          <AuthForm handleCloseModal={() => handleCloseModal()} />
+        )}
         <Separation>{t('Or')}</Separation>
         <WrapLinks>
           <StyledNavLink>

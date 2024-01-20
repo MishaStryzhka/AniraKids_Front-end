@@ -5,4 +5,11 @@ export const AuthFormTranslationsEn = {
   password: 'Password',
   forgotPassword: 'I forgot my password',
   submitButton: 'Log in',
+
+  //errors
+  'Required field': 'Required field',
+  validLogin: 'Enter a valid Login (email or valid phone number)',
+
+  // errors back-end
+  'login or password is wrong': 'Login or password is wrong',
 };

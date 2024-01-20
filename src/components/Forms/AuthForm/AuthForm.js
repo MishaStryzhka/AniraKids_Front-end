@@ -19,12 +19,19 @@ import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validationAuthorizationScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
+import { ErrorMessage } from '../Form.styled';
+import { BeatLoader } from 'react-spinners';
 
-const AuthForm = () => {
+const AuthForm = ({ handleCloseModal }) => {
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.authForm',
+  });
   const [openPassword, setOpenPassword] = useState(false);
-  const { currentTheme } = useAuth();
+  const { currentTheme, isLoading } = useAuth();
+  let { error } = useAuth();
+
+  console.log('error', error);
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -63,24 +70,38 @@ const AuthForm = () => {
                 {t('login')}
                 <FieldStyled
                   placeholder={t('placeholderLogin')}
-                  onChange={e => handleChange(e)}
+                  onChange={e => {
+                    error = null;
+                    handleChange(e);
+                  }}
                   name="login"
                   value={values.login}
                   required
                 />
-                <p>{errors.login && touched.login && errors.login}</p>
+                <ErrorMessage>
+                  {errors.login && touched.login && t(errors.login)}
+                </ErrorMessage>
               </Label>
               <Label>
                 {t('password')}
                 <FieldStyled
                   type={openPassword ? 'text' : 'password'}
                   name="password"
-                  onChange={e => handleChange(e)}
+                  onChange={e => {
+                    error = null;
+                    handleChange(e);
+                  }}
                   value={values.password}
                   placeholder="****"
                   required
                 />
-                <p>{errors.password && touched.password && errors.password}</p>
+                <ErrorMessage>
+                  {(errors.password &&
+                    touched.password &&
+                    t(errors.password)) ||
+                    (error?.message === 'login or password is wrong' &&
+                      t(error?.message))}
+                </ErrorMessage>
                 <WrapIcon onClick={handleOpenPassword}>
                   {openPassword ? (
                     <IconEyeOpen fill={theme[currentTheme].color.mainColor2} />
@@ -92,8 +113,15 @@ const AuthForm = () => {
                 </WrapIcon>
               </Label>
             </Wrap>
-            <StyledNavLink>{t('forgotPassword')}</StyledNavLink>
-            <Button type="submit">{t('submitButton')}</Button>
+            <StyledNavLink
+              to="/refreshPassword"
+              onClick={() => handleCloseModal()}
+            >
+              {t('forgotPassword')}
+            </StyledNavLink>
+            <Button type="submit" disabled={isLoading}>
+              {!isLoading ? t('submitButton') : <BeatLoader color="#fff" />}
+            </Button>
           </Form>
         )}
       </Formik>

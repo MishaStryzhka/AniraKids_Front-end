@@ -7,4 +7,12 @@ export const AuthFormTranslationsUk = {
   passwordPlaceholder: '****',
   forgotPassword: 'Я забув (-ла) свій пароль',
   submitButton: 'Увійти',
+
+  // errors
+  'Required field': 'Обов`язкове поле',
+  validLogin:
+    'Введіть дійсний логін (електронну пошту або дійсний номер телефону)',
+
+  // errors back-end
+  'login or password is wrong': 'Логін або пароль неправильний',
 };

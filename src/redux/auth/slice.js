@@ -32,29 +32,46 @@ const authSlice = createSlice({
   },
   extraReducers: builder => {
     builder
+      // register
+      .addCase(register.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(register.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
         state.isFirstLogin = true;
       })
       .addCase(register.rejected, (state, action) => {
-        console.log('action.payload', action.payload);
-
+        state.isLoading = false;
         state.error = action.payload;
       })
+      // logIn
+      .addCase(logIn.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(logIn.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
         state.isFirstLogin = false;
       })
+      .addCase(logIn.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // logOut
       .addCase(logOut.fulfilled, state => {
         state.user = null;
         state.token = null;
         state.isLoggedIn = false;
         state.isFirstLogin = false;
       })
+      // refreshUser
       .addCase(refreshUser.pending, state => {
         state.isRefreshing = true;
       })
@@ -68,6 +85,7 @@ const authSlice = createSlice({
         state.isRefreshing = false;
         state.token = null;
       })
+      // updateUserInfo
       .addCase(updateUserInfo.fulfilled, (state, action) => {
         console.log('action.payload', action.payload);
 
@@ -76,7 +94,7 @@ const authSlice = createSlice({
       .addCase(updateUserInfo.rejected, (state, action) => {
         state.error = action.payload;
       })
-      // =======updateUserEmail
+      // updateUserEmail
       .addCase(updateUserEmail.pending, state => {
         state.isLoading = true;
       })

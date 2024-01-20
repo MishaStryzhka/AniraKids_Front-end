@@ -30,6 +30,6 @@ export const ComponentTranslationsUk = {
   ...ModalRegisterTranslationsUk,
   formRegistrationEmail: FormRegistrationEmailTranslationsUk,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
-  ...AuthFormTranslationsUk,
+  authForm: AuthFormTranslationsUk,
   modalChangeEmail: ModalChangeEmailTranslationsUk,
 };
