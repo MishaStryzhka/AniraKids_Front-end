@@ -21,7 +21,7 @@ import IconGoogle from 'images/icons/IconGoogle';
 import IconEmail from 'images/icons/IcomEmail';
 import { useTranslation } from 'react-i18next';
 
-const ModalRegister = () => {
+const ModalRegister = ({ handleCloseModal }) => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
   const [typeRegistration, setTypeRegistration] = useState('email');
   const { t } = useTranslation();
@@ -103,7 +103,11 @@ const ModalRegister = () => {
               </ButtonContact>
             </WrapButton>
             <Wrap>
-              {typeRegistration === 'email' && <FormRegistrationEmail />}
+              {typeRegistration === 'email' && (
+                <FormRegistrationEmail
+                  handleCloseModal={() => handleCloseModal()}
+                />
+              )}
               {typeRegistration === 'primaryPhoneNumber' && (
                 <FormRegistrationPhoneNumber />
               )}

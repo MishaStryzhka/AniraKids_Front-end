@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { NavList, StyledNavLink } from './BoxNavLinks.styled';
 
 const BoxNavLinks = ({ $mainPage }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.boxNavLinks',
+  });
   return (
     <NavList>
       <StyledNavLink $mainPage={$mainPage} to="./forWomen">

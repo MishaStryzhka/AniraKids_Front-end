@@ -5,6 +5,7 @@ import { SectionAboutUsTranslationsUk } from 'components/SectionAboutUs/translat
 import { SectionOurMissionTranslationsUk } from 'components/SectionOurMission/translations/uk';
 import { SectionSimpleStepsTranslationsUk } from 'components/SectionSimpleSteps/translations/uk';
 import { SectionAreYouReadyTranslationsUk } from 'components/SectionAreYouReady/translations/uk';
+import { BoxNavLinksTranslationsUk } from 'components/BoxNavLinks/translations/uk';
 import { AuthFormTranslationsUk } from 'components/Forms/AuthForm/translations/uk';
 import { FormRegistrationEmailTranslationsUk } from 'components/Forms/FormRegistrationEmail/translations/uk';
 import { FormRegistrationPhoneNumberTranslationsUk } from 'components/Forms/FormRegistrationPhoneNumber/translations/uk';
@@ -22,12 +23,13 @@ export const ComponentTranslationsUk = {
   sectionOurMission: SectionOurMissionTranslationsUk,
   sectionSimpleSteps: SectionSimpleStepsTranslationsUk,
   sectionAreYouReady: SectionAreYouReadyTranslationsUk,
+  boxNavLinks: BoxNavLinksTranslationsUk,
   ...SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
   ...ModalRegisterTranslationsUk,
-  ...FormRegistrationEmailTranslationsUk,
-  ...FormRegistrationPhoneNumberTranslationsUk,
+  formRegistrationEmail: FormRegistrationEmailTranslationsUk,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
   ...AuthFormTranslationsUk,
   modalChangeEmail: ModalChangeEmailTranslationsUk,
 };

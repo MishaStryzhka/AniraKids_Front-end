@@ -15,10 +15,10 @@ import { useAuth } from 'hooks';
 import { BeatLoader } from 'react-spinners';
 import { TextDone } from '../Modal.styled';
 import { clearDone, clearError } from '../../../redux/auth/slice';
-import { TextError } from 'components/Forms/Form.styled';
 import { useEffect } from 'react';
 import { WrapButton } from '../ModalRegister/ModalRegister.styled';
 import { useTranslation } from 'react-i18next';
+import { ErrorMessage } from 'components/Forms/Form.styled';
 
 const ModalChangeEmail = ({ onClick }) => {
   const { t } = useTranslation('translation', {
@@ -84,10 +84,10 @@ const ModalChangeEmail = ({ onClick }) => {
                   onBlur={handleBlur}
                   placeholder="exsample@gmail.com"
                 />
-                <TextError>
+                <ErrorMessage>
                   {(errors.email && touched.email && errors.email) ||
                     (error?.message === 'Email in use' && t('Email in use'))}
-                </TextError>
+                </ErrorMessage>
               </LabelModal>
               <WrapButton>
                 <Button type="submit">

@@ -1,4 +1,5 @@
 import { AppBarTranslationsCs } from 'components/AppBar/translations/cs';
+import { BoxNavLinksTranslationsCs } from 'components/BoxNavLinks/translations/cs';
 import { AuthFormTranslationsCs } from 'components/Forms/AuthForm/translations/cs';
 import { SectionHeroTranslationsCs } from 'components/SectionHero/translations/cs';
 import { SectionAboutAniraKTranslationsCs } from 'components/SectionAboutAniraK/translations/cs';
@@ -21,12 +22,13 @@ export const ComponentTranslationsCs = {
   sectionOurMission: SectionOurMissionTranslationsCs,
   sectionSimpleSteps: SectionSimpleStepsTranslationsCs,
   sectionAreYouReady: SectionAreYouReadyTranslationsCs,
+  boxNavLinks: BoxNavLinksTranslationsCs,
   ...SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
 
   ...ModalRegisterTranslationsCs,
-  ...FormRegistrationEmailTranslationsCs,
-  ...FormRegistrationPhoneNumberTranslationsCs,
+  formRegistrationEmail: FormRegistrationEmailTranslationsCs,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
   ...AuthFormTranslationsCs,
   modalChangeEmail: ModalChangeEmailTranslationsCs,
 };

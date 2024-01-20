@@ -53,7 +53,7 @@ const BoxNavigation = ({ $mainPage }) => {
             setIsModal(false);
           }}
         >
-          <ModalRegister />
+          <ModalRegister handleCloseModal={() => setIsModal(false)} />
         </Modal>
       )}
 

@@ -8,7 +8,6 @@ import {
   AvaterTitle,
   ButtonEdit,
   ButtonShow,
-  ErrorMessage,
   InputText,
   Label,
   Placeholder,
@@ -22,7 +21,7 @@ import { useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
-import { InputField } from 'components/Forms/Form.styled';
+import { ErrorMessage, InputField } from 'components/Forms/Form.styled';
 import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 import IconPencil from 'images/icons/IconPencil';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
