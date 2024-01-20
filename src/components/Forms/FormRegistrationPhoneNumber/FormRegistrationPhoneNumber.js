@@ -18,6 +18,7 @@ import { useAuth } from 'hooks';
 import { validRegistrationPhoneNumberScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from '../Form.styled';
+import { BeatLoader } from 'react-spinners';
 
 const FormRegistrationPhoneNumber = () => {
   const { t } = useTranslation('translation', {
@@ -25,9 +26,7 @@ const FormRegistrationPhoneNumber = () => {
   });
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
-  const { currentTheme, error } = useAuth();
-
-  console.log('error', error);
+  const { currentTheme, error, isLoading } = useAuth();
 
   const handleOpenPassword = () =>
     setOpenPassword(openPassword => !openPassword);
@@ -35,7 +34,6 @@ const FormRegistrationPhoneNumber = () => {
   const handleRegistrationSubmit = values => {
     const { primaryPhoneNumber, password } = values;
 
-    console.log(values);
     dispatch(register({ primaryPhoneNumber, password }));
   };
   return (
@@ -107,8 +105,8 @@ const FormRegistrationPhoneNumber = () => {
                 </StyledNavLinkCondition>
                 .
               </TextCondition>
-              <Button type="button" onClick={handleSubmit}>
-                {t('registerButton')}
+              <Button type="button" onClick={handleSubmit} disabled={isLoading}>
+                {!isLoading ? t('registerButton') : <BeatLoader color="#fff" />}
               </Button>
             </Form>
           );

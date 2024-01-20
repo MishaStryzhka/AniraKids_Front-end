@@ -15,6 +15,6 @@ export const ComponentTranslationsCs = {
   ...ModalRegisterTranslationsCs,
   formRegistrationEmail: FormRegistrationEmailTranslationsCs,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
-  ...AuthFormTranslationsCs,
+  authForm: AuthFormTranslationsCs,
   modalChangeEmail: ModalChangeEmailTranslationsCs,
 };

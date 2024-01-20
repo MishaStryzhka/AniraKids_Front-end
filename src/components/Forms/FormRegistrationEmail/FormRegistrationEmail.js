@@ -18,6 +18,7 @@ import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from '../Form.styled';
+import { BeatLoader } from 'react-spinners';
 
 const FormRegistrationEmail = ({ handleCloseModal }) => {
   const { t } = useTranslation('translation', {
@@ -25,9 +26,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
   });
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
-  const { currentTheme, error } = useAuth();
-
-  console.log('error', error);
+  const { currentTheme, error, isLoading } = useAuth();
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -35,9 +34,6 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
 
   const handleRegistrationEmailSubmit = values => {
     const { email, password } = values;
-
-    console.log(values);
-
     dispatch(register({ email, password }));
   };
 
@@ -108,7 +104,9 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
               </StyledNavLinkCondition>
               .
             </TextCondition>
-            <Button type="submit">{t('registration')}</Button>
+            <Button type="submit" disabled={isLoading}>
+              {!isLoading ? t('registration') : <BeatLoader color="#fff" />}
+            </Button>
           </Form>
         )}
       </Formik>
