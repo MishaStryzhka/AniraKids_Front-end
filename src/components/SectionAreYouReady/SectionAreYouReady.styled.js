@@ -30,6 +30,7 @@ export const Title = styled.h2`
   font-weight: 500;
   line-height: 1.17;
   margin-bottom: 48px;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;

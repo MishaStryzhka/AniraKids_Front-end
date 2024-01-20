@@ -9,34 +9,31 @@ import {
   TitleStep,
 } from './SectionSimpleSteps.styled';
 import { Container } from 'components/Container/Container';
+import { useTranslation } from 'react-i18next';
 
 const SectionSimpleSteps = () => {
+  const { t } = useTranslation();
   return (
     <Section>
       <Container>
-        <Title>ВСЬОГО ТРИ ПРОСТИХ КРОКИ</Title>
+        <Title>{t('Just three simple steps')}</Title>
         <Border />
         <ListSteps>
           <ItemStep>
             <Step>1</Step>
-            <TitleStep>Зареєструйся</TitleStep>
-            <DescriptionStep>
-              Зареєструйся на платформі та додай свої дані
-            </DescriptionStep>
+            <TitleStep>{t('Register')}</TitleStep>
+            <DescriptionStep>{t('Description of register')}</DescriptionStep>
           </ItemStep>
           <ItemStep>
             <Step>2</Step>
-            <TitleStep>Додай фото</TitleStep>
-            <DescriptionStep>
-              Додай фото речі, яку хочеш здати
-              <br /> в оренду
-            </DescriptionStep>
+            <TitleStep>{t('Add a photo')}</TitleStep>
+            <DescriptionStep>{t('Description of add a photo')}</DescriptionStep>
           </ItemStep>
           <ItemStep>
             <Step>3</Step>
-            <TitleStep>Отримай оплату</TitleStep>
+            <TitleStep>{t('Receive payment')}</TitleStep>
             <DescriptionStep>
-              Отримай гроші за свою вишукану річ
+              {t('Description of receive payment')}
             </DescriptionStep>
           </ItemStep>
         </ListSteps>

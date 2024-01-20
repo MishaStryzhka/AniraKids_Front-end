@@ -12,13 +12,15 @@ import PhotoAbout1x from 'images/photo-about-us/photo-about-us-1x.jpg';
 import PhotoAbout2x from 'images/photo-about-us/photo-about-us-2x.jpg';
 import { Container } from 'components/Container/Container';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const SectionAboutUs = () => {
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   return (
     <Section $mainPage={pathname === `/`}>
       <Container>
-        {pathname === '/' && <Title>Про нас</Title>}
+        {pathname === '/' && <Title>{t('About Us')}</Title>}
         <Border />
       </Container>
       <Picture>
@@ -36,12 +38,7 @@ const SectionAboutUs = () => {
       </Picture>
       <Container>
         <Wrap>
-          <Description>
-            AniraK... — перша в Чеській Республіці платформа циклічної оренди
-            вишуканого і брендового одягу і речей для усієї сімʼї. Провідне
-            місце для економічно вигідного розширення/оновлення та монетизації
-            вашого гардеробу.
-          </Description>
+          <Description>{t('AniraK...')}</Description>
         </Wrap>
       </Container>
     </Section>

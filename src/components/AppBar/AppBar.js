@@ -12,12 +12,13 @@ import SearchInput from '../SearchInput/SearchInput';
 import BoxNavigation from '../BoxNavigation/BoxNavigation';
 import BoxNavLinks from '../BoxNavLinks/BoxNavLinks';
 import { Container } from 'components/Container/Container';
+import { useTranslation } from 'react-i18next';
 
 const AppBar = () => {
   const { pathname } = useLocation();
-  // console.log('pathname', pathname);
-  // console.log('pathname === `/`', pathname === `/`);
-
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.appBar',
+  });
   return (
     <>
       <BoxShadow $mainPage={pathname === `/`}>
@@ -25,9 +26,9 @@ const AppBar = () => {
           <ContainerAppBar $mainPage={pathname === `/`}>
             <FirstHeader>
               <List>
-                <Item $mainPage={pathname === `/`}>Жінки</Item>
-                <Item $mainPage={pathname === `/`}>Чоловіки</Item>
-                <Item $mainPage={pathname === `/`}>Діти</Item>
+                <Item $mainPage={pathname === `/`}>{t('Women')}</Item>
+                <Item $mainPage={pathname === `/`}>{t('Men')}</Item>
+                <Item $mainPage={pathname === `/`}>{t('Children')}</Item>
               </List>
               <Logo />
               <SearchInput />

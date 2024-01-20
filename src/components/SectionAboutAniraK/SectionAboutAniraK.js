@@ -17,24 +17,22 @@ import IconAboutFour from 'images/icons/IconAboutFour';
 import IconAboutFive from 'images/icons/IconAboutFive';
 import { Container } from 'components/Container/Container';
 import Border from 'components/Border/Border';
+import { useTranslation } from 'react-i18next';
 
 const SectionAboutAniraK = () => {
+  const { t } = useTranslation();
   return (
     <Section>
       <Container>
-        <Title>ПЛАТФОРМА ANIRAK - ЦЕ</Title>
+        <Title>{t('Platform ANIRAK')}</Title>
         <Border />
         <List>
           <Item>
             <WrapIcon>
               <IconAboutFirst width="80" height="80" />
             </WrapIcon>
-            <TitleDescription>Розширення гардеробу</TitleDescription>
-            <Description>
-              Можливість виглядати бездоганно при цьому, не витрачаючи багато
-              грошей на покупку та не обмежуючи себе в приємних емоціях від
-              оновлення гардероба
-            </Description>
+            <TitleDescription>{t('Wardrobe expansion')}</TitleDescription>
+            <Description>{t('Description wardrobe expansion')}</Description>
           </Item>
 
           <Item>
@@ -42,11 +40,8 @@ const SectionAboutAniraK = () => {
               <IconAboutSecond width="80" height="80" />
             </WrapIcon>
 
-            <TitleDescription>Пасивний дохід</TitleDescription>
-            <Description>
-              Монетизуючи свою шафу і здаючи в оренду свої вишукані речі ви
-              заробляєте додаткові кошти
-            </Description>
+            <TitleDescription>{t('Passive income')}</TitleDescription>
+            <Description>{t('Description passive income')}</Description>
           </Item>
 
           <Item>
@@ -54,11 +49,8 @@ const SectionAboutAniraK = () => {
               <IconAboutThird width="80" height="80" />
             </WrapIcon>
 
-            <TitleDescription>Економічна вигода</TitleDescription>
-            <Description>
-              Оренда вишуканого і брендового одягу - гарна альтернатива покупці
-              нового одягу для ваших особливих подій
-            </Description>
+            <TitleDescription>{t('Economic benefit')}</TitleDescription>
+            <Description>{t('Description economic benefit')}</Description>
           </Item>
 
           <Item>
@@ -68,27 +60,20 @@ const SectionAboutAniraK = () => {
               </AddWrap>
             </WrapIcon>
 
-            <TitleDescription>Безпечне користування</TitleDescription>
-            <Description>
-              Завдяки інноваційним процесам авторизації (перевірки особи) та
-              рейтингам користувачів — платформа контролює рівень безпеки та
-              обмежує можливі шахрайства
-            </Description>
+            <TitleDescription>{t('Safe usage')}</TitleDescription>
+            <Description>{t('Description safe usage')}</Description>
           </Item>
 
           <Item>
             <WrapIcon>
               <IconAboutFive width="80" height="80" />
             </WrapIcon>
-            <TitleDescription>Допомога планеті</TitleDescription>
-            <Description>
-              Свідоме циклічне споживання — це турбота про екологію та реальне
-              зменшення негативного впливу на навколишнє середовище
-            </Description>
+            <TitleDescription>{t('Helping the planet')}</TitleDescription>
+            <Description>{t('Description of helping')}</Description>
           </Item>
         </List>
         <WrapButton>
-          <Button>ОРЕНДУВАТИ</Button>
+          <Button>{t('rent')}</Button>
         </WrapButton>
       </Container>
     </Section>

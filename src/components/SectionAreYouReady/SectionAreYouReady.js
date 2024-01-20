@@ -11,8 +11,10 @@ import PhotoReadyWoman2xWebp from 'images/photo-ready-woman/photo-are-you-ready-
 import PhotoReadyWoman1x from 'images/photo-ready-woman/photo-are-you-ready-1x.jpg';
 import PhotoReadyWoman2x from 'images/photo-ready-woman/photo-are-you-ready-2x.jpg';
 import Button from 'components/Button/Button';
+import { useTranslation } from 'react-i18next';
 
 const SectionAreYouReady = () => {
+  const { t } = useTranslation();
   return (
     <Section>
       <ImageWrap>
@@ -35,8 +37,8 @@ const SectionAreYouReady = () => {
         </Picture>
       </ImageWrap>
       <WrapText>
-        <Title>ГОТОВІ ПОЧАТИ?</Title>
-        <Button>ОРЕНДУВАТИ</Button>
+        <Title>{t('Ready to start')}</Title>
+        <Button>{t('Rent')}</Button>
       </WrapText>
     </Section>
   );
