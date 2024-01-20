@@ -1,4 +1,10 @@
-import { BoxNavigationTranslationsUk } from 'components/BoxNavLinks/translations/uk';
+import { AppBarTranslationsUk } from 'components/AppBar/translations/uk';
+import { SectionHeroTranslationsUk } from 'components/SectionHero/translations/uk';
+import { SectionAboutAniraKTranslationsUk } from 'components/SectionAboutAniraK/translations/uk';
+import { SectionAboutUsTranslationsUk } from 'components/SectionAboutUs/translations/uk';
+import { SectionOurMissionTranslationsUk } from 'components/SectionOurMission/translations/uk';
+import { SectionSimpleStepsTranslationsUk } from 'components/SectionSimpleSteps/translations/uk';
+import { SectionAreYouReadyTranslationsUk } from 'components/SectionAreYouReady/translations/uk';
 import { AuthFormTranslationsUk } from 'components/Forms/AuthForm/translations/uk';
 import { FormRegistrationEmailTranslationsUk } from 'components/Forms/FormRegistrationEmail/translations/uk';
 import { FormRegistrationPhoneNumberTranslationsUk } from 'components/Forms/FormRegistrationPhoneNumber/translations/uk';
@@ -9,7 +15,13 @@ import { SearchInputTranslationsUk } from 'components/SearchInput/translations/u
 import { UserPageTranslationsUk } from 'pages/UserPage/translations/uk';
 
 export const ComponentTranslationsUk = {
-  ...BoxNavigationTranslationsUk,
+  appBar: AppBarTranslationsUk,
+  sectionHero: SectionHeroTranslationsUk,
+  sectionAboutAniraK: SectionAboutAniraKTranslationsUk,
+  sectionAboutUs: SectionAboutUsTranslationsUk,
+  sectionOurMission: SectionOurMissionTranslationsUk,
+  sectionSimpleSteps: SectionSimpleStepsTranslationsUk,
+  sectionAreYouReady: SectionAreYouReadyTranslationsUk,
   ...SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,

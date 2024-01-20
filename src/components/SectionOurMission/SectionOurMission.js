@@ -5,6 +5,7 @@ import PhotoOpenClosetUrl1x from 'images/photo-mission/photo-open-closet-1x.jpg'
 import PhotoOpenClosetUrl2x from 'images/photo-mission/photo-open-closet-2x.jpg';
 import IconCheck from 'images/icons/IconCheck';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const {
   Section,
@@ -20,65 +21,40 @@ const {
 } = require('./SectionOurMission.styled');
 
 const SectionOurMission = () => {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   return (
     <Section>
       <TextWrap>
         <Container>
-          <Title $mainPage={pathname === `/`}>Наша місія </Title>
+          <Title $mainPage={pathname === `/`}>{t('Our mission')}</Title>
           <ListMission>
             <Item>
               <IconCheck />
               <AddWrap>
-                <Description>
-                  Полягає в тому, щоб змінити ваше уявлення про свою шафу.
-                </Description>
+                <Description>{t('First mission')}</Description>
               </AddWrap>
             </Item>
             <Item>
               <IconCheck />
               <AddWrap>
-                <Description>
-                  Задовільнити потребу в користуванні та носінні дорогого
-                  гардеробу без необхідності купувати його, що однозначно
-                  зекономить ваші кошти та не обмежить в приємних емоціях.
-                </Description>
+                <Description>{t('Second mission')}</Description>
               </AddWrap>
             </Item>
             <Item>
               <IconCheck />
               <AddWrap>
-                <Description>
-                  Продовжити життєвий цикл одягу, що нестиме значний позитивний
-                  вплив на <br /> екологію.
-                  <br /> Ми знаємо, що суспільство почало розглядати більш
-                  свідомі та екологічні способи споживання речей. Тому
-                  використання вже існуючих нарядів замість купівлі нових
-                  посприяє покращенню екології планети.
-                </Description>
+                <Description>{t('Third mission')}</Description>
               </AddWrap>
             </Item>
           </ListMission>
-          <Title $mainPage={pathname === `/`}>Унікальна циклічна модель</Title>
+          <Title $mainPage={pathname === `/`}>{t('Unique cyclic model')}</Title>
           <ListModel>
             <Item>
-              <Description>
-                Платформа надає можливість отримувати пасивний дохід, тобто
-                після авторизації вам стає доступний функціонал щоб
-                запропонувати і здавати в оренду свої речі. Важливо, це
-                <br /> мають бути вишукані чи брендові речі в чудовому стані,
-                для особливих чи святкових подій, заходів, фотосесій. Речі які
-                не підходять нашим критеріям не будуть схвалені для <br />
-                опублікації.
-              </Description>
+              <Description>{t('Description first about model')}</Description>
             </Item>
             <Item>
-              <Description>
-                Інноваційний процес авторизації та рейтинги користувачів надають
-                високий рівень безпеки, а автоматизований функціонал платформи
-                робить ваш процес оренди легким і зручним. Спробуйте і вам
-                обов’язково це сподобається!
-              </Description>
+              <Description>{t('Description second about model')}</Description>
             </Item>
           </ListModel>
         </Container>
