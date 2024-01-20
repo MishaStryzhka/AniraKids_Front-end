@@ -1,4 +1,4 @@
-import { BoxNavigationTranslationsEn } from 'components/BoxNavLinks/translations/en';
+import { BoxNavLinksTranslationsEn } from 'components/BoxNavLinks/translations/en';
 import { AuthFormTranslationsEn } from 'components/Forms/AuthForm/translations/en';
 import { FormRegistrationEmailTranslationsEn } from 'components/Forms/FormRegistrationEmail/translations/en';
 import { FormRegistrationPhoneNumberTranslationsEn } from 'components/Forms/FormRegistrationPhoneNumber/translations/en';
@@ -9,13 +9,13 @@ import { SearchInputTranslationsEn } from 'components/SearchInput/translations/e
 import { UserPageTranslationsEn } from 'pages/UserPage/translations/en';
 
 export const ComponentTranslationsEn = {
-  ...BoxNavigationTranslationsEn,
+  boxNavLinks: BoxNavLinksTranslationsEn,
   ...SearchInputTranslationsEn,
   ...NavigationOverlayTranslationsEn,
   ...UserPageTranslationsEn,
   ...ModalRegisterTranslationsEn,
-  ...FormRegistrationEmailTranslationsEn,
-  ...FormRegistrationPhoneNumberTranslationsEn,
+  formRegistrationEmail: FormRegistrationEmailTranslationsEn,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsEn,
   ...AuthFormTranslationsEn,
   modalChangeEmail: ModalChangeEmailTranslationsEn,
 };

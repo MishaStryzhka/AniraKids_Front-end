@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { refreshUser } from '../redux/auth/operations';
 import { useAuth } from 'hooks';
 import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct';
+import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -63,6 +64,7 @@ function App() {
           <Route path="/decorAndToys" element={<DecorAndToysPage />} />
           <Route path="/aboutUs" element={<AboutUsPage />} />
           <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route
             path="/my-account"

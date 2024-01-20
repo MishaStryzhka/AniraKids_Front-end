@@ -1,4 +1,4 @@
-export const BoxNavigationTranslationsCs = {
+export const BoxNavLinksTranslationsCs = {
   "Women's Clothing": 'Dámské oblečení',
   "Men's Suits": 'Pánské obleky',
   "Children's Clothing": 'Dětské oblečení',
