@@ -3,7 +3,7 @@ import MainContent from 'components/MainContent/MainContent';
 import NavigationOverlay from 'components/NavigationOverlay/NavigationOverlay';
 import SideBar from 'components/SideBar/SideBar';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
-import { useTitle } from 'hooks';
+import { useAuth, useTitle } from 'hooks';
 import { useDispatch } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
@@ -21,11 +21,12 @@ import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 
 const UserPage = () => {
-  const { t, i18n } = useTranslation('translation', { keyPrefix: 'pages.userPage' });
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.userPage',
+  });
   const dispatch = useDispatch();
 
-  console.log('i18n', i18n);
-  console.log("{t('profile')}", t('profile'));
+  const { user } = useAuth();
 
   useTitle('Акаунт');
 
@@ -45,9 +46,11 @@ const UserPage = () => {
             <IconHeart />
             {t('favorite')}
           </StyledNavLink>
-          <StyledNavLink to="./rent-out">
-            <IconCloth /> {t('rentOut')}
-          </StyledNavLink>
+          {(user.typeUser === 'owner' || true) && (
+            <StyledNavLink to="./rent-out">
+              <IconCloth /> {t('rentOut')}
+            </StyledNavLink>
+          )}
           <StyledNavLink to="./rent-in">
             <IconHanger />
             {t('rentIn')}
@@ -56,9 +59,11 @@ const UserPage = () => {
             <IconBag2 />
             {t('myPurchases')}
           </StyledNavLink>
-          <StyledNavLink to="./my-purchases">
-            <IconShopCart /> {t('mySales')}
-          </StyledNavLink>
+          {(user.typeUser === 'owner' || true) && (
+            <StyledNavLink to="./my-purchases">
+              <IconShopCart /> {t('mySales')}
+            </StyledNavLink>
+          )}
           <StyledNavLink to="./wallet">
             <IconCard /> {t('wallet')}
           </StyledNavLink>

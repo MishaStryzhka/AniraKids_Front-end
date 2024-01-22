@@ -5,7 +5,6 @@ export const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 48px;
-  width: 688px;
 `;
 
 export const Title = styled.h2`
@@ -19,7 +18,32 @@ export const Title = styled.h2`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const WrapPhoto = styled.div`
+export const WrapperPhotos = styled.div`
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 8px;
+
+  &::-webkit-scrollbar {
+    margin-top: 5px;
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.color.mainColor2};
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: ${({ theme }) => theme.color.additionalColorGray};
+    border-radius: 10px;
+  }
+`;
+
+export const WrapPhoto = styled.label`
+  flex: 0 0 auto;
+  overflow: hidden;
+
   width: 200px;
   height: 230px;
   border: 1px dashed;
@@ -27,6 +51,13 @@ export const WrapPhoto = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+export const PhotoImg = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 export const Picture = styled.picture`

@@ -10,6 +10,7 @@ import { useAuth } from 'hooks';
 import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
+import { RestrictedRoute } from './RestrictedRoute';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -57,7 +58,16 @@ function App() {
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <Routes>
-        <Route path="/" element={<SharedLayout />}>
+        <Route
+          path="/"
+          element={
+            <RestrictedRoute
+              redirectTo="/"
+              redirectBack="/my-account"
+              component={<SharedLayout />}
+            />
+          }
+        >
           <Route path="/" element={<MainPage />} />
           <Route path="/forMen" element={<ForMenPage />} />
           <Route path="/forWomen" element={<ForWomenPage />} />
@@ -73,7 +83,7 @@ function App() {
             element={
               <PrivateRoute
                 redirectTo="/"
-                redirectBack="/my-account"
+                redirectBack="/my-account/profile"
                 component={<UserPage />}
               />
             }
