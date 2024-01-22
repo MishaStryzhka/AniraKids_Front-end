@@ -9,7 +9,6 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './redux/store';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import { ComponentTranslationsUk } from 'components/translations/uk';
 import { ComponentTranslationsCs } from 'components/translations/cs';
 import { ComponentTranslationsEn } from 'components/translations/en';
@@ -19,7 +18,7 @@ import { PagesTranslationsCs } from 'pages/translations/cs';
 import { PagesTranslationsEn } from 'pages/translations/en';
 import { PagesTranslationsUk } from 'pages/translations/uk';
 
-i18n.use(LanguageDetector).init({
+i18n.init({
   interpolation: {
     escapeValue: false, // реагує на HTML-теги у тексті
   },
