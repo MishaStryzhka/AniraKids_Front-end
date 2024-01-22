@@ -8,13 +8,17 @@ import SideBar from 'components/SideBar/SideBar';
 import MainContent from 'components/MainContent/MainContent';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
 import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
-import FilterAge from 'components/Filters/FilterAge/FilterAge';
-import FilterDecor from 'components/Filters/FilterDecor/FilterDecor';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
 import NotFound from 'components/NotFound/NotFound';
+import { TitleFilter } from './ForMenPage.styled';
+import FilterType from 'components/Filters/FilterType/FilterType';
+import FilterSort from 'components/Filters/FilterSort/FilterSort';
+import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
 
 const ForMenPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.forMenPage',
+  });
   useTitle(t('Men suits'));
   return (
     <Container>
@@ -22,13 +26,15 @@ const ForMenPage = () => {
       <GeneralTitle>{t('Men suits')}</GeneralTitle>
       <WrapMainContent>
         <SideBar>
+          <TitleFilter>{t('Filters')}</TitleFilter>
+          <FilterType />
+          <FilterFamilyLook />
           <FilterPrice />
-          <FilterSizeAdult />
-          <FilterAge />
-          <FilterDecor />
           <FilterColor />
+          <FilterSizeAdult />
         </SideBar>
         <MainContent>
+          <FilterSort />
           <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>

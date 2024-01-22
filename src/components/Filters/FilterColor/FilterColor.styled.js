@@ -23,6 +23,7 @@ export const FilterTitle = styled.h3`
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.02px;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;

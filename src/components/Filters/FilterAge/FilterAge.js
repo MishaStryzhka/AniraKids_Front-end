@@ -9,11 +9,16 @@ import {
   Wrap,
 } from './FilterAge.styled';
 import { arrayAgeProduct } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const FilterAge = () => {
   const [isFilterAgeList, setIsFilterAgeList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterAge',
+  });
 
   const handleToggleList = () => {
     setIsFilterAgeList(prevIsFilterAgeList => !prevIsFilterAgeList);
@@ -22,7 +27,7 @@ const FilterAge = () => {
   return (
     <MainItem>
       <Wrap $openAgeList={isFilterAgeList === true}>
-        <FilterTitle>ВІК</FilterTitle>
+        <FilterTitle>{t('Age')}</FilterTitle>
         <StyledIconArrowUp
           $openAgeList={isFilterAgeList === true}
           onClick={handleToggleList}

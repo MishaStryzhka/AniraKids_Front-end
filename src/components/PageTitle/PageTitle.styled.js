@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Title = styled.h2`
   text-transform: uppercase;
 
-  padding-top: 24px;
+  margin-top: 24px;
   font-family: 'Cormorant SC';
   font-size: 48px;
   font-weight: 500;

@@ -4,13 +4,17 @@ import NavigationOverlay from 'components/NavigationOverlay/NavigationOverlay';
 import SectionAboutUs from 'components/SectionAboutUs/SectionAboutUs';
 import SectionOurMission from 'components/SectionOurMission/SectionOurMission';
 import SectionAnswers from 'components/SectionAnswers/SectionAnswers';
+import { useTranslation } from 'react-i18next';
 
 const AboutUsPage = () => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.aboutUsPage',
+  });
   return (
     <>
       <Container>
         <NavigationOverlay />
-        <GeneralTitle>ПРО НАС</GeneralTitle>
+        <GeneralTitle>{t('About us')}</GeneralTitle>
       </Container>
       <SectionAboutUs />
       <SectionOurMission />

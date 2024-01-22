@@ -1,3 +1,3 @@
 export const SearchInputTranslationsUk = {
-  Пошук: 'Пошук',
+  Search: 'Пошук',
 };

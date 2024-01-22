@@ -3,7 +3,9 @@ import IconSearch from '../../images/icons/IconSearch';
 import { Input, Label, WrapIcon } from './SearchInput.styled';
 
 const SearchInput = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.searchInput',
+  });
   const handleInput = ({ target }) => {
     console.log(target.value);
   };
@@ -12,7 +14,7 @@ const SearchInput = () => {
     <>
       <Label>
         <Input
-          placeholder={t('Пошук')}
+          placeholder={t('Search')}
           // value={value}
           onChange={e => handleInput(e)}
         />

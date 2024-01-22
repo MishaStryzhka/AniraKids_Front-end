@@ -9,6 +9,7 @@ import {
 } from './FilterSubject.styled';
 import { useSearchParams } from 'react-router-dom';
 import { arrayOfSubjectsProduct } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 export const arrayOfSubjects = [
   {
@@ -50,6 +51,10 @@ const FilterSubject = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterSubject',
+  });
+
   const handleToggleList = () => {
     setIsFilterSubjectsList(
       prevIsFilterOutfitsList => !prevIsFilterOutfitsList
@@ -58,7 +63,7 @@ const FilterSubject = () => {
   return (
     <MainItem>
       <Wrap $openSubjectsList={isFilterSubjectsList === true}>
-        <FilterTitle>ТЕМАТИКА</FilterTitle>
+        <FilterTitle>{t('Subject')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openSubjectsList={isFilterSubjectsList === true}

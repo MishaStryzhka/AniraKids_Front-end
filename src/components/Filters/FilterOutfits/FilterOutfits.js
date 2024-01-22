@@ -8,6 +8,7 @@ import {
   Wrap,
 } from './FilterOutfits.styled';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const arrayOfOutfits = [
   {
@@ -29,13 +30,17 @@ const FilterOutfits = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterOutfits',
+  });
+
   const handleToggleList = () => {
     setIsFilterOutfitsList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
   return (
     <MainItem>
       <Wrap $openOutfitsList={isFilterOutfitsList === true}>
-        <FilterTitle>НАРЯДИ</FilterTitle>
+        <FilterTitle>{t('Outfits')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openOutfitsList={isFilterOutfitsList === true}

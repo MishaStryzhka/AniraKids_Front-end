@@ -16,11 +16,14 @@ import { useTranslation } from 'react-i18next';
 
 const SectionAboutUs = () => {
   const { pathname } = useLocation();
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionAboutUs',
+  });
   return (
     <Section $mainPage={pathname === `/`}>
       <Container>
         {pathname === '/' && <Title>{t('About Us')}</Title>}
+        {/* {pathname === '/' && <Border />} */}
         <Border />
       </Container>
       <Picture>

@@ -10,11 +10,16 @@ import {
 } from './FilterSizeChildren.styled';
 import { useSearchParams } from 'react-router-dom';
 import { arraySizeChildrenProduct } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const FilterSizeChildren = () => {
   const [isSizeChildrenList, setIsSizeChildrenList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterSizeChildren',
+  });
 
   const handleToggleList = () => {
     setIsSizeChildrenList(prevIsSizeChildrenList => !prevIsSizeChildrenList);
@@ -22,7 +27,7 @@ const FilterSizeChildren = () => {
   return (
     <MainItem>
       <Wrap $openSizeChildrenList={isSizeChildrenList === true}>
-        <FilterTitle>РОЗМІР</FilterTitle>
+        <FilterTitle>{t('Size')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openSizeChildrenList={isSizeChildrenList === true}

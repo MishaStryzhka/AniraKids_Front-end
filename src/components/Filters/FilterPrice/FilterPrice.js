@@ -11,10 +11,15 @@ import {
   Wrap,
   WrapSlider,
 } from './FilterPrice.styled';
+import { useTranslation } from 'react-i18next';
 
 const FilterPrice = () => {
   const [isPriceList, setIsPriceList] = useState(false);
   const [rangeValues, setRangeValues] = useState([0, 3000]);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterPrice',
+  });
 
   const handleToggleList = () => {
     setIsPriceList(prevIsPriceList => !prevIsPriceList);
@@ -28,7 +33,7 @@ const FilterPrice = () => {
   return (
     <MainItem>
       <Wrap $openPriceList={isPriceList === true}>
-        <FilterTitle>ЦІНА</FilterTitle>
+        <FilterTitle>{t('Price')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openPriceList={isPriceList === true}

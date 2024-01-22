@@ -20,7 +20,9 @@ import Border from 'components/Border/Border';
 import { useTranslation } from 'react-i18next';
 
 const SectionAboutAniraK = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionAboutAniraK',
+  });
   return (
     <Section>
       <Container>

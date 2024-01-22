@@ -9,11 +9,16 @@ import {
   Wrap,
 } from './FilterDecor.styled';
 import { arrayofDecorProduct } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterDecor',
+  });
 
   const handleToggleList = () => {
     setIsFilterDecorList(prevIsFilterDecorList => !prevIsFilterDecorList);
@@ -22,7 +27,7 @@ const FilterDecor = () => {
   return (
     <MainItem>
       <Wrap $openDecorList={isFilterDecorList === true}>
-        <FilterTitle>ДЕКОР</FilterTitle>
+        <FilterTitle>{t('Decor')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openDecorList={isFilterDecorList === true}

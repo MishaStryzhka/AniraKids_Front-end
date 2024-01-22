@@ -9,11 +9,16 @@ import {
 } from './FilterForPregnantWomen.styled';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const FilterForPregnantWomen = () => {
   const [isPregnancyList, setIsPregnancyList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterForPregnantWomen',
+  });
 
   const handleToggleList = () => {
     setIsPregnancyList(prevIsPregnancyList => !prevIsPregnancyList);
@@ -22,7 +27,7 @@ const FilterForPregnantWomen = () => {
   return (
     <MainItem>
       <Wrap $openPregnancyList={isPregnancyList === true}>
-        <FilterTitle> ДЛЯ ВАГІТНИХ</FilterTitle>
+        <FilterTitle>{t('For pregnant women')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openPregnancyList={isPregnancyList === true}
