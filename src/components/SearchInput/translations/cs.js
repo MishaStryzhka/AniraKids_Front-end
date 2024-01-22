@@ -1,3 +1,3 @@
 export const SearchInputTranslationsCs = {
-  Пошук: 'Hledat',
+  Search: 'Hledat',
 };

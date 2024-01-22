@@ -14,7 +14,9 @@ import Button from 'components/Button/Button';
 import { useTranslation } from 'react-i18next';
 
 const SectionAreYouReady = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionAreYouReady',
+  });
   return (
     <Section>
       <ImageWrap>

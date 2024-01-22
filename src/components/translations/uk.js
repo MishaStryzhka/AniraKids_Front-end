@@ -14,8 +14,33 @@ import { ModalRegisterTranslationsUk } from 'components/Modals/ModalRegister/tra
 import { NavigationOverlayTranslationsUk } from 'components/NavigationOverlay/translations/uk';
 import { SearchInputTranslationsUk } from 'components/SearchInput/translations/uk';
 import { UserPageTranslationsUk } from 'pages/UserPage/translations/uk';
+import { SectionAnswerTranslationsUk } from 'components/SectionAnswers/translations/uk';
+import { FilterAgeTranslationsUk } from 'components/Filters/FilterAge/translations/uk';
+import { FilterColorTranslationsUk } from 'components/Filters/FilterColor/translations/uk';
+import { FilterDecorTranslationsUk } from 'components/Filters/FilterDecor/translations/uk';
+import { FilterFamilyLookTranslationsUk } from 'components/Filters/FilterFamilyLook/translations/uk';
+import { FilterForPregnantWomenTranslationsUk } from 'components/Filters/FilterForPregnantWomen/translations/uk';
+import { FilterPriceTranslationsUk } from 'components/Filters/FilterPrice/translations/uk';
+import { FilterSizeAdultTranslationsUk } from 'components/Filters/FilterSizeAdult/translations/uk';
+import { FilterSubjectTranslationsUk } from 'components/Filters/FilterSubject/translations/uk';
+import { FilterSortTranslationsUk } from 'components/Filters/FilterSort/translations/uk';
+import { FilterTypeTranslationsUk } from 'components/Filters/FilterType/translations/uk';
+import { FilterOutfitsTranslationsUk } from 'components/Filters/FilterOutfits/translations/uk';
+import { FilterSizeChildrenTranslationsUk } from 'components/Filters/FilterSizeChildren/translations/uk';
 
 export const ComponentTranslationsUk = {
+  filterType: FilterTypeTranslationsUk,
+  filterSort: FilterSortTranslationsUk,
+  filterSubject: FilterSubjectTranslationsUk,
+  filterSizeChildren: FilterSizeChildrenTranslationsUk,
+  filterSizeAdult: FilterSizeAdultTranslationsUk,
+  filterPrice: FilterPriceTranslationsUk,
+  filterOutfits: FilterOutfitsTranslationsUk,
+  filterForPregnantWomen: FilterForPregnantWomenTranslationsUk,
+  filterFamilyLook: FilterFamilyLookTranslationsUk,
+  filterDecor: FilterDecorTranslationsUk,
+  filterColor: FilterColorTranslationsUk,
+  filterAge: FilterAgeTranslationsUk,
   appBar: AppBarTranslationsUk,
   sectionHero: SectionHeroTranslationsUk,
   sectionAboutAniraK: SectionAboutAniraKTranslationsUk,
@@ -24,7 +49,8 @@ export const ComponentTranslationsUk = {
   sectionSimpleSteps: SectionSimpleStepsTranslationsUk,
   sectionAreYouReady: SectionAreYouReadyTranslationsUk,
   boxNavLinks: BoxNavLinksTranslationsUk,
-  ...SearchInputTranslationsUk,
+  sectionAnswer: SectionAnswerTranslationsUk,
+  searchInput: SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
   ...ModalRegisterTranslationsUk,

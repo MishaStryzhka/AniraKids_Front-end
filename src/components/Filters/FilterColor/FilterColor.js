@@ -11,6 +11,7 @@ import {
   Wrap,
 } from './FilterColor.styled';
 import { arrayColorsProduct } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const FilterColor = () => {
   const [isFilterColorList, setIsFilterColorList] = useState(false);
@@ -19,6 +20,10 @@ const FilterColor = () => {
 
   const [selectedColor, setSelectedColor] = useState(null);
   console.log(selectedColor);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterColor',
+  });
 
   const handleColorClick = color => {
     setSelectedColor(color);
@@ -30,7 +35,7 @@ const FilterColor = () => {
   return (
     <MainItem>
       <Wrap $openColorList={isFilterColorList === true}>
-        <FilterTitle>КОЛІР</FilterTitle>
+        <FilterTitle>{t('Color')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openColorList={isFilterColorList === true}

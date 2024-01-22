@@ -12,8 +12,12 @@ import {
 import Border from 'components/Border/Border';
 import { Container } from 'components/Container/Container';
 import { arrayAnswers } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const SectionAnswers = () => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionAnswers',
+  });
   const [isOpenAnswer, setIsOpenAnswer] = useState(
     Array(arrayAnswers.length).fill(false)
   );
@@ -23,9 +27,7 @@ const SectionAnswers = () => {
     newOpenAnswer[index] = !newOpenAnswer[index];
     setIsOpenAnswer(newOpenAnswer);
   };
-  //   const handleToggleList = () => {
-  //     setIsOpenAnswer(prevIsOpenAnswer => !prevIsOpenAnswer);
-  //   };
+
   return (
     <Section>
       <Container>
@@ -36,14 +38,14 @@ const SectionAnswers = () => {
         {arrayAnswers.map(({ titleQuestion, textAnswer }, index) => (
           <Item key={index}>
             <Wrap>
-              <QuestionDescription>{titleQuestion}</QuestionDescription>
+              <QuestionDescription>{t('titleQuestion')}</QuestionDescription>
               <StyledIconArrowUp
                 $openAnswer={isOpenAnswer[index]}
                 onClick={() => handleToggleList(index)}
               />
             </Wrap>
             {isOpenAnswer[index] && (
-              <AnswerDescription>{textAnswer}</AnswerDescription>
+              <AnswerDescription>{t('textAnswer')}</AnswerDescription>
             )}
           </Item>
         ))}

@@ -12,7 +12,9 @@ import { Container } from 'components/Container/Container';
 import { useTranslation } from 'react-i18next';
 
 const SectionSimpleSteps = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionSimpleSteps',
+  });
   return (
     <Section>
       <Container>

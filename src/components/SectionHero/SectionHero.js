@@ -9,7 +9,9 @@ import { Container } from 'components/Container/Container';
 import { useTranslation } from 'react-i18next';
 
 const SectionHero = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionHero',
+  });
   return (
     <WrapSection>
       <Container>

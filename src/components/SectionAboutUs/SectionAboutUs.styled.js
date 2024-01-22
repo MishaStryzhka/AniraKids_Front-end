@@ -5,7 +5,7 @@ export const Section = styled.section`
   margin: 0 auto;
   padding-bottom: 40px;
 
-  padding-top: ${({ $mainPage }) => ($mainPage ? '0' : '40px')};
+  padding-top: ${({ $mainPage }) => ($mainPage ? '0' : '16px')};
 `;
 
 export const Title = styled.h2`

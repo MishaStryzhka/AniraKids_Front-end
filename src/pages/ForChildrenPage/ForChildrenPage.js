@@ -6,15 +6,20 @@ import { useTitle } from 'hooks';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
 import SideBar from 'components/SideBar/SideBar';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
-import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
 import FilterAge from 'components/Filters/FilterAge/FilterAge';
-import FilterDecor from 'components/Filters/FilterDecor/FilterDecor';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
 import MainContent from 'components/MainContent/MainContent';
 import NotFound from 'components/NotFound/NotFound';
+import { TitleFilter } from 'pages/ForWomenPage/ForWomenPage.styled';
+import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
+import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
+import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
+import FilterType from 'components/Filters/FilterType/FilterType';
 
 const ForChildrenPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.forChildrenPage',
+  });
   useTitle(t("Children's Clothing"));
 
   return (
@@ -23,11 +28,14 @@ const ForChildrenPage = () => {
       <GeneralTitle>{t("Children's Clothing")}</GeneralTitle>
       <WrapMainContent>
         <SideBar>
-          <FilterPrice />
-          <FilterSizeAdult />
+          <TitleFilter>{t('Filters')}</TitleFilter>
+          <FilterType />
+          <FilterSubject />
+          <FilterOutfits />
           <FilterAge />
-          <FilterDecor />
+          <FilterPrice />
           <FilterColor />
+          <FilterSizeChildren />
         </SideBar>
         <MainContent>
           <NotFound>{t('Empty here for now')}</NotFound>

@@ -9,17 +9,17 @@ import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/Fi
 import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
 import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
-import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
-import FilterAge from 'components/Filters/FilterAge/FilterAge';
-import FilterDecor from 'components/Filters/FilterDecor/FilterDecor';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
-import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
-import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import ProductCard from 'components/ProductCard/ProductCard';
 import { useTranslation } from 'react-i18next';
+import FilterSort from 'components/Filters/FilterSort/FilterSort';
+import FilterType from 'components/Filters/FilterType/FilterType';
+import { TitleFilter } from './ForWomenPage.styled';
 
 const ForWomenPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.forWomenPage',
+  });
   useTitle(t("Women's Clothing"));
 
   return (
@@ -28,18 +28,16 @@ const ForWomenPage = () => {
       <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>
       <WrapMainContent>
         <SideBar>
+          <TitleFilter>{t('Filters')}</TitleFilter>
+          <FilterType />
           <FilterForPregnantWomen />
           <FilterFamilyLook />
           <FilterPrice />
-          <FilterSizeAdult />
-          <FilterSizeChildren />
-          <FilterAge />
-          <FilterDecor />
           <FilterColor />
-          <FilterOutfits />
-          <FilterSubject />
+          <FilterSizeAdult />
         </SideBar>
         <MainContent>
+          <FilterSort />
           <ProductCard />
         </MainContent>
       </WrapMainContent>

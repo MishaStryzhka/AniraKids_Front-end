@@ -10,11 +10,16 @@ import {
 } from './FilterSizeAdult.styled';
 import { useSearchParams } from 'react-router-dom';
 import { arraySizeAdult } from 'helpers';
+import { useTranslation } from 'react-i18next';
 
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.filterSizeAdult',
+  });
 
   const handleToggleList = () => {
     setIsSizeAdultList(prevIsSizeAdultList => !prevIsSizeAdultList);
@@ -22,7 +27,7 @@ const FilterSizeAdult = () => {
   return (
     <MainItem>
       <Wrap $openSizeList={isSizeAdultList === true}>
-        <FilterTitle>РОЗМІР</FilterTitle>
+        <FilterTitle>{t('Size')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openSizeList={isSizeAdultList === true}

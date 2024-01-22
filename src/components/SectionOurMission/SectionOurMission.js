@@ -21,7 +21,9 @@ const {
 } = require('./SectionOurMission.styled');
 
 const SectionOurMission = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.sectionOurMission',
+  });
   const { pathname } = useLocation();
   return (
     <Section>
