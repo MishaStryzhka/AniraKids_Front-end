@@ -67,8 +67,6 @@ const Profile = () => {
     dispatch(confirmUserEmail());
   };
 
-  console.log('error', error);
-
   return (
     <Formik
       initialValues={{
@@ -97,31 +95,15 @@ const Profile = () => {
         handleBlur,
         handleSubmit,
       }) => {
-        console.log('errors', errors);
-
         return (
           <ProfileForm>
             <Wrap>
               <Label>
-                <Placeholder>Прізвище</Placeholder>
-                {user?.firstName ? (
-                  <InputText>{user?.firstName}</InputText>
-                ) : (
-                  <InputField
-                    type="text"
-                    id="firstName"
-                    value={values.firstName}
-                    name="firstName"
-                    placeholder="Стрижка"
-                    onChange={handleChange}
-                  />
-                )}
-              </Label>
-
-              <Label>
-                <Placeholder>Ім'я</Placeholder>
+                <Placeholder>{t('lastName')}</Placeholder>
                 {user?.lastName ? (
-                  <InputText>{user?.lastName}</InputText>
+                  <Wrapper>
+                    <InputText>{user?.lastName}</InputText>
+                  </Wrapper>
                 ) : (
                   <InputField
                     type="text"
@@ -135,9 +117,29 @@ const Profile = () => {
               </Label>
 
               <Label>
-                <Placeholder>Побатькові (необов'язково)</Placeholder>
+                <Placeholder>{t('firstName')}</Placeholder>
+                {user?.firstName ? (
+                  <Wrapper>
+                    <InputText>{user?.firstName}</InputText>
+                  </Wrapper>
+                ) : (
+                  <InputField
+                    type="text"
+                    id="firstName"
+                    value={values.firstName}
+                    name="firstName"
+                    placeholder="Стрижка"
+                    onChange={handleChange}
+                  />
+                )}
+              </Label>
+
+              <Label>
+                <Placeholder>{t('patronymicOptional')}</Placeholder>
                 {user?.patronymic ? (
-                  <InputText>{user?.patronymic}</InputText>
+                  <Wrapper>
+                    <InputText>{user?.patronymic}</InputText>
+                  </Wrapper>
                 ) : (
                   <InputField
                     type="text"
@@ -153,7 +155,9 @@ const Profile = () => {
               {/* <Label>
                 <Placeholder>Назва компанії</Placeholder>
                 {user?.companyName ? (
-                  <InputText>{user?.companyName}</InputText>
+                  <Wrapper>
+                    <InputText>{user?.companyName}</InputText>
+                  </Wrapper>
                 ) : (
                   <InputField
                     type="text"
@@ -169,7 +173,7 @@ const Profile = () => {
               {/* <Label>
                 <Placeholder>IČO</Placeholder>
                 {user?.ico ? (
-                  <InputText>{user?.ico}</InputText>
+                  <Wrapper><InputText>{user?.ico}</InputText></Wrapper>
                 ) : (
                   <InputField
                     type="number"
@@ -185,7 +189,9 @@ const Profile = () => {
               <Label>
                 <Placeholder>Nickname</Placeholder>
                 {user?.nickname ? (
-                  <InputText>{user?.nickname}</InputText>
+                  <Wrapper>
+                    <InputText>{user?.nickname}</InputText>
+                  </Wrapper>
                 ) : (
                   <InputField
                     type="text"
@@ -209,7 +215,7 @@ const Profile = () => {
               </Label>
 
               <Label>
-                <Placeholder>Номер телефону</Placeholder>
+                <Placeholder>{t('phoneNumber')}</Placeholder>
                 {user?.primaryPhoneNumber ? (
                   <Wrapper>
                     <InputText>{user?.primaryPhoneNumber}</InputText>
@@ -241,7 +247,7 @@ const Profile = () => {
               </Label>
 
               <Label>
-                <Placeholder>Електронна пошта</Placeholder>
+                <Placeholder>{t('email')}</Placeholder>
                 {user?.email ? (
                   <Wrapper>
                     <InputText>{user?.email}</InputText>
@@ -286,7 +292,7 @@ const Profile = () => {
               {user?.isFirstLogin && user?.provider === 'Google' && (
                 <>
                   <Label>
-                    <Placeholder>Новий пароль</Placeholder>
+                    <Placeholder>{t('newPassword')}</Placeholder>
                     <InputField
                       type={!showNewPassword ? 'password' : 'text'}
                       id="newPassword"
@@ -298,7 +304,7 @@ const Profile = () => {
                     {values.newPassword !== '' && (
                       <ButtonShow
                         type="button"
-                        title="show password"
+                        title={t('showPassword')}
                         onClick={() => setShowNewPassword(!showNewPassword)}
                       >
                         {!showNewPassword ? (
@@ -315,7 +321,7 @@ const Profile = () => {
                   </Label>
 
                   <Label>
-                    <Placeholder>Введіть новий пароль ще раз</Placeholder>
+                    <Placeholder>{t('enterNewPasswordAgain')}</Placeholder>
                     <InputField
                       type={!showConfirmNewPassword ? 'password' : 'text'}
                       id="confirmNewPassword"
@@ -348,8 +354,8 @@ const Profile = () => {
               )}
 
               {Object.entries(touched).length !== 0 && (
-                <StyledButton type="submit" title="ЗБЕРЕГТИ">
-                  ЗБЕРЕГТИ
+                <StyledButton type="submit" title={t('saveChanges')}>
+                  {t('saveChanges')}
                 </StyledButton>
               )}
             </Wrap>
@@ -381,8 +387,8 @@ const Profile = () => {
                   <img src={AvatarImage} alt="avatar" />
                 )}
               </AvatarWrap>
-              <AvaterTitle>Фото профілю</AvaterTitle>
-              <AvatarDescription>Максимальний розмір - 5 Мб</AvatarDescription>
+              <AvaterTitle>{t('profilePhoto')}</AvaterTitle>
+              <AvatarDescription>{t('maxFileSize')}</AvatarDescription>
               {isOpenModalAddAvatar && (
                 <Modal
                   onClick={() => {
