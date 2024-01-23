@@ -14,7 +14,7 @@ import { ModalRegisterTranslationsUk } from 'components/Modals/ModalRegister/tra
 import { NavigationOverlayTranslationsUk } from 'components/NavigationOverlay/translations/uk';
 import { SearchInputTranslationsUk } from 'components/SearchInput/translations/uk';
 import { UserPageTranslationsUk } from 'pages/UserPage/translations/uk';
-import { SectionAnswerTranslationsUk } from 'components/SectionAnswers/translations/uk';
+import { SectionAnswersTranslationsUk } from 'components/SectionAnswers/translations/uk';
 import { FilterAgeTranslationsUk } from 'components/Filters/FilterAge/translations/uk';
 import { FilterColorTranslationsUk } from 'components/Filters/FilterColor/translations/uk';
 import { FilterDecorTranslationsUk } from 'components/Filters/FilterDecor/translations/uk';
@@ -27,8 +27,12 @@ import { FilterSortTranslationsUk } from 'components/Filters/FilterSort/translat
 import { FilterTypeTranslationsUk } from 'components/Filters/FilterType/translations/uk';
 import { FilterOutfitsTranslationsUk } from 'components/Filters/FilterOutfits/translations/uk';
 import { FilterSizeChildrenTranslationsUk } from 'components/Filters/FilterSizeChildren/translations/uk';
+import { FilterOfToysTranslationsUk } from 'components/Filters/FilterToys/translations/uk';
+import { ProductCardTranslationsUk } from 'components/ProductCard/translations/uk';
 
 export const ComponentTranslationsUk = {
+  productCard: ProductCardTranslationsUk,
+  filterOfToys: FilterOfToysTranslationsUk,
   filterType: FilterTypeTranslationsUk,
   filterSort: FilterSortTranslationsUk,
   filterSubject: FilterSubjectTranslationsUk,
@@ -49,7 +53,7 @@ export const ComponentTranslationsUk = {
   sectionSimpleSteps: SectionSimpleStepsTranslationsUk,
   sectionAreYouReady: SectionAreYouReadyTranslationsUk,
   boxNavLinks: BoxNavLinksTranslationsUk,
-  sectionAnswer: SectionAnswerTranslationsUk,
+  sectionAnswers: SectionAnswersTranslationsUk,
   searchInput: SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,

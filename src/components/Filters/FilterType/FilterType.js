@@ -44,7 +44,7 @@ const FilterType = () => {
       </Wrap>
       {isFilterTypeList && (
         <List>
-          {arrayParamsType.map(({ variantOfType, searchParams }, index) => (
+          {arrayParamsType.map(({ searchParams }, index) => (
             <li key={index}>
               <Button
                 type="button"
@@ -52,7 +52,7 @@ const FilterType = () => {
                   setSearchParams({ Type: searchParams });
                 }}
               >
-                {variantOfType}
+                {t(searchParams)}
               </Button>
             </li>
           ))}

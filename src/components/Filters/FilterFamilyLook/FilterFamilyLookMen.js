@@ -1,4 +1,4 @@
-import { arrayPregnancyProduct } from 'helpers';
+import { useState } from 'react';
 import {
   Button,
   FilterTitle,
@@ -6,41 +6,41 @@ import {
   MainItem,
   StyledIconArrowUp,
   Wrap,
-} from './FilterForPregnantWomen.styled';
-import { useState } from 'react';
+} from './FilterFamilyLook.styled';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { arrayFamilyLookMen } from 'helpers';
 
-const FilterForPregnantWomen = () => {
-  const [isPregnancyList, setIsPregnancyList] = useState(false);
+const FilterFamilyLookMen = () => {
+  const [isFamilyLookList, setIsFamilyLookList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
-    keyPrefix: 'components.filterForPregnantWomen',
+    keyPrefix: 'components.filterFamilyLook',
   });
+  console.log(t);
 
   const handleToggleList = () => {
-    setIsPregnancyList(prevIsPregnancyList => !prevIsPregnancyList);
+    setIsFamilyLookList(prevIsFamilyLookList => !prevIsFamilyLookList);
   };
-
   return (
     <MainItem>
-      <Wrap $openPregnancyList={isPregnancyList === true}>
-        <FilterTitle>{t('For pregnant women')}</FilterTitle>
+      <Wrap $openLookList={isFamilyLookList === true}>
+        <FilterTitle>FAMILY LOOK</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
-          $openPregnancyList={isPregnancyList === true}
+          $openLookList={isFamilyLookList === true}
         />
       </Wrap>
-      {isPregnancyList && (
+      {isFamilyLookList && (
         <List>
-          {arrayPregnancyProduct.map(({ valueVariant }, index) => (
+          {arrayFamilyLookMen.map(({ valueVariant }, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Pregnancy: valueVariant });
+                  setSearchParams({ familyLook: valueVariant });
                 }}
               >
                 {t(valueVariant)}
@@ -53,4 +53,4 @@ const FilterForPregnantWomen = () => {
   );
 };
 
-export default FilterForPregnantWomen;
+export default FilterFamilyLookMen;

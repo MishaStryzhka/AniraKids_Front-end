@@ -11,13 +11,13 @@ import { useSearchParams } from 'react-router-dom';
 import { arrayFamilyLookProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
 
-const FilterFamilyLook = () => {
+const FilterFamilyLookWomen = () => {
   const [isFamilyLookList, setIsFamilyLookList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
-    keyPrefix: 'components.filterFamilyLookr',
+    keyPrefix: 'components.filterFamilyLook',
   });
   console.log(t);
 
@@ -35,24 +35,22 @@ const FilterFamilyLook = () => {
       </Wrap>
       {isFamilyLookList && (
         <List>
-          {arrayFamilyLookProduct.map(
-            ({ variantOfFamilyLook, valueVariant }, index) => (
-              <li key={index}>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ familyLook: valueVariant });
-                  }}
-                >
-                  {variantOfFamilyLook}
-                </Button>
-              </li>
-            )
-          )}
+          {arrayFamilyLookProduct.map(({ valueVariant }, index) => (
+            <li key={index}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setSearchParams({ familyLook: valueVariant });
+                }}
+              >
+                {t(valueVariant)}
+              </Button>
+            </li>
+          ))}
         </List>
       )}
     </MainItem>
   );
 };
 
-export default FilterFamilyLook;
+export default FilterFamilyLookWomen;

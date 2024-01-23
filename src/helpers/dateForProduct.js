@@ -4,19 +4,33 @@ export const arrayFamilyLookProduct = [
     valueVariant: 'for-all-family',
   },
   {
-    variantOfFamilyLook: 'Так + дівчинки',
-    valueVariant: 'yes-and-girl',
+    variantOfFamilyLook: 'Так + дівчинка',
+    valueVariant: 'for-mamy-and-girl',
   },
   {
     variantOfFamilyLook: 'Так + хлопчика',
-    valueVariant: 'yes-and-boy',
+    valueVariant: 'for-mamy-and-boy',
   },
-  {
-    variantOfFamilyLook: 'Ні',
-    valueVariant: 'no',
-  },
+  // {
+  //   variantOfFamilyLook: 'Ні',
+  //   valueVariant: 'no',
+  // },
 ];
 
+export const arrayFamilyLookMen = [
+  {
+    variantOfFamilyLook: 'Для всієї сім’ї',
+    valueVariant: 'for-all-family',
+  },
+  {
+    variantOfFamilyLook: 'Для тата і дівчинки',
+    valueVariant: 'for-dad-and-girl',
+  },
+  {
+    variantOfFamilyLook: 'Для тата і хлопчика',
+    valueVariant: 'for-dad-and-boy',
+  },
+];
 export const arrayPregnancyProduct = [
   { isPregnancy: 'Так', valueVariant: 'true' },
   { isPregnancy: 'Ні', valueVariant: 'false' },
@@ -100,11 +114,11 @@ export const arrayColorsProduct = [
 export const arrayAgeProduct = [
   {
     descriptionAge: 'для передчасно народжених',
-    valueAge: 'premature',
+    valueAge: 'for premature babies',
   },
   {
     descriptionAge: 'для новонароджених',
-    valueAge: 'newborns',
+    valueAge: 'for newborns',
   },
   {
     descriptionAge: '0-3 місяці',
@@ -170,7 +184,7 @@ export const arrayAgeProduct = [
 
 export const arraySizeChildrenProduct = [
   {
-    descriptionSize: 'до 50',
+    descriptionSize: '50',
     valueSize: 'before-50',
   },
   {
@@ -252,12 +266,12 @@ export const arraySizeChildrenProduct = [
 ];
 
 export const arrayofDecorProduct = [
-  { variantOfDecor: 'Аксесуари', searchDecor: 'accessuries' },
+  { variantOfDecor: 'Аксесуари', searchDecor: 'accessories' },
   { variantOfDecor: 'День народження', searchDecor: 'birthday' },
   { variantOfDecor: 'Різдво', searchDecor: 'Christmas' },
   {
     variantOfDecor: 'Тематичні свята',
-    searchDecor: 'thematic-holidays',
+    searchDecor: 'Theme-holidays',
   },
   {
     variantOfDecor: 'Текстиль',
@@ -300,11 +314,11 @@ export const arrayOfToysProduct = [
   },
   {
     variantOfToys: 'Настільні ігри, пазли',
-    typeOfToys: 'puzzles',
+    typeOfToys: 'board-games-and-puzzles',
   },
   {
     variantOfToys: 'Іграшкова зброя',
-    typeOfToys: 'toys-weapon',
+    typeOfToys: 'toy-weapon',
   },
   {
     variantOfToys: 'Творчість і розвиток',
@@ -312,7 +326,7 @@ export const arrayOfToysProduct = [
   },
   {
     variantOfToys: 'Товари для школи',
-    typeOfToys: 'for-school',
+    typeOfToys: 'school-supplies',
   },
   {
     variantOfToys: 'Дитячий транспорт',

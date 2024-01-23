@@ -6,7 +6,6 @@ import SideBar from 'components/SideBar/SideBar';
 import { useTitle } from 'hooks';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
 import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/FilterForPregnantWomen';
-import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
 import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
@@ -15,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import { TitleFilter } from './ForWomenPage.styled';
+import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -31,7 +31,7 @@ const ForWomenPage = () => {
           <TitleFilter>{t('Filters')}</TitleFilter>
           <FilterType />
           <FilterForPregnantWomen />
-          <FilterFamilyLook />
+          <FilterFamilyLookWomen />
           <FilterPrice />
           <FilterColor />
           <FilterSizeAdult />

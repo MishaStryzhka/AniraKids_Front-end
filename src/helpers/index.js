@@ -9,11 +9,13 @@ const { arrayofDecorProduct } = require('./dateForProduct');
 const { arrayOfToysProduct } = require('./dateForProduct');
 const { arraySizeAdult } = require('./dateForProduct');
 const { arrayAnswers } = require('./arrayAnswers');
+const { arrayFamilyLookMen } = require('./dateForProduct');
 const { detectLanguageFromStore } = require('./detectLanguageFromStore');
 
 module.exports = {
   getCroppedImg,
   arrayFamilyLookProduct,
+  arrayFamilyLookMen,
   arrayPregnancyProduct,
   arrayOfSubjectsProduct,
   arrayColorsProduct,

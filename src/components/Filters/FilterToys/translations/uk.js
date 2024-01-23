@@ -1,0 +1,15 @@
+export const FilterOfToysTranslationsUk = {
+  Toys: 'Іграшки',
+  'toys-for-baby': 'Іграшки для малюків',
+  'dolls-and-pups': 'Ляльки та пупси',
+  'stuffed-toys': 'М’які іграшки',
+  constructors: 'Конструктори',
+  'car-model': 'Машинки, моделі, техніка',
+  'for-recreation': 'Для активного відпочинку',
+  'board-games-and-puzzles': 'Настільні ігри, пазли',
+  'toy-weapon': 'Іграшкова зброя',
+  'creativite-and-development': 'Творчість і розвиток',
+  'school-supplies': 'Товари для школи',
+  'children`s-transport': 'Дитячий транспорт',
+  'robots-and-transformers': 'Роботи і трансформери',
+};

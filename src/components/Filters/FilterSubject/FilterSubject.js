@@ -71,20 +71,18 @@ const FilterSubject = () => {
       </Wrap>
       {isFilterSubjectsList && (
         <List>
-          {arrayOfSubjectsProduct.map(
-            ({ variantOfSubjects, valueSubject }, index) => (
-              <li key={index}>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ Outfits: valueSubject });
-                  }}
-                >
-                  {variantOfSubjects}
-                </Button>
-              </li>
-            )
-          )}
+          {arrayOfSubjectsProduct.map(({ valueSubject }, index) => (
+            <li key={index}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setSearchParams({ Outfits: valueSubject });
+                }}
+              >
+                {t(valueSubject)}
+              </Button>
+            </li>
+          ))}
         </List>
       )}
     </MainItem>
