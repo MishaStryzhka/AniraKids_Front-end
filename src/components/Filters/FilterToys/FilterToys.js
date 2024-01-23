@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import {
   Button,
@@ -7,43 +8,41 @@ import {
   MainItem,
   StyledIconArrowUp,
   Wrap,
-} from './FilterAge.styled';
-import { arrayAgeProduct } from 'helpers';
-import { useTranslation } from 'react-i18next';
+} from './FilterToys.styled';
+import { arrayOfToysProduct } from 'helpers';
 
-const FilterAge = () => {
-  const [isFilterAgeList, setIsFilterAgeList] = useState(false);
+const FilterOfToys = () => {
+  const [isFilterToysList, setIsFilterToysList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
-    keyPrefix: 'components.filterAge',
+    keyPrefix: 'components.filterOfToys',
   });
 
   const handleToggleList = () => {
-    setIsFilterAgeList(prevIsFilterAgeList => !prevIsFilterAgeList);
+    setIsFilterToysList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
-
   return (
     <MainItem>
-      <Wrap $openAgeList={isFilterAgeList === true}>
-        <FilterTitle>{t('Age')}</FilterTitle>
+      <Wrap $openOutfitsList={isFilterToysList === true}>
+        <FilterTitle>{t('Toys')}</FilterTitle>
         <StyledIconArrowUp
-          $openAgeList={isFilterAgeList === true}
           onClick={handleToggleList}
+          $openOutfitsList={isFilterToysList === true}
         />
       </Wrap>
-      {isFilterAgeList && (
+      {isFilterToysList && (
         <List>
-          {arrayAgeProduct.map(({ valueAge }, index) => (
+          {arrayOfToysProduct.map(({ typeOfToys }, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Age: valueAge });
+                  setSearchParams({ Toys: typeOfToys });
                 }}
               >
-                {t(valueAge)}
+                {t(typeOfToys)}
               </Button>
             </li>
           ))}
@@ -52,5 +51,4 @@ const FilterAge = () => {
     </MainItem>
   );
 };
-
-export default FilterAge;
+export default FilterOfToys;

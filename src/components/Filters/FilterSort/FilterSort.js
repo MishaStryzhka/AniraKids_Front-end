@@ -48,7 +48,7 @@ const FilterSort = () => {
       </Wrap>
       {isFilterSortList && (
         <List>
-          {arrayParamsSort.map(({ variantOfParams, searchParams }, index) => (
+          {arrayParamsSort.map(({ searchParams }, index) => (
             <li key={index}>
               <Button
                 type="button"
@@ -56,7 +56,7 @@ const FilterSort = () => {
                   setSearchParams({ Sort: searchParams });
                 }}
               >
-                {variantOfParams}
+                {t(searchParams)}
               </Button>
             </li>
           ))}

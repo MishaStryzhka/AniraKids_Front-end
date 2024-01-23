@@ -13,7 +13,7 @@ import NotFound from 'components/NotFound/NotFound';
 import { TitleFilter } from './ForMenPage.styled';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
-import FilterFamilyLook from 'components/Filters/FilterFamilyLook/FilterFamilyLook';
+import FilterFamilyLookMen from 'components/Filters/FilterFamilyLook/FilterFamilyLookMen';
 
 const ForMenPage = () => {
   const { t } = useTranslation('translation', {
@@ -28,7 +28,7 @@ const ForMenPage = () => {
         <SideBar>
           <TitleFilter>{t('Filters')}</TitleFilter>
           <FilterType />
-          <FilterFamilyLook />
+          <FilterFamilyLookMen />
           <FilterPrice />
           <FilterColor />
           <FilterSizeAdult />

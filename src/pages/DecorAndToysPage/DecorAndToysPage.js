@@ -11,6 +11,7 @@ import FilterColor from 'components/Filters/FilterColor/FilterColor';
 import MainContent from 'components/MainContent/MainContent';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
+import FilterOfToys from 'components/Filters/FilterToys/FilterToys';
 
 const DecorAndToysPage = () => {
   const { t } = useTranslation('translation', {
@@ -25,6 +26,7 @@ const DecorAndToysPage = () => {
           <TitleFilter>{t('Filters')}</TitleFilter>
           <FilterType />
           <FilterDecor />
+          <FilterOfToys />
           <FilterPrice />
           <FilterColor />
         </SideBar>

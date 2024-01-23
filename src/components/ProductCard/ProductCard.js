@@ -14,9 +14,15 @@ import CardImage from 'images/photo-product.jpg';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
+import { useTranslation } from 'react-i18next';
 
 const ProductCard = () => {
   const { currentTheme } = useAuth();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.productCard',
+  });
+
   return (
     <WrapCard>
       <PictureCard>
@@ -29,12 +35,12 @@ const ProductCard = () => {
         <Wrap>
           <TextName>HOUSE OF THE BREND</TextName>
           <TextSize>
-            <Span>Розмір:</Span>
+            <Span>{t('Size')}:</Span>
             XXXL
           </TextSize>
         </Wrap>
         <Wrap>
-          <Price>Продаж</Price>
+          <Price>{t('Sale')}</Price>
           <TextPrice>100 $</TextPrice>
         </Wrap>
       </WrapText>

@@ -1,0 +1,15 @@
+export const FilterOfToysTranslationsEn = {
+  Toys: 'Toys',
+  'toys-for-baby': 'Toys for baby',
+  'dolls-and-pups': 'Dolls and pups',
+  'stuffed-toys': 'Stuffed toys',
+  constructors: 'Constructors',
+  'car-model': 'Cars, models, technology',
+  'for-recreation': 'For active recreation',
+  'board-games-and-puzzles': 'Board games, puzzles',
+  'toy-weapon': 'Toy weapon',
+  'creativity-and-development': 'Creativity and Development',
+  'school-supplies': 'School supplies',
+  'children`s-transport': 'Children`s transport',
+  'robots-and-transformers': 'Robots and transformers',
+};

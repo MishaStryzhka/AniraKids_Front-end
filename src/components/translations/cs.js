@@ -13,7 +13,6 @@ import { ModalChangeEmailTranslationsCs } from 'components/Modals/ModalChangeEma
 import { ModalRegisterTranslationsCs } from 'components/Modals/ModalRegister/translations/cs';
 import { NavigationOverlayTranslationsCs } from 'components/NavigationOverlay/translations/cs';
 import { SearchInputTranslationsCs } from 'components/SearchInput/translations/cs';
-import { SectionAnswerTranslationsCs } from 'components/SectionAnswers/translations/cs';
 import { FilterAgeTranslationsCs } from 'components/Filters/FilterAge/translations/cs';
 import { FilterColorTranslationsCs } from 'components/Filters/FilterColor/translations/cs';
 import { FilterDecorTranslationsCs } from 'components/Filters/FilterDecor/translations/cs';
@@ -26,8 +25,13 @@ import { FilterSizeChildrenTranslationsCs } from 'components/Filters/FilterSizeC
 import { FilterSubjectTranslationsCs } from 'components/Filters/FilterSubject/translations/cs';
 import { FilterSortTranslationsCs } from 'components/Filters/FilterSort/translations/cs';
 import { FilterTypeTranslationsCs } from 'components/Filters/FilterType/translations/cs';
+import { FilterOfToysTranslationsCs } from 'components/Filters/FilterToys/translations/cs';
+import { SectionAnswersTranslationsCs } from 'components/SectionAnswers/translations/cs';
+import { ProductCardTranslationsCs } from 'components/ProductCard/translations/cs';
 
 export const ComponentTranslationsCs = {
+  productCard: ProductCardTranslationsCs,
+  filterOfToys: FilterOfToysTranslationsCs,
   filterType: FilterTypeTranslationsCs,
   filterSort: FilterSortTranslationsCs,
   filterSubject: FilterSubjectTranslationsCs,
@@ -48,7 +52,7 @@ export const ComponentTranslationsCs = {
   sectionSimpleSteps: SectionSimpleStepsTranslationsCs,
   sectionAreYouReady: SectionAreYouReadyTranslationsCs,
   boxNavLinks: BoxNavLinksTranslationsCs,
-  sectionAnswer: SectionAnswerTranslationsCs,
+  sectionAnswers: SectionAnswersTranslationsCs,
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
 

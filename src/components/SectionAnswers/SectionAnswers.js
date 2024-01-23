@@ -38,14 +38,14 @@ const SectionAnswers = () => {
         {arrayAnswers.map(({ titleQuestion, textAnswer }, index) => (
           <Item key={index}>
             <Wrap>
-              <QuestionDescription>{t('titleQuestion')}</QuestionDescription>
+              <QuestionDescription>{t(titleQuestion)}</QuestionDescription>
               <StyledIconArrowUp
                 $openAnswer={isOpenAnswer[index]}
                 onClick={() => handleToggleList(index)}
               />
             </Wrap>
             {isOpenAnswer[index] && (
-              <AnswerDescription>{t('textAnswer')}</AnswerDescription>
+              <AnswerDescription>{t(textAnswer)}</AnswerDescription>
             )}
           </Item>
         ))}

@@ -35,7 +35,7 @@ const FilterDecor = () => {
       </Wrap>
       {isFilterDecorList && (
         <List>
-          {arrayofDecorProduct.map(({ variantOfDecor, searchDecor }, index) => (
+          {arrayofDecorProduct.map(({ searchDecor }, index) => (
             <li key={index}>
               <Button
                 type="button"
@@ -43,7 +43,7 @@ const FilterDecor = () => {
                   setSearchParams({ Decor: searchDecor });
                 }}
               >
-                {variantOfDecor}
+                {t(searchDecor)}
               </Button>
             </li>
           ))}

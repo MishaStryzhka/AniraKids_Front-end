@@ -45,7 +45,7 @@ const FilterSizeChildren = () => {
                       setSearchParams({ size: valueSize });
                     }}
                   >
-                    {descriptionSize} см
+                    {descriptionSize} {t('cm')}
                   </Button>
                 </li>
               )

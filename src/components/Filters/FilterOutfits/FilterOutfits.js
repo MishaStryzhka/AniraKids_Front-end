@@ -48,7 +48,7 @@ const FilterOutfits = () => {
       </Wrap>
       {isFilterOutfitsList && (
         <List>
-          {arrayOfOutfits.map(({ variantOfOutfits, searchOutfits }, index) => (
+          {arrayOfOutfits.map(({ searchOutfits }, index) => (
             <li key={index}>
               <Button
                 type="button"
@@ -56,7 +56,7 @@ const FilterOutfits = () => {
                   setSearchParams({ Outfits: searchOutfits });
                 }}
               >
-                {variantOfOutfits}
+                {t(searchOutfits)}
               </Button>
             </li>
           ))}
