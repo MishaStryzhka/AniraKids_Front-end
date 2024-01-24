@@ -29,8 +29,24 @@ import { FilterOutfitsTranslationsUk } from 'components/Filters/FilterOutfits/tr
 import { FilterSizeChildrenTranslationsUk } from 'components/Filters/FilterSizeChildren/translations/uk';
 import { FilterOfToysTranslationsUk } from 'components/Filters/FilterToys/translations/uk';
 import { ProductCardTranslationsUk } from 'components/ProductCard/translations/uk';
+import { ModalAddAvatarTranslationsUk } from 'components/Modals/ModalAddAvatar/translations/uk';
+import { ModalChangeLoginTranslationsUk } from 'components/Modals/ModalChangeLogin/translations/uk';
+import { ModalChangePasswordTranslationsUk } from 'components/Modals/ModalChangePassword/translations/uk';
+import { ModalChangePhoneNumberTranslationsUk } from 'components/Modals/ModalChangePhoneNumber/translations/uk';
+import { ModalChangePhotoTranslationsUk } from 'components/Modals/ModalChangePhoto/translations/uk';
+import { ModalLogOutTranslationsUk } from 'components/Modals/ModalLogOut/translations/uk';
+import { ModalRemoveProductTranslationsUk } from 'components/Modals/ModalRemoveProduct/translations/uk';
+import { FormAddProductTranslationsUk } from 'components/Forms/FormAddProduct/translations/uk';
 
 export const ComponentTranslationsUk = {
+  formAddProduct: FormAddProductTranslationsUk,
+  modalRemoveProduct: ModalRemoveProductTranslationsUk,
+  modalLogOut: ModalLogOutTranslationsUk,
+  modalChangePhoto: ModalChangePhotoTranslationsUk,
+  modalChangePhoneNumber: ModalChangePhoneNumberTranslationsUk,
+  modalChangePassword: ModalChangePasswordTranslationsUk,
+  modalChangeLogin: ModalChangeLoginTranslationsUk,
+  modalAddAvatar: ModalAddAvatarTranslationsUk,
   productCard: ProductCardTranslationsUk,
   filterOfToys: FilterOfToysTranslationsUk,
   filterType: FilterTypeTranslationsUk,
@@ -57,7 +73,7 @@ export const ComponentTranslationsUk = {
   searchInput: SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
-  ...ModalRegisterTranslationsUk,
+  modalRegister: ModalRegisterTranslationsUk,
   formRegistrationEmail: FormRegistrationEmailTranslationsUk,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
   authForm: AuthFormTranslationsUk,

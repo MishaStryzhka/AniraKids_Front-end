@@ -53,9 +53,11 @@ import {
   arrayOfSubjectsProduct,
   arrayColorsProduct,
   arraySizeAdult,
+  arrayFamilyLookMen,
 } from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
+import { useTranslation } from 'react-i18next';
 
 const FormAddProduct = () => {
   const [isParamsWoman, setIsParamsWoman] = useState(false);
@@ -64,6 +66,10 @@ const FormAddProduct = () => {
   const [isParamsDecor, setIsParamsDecor] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.formAddProduct',
+  });
 
   // ===========
 
@@ -210,7 +216,7 @@ const FormAddProduct = () => {
                 }}
                 multiple
               />
-              <Title>ЗАВАНТАЖТЕ ФОТО</Title>
+              <Title>{t('Upload photo')}</Title>
               <WrapperPhotos ref={wrapPhototsRef}>
                 {photoOrder.map((photo, index) => (
                   <WrapPhoto
@@ -232,19 +238,17 @@ const FormAddProduct = () => {
                   <WrapPhoto htmlFor="photoUrls">
                     <Picture>
                       <IconPhoto />
-                      <TextPhoto>Завантажте фото</TextPhoto>
+                      <TextPhoto>{t('Upload photo')}</TextPhoto>
                     </Picture>
                   </WrapPhoto>
                 )}
               </WrapperPhotos>
-              <TextInstruction>
-                Ви можете змінити порядок фотографій, переміщаючи їх між собою
-              </TextInstruction>
+              <TextInstruction>{t('instruction upload photo')}</TextInstruction>
             </div>
             <div>
-              <Title>ДОДАЙТЕ ВІДЕО ОГЛЯД</Title>
+              <Title>{t('addVideo')}</Title>
               <LabelDescription>
-                Ви можете додати відео огляд на річ с youtube.
+                {t('labelAddVideo')}
                 <Field
                   onChange={handleChange}
                   name="videoUrl"
@@ -256,27 +260,27 @@ const FormAddProduct = () => {
               </LabelDescription>
             </div>
             <div>
-              <Title>ОПИШІТЬ ВАШУ РІЧ</Title>
+              <Title>{t('describeItem')}</Title>
               <LabelDescription>
-                Назва (українською мовою)
+                {t('nameItem')}
                 <Field
                   onChange={handleChange}
                   name="name"
                   value={values.name}
                   type="text"
-                  placeholder="Наприклад: Сукня H&M"
+                  placeholder={t('namePlaceholder')}
                 />
                 <p>{errors.name && touched.name && errors.name}</p>
               </LabelDescription>
 
               <LabelDescription>
-                Опис (українською мовою)
+                {t('descriptionItem')}
                 <FieldComments
                   onChange={handleChange}
                   name="description"
                   value={values.description}
                   type="text"
-                  placeholder="Наприклад: В цій сукні ви виглядатиме як зірка"
+                  placeholder={t('descriptionPlaceholder')}
                 />
                 <p>
                   {errors.description &&
@@ -286,19 +290,19 @@ const FormAddProduct = () => {
               </LabelDescription>
 
               <LabelDescription>
-                Бренд
+                {t('brandItem')}
                 <Field
                   onChange={handleChange}
                   name="brand"
                   value={values.brand}
                   type="text"
-                  placeholder="Наприклад: H&M"
+                  placeholder={t('brandPlaceholder')}
                 />
                 <p>{errors.brand && touched.brand && errors.brand}</p>
               </LabelDescription>
             </div>
             <div>
-              <Title>ВИБЕРІТЬ РОЗДІЛ</Title>
+              <Title>{t('Choose a category')}</Title>
               <GeneralList>
                 <li>
                   <Button
@@ -311,7 +315,7 @@ const FormAddProduct = () => {
                       setIsParamsDecor(false);
                     }}
                   >
-                    ЖІНОЧІ НАРЯДИ
+                    {t("Women's Clothing")}
                   </Button>
                 </li>
                 <li>
@@ -325,7 +329,7 @@ const FormAddProduct = () => {
                       setIsParamsDecor(false);
                     }}
                   >
-                    ЧОЛОВІЧІ КОСТЮМИ
+                    {t("Men's Suits")}
                   </Button>
                 </li>
                 <li>
@@ -339,7 +343,7 @@ const FormAddProduct = () => {
                       setIsParamsDecor(false);
                     }}
                   >
-                    ДИТЯЧІ НАРЯДИ
+                    {t("Children's Clothing")}
                   </Button>
                 </li>
 
@@ -354,19 +358,19 @@ const FormAddProduct = () => {
                       setIsParamsDecor(true);
                     }}
                   >
-                    ДЕКОР ТА ІГРАШКИ
+                    {t('Decor and Toys')}
                   </Button>
                 </li>
               </GeneralList>
               {isParamsWoman && (
                 <Wrap>
-                  <Title>ОБЕРІТЬ КАТЕГОРІЮ</Title>
+                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
                       <Description>Family look</Description>
                       <List>
                         {arrayFamilyLookProduct.map(
-                          ({ valueVariant, variantOfFamilyLook }, index) => (
+                          ({ valueVariant }, index) => (
                             <li key={index}>
                               <Label>
                                 <Box>
@@ -374,7 +378,7 @@ const FormAddProduct = () => {
                                     <IconCheck />
                                   )}
                                 </Box>
-                                {variantOfFamilyLook}
+                                {t(valueVariant)}
                                 <Input
                                   type="radio"
                                   name="familyLook"
@@ -388,10 +392,10 @@ const FormAddProduct = () => {
                       </List>
                     </WrapCategory>
                     <WrapCategory>
-                      <Description>Для вагітних</Description>
+                      <Description>{t('For pregnant women')}</Description>
                       <List>
                         {arrayPregnancyProduct.map(
-                          ({ valueVariant, isPregnancy }, index) => (
+                          ({ valueVariant }, index) => (
                             <li key={index}>
                               <Label>
                                 <Box>
@@ -399,7 +403,7 @@ const FormAddProduct = () => {
                                     <IconCheck />
                                   )}
                                 </Box>
-                                {isPregnancy}
+                                {t(valueVariant)}
                                 <Input
                                   type="radio"
                                   name="isPregnancy"
@@ -413,7 +417,7 @@ const FormAddProduct = () => {
                       </List>
                     </WrapCategory>
                   </BoxCategory>
-                  <Title>ВКАЖІТЬ РОЗМІР</Title>
+                  <Title>{t('Specify the size')}</Title>
                   <ListHorizont>
                     {arraySizeAdult.map(({ descriptionSize }, index) => (
                       <li key={index}>
@@ -435,33 +439,31 @@ const FormAddProduct = () => {
               )}
               {isParamsMan && (
                 <Wrap>
-                  <Title>ОБЕРІТЬ КАТЕГОРІЮ</Title>
+                  {/* <Title>{t('Choose a category')}</Title> */}
                   <WrapCategory $isParamsMan={isParamsMan}>
                     <Description>Family look</Description>
                     <List>
-                      {arrayFamilyLookProduct.map(
-                        ({ valueVariant, variantOfFamilyLook }, index) => (
-                          <li key={index}>
-                            <Label>
-                              <Box>
-                                {values.familyLook === valueVariant && (
-                                  <IconCheck />
-                                )}
-                              </Box>
-                              {variantOfFamilyLook}
-                              <Input
-                                type="radio"
-                                name="familyLook"
-                                value={valueVariant}
-                                onChange={handleChange}
-                              />
-                            </Label>
-                          </li>
-                        )
-                      )}
+                      {arrayFamilyLookMen.map(({ valueVariant }, index) => (
+                        <li key={index}>
+                          <Label>
+                            <Box>
+                              {values.familyLook === valueVariant && (
+                                <IconCheck />
+                              )}
+                            </Box>
+                            {t(valueVariant)}
+                            <Input
+                              type="radio"
+                              name="familyLook"
+                              value={valueVariant}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        </li>
+                      ))}
                     </List>
                   </WrapCategory>
-                  <Title>ВКАЖІТЬ РОЗМІР</Title>
+                  <Title>{t('Specify the size')}</Title>
                   <ListHorizont>
                     {arraySizeAdult.map(({ descriptionSize }, index) => (
                       <li key={index}>
@@ -483,20 +485,20 @@ const FormAddProduct = () => {
               )}
               {isParamsChildren && (
                 <Wrap>
-                  <Title>ОБЕРІТЬ КАТЕГОРІЮ</Title>
+                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
-                      <Description>Тематика</Description>
+                      <Description>{t('Subject')}</Description>
                       <List>
                         {arrayOfSubjectsProduct.map(
-                          ({ valueSubject, variantOfSubjects }, index) => (
+                          ({ valueSubject }, index) => (
                             <Label key={index}>
                               <Box>
                                 {values.subject === valueSubject && (
                                   <IconCheck />
                                 )}
                               </Box>
-                              {variantOfSubjects}
+                              {t(valueSubject)}
                               <Input
                                 type="radio"
                                 name="subject"
@@ -509,31 +511,30 @@ const FormAddProduct = () => {
                       </List>
                     </WrapCategory>
                   </BoxCategory>
-                  <Title>ВКАЖІТЬ ВІК</Title>
+                  <Title>{t('Age')}</Title>
                   <WrapChildrenParams>
-                    {arrayAgeProduct.map(
-                      ({ valueAge, descriptionAge }, index) => (
-                        <LabelChildren key={index}>
-                          <BoxSize $check={values.age === valueAge}>
-                            {descriptionAge}
-                          </BoxSize>
-                          <Input
-                            type="radio"
-                            name="age"
-                            value={valueAge}
-                            onChange={handleChange}
-                          />
-                        </LabelChildren>
-                      )
-                    )}
+                    {arrayAgeProduct.map(({ valueAge }, index) => (
+                      <LabelChildren key={index}>
+                        <BoxSize $check={values.age === valueAge}>
+                          {t(valueAge)}
+                        </BoxSize>
+                        <Input
+                          type="radio"
+                          name="age"
+                          value={valueAge}
+                          onChange={handleChange}
+                        />
+                      </LabelChildren>
+                    ))}
                   </WrapChildrenParams>
-                  <Title>ВКАЖІТЬ РОЗМІР</Title>
+                  <Title>{t('Size')}</Title>
                   <WrapChildrenSize>
                     {arraySizeChildrenProduct.map(
                       ({ descriptionSize, valueSize }, index) => (
                         <LabelChildren key={index}>
                           <BoxSize $check={values.size === valueSize}>
-                            {descriptionSize}см
+                            {descriptionSize}
+                            {t('sizecm')}
                           </BoxSize>
 
                           <Input
@@ -550,50 +551,46 @@ const FormAddProduct = () => {
               )}
               {isParamsDecor && (
                 <Wrap>
-                  <Title>ОБЕРІТЬ КАТЕГОРІЮ</Title>
+                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
-                      <Description>Декор</Description>
+                      <Description>{t('Decor')}</Description>
                       <List>
-                        {arrayofDecorProduct.map(
-                          ({ variantOfDecor, searchDecor }, index) => (
-                            <Label key={index}>
-                              <Box>
-                                {values.decor === searchDecor && <IconCheck />}
-                              </Box>
-                              {variantOfDecor}
-                              <Input
-                                type="radio"
-                                name="decor"
-                                value={searchDecor}
-                                onChange={handleChange}
-                              />
-                            </Label>
-                          )
-                        )}
+                        {arrayofDecorProduct.map(({ searchDecor }, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.decor === searchDecor && <IconCheck />}
+                            </Box>
+                            {t(searchDecor)}
+                            <Input
+                              type="radio"
+                              name="decor"
+                              value={searchDecor}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
                       </List>
                     </WrapCategory>
                     <WrapCategory>
-                      <Description>Іграшки</Description>
+                      <Description>{t('Toys')}</Description>
                       <List>
-                        {arrayOfToysProduct.map(
-                          ({ variantOfToys, typeOfToys }, index) => (
-                            <Label key={index}>
-                              <Box>
-                                {values.toys === typeOfToys && <IconCheck />}
-                              </Box>
-                              {variantOfToys}
-                              <Input
-                                type="radio"
-                                name="toys"
-                                value={typeOfToys}
-                                onChange={handleChange}
-                              />
-                            </Label>
-                            //  variantOfToys: 'Роботи і трансформери',
-                            // typeOfToys:
-                          )
-                        )}
+                        {arrayOfToysProduct.map(({ typeOfToys }, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.toys === typeOfToys && <IconCheck />}
+                            </Box>
+                            {t(typeOfToys)}
+                            <Input
+                              type="radio"
+                              name="toys"
+                              value={typeOfToys}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                          //  variantOfToys: 'Роботи і трансформери',
+                          // typeOfToys:
+                        ))}
                       </List>
                     </WrapCategory>
                   </BoxCategory>
@@ -601,38 +598,34 @@ const FormAddProduct = () => {
               )}
             </div>
             <div>
-              <Title>ВИБЕРІТЬ КОЛІР</Title>
+              <Title>{t('Color')}</Title>
               <ListColor>
-                {arrayColorsProduct.map(
-                  ({ nameColor, colorCode, color }, index) => (
-                    <ItemButton key={index}>
-                      <LabelColor color={colorCode}>
-                        <Input
-                          type="radio"
-                          name="color"
-                          value={color}
-                          onChange={handleChange}
-                        />
-                        <WrapBoxColor $check={values.color === color}>
-                          <BoxColor color={colorCode} />
-                          {nameColor}
-                        </WrapBoxColor>
-                      </LabelColor>
-                    </ItemButton>
-                  )
-                )}
+                {arrayColorsProduct.map(({ colorCode, color }, index) => (
+                  <ItemButton key={index}>
+                    <LabelColor color={colorCode}>
+                      <Input
+                        type="radio"
+                        name="color"
+                        value={color}
+                        onChange={handleChange}
+                      />
+                      <WrapBoxColor $check={values.color === color}>
+                        <BoxColor color={colorCode} />
+                        {t(color)}
+                      </WrapBoxColor>
+                    </LabelColor>
+                  </ItemButton>
+                ))}
               </ListColor>
-              <TextInstruction>
-                Ви можете обрати до двох відтінків
-              </TextInstruction>
+              <TextInstruction>{t('descriptionColor')}</TextInstruction>
             </div>
             <div>
-              <Title>УМОВИ ОРЕНДИ / ПРОДАЖУ</Title>
+              <Title>{t('title rent-sale')}</Title>
               <GeneralWrap>
                 <WrapCondition>
                   <LabelStatus>
                     <Box>{values.rental === 'true' && <IconCheck />}</Box>
-                    Оренда
+                    {t('Rental')}
                     <Input
                       type="radio"
                       name="rental"
@@ -641,9 +634,9 @@ const FormAddProduct = () => {
                     />
                   </LabelStatus>
                   <LabelPrice>
-                    Ціна
+                    {t('Price')}
                     <InputPrice
-                      placeholder="1500 грн"
+                      placeholder={t('pricePlaceholder')}
                       type="text"
                       name="rentalPrice"
                       value={values.rentalPrice}
@@ -654,7 +647,7 @@ const FormAddProduct = () => {
                 <WrapCondition>
                   <LabelStatus>
                     <Box>{values.sale === 'true' && <IconCheck />}</Box>
-                    Продаж
+                    {t('Sale')}
                     <Input
                       type="radio"
                       name="sale"
@@ -663,9 +656,9 @@ const FormAddProduct = () => {
                     />
                   </LabelStatus>
                   <LabelPrice>
-                    Ціна
+                    {t('Price')}
                     <InputPrice
-                      placeholder="1500 грн"
+                      placeholder={t('pricePlaceholder')}
                       type="text"
                       name="salePrice"
                       value={values.salePrice}
@@ -676,28 +669,22 @@ const FormAddProduct = () => {
               </GeneralWrap>
             </div>
             <div>
-              <Title>КЛЮЧОВІ СЛОВА</Title>
-              <Description>
-                Введіть ключові слова через кому або Enter. За ними також будуть
-                знаходити ваш товар
-              </Description>
+              <Title>{t('keywords')}</Title>
+              <Description>{t('labelKeywords')}</Description>
 
               <Field
                 onChange={handleChange}
                 name="keyWord"
                 value={values.keyWord}
                 type="text"
-                placeholder="Введіть ключові слова"
+                placeholder={t('keywordsPlaceholder')}
               />
-              <TextInstruction>
-                Наприклад слова, такі як: сукня, сукня H&M, червона сукня
-                горошок
-              </TextInstruction>
+              <TextInstruction>{t('addsKeywords')}</TextInstruction>
             </div>
             <LabelStatus>
-              <Box>{values.check === 'true' && <IconCheck />}</Box>Я додав (-ла)
-              як мінімум одне фото речі, яке зробив (-ла) сам (-а).
-              <StyledNavLink>Чому це важливо?</StyledNavLink>
+              <Box>{values.check === 'true' && <IconCheck />}</Box>
+              {t('yourAgree')}
+              <StyledNavLink>{t('linkAgree')}</StyledNavLink>
               <Input
                 type="radio"
                 name="check"
@@ -706,7 +693,7 @@ const FormAddProduct = () => {
               />
             </LabelStatus>
             <ButtonSubmit type="submit">
-              ДОДАТИ ТОВАР
+              {t('addItem')}
               <IconPlus />
             </ButtonSubmit>
           </Form>

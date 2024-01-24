@@ -28,8 +28,24 @@ import { FilterTypeTranslationsCs } from 'components/Filters/FilterType/translat
 import { FilterOfToysTranslationsCs } from 'components/Filters/FilterToys/translations/cs';
 import { SectionAnswersTranslationsCs } from 'components/SectionAnswers/translations/cs';
 import { ProductCardTranslationsCs } from 'components/ProductCard/translations/cs';
+import { ModalAddAvatarTranslationsCs } from 'components/Modals/ModalAddAvatar/translations/cs';
+import { ModalChangeLoginTranslationsCs } from 'components/Modals/ModalChangeLogin/translations/cs';
+import { ModalChangePasswordTranslationsCs } from 'components/Modals/ModalChangePassword/translations/cs';
+import { ModalChangePhoneNumberTranslationsCs } from 'components/Modals/ModalChangePhoneNumber/translations/cs';
+import { ModalChangePhotoTranslationsCs } from 'components/Modals/ModalChangePhoto/translations/cs';
+import { ModalLogOutTranslationsCs } from 'components/Modals/ModalLogOut/translations/cs';
+import { ModalRemoveProductTranslationsCs } from 'components/Modals/ModalRemoveProduct/translations/cs';
+import { FormAddProductTranslationsCs } from 'components/Forms/FormAddProduct/translations/cs';
 
 export const ComponentTranslationsCs = {
+  formAddProduct: FormAddProductTranslationsCs,
+  modalRemoveProduct: ModalRemoveProductTranslationsCs,
+  modalLogOut: ModalLogOutTranslationsCs,
+  modalChangePhoto: ModalChangePhotoTranslationsCs,
+  modalChangePhoneNumber: ModalChangePhoneNumberTranslationsCs,
+  modalChangePassword: ModalChangePasswordTranslationsCs,
+  modalChangeLogin: ModalChangeLoginTranslationsCs,
+  modalAddAvatar: ModalAddAvatarTranslationsCs,
   productCard: ProductCardTranslationsCs,
   filterOfToys: FilterOfToysTranslationsCs,
   filterType: FilterTypeTranslationsCs,
@@ -56,7 +72,7 @@ export const ComponentTranslationsCs = {
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
 
-  ...ModalRegisterTranslationsCs,
+  modalRegister: ModalRegisterTranslationsCs,
   formRegistrationEmail: FormRegistrationEmailTranslationsCs,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
   authForm: AuthFormTranslationsCs,

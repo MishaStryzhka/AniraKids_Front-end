@@ -11,5 +11,5 @@ export const PagesTranslationsCs = {
   forMenPage: ForMenPageTranslationsCs,
   forChildrenPage: ForChildrenPageTranslationsCs,
   userPage: UserPageTranslationsCs,
-  decorAndToysPage:DecorAndToysPageTranslationsCs,
+  decorAndToysPage: DecorAndToysPageTranslationsCs,
 };

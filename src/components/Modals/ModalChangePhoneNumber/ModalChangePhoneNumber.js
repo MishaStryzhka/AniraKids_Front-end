@@ -11,9 +11,14 @@ import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validPhoneNumberScheme } from 'schemas';
+import { useTranslation } from 'react-i18next';
 
 const ModalChangePhoneNumber = ({ onClick }) => {
   const dispatch = useDispatch();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalChangePhoneNumber',
+  });
 
   const handlePhoneNumberSubmit = values => {
     const { primaryPhoneNumber } = values;
@@ -45,9 +50,9 @@ const ModalChangePhoneNumber = ({ onClick }) => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <ModalTitle>Змінити номер телефону</ModalTitle>
+            <ModalTitle>{t('changePhoneNumber')}</ModalTitle>
             <Label>
-              Номер телефону
+              {t('phoneNumber')}
               <Input
                 type="tel"
                 name="primaryPhoneNumber"
@@ -62,7 +67,7 @@ const ModalChangePhoneNumber = ({ onClick }) => {
                   errors.primaryPhoneNumber}
               </p>
             </Label>
-            <Button type="submit">Зберегти</Button>
+            <Button type="submit">{t('saveButton')}</Button>
           </Form>
         )}
       </Formik>

@@ -29,8 +29,24 @@ import { FilterSortTranslationsEn } from 'components/Filters/FilterSort/translat
 import { FilterTypeTranslationsEn } from 'components/Filters/FilterType/translations/en';
 import { FilterOfToysTranslationsEn } from 'components/Filters/FilterToys/translations/en';
 import { ProductCardTranslationsEn } from 'components/ProductCard/translations/en';
+import { ModalAddAvatarTranslationsEn } from 'components/Modals/ModalAddAvatar/translations/en';
+import { ModalChangeLoginTranslationsEn } from 'components/Modals/ModalChangeLogin/translations/en';
+import { ModalChangePasswordTranslationsEn } from 'components/Modals/ModalChangePassword/translations/en';
+import { ModalChangePhoneNumberTranslationsEn } from 'components/Modals/ModalChangePhoneNumber/translations/en';
+import { ModalChangePhotoTranslationsEn } from 'components/Modals/ModalChangePhoto/translations/en';
+import { ModalLogOutTranslationsEn } from 'components/Modals/ModalLogOut/translations/en';
+import { ModalRemoveProductTranslationsEn } from 'components/Modals/ModalRemoveProduct/translations/en';
+import { FormAddProductTranslationsEn } from 'components/Forms/FormAddProduct/translations/en';
 
 export const ComponentTranslationsEn = {
+  formAddProduct: FormAddProductTranslationsEn,
+  modalRemoveProduct: ModalRemoveProductTranslationsEn,
+  modalLogOut: ModalLogOutTranslationsEn,
+  modalChangePhoto: ModalChangePhotoTranslationsEn,
+  modalChangePhoneNumber: ModalChangePhoneNumberTranslationsEn,
+  modalChangePassword: ModalChangePasswordTranslationsEn,
+  modalChangeLogin: ModalChangeLoginTranslationsEn,
+  modalAddAvatar: ModalAddAvatarTranslationsEn,
   productCard: ProductCardTranslationsEn,
   filterOfToys: FilterOfToysTranslationsEn,
   filterType: FilterTypeTranslationsEn,
@@ -57,7 +73,7 @@ export const ComponentTranslationsEn = {
   searchInput: SearchInputTranslationsEn,
   ...NavigationOverlayTranslationsEn,
   ...UserPageTranslationsEn,
-  ...ModalRegisterTranslationsEn,
+  modalRegister: ModalRegisterTranslationsEn,
   formRegistrationEmail: FormRegistrationEmailTranslationsEn,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsEn,
   authForm: AuthFormTranslationsEn,

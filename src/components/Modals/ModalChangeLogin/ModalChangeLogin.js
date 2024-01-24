@@ -11,9 +11,14 @@ import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validUpdateLoginScheme } from 'schemas';
+import { useTranslation } from 'react-i18next';
 
 const ModalChangeLogin = ({ onClick }) => {
   const dispatch = useDispatch();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalChangeLogin',
+  });
 
   const handleSubmitLogin = values => {
     const { login } = values;
@@ -45,9 +50,9 @@ const ModalChangeLogin = ({ onClick }) => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <ModalTitle>Змінити логін</ModalTitle>
+            <ModalTitle>{t('changeLogin')}</ModalTitle>
             <LabelModal>
-              Логін
+              {t('Login')}
               <InputModal
                 value={values.login}
                 name="login"
@@ -59,7 +64,7 @@ const ModalChangeLogin = ({ onClick }) => {
               />
               <p>{errors.login && touched.login && errors.login}</p>
             </LabelModal>
-            <Button type="submit">Зберегти</Button>
+            <Button type="submit">{t('Save')}</Button>
           </Form>
         )}
       </Formik>

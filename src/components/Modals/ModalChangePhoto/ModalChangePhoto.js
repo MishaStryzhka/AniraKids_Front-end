@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   InputModal,
   LabelModal,
@@ -10,6 +11,10 @@ import {
 import PhotoPlug from 'images/photo-plug.jpg';
 
 const ModalChangePhoto = ({ onClick }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalChangePhoto',
+  });
+
   return (
     <ModalWindow>
       <StyledIconCross
@@ -18,12 +23,12 @@ const ModalChangePhoto = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>Додати фото</ModalTitle>
+      <ModalTitle>{t('addPhoto')}</ModalTitle>
       <Picture>
         <img src={PhotoPlug} alt="Фото-заглушка" />
       </Picture>
       <LabelModal>
-        <InputModal placeholder="Напишіть  Ваше повідомлення..." />
+        <InputModal placeholder={t('textPlaceholder')} />
         <StyledIconSend />
       </LabelModal>
     </ModalWindow>

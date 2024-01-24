@@ -7,9 +7,14 @@ import {
 } from './ModalLogOut.styled';
 import { useDispatch } from 'react-redux';
 import { logOut } from '../../../redux/auth/operations';
+import { useTranslation } from 'react-i18next';
 
 const ModalLogOut = ({ onClick }) => {
   const dispatch = useDispatch();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalLogOut',
+  });
 
   const handleSignOut = () => {
     dispatch(logOut());
@@ -23,10 +28,10 @@ const ModalLogOut = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>Ви дійсно бажаєте вийти?</ModalTitle>
+      <ModalTitle>{t('LogOut')}</ModalTitle>
 
       <Button type="button" onClick={() => handleSignOut()}>
-        Так, вийти
+        {t('yes')}
       </Button>
       <ButtonBack
         type="button"
@@ -34,7 +39,7 @@ const ModalLogOut = ({ onClick }) => {
           onClick();
         }}
       >
-        Назад
+        {t('back')}
       </ButtonBack>
     </ModalWindow>
   );
