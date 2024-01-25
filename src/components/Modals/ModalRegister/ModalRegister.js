@@ -24,7 +24,9 @@ import { useTranslation } from 'react-i18next';
 const ModalRegister = ({ handleCloseModal }) => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
   const [typeRegistration, setTypeRegistration] = useState('email');
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalRegister',
+  });
 
   const [isActiveBtn, setIsActiveBtn] = useState({
     button1: true,

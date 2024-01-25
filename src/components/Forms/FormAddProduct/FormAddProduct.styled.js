@@ -14,6 +14,7 @@ export const Title = styled.h2`
   line-height: 1.4;
   letter-spacing: 0.02px;
   margin-bottom: 16px;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -151,6 +152,7 @@ export const Button = styled.button`
   background-color: transparent;
   border: 1px dashed;
   border-radius: 2px;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor2};
   border-color: ${({ theme }) => theme.color.additionalColorBrown};

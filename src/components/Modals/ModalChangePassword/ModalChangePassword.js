@@ -17,11 +17,16 @@ import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validPasswordScheme } from 'schemas';
+import { useTranslation } from 'react-i18next';
 
 const ModalChangePassword = ({ onClick }) => {
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme } = useAuth();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalChangePassword',
+  });
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -53,9 +58,9 @@ const ModalChangePassword = ({ onClick }) => {
       >
         {({ values, errors, touched, handleChange, handleSubmit }) => (
           <Form onSubmit={handleSubmit}>
-            <ModalTitle>Змінити пароль</ModalTitle>
+            <ModalTitle>{t('changePassword')}</ModalTitle>
             <LabelModal>
-              Ваш пароль
+              {t('yourPassword')}
               <InputModal
                 type={openPassword ? 'text' : 'password'}
                 name="password"
@@ -74,7 +79,7 @@ const ModalChangePassword = ({ onClick }) => {
               </WrapIcon>
             </LabelModal>
             <LabelModal>
-              Новий пароль
+              {t('newPassword')}
               <InputModal
                 type={openPassword ? 'text' : 'password'}
                 name="newPassword"
@@ -97,7 +102,7 @@ const ModalChangePassword = ({ onClick }) => {
               </WrapIcon>
             </LabelModal>
             <LabelModal>
-              Введіть новий пароль ще раз
+              {t('Enter new password')}
               <InputModal
                 type={openPassword ? 'text' : 'password'}
                 name="confirmNewPassword"
@@ -119,7 +124,7 @@ const ModalChangePassword = ({ onClick }) => {
                 )}
               </WrapIcon>
             </LabelModal>
-            <Button type="submit">Зберегти</Button>
+            <Button type="submit">{t('saveButton')}</Button>
           </Form>
         )}
       </Formik>

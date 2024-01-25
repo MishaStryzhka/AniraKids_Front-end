@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   ButtonAgree,
   ButtonReject,
@@ -7,6 +8,9 @@ import {
 } from './ModalRemoveProduct.styled';
 
 const ModalRemoveProduct = ({ onClick }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.modalRemoveProduct',
+  });
   return (
     <ModalWindow>
       <StyledIconCross
@@ -15,14 +19,14 @@ const ModalRemoveProduct = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>Дійсно видалити товар?</ModalTitle>
-      <ButtonAgree>Так</ButtonAgree>
+      <ModalTitle>{t('titleRemoveProduct')}</ModalTitle>
+      <ButtonAgree>{t('yes')}</ButtonAgree>
       <ButtonReject
         onClick={() => {
           onClick();
         }}
       >
-        Ні
+        {t('no')}
       </ButtonReject>
     </ModalWindow>
   );
