@@ -15,4 +15,6 @@ export const ProfileTranslationsUk = {
   saveChanges: 'Зберегти зміни',
   profilePhoto: 'Фото профілю',
   maxFileSize: 'Максимальний розмір файлу - 5 МБ',
+  verify: 'Верифікувати',
+  verified: 'Верифіковано',
 };

@@ -15,4 +15,6 @@ export const ProfileTranslationsEn = {
   saveChanges: 'Save Changes',
   profilePhoto: 'Profile Photo',
   maxFileSize: 'Maximum file size - 5 MB',
+  verify: 'Verify',
+  verified: 'Verified',
 };

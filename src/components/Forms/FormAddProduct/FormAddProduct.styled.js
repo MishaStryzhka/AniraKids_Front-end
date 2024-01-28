@@ -116,6 +116,7 @@ export const Field = styled.input`
   font-weight: 400;
   line-height: 1.43;
   border: 1.5px solid;
+  outline: transparent;
 
   color: ${({ theme }) => theme.color.mainColor3};
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
@@ -126,6 +127,7 @@ export const FieldComments = styled.textarea`
   padding: 16px;
   border-radius: 5px;
   border: 1.5px solid;
+  outline: transparent;
 
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -150,17 +152,12 @@ export const Button = styled.button`
   line-height: 1.43;
   padding: 16px;
   background-color: transparent;
-  border: 1px dashed;
+  border: 1px ${({ $active }) => ($active ? 'solid' : 'dashed')};
   border-radius: 2px;
   text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor2};
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
-
-  border: ${({ $isParamsWoman }) => $isParamsWoman && '1px solid'};
-  border: ${({ $isParamsMan }) => $isParamsMan && '1px solid'};
-  border: ${({ $isParamsChildren }) => $isParamsChildren && '1px solid'};
-  border: ${({ $isParamsDecor }) => $isParamsDecor && '1px solid'};
 `;
 
 export const List = styled.ul`
@@ -185,7 +182,7 @@ export const WrapCategory = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: ${({ $isParamsMan }) => ($isParamsMan ? '48px' : '0')};
+  margin-bottom: ${({ $isCategoryMan }) => ($isCategoryMan ? '48px' : '0')};
 `;
 export const Label = styled.label`
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -380,4 +377,8 @@ export const ButtonSubmit = styled.button`
 
   color: ${({ theme }) => theme.color.mainColor3};
   border-color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const WrapError = styled.div`
+  margin-top: 10px;
 `;

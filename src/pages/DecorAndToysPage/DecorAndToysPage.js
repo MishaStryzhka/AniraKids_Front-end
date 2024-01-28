@@ -12,6 +12,7 @@ import MainContent from 'components/MainContent/MainContent';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
 import FilterOfToys from 'components/Filters/FilterToys/FilterToys';
+import NotFound from 'components/NotFound/NotFound';
 
 const DecorAndToysPage = () => {
   const { t } = useTranslation('translation', {
@@ -32,6 +33,7 @@ const DecorAndToysPage = () => {
         </SideBar>
         <MainContent>
           <FilterSort />
+          <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>
     </Container>

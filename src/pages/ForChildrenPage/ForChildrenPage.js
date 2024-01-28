@@ -15,6 +15,7 @@ import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
 import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
 import FilterType from 'components/Filters/FilterType/FilterType';
+import FilterSort from 'components/Filters/FilterSort/FilterSort';
 
 const ForChildrenPage = () => {
   const { t } = useTranslation('translation', {
@@ -38,6 +39,7 @@ const ForChildrenPage = () => {
           <FilterSizeChildren />
         </SideBar>
         <MainContent>
+          <FilterSort />
           <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>

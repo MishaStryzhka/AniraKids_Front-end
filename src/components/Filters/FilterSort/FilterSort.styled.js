@@ -3,9 +3,13 @@ import styled from 'styled-components';
 
 export const MainItem = styled.li`
   width: 305px;
+  list-style: none;
   display: flex;
   flex-direction: column;
+  position: relative;
   gap: 4px;
+  margin-left: auto;
+  margin-bottom: 24px;
 `;
 
 export const Wrap = styled.div`
@@ -56,4 +60,15 @@ export const StyledIconArrowUp = styled(IconArrow)`
   transform: ${({ $openOutfitsList }) =>
     $openOutfitsList ? 'rotate(270deg)' : 'rotate(90deg)'};
   cursor: pointer;
+`;
+
+export const ButtonCalendar = styled.button`
+  position: absolute;
+  top: 14px;
+  left: -44px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  background-color: transparent;
 `;
