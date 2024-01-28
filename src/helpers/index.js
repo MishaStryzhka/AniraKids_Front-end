@@ -10,6 +10,7 @@ const { arrayOfToysProduct } = require('./dateForProduct');
 const { arraySizeAdult } = require('./dateForProduct');
 const { arrayAnswers } = require('./arrayAnswers');
 const { arrayFamilyLookMen } = require('./dateForProduct');
+const { arraySaleOrRent } = require('./dateForProduct');
 const { detectLanguageFromStore } = require('./detectLanguageFromStore');
 
 module.exports = {
@@ -25,5 +26,6 @@ module.exports = {
   arrayOfToysProduct,
   arraySizeAdult,
   arrayAnswers,
+  arraySaleOrRent,
   detectLanguageFromStore,
 };

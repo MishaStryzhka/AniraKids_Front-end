@@ -15,4 +15,7 @@ export const ProfileTranslationsCs = {
   saveChanges: 'Uložit změny',
   profilePhoto: 'Profilová fotka',
   maxFileSize: 'Maximální velikost souboru - 5 MB',
+  verify: 'Ověřit',
+
+  verified: 'Ověřeno',
 };
