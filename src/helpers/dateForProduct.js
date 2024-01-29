@@ -368,3 +368,8 @@ export const arraySizeAdult = [
     searchSize: 'XXXL',
   },
 ];
+
+export const arraySaleOrRent = [
+  { variant: 'Sale', price: 'Price' },
+  { variant: 'Rental', price: 'Price' },
+];

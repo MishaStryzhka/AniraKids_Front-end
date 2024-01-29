@@ -39,10 +39,13 @@ import {
   LabelChildren,
   WrapperPhotos,
   PhotoImg,
+  WrapError,
+  // WrapCondition,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 import { validationProductSchema } from 'schemas';
+import { ErrorMessage } from '../Form.styled';
 import {
   arrayAgeProduct,
   arrayFamilyLookProduct,
@@ -54,16 +57,13 @@ import {
   arrayColorsProduct,
   arraySizeAdult,
   arrayFamilyLookMen,
+  // arraySaleOrRent,
 } from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 
 const FormAddProduct = () => {
-  const [isParamsWoman, setIsParamsWoman] = useState(false);
-  const [isParamsMan, setIsParamsMan] = useState(false);
-  const [isParamsChildren, setIsParamsChildren] = useState(false);
-  const [isParamsDecor, setIsParamsDecor] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
 
@@ -133,13 +133,15 @@ const FormAddProduct = () => {
 
   // ===========
   const handleFormSubmit = values => {
-    console.log(values);
+    console.log('I am here');
+    console.log('Form values:', values);
   };
 
   return (
     <Formik
       initialValues={{
         photoUrls: photoOrder.map(i => selectedPhotos[i]),
+        category: '',
         videoUrl: '',
         name: '',
         description: '',
@@ -152,14 +154,17 @@ const FormAddProduct = () => {
         childSize: '',
         decor: '',
         color: '',
-        salePrice: '',
-        rentalPrice: '',
-        check: '',
+        saleOrRental: '',
+        sale: '',
+        rental: '',
+        priceRental: '',
+        priceSale: '',
+        isAddPhoto: '',
       }}
       validationSchema={validationProductSchema}
       onSubmit={handleFormSubmit}
     >
-      {e => {
+      {formikProps => {
         const {
           values,
           errors,
@@ -168,8 +173,11 @@ const FormAddProduct = () => {
           setFieldValue,
           handleChange,
           handleSubmit,
-        } = e;
-        console.log('values', values);
+        } = formikProps;
+        console.log(errors);
+        const handleCategoryButtonClick = category => {
+          formikProps.setFieldValue('category', category);
+        };
 
         return (
           <Form onSubmit={handleSubmit}>
@@ -255,8 +263,13 @@ const FormAddProduct = () => {
                   value={values.videoUrl}
                   type="text"
                   placeholder="https://www.youtube.com/watch?..."
+                  required
                 />
-                <p>{errors.videoUrl && touched.videoUrl && errors.videoUrl}</p>
+                <ErrorMessage>
+                  {errors.videoUrl &&
+                    touched.videoUrl &&
+                    t(`${errors.videoUrl}`)}
+                </ErrorMessage>
               </LabelDescription>
             </div>
             <div>
@@ -269,8 +282,11 @@ const FormAddProduct = () => {
                   value={values.name}
                   type="text"
                   placeholder={t('namePlaceholder')}
+                  required
                 />
-                <p>{errors.name && touched.name && errors.name}</p>
+                <ErrorMessage>
+                  {errors.name && touched.name && t(`${errors.name}`)}
+                </ErrorMessage>
               </LabelDescription>
 
               <LabelDescription>
@@ -281,12 +297,13 @@ const FormAddProduct = () => {
                   value={values.description}
                   type="text"
                   placeholder={t('descriptionPlaceholder')}
+                  required
                 />
-                <p>
+                <ErrorMessage>
                   {errors.description &&
                     touched.description &&
-                    errors.description}
-                </p>
+                    t(`${errors.description}`)}
+                </ErrorMessage>
               </LabelDescription>
 
               <LabelDescription>
@@ -298,50 +315,44 @@ const FormAddProduct = () => {
                   type="text"
                   placeholder={t('brandPlaceholder')}
                 />
-                <p>{errors.brand && touched.brand && errors.brand}</p>
+                <ErrorMessage>
+                  {errors.brand && touched.brand && t(`${errors.brand}`)}
+                </ErrorMessage>
               </LabelDescription>
             </div>
+
+            {/* Buttons of category */}
+
             <div>
               <Title>{t('Choose a category')}</Title>
               <GeneralList>
                 <li>
                   <Button
-                    $isParamsWoman={isParamsWoman}
+                    $active={values.category === 'women`s category'}
                     type="button"
-                    onClick={() => {
-                      setIsParamsWoman(true);
-                      setIsParamsMan(false);
-                      setIsParamsChildren(false);
-                      setIsParamsDecor(false);
-                    }}
+                    onClick={() =>
+                      handleCategoryButtonClick('women`s category')
+                    }
                   >
                     {t("Women's Clothing")}
                   </Button>
                 </li>
                 <li>
                   <Button
-                    $isParamsMan={isParamsMan}
+                    $active={values.category === 'men`s category'}
                     type="button"
-                    onClick={() => {
-                      setIsParamsMan(true);
-                      setIsParamsWoman(false);
-                      setIsParamsChildren(false);
-                      setIsParamsDecor(false);
-                    }}
+                    onClick={() => handleCategoryButtonClick('men`s category')}
                   >
                     {t("Men's Suits")}
                   </Button>
                 </li>
                 <li>
                   <Button
-                    $isParamsChildren={isParamsChildren}
+                    $active={values.category === 'children`s category'}
                     type="button"
-                    onClick={() => {
-                      setIsParamsChildren(true);
-                      setIsParamsMan(false);
-                      setIsParamsWoman(false);
-                      setIsParamsDecor(false);
-                    }}
+                    onClick={() =>
+                      handleCategoryButtonClick('children`s category')
+                    }
                   >
                     {t("Children's Clothing")}
                   </Button>
@@ -349,46 +360,56 @@ const FormAddProduct = () => {
 
                 <li>
                   <Button
-                    $isParamsDecor={isParamsDecor}
+                    $active={values.category === 'decoration category'}
                     type="button"
-                    onClick={() => {
-                      setIsParamsChildren(false);
-                      setIsParamsMan(false);
-                      setIsParamsWoman(false);
-                      setIsParamsDecor(true);
-                    }}
+                    onClick={() =>
+                      handleCategoryButtonClick('decoration category')
+                    }
                   >
                     {t('Decor and Toys')}
                   </Button>
                 </li>
               </GeneralList>
-              {isParamsWoman && (
+              <WrapError>
+                <ErrorMessage>
+                  {errors.category &&
+                    touched.category &&
+                    t(`${errors.category}`)}
+                </ErrorMessage>
+              </WrapError>
+
+              {/* WOMEN`S CATEGORY */}
+
+              {values.category === 'women`s category' && (
                 <Wrap>
-                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
                       <Description>Family look</Description>
                       <List>
                         {arrayFamilyLookProduct.map(
                           ({ valueVariant }, index) => (
-                            <li key={index}>
-                              <Label>
-                                <Box>
-                                  {values.familyLook === valueVariant && (
-                                    <IconCheck />
-                                  )}
-                                </Box>
-                                {t(valueVariant)}
-                                <Input
-                                  type="radio"
-                                  name="familyLook"
-                                  value={valueVariant}
-                                  onChange={handleChange}
-                                />
-                              </Label>
-                            </li>
+                            <Label key={index}>
+                              <Box>
+                                {values.familyLook === valueVariant && (
+                                  <IconCheck />
+                                )}
+                              </Box>
+                              {t(valueVariant)}
+                              <Input
+                                type="radio"
+                                name="familyLook"
+                                value={valueVariant}
+                                onChange={handleChange}
+                              />
+                            </Label>
                           )
                         )}
+
+                        <ErrorMessage>
+                          {errors.familyLook &&
+                            touched.familyLook &&
+                            t(errors.familyLook)}
+                        </ErrorMessage>
                       </List>
                     </WrapCategory>
                     <WrapCategory>
@@ -414,6 +435,11 @@ const FormAddProduct = () => {
                             </li>
                           )
                         )}
+                        <ErrorMessage>
+                          {errors.isPregnancy &&
+                            touched.isPregnancy &&
+                            t(errors.isPregnancy)}
+                        </ErrorMessage>
                       </List>
                     </WrapCategory>
                   </BoxCategory>
@@ -435,12 +461,21 @@ const FormAddProduct = () => {
                       </li>
                     ))}
                   </ListHorizont>
+                  <WrapError>
+                    <ErrorMessage>
+                      {errors.size && touched.size && t(errors.size)}
+                    </ErrorMessage>
+                  </WrapError>
                 </Wrap>
               )}
-              {isParamsMan && (
+
+              {/* MEN`S CATEGORY */}
+
+              {values.category === 'men`s category' && (
                 <Wrap>
-                  {/* <Title>{t('Choose a category')}</Title> */}
-                  <WrapCategory $isParamsMan={isParamsMan}>
+                  <WrapCategory
+                    $isCategoryMan={values.category === 'men`s category'}
+                  >
                     <Description>Family look</Description>
                     <List>
                       {arrayFamilyLookMen.map(({ valueVariant }, index) => (
@@ -462,6 +497,13 @@ const FormAddProduct = () => {
                         </li>
                       ))}
                     </List>
+                    <WrapError>
+                      <ErrorMessage>
+                        {errors.familyLook &&
+                          touched.familyLook &&
+                          t(`${errors.familyLook}`)}
+                      </ErrorMessage>
+                    </WrapError>
                   </WrapCategory>
                   <Title>{t('Specify the size')}</Title>
                   <ListHorizont>
@@ -481,11 +523,18 @@ const FormAddProduct = () => {
                       </li>
                     ))}
                   </ListHorizont>
+                  <WrapError>
+                    <ErrorMessage>
+                      {errors.size && touched.size && t(`${errors.size}`)}
+                    </ErrorMessage>
+                  </WrapError>
                 </Wrap>
               )}
-              {isParamsChildren && (
+
+              {/* CHILDREN`S CATEGORY */}
+
+              {values.category === 'children`s category' && (
                 <Wrap>
-                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
                       <Description>{t('Subject')}</Description>
@@ -509,6 +558,9 @@ const FormAddProduct = () => {
                           )
                         )}
                       </List>
+                      <ErrorMessage>
+                        {errors.subject && touched.subject && t(errors.subject)}
+                      </ErrorMessage>
                     </WrapCategory>
                   </BoxCategory>
                   <Title>{t('Age')}</Title>
@@ -527,19 +579,24 @@ const FormAddProduct = () => {
                       </LabelChildren>
                     ))}
                   </WrapChildrenParams>
+                  <WrapError>
+                    <ErrorMessage>
+                      {errors.age && touched.age && t(`${errors.age}`)}
+                    </ErrorMessage>
+                  </WrapError>
+
                   <Title>{t('Size')}</Title>
                   <WrapChildrenSize>
                     {arraySizeChildrenProduct.map(
                       ({ descriptionSize, valueSize }, index) => (
                         <LabelChildren key={index}>
-                          <BoxSize $check={values.size === valueSize}>
+                          <BoxSize $check={values.childSize === valueSize}>
                             {descriptionSize}
                             {t('sizecm')}
                           </BoxSize>
-
                           <Input
                             type="radio"
-                            name="size"
+                            name="childSize"
                             value={valueSize}
                             onChange={handleChange}
                           />
@@ -547,11 +604,20 @@ const FormAddProduct = () => {
                       )
                     )}
                   </WrapChildrenSize>
+                  <WrapError>
+                    <ErrorMessage>
+                      {errors.childSize &&
+                        touched.childSize &&
+                        t(errors.childSize)}
+                    </ErrorMessage>
+                  </WrapError>
                 </Wrap>
               )}
-              {isParamsDecor && (
+
+              {/* DECORATION CATEGORY */}
+
+              {values.category === 'decoration category' && (
                 <Wrap>
-                  {/* <Title>{t('Choose a category')}</Title> */}
                   <BoxCategory>
                     <WrapCategory>
                       <Description>{t('Decor')}</Description>
@@ -571,9 +637,15 @@ const FormAddProduct = () => {
                           </Label>
                         ))}
                       </List>
+                      <WrapError>
+                        <ErrorMessage>
+                          {errors.decor && touched.decor && t(errors.decor)}
+                        </ErrorMessage>
+                      </WrapError>
                     </WrapCategory>
                     <WrapCategory>
                       <Description>{t('Toys')}</Description>
+
                       <List>
                         {arrayOfToysProduct.map(({ typeOfToys }, index) => (
                           <Label key={index}>
@@ -588,15 +660,21 @@ const FormAddProduct = () => {
                               onChange={handleChange}
                             />
                           </Label>
-                          //  variantOfToys: 'Роботи і трансформери',
-                          // typeOfToys:
                         ))}
                       </List>
+                      <WrapError>
+                        <ErrorMessage>
+                          {errors.toys && touched.toys && t(errors.toys)}
+                        </ErrorMessage>
+                      </WrapError>
                     </WrapCategory>
                   </BoxCategory>
                 </Wrap>
               )}
             </div>
+
+            {/* Сolor of product */}
+
             <div>
               <Title>{t('Color')}</Title>
               <ListColor>
@@ -618,7 +696,13 @@ const FormAddProduct = () => {
                 ))}
               </ListColor>
               <TextInstruction>{t('descriptionColor')}</TextInstruction>
+              <WrapError>
+                <ErrorMessage>
+                  {errors.color && touched.color && t(errors.color)}
+                </ErrorMessage>
+              </WrapError>
             </div>
+            {/* Rental or Sale of Product */}
             <div>
               <Title>{t('title rent-sale')}</Title>
               <GeneralWrap>
@@ -629,8 +713,10 @@ const FormAddProduct = () => {
                     <Input
                       type="radio"
                       name="rental"
-                      value="true"
-                      onChange={handleChange}
+                      value={values.rental === 'true' ? 'false' : 'true'}
+                      onChange={e => {
+                        setFieldValue('rental', e.target.value);
+                      }}
                     />
                   </LabelStatus>
                   <LabelPrice>
@@ -651,8 +737,10 @@ const FormAddProduct = () => {
                     <Input
                       type="radio"
                       name="sale"
-                      value="true"
-                      onChange={handleChange}
+                      value={values.sale === 'true' ? 'false' : 'true'}
+                      onChange={e => {
+                        setFieldValue('sale', e.target.value);
+                      }}
                     />
                   </LabelStatus>
                   <LabelPrice>
@@ -668,6 +756,9 @@ const FormAddProduct = () => {
                 </WrapCondition>
               </GeneralWrap>
             </div>
+
+            {/* KEYWORDS of Product */}
+
             <div>
               <Title>{t('keywords')}</Title>
               <Description>{t('labelKeywords')}</Description>
@@ -681,13 +772,16 @@ const FormAddProduct = () => {
               />
               <TextInstruction>{t('addsKeywords')}</TextInstruction>
             </div>
+
+            {/*  AGREE ADD PHOTO of Product */}
+
             <LabelStatus>
               <Box>{values.check === 'true' && <IconCheck />}</Box>
               {t('yourAgree')}
               <StyledNavLink>{t('linkAgree')}</StyledNavLink>
               <Input
                 type="radio"
-                name="check"
+                name="isAddPhoto"
                 value="true"
                 onChange={handleChange}
               />

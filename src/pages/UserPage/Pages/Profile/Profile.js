@@ -244,14 +244,14 @@ const Profile = () => {
                       <IconPencil />
                     </ButtonEdit>
                     {user.emailVerified ? (
-                      <p>Верифіковано</p>
+                      <p>{t('verified')}</p>
                     ) : (
                       <button
                         type="buttom"
                         title="Верифікувати пошту"
                         onClick={() => verifyEmail()}
                       >
-                        Верифікувати
+                        {t('verify')}
                       </button>
                     )}
                   </Wrapper>
