@@ -37,9 +37,15 @@ import { ModalChangePhotoTranslationsUk } from 'components/Modals/ModalChangePho
 import { ModalLogOutTranslationsUk } from 'components/Modals/ModalLogOut/translations/uk';
 import { ModalRemoveProductTranslationsUk } from 'components/Modals/ModalRemoveProduct/translations/uk';
 import { FormAddProductTranslationsUk } from 'components/Forms/FormAddProduct/translations/uk';
+import { ModalBecomeLandlordTranslationsUk } from 'components/Modals/ModalBecomeLandlord/translations/uk';
 
 export const ComponentTranslationsUk = {
   formAddProduct: FormAddProductTranslationsUk,
+  formRegistrationEmail: FormRegistrationEmailTranslationsUk,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
+  authForm: AuthFormTranslationsUk,
+
+  // modals
   modalRemoveProduct: ModalRemoveProductTranslationsUk,
   modalLogOut: ModalLogOutTranslationsUk,
   modalChangePhoto: ModalChangePhotoTranslationsUk,
@@ -47,7 +53,11 @@ export const ComponentTranslationsUk = {
   modalChangePassword: ModalChangePasswordTranslationsUk,
   modalChangeLogin: ModalChangeLoginTranslationsUk,
   modalAddAvatar: ModalAddAvatarTranslationsUk,
-  productCard: ProductCardTranslationsUk,
+  modalChangeEmail: ModalChangeEmailTranslationsUk,
+  modalRegister: ModalRegisterTranslationsUk,
+  modalBecomeLandlord: ModalBecomeLandlordTranslationsUk,
+
+  // filters
   filterOfToys: FilterOfToysTranslationsUk,
   filterType: FilterTypeTranslationsUk,
   filterSort: FilterSortTranslationsUk,
@@ -61,6 +71,8 @@ export const ComponentTranslationsUk = {
   filterDecor: FilterDecorTranslationsUk,
   filterColor: FilterColorTranslationsUk,
   filterAge: FilterAgeTranslationsUk,
+
+  productCard: ProductCardTranslationsUk,
   appBar: AppBarTranslationsUk,
   sectionHero: SectionHeroTranslationsUk,
   sectionAboutAniraK: SectionAboutAniraKTranslationsUk,
@@ -73,9 +85,4 @@ export const ComponentTranslationsUk = {
   searchInput: SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
-  modalRegister: ModalRegisterTranslationsUk,
-  formRegistrationEmail: FormRegistrationEmailTranslationsUk,
-  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
-  authForm: AuthFormTranslationsUk,
-  modalChangeEmail: ModalChangeEmailTranslationsUk,
 };

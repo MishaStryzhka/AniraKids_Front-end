@@ -32,9 +32,7 @@ export const StyledNavLink = styled(NavLink)`
 `;
 
 export const StyledSecondButton = styled(NavLink)`
-  position: absolute;
-  right: 0;
-  top: 24px;
+  ${({ to }) => to && 'position: absolute; right: 0; top: 24px;'}
 
   box-sizing: border-box;
   width: 305px;

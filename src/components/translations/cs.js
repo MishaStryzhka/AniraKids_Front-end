@@ -36,17 +36,26 @@ import { ModalChangePhotoTranslationsCs } from 'components/Modals/ModalChangePho
 import { ModalLogOutTranslationsCs } from 'components/Modals/ModalLogOut/translations/cs';
 import { ModalRemoveProductTranslationsCs } from 'components/Modals/ModalRemoveProduct/translations/cs';
 import { FormAddProductTranslationsCs } from 'components/Forms/FormAddProduct/translations/cs';
+import { ModalBecomeLandlordTranslationsCs } from 'components/Modals/ModalBecomeLandlord/translations/cs';
 
 export const ComponentTranslationsCs = {
   formAddProduct: FormAddProductTranslationsCs,
+
+  // modals
   modalRemoveProduct: ModalRemoveProductTranslationsCs,
   modalLogOut: ModalLogOutTranslationsCs,
   modalChangePhoto: ModalChangePhotoTranslationsCs,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsCs,
+  modalChangeEmail: ModalChangeEmailTranslationsCs,
   modalChangePassword: ModalChangePasswordTranslationsCs,
   modalChangeLogin: ModalChangeLoginTranslationsCs,
   modalAddAvatar: ModalAddAvatarTranslationsCs,
+  modalRegister: ModalRegisterTranslationsCs,
+  modalBecomeLandlord: ModalBecomeLandlordTranslationsCs,
+
   productCard: ProductCardTranslationsCs,
+
+  // filters
   filterOfToys: FilterOfToysTranslationsCs,
   filterType: FilterTypeTranslationsCs,
   filterSort: FilterSortTranslationsCs,
@@ -60,6 +69,7 @@ export const ComponentTranslationsCs = {
   filterDecor: FilterDecorTranslationsCs,
   filterColor: FilterColorTranslationsCs,
   filterAge: FilterAgeTranslationsCs,
+
   appBar: AppBarTranslationsCs,
   sectionHero: SectionHeroTranslationsCs,
   sectionAboutAniraK: SectionAboutAniraKTranslationsCs,
@@ -72,9 +82,7 @@ export const ComponentTranslationsCs = {
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
 
-  modalRegister: ModalRegisterTranslationsCs,
   formRegistrationEmail: FormRegistrationEmailTranslationsCs,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
   authForm: AuthFormTranslationsCs,
-  modalChangeEmail: ModalChangeEmailTranslationsCs,
 };

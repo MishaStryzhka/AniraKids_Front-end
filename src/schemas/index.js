@@ -12,6 +12,9 @@ const { validUpdateLoginScheme } = require('./updateUserLoginScheme');
 const { validPhoneNumberScheme } = require('./updateUserPhoneNumberScheme');
 const { validPasswordScheme } = require('./updateUserPasswordScheme');
 const { validationProductSchema } = require('./validationProductScheme');
+const {
+  validModalBecomeLandlordScheme,
+} = require('./validModalBecomeLandlordScheme');
 
 module.exports = {
   validationProfileSchema,
@@ -23,4 +26,5 @@ module.exports = {
   validPhoneNumberScheme,
   validPasswordScheme,
   validationProductSchema,
+  validModalBecomeLandlordScheme,
 };

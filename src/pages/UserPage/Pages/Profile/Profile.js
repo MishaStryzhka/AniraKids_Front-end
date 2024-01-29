@@ -5,13 +5,13 @@ import {
   AvatarDescription,
   AvatarLabel,
   AvatarWrap,
-  AvaterTitle,
   ButtonEdit,
   ButtonShow,
   InputText,
   Label,
   Placeholder,
   ProfileForm,
+  SecondWrap,
   StyledButton,
   Wrap,
   Wrapper,
@@ -34,6 +34,8 @@ import {
   updateUserInfo,
 } from '../../../../redux/auth/operations';
 import { useTranslation } from 'react-i18next';
+import { StyledSecondButton } from 'components/NavigationOverlay/NavigationOverlay.styled';
+import ModalBecomeLandlord from 'components/Modals/ModalBecomeLandlord/ModalBecomeLandlord';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
@@ -47,6 +49,8 @@ const Profile = () => {
   const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
     useState(false);
   const [isOpenModalChangeEmail, setIsOpenModalChangeEmail] = useState(false);
+  const [isOpenModalBecomeLandlord, setIsOpenModalBecomeLandlord] =
+    useState(false);
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
@@ -73,7 +77,6 @@ const Profile = () => {
         avatarUrl: user?.avatar || '',
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
-        patronymic: user?.patronymic || '',
         companyName: user?.companyName || '',
         nickname: user?.nickname || '',
         primaryPhoneNumber: '',
@@ -129,24 +132,6 @@ const Profile = () => {
                     value={values.firstName}
                     name="firstName"
                     placeholder="Стрижка"
-                    onChange={handleChange}
-                  />
-                )}
-              </Label>
-
-              <Label>
-                <Placeholder>{t('patronymicOptional')}</Placeholder>
-                {user?.patronymic ? (
-                  <Wrapper>
-                    <InputText>{user?.patronymic}</InputText>
-                  </Wrapper>
-                ) : (
-                  <InputField
-                    type="text"
-                    id="patronymic"
-                    value={values.patronymic}
-                    name="patronymic"
-                    placeholder="Михайлівна"
                     onChange={handleChange}
                   />
                 )}
@@ -359,50 +344,64 @@ const Profile = () => {
                 </StyledButton>
               )}
             </Wrap>
-            <AvatarLabel>
-              <Field
-                style={{ display: 'none' }}
-                type="file"
-                id="avatarUrl"
-                value=""
-                name="avatarUrl"
-                onChange={e => {
-                  setTouched({ ...touched, avatarUrl: true });
-                  isChangeAvatarUrl(e);
-                }}
-              />
-              <AvatarWrap $avatar={values.avatarUrl} htmlFor="avatarUrl">
-                {values.avatarUrl ? (
-                  <Avatar
-                    width={197}
-                    height={197}
-                    src={
-                      typeof values.avatarUrl === 'object'
-                        ? URL.createObjectURL(values.avatarUrl)
-                        : values.avatarUrl
-                    }
-                    alt="avatar"
-                  />
-                ) : (
-                  <img src={AvatarImage} alt="avatar" />
-                )}
-              </AvatarWrap>
-              <AvaterTitle>{t('profilePhoto')}</AvaterTitle>
-              <AvatarDescription>{t('maxFileSize')}</AvatarDescription>
-              {isOpenModalAddAvatar && (
-                <Modal
-                  onClick={() => {
-                    setIsOpenModalAddAvatar(false);
+            <SecondWrap>
+              <AvatarLabel>
+                <Field
+                  style={{ display: 'none' }}
+                  type="file"
+                  id="avatarUrl"
+                  value=""
+                  name="avatarUrl"
+                  onChange={e => {
+                    setTouched({ ...touched, avatarUrl: true });
+                    isChangeAvatarUrl(e);
                   }}
-                >
-                  <ModalAddAvatar
-                    avatar={avatar}
-                    setFieldValue={setFieldValue}
-                    setIsOpenModalAddAvatar={setIsOpenModalAddAvatar}
-                  />
+                />
+                <AvatarWrap $avatar={values.avatarUrl} htmlFor="avatarUrl">
+                  {values.avatarUrl ? (
+                    <Avatar
+                      width={197}
+                      height={197}
+                      src={
+                        typeof values.avatarUrl === 'object'
+                          ? URL.createObjectURL(values.avatarUrl)
+                          : values.avatarUrl
+                      }
+                      alt="avatar"
+                    />
+                  ) : (
+                    <img src={AvatarImage} alt="avatar" />
+                  )}
+                </AvatarWrap>
+                <Placeholder>{t('profilePhoto')}</Placeholder>
+                <AvatarDescription>{t('maxFileSize')}</AvatarDescription>
+                {isOpenModalAddAvatar && (
+                  <Modal
+                    onClick={() => {
+                      setIsOpenModalAddAvatar(false);
+                    }}
+                  >
+                    <ModalAddAvatar
+                      avatar={avatar}
+                      setFieldValue={setFieldValue}
+                      setIsOpenModalAddAvatar={setIsOpenModalAddAvatar}
+                    />
+                  </Modal>
+                )}
+              </AvatarLabel>
+              <StyledSecondButton
+                onClick={() => setIsOpenModalBecomeLandlord(true)}
+              >
+                {t('BECOME_LANDLORD')}
+              </StyledSecondButton>
+              {isOpenModalBecomeLandlord && (
+                <Modal onClick={() => setIsOpenModalBecomeLandlord(false)}>
+                  <ModalBecomeLandlord
+                    onClick={() => setIsOpenModalBecomeLandlord(false)}
+                  ></ModalBecomeLandlord>
                 </Modal>
               )}
-            </AvatarLabel>
+            </SecondWrap>
           </ProfileForm>
         );
       }}

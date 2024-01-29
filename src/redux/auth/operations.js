@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
-// axios.defaults.baseURL = 'http://Localhost:4000';
+// axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
+axios.defaults.baseURL = 'http://Localhost:4000';
 
 // Utility to add JWT
 const setAuthHeader = token => {
@@ -107,7 +107,6 @@ export const updateUserInfo = createAsyncThunk(
       avatarUrl: avatar,
       firstName,
       lastName,
-      patronymic,
       companyName,
       nickname,
       primaryPhoneNumber,
@@ -123,7 +122,6 @@ export const updateUserInfo = createAsyncThunk(
       avatar && formData.append('avatar', avatar);
       firstName && formData.append('firstName', firstName);
       lastName && formData.append('lastName', lastName);
-      patronymic && formData.append('patronymic', patronymic);
       companyName && formData.append('companyName', companyName);
       ico && formData.append('ico', ico);
       nickname && formData.append('nickname', nickname);
