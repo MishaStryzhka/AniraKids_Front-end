@@ -15,11 +15,7 @@ export const ProfileTranslationsCs = {
   saveChanges: 'Uložit změny',
   profilePhoto: 'Profilová fotka',
   maxFileSize: 'Maximální velikost souboru - 5 MB',
-<<<<<<< HEAD
   BECOME_LANDLORD: 'STÁT SE PRONAJÍMATELEM',
-=======
   verify: 'Ověřit',
-
   verified: 'Ověřeno',
->>>>>>> 3da5692cd097a6124c9b65e687ac7e327b6ab1a1
 };
