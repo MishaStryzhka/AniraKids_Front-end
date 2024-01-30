@@ -13,8 +13,8 @@ const { validPhoneNumberScheme } = require('./updateUserPhoneNumberScheme');
 const { validPasswordScheme } = require('./updateUserPasswordScheme');
 const { validationProductSchema } = require('./validationProductScheme');
 const {
-  validModalBecomeLandlordScheme,
-} = require('./validModalBecomeLandlordScheme');
+  validationBillingDetailsScheme,
+} = require('./validationBillingDetailsScheme');
 
 module.exports = {
   validationProfileSchema,
@@ -26,5 +26,5 @@ module.exports = {
   validPhoneNumberScheme,
   validPasswordScheme,
   validationProductSchema,
-  validModalBecomeLandlordScheme,
+  validationBillingDetailsScheme,
 };

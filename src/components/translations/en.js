@@ -38,6 +38,7 @@ import { ModalLogOutTranslationsEn } from 'components/Modals/ModalLogOut/transla
 import { ModalRemoveProductTranslationsEn } from 'components/Modals/ModalRemoveProduct/translations/en';
 import { FormAddProductTranslationsEn } from 'components/Forms/FormAddProduct/translations/en';
 import { ModalBecomeLandlordTranslationsEn } from 'components/Modals/ModalBecomeLandlord/translations/en';
+import { FormBillingDetailsTranslationsEn } from 'components/Forms/FormBillingDetails/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -45,6 +46,7 @@ export const ComponentTranslationsEn = {
   formRegistrationEmail: FormRegistrationEmailTranslationsEn,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsEn,
   authForm: AuthFormTranslationsEn,
+  formBillingDetails: FormBillingDetailsTranslationsEn,
 
   // modals
   modalRemoveProduct: ModalRemoveProductTranslationsEn,
@@ -58,7 +60,6 @@ export const ComponentTranslationsEn = {
   modalRegister: ModalRegisterTranslationsEn,
   modalChangeEmail: ModalChangeEmailTranslationsEn,
 
-  
   // filters
   filterOfToys: FilterOfToysTranslationsEn,
   filterType: FilterTypeTranslationsEn,
@@ -73,7 +74,7 @@ export const ComponentTranslationsEn = {
   filterDecor: FilterDecorTranslationsEn,
   filterColor: FilterColorTranslationsEn,
   filterAge: FilterAgeTranslationsEn,
-  
+
   productCard: ProductCardTranslationsEn,
   appBar: AppBarTranslationsEn,
   sectionHero: SectionHeroTranslationsEn,

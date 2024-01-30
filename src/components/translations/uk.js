@@ -38,12 +38,15 @@ import { ModalLogOutTranslationsUk } from 'components/Modals/ModalLogOut/transla
 import { ModalRemoveProductTranslationsUk } from 'components/Modals/ModalRemoveProduct/translations/uk';
 import { FormAddProductTranslationsUk } from 'components/Forms/FormAddProduct/translations/uk';
 import { ModalBecomeLandlordTranslationsUk } from 'components/Modals/ModalBecomeLandlord/translations/uk';
+import { FormBillingDetailsTranslationsUk } from 'components/Forms/FormBillingDetails/translations/uk';
 
 export const ComponentTranslationsUk = {
+  // forms
   formAddProduct: FormAddProductTranslationsUk,
   formRegistrationEmail: FormRegistrationEmailTranslationsUk,
   formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsUk,
   authForm: AuthFormTranslationsUk,
+  formBillingDetails: FormBillingDetailsTranslationsUk,
 
   // modals
   modalRemoveProduct: ModalRemoveProductTranslationsUk,

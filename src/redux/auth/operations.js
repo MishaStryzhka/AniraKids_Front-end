@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
-// axios.defaults.baseURL = 'http://Localhost:4000';
+// axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
+axios.defaults.baseURL = 'http://Localhost:4000';
 
 // Utility to add JWT
 const setAuthHeader = token => {
@@ -142,6 +142,28 @@ export const updateUserInfo = createAsyncThunk(
       return response.data;
     } catch (error) {
       // console.log('error', error);
+
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
+export const updateUserBillingDetails = createAsyncThunk(
+  'auth/update-billing-details',
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.patch(
+        `/api/users/current/update-billing-details`,
+        credentials
+      );
+      console.log('response.data', response.data);
+
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,

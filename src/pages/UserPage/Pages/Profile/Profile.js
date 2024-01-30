@@ -36,12 +36,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import { StyledSecondButton } from 'components/NavigationOverlay/NavigationOverlay.styled';
 import ModalBecomeLandlord from 'components/Modals/ModalBecomeLandlord/ModalBecomeLandlord';
+import { BeatLoader } from 'react-spinners';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.userPage.profilePage',
   });
-  const { user, currentTheme } = useAuth();
+  const { user, currentTheme, isLoading } = useAuth();
   let { error } = useAuth();
 
   const [avatar, setAvatar] = useState(null);
@@ -98,6 +99,8 @@ const Profile = () => {
         handleBlur,
         handleSubmit,
       }) => {
+        console.log('errors', errors);
+
         return (
           <ProfileForm>
             <Wrap>
@@ -114,7 +117,10 @@ const Profile = () => {
                     value={values.lastName}
                     name="lastName"
                     placeholder="Каріна"
-                    onChange={handleChange}
+                    onChange={e => {
+                      error = null;
+                      handleChange(e);
+                    }}
                   />
                 )}
               </Label>
@@ -132,44 +138,13 @@ const Profile = () => {
                     value={values.firstName}
                     name="firstName"
                     placeholder="Стрижка"
-                    onChange={handleChange}
+                    onChange={e => {
+                      error = null;
+                      handleChange(e);
+                    }}
                   />
                 )}
               </Label>
-
-              {/* <Label>
-                <Placeholder>Назва компанії</Placeholder>
-                {user?.companyName ? (
-                  <Wrapper>
-                    <InputText>{user?.companyName}</InputText>
-                  </Wrapper>
-                ) : (
-                  <InputField
-                    type="text"
-                    id="companyName"
-                    value={values.companyName}
-                    name="companyName"
-                    placeholder="aniraKids"
-                    onChange={handleChange}
-                  />
-                )}
-              </Label> */}
-
-              {/* <Label>
-                <Placeholder>IČO</Placeholder>
-                {user?.ico ? (
-                  <Wrapper><InputText>{user?.ico}</InputText></Wrapper>
-                ) : (
-                  <InputField
-                    type="number"
-                    id="ico"
-                    value={values.ico}
-                    name="ico"
-                    placeholder="19970561"
-                    onChange={handleChange}
-                  />
-                )}
-              </Label> */}
 
               <Label>
                 <Placeholder>Nickname</Placeholder>
@@ -189,7 +164,7 @@ const Profile = () => {
                         e.currentTarget.value.replaceAll('@', '').length < 1
                           ? ''
                           : `@${e.currentTarget.value.replaceAll('@', '')}`;
-
+                      error = null;
                       handleChange(e);
                     }}
                   />
@@ -219,7 +194,10 @@ const Profile = () => {
                     value={values.primaryPhoneNumber}
                     name="primaryPhoneNumber"
                     placeholder="+380"
-                    onChange={handleChange}
+                    onChange={e => {
+                      error = null;
+                      handleChange(e);
+                    }}
                   />
                 )}
                 {isOpenModalChangePhoneNomber && (
@@ -256,14 +234,24 @@ const Profile = () => {
                     )}
                   </Wrapper>
                 ) : (
-                  <InputField
-                    type="email"
-                    id="email"
-                    value={values.email}
-                    name="email"
-                    placeholder="***@gmail.com"
-                    onChange={handleChange}
-                  />
+                  <>
+                    <InputField
+                      type="email"
+                      id="email"
+                      value={values.email}
+                      name="email"
+                      placeholder="***@gmail.com"
+                      onChange={e => {
+                        error = null;
+                        handleChange(e);
+                      }}
+                    />
+                    <ErrorMessage>
+                      {(errors?.email && touched?.email && t(errors?.email)) ||
+                        (error?.message === 'Email in use' &&
+                          t(error?.message))}
+                    </ErrorMessage>
+                  </>
                 )}
                 {isOpenModalChangeEmail && (
                   <Modal onClick={() => setIsOpenModalChangeEmail(false)}>
@@ -284,7 +272,10 @@ const Profile = () => {
                       value={values.newPassword}
                       name="newPassword"
                       placeholder="********"
-                      onChange={handleChange}
+                      onChange={e => {
+                        error = null;
+                        handleChange(e);
+                      }}
                     />
                     {values.newPassword !== '' && (
                       <ButtonShow
@@ -313,7 +304,10 @@ const Profile = () => {
                       value={values.confirmNewPassword}
                       name="confirmNewPassword"
                       placeholder="********"
-                      onChange={handleChange}
+                      onChange={e => {
+                        error = null;
+                        handleChange(e);
+                      }}
                     />
                     {values.confirmNewPassword !== '' && (
                       <ButtonShow
@@ -338,9 +332,13 @@ const Profile = () => {
                 </>
               )}
 
-              {Object.entries(touched).length !== 0 && (
-                <StyledButton type="submit" title={t('saveChanges')}>
-                  {t('saveChanges')}
+              {Object.entries(touched).length !== 0 && user.isFirstLogin && (
+                <StyledButton
+                  type="submit"
+                  title={t('saveChanges')}
+                  disabled={isLoading}
+                >
+                  {!isLoading ? t('saveChanges') : <BeatLoader color="#fff" />}
                 </StyledButton>
               )}
             </Wrap>

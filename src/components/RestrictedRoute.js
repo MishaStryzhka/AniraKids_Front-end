@@ -5,6 +5,10 @@ export const RestrictedRoute = ({ component: Component, redirectTo = '/' }) => {
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
+  if (isLoggedIn && location?.state?.redirectBack) {
+    document.body.style.overflow = 'auto';
+  }
+
   return isLoggedIn && location?.state?.redirectBack ? (
     <Navigate
       to={location?.state?.redirectBack || redirectTo}

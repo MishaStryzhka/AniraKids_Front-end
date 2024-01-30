@@ -109,7 +109,10 @@ export const InputModal = styled.input`
   outline: none;
 
   border-color: ${({ theme }) => theme.color.mainColor2};
-  color: ${({ theme }) => theme.color.lightBGColor};
+  color: ${({ theme }) => theme.color.mainColor2};
+  &::placeholder {
+    color: ${({ theme }) => theme.color.lightBGColor};
+  }
 `;
 
 export const ScrollBox = styled.div`

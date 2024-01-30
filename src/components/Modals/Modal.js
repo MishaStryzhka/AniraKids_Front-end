@@ -32,7 +32,7 @@ const Modal = ({ children, onClick }) => {
 
   return createPortal(
     <Backdrop onClick={handleBackdropClick}>
-      <ScrollBox>
+      <ScrollBox onClick={handleBackdropClick}>
         <ModalContainer>{children}</ModalContainer>
       </ScrollBox>
     </Backdrop>,

@@ -18,4 +18,7 @@ export const ProfileTranslationsCs = {
   BECOME_LANDLORD: 'STÁT SE PRONAJÍMATELEM',
   verify: 'Ověřit',
   verified: 'Ověřeno',
+
+  // errors back-end
+  'Email in use': 'Email je již používán.',
 };
