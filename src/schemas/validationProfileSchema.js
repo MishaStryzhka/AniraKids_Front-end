@@ -1,35 +1,13 @@
 import * as Yup from 'yup';
 
 export const validationProfileSchema = Yup.object().shape({
-  companyName: Yup.string()
-    .min(3, 'Мінімальна довжина 3 символи')
-    .max(50, 'Максимальна довжина 50 символів'),
-  ico: Yup.string()
-    .min(3, 'Мінімальна довжина 3 символи')
-    .max(16, 'Максимальна довжина 16 символів'),
   firstName: Yup.string()
-    .matches(
-      // eslint-disable-next-line no-useless-escape
-      `^(?!.*[ЪЫЭъыэ])[а-яА-ЯіїєґІЇЄҐ -')]+$`,
-      'Введено недопустимі символи. Введіть ім’я українською мовою.'
-    )
     .required("Поле обов'язкове")
     .max(64, 'Ім’я має бути менше 64 символів'),
   lastName: Yup.string()
-    .matches(
-      // eslint-disable-next-line no-useless-escape
-      `^(?!.*[ЪЫЭъыэ])[а-яА-ЯіїєґІЇЄҐ -')]+$`,
-      'Введено недопустимі символи. Введіть прізвище українською мовою.'
-    )
     .required('Поле обов`язкове')
     .max(64, 'Прізвище має бути менше 64 символів'),
-  patronymic: Yup.string()
-    .matches(
-      // eslint-disable-next-line no-useless-escape
-      `^(?!.*[ЪЫЭъыэ])[а-яА-ЯіїєґІЇЄҐ -')]+$`,
-      'Введено недопустимі символи. Введіть по-батькові українською мовою.'
-    )
-    .max(64, 'По-батькові має бути менше 64 символів'),
+  patronymic: Yup.string().max(64, 'По-батькові має бути менше 64 символів'),
   nickname: Yup.string()
     .required('Поле обов`язкове')
     .matches(

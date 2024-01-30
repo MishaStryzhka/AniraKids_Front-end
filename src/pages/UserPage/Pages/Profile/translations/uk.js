@@ -18,4 +18,7 @@ export const ProfileTranslationsUk = {
   BECOME_LANDLORD: 'СТАТИ ОРЕНДОДАВЦЕМ',
   verify: 'Верифікувати',
   verified: 'Верифіковано',
+
+  // errors back-end
+  'Email in use': 'Електронна пошта вже використовується.',
 };

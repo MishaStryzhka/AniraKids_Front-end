@@ -37,8 +37,14 @@ import { ModalLogOutTranslationsCs } from 'components/Modals/ModalLogOut/transla
 import { ModalRemoveProductTranslationsCs } from 'components/Modals/ModalRemoveProduct/translations/cs';
 import { FormAddProductTranslationsCs } from 'components/Forms/FormAddProduct/translations/cs';
 import { ModalBecomeLandlordTranslationsCs } from 'components/Modals/ModalBecomeLandlord/translations/cs';
+import { FormBillingDetailsTranslationsCs } from 'components/Forms/FormBillingDetails/translations/cs';
 
 export const ComponentTranslationsCs = {
+  // forms
+  formRegistrationEmail: FormRegistrationEmailTranslationsCs,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
+  formBillingDetails: FormBillingDetailsTranslationsCs,
+  authForm: AuthFormTranslationsCs,
   formAddProduct: FormAddProductTranslationsCs,
 
   // modals
@@ -81,8 +87,4 @@ export const ComponentTranslationsCs = {
   sectionAnswers: SectionAnswersTranslationsCs,
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
-
-  formRegistrationEmail: FormRegistrationEmailTranslationsCs,
-  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsCs,
-  authForm: AuthFormTranslationsCs,
 };

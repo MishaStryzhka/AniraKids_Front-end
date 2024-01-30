@@ -151,6 +151,28 @@ export const updateUserInfo = createAsyncThunk(
   }
 );
 
+export const updateUserBillingDetails = createAsyncThunk(
+  'auth/update-billing-details',
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.patch(
+        `/api/users/current/update-billing-details`,
+        credentials
+      );
+      console.log('response.data', response.data);
+
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
 export const updateUserEmail = createAsyncThunk(
   'auth/updateEmail',
   async ({ email }, thunkAPI) => {
