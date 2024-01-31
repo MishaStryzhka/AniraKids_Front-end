@@ -406,11 +406,13 @@ const Profile = () => {
                     </Modal>
                   )}
                 </AvatarLabel>
-                <StyledSecondButton
-                  onClick={() => setIsOpenModalBecomeLandlord(true)}
-                >
-                  {t('BECOME_LANDLORD')}
-                </StyledSecondButton>
+                {user.typeUser !== 'owner' && (
+                  <StyledSecondButton
+                    onClick={() => setIsOpenModalBecomeLandlord(true)}
+                  >
+                    {t('BECOME_LANDLORD')}
+                  </StyledSecondButton>
+                )}
                 {isOpenModalBecomeLandlord && (
                   <Modal onClick={() => setIsOpenModalBecomeLandlord(false)}>
                     <ModalBecomeLandlord
