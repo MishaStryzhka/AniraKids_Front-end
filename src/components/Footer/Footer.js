@@ -4,6 +4,7 @@ import {
   FooterNavigate,
   FooterWrap,
   StyledFooter,
+  Wrap,
 } from './Footer.styled';
 import Logo from 'components/Logo/Logo';
 import SectionNavLinks from 'components/BoxNavLinks/BoxNavLinks';
@@ -17,8 +18,10 @@ const Footer = () => {
       <FooterContainer>
         <FooterNavigate>
           <Logo />
-          <SectionNavLinks />
-          <FooterSelectLanguage />
+          <Wrap>
+            <SectionNavLinks />
+            <FooterSelectLanguage />
+          </Wrap>
         </FooterNavigate>
         <FooterWrap>
           <FooterCopyright>

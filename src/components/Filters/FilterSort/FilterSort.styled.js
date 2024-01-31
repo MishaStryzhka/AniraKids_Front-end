@@ -10,6 +10,8 @@ export const MainItem = styled.li`
   gap: 4px;
   margin-left: auto;
   margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
 `;
 
 export const Wrap = styled.div`
@@ -37,7 +39,12 @@ export const List = styled.ul`
 
   flex-direction: column;
   gap: 4px;
-  border-bottom: 1px solid #ebdad1;
+
+  position: absolute;
+  z-index: 1;
+  top: 56px;
+
+  box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
 `;
 
 export const Button = styled.button`

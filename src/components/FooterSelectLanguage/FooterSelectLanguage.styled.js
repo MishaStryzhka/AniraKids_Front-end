@@ -6,10 +6,10 @@ export const StyledFooterSelectLanguage = styled.button`
 
   border: none;
   background: transparent;
-  padding: 0;
+  /* padding: 0; */
+  padding: 10px 16px;
 
   display: flex;
-  height: 80px;
   justify-content: center;
   align-items: center;
   gap: 4px;

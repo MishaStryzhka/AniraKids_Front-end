@@ -3,6 +3,10 @@ import styled from 'styled-components';
 
 export const NavList = styled.ul`
   display: flex;
+  flex-direction: ${({ $mainPage }) => ($mainPage ? 'row' : 'column')};
+  @media screen and (min-width: 1280px) {
+    flex-direction: row;
+  }
   gap: 16px;
 `;
 

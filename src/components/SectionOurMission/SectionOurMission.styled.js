@@ -2,8 +2,13 @@ import styled from 'styled-components';
 
 export const Section = styled.section`
   display: flex;
-  width: 1440px;
-  margin: 0 auto;
+  flex-direction: column;
+
+  @media screen and (min-width: 1280px) {
+    width: 1440px;
+    margin: 0 auto;
+    flex-direction: row;
+  }
 `;
 export const Title = styled.h3`
   font-family: ${({ $mainPage }) =>
@@ -12,16 +17,19 @@ export const Title = styled.h3`
   font-weight: ${({ $mainPage }) => ($mainPage ? '500' : '700')};
   line-height: ${({ $mainPage }) => ($mainPage ? '1.25' : '1.4')};
   margin-bottom: 16px;
-  max-width: 626px;
-
+  max-width: 370px;
+  @media screen and (min-width: 768px) {
+    max-width: 626px;
+  }
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
 export const TextWrap = styled.div`
-  width: 730px;
-
-  background-color: ${({ theme }) => theme.color.lightBGColor};
   padding: 40px 0;
+  @media screen and (min-width: 1280px) {
+    width: 730px;
+  }
+  background-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 
 export const ListMission = styled.ul`
@@ -56,7 +64,9 @@ export const ListModel = styled.ul`
 `;
 
 export const ImageWrap = styled.div`
-  width: 710px;
+  @media screen and (min-width: 1280px) {
+    width: 710px;
+  }
 `;
 
 export const Picture = styled.picture`
