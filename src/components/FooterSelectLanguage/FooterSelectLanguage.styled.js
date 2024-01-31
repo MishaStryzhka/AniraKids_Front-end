@@ -1,7 +1,7 @@
 import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
-export const StyledFooterSelectLanguage = styled.button`
+export const StyledFooterSelectLanguage = styled.div`
   position: relative;
 
   border: none;
@@ -47,6 +47,6 @@ export const ButtonLanguage = styled.button`
   font-family: Open Sans, sans-serif;
   font-size: 14px;
   font-style: normal;
-  font-weight: ${({ active }) => (active ? 700 : 400)};
+  font-weight: ${({ $active }) => ($active ? 700 : 400)};
   line-height: 20px;
 `;

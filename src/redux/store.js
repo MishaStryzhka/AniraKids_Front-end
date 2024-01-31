@@ -23,7 +23,7 @@ const authPersistConfig = {
 const settingsPersistConfig = {
   key: 'settings',
   storage,
-  whitelist: ['currentTheme', 'currentLanguage'],
+  whitelist: ['currentTheme', 'language'],
 };
 
 export const store = configureStore({

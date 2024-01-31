@@ -19,11 +19,15 @@ import { PagesTranslationsCs } from 'pages/translations/cs';
 import { PagesTranslationsEn } from 'pages/translations/en';
 import { PagesTranslationsUk } from 'pages/translations/uk';
 
+const persistLanguage = JSON.parse(
+  localStorage.getItem('persist:settings')
+)?.language.replace(/^"(.*)"$/, '$1');
+
 i18n.use(LanguageDetector).init({
   interpolation: {
     escapeValue: false, // реагує на HTML-теги у тексті
   },
-  lng: detectLanguageFromStore() || 'en',
+  lng: persistLanguage || detectLanguageFromStore() || 'cs',
   resources: {
     uk: {
       translation: {

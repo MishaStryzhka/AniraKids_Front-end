@@ -50,7 +50,7 @@ export const StyledIconArrowUp = styled(IconArrow)`
 
 export const QuestionDescription = styled.p`
   font-family: 'Open Sans Hebrew', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.02px;
