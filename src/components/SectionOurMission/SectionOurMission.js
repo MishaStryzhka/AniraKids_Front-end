@@ -1,8 +1,16 @@
 import { Container } from 'components/Container/Container';
-import PhotoOpenClosetUrl1xWebp from 'images/photo-mission/photo-open-closet-1x-webp.webp';
-import PhotoOpenClosetUrl2xWebp from 'images/photo-mission/photo-open-closet-2x-webp.webp';
-import PhotoOpenClosetUrl1x from 'images/photo-mission/photo-open-closet-1x.jpg';
-import PhotoOpenClosetUrl2x from 'images/photo-mission/photo-open-closet-2x.jpg';
+import ClosetDesktopWebp1x from 'images/photo-mission/closet-desktop-1x.webp';
+import ClosetDesktopWebp2x from 'images/photo-mission/closet-desktop-2x.webp';
+import ClosetDesktop1x from 'images/photo-mission/closet-desktop-1x.jpg';
+import ClosetDesktop2x from 'images/photo-mission/closet-desktop-2x.jpg';
+import ClosetTabletWebp1x from 'images/photo-mission/closet-tablet-1x.webp';
+import ClosetTabletWebp2x from 'images/photo-mission/closet-tablet-2x.webp';
+import ClosetTablet1x from 'images/photo-mission/closet-tablet-1x.jpg';
+import ClosetTablet2x from 'images/photo-mission/closet-tablet-2x.jpg';
+import ClosetMobileWebp1x from 'images/photo-mission/closet-mobile-1x.webp';
+import ClosetMobileWebp2x from 'images/photo-mission/closet-mobile-2x.webp';
+import ClosetMobile1x from 'images/photo-mission/closet-mobile-1x.jpg';
+import ClosetMobile2x from 'images/photo-mission/closet-mobile-2x.jpg';
 import IconCheck from 'images/icons/IconCheck';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -64,16 +72,34 @@ const SectionOurMission = () => {
       <ImageWrap>
         <Picture>
           <source
-            media="(min-width: 1440px)"
+            media="(min-width: 1280px)"
             type="image/webp"
-            srcSet={`${PhotoOpenClosetUrl1xWebp} 1x, ${PhotoOpenClosetUrl2xWebp} 2x`}
+            srcSet={`${ClosetDesktopWebp1x} 1x, ${ClosetDesktopWebp2x} 2x`}
           />
           <source
-            media="(min-width: 1440px)"
-            srcSet={`${PhotoOpenClosetUrl1x} 1x, ${PhotoOpenClosetUrl2x} 2x`}
+            media="(min-width: 1280px)"
+            srcSet={`${ClosetDesktop1x} 1x, ${ClosetDesktop2x} 2x`}
+          />
+          <source
+            media="(min-width: 768px)"
+            type="image/webp"
+            srcSet={`${ClosetTabletWebp1x} 1x, ${ClosetTabletWebp2x} 2x`}
+          />
+          <source
+            media="(min-width: 768px)"
+            srcSet={`${ClosetTablet1x} 1x, ${ClosetTablet2x} 2x`}
+          />
+          <source
+            media="(max-width: 768px)"
+            type="image/webp"
+            srcSet={`${ClosetMobileWebp1x} 1x, ${ClosetMobileWebp2x} 2x`}
+          />
+          <source
+            media="(max-width: 768px)"
+            srcSet={`${ClosetMobile1x} 1x, ${ClosetMobile2x} 2x`}
           />
 
-          <img srcSet={`${PhotoOpenClosetUrl1x}`} alt="Гардероб" width="720" />
+          <img srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
         </Picture>
       </ImageWrap>
     </Section>

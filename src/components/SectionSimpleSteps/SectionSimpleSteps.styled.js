@@ -1,7 +1,13 @@
 import styled from 'styled-components';
 
 export const Section = styled.section`
-  padding: 96px 0;
+  padding: 64px 0;
+  @media screen and (min-width: 768px) {
+    padding: 72px 0;
+  }
+  @media screen and (min-width: 1280px) {
+    padding: 96px 0;
+  }
 `;
 
 export const Title = styled.h2`
@@ -18,27 +24,37 @@ export const Title = styled.h2`
 
 export const ListSteps = styled.ul`
   display: flex;
-  padding: 0 70px;
   justify-content: space-between;
+  @media screen and (min-width: 1280px) {
+    padding: 0 70px;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 export const ItemStep = styled.li`
+  width: 180px;
   display: flex;
   flex-direction: column;
   position: relative;
-
-  &:nth-child(1)::after,
-  &:nth-child(2)::after {
-    content: '';
-    display: block;
-    height: 1px;
-    width: 170px;
-    position: absolute;
-    left: 110%;
-    top: 50%;
-
-    background-color: ${({ theme }) => theme.color.mainColor2};
+  @media screen and (min-width: 1280px) {
+    width: 240px;
   }
+
+  /* &:nth-child(1)::after,
+  &:nth-child(2)::after {
+    @media screen and (min-width: 768px) {
+      content: '';
+      display: block;
+      height: 1px;
+      width: 34px;
+      position: absolute;
+      left: 110%;
+      top: 50%;
+
+      background-color: ${({ theme }) => theme.color.mainColor2};
+    }
+  } */
 `;
 
 export const Step = styled.span`

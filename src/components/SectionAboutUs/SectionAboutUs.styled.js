@@ -1,11 +1,15 @@
 import styled from 'styled-components';
 
 export const Section = styled.section`
-  width: 1440px;
-  margin: 0 auto;
+  width: 428px;
+
   padding-bottom: 40px;
 
   padding-top: ${({ $mainPage }) => ($mainPage ? '0' : '16px')};
+  @media screen and (min-width: 1280px) {
+    width: 1440px;
+    margin: 0 auto;
+  }
 `;
 
 export const Title = styled.h2`
@@ -36,6 +40,11 @@ export const Description = styled.p`
 `;
 
 export const Wrap = styled.div`
-  padding: 24px;
-  border-left: 1px solid #c6a58d;
+  padding: 24px 0;
+  @media screen and (min-width: 768px) {
+    border-left: 1px solid #c6a58d;
+    padding: 24px;
+  }
+  @media screen and (min-width: 1280px) {
+  }
 `;

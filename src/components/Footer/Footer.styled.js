@@ -2,24 +2,38 @@ import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
-  width: ${({ $mainPage }) => ($mainPage ? '1440px' : '100%')};
-  margin: 0 auto;
-  padding: 40px 0;
+  /* width: 100%; */
 
+  padding: 40px;
   background-color: ${({ theme }) => theme.color.lightBGColor};
+  @media screen and (min-width: 1280px) {
+    padding: 40px 0;
+    margin: 0 auto;
+    width: ${({ $mainPage }) => ($mainPage ? '1440px' : '100%')};
+  }
 `;
 
 export const FooterContainer = styled(Container)`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 0;
+  width: inherit;
+  @media screen and (min-width: 1280px) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 `;
 
 export const FooterNavigate = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
+  gap: 41px;
+  @media screen and (min-width: 768px) {
+    gap: 100px;
+    justify-content: center;
+  }
+  @media screen and (min-width: 1280px) {
+    align-items: center;
+    gap: 32px;
+  }
 `;
 
 export const FooterWrap = styled.div`
@@ -28,3 +42,22 @@ export const FooterWrap = styled.div`
 `;
 
 export const FooterCopyright = styled.p``;
+
+export const Wrap = styled.div`
+  display: flex;
+  flex-direction: column-reverse;
+
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  @media screen and (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 80px;
+  }
+  @media screen and (min-width: 1280px) {
+    flex-direction: row;
+    gap: 32px;
+    align-items: center;
+  }
+`;

@@ -1,7 +1,13 @@
 import styled from 'styled-components';
 
 export const Section = styled.section`
-  padding: 96px 0;
+  padding: 64px 0;
+  @media screen and (min-width: 768px) {
+    padding: 72px 0;
+  }
+  @media screen and (min-width: 1280px) {
+    padding: 96px 0;
+  }
 `;
 
 export const Title = styled.h2`
@@ -26,7 +32,7 @@ export const Item = styled.li`
   flex-direction: column;
   align-items: center;
 
-  flex-basis: calc((100% - 80px) / 5);
+  /* flex-basis: calc((100% - 80px) / 5); */
   width: 100%;
 `;
 
@@ -52,6 +58,7 @@ export const TitleDescription = styled.h3`
 `;
 
 export const Description = styled.p`
+  max-width: 240px;
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -64,4 +71,17 @@ export const Description = styled.p`
 export const WrapButton = styled.div`
   width: 305px;
   margin: 0 auto;
+`;
+
+export const PaginationContainer = styled.div`
+  width: 150px;
+  height: 20px;
+  border: 1px solid black;
+  background-color: brown;
+  /* Стилі для контейнера точок пагінації */
+  .swiper-pagination-bullet {
+    width: 50px;
+    height: 20px;
+    background-color: brown;
+  }
 `;

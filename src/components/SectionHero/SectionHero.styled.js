@@ -1,32 +1,46 @@
 import styled from 'styled-components';
-import BgPhotoUrl from 'images/bg-photo/bg-desktop-1x.jpg';
+import BgPhotoDesktopUrl from 'images/bg-photo/bg-desktop-1x.jpg';
+import BgPhotoMobileUrl from 'images/bg-photo/photo-bg-mobile-1x.jpg';
+import BgPhotoTabletUrl from 'images/bg-photo/photo-bg-tablet-1x.jpg';
 
 export const WrapSection = styled.section`
   background-color: ${({ theme }) => theme.color.btnColorBG};
-  padding-top: 306px;
-  padding-bottom: 305px;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  width: 1440px;
   position: relative;
-  z-index: 1;
-
-  background-image: url(${BgPhotoUrl});
+  z-index: 2;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  padding-top: 300px;
+  padding-bottom: 305px;
+  width: 428px;
+  background-image: url(${BgPhotoMobileUrl});
+  @media screen and (min-width: 768px) {
+    background-image: url(${BgPhotoTabletUrl});
+    width: 768px;
+  }
+  @media screen and (min-width: 1280px) {
+    background-image: url(${BgPhotoDesktopUrl});
+    width: 1440px;
+  }
 `;
 
 export const MainTitle = styled.h1`
   font-family: 'Cormorant SC';
-  font-size: 100px;
+  /* font-size - тимчасово має бути 100px */
+  font-size: 70px;
+  /*  */
   font-weight: 600;
   line-height: normal;
   text-transform: uppercase;
   margin-bottom: 16px;
 
   color: ${({ theme }) => theme.color.mainColor1};
+  @media screen and (min-width: 1200px) {
+    font-size: 100px;
+  }
 `;
 
 export const Span = styled.span`
@@ -42,6 +56,5 @@ export const Description = styled.p`
   letter-spacing: 0.02px;
   max-width: 400px;
   margin-bottom: 48px;
-
   color: ${({ theme }) => theme.color.mainColor1};
 `;

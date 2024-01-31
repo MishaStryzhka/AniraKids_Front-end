@@ -28,7 +28,7 @@ export const Backdrop = styled.div`
 `;
 export const ModalContainer = styled.div`
   background-color: ${p => p.theme.color.cardBG};
-  // min-width: 280px;
+  /* min-width: 280px; */
   margin: 0 auto;
   border-radius: 20px;
   z-index: 2000;

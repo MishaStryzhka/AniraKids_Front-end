@@ -6,7 +6,7 @@ const BoxNavLinks = ({ $mainPage }) => {
     keyPrefix: 'components.boxNavLinks',
   });
   return (
-    <NavList>
+    <NavList $mainPage={$mainPage}>
       <StyledNavLink $mainPage={$mainPage} to="./forWomen">
         {t("Women's Clothing")}
       </StyledNavLink>

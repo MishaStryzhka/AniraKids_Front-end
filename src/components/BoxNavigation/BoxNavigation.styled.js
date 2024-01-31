@@ -1,8 +1,11 @@
 import styled from 'styled-components';
 
 export const Box = styled.div`
-  display: flex;
-  gap: 16px;
+  display: none;
+  @media screen and (min-width: 1280px) {
+    display: flex;
+    gap: 16px;
+  }
 `;
 
 export const Button = styled.button`
