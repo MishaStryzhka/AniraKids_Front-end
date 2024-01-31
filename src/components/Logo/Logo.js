@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import IconLogo from '../../images/icons/IconLogo';
-// import { StyledIconLogo } from './Logo.styled';
+import IconLogoMin from 'images/icons/IconLogoMin';
 
 const Logo = () => {
+  const WidthScreen = window.innerWidth >= 1280;
   return (
     <NavLink to="./" style={{ display: 'flex' }}>
-      <IconLogo />
+      {WidthScreen ? <IconLogo /> : <IconLogoMin />}
     </NavLink>
   );
 };

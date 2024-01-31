@@ -37,7 +37,7 @@ export const List = styled.ul`
 
   flex-direction: column;
   gap: 4px;
-  border-bottom: 1px solid #ebdad1;
+  box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
 `;
 
 export const Button = styled.button`
