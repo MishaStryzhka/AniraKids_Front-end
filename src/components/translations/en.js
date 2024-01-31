@@ -37,9 +37,18 @@ import { ModalChangePhotoTranslationsEn } from 'components/Modals/ModalChangePho
 import { ModalLogOutTranslationsEn } from 'components/Modals/ModalLogOut/translations/en';
 import { ModalRemoveProductTranslationsEn } from 'components/Modals/ModalRemoveProduct/translations/en';
 import { FormAddProductTranslationsEn } from 'components/Forms/FormAddProduct/translations/en';
+import { ModalBecomeLandlordTranslationsEn } from 'components/Modals/ModalBecomeLandlord/translations/en';
+import { FormBillingDetailsTranslationsEn } from 'components/Forms/FormBillingDetails/translations/en';
 
 export const ComponentTranslationsEn = {
+  // forms
   formAddProduct: FormAddProductTranslationsEn,
+  formRegistrationEmail: FormRegistrationEmailTranslationsEn,
+  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsEn,
+  authForm: AuthFormTranslationsEn,
+  formBillingDetails: FormBillingDetailsTranslationsEn,
+
+  // modals
   modalRemoveProduct: ModalRemoveProductTranslationsEn,
   modalLogOut: ModalLogOutTranslationsEn,
   modalChangePhoto: ModalChangePhotoTranslationsEn,
@@ -47,7 +56,11 @@ export const ComponentTranslationsEn = {
   modalChangePassword: ModalChangePasswordTranslationsEn,
   modalChangeLogin: ModalChangeLoginTranslationsEn,
   modalAddAvatar: ModalAddAvatarTranslationsEn,
-  productCard: ProductCardTranslationsEn,
+  modalBecomeLandlord: ModalBecomeLandlordTranslationsEn,
+  modalRegister: ModalRegisterTranslationsEn,
+  modalChangeEmail: ModalChangeEmailTranslationsEn,
+
+  // filters
   filterOfToys: FilterOfToysTranslationsEn,
   filterType: FilterTypeTranslationsEn,
   filterSort: FilterSortTranslationsEn,
@@ -61,6 +74,8 @@ export const ComponentTranslationsEn = {
   filterDecor: FilterDecorTranslationsEn,
   filterColor: FilterColorTranslationsEn,
   filterAge: FilterAgeTranslationsEn,
+
+  productCard: ProductCardTranslationsEn,
   appBar: AppBarTranslationsEn,
   sectionHero: SectionHeroTranslationsEn,
   sectionAboutAniraK: SectionAboutAniraKTranslationsEn,
@@ -73,9 +88,4 @@ export const ComponentTranslationsEn = {
   searchInput: SearchInputTranslationsEn,
   ...NavigationOverlayTranslationsEn,
   ...UserPageTranslationsEn,
-  modalRegister: ModalRegisterTranslationsEn,
-  formRegistrationEmail: FormRegistrationEmailTranslationsEn,
-  formRegistrationPhoneNumber: FormRegistrationPhoneNumberTranslationsEn,
-  authForm: AuthFormTranslationsEn,
-  modalChangeEmail: ModalChangeEmailTranslationsEn,
 };

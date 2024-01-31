@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Suspense, useState } from 'react';
 import Footer from '../Footer/Footer';
 import { ContainerLayout, StuledContainer } from './SharedLayout.styled';
@@ -6,9 +6,6 @@ import AppBar from '../AppBar/AppBar';
 
 const SharedLayout = () => {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
-  const location = useLocation();
-
-  console.log('location', location);
 
   const closeMenu = e => {
     if (

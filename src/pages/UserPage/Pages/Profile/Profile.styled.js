@@ -15,6 +15,13 @@ export const Wrap = styled.div`
   gap: 24px;
 `;
 
+export const SecondWrap = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+`;
+
 export const AvatarLabel = styled.div`
   width: 197px;
   display: flex;
@@ -29,7 +36,9 @@ export const AvatarWrap = styled.label`
 `;
 export const Avatar = styled.img``;
 export const AvaterTitle = styled.p``;
-export const AvatarDescription = styled.p``;
+export const AvatarDescription = styled.p`
+  text-align: center;
+`;
 
 export const Label = styled.label`
   position: relative;

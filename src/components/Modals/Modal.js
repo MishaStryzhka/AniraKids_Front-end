@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { Backdrop, ModalContainer } from './Modal.styled';
+import { Backdrop, ModalContainer, ScrollBox } from './Modal.styled';
 import { createPortal } from 'react-dom';
 
 const Modal = ({ children, onClick }) => {
@@ -32,7 +32,9 @@ const Modal = ({ children, onClick }) => {
 
   return createPortal(
     <Backdrop onClick={handleBackdropClick}>
-      <ModalContainer>{children}</ModalContainer>
+      <ScrollBox onClick={handleBackdropClick}>
+        <ModalContainer>{children}</ModalContainer>
+      </ScrollBox>
     </Backdrop>,
     document.querySelector('#modal')
   );

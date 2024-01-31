@@ -107,7 +107,6 @@ export const updateUserInfo = createAsyncThunk(
       avatarUrl: avatar,
       firstName,
       lastName,
-      patronymic,
       companyName,
       nickname,
       primaryPhoneNumber,
@@ -123,7 +122,6 @@ export const updateUserInfo = createAsyncThunk(
       avatar && formData.append('avatar', avatar);
       firstName && formData.append('firstName', firstName);
       lastName && formData.append('lastName', lastName);
-      patronymic && formData.append('patronymic', patronymic);
       companyName && formData.append('companyName', companyName);
       ico && formData.append('ico', ico);
       nickname && formData.append('nickname', nickname);
@@ -144,6 +142,28 @@ export const updateUserInfo = createAsyncThunk(
       return response.data;
     } catch (error) {
       // console.log('error', error);
+
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
+export const updateUserBillingDetails = createAsyncThunk(
+  'auth/update-billing-details',
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.patch(
+        `/api/users/current/update-billing-details`,
+        credentials
+      );
+      console.log('response.data', response.data);
+
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,

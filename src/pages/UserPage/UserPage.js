@@ -46,7 +46,7 @@ const UserPage = () => {
             <IconHeart />
             {t('favorite')}
           </StyledNavLink>
-          {(user.typeUser === 'owner' || true) && (
+          {user.typeUser === 'owner' && (
             <StyledNavLink to="./rent-out">
               <IconCloth /> {t('rentOut')}
             </StyledNavLink>
@@ -59,7 +59,7 @@ const UserPage = () => {
             <IconBag2 />
             {t('myPurchases')}
           </StyledNavLink>
-          {(user.typeUser === 'owner' || true) && (
+          {user.typeUser === 'owner' && (
             <StyledNavLink to="./my-purchases">
               <IconShopCart /> {t('mySales')}
             </StyledNavLink>
