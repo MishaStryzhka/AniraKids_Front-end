@@ -15,6 +15,10 @@ export const ProfileTranslationsUk = {
   saveChanges: 'Зберегти зміни',
   profilePhoto: 'Фото профілю',
   maxFileSize: 'Максимальний розмір файлу - 5 МБ',
+  BECOME_LANDLORD: 'СТАТИ ОРЕНДОДАВЦЕМ',
   verify: 'Верифікувати',
   verified: 'Верифіковано',
+
+  // errors back-end
+  'Email in use': 'Електронна пошта вже використовується.',
 };
