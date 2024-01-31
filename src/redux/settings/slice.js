@@ -3,7 +3,8 @@ import { updateLanguage } from './operations';
 
 const initialState = {
   currentTheme: 'light',
-  language: 'uk',
+  language: 'cs',
+  error: null,
 };
 
 const settingsSlice = createSlice({
@@ -11,19 +12,16 @@ const settingsSlice = createSlice({
   initialState,
   reducers: {
     setLanguage: (state, action) => {
-      state.currentLanguage = action.payload;
+      state.language = action.payload;
     },
   },
   extraReducers: builder => {
     builder
       .addCase(updateLanguage.pending, state => {
-        state.isRefreshing = true;
+        // state.isRefreshing = true;
       })
       .addCase(updateLanguage.fulfilled, (state, action) => {
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isLoggedIn = true;
-        state.isFirstLogin = true;
+        state.language = action.payload.language;
       })
       .addCase(updateLanguage.rejected, (state, action) => {
         state.error = action.payload;

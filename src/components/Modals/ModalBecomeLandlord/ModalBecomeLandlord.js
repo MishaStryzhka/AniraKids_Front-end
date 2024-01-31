@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { clearDone } from '../../../redux/auth/slice';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
+import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
 
 const ModalBecomeLandlord = ({ onClick }) => {
   const { t } = useTranslation('translation', {
@@ -15,8 +16,6 @@ const ModalBecomeLandlord = ({ onClick }) => {
   const [step, setStep] = useState('first');
   const { isDone } = useAuth();
   const dispatch = useDispatch();
-
-  console.log('step', step);
 
   useEffect(() => {
     isDone && setStep('second');
@@ -34,9 +33,19 @@ const ModalBecomeLandlord = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>{t('becomeLandlord')}</ModalTitle>
-      <ModalDescription>{t('fillBillingDetails')}</ModalDescription>
-      <FormBillingDetails />
+      {step === 'first' && (
+        <>
+          <ModalTitle>{t('becomeLandlord')}</ModalTitle>
+          <ModalDescription>{t('fillBillingDetails')}</ModalDescription>
+          <FormBillingDetails />
+        </>
+      )}
+      {step === 'second' && (
+        <>
+          <ModalTitle>Nový bankovní účet</ModalTitle>
+          <FormBankAccount />
+        </>
+      )}
     </ModalWindow>
   );
 };

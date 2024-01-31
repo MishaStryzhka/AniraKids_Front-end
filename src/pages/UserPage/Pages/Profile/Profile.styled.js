@@ -93,3 +93,10 @@ export const ButtonShow = styled.button`
 export const StyledButton = styled(Button)`
   margin: 0 auto;
 `;
+
+export const WrapperBiling = styled.div`
+  padding: 8px;
+  border-bottom: 1px solid;
+
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;

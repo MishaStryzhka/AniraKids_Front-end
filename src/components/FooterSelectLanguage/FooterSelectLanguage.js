@@ -75,19 +75,19 @@ const FooterSelectLanguage = () => {
       {isOpenMenuLanguage && (
         <MenuLanguage>
           <ButtonLanguage
-            active={currentLanguage === 'en'}
+            $active={currentLanguage === 'en'}
             onClick={() => handleLanguageClick('en')}
           >
             EN
           </ButtonLanguage>
           <ButtonLanguage
-            active={currentLanguage === 'cs'}
+            $active={currentLanguage === 'cs'}
             onClick={() => handleLanguageClick('cs')}
           >
             CZ
           </ButtonLanguage>
           <ButtonLanguage
-            active={currentLanguage === 'uk'}
+            $active={currentLanguage === 'uk'}
             onClick={() => handleLanguageClick('uk')}
           >
             UKR

@@ -1,4 +1,3 @@
-import { updateUserBillingDetails } from '../../../redux/auth/operations';
 import { validationBillingDetailsScheme } from 'schemas';
 import {
   ButtonLabel,
@@ -12,6 +11,7 @@ import { WrapButton } from 'components/Modals/ModalRegister/ModalRegister.styled
 import Button from 'components/Button/Button';
 import { BeatLoader } from 'react-spinners';
 import { useDispatch } from 'react-redux';
+import { updateUserBillingDetails } from '../../../redux/auth/operations';
 
 const { Formik, Field } = require('formik');
 const { useAuth } = require('hooks');
@@ -20,13 +20,14 @@ const FormBillingDetails = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.formBillingDetails',
   });
-
-  const { user, isLoading } = useAuth();
   const dispatch = useDispatch();
 
   const handleSubmit = e => {
     dispatch(updateUserBillingDetails(e));
   };
+
+  const { user, isLoading } = useAuth();
+
   return (
     <Formik
       initialValues={{
@@ -51,7 +52,7 @@ const FormBillingDetails = () => {
         handleSubmit,
       }) => {
         return (
-          <StyledForm onSubmit={handleSubmit}>
+          <StyledForm id="formBillingDetails" onSubmit={handleSubmit}>
             <WrapInput>
               <LabelModal>
                 {t('Name')}*
@@ -221,7 +222,11 @@ const FormBillingDetails = () => {
               </LabelModal>
             </WrapInput>
             <WrapButton>
-              <Button type="submit" disabled={isLoading}>
+              <Button
+                htmlFor="formBillingDetails"
+                type="submit"
+                disabled={isLoading}
+              >
                 {!isLoading ? t('Continue') : <BeatLoader color="#fff" />}
               </Button>
             </WrapButton>
