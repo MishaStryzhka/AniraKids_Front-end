@@ -3,7 +3,7 @@ import GeneralTitle from 'components/PageTitle/PageTitle';
 import NavigationOverlay from 'components/NavigationOverlay/NavigationOverlay';
 import { useTranslation } from 'react-i18next';
 import SideBar from 'components/SideBar/SideBar';
-import { TitleFilter } from 'pages/ForWomenPage/ForWomenPage.styled';
+import { TitleFilter, Wrap } from 'pages/ForWomenPage/ForWomenPage.styled';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import FilterDecor from 'components/Filters/FilterDecor/FilterDecor';
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
@@ -13,6 +13,8 @@ import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
 import FilterOfToys from 'components/Filters/FilterToys/FilterToys';
 import NotFound from 'components/NotFound/NotFound';
+import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
+import Border from 'components/Border/Border';
 
 const DecorAndToysPage = () => {
   const { t } = useTranslation('translation', {
@@ -22,6 +24,7 @@ const DecorAndToysPage = () => {
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t('Decor And Toys')}</GeneralTitle>
+      <Border />
       <WrapMainContent>
         <SideBar>
           <TitleFilter>{t('Filters')}</TitleFilter>
@@ -32,7 +35,10 @@ const DecorAndToysPage = () => {
           <FilterColor />
         </SideBar>
         <MainContent>
-          <FilterSort />
+          <Wrap>
+            <IconsMenuForPages />
+            <FilterSort />
+          </Wrap>
           <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>

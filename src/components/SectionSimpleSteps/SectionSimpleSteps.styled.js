@@ -41,8 +41,9 @@ export const ItemStep = styled.li`
     width: 240px;
   }
 
-  /* &:nth-child(1)::after,
+  &:nth-child(1)::after,
   &:nth-child(2)::after {
+    background-color: ${({ theme }) => theme.color.mainColor2};
     @media screen and (min-width: 768px) {
       content: '';
       display: block;
@@ -51,10 +52,11 @@ export const ItemStep = styled.li`
       position: absolute;
       left: 110%;
       top: 50%;
-
-      background-color: ${({ theme }) => theme.color.mainColor2};
     }
-  } */
+    @media screen and (min-width: 1280px) {
+      width: 170px;
+    }
+  }
 `;
 
 export const Step = styled.span`

@@ -11,3 +11,12 @@ export const TitleFilter = styled.h2`
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
+
+export const Wrap = styled.div`
+  display: flex;
+  justify-content: space-between;
+  @media screen and (min-width: 1280px) {
+    justify-content: flex-end;
+    gap: 6px;
+  }
+`;

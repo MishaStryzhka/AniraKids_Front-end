@@ -35,6 +35,20 @@ export const SecondHeader = styled.div`
   }
 `;
 
+export const WrapSearch = styled.div`
+  display: none;
+  @media screen and (min-width: 1280px) {
+    display: block;
+  }
+`;
+
+export const WrapBoxNav = styled.div`
+  display: none;
+  @media screen and (min-width: 1280px) {
+    display: block;
+  }
+`;
+
 export const List = styled.ul`
   display: none;
 

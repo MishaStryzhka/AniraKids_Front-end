@@ -39,6 +39,7 @@ import { FormAddProductTranslationsCs } from 'components/Forms/FormAddProduct/tr
 import { ModalBecomeLandlordTranslationsCs } from 'components/Modals/ModalBecomeLandlord/translations/cs';
 import { FormBillingDetailsTranslationsCs } from 'components/Forms/FormBillingDetails/translations/cs';
 import { FormBankAccountTranslationsCs } from 'components/Forms/FormBankAccount/translations/cs';
+import { ModalFiltersTranslationsCs } from 'components/Modals/ModalFiltes/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -50,6 +51,7 @@ export const ComponentTranslationsCs = {
   formBankAccount: FormBankAccountTranslationsCs,
 
   // modals
+  modalFilters: ModalFiltersTranslationsCs,
   modalRemoveProduct: ModalRemoveProductTranslationsCs,
   modalLogOut: ModalLogOutTranslationsCs,
   modalChangePhoto: ModalChangePhotoTranslationsCs,

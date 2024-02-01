@@ -1,7 +1,10 @@
+import { useLocation } from 'react-router-dom';
+
 const { BorderBottom } = require('./Border.styled');
 
 const Border = () => {
-  return <BorderBottom />;
+  const { pathname } = useLocation();
+  return <BorderBottom $mainPage={pathname === `/`} />;
 };
 
 export default Border;

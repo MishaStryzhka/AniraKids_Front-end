@@ -25,13 +25,10 @@ export const Input = styled.input`
 `;
 
 export const Label = styled.label`
-  display: none;
-  @media screen and (min-width: 1280px) {
-    position: relative;
-    width: 305px;
-    display: flex;
-    align-items: center;
-  }
+  position: relative;
+  width: 305px;
+  display: flex;
+  align-items: center;
 `;
 
 export const WrapIcon = styled.div`

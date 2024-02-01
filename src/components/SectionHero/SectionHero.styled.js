@@ -58,3 +58,11 @@ export const Description = styled.p`
   margin-bottom: 48px;
   color: ${({ theme }) => theme.color.mainColor1};
 `;
+
+export const WrapButton = styled.div`
+  margin: 0 auto;
+  width: 304px;
+  @media screen and (min-width: 768px) {
+    margin: 0;
+  }
+`;

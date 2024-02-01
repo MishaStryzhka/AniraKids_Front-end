@@ -40,6 +40,7 @@ import { FormAddProductTranslationsEn } from 'components/Forms/FormAddProduct/tr
 import { ModalBecomeLandlordTranslationsEn } from 'components/Modals/ModalBecomeLandlord/translations/en';
 import { FormBillingDetailsTranslationsEn } from 'components/Forms/FormBillingDetails/translations/en';
 import { FormBankAccountTranslationsEn } from 'components/Forms/FormBankAccount/translations/en';
+import { ModalFiltersTranslationsEn } from 'components/Modals/ModalFiltes/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -51,6 +52,7 @@ export const ComponentTranslationsEn = {
   formBankAccount: FormBankAccountTranslationsEn,
 
   // modals
+  modalFilters: ModalFiltersTranslationsEn,
   modalRemoveProduct: ModalRemoveProductTranslationsEn,
   modalLogOut: ModalLogOutTranslationsEn,
   modalChangePhoto: ModalChangePhotoTranslationsEn,

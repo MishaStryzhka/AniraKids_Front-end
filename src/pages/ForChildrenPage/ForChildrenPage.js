@@ -10,12 +10,14 @@ import FilterAge from 'components/Filters/FilterAge/FilterAge';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
 import MainContent from 'components/MainContent/MainContent';
 import NotFound from 'components/NotFound/NotFound';
-import { TitleFilter } from 'pages/ForWomenPage/ForWomenPage.styled';
+import { TitleFilter, Wrap } from 'pages/ForWomenPage/ForWomenPage.styled';
 import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import FilterSizeChildren from 'components/Filters/FilterSizeChildren/FilterSizeChildren';
 import FilterOutfits from 'components/Filters/FilterOutfits/FilterOutfits';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
+import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
+import Border from 'components/Border/Border';
 
 const ForChildrenPage = () => {
   const { t } = useTranslation('translation', {
@@ -27,6 +29,7 @@ const ForChildrenPage = () => {
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t("Children's Clothing")}</GeneralTitle>
+      <Border />
       <WrapMainContent>
         <SideBar>
           <TitleFilter>{t('Filters')}</TitleFilter>
@@ -39,7 +42,10 @@ const ForChildrenPage = () => {
           <FilterSizeChildren />
         </SideBar>
         <MainContent>
-          <FilterSort />
+          <Wrap>
+            <IconsMenuForPages />
+            <FilterSort />
+          </Wrap>
           <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>
