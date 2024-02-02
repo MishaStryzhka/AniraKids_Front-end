@@ -1,5 +1,9 @@
 import styled from 'styled-components';
 
 export const StyledSideBar = styled.div`
-  width: 305px;
+  display: none;
+  @media screen and (min-width: 1280px) {
+    display: block;
+    width: 305px;
+  }
 `;

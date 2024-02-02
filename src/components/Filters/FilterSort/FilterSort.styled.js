@@ -2,16 +2,21 @@ import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
 export const MainItem = styled.li`
-  width: 305px;
+  max-width: 210px;
   list-style: none;
   display: flex;
   flex-direction: column;
   position: relative;
   gap: 4px;
-  margin-left: auto;
   margin-bottom: 24px;
   position: relative;
   z-index: 2;
+  @media screen and (min-width: 768px) {
+    min-width: 305px;
+    justify-content: space-between;
+  }
+  @media screen and (min-width: 1280px) {
+  }
 `;
 
 export const Wrap = styled.div`
@@ -67,15 +72,4 @@ export const StyledIconArrowUp = styled(IconArrow)`
   transform: ${({ $openOutfitsList }) =>
     $openOutfitsList ? 'rotate(270deg)' : 'rotate(90deg)'};
   cursor: pointer;
-`;
-
-export const ButtonCalendar = styled.button`
-  position: absolute;
-  top: 14px;
-  left: -44px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-
-  background-color: transparent;
 `;

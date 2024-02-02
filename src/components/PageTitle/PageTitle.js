@@ -6,7 +6,6 @@ const PageTitle = ({ children }) => {
   return (
     <>
       <Title>{children}</Title>
-      {/* <Border /> */}
     </>
   );
 };

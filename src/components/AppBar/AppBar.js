@@ -7,6 +7,8 @@ import {
   Item,
   List,
   SecondHeader,
+  WrapBoxNav,
+  WrapSearch,
 } from './AppBar.styled';
 import Logo from '../Logo/Logo';
 import SearchInput from '../SearchInput/SearchInput';
@@ -16,7 +18,8 @@ import { Container } from 'components/Container/Container';
 import { useTranslation } from 'react-i18next';
 import IconBurgerMenu from 'images/icons/IconBurgerMenu';
 import { useState } from 'react';
-import BurgerMenu from 'components/BurgerMenu/BurgerMenu';
+import Modal from 'components/Modals/Modal';
+import ModalBurgerMenu from 'components/Modals/ModalBurgerMenu/ModalBurgerMenu';
 
 const AppBar = () => {
   const [isModal, setIsModal] = useState(false);
@@ -24,7 +27,7 @@ const AppBar = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.appBar',
   });
-  const openModal = () => {
+  const isOpenModal = () => {
     setIsModal(true);
   };
 
@@ -43,12 +46,24 @@ const AppBar = () => {
                 <Item $mainPage={pathname === `/`}>{t('Children')}</Item>
               </List>
               <Logo />
-              <ButtonMenu onClick={() => openModal()}>
+              <ButtonMenu type="button" onClick={isOpenModal}>
                 <IconBurgerMenu />
               </ButtonMenu>
-              {isModal && <BurgerMenu handleCloseMenu={closeModal} />}
-              <SearchInput />
-              <BoxNavigation $mainPage={pathname === `/`} />
+              {isModal && (
+                <Modal
+                  onClick={() => {
+                    setIsModal(false);
+                  }}
+                >
+                  <ModalBurgerMenu onClick={closeModal} />
+                </Modal>
+              )}
+              <WrapSearch>
+                <SearchInput />
+              </WrapSearch>
+              <WrapBoxNav>
+                <BoxNavigation $mainPage={pathname === `/`} />
+              </WrapBoxNav>
             </FirstHeader>
             <SecondHeader>
               <BoxNavLinks $mainPage={pathname === `/`} />

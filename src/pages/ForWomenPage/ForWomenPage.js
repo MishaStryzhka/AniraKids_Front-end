@@ -13,8 +13,10 @@ import ProductCard from 'components/ProductCard/ProductCard';
 import { useTranslation } from 'react-i18next';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import FilterType from 'components/Filters/FilterType/FilterType';
-import { TitleFilter } from './ForWomenPage.styled';
+import { TitleFilter, Wrap } from './ForWomenPage.styled';
 import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
+import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
+import Border from 'components/Border/Border';
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -26,6 +28,7 @@ const ForWomenPage = () => {
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>
+      <Border />
       <WrapMainContent>
         <SideBar>
           <TitleFilter>{t('Filters')}</TitleFilter>
@@ -37,7 +40,10 @@ const ForWomenPage = () => {
           <FilterSizeAdult />
         </SideBar>
         <MainContent>
-          <FilterSort />
+          <Wrap>
+            <IconsMenuForPages />
+            <FilterSort />
+          </Wrap>
           <ProductCard />
         </MainContent>
       </WrapMainContent>

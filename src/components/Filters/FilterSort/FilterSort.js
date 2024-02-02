@@ -3,14 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import {
   Button,
-  ButtonCalendar,
   FilterTitle,
   List,
   MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterSort.styled';
-import IconCalendar from 'images/icons/IconCalendar';
 
 const arrayParamsSort = [
   {
@@ -41,10 +39,6 @@ const FilterSort = () => {
   };
   return (
     <MainItem>
-      <ButtonCalendar>
-        <IconCalendar />
-      </ButtonCalendar>
-
       <Wrap $openOutfitsList={isFilterSortList === true}>
         <FilterTitle>{t('Sort by')}</FilterTitle>
         <StyledIconArrowUp

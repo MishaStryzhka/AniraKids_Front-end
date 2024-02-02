@@ -3,6 +3,7 @@ import {
   Description,
   MainTitle,
   Span,
+  WrapButton,
   WrapSection,
 } from './SectionHero.styled';
 import { Container } from 'components/Container/Container';
@@ -19,7 +20,9 @@ const SectionHero = () => {
           <Span>A</Span>nira<Span>K</Span>
         </MainTitle>
         <Description>{t('Platform Description')}</Description>
-        <Button>{t('rent')}</Button>
+        <WrapButton>
+          <Button>{t('rent')}</Button>
+        </WrapButton>
       </Container>
     </WrapSection>
   );

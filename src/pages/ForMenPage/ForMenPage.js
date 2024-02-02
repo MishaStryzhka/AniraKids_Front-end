@@ -14,6 +14,9 @@ import { TitleFilter } from './ForMenPage.styled';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import FilterFamilyLookMen from 'components/Filters/FilterFamilyLook/FilterFamilyLookMen';
+import { Wrap } from 'pages/ForWomenPage/ForWomenPage.styled';
+import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
+import Border from 'components/Border/Border';
 
 const ForMenPage = () => {
   const { t } = useTranslation('translation', {
@@ -24,6 +27,7 @@ const ForMenPage = () => {
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t('Men suits')}</GeneralTitle>
+      <Border />
       <WrapMainContent>
         <SideBar>
           <TitleFilter>{t('Filters')}</TitleFilter>
@@ -34,7 +38,10 @@ const ForMenPage = () => {
           <FilterSizeAdult />
         </SideBar>
         <MainContent>
-          <FilterSort />
+          <Wrap>
+            <IconsMenuForPages />
+            <FilterSort />
+          </Wrap>
           <NotFound>{t('Empty here for now')}</NotFound>
         </MainContent>
       </WrapMainContent>
