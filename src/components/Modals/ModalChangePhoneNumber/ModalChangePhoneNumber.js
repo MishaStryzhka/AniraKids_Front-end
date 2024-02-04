@@ -1,17 +1,16 @@
 import Button from 'components/Button/Button';
-import {
-  Form,
-  Input,
-  Label,
-  ModalTitle,
-  ModalWindow,
-  StyledIconCross,
-} from './ModalChangePhoneNumber.syled';
+import { Form, Label } from './ModalChangePhoneNumber.syled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validPhoneNumberScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
+import {
+  GeneralModalWindow,
+  InputModal,
+  ModalTitle,
+  StyledIconCross,
+} from '../Modal.styled';
 
 const ModalChangePhoneNumber = ({ onClick }) => {
   const dispatch = useDispatch();
@@ -27,13 +26,7 @@ const ModalChangePhoneNumber = ({ onClick }) => {
     dispatch(updateUserInfo({ primaryPhoneNumber }));
   };
   return (
-    <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
+    <GeneralModalWindow>
       <Formik
         initialValues={{
           primaryPhoneNumber: '',
@@ -50,10 +43,16 @@ const ModalChangePhoneNumber = ({ onClick }) => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
+            <StyledIconCross
+              onClick={() => {
+                document.body.style.overflow = 'auto';
+                onClick();
+              }}
+            />
             <ModalTitle>{t('changePhoneNumber')}</ModalTitle>
             <Label>
               {t('phoneNumber')}
-              <Input
+              <InputModal
                 type="tel"
                 name="primaryPhoneNumber"
                 onChange={e => handleChange(e)}
@@ -71,7 +70,7 @@ const ModalChangePhoneNumber = ({ onClick }) => {
           </Form>
         )}
       </Formik>
-    </ModalWindow>
+    </GeneralModalWindow>
   );
 };
 

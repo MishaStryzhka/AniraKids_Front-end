@@ -1,30 +1,49 @@
 import styled from 'styled-components';
 import PhotoBgClothes from 'images/clothes.jpg';
+import PhotoBgMobileClothers from 'images/bg-clothers-mobile.jpg';
+import PhotoBgTabletClothers from 'images/bg-clothers-tablet.jpg';
 import { NavLink } from 'react-router-dom';
 
 export const ModalWindow = styled.div`
-  width: 992px;
-  height: 668px;
+  width: 428px;
+  height: 628px;
 
   background-color: ${({ theme }) => theme.color.mainColor1};
-  background-image: url(${PhotoBgClothes});
+  background-image: url(${PhotoBgMobileClothers});
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
   z-index: 1;
   position: relative;
+  @media screen and (min-width: 768px) {
+    background-image: url(${PhotoBgTabletClothers});
+    width: 768px;
+  }
+  @media screen and (min-width: 1280px) {
+    background-image: url(${PhotoBgClothes});
+    width: 992px;
+    height: 668px;
+  }
 `;
 
 export const WrapForm = styled.div`
   background-color: rgba(255, 255, 255, 0.9);
   position: absolute;
   z-index: 3;
+  height: inherit;
+  max-width: 428px;
   height: 588px;
-  max-width: 400px;
-  padding: 40px 48px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  @media screen and (min-width: 768px) {
+    padding: 20px 20px;
+    max-width: 400px;
+  }
+  @media screen and (min-width: 1280px) {
+    padding: 40px 48px;
+  }
 `;
 
 export const Wrap = styled.div`
@@ -100,6 +119,7 @@ export const Separation = styled.p`
   position: relative;
   display: flex;
   justify-content: center;
+  text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};
 

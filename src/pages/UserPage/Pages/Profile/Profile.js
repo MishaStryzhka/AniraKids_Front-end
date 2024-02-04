@@ -17,13 +17,13 @@ import {
   Wrapper,
   WrapperBiling,
 } from './Profile.styled';
-import AvatarImage from '../../../../images/photo-plug.jpg';
+import AvatarImage from 'images/photo-plug.jpg';
 import { useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
 import { ErrorMessage, InputField } from 'components/Forms/Form.styled';
-import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
+// import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 import IconPencil from 'images/icons/IconPencil';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
 import IconEyeOpen from 'images/icons/IconEyeOpen';
@@ -44,6 +44,7 @@ import {
 } from 'components/SectionAnswers/SectionAnswers.styled';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
+import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {

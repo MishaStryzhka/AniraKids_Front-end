@@ -30,7 +30,6 @@ import { FilterSizeChildrenTranslationsUk } from 'components/Filters/FilterSizeC
 import { FilterOfToysTranslationsUk } from 'components/Filters/FilterToys/translations/uk';
 import { ProductCardTranslationsUk } from 'components/ProductCard/translations/uk';
 import { ModalAddAvatarTranslationsUk } from 'components/Modals/ModalAddAvatar/translations/uk';
-import { ModalChangeLoginTranslationsUk } from 'components/Modals/ModalChangeLogin/translations/uk';
 import { ModalChangePasswordTranslationsUk } from 'components/Modals/ModalChangePassword/translations/uk';
 import { ModalChangePhoneNumberTranslationsUk } from 'components/Modals/ModalChangePhoneNumber/translations/uk';
 import { ModalChangePhotoTranslationsUk } from 'components/Modals/ModalChangePhoto/translations/uk';
@@ -41,6 +40,7 @@ import { ModalBecomeLandlordTranslationsUk } from 'components/Modals/ModalBecome
 import { FormBillingDetailsTranslationsUk } from 'components/Forms/FormBillingDetails/translations/uk';
 import { FormBankAccountTranslationsUk } from 'components/Forms/FormBankAccount/translations/uk';
 import { ModalFiltersTranslationsUk } from 'components/Modals/ModalFiltes/translations/uk';
+import { ModalChangeNicknameTranslationsUk } from 'components/Modals/ModalChangeNickname/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -52,13 +52,13 @@ export const ComponentTranslationsUk = {
   formBankAccount: FormBankAccountTranslationsUk,
 
   // modals
+  modalChangeNickname: ModalChangeNicknameTranslationsUk,
   modalFilters: ModalFiltersTranslationsUk,
   modalRemoveProduct: ModalRemoveProductTranslationsUk,
   modalLogOut: ModalLogOutTranslationsUk,
   modalChangePhoto: ModalChangePhotoTranslationsUk,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsUk,
   modalChangePassword: ModalChangePasswordTranslationsUk,
-  modalChangeLogin: ModalChangeLoginTranslationsUk,
   modalAddAvatar: ModalAddAvatarTranslationsUk,
   modalChangeEmail: ModalChangeEmailTranslationsUk,
   modalRegister: ModalRegisterTranslationsUk,

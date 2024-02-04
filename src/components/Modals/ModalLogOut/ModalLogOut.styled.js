@@ -4,20 +4,27 @@ import styled from 'styled-components';
 export const ModalWindow = styled.div`
   width: 420px;
   display: flex;
-  padding: 24px;
-  gap: 24px;
+  padding: 16px;
+  gap: 16px;
   flex-direction: column;
   align-items: center;
   position: relative;
-
+  @media screen and (min-width: 768px) {
+    padding: 24px;
+    gap: 24px;
+  }
   background-color: ${({ theme }) => theme.color.mainColor1};
 `;
 
 export const StyledIconCross = styled(IconCross)`
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 16px;
+  right: 16px;
   cursor: pointer;
+  @media screen and (min-width: 768px) {
+    top: 24px;
+    right: 24px;
+  }
 `;
 
 export const ModalTitle = styled.h2`

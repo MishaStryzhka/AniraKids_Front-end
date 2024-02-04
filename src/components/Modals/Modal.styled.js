@@ -1,4 +1,32 @@
+import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
+
+export const GeneralModalWindow = styled.div`
+  padding: 16px;
+
+  @media screen and (min-width: 768px) {
+    padding: 24px;
+  }
+  background-color: ${({ theme }) => theme.color.mainColor1};
+`;
+
+export const StyledIconCross = styled(IconCross)`
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  cursor: pointer;
+`;
+
+export const ModalTitle = styled.h2`
+  text-align: center;
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
 
 export const TextDone = styled.p`
   padding: 48px 48px;
@@ -51,17 +79,6 @@ export const BtnStyled = styled.button`
   background-color: transparent;
 `;
 
-export const ModalTitle = styled.h2`
-  text-align: center;
-  font-family: Open Sans, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.02px;
-
-  color: ${({ theme }) => theme.color.mainColor5};
-`;
-
 export const ModalDescription = styled.p`
   text-align: center;
   font-family: Open Sans, sans-serif;
@@ -77,11 +94,15 @@ export const ModalWindow = styled.div`
   box-sizing: border-box;
   ${({ width }) => `width: ${width};`}
   display: flex;
-  padding: 24px;
-  gap: 24px;
+  padding: 16px;
+  gap: 16px;
   flex-direction: column;
   align-items: center;
   position: relative;
+  @media screen and (min-width: 768px) {
+    padding: 24px;
+    gap: 24px;
+  }
 
   background-color: ${({ theme }) => theme.color.mainColor1};
 `;
@@ -125,4 +146,14 @@ export const ScrollBox = styled.div`
   display: flex;
 
   padding: 40px;
+`;
+
+export const ErrorMessage = styled.p`
+  color: ${({ theme }) => theme.color.additionalColorRed};
+
+  font-family: 'Open Sans, sans-serif';
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 20px; /* 142.857% */
 `;

@@ -2,6 +2,7 @@ import Border from 'components/Border/Border';
 import {
   Description,
   Picture,
+  PictureContainer,
   Section,
   Title,
   Wrap,
@@ -34,37 +35,39 @@ const SectionAboutUs = () => {
         {/* {pathname === '/' && <Border />} */}
         <Border />
       </Container>
-      <Picture>
-        <source
-          media="(min-width: 1280px)"
-          type="image/webp"
-          srcSet={`${PhotoAbout1xWebp} 1x, ${PhotoAbout2xWebp} 2x`}
-        />
-        <source
-          media="(min-width: 1280px)"
-          srcSet={`${PhotoAbout1x} 1x, ${PhotoAbout2x} 2x`}
-        />
-        <source
-          media="(min-width: 768px)"
-          type="image/webp"
-          srcSet={`${PhotoAboutTablet1xWebp} 1x, ${PhotoAboutTablet2xWebp} 2x`}
-        />
-        <source
-          media="(min-width: 768px)"
-          srcSet={`${PhotoAboutTablet1x} 1x, ${PhotoAboutTablet2x} 2x`}
-        />
-        <source
-          media="(max-width: 767.5px)"
-          type="image/webp"
-          srcSet={`${PhotoAboutMobile1xWebp} 1x, ${PhotoAboutMobile2xWebp} 2x`}
-        />
-        <source
-          media="(max-width: 767.5px)"
-          srcSet={`${PhotoAboutMobile1x} 1x, ${PhotoAboutMobile2x} 2x`}
-        />
+      <PictureContainer>
+        <Picture>
+          <source
+            media="(min-width: 1280px)"
+            type="image/webp"
+            srcSet={`${PhotoAbout1xWebp} 1x, ${PhotoAbout2xWebp} 2x`}
+          />
+          <source
+            media="(min-width: 1280px)"
+            srcSet={`${PhotoAbout1x} 1x, ${PhotoAbout2x} 2x`}
+          />
+          <source
+            media="(min-width: 768px)"
+            type="image/webp"
+            srcSet={`${PhotoAboutTablet1xWebp} 1x, ${PhotoAboutTablet2xWebp} 2x`}
+          />
+          <source
+            media="(min-width: 768px)"
+            srcSet={`${PhotoAboutTablet1x} 1x, ${PhotoAboutTablet2x} 2x`}
+          />
+          <source
+            media="(max-width: 767.5px)"
+            type="image/webp"
+            srcSet={`${PhotoAboutMobile1xWebp} 1x, ${PhotoAboutMobile2xWebp} 2x`}
+          />
+          <source
+            media="(max-width: 767.5px)"
+            srcSet={`${PhotoAboutMobile1x} 1x, ${PhotoAboutMobile2x} 2x`}
+          />
 
-        <img srcSet={`${PhotoAbout1x}`} alt="Гардероб" />
-      </Picture>
+          <img srcSet={`${PhotoAbout1x}`} alt="Гардероб" />
+        </Picture>
+      </PictureContainer>
       <Container>
         <Wrap>
           <Description>{t('AniraK...')}</Description>

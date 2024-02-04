@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import {
+  MenuButton,
   NavigationWrapper,
   SecondBox,
   StyledNavLink,
@@ -9,16 +10,28 @@ import {
 import IconArrow from 'images/icons/IconArrow';
 import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
+import IconBurgerMenu from 'images/icons/IconBurgerMenu';
+import { useState } from 'react';
+import ModalBurgerAdmin from 'components/Modals/ModalBurgerAdmin/ModalBurgerAdmin';
 
 const NavigationOverlay = () => {
   const location = useLocation();
   const { t } = useTranslation();
-
+  const [isModal, setIsModal] = useState(false);
+  const closeModal = () => {
+    setIsModal(false);
+  };
+  const openModal = () => {
+    setIsModal(true);
+  };
   return (
     <TabBar>
       <NavigationWrapper>
         {/* =====Головна======= */}
-
+        <MenuButton type="button" onClick={openModal}>
+          <IconBurgerMenu />
+        </MenuButton>
+        {isModal && <ModalBurgerAdmin onClick={closeModal} />}
         {location.pathname === '/forWomen' && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>

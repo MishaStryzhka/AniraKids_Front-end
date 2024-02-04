@@ -1,3 +1,4 @@
+import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const Section = styled.section`
@@ -10,6 +11,11 @@ export const Section = styled.section`
     flex-direction: row;
   }
 `;
+
+export const PictureContainer = styled(Container)`
+  padding: 0;
+`;
+
 export const Title = styled.h3`
   font-family: ${({ $mainPage }) =>
     $mainPage ? 'Cormorant SC' : 'Open Sans Hebrew'};
