@@ -28,10 +28,7 @@ const NavigationOverlay = () => {
     <TabBar>
       <NavigationWrapper>
         {/* =====Головна======= */}
-        <MenuButton type="button" onClick={openModal}>
-          <IconBurgerMenu />
-        </MenuButton>
-        {isModal && <ModalBurgerAdmin onClick={closeModal} />}
+
         {location.pathname === '/forWomen' && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
@@ -71,10 +68,13 @@ const NavigationOverlay = () => {
             <StyledNavLink to="/aboutUs">{t('aboutUs')}</StyledNavLink>
           </>
         )}
-
         {/* ======Акаунт======= */}
         {location.pathname.includes('my-account') && (
           <>
+            <MenuButton type="button" onClick={openModal}>
+              <IconBurgerMenu />
+            </MenuButton>
+            {isModal && <ModalBurgerAdmin onClick={closeModal} />}
             <StyledNavLink $notActive to="/my-account/profile">
               {t('account')}
             </StyledNavLink>
