@@ -18,14 +18,18 @@ import FilterType from 'components/Filters/FilterType/FilterType';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
+import { Outlet, useParams } from 'react-router-dom';
 
 const ForChildrenPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.forChildrenPage',
   });
   useTitle(t("Children's Clothing"));
+  const { id } = useParams();
 
-  return (
+  return id ? (
+    <Outlet />
+  ) : (
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t("Children's Clothing")}</GeneralTitle>

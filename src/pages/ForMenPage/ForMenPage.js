@@ -17,13 +17,18 @@ import FilterFamilyLookMen from 'components/Filters/FilterFamilyLook/FilterFamil
 import { Wrap } from 'pages/ForWomenPage/ForWomenPage.styled';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
+import { Outlet, useParams } from 'react-router-dom';
 
 const ForMenPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.forMenPage',
   });
   useTitle(t('Men suits'));
-  return (
+  const { id } = useParams();
+
+  return id ? (
+    <Outlet />
+  ) : (
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t('Men suits')}</GeneralTitle>
