@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[751],{4751:(s,e,a)=>{a.r(e),a.d(e,{default:()=>c});var n=a(7689),r=a(184);const c=()=>{const{id:s}=(0,n.UO)();return console.log("id",s),(0,r.jsx)("p",{children:"ProductPage"})}}}]);
+//# sourceMappingURL=751.11a64e86.chunk.js.map
