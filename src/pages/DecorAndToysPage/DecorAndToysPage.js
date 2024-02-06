@@ -15,12 +15,19 @@ import FilterOfToys from 'components/Filters/FilterToys/FilterToys';
 import NotFound from 'components/NotFound/NotFound';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
+import { Outlet, useParams } from 'react-router-dom';
+import { useTitle } from 'hooks';
 
 const DecorAndToysPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.decorAndToysPage',
   });
-  return (
+  useTitle(t('Decor And Toys'));
+  const { id } = useParams();
+
+  return id ? (
+    <Outlet />
+  ) : (
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t('Decor And Toys')}</GeneralTitle>

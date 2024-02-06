@@ -17,8 +17,7 @@ import { TitleFilter, Wrap } from './ForWomenPage.styled';
 import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
-import ProductPage from 'pages/ProductPage/ProductPage';
-import { useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -28,7 +27,7 @@ const ForWomenPage = () => {
   const { id } = useParams();
 
   return id ? (
-    <ProductPage />
+    <Outlet />
   ) : (
     <Container>
       <NavigationOverlay />
