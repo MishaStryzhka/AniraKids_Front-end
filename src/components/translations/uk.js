@@ -44,6 +44,7 @@ import { ModalChangeNicknameTranslationsUk } from 'components/Modals/ModalChange
 import { ModalResetPasswordTranslationsUk } from 'components/Modals/ModalResetPassword/translations/uk';
 import { ModalAttentionTranslationsUk } from 'components/Modals/ModalAttention/translations/uk';
 import { ModalVideoResolvedTranslationsUk } from 'components/Modals/ModalVideoResolved/translations/uk';
+import { ModalAddVideoTranslationsUk } from 'components/Modals/ModalAddVideo/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -55,6 +56,7 @@ export const ComponentTranslationsUk = {
   formBankAccount: FormBankAccountTranslationsUk,
 
   // modals
+  modalAddVideo: ModalAddVideoTranslationsUk,
   modalVideoResolved: ModalVideoResolvedTranslationsUk,
   modalAttention: ModalAttentionTranslationsUk,
   modalResetPassword: ModalResetPasswordTranslationsUk,

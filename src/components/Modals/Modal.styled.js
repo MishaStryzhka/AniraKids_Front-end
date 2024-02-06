@@ -126,6 +126,7 @@ export const ModalWindow = styled.div`
   @media screen and (min-width: 768px) {
     padding: 24px;
     gap: 24px;
+    width: 448px;
   }
 
   background-color: ${({ theme }) => theme.color.mainColor1};

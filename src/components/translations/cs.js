@@ -43,6 +43,7 @@ import { ModalChangeNicknameTranslationsCs } from 'components/Modals/ModalChange
 import { ModalResetPasswordTranslationsCs } from 'components/Modals/ModalResetPassword/translations/cs';
 import { ModalAttentionTranslationsCs } from 'components/Modals/ModalAttention/translations/cs';
 import { ModalVideoResolvedTranslationsCs } from 'components/Modals/ModalVideoResolved/translations/cs';
+import { ModalAddVideoTranslationsCs } from 'components/Modals/ModalAddVideo/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -54,6 +55,7 @@ export const ComponentTranslationsCs = {
   formBankAccount: FormBankAccountTranslationsCs,
 
   // modals
+  modalAddVideo: ModalAddVideoTranslationsCs,
   modalVideoResolved: ModalVideoResolvedTranslationsCs,
   modalAttention: ModalAttentionTranslationsCs,
   modalResetPassword: ModalResetPasswordTranslationsCs,
