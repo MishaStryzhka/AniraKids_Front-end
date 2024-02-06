@@ -70,12 +70,18 @@ function App() {
           }
         >
           <Route path="/" element={<MainPage />} />
-          <Route path="/forMen" element={<ForMenPage />} />
+          <Route path="/forMen" element={<ForMenPage />}>
+            <Route path=":id" element={<ProductPage />} />
+          </Route>
           <Route path="/forWomen" element={<ForWomenPage />}>
             <Route path=":id" element={<ProductPage />} />
           </Route>
-          <Route path="/forChildren" element={<ForChildrenPage />} />
-          <Route path="/decorAndToys" element={<DecorAndToysPage />} />
+          <Route path="/forChildren" element={<ForChildrenPage />}>
+            <Route path=":id" element={<ProductPage />} />
+          </Route>
+          <Route path="/decorAndToys" element={<DecorAndToysPage />}>
+            <Route path=":id" element={<ProductPage />} />
+          </Route>
           <Route path="/aboutUs" element={<AboutUsPage />} />
           <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
           <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
