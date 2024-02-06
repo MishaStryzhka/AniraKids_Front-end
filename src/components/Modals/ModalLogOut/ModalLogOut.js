@@ -4,6 +4,7 @@ import {
   ModalTitle,
   ModalWindow,
   StyledIconCross,
+  Wrap,
 } from './ModalLogOut.styled';
 import { useDispatch } from 'react-redux';
 import { logOut } from '../../../redux/auth/operations';
@@ -30,17 +31,19 @@ const ModalLogOut = ({ onClick }) => {
       />
       <ModalTitle>{t('LogOut')}</ModalTitle>
 
-      <Button type="button" onClick={() => handleSignOut()}>
-        {t('yes')}
-      </Button>
-      <ButtonBack
-        type="button"
-        onClick={() => {
-          onClick();
-        }}
-      >
-        {t('back')}
-      </ButtonBack>
+      <Wrap>
+        <Button type="button" onClick={() => handleSignOut()}>
+          {t('yes')}
+        </Button>
+        <ButtonBack
+          type="button"
+          onClick={() => {
+            onClick();
+          }}
+        >
+          {t('back')}
+        </ButtonBack>
+      </Wrap>
     </ModalWindow>
   );
 };

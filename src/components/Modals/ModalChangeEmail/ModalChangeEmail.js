@@ -1,19 +1,18 @@
 import Button from 'components/Button/Button';
-import {
-  Form,
-  InputModal,
-  LabelModal,
-  ModalTitle,
-  ModalWindow,
-  StyledIconCross,
-} from './ModalChangeEmail.styled';
+import { Form, LabelModal } from './ModalChangeEmail.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserEmail } from '../../../redux/auth/operations';
 import { validUpdateEmailScheme } from 'schemas';
 import { useAuth } from 'hooks';
 import { BeatLoader } from 'react-spinners';
-import { TextDone } from '../Modal.styled';
+import {
+  GeneralModalWindow,
+  InputModal,
+  ModalTitle,
+  StyledIconCross,
+  TextDone,
+} from '../Modal.styled';
 import { clearDone, clearError } from '../../../redux/auth/slice';
 import { useEffect } from 'react';
 import { WrapButton } from '../ModalRegister/ModalRegister.styled';
@@ -42,13 +41,7 @@ const ModalChangeEmail = ({ onClick }) => {
   };
 
   return (
-    <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
+    <GeneralModalWindow>
       <Formik
         initialValues={{
           email: '',
@@ -70,6 +63,12 @@ const ModalChangeEmail = ({ onClick }) => {
             </TextDone>
           ) : (
             <Form onSubmit={handleSubmit}>
+              <StyledIconCross
+                onClick={() => {
+                  document.body.style.overflow = 'auto';
+                  onClick();
+                }}
+              />
               <ModalTitle>{t('changeEmailTitle')}</ModalTitle>
               <LabelModal>
                 {t('enterEmailLabel')}
@@ -98,7 +97,7 @@ const ModalChangeEmail = ({ onClick }) => {
           );
         }}
       </Formik>
-    </ModalWindow>
+    </GeneralModalWindow>
   );
 };
 

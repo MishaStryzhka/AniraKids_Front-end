@@ -5,4 +5,5 @@ export const StyledWrapMainContent = styled.div`
 
   display: flex;
   gap: 20px;
+  position: relative;
 `;

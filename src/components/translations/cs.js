@@ -29,7 +29,6 @@ import { FilterOfToysTranslationsCs } from 'components/Filters/FilterToys/transl
 import { SectionAnswersTranslationsCs } from 'components/SectionAnswers/translations/cs';
 import { ProductCardTranslationsCs } from 'components/ProductCard/translations/cs';
 import { ModalAddAvatarTranslationsCs } from 'components/Modals/ModalAddAvatar/translations/cs';
-import { ModalChangeLoginTranslationsCs } from 'components/Modals/ModalChangeLogin/translations/cs';
 import { ModalChangePasswordTranslationsCs } from 'components/Modals/ModalChangePassword/translations/cs';
 import { ModalChangePhoneNumberTranslationsCs } from 'components/Modals/ModalChangePhoneNumber/translations/cs';
 import { ModalChangePhotoTranslationsCs } from 'components/Modals/ModalChangePhoto/translations/cs';
@@ -40,6 +39,10 @@ import { ModalBecomeLandlordTranslationsCs } from 'components/Modals/ModalBecome
 import { FormBillingDetailsTranslationsCs } from 'components/Forms/FormBillingDetails/translations/cs';
 import { FormBankAccountTranslationsCs } from 'components/Forms/FormBankAccount/translations/cs';
 import { ModalFiltersTranslationsCs } from 'components/Modals/ModalFiltes/translations/cs';
+import { ModalChangeNicknameTranslationsCs } from 'components/Modals/ModalChangeNickname/translations/cs';
+import { ModalResetPasswordTranslationsCs } from 'components/Modals/ModalResetPassword/translations/cs';
+import { ModalAttentionTranslationsCs } from 'components/Modals/ModalAttention/translations/cs';
+import { ModalVideoResolvedTranslationsCs } from 'components/Modals/ModalVideoResolved/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -51,6 +54,10 @@ export const ComponentTranslationsCs = {
   formBankAccount: FormBankAccountTranslationsCs,
 
   // modals
+  modalVideoResolved: ModalVideoResolvedTranslationsCs,
+  modalAttention: ModalAttentionTranslationsCs,
+  modalResetPassword: ModalResetPasswordTranslationsCs,
+  modalChangeNickname: ModalChangeNicknameTranslationsCs,
   modalFilters: ModalFiltersTranslationsCs,
   modalRemoveProduct: ModalRemoveProductTranslationsCs,
   modalLogOut: ModalLogOutTranslationsCs,
@@ -58,7 +65,6 @@ export const ComponentTranslationsCs = {
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsCs,
   modalChangeEmail: ModalChangeEmailTranslationsCs,
   modalChangePassword: ModalChangePasswordTranslationsCs,
-  modalChangeLogin: ModalChangeLoginTranslationsCs,
   modalAddAvatar: ModalAddAvatarTranslationsCs,
   modalRegister: ModalRegisterTranslationsCs,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsCs,

@@ -30,7 +30,6 @@ import { FilterTypeTranslationsEn } from 'components/Filters/FilterType/translat
 import { FilterOfToysTranslationsEn } from 'components/Filters/FilterToys/translations/en';
 import { ProductCardTranslationsEn } from 'components/ProductCard/translations/en';
 import { ModalAddAvatarTranslationsEn } from 'components/Modals/ModalAddAvatar/translations/en';
-import { ModalChangeLoginTranslationsEn } from 'components/Modals/ModalChangeLogin/translations/en';
 import { ModalChangePasswordTranslationsEn } from 'components/Modals/ModalChangePassword/translations/en';
 import { ModalChangePhoneNumberTranslationsEn } from 'components/Modals/ModalChangePhoneNumber/translations/en';
 import { ModalChangePhotoTranslationsEn } from 'components/Modals/ModalChangePhoto/translations/en';
@@ -41,6 +40,10 @@ import { ModalBecomeLandlordTranslationsEn } from 'components/Modals/ModalBecome
 import { FormBillingDetailsTranslationsEn } from 'components/Forms/FormBillingDetails/translations/en';
 import { FormBankAccountTranslationsEn } from 'components/Forms/FormBankAccount/translations/en';
 import { ModalFiltersTranslationsEn } from 'components/Modals/ModalFiltes/translations/en';
+import { ModalChangeNicknameTranslationsEn } from 'components/Modals/ModalChangeNickname/translations/en';
+import { ModalResetPasswordTranslationsEn } from 'components/Modals/ModalResetPassword/translations/en';
+import { ModalAttentionTranslationsEn } from 'components/Modals/ModalAttention/translations/en';
+import { ModalVideoResolvedTranslationsEn } from 'components/Modals/ModalVideoResolved/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -52,13 +55,16 @@ export const ComponentTranslationsEn = {
   formBankAccount: FormBankAccountTranslationsEn,
 
   // modals
+  modalVideoResolved: ModalVideoResolvedTranslationsEn,
+  modalAttention: ModalAttentionTranslationsEn,
+  modalResetPassword: ModalResetPasswordTranslationsEn,
+  modalChangeNickname: ModalChangeNicknameTranslationsEn,
   modalFilters: ModalFiltersTranslationsEn,
   modalRemoveProduct: ModalRemoveProductTranslationsEn,
   modalLogOut: ModalLogOutTranslationsEn,
   modalChangePhoto: ModalChangePhotoTranslationsEn,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsEn,
   modalChangePassword: ModalChangePasswordTranslationsEn,
-  modalChangeLogin: ModalChangeLoginTranslationsEn,
   modalAddAvatar: ModalAddAvatarTranslationsEn,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsEn,
   modalRegister: ModalRegisterTranslationsEn,

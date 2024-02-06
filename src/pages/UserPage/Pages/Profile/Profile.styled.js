@@ -4,7 +4,13 @@ import styled from 'styled-components';
 
 export const ProfileForm = styled(Form)`
   display: flex;
+  flex-direction: column-reverse;
+  gap: 40px;
   justify-content: space-evenly;
+  @media screen and (min-width: 768px) {
+    flex-direction: row;
+    gap: 0;
+  }
 `;
 
 export const Wrap = styled.div`
@@ -19,7 +25,13 @@ export const SecondWrap = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 64px;
+  gap: 32px;
+  @media screen and (min-width: 768px) {
+    gap: 40px;
+  }
+  @media screen and (min-width: 1280) {
+    gap: 64px;
+  }
 `;
 
 export const AvatarLabel = styled.div`
@@ -37,7 +49,11 @@ export const AvatarWrap = styled.label`
 export const Avatar = styled.img``;
 export const AvaterTitle = styled.p``;
 export const AvatarDescription = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
   text-align: center;
+  font-size: 10px;
+  line-height: 1.8;
+  letter-spacing: 0.01px;
 `;
 
 export const Label = styled.label`
