@@ -50,13 +50,11 @@ import {
   arrayAgeProduct,
   arrayFamilyLookProduct,
   arrayOfToysProduct,
-  arrayPregnancyProduct,
   arraySizeChildrenProduct,
   arrayofDecorProduct,
   arrayOfSubjectsProduct,
   arrayColorsProduct,
   arraySizeAdult,
-  arrayFamilyLookMen,
   // arraySaleOrRent,
 } from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
@@ -64,13 +62,12 @@ import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 
 const FormAddProduct = () => {
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
-  const [photoOrder, setPhotoOrder] = useState([]);
-
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.formAddProduct',
   });
 
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [photoOrder, setPhotoOrder] = useState([]);
   // ===========
 
   const handleDragStart = (e, index) => {
@@ -110,24 +107,23 @@ const FormAddProduct = () => {
     const handleScroll = event => {
       const wrapPhotots = wrapPhototsRef.current;
 
-      // Визначте кількість пікселів, на яку буде прокручено за кожен "крок" роліка
-      const scrollStep = 50;
+      const scrollStep = 25;
 
-      // Прокручуйте вліво або вправо в залежності від напрямку русу роліка
       if (event.deltaY > 0) {
         wrapPhotots.scrollLeft += scrollStep;
       } else {
         wrapPhotots.scrollLeft -= scrollStep;
       }
 
-      // Зупиніть подальше поширення події, якщо ви обробляєте прокрутку
-      event.preventDefault();
+      // event.preventDefault();
     };
 
-    wrapPhotots.addEventListener('wheel', handleScroll);
+    wrapPhotots.addEventListener('wheel', handleScroll, { passive: true });
 
     return () => {
-      wrapPhotots.removeEventListener('wheel', handleScroll);
+      wrapPhotots.removeEventListener('wheel', handleScroll, {
+        passive: true,
+      });
     };
   }, []);
 
@@ -173,10 +169,23 @@ const FormAddProduct = () => {
           setFieldValue,
           handleChange,
           handleSubmit,
+          handleBlur,
         } = formikProps;
-        console.log(errors);
-        const handleCategoryButtonClick = category => {
-          formikProps.setFieldValue('category', category);
+
+        console.log('values', values);
+        console.log('touched', touched);
+
+        console.log('errors', errors);
+
+        const resetInitialValuesForCategories = () => {
+          setFieldValue('familyLook', '');
+          setFieldValue('isPregnancy', '');
+          setFieldValue('size', '');
+          setFieldValue('subject', '');
+          setFieldValue('age', '');
+          setFieldValue('childSize', '');
+          setFieldValue('decor', '');
+          setFieldValue('toys', '');
         };
 
         return (
@@ -222,6 +231,7 @@ const FormAddProduct = () => {
                     )
                   );
                 }}
+                onBlur={handleBlur}
                 multiple
               />
               <Title>{t('Upload photo')}</Title>
@@ -252,18 +262,23 @@ const FormAddProduct = () => {
                 )}
               </WrapperPhotos>
               <TextInstruction>{t('instruction upload photo')}</TextInstruction>
+              <ErrorMessage>
+                {errors.photoUrls &&
+                  touched.photoUrls &&
+                  t(`${errors.photoUrls}`)}
+              </ErrorMessage>
             </div>
             <div>
               <Title>{t('addVideo')}</Title>
               <LabelDescription>
                 {t('labelAddVideo')}
                 <Field
-                  onChange={handleChange}
                   name="videoUrl"
                   value={values.videoUrl}
                   type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="https://www.youtube.com/watch?..."
-                  required
                 />
                 <ErrorMessage>
                   {errors.videoUrl &&
@@ -275,12 +290,13 @@ const FormAddProduct = () => {
             <div>
               <Title>{t('describeItem')}</Title>
               <LabelDescription>
-                {t('nameItem')}
+                {t('nameItem')}*
                 <Field
-                  onChange={handleChange}
+                  type="text"
                   name="name"
                   value={values.name}
-                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder={t('namePlaceholder')}
                   required
                 />
@@ -290,12 +306,13 @@ const FormAddProduct = () => {
               </LabelDescription>
 
               <LabelDescription>
-                {t('descriptionItem')}
+                {t('descriptionItem')}*
                 <FieldComments
-                  onChange={handleChange}
+                  type="text"
                   name="description"
                   value={values.description}
-                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder={t('descriptionPlaceholder')}
                   required
                 />
@@ -330,9 +347,10 @@ const FormAddProduct = () => {
                   <Button
                     $active={values.category === 'women`s category'}
                     type="button"
-                    onClick={() =>
-                      handleCategoryButtonClick('women`s category')
-                    }
+                    onClick={() => {
+                      resetInitialValuesForCategories();
+                      setFieldValue('category', 'women`s category');
+                    }}
                   >
                     {t("Women's Clothing")}
                   </Button>
@@ -341,7 +359,10 @@ const FormAddProduct = () => {
                   <Button
                     $active={values.category === 'men`s category'}
                     type="button"
-                    onClick={() => handleCategoryButtonClick('men`s category')}
+                    onClick={() => {
+                      resetInitialValuesForCategories();
+                      setFieldValue('category', 'men`s category');
+                    }}
                   >
                     {t("Men's Suits")}
                   </Button>
@@ -350,9 +371,10 @@ const FormAddProduct = () => {
                   <Button
                     $active={values.category === 'children`s category'}
                     type="button"
-                    onClick={() =>
-                      handleCategoryButtonClick('children`s category')
-                    }
+                    onClick={() => {
+                      resetInitialValuesForCategories();
+                      setFieldValue('category', 'children`s category');
+                    }}
                   >
                     {t("Children's Clothing")}
                   </Button>
@@ -362,9 +384,10 @@ const FormAddProduct = () => {
                   <Button
                     $active={values.category === 'decoration category'}
                     type="button"
-                    onClick={() =>
-                      handleCategoryButtonClick('decoration category')
-                    }
+                    onClick={() => {
+                      resetInitialValuesForCategories();
+                      setFieldValue('category', 'decoration category');
+                    }}
                   >
                     {t('Decor and Toys')}
                   </Button>
@@ -378,9 +401,10 @@ const FormAddProduct = () => {
                 </ErrorMessage>
               </WrapError>
 
-              {/* WOMEN`S CATEGORY */}
+              {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
 
-              {values.category === 'women`s category' && (
+              {(values.category === 'women`s category' ||
+                values.category === 'men`s category') && (
                 <Wrap>
                   <BoxCategory>
                     <WrapCategory>
@@ -412,36 +436,26 @@ const FormAddProduct = () => {
                         </ErrorMessage>
                       </List>
                     </WrapCategory>
-                    <WrapCategory>
-                      <Description>{t('For pregnant women')}</Description>
-                      <List>
-                        {arrayPregnancyProduct.map(
-                          ({ valueVariant }, index) => (
-                            <li key={index}>
-                              <Label>
-                                <Box>
-                                  {values.isPregnancy === valueVariant && (
-                                    <IconCheck />
-                                  )}
-                                </Box>
-                                {t(valueVariant)}
-                                <Input
-                                  type="radio"
-                                  name="isPregnancy"
-                                  value={valueVariant}
-                                  onChange={handleChange}
-                                />
-                              </Label>
-                            </li>
-                          )
-                        )}
+                    {values.category === 'women`s category' && (
+                      <WrapCategory>
+                        <Description>{t('For pregnant women')}</Description>
+                        <Label>
+                          <Box>{values.isPregnancy && <IconCheck />}</Box>
+                          {t(true)}
+                          <Input
+                            type="checkbox"
+                            name="isPregnancy"
+                            value={values.isPregnancy}
+                            onChange={handleChange}
+                          />
+                        </Label>
                         <ErrorMessage>
                           {errors.isPregnancy &&
                             touched.isPregnancy &&
                             t(errors.isPregnancy)}
                         </ErrorMessage>
-                      </List>
-                    </WrapCategory>
+                      </WrapCategory>
+                    )}
                   </BoxCategory>
                   <Title>{t('Specify the size')}</Title>
                   <ListHorizont>
@@ -456,6 +470,7 @@ const FormAddProduct = () => {
                             name="size"
                             value={descriptionSize}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                           />
                         </LabelSize>
                       </li>
@@ -464,68 +479,6 @@ const FormAddProduct = () => {
                   <WrapError>
                     <ErrorMessage>
                       {errors.size && touched.size && t(errors.size)}
-                    </ErrorMessage>
-                  </WrapError>
-                </Wrap>
-              )}
-
-              {/* MEN`S CATEGORY */}
-
-              {values.category === 'men`s category' && (
-                <Wrap>
-                  <WrapCategory
-                    $isCategoryMan={values.category === 'men`s category'}
-                  >
-                    <Description>Family look</Description>
-                    <List>
-                      {arrayFamilyLookMen.map(({ valueVariant }, index) => (
-                        <li key={index}>
-                          <Label>
-                            <Box>
-                              {values.familyLook === valueVariant && (
-                                <IconCheck />
-                              )}
-                            </Box>
-                            {t(valueVariant)}
-                            <Input
-                              type="radio"
-                              name="familyLook"
-                              value={valueVariant}
-                              onChange={handleChange}
-                            />
-                          </Label>
-                        </li>
-                      ))}
-                    </List>
-                    <WrapError>
-                      <ErrorMessage>
-                        {errors.familyLook &&
-                          touched.familyLook &&
-                          t(`${errors.familyLook}`)}
-                      </ErrorMessage>
-                    </WrapError>
-                  </WrapCategory>
-                  <Title>{t('Specify the size')}</Title>
-                  <ListHorizont>
-                    {arraySizeAdult.map(({ descriptionSize }, index) => (
-                      <li key={index}>
-                        <LabelSize>
-                          <BoxSize $check={values?.size === descriptionSize}>
-                            {descriptionSize}
-                          </BoxSize>
-                          <Input
-                            type="radio"
-                            name="size"
-                            value={descriptionSize}
-                            onChange={handleChange}
-                          />
-                        </LabelSize>
-                      </li>
-                    ))}
-                  </ListHorizont>
-                  <WrapError>
-                    <ErrorMessage>
-                      {errors.size && touched.size && t(`${errors.size}`)}
                     </ErrorMessage>
                   </WrapError>
                 </Wrap>
@@ -566,17 +519,20 @@ const FormAddProduct = () => {
                   <Title>{t('Age')}</Title>
                   <WrapChildrenParams>
                     {arrayAgeProduct.map(({ valueAge }, index) => (
-                      <LabelChildren key={index}>
-                        <BoxSize $check={values.age === valueAge}>
-                          {t(valueAge)}
-                        </BoxSize>
-                        <Input
-                          type="radio"
-                          name="age"
-                          value={valueAge}
-                          onChange={handleChange}
-                        />
-                      </LabelChildren>
+                      <li key={index}>
+                        <LabelChildren>
+                          <BoxSize $check={values.age === valueAge}>
+                            {t(valueAge)}
+                          </BoxSize>
+                          <Input
+                            type="radio"
+                            name="age"
+                            value={valueAge}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          />
+                        </LabelChildren>
+                      </li>
                     ))}
                   </WrapChildrenParams>
                   <WrapError>
@@ -589,18 +545,20 @@ const FormAddProduct = () => {
                   <WrapChildrenSize>
                     {arraySizeChildrenProduct.map(
                       ({ descriptionSize, valueSize }, index) => (
-                        <LabelChildren key={index}>
-                          <BoxSize $check={values.childSize === valueSize}>
-                            {descriptionSize}
-                            {t('sizecm')}
-                          </BoxSize>
-                          <Input
-                            type="radio"
-                            name="childSize"
-                            value={valueSize}
-                            onChange={handleChange}
-                          />
-                        </LabelChildren>
+                        <li key={index}>
+                          <LabelChildren>
+                            <BoxSize $check={values.childSize === valueSize}>
+                              {descriptionSize}
+                              {t('sizecm')}
+                            </BoxSize>
+                            <Input
+                              type="radio"
+                              name="childSize"
+                              value={valueSize}
+                              onChange={handleChange}
+                            />
+                          </LabelChildren>
+                        </li>
                       )
                     )}
                   </WrapChildrenSize>
@@ -633,6 +591,7 @@ const FormAddProduct = () => {
                               name="decor"
                               value={searchDecor}
                               onChange={handleChange}
+                              onBlur={handleBlur}
                             />
                           </Label>
                         ))}
@@ -686,6 +645,7 @@ const FormAddProduct = () => {
                         name="color"
                         value={color}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                       />
                       <WrapBoxColor $check={values.color === color}>
                         <BoxColor color={colorCode} />
@@ -702,59 +662,75 @@ const FormAddProduct = () => {
                 </ErrorMessage>
               </WrapError>
             </div>
+
             {/* Rental or Sale of Product */}
             <div>
               <Title>{t('title rent-sale')}</Title>
               <GeneralWrap>
                 <WrapCondition>
                   <LabelStatus>
-                    <Box>{values.rental === 'true' && <IconCheck />}</Box>
+                    <Box>{values.rental && <IconCheck />}</Box>
                     {t('Rental')}
                     <Input
-                      type="radio"
+                      type="checkbox"
                       name="rental"
-                      value={values.rental === 'true' ? 'false' : 'true'}
+                      value={values.rental}
                       onChange={e => {
-                        setFieldValue('rental', e.target.value);
+                        e.currentTarget.value === 'true' &&
+                          setFieldValue('rentalPrice', '');
+                        handleChange(e);
                       }}
+                      onBlur={handleBlur}
                     />
                   </LabelStatus>
                   <LabelPrice>
-                    {t('Price')}
+                    {t('Price')} (Kč)
                     <InputPrice
                       placeholder={t('pricePlaceholder')}
-                      type="text"
+                      type="number"
                       name="rentalPrice"
                       value={values.rentalPrice}
                       onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!values.rental}
                     />
                   </LabelPrice>
                 </WrapCondition>
                 <WrapCondition>
                   <LabelStatus>
-                    <Box>{values.sale === 'true' && <IconCheck />}</Box>
+                    <Box>{values.sale && <IconCheck />}</Box>
                     {t('Sale')}
                     <Input
-                      type="radio"
+                      type="checkbox"
                       name="sale"
-                      value={values.sale === 'true' ? 'false' : 'true'}
+                      value={values.sale}
                       onChange={e => {
-                        setFieldValue('sale', e.target.value);
+                        e.currentTarget.value === 'true' &&
+                          setFieldValue('salePrice', '');
+                        handleChange(e);
                       }}
+                      onBlur={handleBlur}
                     />
                   </LabelStatus>
                   <LabelPrice>
-                    {t('Price')}
+                    {t('Price')} (Kč)
                     <InputPrice
                       placeholder={t('pricePlaceholder')}
-                      type="text"
+                      type="number"
                       name="salePrice"
                       value={values.salePrice}
                       onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!values.sale}
                     />
                   </LabelPrice>
                 </WrapCondition>
               </GeneralWrap>
+              <WrapError>
+                <ErrorMessage>
+                  {errors.rental && touched.rental && t(errors.rental)}
+                </ErrorMessage>
+              </WrapError>
             </div>
 
             {/* KEYWORDS of Product */}
@@ -764,10 +740,11 @@ const FormAddProduct = () => {
               <Description>{t('labelKeywords')}</Description>
 
               <Field
-                onChange={handleChange}
+                type="text"
                 name="keyWord"
                 value={values.keyWord}
-                type="text"
+                onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder={t('keywordsPlaceholder')}
               />
               <TextInstruction>{t('addsKeywords')}</TextInstruction>
@@ -776,16 +753,18 @@ const FormAddProduct = () => {
             {/*  AGREE ADD PHOTO of Product */}
 
             <LabelStatus>
-              <Box>{values.check === 'true' && <IconCheck />}</Box>
+              <Box>{values.isAddPhoto && <IconCheck />}</Box>
               {t('yourAgree')}
               <StyledNavLink>{t('linkAgree')}</StyledNavLink>
               <Input
-                type="radio"
+                type="checkbox"
                 name="isAddPhoto"
-                value="true"
+                value={values.isAddPhoto}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
             </LabelStatus>
+
             <ButtonSubmit type="submit">
               {t('addItem')}
               <IconPlus />

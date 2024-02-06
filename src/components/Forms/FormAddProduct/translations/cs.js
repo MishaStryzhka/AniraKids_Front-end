@@ -34,7 +34,6 @@ export const FormAddProductTranslationsCs = {
   // part - pregnant woman
   'For pregnant women': 'Pro těhotné',
   true: 'Ano',
-  false: 'Ne',
 
   // part - adult size
   'Specify the size': 'Uveďte velikost',
@@ -131,7 +130,7 @@ export const FormAddProductTranslationsCs = {
   Rental: 'pronájem',
   Sale: 'Prodej',
   Price: 'Cena',
-  pricePlaceholder: '1500 CZK',
+  pricePlaceholder: '1500',
 
   // part - keywords of product
   keywords: 'klíčová slova',
@@ -155,5 +154,6 @@ export const FormAddProductTranslationsCs = {
   minLongText: 'Název produktu musí obsahovat alespoň 3 znaky',
   maxLongText: 'Název produktu musí být kratší než 50 znaků',
   maxLongComments: 'Název produktu musí být kratší než 300 znaků',
-  'Required section': 'Vyberte kategorii',
+  'Required category': 'Vyberte kategorii',
+  'Select at least one type of service': 'Vyberte aspoň jeden typ služby',
 };

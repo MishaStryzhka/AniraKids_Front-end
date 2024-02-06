@@ -156,5 +156,6 @@ export const FormAddProductTranslationsUk = {
   minLongText: 'Повинно містити щонайменше 3 символи',
   maxLongText: 'Повинно бути менше 50 символів',
   maxLongComments: 'Повинно бути менше 300 символів',
-  'Required section': 'Оберіть категорію',
+  'Required category': 'Оберіть категорію',
+  'Select at least one type of service': 'Виберіть принаймні один тип послуги',
 };

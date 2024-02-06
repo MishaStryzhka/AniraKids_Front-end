@@ -11,29 +11,6 @@ export const arrayFamilyLookProduct = [
     variantOfFamilyLook: 'Так + хлопчика',
     valueVariant: 'for-mamy-and-boy',
   },
-  // {
-  //   variantOfFamilyLook: 'Ні',
-  //   valueVariant: 'no',
-  // },
-];
-
-export const arrayFamilyLookMen = [
-  {
-    variantOfFamilyLook: 'Для всієї сім’ї',
-    valueVariant: 'for-all-family',
-  },
-  {
-    variantOfFamilyLook: 'Для тата і дівчинки',
-    valueVariant: 'for-dad-and-girl',
-  },
-  {
-    variantOfFamilyLook: 'Для тата і хлопчика',
-    valueVariant: 'for-dad-and-boy',
-  },
-];
-export const arrayPregnancyProduct = [
-  { isPregnancy: 'Так', valueVariant: 'true' },
-  { isPregnancy: 'Ні', valueVariant: 'false' },
 ];
 
 export const arrayOfSubjectsProduct = [
@@ -72,6 +49,12 @@ export const arrayOfSubjectsProduct = [
 ];
 
 export const arrayColorsProduct = [
+  {
+    color: 'colorful',
+    nameColor: 'Різнокольоровий',
+    colorCode:
+      'linear-gradient(138deg, #FFF500 -16.67%, rgba(0, 74, 218, 0.70) 45.48%, #004E24 89.42%)',
+  },
   { color: 'white', nameColor: 'Білий', colorCode: '#FFF' },
   { color: 'gray', nameColor: 'Сірий', colorCode: '#A7A7A7' },
   { color: 'orange', nameColor: 'Помаранчевий', colorCode: '#FFB833' },
@@ -85,12 +68,6 @@ export const arrayColorsProduct = [
   { color: 'pink', nameColor: 'Рожевий', colorCode: '#FFC0CB' },
   { color: 'blue', nameColor: 'Синій', colorCode: '#3395D2' },
   { color: 'violet', nameColor: 'Фіолетовий', colorCode: '#9A339B' },
-  {
-    color: 'colorful',
-    nameColor: 'Різнокольоровий',
-    colorCode:
-      'linear-gradient(138deg, #FFF500 -16.67%, rgba(0, 74, 218, 0.70) 45.48%, #004E24 89.42%)',
-  },
   {
     color: 'light-green',
     nameColor: 'Салатовий',

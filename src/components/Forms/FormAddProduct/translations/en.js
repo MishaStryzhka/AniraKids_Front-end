@@ -156,5 +156,6 @@ export const FormAddProductTranslationsEn = {
   minLongText: 'Name must be at least 3 characters',
   maxLongText: 'Name must be less than 50 characters',
   maxLongComments: 'Name must be less than 300 characters',
-  'Required section': 'Choose a category',
+  'Required category': 'Choose a category',
+  'Select at least one type of service': 'Select at least one type of service',
 };
