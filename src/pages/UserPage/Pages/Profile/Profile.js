@@ -44,7 +44,6 @@ import {
 } from 'components/SectionAnswers/SectionAnswers.styled';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
-// import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
