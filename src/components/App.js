@@ -43,6 +43,7 @@ const MyPurchases = lazy(() =>
 );
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Order1 = lazy(() => import('../pages/UserPage/Pages/Order1/Order1'));
+const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
@@ -70,7 +71,9 @@ function App() {
         >
           <Route path="/" element={<MainPage />} />
           <Route path="/forMen" element={<ForMenPage />} />
-          <Route path="/forWomen" element={<ForWomenPage />} />
+          <Route path="/forWomen" element={<ForWomenPage />}>
+            <Route path=":id" element={<ProductPage />} />
+          </Route>
           <Route path="/forChildren" element={<ForChildrenPage />} />
           <Route path="/decorAndToys" element={<DecorAndToysPage />} />
           <Route path="/aboutUs" element={<AboutUsPage />} />

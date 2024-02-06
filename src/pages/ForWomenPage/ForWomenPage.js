@@ -17,14 +17,19 @@ import { TitleFilter, Wrap } from './ForWomenPage.styled';
 import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
+import ProductPage from 'pages/ProductPage/ProductPage';
+import { useParams } from 'react-router-dom';
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.forWomenPage',
   });
   useTitle(t("Women's Clothing"));
+  const { id } = useParams();
 
-  return (
+  return id ? (
+    <ProductPage />
+  ) : (
     <Container>
       <NavigationOverlay />
       <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>
