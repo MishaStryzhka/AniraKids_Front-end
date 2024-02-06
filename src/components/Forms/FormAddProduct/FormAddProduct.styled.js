@@ -25,6 +25,9 @@ export const WrapperPhotos = styled.div`
   gap: 20px;
   padding-bottom: 8px;
 
+  width: min-content;
+  max-width: 100%;
+
   &::-webkit-scrollbar {
     margin-top: 5px;
     width: 12px;
@@ -107,6 +110,7 @@ export const LabelDescription = styled.label`
 `;
 
 export const Field = styled.input`
+  box-sizing: border-box;
   width: 100%;
   padding: 16px;
   border-radius: 5px;
@@ -123,6 +127,7 @@ export const Field = styled.input`
 `;
 
 export const FieldComments = styled.textarea`
+  box-sizing: border-box;
   width: 100%;
   padding: 16px;
   border-radius: 5px;
@@ -152,7 +157,7 @@ export const Button = styled.button`
   line-height: 1.43;
   padding: 16px;
   background-color: transparent;
-  border: 1px ${({ $active }) => ($active ? 'solid' : 'dashed')};
+  border: ${({ $active }) => ($active ? '2px solid' : '1px dashed')};
   border-radius: 2px;
   text-transform: uppercase;
 
@@ -279,8 +284,9 @@ export const BoxColor = styled.div`
   width: 18px;
   height: 18px;
   cursor: pointer;
-  background-color: ${({ color }) => color};
+  background: ${({ color }) => color};
   border-radius: 2px;
+  border: 1px solid #00000030;
 `;
 
 export const WrapChildrenParams = styled.ul`
