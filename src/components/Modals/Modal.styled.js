@@ -17,6 +17,17 @@ export const StyledIconCross = styled(IconCross)`
   cursor: pointer;
 `;
 
+export const StyledIconCrossToWindow = styled(IconCross)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  cursor: pointer;
+  @media screen and (min-width: 768px) {
+    top: 24px;
+    right: 24px;
+  }
+`;
+
 export const ModalTitle = styled.h2`
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -24,6 +35,18 @@ export const ModalTitle = styled.h2`
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.02px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const TextDescription = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  margin-top: 0;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.43;
+  max-width: 200px;
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -92,7 +115,8 @@ export const ModalDescription = styled.p`
 
 export const ModalWindow = styled.div`
   box-sizing: border-box;
-  ${({ width }) => `width: ${width};`}
+  /* ${({ width }) => `width: ${width};`} */
+  width: 360px;
   display: flex;
   padding: 16px;
   gap: 16px;

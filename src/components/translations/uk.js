@@ -41,6 +41,9 @@ import { FormBillingDetailsTranslationsUk } from 'components/Forms/FormBillingDe
 import { FormBankAccountTranslationsUk } from 'components/Forms/FormBankAccount/translations/uk';
 import { ModalFiltersTranslationsUk } from 'components/Modals/ModalFiltes/translations/uk';
 import { ModalChangeNicknameTranslationsUk } from 'components/Modals/ModalChangeNickname/translations/uk';
+import { ModalResetPasswordTranslationsUk } from 'components/Modals/ModalResetPassword/translations/uk';
+import { ModalAttentionTranslationsUk } from 'components/Modals/ModalAttention/translations/uk';
+import { ModalVideoResolvedTranslationsUk } from 'components/Modals/ModalVideoResolved/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -52,6 +55,9 @@ export const ComponentTranslationsUk = {
   formBankAccount: FormBankAccountTranslationsUk,
 
   // modals
+  modalVideoResolved: ModalVideoResolvedTranslationsUk,
+  modalAttention: ModalAttentionTranslationsUk,
+  modalResetPassword: ModalResetPasswordTranslationsUk,
   modalChangeNickname: ModalChangeNicknameTranslationsUk,
   modalFilters: ModalFiltersTranslationsUk,
   modalRemoveProduct: ModalRemoveProductTranslationsUk,

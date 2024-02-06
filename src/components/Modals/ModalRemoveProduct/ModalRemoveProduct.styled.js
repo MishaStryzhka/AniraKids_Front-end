@@ -2,7 +2,7 @@ import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
-  width: 420px;
+  width: 388px;
   display: flex;
   padding: 16px;
   gap: 16px;
@@ -12,6 +12,7 @@ export const ModalWindow = styled.div`
   @media screen and (min-width: 768px) {
     padding: 24px;
     gap: 24px;
+    width: 372px;
   }
   background-color: ${({ theme }) => theme.color.mainColor1};
 `;
@@ -64,7 +65,7 @@ export const ButtonReject = styled.button`
   border: none;
   border-radius: 2px;
   cursor: pointer;
-
+  margin-top: 16px;
   text-align: center;
 
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -76,4 +77,10 @@ export const ButtonReject = styled.button`
 
   color: ${({ theme }) => theme.color.mainColor1};
   background-color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const Wrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;

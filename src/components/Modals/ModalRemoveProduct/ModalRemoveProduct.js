@@ -5,6 +5,7 @@ import {
   ModalTitle,
   ModalWindow,
   StyledIconCross,
+  Wrap,
 } from './ModalRemoveProduct.styled';
 
 const ModalRemoveProduct = ({ onClick }) => {
@@ -20,14 +21,16 @@ const ModalRemoveProduct = ({ onClick }) => {
         }}
       />
       <ModalTitle>{t('titleRemoveProduct')}</ModalTitle>
-      <ButtonAgree>{t('yes')}</ButtonAgree>
-      <ButtonReject
-        onClick={() => {
-          onClick();
-        }}
-      >
-        {t('no')}
-      </ButtonReject>
+      <Wrap>
+        <ButtonAgree>{t('yes')}</ButtonAgree>
+        <ButtonReject
+          onClick={() => {
+            onClick();
+          }}
+        >
+          {t('no')}
+        </ButtonReject>
+      </Wrap>
     </ModalWindow>
   );
 };

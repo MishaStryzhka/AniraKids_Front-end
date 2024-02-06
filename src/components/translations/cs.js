@@ -40,6 +40,9 @@ import { FormBillingDetailsTranslationsCs } from 'components/Forms/FormBillingDe
 import { FormBankAccountTranslationsCs } from 'components/Forms/FormBankAccount/translations/cs';
 import { ModalFiltersTranslationsCs } from 'components/Modals/ModalFiltes/translations/cs';
 import { ModalChangeNicknameTranslationsCs } from 'components/Modals/ModalChangeNickname/translations/cs';
+import { ModalResetPasswordTranslationsCs } from 'components/Modals/ModalResetPassword/translations/cs';
+import { ModalAttentionTranslationsCs } from 'components/Modals/ModalAttention/translations/cs';
+import { ModalVideoResolvedTranslationsCs } from 'components/Modals/ModalVideoResolved/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -51,6 +54,9 @@ export const ComponentTranslationsCs = {
   formBankAccount: FormBankAccountTranslationsCs,
 
   // modals
+  modalVideoResolved: ModalVideoResolvedTranslationsCs,
+  modalAttention: ModalAttentionTranslationsCs,
+  modalResetPassword: ModalResetPasswordTranslationsCs,
   modalChangeNickname: ModalChangeNicknameTranslationsCs,
   modalFilters: ModalFiltersTranslationsCs,
   modalRemoveProduct: ModalRemoveProductTranslationsCs,
