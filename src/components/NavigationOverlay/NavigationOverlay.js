@@ -34,6 +34,11 @@ const NavigationOverlay = () => {
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
             <IconArrow />
             <StyledNavLink to="/forWomen">{t('womenClothing')}</StyledNavLink>
+            {location.pathname.includes('productCard') && (
+              <StyledNavLink to="./productCard">
+                {t('cardProduct')}
+              </StyledNavLink>
+            )}
           </>
         )}
         {location.pathname === '/forMen' && (
