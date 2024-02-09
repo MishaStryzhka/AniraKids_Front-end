@@ -1,7 +1,14 @@
+import { StyleButton } from 'components/Button/Button.styled';
 import styled from 'styled-components';
 
-export const WrapProductCard = styled.div`
+export const GeneralWrap = styled.div`
   margin-bottom: 80px;
+  @media screen and (min-width: 1280px) {
+    margin-bottom: 132px;
+  }
+`;
+
+export const WrapProductCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -58,6 +65,9 @@ export const WrapSecondaryImages = styled.div`
 `;
 
 export const TextWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
   @media screen and (min-width: 1280px) {
     max-width: 522px;
   }
@@ -151,9 +161,8 @@ export const WrapBtn = styled.div`
 export const Border = styled.div`
   width: 100%;
   height: 1px;
-  margin-top: 40px;
   margin-bottom: 24px;
-  background-color: ${({ theme }) => theme.color.btnColorBG};
+  background-color: ${({ theme }) => theme.color.mainColor2};
 `;
 export const TitleDescription = styled(Title)`
   margin-bottom: 8px;
@@ -182,4 +191,132 @@ export const Color = styled.div`
   border-radius: 2px;
 
   background-color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const WrapReviews = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  @media screen and (min-width: 1280px) {
+    width: 1064px;
+    margin: 40px auto 0;
+  }
+`;
+
+export const ListReviews = styled.ul`
+  width: 100%;
+`;
+
+export const ItemReview = styled.li`
+  padding: 40px 0;
+  border-top: 1px solid;
+  @media screen and (min-width: 768px) {
+    display: flex;
+    gap: 40px;
+  }
+  @media screen and (min-width: 1280px) {
+    gap: 64px;
+  }
+  border-color: ${({ theme }) => theme.color.mainColor2};
+`;
+
+export const WrapPerson = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 40px;
+`;
+export const PicturePerson = styled.picture`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid;
+
+  /* background-color: gray; */
+  border-color: ${({ theme }) => theme.color.mainColor2};
+`;
+
+export const ImagesPerson = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+export const TitleName = styled(Title)`
+  font-size: 14px;
+  line-height: 1.43;
+`;
+
+export const WrapInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const WrapPersonInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  @media screen and (min-width: 768px) {
+    width: 446px;
+  }
+  @media screen and (min-width: 768px) {
+    width: 798px;
+  }
+`;
+
+export const WrapIconsStars = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+export const WrapTimeRent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const TextRent = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+
+  color: ${({ theme }) => theme.color.mainColor2};
+`;
+
+export const TextRentValue = styled(TextRent)`
+  font-weight: 400;
+`;
+
+export const TextReview = styled(TextRent)`
+  font-weight: 400;
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const ButtonPreview = styled(StyleButton)`
+  margin: 0 auto;
+`;
+
+export const WrapCalendar = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+export const ButtonCalendarTime = styled.button`
+  cursor: pointer;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+`;
+export const TextCalendar = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+
+  color: ${({ theme }) => theme.color.btnColorBG};
 `;

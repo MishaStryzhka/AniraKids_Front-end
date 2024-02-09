@@ -6,4 +6,8 @@ export const ProductPageTranslationsUk = {
   'Product Description': 'Опис продукту',
   color: 'Колір',
   black: 'Чорний',
+  reviews: 'Відгуки',
+  'Rental completed': 'Оренда завершена',
+  'Leave a review': 'Залишити відгук',
+  'Rental calendar': 'Календар оренди',
 };
