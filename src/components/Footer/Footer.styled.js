@@ -2,8 +2,8 @@ import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
-  /* width: 100%; */
-
+  /* width: 428px;
+  margin: 0 auto; */
   padding: 40px;
   background-color: ${({ theme }) => theme.color.lightBGColor};
   @media screen and (min-width: 1280px) {
@@ -16,6 +16,7 @@ export const StyledFooter = styled.footer`
 export const FooterContainer = styled(Container)`
   padding: 0;
   width: inherit;
+  /* margin: 0 auto; */
   @media screen and (min-width: 1280px) {
     display: flex;
     flex-direction: column;

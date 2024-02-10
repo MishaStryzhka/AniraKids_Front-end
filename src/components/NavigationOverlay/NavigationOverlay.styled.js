@@ -57,3 +57,16 @@ export const StyledSecondButton = styled(NavLink)`
 
   text-decoration: none;
 `;
+
+export const MenuButton = styled.button`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+
+  padding: 0 6px;
+  @media screen and (min-width: 1280px) {
+    display: none;
+  }
+`;

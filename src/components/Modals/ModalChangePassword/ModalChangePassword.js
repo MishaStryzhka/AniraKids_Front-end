@@ -1,13 +1,5 @@
 import Button from 'components/Button/Button';
-import {
-  Form,
-  InputModal,
-  LabelModal,
-  ModalTitle,
-  ModalWindow,
-  StyledIconCross,
-  WrapIcon,
-} from './ModalChangePassword.styled';
+import { Form, LabelModal, WrapIcon } from './ModalChangePassword.styled';
 import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
@@ -18,6 +10,12 @@ import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validPasswordScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
+import {
+  GeneralModalWindow,
+  InputModal,
+  ModalTitle,
+  StyledIconCross,
+} from '../Modal.styled';
 
 const ModalChangePassword = ({ onClick }) => {
   const dispatch = useDispatch();
@@ -40,13 +38,7 @@ const ModalChangePassword = ({ onClick }) => {
     dispatch(updateUserInfo({ newPassword, confirmNewPassword }));
   };
   return (
-    <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
+    <GeneralModalWindow>
       <Formik
         initialValues={{
           password: '',
@@ -58,6 +50,12 @@ const ModalChangePassword = ({ onClick }) => {
       >
         {({ values, errors, touched, handleChange, handleSubmit }) => (
           <Form onSubmit={handleSubmit}>
+            <StyledIconCross
+              onClick={() => {
+                document.body.style.overflow = 'auto';
+                onClick();
+              }}
+            />
             <ModalTitle>{t('changePassword')}</ModalTitle>
             <LabelModal>
               {t('yourPassword')}
@@ -128,7 +126,7 @@ const ModalChangePassword = ({ onClick }) => {
           </Form>
         )}
       </Formik>
-    </ModalWindow>
+    </GeneralModalWindow>
   );
 };
 

@@ -35,7 +35,10 @@ export const MenuLanguage = styled.div`
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: -35px;
+  top: -42px;
+  @media screen and (min-width: 1280px) {
+    top: -50px;
+  }
 `;
 
 export const ButtonLanguage = styled.button`

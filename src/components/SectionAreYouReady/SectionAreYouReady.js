@@ -1,6 +1,7 @@
 import {
   ImageWrap,
   Picture,
+  PictureContainer,
   Section,
   Title,
   WrapText,
@@ -27,47 +28,49 @@ const SectionAreYouReady = () => {
   });
   return (
     <Section>
-      <ImageWrap>
-        <Picture>
-          <source
-            media="(min-width: 1280px)"
-            type="image/webp"
-            srcSet={`${AreYouReadyDesktopWebp1x} 1x, ${AreYouReadyDesktopWebp2x} 2x`}
-          />
-          <source
-            media="(min-width: 1280px)"
-            srcSet={`${AreYouReadyDesktop1x} 1x, ${AreYouReadyDesktop2x} 2x`}
-          />
-          <source
-            media="(min-width: 768px)"
-            type="image/webp"
-            srcSet={`${ReadyTabletWebp1x} 1x, ${ReadyTabletWebp2x} 2x`}
-          />
-          <source
-            media="(min-width: 768px)"
-            srcSet={`${ReadyTablet1x} 1x, ${ReadyTablet2x} 2x`}
-          />
-          <source
-            media="(max-width: 768px)"
-            type="image/webp"
-            srcSet={`${ReadyMobileWebp1x} 1x, ${ReadyMobileWebp2x} 2x`}
-          />
-          <source
-            media="(max-width: 768px)"
-            srcSet={`${ReadyMobile1x} 1x, ${ReadyMobile2x} 2x`}
-          />
+      <PictureContainer>
+        <ImageWrap>
+          <Picture>
+            <source
+              media="(min-width: 1280px)"
+              type="image/webp"
+              srcSet={`${AreYouReadyDesktopWebp1x} 1x, ${AreYouReadyDesktopWebp2x} 2x`}
+            />
+            <source
+              media="(min-width: 1280px)"
+              srcSet={`${AreYouReadyDesktop1x} 1x, ${AreYouReadyDesktop2x} 2x`}
+            />
+            <source
+              media="(min-width: 768px)"
+              type="image/webp"
+              srcSet={`${ReadyTabletWebp1x} 1x, ${ReadyTabletWebp2x} 2x`}
+            />
+            <source
+              media="(min-width: 768px)"
+              srcSet={`${ReadyTablet1x} 1x, ${ReadyTablet2x} 2x`}
+            />
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet={`${ReadyMobileWebp1x} 1x, ${ReadyMobileWebp2x} 2x`}
+            />
+            <source
+              media="(max-width: 768px)"
+              srcSet={`${ReadyMobile1x} 1x, ${ReadyMobile2x} 2x`}
+            />
 
-          <img
-            srcSet={`${AreYouReadyDesktop1x}`}
-            alt="Вишукана пані"
-            // width="730"
-          />
-        </Picture>
-      </ImageWrap>
-      <WrapText>
-        <Title>{t('Ready to start')}</Title>
-        <Button>{t('Rent')}</Button>
-      </WrapText>
+            <img
+              srcSet={`${AreYouReadyDesktop1x}`}
+              alt="Вишукана пані"
+              // width="730"
+            />
+          </Picture>
+        </ImageWrap>
+        <WrapText>
+          <Title>{t('Ready to start')}</Title>
+          <Button>{t('Rent')}</Button>
+        </WrapText>
+      </PictureContainer>
     </Section>
   );
 };

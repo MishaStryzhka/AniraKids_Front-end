@@ -1,3 +1,4 @@
+import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const Section = styled.section`
@@ -5,6 +6,7 @@ export const Section = styled.section`
   width: 428px;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 
   @media screen and (min-width: 768px) {
     width: 768px;
@@ -14,6 +16,14 @@ export const Section = styled.section`
     width: 1440px;
     margin: 0 auto;
     flex-direction: row;
+  }
+`;
+
+export const PictureContainer = styled(Container)`
+  padding: 0;
+
+  @media screen and (min-width: 1280px) {
+    display: flex;
   }
 `;
 
