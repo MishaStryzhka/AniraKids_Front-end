@@ -16,5 +16,6 @@ export const NavigationOverlayTranslationsCs = {
   myPurchases: 'Moje nákupy',
   wallet: 'Můj peněženka',
   basket: 'Košík',
+  cardProduct: 'Karta produktu',
   edit: 'Úprava',
 };
