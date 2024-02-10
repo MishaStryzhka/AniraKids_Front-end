@@ -7,6 +7,17 @@ const categoryOptions = [
   'decoration category',
 ];
 
+const subjectOptions = [
+  'Christmas',
+  'Ukrainian-symbols',
+  'Animals',
+  'ballet-&-princesses',
+  'Dinosaurs',
+  'Flowers-&-butterflies',
+  'Hearts',
+  'unicors-&-rainbows',
+];
+
 export const validationProductSchema = Yup.object().shape({
   videoUrl: Yup.string().matches(
     /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/,
@@ -29,6 +40,15 @@ export const validationProductSchema = Yup.object().shape({
   familyLook: Yup.string(),
 
   isPregnancy: Yup.boolean(),
+
+  subject: Yup.string().test('required', 'Required field', function (value) {
+    const category = this.parent.category;
+    if (category === 'children`s category') {
+      return subjectOptions.includes(value);
+    } else {
+      return true;
+    }
+  }),
 
   size: Yup.string().test('required-size', 'Required field', function (value) {
     const category = this.parent.category;
@@ -82,4 +102,6 @@ export const validationProductSchema = Yup.object().shape({
   keyWord: Yup.string(),
 
   isAddPhoto: Yup.string().required('Required field'),
+
+  brand: Yup.string(),
 });
