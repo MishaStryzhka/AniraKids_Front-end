@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   NavigationWrapper,
   SecondBox,
@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 const NavigationOverlay = () => {
   const location = useLocation();
   const { t } = useTranslation();
+
+  const { id: productId } = useParams();
 
   return (
     <TabBar>
@@ -76,7 +78,27 @@ const NavigationOverlay = () => {
               <StyledNavLink to="./favorite">{t('favorite')}</StyledNavLink>
             )}
             {location.pathname.includes('rent-out') && (
-              <StyledNavLink to="./rent-out">{t('offer')}</StyledNavLink>
+              <>
+                <StyledNavLink
+                  $notActive={location.pathname !== '/my-account/rent-out'}
+                  to="./rent-out"
+                >
+                  {t('offer')}
+                </StyledNavLink>
+                {location.pathname !== '/my-account/rent-out' && <IconArrow />}
+                {location.pathname.includes('add-product') && (
+                  <StyledNavLink to="/my-account/rent-out/add-product">
+                    {t('addProduct')}
+                  </StyledNavLink>
+                )}
+                {location.pathname.includes('update-product') && (
+                  <StyledNavLink
+                    to={`/my-account/rent-out/update-product/${productId}`}
+                  >
+                    {t('edit')}
+                  </StyledNavLink>
+                )}
+              </>
             )}
             {location.pathname.includes('rent-in') && (
               <StyledNavLink to="./rent-in">{t('rentIn')}</StyledNavLink>

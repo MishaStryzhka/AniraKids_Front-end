@@ -16,4 +16,5 @@ export const NavigationOverlayTranslationsEn = {
   myPurchases: 'My Sales',
   wallet: 'My Wallet',
   basket: 'Basket',
+  edit: 'Editing',
 };

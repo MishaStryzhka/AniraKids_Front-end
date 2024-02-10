@@ -16,4 +16,5 @@ export const NavigationOverlayTranslationsUk = {
   myPurchases: 'Мої продажі',
   wallet: 'Мій гаманець',
   basket: 'Кошик',
+  edit: 'Редагування',
 };
