@@ -60,6 +60,10 @@ import {
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
+import { BeatLoader } from 'react-spinners';
+import { useNavigate } from 'react-router-dom';
+
+const api = require('./../../../api/product');
 
 const FormAddProduct = () => {
   const { t } = useTranslation('translation', {
@@ -68,6 +72,11 @@ const FormAddProduct = () => {
 
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+
   // ===========
 
   const handleDragStart = (e, index) => {
@@ -129,8 +138,15 @@ const FormAddProduct = () => {
 
   // ===========
   const handleFormSubmit = values => {
-    console.log('I am here');
-    console.log('Form values:', values);
+    setIsLoading(true);
+    api
+      .addProduct(values)
+      .then(data => {
+        console.log('data', data);
+        setIsLoading(false);
+        navigate('/my-account/rent-out', { replace: true });
+      })
+      .catch(error => console.log('error', error));
   };
 
   return (
@@ -172,10 +188,7 @@ const FormAddProduct = () => {
           handleBlur,
         } = formikProps;
 
-        console.log('values', values);
-        console.log('touched', touched);
-
-        console.log('errors', errors);
+        // console.log('errors', errors);
 
         const resetInitialValuesForCategories = () => {
           setFieldValue('familyLook', '');
@@ -765,9 +778,15 @@ const FormAddProduct = () => {
               />
             </LabelStatus>
 
-            <ButtonSubmit type="submit">
-              {t('addItem')}
-              <IconPlus />
+            <ButtonSubmit type="submit" disabled={isLoading}>
+              {!isLoading ? (
+                <>
+                  {t('addItem')}
+                  <IconPlus />
+                </>
+              ) : (
+                <BeatLoader color="#EBDAD1" />
+              )}
             </ButtonSubmit>
           </Form>
         );
