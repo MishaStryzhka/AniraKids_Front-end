@@ -26,6 +26,7 @@ const {
   ImageWrap,
   Picture,
   AddWrap,
+  PictureContainer,
 } = require('./SectionOurMission.styled');
 
 const SectionOurMission = () => {
@@ -70,37 +71,39 @@ const SectionOurMission = () => {
         </Container>
       </TextWrap>
       <ImageWrap>
-        <Picture>
-          <source
-            media="(min-width: 1280px)"
-            type="image/webp"
-            srcSet={`${ClosetDesktopWebp1x} 1x, ${ClosetDesktopWebp2x} 2x`}
-          />
-          <source
-            media="(min-width: 1280px)"
-            srcSet={`${ClosetDesktop1x} 1x, ${ClosetDesktop2x} 2x`}
-          />
-          <source
-            media="(min-width: 768px)"
-            type="image/webp"
-            srcSet={`${ClosetTabletWebp1x} 1x, ${ClosetTabletWebp2x} 2x`}
-          />
-          <source
-            media="(min-width: 768px)"
-            srcSet={`${ClosetTablet1x} 1x, ${ClosetTablet2x} 2x`}
-          />
-          <source
-            media="(max-width: 768px)"
-            type="image/webp"
-            srcSet={`${ClosetMobileWebp1x} 1x, ${ClosetMobileWebp2x} 2x`}
-          />
-          <source
-            media="(max-width: 768px)"
-            srcSet={`${ClosetMobile1x} 1x, ${ClosetMobile2x} 2x`}
-          />
+        <PictureContainer>
+          <Picture>
+            <source
+              media="(min-width: 1280px)"
+              type="image/webp"
+              srcSet={`${ClosetDesktopWebp1x} 1x, ${ClosetDesktopWebp2x} 2x`}
+            />
+            <source
+              media="(min-width: 1280px)"
+              srcSet={`${ClosetDesktop1x} 1x, ${ClosetDesktop2x} 2x`}
+            />
+            <source
+              media="(min-width: 768px)"
+              type="image/webp"
+              srcSet={`${ClosetTabletWebp1x} 1x, ${ClosetTabletWebp2x} 2x`}
+            />
+            <source
+              media="(min-width: 768px)"
+              srcSet={`${ClosetTablet1x} 1x, ${ClosetTablet2x} 2x`}
+            />
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet={`${ClosetMobileWebp1x} 1x, ${ClosetMobileWebp2x} 2x`}
+            />
+            <source
+              media="(max-width: 768px)"
+              srcSet={`${ClosetMobile1x} 1x, ${ClosetMobile2x} 2x`}
+            />
 
-          <img srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
-        </Picture>
+            <img srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
+          </Picture>
+        </PictureContainer>
       </ImageWrap>
     </Section>
   );

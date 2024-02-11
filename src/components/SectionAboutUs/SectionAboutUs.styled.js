@@ -1,14 +1,16 @@
+import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const Section = styled.section`
-  width: 428px;
-
+  /* width: 428px; */
+  box-sizing: border-box;
+  margin: 0 auto;
   padding-bottom: 40px;
 
   padding-top: ${({ $mainPage }) => ($mainPage ? '0' : '16px')};
   @media screen and (min-width: 1280px) {
     width: 1440px;
-    margin: 0 auto;
+    /* margin: 0 auto; */
   }
 `;
 
@@ -24,9 +26,14 @@ export const Title = styled.h2`
   color: ${({ theme }) => theme.color.mainColor4};
 `;
 
+export const PictureContainer = styled(Container)`
+  padding: 0;
+`;
 export const Picture = styled.picture`
   display: block;
   width: 1440px;
+  /* box-sizing: border-box; */
+  /* margin: 0 auto; */
   margin-bottom: 40px;
 `;
 

@@ -17,7 +17,7 @@ import {
   Wrapper,
   WrapperBiling,
 } from './Profile.styled';
-import AvatarImage from '../../../../images/photo-plug.jpg';
+import AvatarImage from 'images/photo-plug.jpg';
 import { useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';

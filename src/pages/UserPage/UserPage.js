@@ -33,6 +33,7 @@ const UserPage = () => {
   return (
     <Container>
       <NavigationOverlay />
+
       <WrapMainContent>
         <SideBar>
           <StyledNavLink to="./profile">
