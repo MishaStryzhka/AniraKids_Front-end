@@ -124,15 +124,13 @@ const FormAddProduct = () => {
         wrapPhotots.scrollLeft -= scrollStep;
       }
 
-      // event.preventDefault();
+      event.preventDefault();
     };
 
-    wrapPhotots.addEventListener('wheel', handleScroll, { passive: true });
+    wrapPhotots.addEventListener('wheel', handleScroll);
 
     return () => {
-      wrapPhotots.removeEventListener('wheel', handleScroll, {
-        passive: true,
-      });
+      wrapPhotots.removeEventListener('wheel', handleScroll);
     };
   }, []);
 
@@ -146,7 +144,10 @@ const FormAddProduct = () => {
         setIsLoading(false);
         navigate('/my-account/rent-out', { replace: true });
       })
-      .catch(error => console.log('error', error));
+      .catch(error => {
+        setIsLoading(false);
+        console.log('error', error);
+      });
   };
 
   return (
@@ -188,7 +189,7 @@ const FormAddProduct = () => {
           handleBlur,
         } = formikProps;
 
-        // console.log('errors', errors);
+        console.log('errors', errors);
 
         const resetInitialValuesForCategories = () => {
           setFieldValue('familyLook', '');
@@ -210,37 +211,58 @@ const FormAddProduct = () => {
                 id="photoUrls"
                 value=""
                 name="photoUrls"
+                accept=".jpg, .jpeg, .png"
                 onChange={e => {
                   const selectedFiles = Array.from(e.target.files);
 
                   if (selectedFiles.length + selectedPhotos.length > 10) {
                     // Заборонити вибір більше ніж 10 файлів
-                    alert('Можна вибрати максимум 10 файлів.');
+                    alert(t('maxFiles'));
                     return;
+                  }
+
+                  if (selectedFiles.some(file => file.size > 10485760)) {
+                    alert(t('maxSize'));
                   }
 
                   setTouched({ ...touched, photoUrls: true });
                   setSelectedPhotos([
                     ...photoOrder.map(i => selectedPhotos[i]),
-                    ...Array.from(e.target.files),
+                    ...Array.from(e.target.files).filter(
+                      file =>
+                        file.type !== 'video/quicktime' && file.size < 10485760
+                    ),
                   ]);
                   setPhotoOrder(
-                    [...selectedPhotos, ...Array.from(e.target.files)].map(
-                      (_, index) => index
-                    )
+                    [...selectedPhotos, ...Array.from(e.target.files)]
+                      .filter(
+                        file =>
+                          file.type !== 'video/quicktime' &&
+                          file.size < 10485760
+                      )
+                      .map((_, index) => index)
                   );
                   setFieldValue(
                     'photoUrls',
                     [
                       ...photoOrder,
-                      ...Array.from(e.target.files).map(
-                        (_, index) => photoOrder.length - 0 + index
-                      ),
+                      ...Array.from(e.target.files)
+                        .filter(
+                          file =>
+                            file.type !== 'video/quicktime' &&
+                            file.size < 10485760
+                        )
+                        .map((_, index) => photoOrder.length - 0 + index),
                     ].map(
                       index =>
-                        [...selectedPhotos, ...Array.from(e.target.files)][
-                          index
-                        ]
+                        [
+                          ...selectedPhotos,
+                          ...Array.from(e.target.files).filter(
+                            file =>
+                              file.type !== 'video/quicktime' &&
+                              file.size < 10485760
+                          ),
+                        ][index]
                     )
                   );
                 }}

@@ -2,6 +2,9 @@ export const FormAddProductTranslationsCs = {
   // section photo of product
   'Upload photo': 'Nahrát foto',
   'instruction upload photo': 'Můžete změnit pořadí fotografií přeuspořádáním.',
+  maxFiles: 'Lze vybrat maximálně 10 souborů.',
+  maxSize:
+    'Maximální velikost souboru je 10485760, prvky překračující tuto velikost nebyly přidány.',
 
   //   section video of product
   addVideo: 'Přidat videorecenzi',
