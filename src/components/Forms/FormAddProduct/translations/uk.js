@@ -3,6 +3,9 @@ export const FormAddProductTranslationsUk = {
   'Upload photo': 'Завантажте фото',
   'instruction upload photo':
     'Ви можете змінити порядок фотографій, переміщаючи їх між собою',
+  maxFiles: 'Можна вибрати максимум 10 файлів.',
+  maxSize:
+    'Максимальний розмір файлу 10485760, елементи, що перевищують розмір, не були додані.',
 
   //   section video of product
   addVideo: 'Додайте відео огляд',
