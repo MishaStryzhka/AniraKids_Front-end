@@ -11,6 +11,7 @@ import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { RestrictedRoute } from './RestrictedRoute';
+import UpdateProduct from 'pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -101,9 +102,12 @@ function App() {
             <Route path="profile/" element={<Profile />} />
             <Route path="chat/" element={<Chat />} />
             <Route path="favorite/" element={<Favorite />} />
-            <Route path="rent-out/" element={<RentOut />}>
-              <Route path="add-product/" element={<AddProduct />} />
-            </Route>
+            <Route path="rent-out/" element={<RentOut />} />
+            <Route path="rent-out/add-product/" element={<AddProduct />} />
+            <Route
+              path="rent-out/update-product/:id"
+              element={<UpdateProduct />}
+            />
             <Route path="rent-in/" element={<RentIn />} />
             <Route path="my-orders/" element={<MyOrders />} />
             <Route path="my-purchases/" element={<MyPurchases />} />
