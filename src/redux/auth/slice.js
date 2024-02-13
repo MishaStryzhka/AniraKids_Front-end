@@ -8,6 +8,7 @@ import {
   updateUserEmail,
   updateUserBillingDetails,
   updateUserBankAccount,
+  verifiedEmail,
 } from './operations';
 
 const initialState = {
@@ -128,6 +129,8 @@ const authSlice = createSlice({
         console.log('action.payload', action.payload);
 
         state.user.bankAccount = action.payload.bankAccount;
+        state.user.typeUser = action.payload.typeUser;
+
         state.isLoading = false;
         state.isDone = true;
       })
@@ -146,6 +149,19 @@ const authSlice = createSlice({
         state.isDone = true;
       })
       .addCase(updateUserEmail.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isLoading = false;
+      })
+
+      // verifiedEmail
+      .addCase(verifiedEmail.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(verifiedEmail.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isDone = action.payload;
+      })
+      .addCase(verifiedEmail.rejected, (state, action) => {
         state.error = action.payload;
         state.isLoading = false;
       });

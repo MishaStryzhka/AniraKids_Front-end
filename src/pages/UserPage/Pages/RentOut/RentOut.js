@@ -60,12 +60,20 @@ const RentOut = () => {
           ))}
           <p>page {page}</p>
           {pageSize * page < totalProducts && (
-            <button type="button" onClick={() => setPage(page + 1)}>
+            <button
+              type="button"
+              title="next page"
+              onClick={() => setPage(page + 1)}
+            >
               next page
             </button>
           )}
           {pageSize < totalProducts && pageSize * page < totalProducts && (
-            <button type="button" onClick={() => setPageSize(pageSize + 9)}>
+            <button
+              type="button"
+              title="next load 9 card"
+              onClick={() => setPageSize(pageSize + 9)}
+            >
               next 9
             </button>
           )}

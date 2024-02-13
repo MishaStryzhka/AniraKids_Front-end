@@ -214,6 +214,24 @@ export const updateUserEmail = createAsyncThunk(
   }
 );
 
+export const verifiedEmail = createAsyncThunk(
+  'auth/verifiedEmail',
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.patch(`/api/users/current/verifiedEmail`);
+
+      console.log('response.data', response.data);
+
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
 export const confirmUserEmail = createAsyncThunk(
   'auth/confirmEmail',
   async ({ token }, thunkAPI) => {
