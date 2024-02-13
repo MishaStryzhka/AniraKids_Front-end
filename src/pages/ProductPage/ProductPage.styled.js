@@ -12,9 +12,11 @@ export const WrapProductCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 40px;
+  min-width: 0;
   @media screen and (min-width: 1280px) {
     flex-direction: row;
-    gap: 20px;
+    /* gap: 20px; */
+    justify-content: space-between;
   }
 `;
 
@@ -22,6 +24,7 @@ export const WrapAllImages = styled.div`
   display: flex;
   gap: 8px;
   flex-direction: column;
+  min-width: 0;
   @media screen and (min-width: 768px) {
     flex-direction: row;
     gap: 20px;
@@ -32,6 +35,7 @@ export const MainImage = styled.img`
   display: block;
   width: 388px;
   height: 388px;
+  border-radius: 2px;
   @media screen and (min-width: 768px) {
     width: 482px;
     height: 540px;
@@ -46,6 +50,13 @@ export const SecondaryImages = styled.img`
   display: block;
   width: 124px;
   height: 113px;
+  border-radius: 2px;
+  cursor: pointer;
+  /* &:hover,
+  &:active {
+    border: 2px solid;
+    border-color: ${({ theme }) => theme.color.mainColor2};
+  } */
   @media screen and (min-width: 768px) {
     width: 186px;
     height: 175px;
@@ -57,10 +68,12 @@ export const SecondaryImages = styled.img`
 `;
 
 export const WrapSecondaryImages = styled.div`
-  display: flex;
-  gap: 8px;
+  width: 388px;
+  height: 113px;
+
   @media screen and (min-width: 768px) {
-    flex-direction: column;
+    height: 540px;
+    width: 186px;
   }
 `;
 
@@ -319,4 +332,18 @@ export const TextCalendar = styled.p`
   line-height: 1.43;
 
   color: ${({ theme }) => theme.color.btnColorBG};
+`;
+
+export const List = styled.ul`
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  @media screen and (min-width: 768px) {
+    flex-direction: column;
+    height: 540px;
+  }
+  @media screen and (min-width: 1280px) {
+    height: 690px;
+    width: 196px;
+  }
 `;

@@ -45,8 +45,9 @@ import {
   TextCalendar,
   ButtonCalendarTime,
   GeneralWrap,
+  List,
 } from './ProductPage.styled';
-import MainImageCard from '../../images/big-photo-product-card.jpg';
+// import MainImageCard from '../../images/big-photo-product-card.jpg';
 import SecondaryImage1 from '../../images/product-card-1.jpg';
 import SecondaryImage2 from '../../images/product-card-2.jpg';
 import SecondaryImage3 from '../../images/product-card-3.jpg';
@@ -56,30 +57,77 @@ import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
 import IconStar from 'images/icons/IconStart';
 import Button from 'components/Button/Button';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
+// import AliceCarousel from 'react-alice-carousel';
+import 'react-alice-carousel/lib/alice-carousel.css';
+import { useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Scrollbar, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/scrollbar';
+import 'swiper/css/navigation';
+
+const secondaryImages = [
+  SecondaryImage1,
+  SecondaryImage2,
+  SecondaryImage3,
+  SecondaryImage1,
+  SecondaryImage2,
+  SecondaryImage3,
+];
 
 const ProductPage = () => {
+  // const swiperRef = useRef(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { id } = useParams();
   console.log('id', id);
+
+  const handleSecondaryImageClick = index => {
+    setCurrentImageIndex(index);
+    // swiperRef.current.slideTo(index);
+  };
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
+
+  const width = window.innerWidth < 767;
   return (
     <Container>
       <NavigationOverlay />
       <GeneralWrap>
         <WrapProductCard>
           <WrapAllImages>
-            <MainImage srcSet={MainImageCard} alt="frame" />
+            <MainImage
+              srcSet={secondaryImages[currentImageIndex] || secondaryImages[0]}
+              alt="Main photo"
+            />
 
             <WrapSecondaryImages>
-              <SecondaryImages srcSet={SecondaryImage1} alt="frame" />
-
-              <SecondaryImages srcSet={SecondaryImage2} alt="frame" />
-
-              <SecondaryImages srcSet={SecondaryImage3} alt="frame" />
+              <List>
+                <Swiper
+                  // ref={swiperRef}
+                  modules={[Scrollbar, Navigation]}
+                  spaceBetween={8}
+                  slidesPerView={3}
+                  scrollbar={{ draggable: true }}
+                  direction={width ? 'horizontal' : 'vertical'}
+                >
+                  {secondaryImages.map((image, index) => (
+                    <SwiperSlide key={index}>
+                      <SecondaryImages
+                        srcSet={image}
+                        alt="All photos"
+                        onClick={() => {
+                          handleSecondaryImageClick(index);
+                        }}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </List>
             </WrapSecondaryImages>
           </WrapAllImages>
+
           <TextWrap>
             <WrapInformation>
               <Wrap>
