@@ -1,4 +1,3 @@
-import theme from 'components/theme';
 import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 

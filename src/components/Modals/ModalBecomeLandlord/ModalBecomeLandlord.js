@@ -28,7 +28,7 @@ const ModalBecomeLandlord = ({ onClick }) => {
       setTimeout(() => {
         dispatch(clearDone());
       }, 0);
-  }, [dispatch, isDone]);
+  }, [dispatch, isDone, navigate, step]);
 
   return (
     <ModalWindow width="448px">
