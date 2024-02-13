@@ -25,7 +25,7 @@ const Footer = () => {
         </FooterNavigate>
         <FooterWrap>
           <FooterCopyright>
-            GlamGarb Rentals s.r.o © 2023 - 2024
+          AniraKids © 2023 - 2024 GlamGarb Rentals s.r.o
           </FooterCopyright>
         </FooterWrap>
       </FooterContainer>

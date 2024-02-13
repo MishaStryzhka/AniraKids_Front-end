@@ -3,7 +3,10 @@ import * as Yup from 'yup';
 export const validationBillingDetailsScheme = Yup.object().shape({
   name: Yup.string()
     .required('Name is required')
-    .matches(/^[a-zA-Z\u00C0-\u017F\s]+$/, 'Only Czech characters are allowed'),
+    .matches(
+      /^[a-zA-Z\u00C0-\u017F\s.]+$/,
+      'Only Czech characters are allowed'
+    ),
   street: Yup.string()
     .required('Street is required')
     .matches(

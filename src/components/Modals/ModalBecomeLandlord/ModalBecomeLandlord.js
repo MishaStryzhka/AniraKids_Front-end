@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { clearDone } from '../../../redux/auth/slice';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
+import { useNavigate } from 'react-router-dom';
 
 const ModalBecomeLandlord = ({ onClick }) => {
   const { t } = useTranslation('translation', {
@@ -16,14 +17,18 @@ const ModalBecomeLandlord = ({ onClick }) => {
   const [step, setStep] = useState('first');
   const { isDone } = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  console.log('isDone', isDone);
 
   useEffect(() => {
     isDone && setStep('second');
+    step === 'second' && isDone && navigate('/my-account/rent-out');
     isDone &&
       setTimeout(() => {
         dispatch(clearDone());
       }, 0);
-  }, [dispatch, isDone]);
+  }, [dispatch, isDone, navigate, step]);
 
   return (
     <ModalWindow width="448px">

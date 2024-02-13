@@ -18,7 +18,7 @@ import {
   WrapperBiling,
 } from './Profile.styled';
 import AvatarImage from 'images/photo-plug.jpg';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from 'components/Modals/Modal';
 import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
@@ -31,8 +31,8 @@ import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
 import { useDispatch } from 'react-redux';
 import {
-  confirmUserEmail,
   updateUserInfo,
+  verifiedEmail,
 } from '../../../../redux/auth/operations';
 import { useTranslation } from 'react-i18next';
 import { StyledSecondButton } from 'components/NavigationOverlay/NavigationOverlay.styled';
@@ -44,13 +44,17 @@ import {
 } from 'components/SectionAnswers/SectionAnswers.styled';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
+import { clearDone } from '../../../../redux/auth/slice';
+import { TextDone } from 'components/Modals/Modal.styled';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.userPage.profilePage',
   });
   const { user, currentTheme, isLoading } = useAuth();
-  let { error } = useAuth();
+  let { error, isDone } = useAuth();
+
+  console.log('isDone', isDone);
 
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
@@ -66,7 +70,21 @@ const Profile = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
+  const [
+    isOpenModalEmailSentSuccessfully,
+    setIsOpenModalEmailSentSuccessfully,
+  ] = useState();
+
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    isDone?.message === 'Email confirmation sent successfully.' &&
+      setIsOpenModalEmailSentSuccessfully(true);
+    isDone &&
+      setTimeout(() => {
+        dispatch(clearDone());
+      }, 5000);
+  }, [dispatch, isDone]);
 
   const isChangeAvatarUrl = e => {
     const { files } = e.currentTarget;
@@ -79,7 +97,7 @@ const Profile = () => {
   };
 
   const verifyEmail = () => {
-    dispatch(confirmUserEmail());
+    dispatch(verifiedEmail());
   };
 
   return (
@@ -111,6 +129,7 @@ const Profile = () => {
           handleSubmit,
         }) => {
           console.log('errors', errors);
+          console.log('touched', touched);
 
           return (
             <ProfileForm>
@@ -122,17 +141,24 @@ const Profile = () => {
                       <InputText>{user?.lastName}</InputText>
                     </Wrapper>
                   ) : (
-                    <InputField
-                      type="text"
-                      id="lastName"
-                      value={values.lastName}
-                      name="lastName"
-                      placeholder="Каріна"
-                      onChange={e => {
-                        error = null;
-                        handleChange(e);
-                      }}
-                    />
+                    <>
+                      <InputField
+                        type="text"
+                        id="lastName"
+                        value={values.lastName}
+                        name="lastName"
+                        placeholder="Каріна"
+                        onChange={e => {
+                          error = null;
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage>
+                        {errors?.lastName &&
+                          touched?.lastName &&
+                          t(errors?.lastName)}
+                      </ErrorMessage>
+                    </>
                   )}
                 </Label>
 
@@ -143,17 +169,24 @@ const Profile = () => {
                       <InputText>{user?.firstName}</InputText>
                     </Wrapper>
                   ) : (
-                    <InputField
-                      type="text"
-                      id="firstName"
-                      value={values.firstName}
-                      name="firstName"
-                      placeholder="Стрижка"
-                      onChange={e => {
-                        error = null;
-                        handleChange(e);
-                      }}
-                    />
+                    <>
+                      <InputField
+                        type="text"
+                        id="firstName"
+                        value={values.firstName}
+                        name="firstName"
+                        placeholder="Стрижка"
+                        onChange={e => {
+                          error = null;
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage>
+                        {errors?.firstName &&
+                          touched?.firstName &&
+                          t(errors?.firstName)}
+                      </ErrorMessage>
+                    </>
                   )}
                 </Label>
 
@@ -180,9 +213,13 @@ const Profile = () => {
                       }}
                     />
                   )}
-                  {error?.message === 'Nickname must be unique' && (
-                    <ErrorMessage>{t('Nickname must be unique')}</ErrorMessage>
-                  )}
+                  <ErrorMessage>
+                    {(errors?.nickname &&
+                      touched?.nickname &&
+                      t(errors?.nickname)) ||
+                      (error?.message === 'Nickname must be unique' &&
+                        t('Nickname must be unique'))}
+                  </ErrorMessage>
                 </Label>
 
                 <Label>
@@ -199,17 +236,24 @@ const Profile = () => {
                       </ButtonEdit>
                     </Wrapper>
                   ) : (
-                    <InputField
-                      type="text"
-                      id="primaryPhoneNumber"
-                      value={values.primaryPhoneNumber}
-                      name="primaryPhoneNumber"
-                      placeholder="+380"
-                      onChange={e => {
-                        error = null;
-                        handleChange(e);
-                      }}
-                    />
+                    <>
+                      <InputField
+                        type="text"
+                        id="primaryPhoneNumber"
+                        value={values.primaryPhoneNumber}
+                        name="primaryPhoneNumber"
+                        placeholder="+380"
+                        onChange={e => {
+                          error = null;
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage>
+                        {errors?.primaryPhoneNumber &&
+                          touched?.primaryPhoneNumber &&
+                          t(errors?.primaryPhoneNumber)}
+                      </ErrorMessage>
+                    </>
                   )}
                   {isOpenModalChangePhoneNomber && (
                     <Modal
@@ -238,11 +282,16 @@ const Profile = () => {
                         <p>{t('verified')}</p>
                       ) : (
                         <button
-                          type="buttom"
-                          title="Верифікувати пошту"
+                          type="button"
+                          title="verify email"
                           onClick={() => verifyEmail()}
+                          disabled={isLoading}
                         >
-                          {t('verify')}
+                          {!isLoading ? (
+                            t('verify')
+                          ) : (
+                            <BeatLoader color="#fff" />
+                          )}
                         </button>
                       )}
                     </Wrapper>
@@ -273,6 +322,15 @@ const Profile = () => {
                       <ModalChangeEmail
                         onClick={() => setIsOpenModalChangeEmail(false)}
                       ></ModalChangeEmail>
+                    </Modal>
+                  )}
+                  {isOpenModalEmailSentSuccessfully && (
+                    <Modal
+                      onClick={() => setIsOpenModalEmailSentSuccessfully(false)}
+                    >
+                      <TextDone>
+                        {t('changeEmailMessage', { email: values.email })}
+                      </TextDone>
                     </Modal>
                   )}
                 </Label>
@@ -347,7 +405,8 @@ const Profile = () => {
                   </>
                 )}
 
-                {Object.entries(touched).length !== 0 && user.isFirstLogin && (
+                {((Object.entries(touched).length !== 0 && user.isFirstLogin) ||
+                  touched?.avatarUrl) && (
                   <StyledButton
                     type="submit"
                     title={t('saveChanges')}
@@ -414,7 +473,10 @@ const Profile = () => {
                   </StyledSecondButton>
                 )}
                 {isOpenModalBecomeLandlord && (
-                  <Modal onClick={() => setIsOpenModalBecomeLandlord(false)}>
+                  <Modal
+                    prohibitClosingByBackdrop
+                    onClick={() => setIsOpenModalBecomeLandlord(false)}
+                  >
                     <ModalBecomeLandlord
                       onClick={() => setIsOpenModalBecomeLandlord(false)}
                     ></ModalBecomeLandlord>
