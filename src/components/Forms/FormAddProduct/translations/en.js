@@ -35,6 +35,7 @@ export const FormAddProductTranslationsEn = {
   'for-mamy-and-boy': 'Yes + a boy',
   'for-dad-and-girl': 'Yes + a girl',
   'for-dad-and-boy': 'Yes + a boy',
+  no: 'No',
 
   // part - pregnant woman
   'For pregnant women': 'For pregnant women',
@@ -152,6 +153,7 @@ export const FormAddProductTranslationsEn = {
 
   // buttonAdd in form
   addItem: 'Add item',
+  btnNext: 'Next',
 
   // error
   'Required field': 'Required field',

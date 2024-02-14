@@ -27,7 +27,7 @@ const NavigationOverlay = () => {
   const openModal = () => {
     setIsModal(true);
   };
-  
+
   return (
     <TabBar>
       <NavigationWrapper>

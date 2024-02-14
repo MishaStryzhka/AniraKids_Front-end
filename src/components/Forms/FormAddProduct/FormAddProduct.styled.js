@@ -1,10 +1,65 @@
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const Form = styled.form`
+export const FormTablet = styled.form`
+  display: none;
+  @media screen and (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+`;
+
+export const FormMobile = styled.form`
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+`;
+
+export const Section = styled.section`
+  /* display: flex;
+  flex-direction: column;
+  gap: 32px; */
+`;
+
+export const WrapInsideSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 32px;
+`;
+
+export const ButtonNext = styled.button`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  color: ${({ theme }) => theme.color.mainColor3};
+
+  margin-top: 80px;
+  margin-left: 40px;
+
+  width: 305px;
+  padding: 14px 0;
+  background-color: transparent;
+  border-radius: 2px;
+  border: 1px solid;
+  border-color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const ButtonBack = styled.button``;
+
+export const WrapDescribeItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const WrapLabels = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
 `;
 
 export const Title = styled.h2`
@@ -13,10 +68,21 @@ export const Title = styled.h2`
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.02px;
-  margin-bottom: 16px;
+
   text-transform: uppercase;
+  margin-bottom: 16px;
 
   color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const TitleCategory = styled(Title)`
+  margin-bottom: 0;
+`;
+
+export const SectionCondition = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 `;
 
 export const WrapperPhotos = styled.div`
@@ -101,11 +167,13 @@ export const LabelDescription = styled.label`
   font-size: 14px;
   font-weight: 700;
   line-height: 1.43;
-  margin-bottom: 16px;
-  display: flex;
-  gap: 6px;
-  flex-direction: column;
 
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  @media screen and (min-width: 768px) {
+    margin-bottom: 16px;
+  }
   color: ${({ theme }) => theme.color.mainColor4};
 `;
 
@@ -146,6 +214,7 @@ export const FieldComments = styled.textarea`
 
 export const GeneralList = styled.ul`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 `;
 
@@ -186,7 +255,11 @@ export const ButtonSize = styled.button`
 export const WrapCategory = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  @media screen and (min-width: 768px) {
+    gap: 12px;
+  }
+
   margin-bottom: ${({ $isCategoryMan }) => ($isCategoryMan ? '48px' : '0')};
 `;
 export const Label = styled.label`
@@ -211,6 +284,10 @@ export const Description = styled.p`
   font-size: 14px;
   font-weight: 700;
   line-height: 1.43;
+  margin-bottom: 8px;
+  @media screen and (min-width: 768px) {
+    margin-bottom: 0;
+  }
 
   color: ${({ theme }) => theme.color.mainColor4};
 `;
@@ -218,11 +295,16 @@ export const Description = styled.p`
 export const BoxCategory = styled.div`
   display: flex;
   gap: 20px;
-  margin-bottom: 48px;
+
+  @media screen and (min-width: 768px) {
+    margin-bottom: 48px;
+  }
 `;
 
 export const Wrap = styled.div`
-  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 `;
 
 export const ButtonVariant = styled.button`
@@ -233,13 +315,23 @@ export const ButtonVariant = styled.button`
 `;
 
 export const ListColor = styled.ul`
-  width: 700px;
+  width: 388px;
   display: flex;
   flex-wrap: wrap;
-  column-count: 3;
-  gap: 8px;
+  column-count: 2;
+
+  @media screen and (min-width: 768px) {
+    width: 700px;
+    column-count: 3;
+    gap: 8px;
+  }
 `;
-export const ItemButton = styled.li``;
+export const ItemButton = styled.li`
+  padding: 8px 0;
+  @media screen and (min-width: 768px) {
+    padding: 0;
+  }
+`;
 
 export const LabelSize = styled.label`
   border: 1px solid;
@@ -265,8 +357,12 @@ export const BoxSize = styled.div`
 export const LabelColor = styled.label`
   border: none;
   background-color: transparent;
-  width: 200px;
+  width: 184px;
+
   cursor: pointer;
+  @media screen and (min-width: 768px) {
+    width: 200px;
+  }
 `;
 
 export const WrapBoxColor = styled.div`
@@ -295,7 +391,9 @@ export const WrapChildrenParams = styled.ul`
   max-width: 660px;
   gap: 16px;
   column-count: 4;
-  margin-bottom: 48px;
+  @media screen and (min-width: 768px) {
+    margin-bottom: 48px;
+  }
 `;
 
 export const WrapChildrenSize = styled(WrapChildrenParams)`
@@ -304,7 +402,10 @@ export const WrapChildrenSize = styled(WrapChildrenParams)`
 
 export const GeneralWrap = styled.div`
   display: flex;
-  gap: 78px;
+  gap: 20px;
+  @media screen and (min-width: 768px) {
+    gap: 78px;
+  }
 `;
 
 export const WrapCondition = styled.div`
@@ -322,10 +423,21 @@ export const LabelStatus = styled.label`
   align-items: center;
   gap: 4px;
   cursor: pointer;
+  text-transform: uppercase;
 
-  color: ${({ theme }) => theme.color.mainColor5};
+  color: ${({ theme }) => theme.color.additionalColorGreen};
+  /* color: #00542c; */
 `;
 
+export const WrapTextAgree = styled.div`
+  /* max-width: 200px; */
+`;
+
+export const LabelStatusAgree = styled(LabelStatus)`
+  color: ${({ theme }) => theme.color.mainColor5};
+  text-transform: none;
+  gap: 8px;
+`;
 export const LabelPrice = styled.label`
   display: flex;
   flex-direction: column;
@@ -334,11 +446,13 @@ export const LabelPrice = styled.label`
 `;
 
 export const InputPrice = styled.input`
-  width: 305px;
   padding: 16px;
   border: 1px solid;
   border-radius: 2px;
-
+  width: 150px;
+  @media screen and (min-width: 768px) {
+    width: 305px;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -350,11 +464,15 @@ export const InputPrice = styled.input`
 `;
 
 export const Box = styled.div`
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   border: 1px solid;
   display: inline-block;
   border-radius: 2px;
+  @media screen and (min-width: 768px) {
+    width: 24px;
+    height: 24px;
+  }
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
@@ -387,4 +505,8 @@ export const ButtonSubmit = styled.button`
 
 export const WrapError = styled.div`
   margin-top: 10px;
+`;
+
+export const WrapBtnAdd = styled.div`
+  margin-top: 80px;
 `;

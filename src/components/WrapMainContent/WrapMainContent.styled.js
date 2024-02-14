@@ -1,9 +1,12 @@
 import styled from 'styled-components';
 
 export const StyledWrapMainContent = styled.div`
-  margin: 40px 0;
+  margin: 24px 0 40px;
 
-  display: flex;
-  gap: 20px;
   position: relative;
+  @media screen and (min-width: 1280px) {
+    display: flex;
+    gap: 20px;
+    margin: 40px 0;
+  }
 `;

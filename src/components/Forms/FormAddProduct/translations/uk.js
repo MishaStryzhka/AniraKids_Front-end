@@ -34,6 +34,7 @@ export const FormAddProductTranslationsUk = {
   'for-mamy-and-boy': 'Так + хлопчик',
   'for-dad-and-girl': 'Так + дівчинка',
   'for-dad-and-boy': 'Так + хлопчик',
+  no: 'Ні',
 
   // part - pregnant woman
   'For pregnant women': 'Для вагітних',
@@ -97,7 +98,7 @@ export const FormAddProductTranslationsUk = {
   'for-recreation': 'Для активного відпочинку',
   'board-games-and-puzzles': 'Настільні ігри, пазли',
   'toy-weapon': 'Іграшкова зброя',
-  'creativite-and-development': 'Творчість і розвиток',
+  'creativity-and-development': 'Творчість і розвиток',
   'school-supplies': 'Товари для школи',
   'children`s-transport': 'Дитячий транспорт',
   'robots-and-transformers': 'Роботи і трансформери',
@@ -152,6 +153,7 @@ export const FormAddProductTranslationsUk = {
 
   // buttonAdd in form
   addItem: 'Додати товар',
+  btnNext: 'Далі',
 
   // error
   'Required field': 'Обов`язкове поле',
