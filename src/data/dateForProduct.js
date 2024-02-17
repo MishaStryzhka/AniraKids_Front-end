@@ -11,10 +11,6 @@ export const arrayFamilyLookProduct = [
     variantOfFamilyLook: 'Так + хлопчика',
     valueVariant: 'for-mamy-and-boy',
   },
-  {
-    variantOfFamilyLook: 'Ні',
-    valueVariant: 'no',
-  },
 ];
 
 export const arrayOfSubjectsProduct = [

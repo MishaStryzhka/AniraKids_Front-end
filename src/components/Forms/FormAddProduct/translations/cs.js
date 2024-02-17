@@ -33,7 +33,6 @@ export const FormAddProductTranslationsCs = {
   'for-mamy-and-boy': 'Ano + chlapce',
   'for-dad-and-girl': 'Ano + dívku',
   'for-dad-and-boy': 'Ano + chlapce',
-  no: 'Ne',
 
   // part - pregnant woman
   'For pregnant women': 'Pro těhotné',

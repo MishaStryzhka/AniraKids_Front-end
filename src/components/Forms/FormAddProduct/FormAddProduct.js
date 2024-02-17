@@ -51,6 +51,7 @@ import {
   LabelStatusAgree,
   WrapTextAgree,
   WrapBtnAdd,
+  BoxLarge,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
@@ -72,6 +73,7 @@ import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 import { BeatLoader } from 'react-spinners';
 import { useNavigate } from 'react-router-dom';
+import IconBigCheck from 'images/icons/IconBigCheck';
 
 const api = require('./../../../api/product');
 
@@ -311,11 +313,10 @@ const FormAddProduct = () => {
                 <TextInstruction>
                   {t('instruction upload photo')}
                 </TextInstruction>
-                <ErrorMessage>
-                  {errors.photoUrls &&
-                    touched.photoUrls &&
-                    t(`${errors.photoUrls}`)}
-                </ErrorMessage>
+
+                {errors.photoUrls && touched.photoUrls && (
+                  <ErrorMessage>{t(errors.photoUrls)}</ErrorMessage>
+                )}
               </div>
               <div>
                 <Title>{t('addVideo')}</Title>
@@ -329,11 +330,9 @@ const FormAddProduct = () => {
                     onBlur={handleBlur}
                     placeholder="https://www.youtube.com/watch?..."
                   />
-                  <ErrorMessage>
-                    {errors.videoUrl &&
-                      touched.videoUrl &&
-                      t(`${errors.videoUrl}`)}
-                  </ErrorMessage>
+                  {errors.videoUrl && touched.videoUrl && (
+                    <ErrorMessage>{t(errors.videoUrl)}</ErrorMessage>
+                  )}
                 </LabelDescription>
               </div>
               <div>
@@ -442,13 +441,12 @@ const FormAddProduct = () => {
                     </Button>
                   </li>
                 </GeneralList>
-                <WrapError>
-                  <ErrorMessage>
-                    {errors.category &&
-                      touched.category &&
-                      t(`${errors.category}`)}
-                  </ErrorMessage>
-                </WrapError>
+
+                {errors.category && touched.category && (
+                  <WrapError>
+                    <ErrorMessage>{t(errors.category)} </ErrorMessage>
+                  </WrapError>
+                )}
 
                 {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
 
@@ -478,11 +476,9 @@ const FormAddProduct = () => {
                             )
                           )}
 
-                          <ErrorMessage>
-                            {errors.familyLook &&
-                              touched.familyLook &&
-                              t(errors.familyLook)}
-                          </ErrorMessage>
+                          {errors.familyLook && touched.familyLook && (
+                            <ErrorMessage>{t(errors.familyLook)}</ErrorMessage>
+                          )}
                         </List>
                       </WrapCategory>
                       {values.category === 'women`s category' && (
@@ -498,38 +494,41 @@ const FormAddProduct = () => {
                               onChange={handleChange}
                             />
                           </Label>
-                          <ErrorMessage>
-                            {errors.isPregnancy &&
-                              touched.isPregnancy &&
-                              t(errors.isPregnancy)}
-                          </ErrorMessage>
+
+                          {errors.isPregnancy && touched.isPregnancy && (
+                            <ErrorMessage>{t(errors.isPregnancy)}</ErrorMessage>
+                          )}
                         </WrapCategory>
                       )}
                     </BoxCategory>
-                    <Title>{t('Specify the size')}</Title>
-                    <ListHorizont>
-                      {arraySizeAdult.map(({ descriptionSize }, index) => (
-                        <li key={index}>
-                          <LabelSize>
-                            <BoxSize $check={values?.size === descriptionSize}>
-                              {descriptionSize}
-                            </BoxSize>
-                            <Input
-                              type="radio"
-                              name="size"
-                              value={descriptionSize}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                            />
-                          </LabelSize>
-                        </li>
-                      ))}
-                    </ListHorizont>
-                    <WrapError>
-                      <ErrorMessage>
-                        {errors.size && touched.size && t(errors.size)}
-                      </ErrorMessage>
-                    </WrapError>
+                    <div>
+                      <Title>{t('Specify the size')}</Title>
+                      <ListHorizont>
+                        {arraySizeAdult.map(({ descriptionSize }, index) => (
+                          <li key={index}>
+                            <LabelSize>
+                              <BoxSize
+                                $check={values?.size === descriptionSize}
+                              >
+                                {descriptionSize}
+                              </BoxSize>
+                              <Input
+                                type="radio"
+                                name="size"
+                                value={descriptionSize}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                            </LabelSize>
+                          </li>
+                        ))}
+                      </ListHorizont>
+                      {errors.size && touched.size && (
+                        <WrapError>
+                          <ErrorMessage>{t(errors.size)}</ErrorMessage>
+                        </WrapError>
+                      )}
+                    </div>
                   </Wrap>
                 )}
 
@@ -560,66 +559,70 @@ const FormAddProduct = () => {
                             )
                           )}
                         </List>
-                        <ErrorMessage>
-                          {errors.subject &&
-                            touched.subject &&
-                            t(errors.subject)}
-                        </ErrorMessage>
+
+                        {errors.subject && touched.subject && (
+                          <ErrorMessage>{t(errors.subject)}</ErrorMessage>
+                        )}
                       </WrapCategory>
                     </BoxCategory>
-                    <Title>{t('Age')}</Title>
-                    <WrapChildrenParams>
-                      {arrayAgeProduct.map(({ valueAge }, index) => (
-                        <li key={index}>
-                          <LabelChildren>
-                            <BoxSize $check={values.age === valueAge}>
-                              {t(valueAge)}
-                            </BoxSize>
-                            <Input
-                              type="radio"
-                              name="age"
-                              value={valueAge}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                            />
-                          </LabelChildren>
-                        </li>
-                      ))}
-                    </WrapChildrenParams>
-                    <WrapError>
-                      <ErrorMessage>
-                        {errors.age && touched.age && t(`${errors.age}`)}
-                      </ErrorMessage>
-                    </WrapError>
-
-                    <Title>{t('Size')}</Title>
-                    <WrapChildrenSize>
-                      {arraySizeChildrenProduct.map(
-                        ({ descriptionSize, valueSize }, index) => (
+                    <div>
+                      <Title>{t('Age')}</Title>
+                      <WrapChildrenParams>
+                        {arrayAgeProduct.map(({ valueAge }, index) => (
                           <li key={index}>
                             <LabelChildren>
-                              <BoxSize $check={values.childSize === valueSize}>
-                                {descriptionSize}
-                                {t('sizecm')}
+                              <BoxSize $check={values.age === valueAge}>
+                                {t(valueAge)}
                               </BoxSize>
                               <Input
                                 type="radio"
-                                name="childSize"
-                                value={valueSize}
+                                name="age"
+                                value={valueAge}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                               />
                             </LabelChildren>
                           </li>
-                        )
+                        ))}
+                      </WrapChildrenParams>
+
+                      {errors.age && touched.age && (
+                        <WrapError>
+                          <ErrorMessage>{t(errors.age)}</ErrorMessage>
+                        </WrapError>
                       )}
-                    </WrapChildrenSize>
-                    <WrapError>
-                      <ErrorMessage>
-                        {errors.childSize &&
-                          touched.childSize &&
-                          t(errors.childSize)}
-                      </ErrorMessage>
-                    </WrapError>
+                    </div>
+                    <div>
+                      <Title>{t('Size')}</Title>
+                      <WrapChildrenSize>
+                        {arraySizeChildrenProduct.map(
+                          ({ descriptionSize, valueSize }, index) => (
+                            <li key={index}>
+                              <LabelChildren>
+                                <BoxSize
+                                  $check={values.childSize === valueSize}
+                                >
+                                  {descriptionSize}
+                                  {t('sizecm')}
+                                </BoxSize>
+                                <Input
+                                  type="radio"
+                                  name="childSize"
+                                  value={valueSize}
+                                  onChange={handleChange}
+                                />
+                              </LabelChildren>
+                            </li>
+                          )
+                        )}
+                      </WrapChildrenSize>
+
+                      {errors.childSize && touched.childSize && (
+                        <WrapError>
+                          <ErrorMessage>{t(errors.childSize)}</ErrorMessage>
+                        </WrapError>
+                      )}
+                    </div>
                   </Wrap>
                 )}
 
@@ -647,15 +650,15 @@ const FormAddProduct = () => {
                             </Label>
                           ))}
                         </List>
-                        <WrapError>
-                          <ErrorMessage>
-                            {errors.decor && touched.decor && t(errors.decor)}
-                          </ErrorMessage>
-                        </WrapError>
+
+                        {errors.decor && touched.decor && (
+                          <WrapError>
+                            <ErrorMessage>{t(errors.decor)}</ErrorMessage>
+                          </WrapError>
+                        )}
                       </WrapCategory>
                       <WrapCategory>
                         <Description>{t('Toys')}</Description>
-
                         <List>
                           {arrayOfToysProduct.map(({ typeOfToys }, index) => (
                             <Label key={index}>
@@ -671,12 +674,10 @@ const FormAddProduct = () => {
                               />
                             </Label>
                           ))}
+                          {errors.toys && touched.toys && (
+                            <ErrorMessage>{t(errors.toys)}</ErrorMessage>
+                          )}
                         </List>
-                        <WrapError>
-                          <ErrorMessage>
-                            {errors.toys && touched.toys && t(errors.toys)}
-                          </ErrorMessage>
-                        </WrapError>
                       </WrapCategory>
                     </BoxCategory>
                   </Wrap>
@@ -707,11 +708,12 @@ const FormAddProduct = () => {
                   ))}
                 </ListColor>
                 <TextInstruction>{t('descriptionColor')}</TextInstruction>
-                <WrapError>
-                  <ErrorMessage>
-                    {errors.color && touched.color && t(errors.color)}
-                  </ErrorMessage>
-                </WrapError>
+
+                {errors.color && touched.color && (
+                  <WrapError>
+                    <ErrorMessage>{t(errors.color)}</ErrorMessage>
+                  </WrapError>
+                )}
               </div>
 
               {/* Rental or Sale of Product */}
@@ -777,11 +779,12 @@ const FormAddProduct = () => {
                     </LabelPrice>
                   </WrapCondition>
                 </GeneralWrap>
-                <WrapError>
-                  <ErrorMessage>
-                    {errors.rental && touched.rental && t(errors.rental)}
-                  </ErrorMessage>
-                </WrapError>
+
+                {errors.rental && touched.rental && (
+                  <WrapError>
+                    <ErrorMessage>{t(errors.rental)}</ErrorMessage>
+                  </WrapError>
+                )}
               </div>
 
               {/* KEYWORDS of Product */}
@@ -803,10 +806,12 @@ const FormAddProduct = () => {
 
               {/*  AGREE ADD PHOTO of Product */}
 
-              <LabelStatus>
+              <LabelStatusAgree>
                 <Box>{values.isAddPhoto && <IconCheck />}</Box>
-                {t('yourAgree')}
-                <StyledNavLink>{t('linkAgree')}</StyledNavLink>
+                <WrapTextAgree>
+                  {t('yourAgree')}
+                  <StyledNavLink>{t('linkAgree')}</StyledNavLink>
+                </WrapTextAgree>
                 <Input
                   type="checkbox"
                   name="isAddPhoto"
@@ -814,7 +819,7 @@ const FormAddProduct = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-              </LabelStatus>
+              </LabelStatusAgree>
 
               <ButtonSubmit type="submit" disabled={isLoading}>
                 {!isLoading ? (
@@ -827,7 +832,12 @@ const FormAddProduct = () => {
                 )}
               </ButtonSubmit>
             </FormTablet>
-            <FormMobile>
+
+            {/*  */}
+            {/* MOBILE ADAPTIVE */}
+            {/*  */}
+
+            <FormMobile onSubmit={handleSubmit}>
               {stepValue === 1 && (
                 <Section>
                   <WrapInsideSection>
@@ -1070,13 +1080,10 @@ const FormAddProduct = () => {
                           {t('Decor and Toys')}
                         </Button>
                       </li>
-                    </GeneralList>
-
-                    {errors.category && touched.category && (
-                      <WrapError>
+                      {errors.category && touched.category && (
                         <ErrorMessage>{t(errors.category)}</ErrorMessage>
-                      </WrapError>
-                    )}
+                      )}
+                    </GeneralList>
                   </div>
                   <ButtonBack
                     onClick={() => {
@@ -1428,7 +1435,9 @@ const FormAddProduct = () => {
                       <GeneralWrap>
                         <WrapCondition>
                           <LabelStatus>
-                            <Box>{values.rental && <IconCheck />}</Box>
+                            <BoxLarge>
+                              {values.rental && <IconBigCheck />}
+                            </BoxLarge>
                             {t('Rental')}
                             <Input
                               type="checkbox"
@@ -1457,7 +1466,9 @@ const FormAddProduct = () => {
                         </WrapCondition>
                         <WrapCondition>
                           <LabelStatus>
-                            <Box>{values.sale && <IconCheck />}</Box>
+                            <BoxLarge>
+                              {values.sale && <IconBigCheck />}
+                            </BoxLarge>
                             {t('Sale')}
                             <Input
                               type="checkbox"
@@ -1513,7 +1524,9 @@ const FormAddProduct = () => {
                     {/*  AGREE ADD PHOTO of Product */}
 
                     <LabelStatusAgree>
-                      <Box>{values.isAddPhoto && <IconCheck />}</Box>
+                      <BoxLarge>
+                        {values.isAddPhoto && <IconBigCheck />}
+                      </BoxLarge>
                       <WrapTextAgree>
                         {t('yourAgree')}
                         <StyledNavLink>{t('linkAgree')}</StyledNavLink>
@@ -1527,6 +1540,13 @@ const FormAddProduct = () => {
                       />
                     </LabelStatusAgree>
                   </SectionCondition>
+                  <ButtonBack
+                    onClick={() => {
+                      setStepValue(3);
+                    }}
+                  >
+                    Назад
+                  </ButtonBack>
                   <WrapBtnAdd>
                     <ButtonSubmit type="submit" disabled={isLoading}>
                       {!isLoading ? (

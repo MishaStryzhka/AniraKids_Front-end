@@ -34,12 +34,10 @@ export const FormAddProductTranslationsUk = {
   'for-mamy-and-boy': 'Так + хлопчик',
   'for-dad-and-girl': 'Так + дівчинка',
   'for-dad-and-boy': 'Так + хлопчик',
-  no: 'Ні',
 
   // part - pregnant woman
   'For pregnant women': 'Для вагітних',
   true: 'Так',
-  false: 'Ні',
 
   // part - adult size
   'Specify the size': 'Вкажіть розмір',

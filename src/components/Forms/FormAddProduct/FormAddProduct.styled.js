@@ -10,45 +10,6 @@ export const FormTablet = styled.form`
   }
 `;
 
-export const FormMobile = styled.form`
-  @media screen and (min-width: 768px) {
-    display: none;
-  }
-`;
-
-export const Section = styled.section`
-  /* display: flex;
-  flex-direction: column;
-  gap: 32px; */
-`;
-
-export const WrapInsideSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-`;
-
-export const ButtonNext = styled.button`
-  font-family: 'Open Sans Hebrew', sans-serif;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.43;
-  color: ${({ theme }) => theme.color.mainColor3};
-
-  margin-top: 80px;
-  margin-left: 40px;
-
-  width: 305px;
-  padding: 14px 0;
-  background-color: transparent;
-  border-radius: 2px;
-  border: 1px solid;
-  border-color: ${({ theme }) => theme.color.mainColor3};
-`;
-
-export const ButtonBack = styled.button``;
-
 export const WrapDescribeItem = styled.div`
   display: flex;
   flex-direction: column;
@@ -77,12 +38,6 @@ export const Title = styled.h2`
 
 export const TitleCategory = styled(Title)`
   margin-bottom: 0;
-`;
-
-export const SectionCondition = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
 `;
 
 export const WrapperPhotos = styled.div`
@@ -296,15 +251,19 @@ export const BoxCategory = styled.div`
   display: flex;
   gap: 20px;
 
-  @media screen and (min-width: 768px) {
+  /* @media screen and (min-width: 768px) {
     margin-bottom: 48px;
-  }
+  } */
 `;
 
 export const Wrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 32px;
+  @media screen and (min-width: 768px) {
+    margin-top: 48px;
+    gap: 48px;
+  }
 `;
 
 export const ButtonVariant = styled.button`
@@ -464,15 +423,11 @@ export const InputPrice = styled.input`
 `;
 
 export const Box = styled.div`
-  width: 40px;
-  height: 40px;
   border: 1px solid;
   display: inline-block;
   border-radius: 2px;
-  @media screen and (min-width: 768px) {
-    width: 24px;
-    height: 24px;
-  }
+  width: 24px;
+  height: 24px;
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
@@ -504,9 +459,66 @@ export const ButtonSubmit = styled.button`
 `;
 
 export const WrapError = styled.div`
-  margin-top: 10px;
+  margin-top: 8px;
 `;
 
 export const WrapBtnAdd = styled.div`
   margin-top: 80px;
+`;
+
+// STYLES FOR MOBILE ADAPTIVE
+
+export const FormMobile = styled.form`
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+`;
+
+export const Section = styled.section`
+  /* display: flex;
+  flex-direction: column;
+  gap: 32px; */
+`;
+
+export const WrapInsideSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+`;
+
+export const ButtonNext = styled.button`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  color: ${({ theme }) => theme.color.mainColor3};
+
+  margin-top: 80px;
+  margin-left: 40px;
+
+  width: 305px;
+  padding: 14px 0;
+  background-color: transparent;
+  border-radius: 2px;
+  border: 1px solid;
+  border-color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const ButtonBack = styled.button``;
+
+export const SectionCondition = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+`;
+
+export const BoxLarge = styled.div`
+  display: block;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  border: 1px solid;
+  background-color: transparent;
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
