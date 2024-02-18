@@ -8,8 +8,8 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterDecor.styled';
-import { arrayofDecorProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arrayofDecorProduct } from 'data';
 
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);

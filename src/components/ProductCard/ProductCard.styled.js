@@ -11,7 +11,7 @@ export const PictureCard = styled.picture`
   width: inherit;
   height: 350px;
 `;
-export const LikeButton = styled.button`
+export const ButtonAddToFavorites = styled.button`
   width: 24px;
   height: 24px;
   border-radius: 50px;

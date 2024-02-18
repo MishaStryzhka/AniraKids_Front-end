@@ -9,13 +9,13 @@ import {
   WrapButtons,
 } from './FilterSizeAdult.styled';
 import { useSearchParams } from 'react-router-dom';
-import { arraySizeAdult } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arraySizeAdult } from 'data';
 
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSizeAdult',
@@ -23,6 +23,14 @@ const FilterSizeAdult = () => {
 
   const handleToggleList = () => {
     setIsSizeAdultList(prevIsSizeAdultList => !prevIsSizeAdultList);
+  };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
   };
   return (
     <MainItem>
@@ -40,7 +48,7 @@ const FilterSizeAdult = () => {
               <li key={index}>
                 <Button
                   onClick={() => {
-                    setSearchParams({ size: searchSize });
+                    newSetSearchParams('size', searchSize);
                   }}
                 >
                   {descriptionSize}

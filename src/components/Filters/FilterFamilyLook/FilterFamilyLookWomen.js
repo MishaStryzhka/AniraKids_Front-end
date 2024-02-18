@@ -8,22 +8,30 @@ import {
   Wrap,
 } from './FilterFamilyLook.styled';
 import { useSearchParams } from 'react-router-dom';
-import { arrayFamilyLookProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arrayFamilyLookProductWomen } from 'data';
 
 const FilterFamilyLookWomen = () => {
   const [isFamilyLookList, setIsFamilyLookList] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterFamilyLook',
   });
-  console.log(t);
 
   const handleToggleList = () => {
     setIsFamilyLookList(prevIsFamilyLookList => !prevIsFamilyLookList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
   return (
     <MainItem>
       <Wrap $openLookList={isFamilyLookList === true}>
@@ -35,12 +43,12 @@ const FilterFamilyLookWomen = () => {
       </Wrap>
       {isFamilyLookList && (
         <List>
-          {arrayFamilyLookProduct.map(({ valueVariant }, index) => (
+          {arrayFamilyLookProductWomen.map((valueVariant, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ familyLook: valueVariant });
+                  newSetSearchParams('familyLook', valueVariant);
                 }}
               >
                 {t(valueVariant)}

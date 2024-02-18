@@ -54,6 +54,12 @@ export const FormAddProductTranslationsUk = {
   Hearts: 'Сердечки',
   'unicors-&-rainbows': 'Єдинороги та веселки',
 
+  // Outfits
+  Outfits: 'Наряди',
+  'for-girls': 'Для дівчаток',
+  'for-boys': 'Для хлопчиків',
+  'for-babies': 'Для малюків',
+
   // part - age for children
   Age: 'Вкажіть вік',
   'for premature babies': 'для передчасно народжених',

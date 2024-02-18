@@ -9,13 +9,13 @@ import {
   WrapButtons,
 } from './FilterSizeChildren.styled';
 import { useSearchParams } from 'react-router-dom';
-import { arraySizeChildrenProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arraySizeChildrenProduct } from 'data';
 
 const FilterSizeChildren = () => {
   const [isSizeChildrenList, setIsSizeChildrenList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
+  false && console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSizeChildren',
@@ -24,6 +24,23 @@ const FilterSizeChildren = () => {
   const handleToggleList = () => {
     setIsSizeChildrenList(prevIsSizeChildrenList => !prevIsSizeChildrenList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainItem>
       <Wrap $openSizeChildrenList={isSizeChildrenList === true}>
@@ -37,12 +54,14 @@ const FilterSizeChildren = () => {
         <List>
           <WrapButtons>
             {arraySizeChildrenProduct.map(
-              ({ descriptionSize, valueSize }, index) => (
+              ({ descriptionSize, childSize }, index) => (
                 <li key={index}>
                   <Button
                     type="button"
                     onClick={() => {
-                      setSearchParams({ size: valueSize });
+                      childSize === searchParams.get('childSize')
+                        ? removeParam('childSize')
+                        : newSetSearchParams('childSize', childSize);
                     }}
                   >
                     {descriptionSize} {t('cm')}

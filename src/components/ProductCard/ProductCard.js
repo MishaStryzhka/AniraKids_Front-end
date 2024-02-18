@@ -1,5 +1,5 @@
 import {
-  LikeButton,
+  ButtonAddToFavorites,
   PictureCard,
   Price,
   Span,
@@ -10,27 +10,44 @@ import {
   WrapCard,
   WrapText,
 } from './ProductCard.styled';
-import CardImage from 'images/photo-product.jpg';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
 import { useTranslation } from 'react-i18next';
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from '../../redux/auth/operations';
+import { useDispatch } from 'react-redux';
 
-const ProductCard = () => {
-  const { currentTheme } = useAuth();
+const ProductCard = ({ product }) => {
+  const { user, currentTheme, isLoading } = useAuth();
+  const dispatch = useDispatch();
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.productCard',
   });
 
+  const handleAddToFavorites = id => {
+    user.favorites.includes(id)
+      ? dispatch(removeFromFavorites(id))
+      : dispatch(addToFavorites(id));
+  };
+
   return (
     <WrapCard>
       <PictureCard>
-        <img src={CardImage} alt="Фотографія продукту" />
+        <img src={product?.photos[0]?.path} alt="Фотографія продукту" />
       </PictureCard>
-      <LikeButton>
-        <IconLittleHeart stroke={theme[currentTheme].color.mainColor1} />
-      </LikeButton>
+      <ButtonAddToFavorites
+        disabled={isLoading}
+        onClick={() => handleAddToFavorites(product?._id)}
+      >
+        <IconLittleHeart
+          fill={user.favorites.includes(product?._id) ? '#fff' : 'transparent'}
+          stroke={theme[currentTheme].color.mainColor1}
+        />
+      </ButtonAddToFavorites>
       <WrapText>
         <Wrap>
           <TextName>HOUSE OF THE BREND</TextName>

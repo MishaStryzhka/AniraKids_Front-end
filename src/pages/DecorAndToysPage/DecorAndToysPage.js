@@ -17,6 +17,7 @@ import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
 import { Outlet, useParams } from 'react-router-dom';
 import { useTitle } from 'hooks';
+import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 
 const DecorAndToysPage = () => {
   const { t } = useTranslation('translation', {
@@ -37,6 +38,7 @@ const DecorAndToysPage = () => {
           <TitleFilter>{t('Filters')}</TitleFilter>
           <FilterType />
           <FilterDecor />
+          <FilterSubject />
           <FilterOfToys />
           <FilterPrice />
           <FilterColor />

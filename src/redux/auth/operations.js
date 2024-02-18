@@ -249,11 +249,13 @@ export const confirmUserEmail = createAsyncThunk(
   }
 );
 
-export const addUserFavorite = createAsyncThunk(
-  'auth/update/addFavorite',
-  async ({ noticeId }, thunkAPI) => {
+export const addToFavorites = createAsyncThunk(
+  'auth/favorites/add',
+  async (productId, thunkAPI) => {
     try {
-      const response = await axios.post(`/api/notices/favorites/${noticeId}`);
+      const response = await axios.patch(
+        `/api/users/favorites/add/${productId}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -264,12 +266,15 @@ export const addUserFavorite = createAsyncThunk(
   }
 );
 
-export const removeUserFavorite = createAsyncThunk(
-  'auth/update/removeFavorite',
-  async ({ noticeId }, thunkAPI) => {
+export const removeFromFavorites = createAsyncThunk(
+  'auth/favorites/remove',
+  async (productId, thunkAPI) => {
     try {
-      const response = await axios.delete(`/api/notices/favorites/${noticeId}`);
-      return response.data;
+      const res = await axios.delete(
+        `/api/users/favorites/remove/${productId}`
+      );
+
+      return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
         status: error.response.status,

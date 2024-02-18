@@ -11,8 +11,8 @@ import {
 } from './SectionAnswers.styled';
 import Border from 'components/Border/Border';
 import { Container } from 'components/Container/Container';
-import { arrayAnswers } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arrayAnswers } from 'data';
 
 const SectionAnswers = () => {
   const { t } = useTranslation('translation', {

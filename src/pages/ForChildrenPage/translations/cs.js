@@ -1,5 +1,5 @@
 export const ForChildrenPageTranslationsCs = {
   "Children's Clothing": 'Dětské oblečení',
-  'Empty here for now': 'Tady je zatím prázdné',
+  nothing_found: 'Žádné výsledky nenalezeny.',
   Filters: 'Filtrovat',
 };

@@ -28,7 +28,7 @@ const arrayParamsSort = [
 const FilterSort = () => {
   const [isFilterSortList, setIsFilterSortList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
+  false && console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSort',

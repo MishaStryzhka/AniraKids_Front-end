@@ -46,22 +46,23 @@ import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 import { validationProductSchema } from 'schemas';
 import { ErrorMessage } from '../Form.styled';
-import {
-  arrayAgeProduct,
-  arrayFamilyLookProduct,
-  arrayOfToysProduct,
-  arraySizeChildrenProduct,
-  arrayofDecorProduct,
-  arrayOfSubjectsProduct,
-  arrayColorsProduct,
-  arraySizeAdult,
-  // arraySaleOrRent,
-} from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 import { BeatLoader } from 'react-spinners';
 import { useNavigate } from 'react-router-dom';
+import {
+  arrayAgeProduct,
+  arrayColorsProduct,
+  arrayFamilyLookProductMen,
+  arrayFamilyLookProductWomen,
+  productSubjects,
+  arrayOfToysProduct,
+  arraySizeAdult,
+  arraySizeChildrenProduct,
+  arrayofDecorProduct,
+  arrayOfOutfits,
+} from 'data';
 
 const api = require('./../../../api/product');
 
@@ -163,6 +164,7 @@ const FormAddProduct = () => {
         size: '',
         isPregnancy: '',
         subject: '',
+        outfits: '',
         age: '',
         childSize: '',
         decor: '',
@@ -445,24 +447,26 @@ const FormAddProduct = () => {
                     <WrapCategory>
                       <Description>Family look</Description>
                       <List>
-                        {arrayFamilyLookProduct.map(
-                          ({ valueVariant }, index) => (
-                            <Label key={index}>
-                              <Box>
-                                {values.familyLook === valueVariant && (
-                                  <IconCheck />
-                                )}
-                              </Box>
-                              {t(valueVariant)}
-                              <Input
-                                type="radio"
-                                name="familyLook"
-                                value={valueVariant}
-                                onChange={handleChange}
-                              />
-                            </Label>
-                          )
-                        )}
+                        {[
+                          ...(values.category === 'women`s category'
+                            ? arrayFamilyLookProductWomen
+                            : arrayFamilyLookProductMen),
+                        ].map((valueVariant, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.familyLook === valueVariant && (
+                                <IconCheck />
+                              )}
+                            </Box>
+                            {t(valueVariant)}
+                            <Input
+                              type="radio"
+                              name="familyLook"
+                              value={valueVariant}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
 
                         <ErrorMessage>
                           {errors.familyLook &&
@@ -525,26 +529,22 @@ const FormAddProduct = () => {
                 <Wrap>
                   <BoxCategory>
                     <WrapCategory>
-                      <Description>{t('Subject')}</Description>
+                      <Description>{t('Outfits')}</Description>
                       <List>
-                        {arrayOfSubjectsProduct.map(
-                          ({ valueSubject }, index) => (
-                            <Label key={index}>
-                              <Box>
-                                {values.subject === valueSubject && (
-                                  <IconCheck />
-                                )}
-                              </Box>
-                              {t(valueSubject)}
-                              <Input
-                                type="radio"
-                                name="subject"
-                                value={valueSubject}
-                                onChange={handleChange}
-                              />
-                            </Label>
-                          )
-                        )}
+                        {arrayOfOutfits.map((valueOutfits, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.outfits === valueOutfits && <IconCheck />}
+                            </Box>
+                            {t(valueOutfits)}
+                            <Input
+                              type="radio"
+                              name="outfits"
+                              value={valueOutfits}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
                       </List>
                       <ErrorMessage>
                         {errors.subject && touched.subject && t(errors.subject)}
@@ -553,16 +553,16 @@ const FormAddProduct = () => {
                   </BoxCategory>
                   <Title>{t('Age')}</Title>
                   <WrapChildrenParams>
-                    {arrayAgeProduct.map(({ valueAge }, index) => (
+                    {arrayAgeProduct.map(({ age }, index) => (
                       <li key={index}>
                         <LabelChildren>
-                          <BoxSize $check={values.age === valueAge}>
-                            {t(valueAge)}
+                          <BoxSize $check={values.age === age}>
+                            {t(age)}
                           </BoxSize>
                           <Input
                             type="radio"
                             name="age"
-                            value={valueAge}
+                            value={age}
                             onChange={handleChange}
                             onBlur={handleBlur}
                           />
@@ -612,6 +612,28 @@ const FormAddProduct = () => {
               {values.category === 'decoration category' && (
                 <Wrap>
                   <BoxCategory>
+                    <WrapCategory>
+                      <Description>{t('Subject')}</Description>
+                      <List>
+                        {productSubjects.map((valueSubject, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.subject === valueSubject && <IconCheck />}
+                            </Box>
+                            {t(valueSubject)}
+                            <Input
+                              type="radio"
+                              name="subject"
+                              value={valueSubject}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
+                      </List>
+                      <ErrorMessage>
+                        {errors.subject && touched.subject && t(errors.subject)}
+                      </ErrorMessage>
+                    </WrapCategory>
                     <WrapCategory>
                       <Description>{t('Decor')}</Description>
                       <List>

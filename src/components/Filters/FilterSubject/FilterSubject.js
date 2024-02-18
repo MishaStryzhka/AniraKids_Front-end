@@ -8,48 +8,13 @@ import {
   Wrap,
 } from './FilterSubject.styled';
 import { useSearchParams } from 'react-router-dom';
-import { arrayOfSubjectsProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
-
-export const arrayOfSubjects = [
-  {
-    variantOfSubjects: 'Різдво',
-    searchSubjects: 'Christmas',
-  },
-  {
-    variantOfSubjects: 'Українська символіка',
-    searchSubjects: 'Ukrainian-symbols',
-  },
-  {
-    variantOfSubjects: 'Звірята',
-    searchSubjects: 'Animals',
-  },
-  {
-    variantOfSubjects: 'Балет та принцеси',
-    searchSubjects: 'ballet-&-princesses',
-  },
-  {
-    variantOfSubjects: 'Динозаври',
-    searchSubjects: 'Dinosaurs',
-  },
-  {
-    variantOfSubjects: 'Квіти і метелики',
-    searchSubjects: 'Flowers-&-butterflies',
-  },
-  {
-    variantOfSubjects: 'Сердечки',
-    searchSubjects: 'Hearts',
-  },
-  {
-    variantOfSubjects: 'Єдинороги та веселки',
-    searchSubjects: 'unicors-&-rainbows',
-  },
-];
+import { productSubjects } from 'data/dateForProduct';
 
 const FilterSubject = () => {
   const [isFilterSubjectsList, setIsFilterSubjectsList] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSubject',
@@ -59,6 +24,14 @@ const FilterSubject = () => {
     setIsFilterSubjectsList(
       prevIsFilterOutfitsList => !prevIsFilterOutfitsList
     );
+  };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
   };
   return (
     <MainItem>
@@ -71,12 +44,12 @@ const FilterSubject = () => {
       </Wrap>
       {isFilterSubjectsList && (
         <List>
-          {arrayOfSubjectsProduct.map(({ valueSubject }, index) => (
+          {productSubjects.map((valueSubject, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Outfits: valueSubject });
+                  newSetSearchParams('subject', valueSubject);
                 }}
               >
                 {t(valueSubject)}
