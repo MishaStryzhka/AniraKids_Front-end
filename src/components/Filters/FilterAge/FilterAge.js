@@ -8,13 +8,13 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterAge.styled';
-import { arrayAgeProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arrayAgeProduct } from 'data';
 
 const FilterAge = () => {
   const [isFilterAgeList, setIsFilterAgeList] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterAge',
@@ -22,6 +22,22 @@ const FilterAge = () => {
 
   const handleToggleList = () => {
     setIsFilterAgeList(prevIsFilterAgeList => !prevIsFilterAgeList);
+  };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
   };
 
   return (
@@ -35,15 +51,17 @@ const FilterAge = () => {
       </Wrap>
       {isFilterAgeList && (
         <List>
-          {arrayAgeProduct.map(({ valueAge }, index) => (
+          {arrayAgeProduct.map(({ age }, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Age: valueAge });
+                  age === searchParams.get('age')
+                    ? removeParam('age')
+                    : newSetSearchParams('age', age);
                 }}
               >
-                {t(valueAge)}
+                {t(age)}
               </Button>
             </li>
           ))}

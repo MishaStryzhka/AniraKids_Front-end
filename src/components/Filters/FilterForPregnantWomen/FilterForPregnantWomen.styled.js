@@ -34,15 +34,11 @@ export const FilterTitle = styled.h3`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const List = styled.ul`
-  display: flex;
-
-  flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid #ebdad1;
-`;
-
 export const Button = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
   border: none;
   background-color: transparent;
   padding: 2px 12px;

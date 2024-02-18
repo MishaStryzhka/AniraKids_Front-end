@@ -46,12 +46,12 @@ export const ItemButton = styled.li`
 `;
 
 export const Button = styled.button`
-  border: ${({ color }) => (color === '#FFFFFF' ? '1px solid black' : 'none')};
+  border: ${({ color }) => (color === '#FFF' ? '1px solid black' : 'none')};
   border-radius: 2px;
   width: 18px;
   height: 18px;
   cursor: pointer;
-  background-color: ${({ color }) => color};
+  background: ${({ color }) => color};
 `;
 
 export const StyledIconArrowUp = styled(IconArrow)`

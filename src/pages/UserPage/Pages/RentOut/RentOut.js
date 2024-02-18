@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 const api = require('./../../../../api/product');
 
-console.log('api', api);
-
 const RentOut = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);

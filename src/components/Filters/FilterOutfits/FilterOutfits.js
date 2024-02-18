@@ -9,26 +9,12 @@ import {
 } from './FilterOutfits.styled';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-const arrayOfOutfits = [
-  {
-    variantOfOutfits: 'Для дівчаток',
-    searchOutfits: 'for-girls',
-  },
-  {
-    variantOfOutfits: 'Для хлопчиків',
-    searchOutfits: 'for-boys',
-  },
-  {
-    variantOfOutfits: 'Для малюків',
-    searchOutfits: 'for-babies',
-  },
-];
+import { arrayOfOutfits } from 'data';
 
 const FilterOutfits = () => {
   const [isFilterOutfitsList, setIsFilterOutfitsList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
+  false && console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterOutfits',
@@ -37,6 +23,23 @@ const FilterOutfits = () => {
   const handleToggleList = () => {
     setIsFilterOutfitsList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainItem>
       <Wrap $openOutfitsList={isFilterOutfitsList === true}>
@@ -48,15 +51,20 @@ const FilterOutfits = () => {
       </Wrap>
       {isFilterOutfitsList && (
         <List>
-          {arrayOfOutfits.map(({ searchOutfits }, index) => (
+          {arrayOfOutfits.map((outfits, index) => (
             <li key={index}>
               <Button
                 type="button"
+                // onClick={() => {
+                //   newSetSearchParams('outfits', outfits);
+                // }}
                 onClick={() => {
-                  setSearchParams({ Outfits: searchOutfits });
+                  outfits === searchParams.get('outfits')
+                    ? removeParam('outfits')
+                    : newSetSearchParams('outfits', outfits);
                 }}
               >
-                {t(searchOutfits)}
+                {t(outfits)}
               </Button>
             </li>
           ))}

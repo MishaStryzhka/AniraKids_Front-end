@@ -1,5 +1,5 @@
 export const FilterTypeTranslationsUk = {
-  Type: 'Тип',
-  Sale: 'Продаж',
-  Rent: 'Оренда',
+  type: 'Тип',
+  sale: 'Продаж',
+  rent: 'Оренда',
 };

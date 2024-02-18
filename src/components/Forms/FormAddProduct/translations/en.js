@@ -55,6 +55,12 @@ export const FormAddProductTranslationsEn = {
   Hearts: 'Hearts',
   'unicors-&-rainbows': 'Unicors and rainbows',
 
+  // Outfits
+  Outfits: 'Outfits',
+  'for-girls': 'For girls',
+  'for-boys': 'For boys',
+  'for-babies': 'For babies',
+
   // part - age for children
   Age: 'Specify the age',
   'for premature babies': 'for premature babies',
