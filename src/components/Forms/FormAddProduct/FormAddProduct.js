@@ -633,6 +633,28 @@ const FormAddProduct = () => {
                   <Wrap>
                     <BoxCategory>
                       <WrapCategory>
+                      <Description>{t('Subject')}</Description>
+                      <List>
+                        {productSubjects.map((valueSubject, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.subject === valueSubject && <IconCheck />}
+                            </Box>
+                            {t(valueSubject)}
+                            <Input
+                              type="radio"
+                              name="subject"
+                              value={valueSubject}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
+                      </List>
+                      <ErrorMessage>
+                        {errors.subject && touched.subject && t(errors.subject)}
+                      </ErrorMessage>
+                    </WrapCategory>
+                      <WrapCategory>
                         <Description>{t('Decor')}</Description>
                         <List>
                           {arrayofDecorProduct.map(({ searchDecor }, index) => (
@@ -1303,6 +1325,28 @@ const FormAddProduct = () => {
                         <TitleCategory>{t('Decor and Toys')}</TitleCategory>
                       )}
                       <BoxCategory>
+                        <WrapCategory>
+                      <Description>{t('Subject')}</Description>
+                      <List>
+                        {productSubjects.map((valueSubject, index) => (
+                          <Label key={index}>
+                            <Box>
+                              {values.subject === valueSubject && <IconCheck />}
+                            </Box>
+                            {t(valueSubject)}
+                            <Input
+                              type="radio"
+                              name="subject"
+                              value={valueSubject}
+                              onChange={handleChange}
+                            />
+                          </Label>
+                        ))}
+                      </List>
+                      <ErrorMessage>
+                        {errors.subject && touched.subject && t(errors.subject)}
+                      </ErrorMessage>
+                    </WrapCategory>
                         <WrapCategory>
                           <Description>{t('Decor')}</Description>
                           <List>
