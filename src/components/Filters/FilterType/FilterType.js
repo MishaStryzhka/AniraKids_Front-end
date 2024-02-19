@@ -10,21 +10,11 @@ import {
   Wrap,
 } from './FilterType.styled';
 
-const arrayParamsType = [
-  {
-    variantOfType: 'Продаж',
-    searchParams: 'Sale',
-  },
-  {
-    variantOfType: 'Оренда',
-    searchParams: 'Rent',
-  },
-];
+const arrayType = ['sale', 'rent'];
 
 const FilterType = () => {
   const [isFilterTypeList, setIsFilterTypeList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterType',
@@ -33,10 +23,27 @@ const FilterType = () => {
   const handleToggleList = () => {
     setIsFilterTypeList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainItem>
       <Wrap $openOutfitsList={isFilterTypeList === true}>
-        <FilterTitle>{t('Type')}</FilterTitle>
+        <FilterTitle>{t('type')}</FilterTitle>
         <StyledIconArrowUp
           onClick={handleToggleList}
           $openOutfitsList={isFilterTypeList === true}
@@ -44,15 +51,17 @@ const FilterType = () => {
       </Wrap>
       {isFilterTypeList && (
         <List>
-          {arrayParamsType.map(({ searchParams }, index) => (
+          {arrayType.map((type, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Type: searchParams });
+                  type === searchParams.get('type')
+                    ? removeParam('type')
+                    : newSetSearchParams('type', type);
                 }}
               >
-                {t(searchParams)}
+                {t(type)}
               </Button>
             </li>
           ))}

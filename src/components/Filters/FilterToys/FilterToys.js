@@ -9,7 +9,7 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterToys.styled';
-import { arrayOfToysProduct } from 'helpers';
+import { arrayOfToysProduct } from 'data';
 
 const FilterOfToys = () => {
   const [isFilterToysList, setIsFilterToysList] = useState(false);

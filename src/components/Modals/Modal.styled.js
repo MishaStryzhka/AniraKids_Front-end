@@ -2,6 +2,7 @@ import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 
 export const GeneralModalWindow = styled.div`
+  position: relative;
   padding: 16px;
 
   @media screen and (min-width: 768px) {
@@ -12,7 +13,7 @@ export const GeneralModalWindow = styled.div`
 
 export const StyledIconCross = styled(IconCross)`
   position: absolute;
-  top: 2px;
+  top: 8px;
   right: 8px;
   cursor: pointer;
 `;
@@ -78,9 +79,10 @@ export const Backdrop = styled.div`
   z-index: 1200;
 `;
 export const ModalContainer = styled.div`
-  background-color: ${p => p.theme.color.cardBG};
+  position: relative;
+  background-color: ${({ theme }) => theme.color.mainColor1};
   margin: auto;
-  border-radius: 20px;
+  border-radius: 2px;
   z-index: 2000;
   height: max-content;
 

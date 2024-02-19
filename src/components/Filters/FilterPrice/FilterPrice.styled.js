@@ -1,5 +1,4 @@
 import IconArrow from 'images/icons/IconArrow';
-import Slider from 'rc-slider';
 
 import styled from 'styled-components';
 
@@ -74,7 +73,11 @@ export const StyledIconArrowUp = styled(IconArrow)`
 
 export const WrapSlider = styled.div``;
 
-export const StyledSlider = styled(Slider)`
+const Slider = require('rc-slider');
+const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const Range = createSliderWithTooltip(Slider.Range);
+
+export const StyledSlider = styled(Range)`
   width: 272px;
   position: relative;
 
@@ -87,13 +90,13 @@ export const StyledSlider = styled(Slider)`
 
   .rc-slider-handle {
     /*  бігунок */
-    width: 1px;
-    height: 10px;
-    margin-top: -3.5px;
+    width: 12px;
+    height: 12px;
+    margin-top: -4.5px;
     overflow: hidden;
-    border: 1px solid #000;
+    border: 5px solid #000;
     opacity: 1;
-    border-radius: 0;
+    border-radius: 50%;
     cursor: pointer;
   }
 

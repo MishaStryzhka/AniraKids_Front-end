@@ -57,23 +57,24 @@ import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 import { validationProductSchema } from 'schemas';
 import { ErrorMessage } from '../Form.styled';
-import {
-  arrayAgeProduct,
-  arrayFamilyLookProduct,
-  arrayOfToysProduct,
-  arraySizeChildrenProduct,
-  arrayofDecorProduct,
-  arrayOfSubjectsProduct,
-  arrayColorsProduct,
-  arraySizeAdult,
-  // arraySaleOrRent,
-} from 'helpers';
 import IconCheck from 'images/icons/IconCheck';
 import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 import { BeatLoader } from 'react-spinners';
 import { useNavigate } from 'react-router-dom';
 import IconBigCheck from 'images/icons/IconBigCheck';
+import {
+  arrayAgeProduct,
+  arrayColorsProduct,
+  arrayFamilyLookProductMen,
+  arrayFamilyLookProductWomen,
+  productSubjects,
+  arrayOfToysProduct,
+  arraySizeAdult,
+  arraySizeChildrenProduct,
+  arrayofDecorProduct,
+  arrayOfOutfits,
+} from 'data';
 
 const api = require('./../../../api/product');
 
@@ -175,6 +176,7 @@ const FormAddProduct = () => {
         size: '',
         isPregnancy: '',
         subject: '',
+        outfits: '',
         age: '',
         childSize: '',
         decor: '',

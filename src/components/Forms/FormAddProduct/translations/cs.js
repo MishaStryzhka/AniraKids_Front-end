@@ -52,6 +52,12 @@ export const FormAddProductTranslationsCs = {
   Hearts: 'Srdíčka',
   'unicors-&-rainbows': 'Jednorožci a duhy',
 
+  // Outfits
+  Outfits: 'Oblečení',
+  'for-girls': 'Pro holčičky',
+  'for-boys': 'Pro chlapečky',
+  'for-babies': 'Pro miminka',
+
   // part - age for children
   Age: 'Uveďte věk',
   'for premature babies': 'pro nedonošené novorozence',

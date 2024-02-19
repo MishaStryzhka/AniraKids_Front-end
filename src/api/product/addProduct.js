@@ -23,6 +23,7 @@ export const addProduct = async credentials => {
     salePrice,
     size,
     subject,
+    outfits,
     toys,
     videoUrl,
   } = credentials;
@@ -54,6 +55,7 @@ export const addProduct = async credentials => {
   salePrice && formData.append(`salePrice`, salePrice);
   size && formData.append(`size`, size);
   subject && formData.append(`subject`, subject);
+  outfits && formData.append(`outfits`, outfits);
   toys && formData.append(`toys`, toys);
   videoUrl && formData.append(`videoUrl`, videoUrl);
 

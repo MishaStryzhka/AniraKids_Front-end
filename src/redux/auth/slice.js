@@ -8,6 +8,9 @@ import {
   updateUserEmail,
   updateUserBillingDetails,
   updateUserBankAccount,
+  verifiedEmail,
+  addToFavorites,
+  removeFromFavorites,
 } from './operations';
 
 const initialState = {
@@ -128,6 +131,8 @@ const authSlice = createSlice({
         console.log('action.payload', action.payload);
 
         state.user.bankAccount = action.payload.bankAccount;
+        state.user.typeUser = action.payload.typeUser;
+
         state.isLoading = false;
         state.isDone = true;
       })
@@ -146,6 +151,49 @@ const authSlice = createSlice({
         state.isDone = true;
       })
       .addCase(updateUserEmail.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isLoading = false;
+      })
+
+      // verifiedEmail
+      .addCase(verifiedEmail.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(verifiedEmail.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isDone = action.payload;
+      })
+      .addCase(verifiedEmail.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isLoading = false;
+      })
+
+      // addToFavorites
+      .addCase(addToFavorites.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(addToFavorites.fulfilled, (state, action) => {
+        state.user.favorites.push(action.payload.id);
+        state.isLoading = false;
+        state.isDone = true;
+      })
+      .addCase(addToFavorites.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isLoading = false;
+      })
+
+      // removeFromFavorites
+      .addCase(removeFromFavorites.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(removeFromFavorites.fulfilled, (state, action) => {
+        state.user.favorites = state.user.favorites.filter(
+          item => item !== action.payload.id
+        );
+        state.isLoading = false;
+        state.isDone = true;
+      })
+      .addCase(removeFromFavorites.rejected, (state, action) => {
         state.error = action.payload;
         state.isLoading = false;
       });

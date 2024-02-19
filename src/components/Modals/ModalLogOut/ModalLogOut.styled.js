@@ -45,7 +45,6 @@ export const ButtonBack = styled.button`
   border: none;
   border-radius: 2px;
   cursor: pointer;
-  margin-top: 16px;
   text-align: center;
 
   font-family: 'Open Sans Hebrew', sans-serif;

@@ -1,52 +1,26 @@
-export const arrayFamilyLookProduct = [
-  {
-    variantOfFamilyLook: 'Для всієї сім’ї',
-    valueVariant: 'for-all-family',
-  },
-  {
-    variantOfFamilyLook: 'Так + дівчинка',
-    valueVariant: 'for-mamy-and-girl',
-  },
-  {
-    variantOfFamilyLook: 'Так + хлопчика',
-    valueVariant: 'for-mamy-and-boy',
-  },
+export const arrayFamilyLookProductWomen = [
+  'for-all-family',
+  'for-mamy-and-girl',
+  'for-mamy-and-boy',
+];
+export const arrayFamilyLookProductMen = [
+  'for-all-family',
+  'for-dad-and-girl',
+  'for-dad-and-boy',
 ];
 
-export const arrayOfSubjectsProduct = [
-  {
-    variantOfSubjects: 'Різдво',
-    valueSubject: 'Christmas',
-  },
-  {
-    variantOfSubjects: 'Українська символіка',
-    valueSubject: 'Ukrainian-symbols',
-  },
-  {
-    variantOfSubjects: 'Звірята',
-    valueSubject: 'Animals',
-  },
-  {
-    variantOfSubjects: 'Балет та принцеси',
-    valueSubject: 'ballet-&-princesses',
-  },
-  {
-    variantOfSubjects: 'Динозаври',
-    valueSubject: 'Dinosaurs',
-  },
-  {
-    variantOfSubjects: 'Квіти і метелики',
-    valueSubject: 'Flowers-&-butterflies',
-  },
-  {
-    variantOfSubjects: 'Сердечки',
-    valueSubject: 'Hearts',
-  },
-  {
-    variantOfSubjects: 'Єдинороги та веселки',
-    valueSubject: 'unicors-&-rainbows',
-  },
+export const productSubjects = [
+  'Christmas',
+  'Ukrainian-symbols',
+  'Animals',
+  'ballet-&-princesses',
+  'Dinosaurs',
+  'Flowers-&-butterflies',
+  'Hearts',
+  'unicors-&-rainbows',
 ];
+
+export const arrayOfOutfits = ['for-girls', 'for-boys', 'for-babies'];
 
 export const arrayColorsProduct = [
   {
@@ -91,154 +65,154 @@ export const arrayColorsProduct = [
 export const arrayAgeProduct = [
   {
     descriptionAge: 'для передчасно народжених',
-    valueAge: 'for premature babies',
+    age: 'for premature babies',
   },
   {
     descriptionAge: 'для новонароджених',
-    valueAge: 'for newborns',
+    age: 'for newborns',
   },
   {
     descriptionAge: '0-3 місяці',
-    valueAge: '0-3-months',
+    age: '0-3-months',
   },
   {
     descriptionAge: '4-6 місяців',
-    valueAge: '4-6-months',
+    age: '4-6-months',
   },
   {
     descriptionAge: '7-9 місяців',
-    valueAge: '7-9-months',
+    age: '7-9-months',
   },
   {
     descriptionAge: '10-12 місяців',
-    valueAge: '10-12-months',
+    age: '10-12-months',
   },
   {
     descriptionAge: '13-18 місяців',
-    valueAge: '13-18-months',
+    age: '13-18-months',
   },
   {
     descriptionAge: '1,5-2 роки',
-    valueAge: '1.5-2-years',
+    age: '1.5-2-years',
   },
   {
     descriptionAge: '2-3 роки',
-    valueAge: '2-3-years',
+    age: '2-3-years',
   },
   {
     descriptionAge: '3-4 роки',
-    valueAge: '3-4-years',
+    age: '3-4-years',
   },
   {
     descriptionAge: '4-5 роки',
-    valueAge: '4-5-years',
+    age: '4-5-years',
   },
   {
     descriptionAge: '6-7 років',
-    valueAge: '6-7-years',
+    age: '6-7-years',
   },
   {
     descriptionAge: '8-9 років',
-    valueAge: '8-9-years',
+    age: '8-9-years',
   },
   {
     descriptionAge: '10 років',
-    valueAge: '10-years',
+    age: '10-years',
   },
   {
     descriptionAge: '11 років',
-    valueAge: '11-years',
+    age: '11-years',
   },
   {
     descriptionAge: '12 років',
-    valueAge: '12-years',
+    age: '12-years',
   },
   {
     descriptionAge: '13 років',
-    valueAge: '13-years',
+    age: '13-years',
   },
 ];
 
 export const arraySizeChildrenProduct = [
   {
     descriptionSize: '50',
-    valueSize: 'before-50',
+    childSize: 'before-50',
   },
   {
     descriptionSize: '50-56 ',
-    valueSize: '50-56',
+    childSize: '50-56',
   },
   {
     descriptionSize: '62-68',
-    valueSize: '62-68',
+    childSize: '62-68',
   },
   {
     descriptionSize: '68-74',
-    valueSize: '68-74',
+    childSize: '68-74',
   },
   {
     descriptionSize: '74-80',
-    valueSize: '74-80',
+    childSize: '74-80',
   },
   {
     descriptionSize: '80-86',
-    valueSize: '80-86',
+    childSize: '80-86',
   },
   {
     descriptionSize: '86-92',
-    valueSize: '86-92',
+    childSize: '86-92',
   },
   {
     descriptionSize: '92-98',
-    valueSize: '92-98',
+    childSize: '92-98',
   },
   {
     descriptionSize: '98-104',
-    valueSize: '98-104',
+    childSize: '98-104',
   },
   {
     descriptionSize: '104-110',
-    valueSize: '104-110',
+    childSize: '104-110',
   },
   {
     descriptionSize: '110-116',
-    valueSize: '110-116',
+    childSize: '110-116',
   },
   {
     descriptionSize: '116-122',
-    valueSize: '116-122',
+    childSize: '116-122',
   },
   {
     descriptionSize: '122-128',
-    valueSize: '122-128',
+    childSize: '122-128',
   },
   {
     descriptionSize: '128-134',
-    valueSize: '128-134',
+    childSize: '128-134',
   },
   {
     descriptionSize: '134-140',
-    valueSize: '134-140',
+    childSize: '134-140',
   },
   {
     descriptionSize: '140-146',
-    valueSize: '140-146',
+    childSize: '140-146',
   },
   {
     descriptionSize: '146-152',
-    valueSize: '146-152',
+    childSize: '146-152',
   },
   {
     descriptionSize: '152-158',
-    valueSize: '152-158',
+    childSize: '152-158',
   },
   {
     descriptionSize: '158-164',
-    valueSize: '158-164',
+    childSize: '158-164',
   },
   {
     descriptionSize: '164-170',
-    valueSize: '164-170',
+    childSize: '164-170',
   },
 ];
 

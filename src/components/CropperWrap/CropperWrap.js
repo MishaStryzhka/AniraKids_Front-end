@@ -73,7 +73,7 @@ const CropperWrap = ({ image, name, setImage, onClose }) => {
           zoomSpeed={0.1}
         />
       </PreviewBox>
-      <PreviewButtonWraper>
+      <PreviewButtonWraper style={{ marginTop: 24 }}>
         <ButtonBack
           onClick={() => {
             onClose();

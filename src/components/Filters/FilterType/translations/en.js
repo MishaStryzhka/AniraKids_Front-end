@@ -1,5 +1,5 @@
 export const FilterTypeTranslationsEn = {
-  Type: 'Type',
-  Sale: 'Sale',
-  Rent: 'Rent',
+  type: 'Type',
+  sale: 'Sale',
+  rent: 'Rent',
 };

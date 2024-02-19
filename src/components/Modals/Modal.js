@@ -1,8 +1,18 @@
+// ========
+// onClick for close Modal
+//
+// prohibitClosingByBackdrop
+// ========
 import { useCallback, useEffect } from 'react';
-import { Backdrop, ModalContainer, ScrollBox } from './Modal.styled';
+import {
+  Backdrop,
+  ModalContainer,
+  ScrollBox,
+  StyledIconCross,
+} from './Modal.styled';
 import { createPortal } from 'react-dom';
 
-const Modal = ({ children, onClick }) => {
+const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
   const handleKeyDown = useCallback(
     evt => {
       document.body.style.overflow = 'auto';
@@ -12,6 +22,8 @@ const Modal = ({ children, onClick }) => {
     },
     [onClick]
   );
+
+  console.log('prohibitClosingByBackdrop', prohibitClosingByBackdrop);
 
   document.body.style.overflow = 'hidden';
 
@@ -31,9 +43,23 @@ const Modal = ({ children, onClick }) => {
   }, [handleKeyDown]);
 
   return createPortal(
-    <Backdrop onClick={handleBackdropClick}>
-      <ScrollBox onClick={handleBackdropClick}>
-        <ModalContainer>{children}</ModalContainer>
+    <Backdrop
+      onClick={!prohibitClosingByBackdrop ? handleBackdropClick : () => {}}
+    >
+      <ScrollBox
+        onClick={!prohibitClosingByBackdrop ? handleBackdropClick : () => {}}
+      >
+        <ModalContainer>
+          {onClick && (
+            <StyledIconCross
+              onClick={() => {
+                document.body.style.overflow = 'auto';
+                onClick();
+              }}
+            />
+          )}
+          {children}
+        </ModalContainer>
       </ScrollBox>
     </Backdrop>,
     document.querySelector('#modal')

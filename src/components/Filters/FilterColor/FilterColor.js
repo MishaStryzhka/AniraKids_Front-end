@@ -10,28 +10,37 @@ import {
   StyledIconArrowUp,
   Wrap,
 } from './FilterColor.styled';
-import { arrayColorsProduct } from 'helpers';
 import { useTranslation } from 'react-i18next';
+import { arrayColorsProduct } from 'data';
 
 const FilterColor = () => {
   const [isFilterColorList, setIsFilterColorList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
-
-  const [selectedColor, setSelectedColor] = useState(null);
-  console.log(selectedColor);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterColor',
   });
 
-  const handleColorClick = color => {
-    setSelectedColor(color);
-  };
-
   const handleToggleList = () => {
     setIsFilterColorList(prevIsFilterColorList => !prevIsFilterColorList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainItem>
       <Wrap $openColorList={isFilterColorList === true}>
@@ -49,8 +58,9 @@ const FilterColor = () => {
                 <Button
                   color={colorCode}
                   onClick={() => {
-                    handleColorClick({ ColorVariant: color });
-                    setSearchParams({ ColorVariant: color });
+                    color === searchParams.get('color')
+                      ? removeParam('color')
+                      : newSetSearchParams('color', color);
                   }}
                 />
               </ItemButton>

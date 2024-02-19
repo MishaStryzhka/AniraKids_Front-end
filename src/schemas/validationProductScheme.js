@@ -7,6 +7,7 @@ const categoryOptions = [
   'decoration category',
 ];
 
+// eslint-disable-next-line no-unused-vars
 const subjectOptions = [
   'Christmas',
   'Ukrainian-symbols',
@@ -41,14 +42,9 @@ export const validationProductSchema = Yup.object().shape({
 
   isPregnancy: Yup.boolean(),
 
-  subject: Yup.string().test('required', 'Required field', function (value) {
-    const category = this.parent.category;
-    if (category === 'children`s category') {
-      return subjectOptions.includes(value);
-    } else {
-      return true;
-    }
-  }),
+  subject: Yup.string(),
+
+  outfits: Yup.string(),
 
   size: Yup.string().test('required-size', 'Required field', function (value) {
     const category = this.parent.category;

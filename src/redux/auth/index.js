@@ -1,5 +1,6 @@
-const { register } = require('./operations');
+const { register, verifiedEmail } = require('./operations');
 
 module.exports = {
   register,
+  verifiedEmail,
 };

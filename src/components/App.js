@@ -87,7 +87,6 @@ function App() {
           <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
           <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="*" element={<NotFoundPage />} />
           <Route
             path="/my-account"
             element={
@@ -114,6 +113,7 @@ function App() {
             <Route path="wallet/" element={<Wallet />} />
             <Route path="order1/" element={<Order1 />} />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </ThemeProvider>
