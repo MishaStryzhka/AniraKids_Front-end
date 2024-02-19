@@ -47,7 +47,6 @@ import {
   GeneralWrap,
   List,
 } from './ProductPage.styled';
-// import MainImageCard from '../../images/big-photo-product-card.jpg';
 import SecondaryImage1 from '../../images/product-card-1.jpg';
 import SecondaryImage2 from '../../images/product-card-2.jpg';
 import SecondaryImage3 from '../../images/product-card-3.jpg';
@@ -57,7 +56,6 @@ import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
 import IconStar from 'images/icons/IconStart';
 import Button from 'components/Button/Button';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
-// import AliceCarousel from 'react-alice-carousel';
 import 'react-alice-carousel/lib/alice-carousel.css';
 import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';

@@ -24,7 +24,10 @@ export const StyledNavLink = styled(NavLink)`
   font-size: 14px;
   line-height: 20px; /* 142.857% */
   text-decoration-line: none;
-  padding: 8px 16px;
+  padding: 8px 4px;
+  @media screen and (min-width: 1280px) {
+    padding: 8px 16px;
+  }
 
   &.active {
     ${({ $notActive }) => !$notActive && 'font-weight: 700;'}
