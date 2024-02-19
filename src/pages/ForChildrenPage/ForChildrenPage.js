@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import ProductCard from 'components/ProductCard/ProductCard';
 
-const api = require('./../../api/product');
+const api = require('../../api/product');
 
 const ForChildrenPage = () => {
   const { t } = useTranslation('translation', {
@@ -39,7 +39,6 @@ const ForChildrenPage = () => {
   const [products, setProducts] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [totalProducts, setTotalProducts] = useState();
-  console.log('products', products);
 
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
@@ -96,7 +95,9 @@ const ForChildrenPage = () => {
           ) : products.length ? (
             <ProductList>
               {products?.map(product => (
-                <ProductCard key={product._id} product={product} />
+                <li key={product._id}>
+                  <ProductCard product={product} />
+                </li>
               ))}
             </ProductList>
           ) : (

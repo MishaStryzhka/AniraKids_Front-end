@@ -1,13 +1,6 @@
 import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
-export const MainItem = styled.li`
-  width: 305px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`;
-
 export const Wrap = styled.div`
   display: flex;
   justify-content: space-between;

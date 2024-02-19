@@ -3,7 +3,6 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
   WrapButtons,
@@ -11,6 +10,7 @@ import {
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { arraySizeAdult } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterSizeAdult = () => {
   const [isSizeAdultList, setIsSizeAdultList] = useState(false);
@@ -33,7 +33,7 @@ const FilterSizeAdult = () => {
     });
   };
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openSizeList={isSizeAdultList === true}>
         <FilterTitle>{t('Size')}</FilterTitle>
         <StyledIconArrowUp
@@ -58,7 +58,7 @@ const FilterSizeAdult = () => {
           </WrapButtons>
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

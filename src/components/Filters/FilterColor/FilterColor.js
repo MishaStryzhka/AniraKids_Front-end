@@ -6,12 +6,12 @@ import {
   ItemButton,
   List,
   ListButtons,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterColor.styled';
 import { useTranslation } from 'react-i18next';
 import { arrayColorsProduct } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterColor = () => {
   const [isFilterColorList, setIsFilterColorList] = useState(false);
@@ -42,7 +42,7 @@ const FilterColor = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openColorList={isFilterColorList === true}>
         <FilterTitle>{t('Color')}</FilterTitle>
         <StyledIconArrowUp
@@ -68,7 +68,7 @@ const FilterColor = () => {
           </ListButtons>
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

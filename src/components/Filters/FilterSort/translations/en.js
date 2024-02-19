@@ -1,6 +1,7 @@
 export const FilterSortTranslationsEn = {
   'Sort by': 'Sort by',
-  'From expensive to cheap': 'From expensive to cheap',
-  'From cheap to expensive': 'From cheap to expensive',
-  'New arrival': 'New arrival',
+  popularity: 'popularity',
+  'expensive to cheap': 'from expensive to cheap',
+  'cheap to expensive': 'from cheap to expensive',
+  'new arrival': 'new arrival',
 };
