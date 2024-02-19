@@ -350,8 +350,8 @@ export const InputPrice = styled.input`
 `;
 
 export const Box = styled.div`
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   border: 1px solid;
   display: inline-block;
   border-radius: 2px;

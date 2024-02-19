@@ -30,6 +30,10 @@ export const List = styled.ul`
 `;
 
 export const Button = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
   border: none;
   background-color: transparent;
   padding: 2px 12px;

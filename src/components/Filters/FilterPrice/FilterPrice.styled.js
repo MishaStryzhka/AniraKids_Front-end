@@ -64,7 +64,10 @@ export const StyledIconArrowUp = styled(IconArrow)`
   cursor: pointer;
 `;
 
-export const WrapSlider = styled.div``;
+export const WrapSlider = styled.div`
+  padding: 2px 12px;
+  border-bottom: 1px solid #ebdad1;
+`;
 
 const Slider = require('rc-slider');
 const createSliderWithTooltip = Slider.createSliderWithTooltip;

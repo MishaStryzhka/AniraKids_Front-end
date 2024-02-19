@@ -90,9 +90,7 @@ const ForChildrenPage = () => {
             <IconsMenuForPages />
             <FilterSort />
           </Wrap>
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : products.length ? (
+          {products.length ? (
             <ProductList>
               {products?.map(product => (
                 <li key={product._id}>
@@ -100,6 +98,8 @@ const ForChildrenPage = () => {
                 </li>
               ))}
             </ProductList>
+          ) : isLoading ? (
+            <p>Loading...</p>
           ) : (
             <NotFound>{t('nothing_found')}</NotFound>
           )}

@@ -23,7 +23,7 @@ const ModalBurgerMenu = ({ onClick }) => {
         <Button>
           <IconCross
             onClick={() => {
-              // document.body.style.overflow = 'auto';
+              document.body.style.overflow = 'auto';
               onClick();
             }}
           />
@@ -35,7 +35,10 @@ const ModalBurgerMenu = ({ onClick }) => {
 
       <WrapBoxLink>
         <BoxNavLinks
-          onClick={onClick}
+          onClick={() => {
+            document.body.style.overflow = 'auto';
+            onClick();
+          }}
           // $mainPage={pathname === `/`}
         />
       </WrapBoxLink>
