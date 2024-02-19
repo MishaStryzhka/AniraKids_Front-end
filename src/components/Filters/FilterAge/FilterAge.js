@@ -4,12 +4,12 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterAge.styled';
 import { useTranslation } from 'react-i18next';
 import { arrayAgeProduct } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterAge = () => {
   const [isFilterAgeList, setIsFilterAgeList] = useState(false);
@@ -41,7 +41,7 @@ const FilterAge = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openAgeList={isFilterAgeList === true}>
         <FilterTitle>{t('Age')}</FilterTitle>
         <StyledIconArrowUp
@@ -67,7 +67,7 @@ const FilterAge = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

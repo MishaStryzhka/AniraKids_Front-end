@@ -29,22 +29,31 @@ const ProductCard = ({ product }) => {
   });
 
   const handleAddToFavorites = id => {
-    user.favorites.includes(id)
+    user?.favorites.includes(id)
       ? dispatch(removeFromFavorites(id))
       : dispatch(addToFavorites(id));
   };
 
   return (
-    <WrapCard>
+    <WrapCard to={`./${product?._id}`}>
       <PictureCard>
-        <img src={product?.photos[0]?.path} alt="Фотографія продукту" />
+        <img
+          width="305px"
+          height="350px"
+          style={{ objectFit: 'cover' }}
+          src={product?.photos[0]?.path}
+          alt="Фотографія продукту"
+        />
       </PictureCard>
       <ButtonAddToFavorites
         disabled={isLoading}
-        onClick={() => handleAddToFavorites(product?._id)}
+        onClick={e => {
+          e.preventDefault();
+          handleAddToFavorites(product?._id);
+        }}
       >
         <IconLittleHeart
-          fill={user.favorites.includes(product?._id) ? '#fff' : 'transparent'}
+          fill={user?.favorites.includes(product?._id) ? '#fff' : 'transparent'}
           stroke={theme[currentTheme].color.mainColor1}
         />
       </ButtonAddToFavorites>

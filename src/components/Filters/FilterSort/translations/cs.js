@@ -1,6 +1,7 @@
 export const FilterSortTranslationsCs = {
   'Sort by': 'seřadit podle',
-  'From expensive to cheap': 'Od drahých k levným',
-  'From cheap to expensive': 'Od levných k drahým',
-  'New arrival': 'Novinka',
+  popularity: 'oblíbenosti',
+  'expensive to cheap': 'od drahých k levným',
+  'cheap to expensive': 'od levných k drahým',
+  'new arrival': 'novinka',
 };

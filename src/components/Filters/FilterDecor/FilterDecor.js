@@ -4,12 +4,12 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterDecor.styled';
 import { useTranslation } from 'react-i18next';
 import { arrayofDecorProduct } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);
@@ -25,7 +25,7 @@ const FilterDecor = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openDecorList={isFilterDecorList === true}>
         <FilterTitle>{t('Decor')}</FilterTitle>
         <StyledIconArrowUp
@@ -49,7 +49,7 @@ const FilterDecor = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

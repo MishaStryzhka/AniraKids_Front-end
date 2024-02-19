@@ -5,11 +5,11 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterToys.styled';
 import { arrayOfToysProduct } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterOfToys = () => {
   const [isFilterToysList, setIsFilterToysList] = useState(false);
@@ -24,7 +24,7 @@ const FilterOfToys = () => {
     setIsFilterToysList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openOutfitsList={isFilterToysList === true}>
         <FilterTitle>{t('Toys')}</FilterTitle>
         <StyledIconArrowUp
@@ -48,7 +48,7 @@ const FilterOfToys = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 export default FilterOfToys;

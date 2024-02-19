@@ -3,7 +3,6 @@ import { useState } from 'react';
 import 'rc-slider/assets/index.css';
 import {
   FilterTitle,
-  MainItem,
   MaxValue,
   MinValue,
   StyledIconArrowUp,
@@ -13,6 +12,7 @@ import {
 } from './FilterPrice.styled';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterPrice = () => {
   const [isPriceList, setIsPriceList] = useState(false);
@@ -54,7 +54,7 @@ const FilterPrice = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openPriceList={isPriceList === true}>
         <FilterTitle>{t('Price')}</FilterTitle>
         <StyledIconArrowUp
@@ -81,7 +81,7 @@ const FilterPrice = () => {
           </div>
         </WrapSlider>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

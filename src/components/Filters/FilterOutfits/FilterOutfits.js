@@ -3,13 +3,13 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterOutfits.styled';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { arrayOfOutfits } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterOutfits = () => {
   const [isFilterOutfitsList, setIsFilterOutfitsList] = useState(false);
@@ -41,7 +41,7 @@ const FilterOutfits = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openOutfitsList={isFilterOutfitsList === true}>
         <FilterTitle>{t('Outfits')}</FilterTitle>
         <StyledIconArrowUp
@@ -70,7 +70,7 @@ const FilterOutfits = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

@@ -5,10 +5,10 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterType.styled';
+import { MainFilterWrap } from '../filter.styled';
 
 const arrayType = ['sale', 'rent'];
 
@@ -41,7 +41,7 @@ const FilterType = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openOutfitsList={isFilterTypeList === true}>
         <FilterTitle>{t('type')}</FilterTitle>
         <StyledIconArrowUp
@@ -67,7 +67,7 @@ const FilterType = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 export default FilterType;

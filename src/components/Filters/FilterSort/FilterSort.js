@@ -11,24 +11,15 @@ import {
 } from './FilterSort.styled';
 
 const arrayParamsSort = [
-  {
-    variantOfParams: 'Від дорогих до дешевих',
-    searchParams: 'From expensive to cheap',
-  },
-  {
-    variantOfParams: 'Від дешевих до дорогих',
-    searchParams: 'From cheap to expensive',
-  },
-  {
-    variantOfParams: 'Новинка',
-    searchParams: 'New arrival',
-  },
+  'popularity',
+  'expensive to cheap',
+  'cheap to expensive',
+  'new arrival',
 ];
 
 const FilterSort = () => {
   const [isFilterSortList, setIsFilterSortList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  false && console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSort',
@@ -37,31 +28,57 @@ const FilterSort = () => {
   const handleToggleList = () => {
     setIsFilterSortList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
   return (
     <MainItem>
       <Wrap $openOutfitsList={isFilterSortList === true}>
-        <FilterTitle>{t('Sort by')}</FilterTitle>
-        <StyledIconArrowUp
-          onClick={handleToggleList}
-          $openOutfitsList={isFilterSortList === true}
-        />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: 12,
+          }}
+        >
+          <FilterTitle>{t('Sort by')}</FilterTitle>
+          <StyledIconArrowUp
+            onClick={handleToggleList}
+            $openOutfitsList={isFilterSortList === true}
+          />
+        </div>
+        {isFilterSortList && (
+          <List>
+            {arrayParamsSort.map((sort, index) => (
+              <li key={index}>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    sort === searchParams.get('sort')
+                      ? removeParam('sort')
+                      : newSetSearchParams('sort', sort);
+                  }}
+                >
+                  {t(sort)}
+                </Button>
+              </li>
+            ))}
+          </List>
+        )}
       </Wrap>
-      {isFilterSortList && (
-        <List>
-          {arrayParamsSort.map(({ searchParams }, index) => (
-            <li key={index}>
-              <Button
-                type="button"
-                onClick={() => {
-                  setSearchParams({ Sort: searchParams });
-                }}
-              >
-                {t(searchParams)}
-              </Button>
-            </li>
-          ))}
-        </List>
-      )}
     </MainItem>
   );
 };

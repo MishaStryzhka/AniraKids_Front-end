@@ -1,7 +1,7 @@
 import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
-export const MainItem = styled.li`
+export const MainItem = styled.div`
   max-width: 210px;
   list-style: none;
   display: flex;
@@ -20,12 +20,17 @@ export const MainItem = styled.li`
 `;
 
 export const Wrap = styled.div`
+  position: absolute;
+  width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  padding: 12px;
-  border-bottom: ${({ $openOutfitsList }) =>
-    $openOutfitsList ? 'none' : '1px solid'};
   border-color: ${({ theme }) => theme.color.lightBGColor};
+
+  ${({ theme, $openOutfitsList }) =>
+    $openOutfitsList
+      ? `border-radius: 2px; background: ${theme.color.mainColor1}; box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1); border-bottom: none;`
+      : `border-bottom: 1px solid ${theme.color.lightBGColor};`}
 `;
 
 export const FilterTitle = styled.h3`
@@ -45,18 +50,16 @@ export const List = styled.ul`
   flex-direction: column;
   gap: 4px;
 
-  position: absolute;
-  z-index: 2;
-  top: 56px;
-
-  box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
+  // position: absolute;
+  // z-index: 2;
+  // top: 56px;
 `;
 
 export const Button = styled.button`
   border: none;
   background-color: transparent;
   padding: 2px 12px;
-  width: 305px;
+  width: 100%;
   cursor: pointer;
 
   font-family: 'Open Sans Hebrew', sans-serif;

@@ -3,13 +3,13 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterFamilyLook.styled';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { arrayFamilyLookProductWomen } from 'data';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterFamilyLookWomen = () => {
   const [isFamilyLookList, setIsFamilyLookList] = useState(false);
@@ -33,7 +33,7 @@ const FilterFamilyLookWomen = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openLookList={isFamilyLookList === true}>
         <FilterTitle>FAMILY LOOK</FilterTitle>
         <StyledIconArrowUp
@@ -57,7 +57,7 @@ const FilterFamilyLookWomen = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

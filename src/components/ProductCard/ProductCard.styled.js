@@ -1,6 +1,7 @@
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const WrapCard = styled.div`
+export const WrapCard = styled(NavLink)`
   width: 305px;
   display: flex;
   flex-direction: column;

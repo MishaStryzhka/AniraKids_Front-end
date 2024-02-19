@@ -3,13 +3,13 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterSubject.styled';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { productSubjects } from 'data/dateForProduct';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterSubject = () => {
   const [isFilterSubjectsList, setIsFilterSubjectsList] = useState(false);
@@ -34,7 +34,7 @@ const FilterSubject = () => {
     });
   };
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openSubjectsList={isFilterSubjectsList === true}>
         <FilterTitle>{t('Subject')}</FilterTitle>
         <StyledIconArrowUp
@@ -58,7 +58,7 @@ const FilterSubject = () => {
           ))}
         </List>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 

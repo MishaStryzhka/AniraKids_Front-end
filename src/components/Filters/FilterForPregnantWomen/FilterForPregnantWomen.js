@@ -1,7 +1,6 @@
 import {
   Button,
   FilterTitle,
-  MainItem,
   StyledIconArrowUp,
   Wrap,
 } from './FilterForPregnantWomen.styled';
@@ -10,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box } from 'components/Forms/FormAddProduct/FormAddProduct.styled';
 import IconCheck from 'images/icons/IconCheck';
+import { MainFilterWrap } from '../filter.styled';
 
 const FilterForPregnantWomen = () => {
   const [isPregnancyList, setIsPregnancyList] = useState(false);
@@ -33,7 +33,7 @@ const FilterForPregnantWomen = () => {
   };
 
   return (
-    <MainItem>
+    <MainFilterWrap>
       <Wrap $openPregnancyList={isPregnancyList === true}>
         <FilterTitle>{t('For pregnant women')}</FilterTitle>
         <StyledIconArrowUp
@@ -52,7 +52,7 @@ const FilterForPregnantWomen = () => {
           {t('true')}
         </Button>
       )}
-    </MainItem>
+    </MainFilterWrap>
   );
 };
 
