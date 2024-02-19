@@ -31,7 +31,7 @@ export const PictureContainer = styled(Container)`
 `;
 export const Picture = styled.picture`
   display: block;
-  width: 1440px;
+  // width: 1440px;
   /* box-sizing: border-box; */
   /* margin: 0 auto; */
   margin-bottom: 40px;

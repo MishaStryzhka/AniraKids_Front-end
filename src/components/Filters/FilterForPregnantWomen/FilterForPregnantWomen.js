@@ -14,7 +14,7 @@ import { MainFilterWrap } from '../filter.styled';
 const FilterForPregnantWomen = () => {
   const [isPregnancyList, setIsPregnancyList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const pregnancy = searchParams.get('pregnancy');
+  const isPregnancy = searchParams.get('isPregnancy');
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterForPregnantWomen',
@@ -32,6 +32,14 @@ const FilterForPregnantWomen = () => {
     });
   };
 
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainFilterWrap>
       <Wrap $openPregnancyList={isPregnancyList === true}>
@@ -45,10 +53,14 @@ const FilterForPregnantWomen = () => {
         <Button
           type="button"
           onClick={() => {
-            newSetSearchParams('pregnancy', pregnancy !== 'true');
+            isPregnancy
+              ? removeParam('isPregnancy')
+              : newSetSearchParams('isPregnancy', isPregnancy !== 'true');
           }}
         >
-          <Box>{pregnancy === 'true' && <IconCheck />}</Box>
+          <Box>
+            {isPregnancy === 'true' && <IconCheck width={16} height={16} />}
+          </Box>
           {t('true')}
         </Button>
       )}

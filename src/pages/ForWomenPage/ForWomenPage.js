@@ -17,7 +17,12 @@ import { TitleFilter, Wrap } from './ForWomenPage.styled';
 import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
 import IconsMenuForPages from 'components/IconsMenuForPages/IconsMenuForPages';
 import Border from 'components/Border/Border';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { ProductList } from 'pages/pages.styled';
+import NotFound from 'components/NotFound/NotFound';
+
+const api = require('../../api/product');
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -25,6 +30,43 @@ const ForWomenPage = () => {
   });
   useTitle(t("Women's Clothing"));
   const { id } = useParams();
+
+  // eslint-disable-next-line no-unused-vars
+  const [page, setPage] = useState(1);
+  // eslint-disable-next-line no-unused-vars
+  const [pageSize, setPageSize] = useState(9);
+
+  const [products, setProducts] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [totalProducts, setTotalProducts] = useState();
+
+  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState();
+
+  // eslint-disable-next-line no-unused-vars
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    api
+      .getProducts({
+        page,
+        pageSize,
+        category: 'women`s category',
+        ...Object.fromEntries(searchParams.entries()),
+      })
+      .then(data => {
+        setProducts(data.products);
+        setTotalProducts(data.totalProducts);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        setError(error);
+        setIsLoading(false);
+      });
+  }, [page, pageSize, searchParams]);
 
   return id ? (
     <Outlet />
@@ -48,7 +90,19 @@ const ForWomenPage = () => {
             <IconsMenuForPages />
             <FilterSort />
           </Wrap>
-          <ProductCard />
+          {products.length ? (
+            <ProductList>
+              {products?.map(product => (
+                <li key={product._id}>
+                  <ProductCard product={product} />
+                </li>
+              ))}
+            </ProductList>
+          ) : isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <NotFound>{t('nothing_found')}</NotFound>
+          )}
         </MainContent>
       </WrapMainContent>
     </Container>
