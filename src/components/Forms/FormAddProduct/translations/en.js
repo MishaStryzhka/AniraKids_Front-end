@@ -39,7 +39,6 @@ export const FormAddProductTranslationsEn = {
   // part - pregnant woman
   'For pregnant women': 'For pregnant women',
   true: 'Yes',
-  false: 'No',
 
   // part - adult size
   'Specify the size': 'Specify the size',
@@ -158,6 +157,7 @@ export const FormAddProductTranslationsEn = {
 
   // buttonAdd in form
   addItem: 'Add item',
+  btnNext: 'Next',
 
   // error
   'Required field': 'Required field',

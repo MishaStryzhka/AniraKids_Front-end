@@ -156,6 +156,7 @@ export const FormAddProductTranslationsCs = {
 
   // buttonAdd in form
   addItem: 'Přidat položku',
+  btnNext: 'dále',
 
   // error
   'Required field': 'Povinné pole',

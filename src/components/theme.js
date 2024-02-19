@@ -24,6 +24,7 @@ const lightTheme = {
   additionalColorGray: '#EFEFEF',
   additionalColorBrown: '#EBDAD1',
   additionalColorRed: '#ad0000',
+  additionalColorGreen: '#00542c',
   // primary: '#FFC107',
   // secondary: '#111111',
   btnColorBG: '#77695e',
