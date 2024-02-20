@@ -68,43 +68,45 @@ const ForWomenPage = () => {
       });
   }, [page, pageSize, searchParams]);
 
-  return id ? (
-    <Outlet />
-  ) : (
+  return (
     <Container>
       <NavigationOverlay />
-      <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>
+      {!id && <GeneralTitle>{t("Women's Clothing")}</GeneralTitle>}
       <Border />
-      <WrapMainContent>
-        <SideBar>
-          <TitleFilter>{t('Filters')}</TitleFilter>
-          <FilterType />
-          <FilterForPregnantWomen />
-          <FilterFamilyLookWomen />
-          <FilterPrice />
-          <FilterColor />
-          <FilterSizeAdult />
-        </SideBar>
-        <MainContent>
-          <Wrap>
-            <IconsMenuForPages />
-            <FilterSort />
-          </Wrap>
-          {products.length ? (
-            <ProductList>
-              {products?.map(product => (
-                <li key={product._id}>
-                  <ProductCard product={product} />
-                </li>
-              ))}
-            </ProductList>
-          ) : isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <NotFound>{t('nothing_found')}</NotFound>
-          )}
-        </MainContent>
-      </WrapMainContent>
+      {id ? (
+        <Outlet />
+      ) : (
+        <WrapMainContent>
+          <SideBar>
+            <TitleFilter>{t('Filters')}</TitleFilter>
+            <FilterType />
+            <FilterForPregnantWomen />
+            <FilterFamilyLookWomen />
+            <FilterPrice />
+            <FilterColor />
+            <FilterSizeAdult />
+          </SideBar>
+          <MainContent>
+            <Wrap>
+              <IconsMenuForPages />
+              <FilterSort />
+            </Wrap>
+            {products.length ? (
+              <ProductList>
+                {products?.map(product => (
+                  <li key={product._id}>
+                    <ProductCard product={product} />
+                  </li>
+                ))}
+              </ProductList>
+            ) : isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <NotFound>{t('nothing_found')}</NotFound>
+            )}
+          </MainContent>
+        </WrapMainContent>
+      )}
     </Container>
   );
 };

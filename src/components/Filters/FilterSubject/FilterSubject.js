@@ -13,7 +13,6 @@ import { MainFilterWrap } from '../filter.styled';
 
 const FilterSubject = () => {
   const [isFilterSubjectsList, setIsFilterSubjectsList] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { t } = useTranslation('translation', {
@@ -33,6 +32,14 @@ const FilterSubject = () => {
       return params;
     });
   };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
   return (
     <MainFilterWrap>
       <Wrap $openSubjectsList={isFilterSubjectsList === true}>
@@ -49,7 +56,9 @@ const FilterSubject = () => {
               <Button
                 type="button"
                 onClick={() => {
-                  newSetSearchParams('subject', valueSubject);
+                  valueSubject === searchParams.get('subject')
+                    ? removeParam('subject')
+                    : newSetSearchParams('subject', valueSubject);
                 }}
               >
                 {t(valueSubject)}

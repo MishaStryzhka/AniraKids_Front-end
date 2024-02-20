@@ -68,43 +68,45 @@ const ForChildrenPage = () => {
       });
   }, [page, pageSize, searchParams]);
 
-  return id ? (
-    <Outlet />
-  ) : (
+  return (
     <Container>
       <NavigationOverlay />
-      <GeneralTitle>{t("Children's Clothing")}</GeneralTitle>
+      {!id && <GeneralTitle>{t("Children's Clothing")}</GeneralTitle>}
       <Border />
-      <WrapMainContent>
-        <SideBar>
-          <TitleFilter>{t('Filters')}</TitleFilter>
-          <FilterType />
-          <FilterOutfits />
-          <FilterAge />
-          <FilterPrice />
-          <FilterColor />
-          <FilterSizeChildren />
-        </SideBar>
-        <MainContent>
-          <Wrap>
-            <IconsMenuForPages />
-            <FilterSort />
-          </Wrap>
-          {products.length ? (
-            <ProductList>
-              {products?.map(product => (
-                <li key={product._id}>
-                  <ProductCard product={product} />
-                </li>
-              ))}
-            </ProductList>
-          ) : isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <NotFound>{t('nothing_found')}</NotFound>
-          )}
-        </MainContent>
-      </WrapMainContent>
+      {id ? (
+        <Outlet />
+      ) : (
+        <WrapMainContent>
+          <SideBar>
+            <TitleFilter>{t('Filters')}</TitleFilter>
+            <FilterType />
+            <FilterOutfits />
+            <FilterAge />
+            <FilterPrice />
+            <FilterColor />
+            <FilterSizeChildren />
+          </SideBar>
+          <MainContent>
+            <Wrap>
+              <IconsMenuForPages />
+              <FilterSort />
+            </Wrap>
+            {products.length ? (
+              <ProductList>
+                {products?.map(product => (
+                  <li key={product._id}>
+                    <ProductCard product={product} />
+                  </li>
+                ))}
+              </ProductList>
+            ) : isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <NotFound>{t('nothing_found')}</NotFound>
+            )}
+          </MainContent>
+        </WrapMainContent>
+      )}
     </Container>
   );
 };

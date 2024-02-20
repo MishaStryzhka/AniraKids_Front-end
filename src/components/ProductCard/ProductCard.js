@@ -20,7 +20,7 @@ import {
 } from '../../redux/auth/operations';
 import { useDispatch } from 'react-redux';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onRemoveFavorite }) => {
   const { user, currentTheme, isLoading } = useAuth();
   const dispatch = useDispatch();
 
@@ -29,6 +29,7 @@ const ProductCard = ({ product }) => {
   });
 
   const handleAddToFavorites = id => {
+    onRemoveFavorite && onRemoveFavorite();
     user?.favorites.includes(id)
       ? dispatch(removeFromFavorites(id))
       : dispatch(addToFavorites(id));

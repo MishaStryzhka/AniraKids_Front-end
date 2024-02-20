@@ -100,7 +100,9 @@ function App() {
             <Route index element={<Profile />} />
             <Route path="profile/" element={<Profile />} />
             <Route path="chat/" element={<Chat />} />
-            <Route path="favorite/" element={<Favorite />} />
+            <Route path="favorite/" element={<Favorite />}>
+              <Route path=":id" element={<ProductPage />} />
+            </Route>
             <Route path="rent-out/" element={<RentOut />} />
             <Route path="rent-out/add-product/" element={<AddProduct />} />
             <Route

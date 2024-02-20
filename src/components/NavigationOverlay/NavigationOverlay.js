@@ -33,41 +33,84 @@ const NavigationOverlay = () => {
       <NavigationWrapper>
         {/* =====Головна======= */}
 
-        {location.pathname === '/forWomen' && (
+        {location.pathname.includes('/forWomen') && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
             <IconArrow />
-            <StyledNavLink to="/forWomen">{t('womenClothing')}</StyledNavLink>
-            {location.pathname.includes('productCard') && (
-              <StyledNavLink to="./productCard">
-                {t('cardProduct')}
-              </StyledNavLink>
+            <StyledNavLink
+              $notActive={location.pathname !== '/forWomen'}
+              to="/forWomen"
+            >
+              {t('womenClothing')}
+            </StyledNavLink>
+            {productId && (
+              <>
+                <IconArrow />
+                <StyledNavLink to={`/forWomen/${productId}`}>
+                  {t('cardProduct')}
+                </StyledNavLink>
+              </>
             )}
           </>
         )}
-        {location.pathname === '/forMen' && (
+        {location.pathname.includes('/forMen') && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
             <IconArrow />
-            <StyledNavLink to="/forMen">{t('menSuits')}</StyledNavLink>
+            <StyledNavLink
+              $notActive={location.pathname !== '/forMen'}
+              to="/forMen"
+            >
+              {t('menSuits')}
+            </StyledNavLink>
+            {productId && (
+              <>
+                <IconArrow />
+                <StyledNavLink to={`/forMen/${productId}`}>
+                  {t('cardProduct')}
+                </StyledNavLink>
+              </>
+            )}
           </>
         )}
-        {location.pathname === '/forChildren' && (
+        {location.pathname.includes('/forChildren') && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
             <IconArrow />
-            <StyledNavLink to="/forChildren">
+            <StyledNavLink
+              $notActive={location.pathname !== '/forChildren'}
+              to="/forChildren"
+            >
               {t('childrenClothing')}
             </StyledNavLink>
+            {productId && (
+              <>
+                <IconArrow />
+                <StyledNavLink to={`/forChildren/${productId}`}>
+                  {t('cardProduct')}
+                </StyledNavLink>
+              </>
+            )}
           </>
         )}
-        {location.pathname === '/decorAndToys' && (
+        {location.pathname.includes('/decorAndToys') && (
           <>
             <StyledNavLink to="/">{t('home')}</StyledNavLink>
             <IconArrow />
-            <StyledNavLink to="/decorAndToys">
+            <StyledNavLink
+              $notActive={location.pathname !== '/decorAndToys'}
+              to="/decorAndToys"
+            >
               {t('decorAndToys')}
             </StyledNavLink>
+            {productId && (
+              <>
+                <IconArrow />
+                <StyledNavLink to={`/decorAndToys/${productId}`}>
+                  {t('cardProduct')}
+                </StyledNavLink>
+              </>
+            )}
           </>
         )}
         {location.pathname === '/aboutUs' && (
@@ -95,7 +138,22 @@ const NavigationOverlay = () => {
               <StyledNavLink to="./chat">{t('chat')}</StyledNavLink>
             )}
             {location.pathname.includes('favorite') && (
-              <StyledNavLink to="./favorite">{t('favorite')}</StyledNavLink>
+              <>
+                <StyledNavLink
+                  $notActive={location.pathname !== '/my-account/favorite'}
+                  to="./favorite"
+                >
+                  {t('favorite')}
+                </StyledNavLink>
+                {productId && (
+                  <>
+                    <IconArrow />
+                    <StyledNavLink to={`/my-account/favorite/${productId}`}>
+                      {t('cardProduct')}
+                    </StyledNavLink>
+                  </>
+                )}
+              </>
             )}
             {location.pathname.includes('rent-out') && (
               <>
