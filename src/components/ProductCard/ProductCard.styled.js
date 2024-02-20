@@ -13,8 +13,8 @@ export const PictureCard = styled.picture`
   height: 350px;
 `;
 export const ButtonAddToFavorites = styled.button`
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   border-radius: 50px;
   padding: 3px;
   border: none;
