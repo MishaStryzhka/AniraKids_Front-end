@@ -14,7 +14,6 @@ import { MainFilterWrap } from '../filter.styled';
 const FilterDecor = () => {
   const [isFilterDecorList, setIsFilterDecorList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterDecor',
@@ -22,6 +21,22 @@ const FilterDecor = () => {
 
   const handleToggleList = () => {
     setIsFilterDecorList(prevIsFilterDecorList => !prevIsFilterDecorList);
+  };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
   };
 
   return (
@@ -40,7 +55,9 @@ const FilterDecor = () => {
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Decor: searchDecor });
+                  searchDecor === searchParams.get('decor')
+                    ? removeParam('decor')
+                    : newSetSearchParams('decor', searchDecor);
                 }}
               >
                 {t(searchDecor)}

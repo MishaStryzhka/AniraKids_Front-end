@@ -14,7 +14,6 @@ import { MainFilterWrap } from '../filter.styled';
 const FilterOfToys = () => {
   const [isFilterToysList, setIsFilterToysList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log('searchParams', searchParams);
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterOfToys',
@@ -23,6 +22,23 @@ const FilterOfToys = () => {
   const handleToggleList = () => {
     setIsFilterToysList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
   };
+
+  const newSetSearchParams = (key, value) => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.set(key, value);
+      return params;
+    });
+  };
+
+  const removeParam = param => {
+    setSearchParams(pref => {
+      const params = new URLSearchParams(pref);
+      params.delete(param);
+      return params;
+    });
+  };
+
   return (
     <MainFilterWrap>
       <Wrap $openOutfitsList={isFilterToysList === true}>
@@ -39,7 +55,9 @@ const FilterOfToys = () => {
               <Button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ Toys: typeOfToys });
+                  typeOfToys === searchParams.get('toys')
+                    ? removeParam('toys')
+                    : newSetSearchParams('toys', typeOfToys);
                 }}
               >
                 {t(typeOfToys)}

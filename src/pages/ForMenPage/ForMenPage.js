@@ -68,42 +68,44 @@ const ForMenPage = () => {
       });
   }, [page, pageSize, searchParams]);
 
-  return id ? (
-    <Outlet />
-  ) : (
+  return (
     <Container>
       <NavigationOverlay />
-      <GeneralTitle>{t('Men suits')}</GeneralTitle>
+      {!id && <GeneralTitle>{t('Men suits')}</GeneralTitle>}
       <Border />
-      <WrapMainContent>
-        <SideBar>
-          <TitleFilter>{t('Filters')}</TitleFilter>
-          <FilterType />
-          <FilterFamilyLookMen />
-          <FilterPrice />
-          <FilterColor />
-          <FilterSizeAdult />
-        </SideBar>
-        <MainContent>
-          <Wrap>
-            <IconsMenuForPages />
-            <FilterSort />
-          </Wrap>
-          {products.length ? (
-            <ProductList>
-              {products?.map(product => (
-                <li key={product._id}>
-                  <ProductCard product={product} />
-                </li>
-              ))}
-            </ProductList>
-          ) : isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <NotFound>{t('nothing_found')}</NotFound>
-          )}
-        </MainContent>
-      </WrapMainContent>
+      {id ? (
+        <Outlet />
+      ) : (
+        <WrapMainContent>
+          <SideBar>
+            <TitleFilter>{t('Filters')}</TitleFilter>
+            <FilterType />
+            <FilterFamilyLookMen />
+            <FilterPrice />
+            <FilterColor />
+            <FilterSizeAdult />
+          </SideBar>
+          <MainContent>
+            <Wrap>
+              <IconsMenuForPages />
+              <FilterSort />
+            </Wrap>
+            {products.length ? (
+              <ProductList>
+                {products?.map(product => (
+                  <li key={product._id}>
+                    <ProductCard product={product} />
+                  </li>
+                ))}
+              </ProductList>
+            ) : isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <NotFound>{t('nothing_found')}</NotFound>
+            )}
+          </MainContent>
+        </WrapMainContent>
+      )}
     </Container>
   );
 };
