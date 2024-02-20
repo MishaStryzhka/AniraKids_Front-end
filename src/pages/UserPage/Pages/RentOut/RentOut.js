@@ -52,12 +52,13 @@ const RentOut = () => {
         <>
           <ListProducts>
             {products.map(product => (
-              <UsersProductCard
-                key={product._id}
-                product={product}
-                handleRemove={handleRemove}
-                handleUpdate={handleUpdate}
-              />
+              <li key={product._id}>
+                <UsersProductCard
+                  product={product}
+                  handleRemove={handleRemove}
+                  handleUpdate={handleUpdate}
+                />
+              </li>
             ))}
           </ListProducts>
           <p>page {page}</p>

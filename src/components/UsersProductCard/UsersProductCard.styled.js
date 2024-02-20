@@ -3,7 +3,7 @@ import IconBasket from 'images/icons/IconBasket';
 import IconPencil from 'images/icons/IconPencil';
 import styled from 'styled-components';
 
-export const ItemCard = styled.li`
+export const Card = styled.div`
   width: 305px;
   display: flex;
   flex-direction: column;

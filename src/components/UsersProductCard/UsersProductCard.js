@@ -6,7 +6,7 @@ import {
   IconBasketStyled,
   IconPencilStyled,
   Image,
-  ItemCard,
+  Card,
   PictureCard,
   Price,
   Span,
@@ -23,7 +23,7 @@ const UsersProductCard = ({ product, handleRemove, handleUpdate }) => {
   });
   console.log(product);
   return (
-    <ItemCard key={product._id}>
+    <Card>
       <GeneralWrap>
         <PictureCard>
           <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
@@ -59,7 +59,7 @@ const UsersProductCard = ({ product, handleRemove, handleUpdate }) => {
         {t('remove')}
         <IconBasketStyled />
       </ButtonRemove>
-    </ItemCard>
+    </Card>
   );
 };
 
