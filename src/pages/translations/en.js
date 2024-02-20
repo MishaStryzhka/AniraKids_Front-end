@@ -3,10 +3,12 @@ import { DecorAndToysPageTranslationsEn } from 'pages/DecorAndToysPage/translati
 import { ForChildrenPageTranslationsEn } from 'pages/ForChildrenPage/translations/en';
 import { ForMenPageTranslationsEn } from 'pages/ForMenPage/translations/en';
 import { ForWomenPageTranslationsEn } from 'pages/ForWomenPage/translations/en';
+import { NotFoundPageTranslationsEn } from 'pages/NotFoundPage/translations/en';
 import { ProductPageTranslationsEn } from 'pages/ProductPage/translations/en';
 import { UserPageTranslationsEn } from 'pages/UserPage/translations/en';
 
 export const PagesTranslationsEn = {
+  notFoundPage: NotFoundPageTranslationsEn,
   productPage: ProductPageTranslationsEn,
   aboutUsPage: AboutUsPageTranslationsEn,
   forWomenPage: ForWomenPageTranslationsEn,

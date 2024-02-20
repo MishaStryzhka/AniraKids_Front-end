@@ -44,6 +44,7 @@ import { ModalResetPasswordTranslationsCs } from 'components/Modals/ModalResetPa
 import { ModalAttentionTranslationsCs } from 'components/Modals/ModalAttention/translations/cs';
 import { ModalVideoResolvedTranslationsCs } from 'components/Modals/ModalVideoResolved/translations/cs';
 import { ModalAddVideoTranslationsCs } from 'components/Modals/ModalAddVideo/translations/cs';
+import { UsersProductCardTranslationsCs } from 'components/UsersProductCard/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -71,7 +72,9 @@ export const ComponentTranslationsCs = {
   modalRegister: ModalRegisterTranslationsCs,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsCs,
 
+  //cards
   productCard: ProductCardTranslationsCs,
+  usersProductCard: UsersProductCardTranslationsCs,
 
   // filters
   filterOfToys: FilterOfToysTranslationsCs,

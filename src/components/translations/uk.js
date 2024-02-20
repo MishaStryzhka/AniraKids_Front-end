@@ -45,6 +45,7 @@ import { ModalResetPasswordTranslationsUk } from 'components/Modals/ModalResetPa
 import { ModalAttentionTranslationsUk } from 'components/Modals/ModalAttention/translations/uk';
 import { ModalVideoResolvedTranslationsUk } from 'components/Modals/ModalVideoResolved/translations/uk';
 import { ModalAddVideoTranslationsUk } from 'components/Modals/ModalAddVideo/translations/uk';
+import { UsersProductCardTranslationsUk } from 'components/UsersProductCard/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -72,6 +73,10 @@ export const ComponentTranslationsUk = {
   modalRegister: ModalRegisterTranslationsUk,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsUk,
 
+  //cards
+  productCard: ProductCardTranslationsUk,
+  usersProductCard: UsersProductCardTranslationsUk,
+
   // filters
   filterOfToys: FilterOfToysTranslationsUk,
   filterType: FilterTypeTranslationsUk,
@@ -87,7 +92,6 @@ export const ComponentTranslationsUk = {
   filterColor: FilterColorTranslationsUk,
   filterAge: FilterAgeTranslationsUk,
 
-  productCard: ProductCardTranslationsUk,
   appBar: AppBarTranslationsUk,
   sectionHero: SectionHeroTranslationsUk,
   sectionAboutAniraK: SectionAboutAniraKTranslationsUk,

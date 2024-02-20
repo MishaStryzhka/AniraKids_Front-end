@@ -2,6 +2,7 @@ import NotFound from 'components/NotFound/NotFound';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ListProducts } from './RentOut.styled';
 
 const api = require('./../../../../api/product');
 
@@ -41,21 +42,25 @@ const RentOut = () => {
   const handleUpdate = productId => {
     navigation(`/my-account/rent-out/update-product/${productId}`);
   };
-
+  console.log(products);
+  console.log(products.length);
   return (
     <>
       {isLoading ? (
         <p>loading...</p>
       ) : products.length ? (
         <>
-          {products.map(product => (
-            <UsersProductCard
-              key={product._id}
-              product={product}
-              handleRemove={handleRemove}
-              handleUpdate={handleUpdate}
-            />
-          ))}
+          <ListProducts>
+            {products.map(product => (
+              <li key={product._id}>
+                <UsersProductCard
+                  product={product}
+                  handleRemove={handleRemove}
+                  handleUpdate={handleUpdate}
+                />
+              </li>
+            ))}
+          </ListProducts>
           <p>page {page}</p>
           {pageSize * page < totalProducts && (
             <button
