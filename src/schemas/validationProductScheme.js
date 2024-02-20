@@ -67,10 +67,7 @@ export const validationProductSchema = Yup.object().shape({
 
   decor: Yup.string(),
 
-  toys: Yup.string().test('required', 'Required field', function (value) {
-    const category = this.parent.category;
-    return category === 'decoration category' ? !!value : true;
-  }),
+  toys: Yup.string(),
 
   rental: Yup.boolean().test(
     'at-least-one',
