@@ -150,6 +150,7 @@ export const Separation = styled.p`
 export const WrapLinks = styled.div`
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 24px;
 `;
 

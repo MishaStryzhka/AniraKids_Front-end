@@ -11,6 +11,7 @@ import {
   verifiedEmail,
   addToFavorites,
   removeFromFavorites,
+  authByGoogle,
 } from './operations';
 
 const initialState = {
@@ -50,6 +51,23 @@ const authSlice = createSlice({
         state.isFirstLogin = true;
       })
       .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // register
+      .addCase(authByGoogle.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(authByGoogle.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isLoggedIn = true;
+        state.isFirstLogin = true;
+      })
+      .addCase(authByGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

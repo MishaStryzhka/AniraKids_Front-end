@@ -36,6 +36,71 @@ export const register = createAsyncThunk(
 );
 
 /*
+ * POST @ /users/authByGoogle
+ * body: { name, email, password }
+ */
+export const authByGoogle = createAsyncThunk(
+  'auth/authByGoogle',
+  async (credentials, thunkAPI) => {
+    try {
+      const res = await axios.post('api/users/authByGoogle', credentials);
+      // After successful registration, add the token to the HTTP header
+      setAuthHeader(res.data.token);
+      return res.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
+/*
+ * POST https://login.szn.cz/api/v1/oauth/token
+ * body: {
+	"grant_type": "authorization_code",
+	"code": "..."
+	"redirect_uri": "...",
+	"client_secret": "...",
+	"client_id": "..."
+}
+ */
+export const authBySeznam = createAsyncThunk(
+  'auth/authBySeznam',
+  async (credentials, thunkAPI) => {
+    try {
+      const res = await axios.post(
+        'https://login.szn.cz/api/v1/oauth/token',
+        credentials
+      );
+      console.log('res', res);
+
+      // After successful registration, add the token to the HTTP header
+      setAuthHeader(res.data.access_token);
+
+      axios
+        .get('https://login.szn.cz/api/v1/user')
+        .then(response => {
+          // Обработка ответа от API
+          console.log('Ответ от API:', response.data);
+        })
+        .catch(error => {
+          // Обработка ошибки при запросе
+          console.error('Ошибка при выполнении запроса:', error);
+        });
+
+      return res.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({
+        status: error.response.status,
+        message: error.response.data.message,
+      });
+    }
+  }
+);
+
+/*
  * POST @ /users/login
  * body: { email, password }
  */

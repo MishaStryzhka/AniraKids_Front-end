@@ -42,8 +42,8 @@ const SectionSimpleSteps = () => {
             }}
             navigation
             pagination={{ clickable: true, el: '.swiper-pagination' }}
-            onSwiper={swiper => console.log(swiper)}
-            onSlideChange={() => console.log('slide change')}
+            // onSwiper={swiper => console.log(swiper)}
+            // onSlideChange={() => console.log('slide change')}
           >
             <SwiperSlide>
               <ItemStep>

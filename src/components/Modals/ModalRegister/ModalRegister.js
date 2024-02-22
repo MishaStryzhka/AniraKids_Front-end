@@ -4,7 +4,6 @@ import {
   ButtonContact,
   ButtonNav,
   Description,
-  DescriptionLink,
   ModalWindow,
   Separation,
   StyledNavLink,
@@ -17,10 +16,13 @@ import FormRegistrationPhoneNumber from 'components/Forms/FormRegistrationPhoneN
 import FormRegistrationEmail from '../../Forms/FormRegistrationEmail/FormRegistrationEmail';
 import AuthForm from 'components/Forms/AuthForm/AuthForm';
 import IconFacebook from 'images/icons/IconFacebook';
-import IconGoogle from 'images/icons/IconGoogle';
 import IconEmail from 'images/icons/IcomEmail';
 import { useTranslation } from 'react-i18next';
-import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
+import { authByGoogle } from '../../../redux/auth/operations';
+import { useDispatch } from 'react-redux';
+import IconSeznamLogoEskoCervena from 'images/icons/IconSeznamLogoEskoCervena';
+import { nanoid } from '@reduxjs/toolkit';
 
 const ModalRegister = ({ handleCloseModal }) => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
@@ -28,6 +30,7 @@ const ModalRegister = ({ handleCloseModal }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalRegister',
   });
+  const dispatch = useDispatch();
 
   const [isActiveBtn, setIsActiveBtn] = useState({
     button1: true,
@@ -54,16 +57,11 @@ const ModalRegister = ({ handleCloseModal }) => {
     }));
   };
 
-  const login = useGoogleLogin({
-    onSuccess: credentialResponse => {
-      console.log('credentialResponse', credentialResponse);
-    },
-  });
+  const qwe = nanoid();
 
-  console.log(
-    'process.env.REACT_APP_GOOGLE_CLIENT_DI',
-    process.env.REACT_APP_GOOGLE_CLIENT_DI
-  );
+  console.log('qwe', qwe);
+
+  const { origin } = new URL(window.location.href);
 
   return (
     <ModalWindow>
@@ -136,27 +134,33 @@ const ModalRegister = ({ handleCloseModal }) => {
         <WrapLinks>
           <StyledNavLink>
             <IconFacebook />
-            <DescriptionLink>{t('Facebook')}</DescriptionLink>
+            {/* <DescriptionLink>{t('Facebook')}</DescriptionLink> */}
+          </StyledNavLink>
+          <StyledNavLink
+            href={`https://login.szn.cz/api/v1/oauth/auth
+	?client_id=f392b5e098cac39ddb00620731b57d1caf7b99b531542a4d
+	&scope=identity
+	&response_type=code
+	&redirect_uri=${origin}
+	&state=${qwe}`}
+          >
+            <IconSeznamLogoEskoCervena />
+            {/* <DescriptionLink>{t('Facebook')}</DescriptionLink> */}
           </StyledNavLink>
           <GoogleLogin
+            type="icon"
+            theme="outline"
             onSuccess={credentialResponse => {
               console.log(credentialResponse);
+              dispatch(authByGoogle(credentialResponse));
             }}
             onError={() => {
               console.log('Login Failed');
             }}
           />
-          ;
-          <StyledNavLink
-            // href={`${process.env.REACT_APP_BACKEND_BASE_URL}/api/users/google/`}
-            onClick={() => login()}
-          >
-            <IconGoogle />
-            <DescriptionLink>{t('Google')}</DescriptionLink>
-          </StyledNavLink>
           <StyledNavLink>
             <IconEmail />
-            <DescriptionLink>{t('Other')}</DescriptionLink>
+            {/* <DescriptionLink>{t('Other')}</DescriptionLink> */}
           </StyledNavLink>
         </WrapLinks>
       </WrapForm>
