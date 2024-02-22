@@ -60,6 +60,11 @@ const ModalRegister = ({ handleCloseModal }) => {
     },
   });
 
+  console.log(
+    'process.env.REACT_APP_GOOGLE_CLIENT_DI',
+    process.env.REACT_APP_GOOGLE_CLIENT_DI
+  );
+
   return (
     <ModalWindow>
       <WrapForm>
