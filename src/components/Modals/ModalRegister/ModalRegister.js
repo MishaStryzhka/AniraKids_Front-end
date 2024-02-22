@@ -20,6 +20,7 @@ import IconFacebook from 'images/icons/IconFacebook';
 import IconGoogle from 'images/icons/IconGoogle';
 import IconEmail from 'images/icons/IcomEmail';
 import { useTranslation } from 'react-i18next';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
 const ModalRegister = ({ handleCloseModal }) => {
   const [typeNavigation, setTypeNavigation] = useState('registration');
@@ -53,10 +54,11 @@ const ModalRegister = ({ handleCloseModal }) => {
     }));
   };
 
-  console.log(
-    'process.env.REACT_APP_BACKEND_BASE_URL',
-    process.env.REACT_APP_BACKEND_BASE_URL
-  );
+  const login = useGoogleLogin({
+    onSuccess: credentialResponse => {
+      console.log('credentialResponse', credentialResponse);
+    },
+  });
 
   return (
     <ModalWindow>
@@ -131,8 +133,18 @@ const ModalRegister = ({ handleCloseModal }) => {
             <IconFacebook />
             <DescriptionLink>{t('Facebook')}</DescriptionLink>
           </StyledNavLink>
+          <GoogleLogin
+            onSuccess={credentialResponse => {
+              console.log(credentialResponse);
+            }}
+            onError={() => {
+              console.log('Login Failed');
+            }}
+          />
+          ;
           <StyledNavLink
-            href={`${process.env.REACT_APP_BACKEND_BASE_URL}/api/users/google/`}
+            // href={`${process.env.REACT_APP_BACKEND_BASE_URL}/api/users/google/`}
+            onClick={() => login()}
           >
             <IconGoogle />
             <DescriptionLink>{t('Google')}</DescriptionLink>

@@ -18,6 +18,7 @@ import { detectLanguageFromStore } from 'helpers/detectLanguageFromStore';
 import { PagesTranslationsCs } from 'pages/translations/cs';
 import { PagesTranslationsEn } from 'pages/translations/en';
 import { PagesTranslationsUk } from 'pages/translations/uk';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const persistLanguage = JSON.parse(
   localStorage.getItem('persist:settings')
@@ -55,19 +56,21 @@ i18n.use(LanguageDetector).init({
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  // <React.StrictMode>
-  <I18nextProvider i18n={i18n}>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <BrowserRouter>
-          <React.Suspense fallback="loading...">
-            <App />
-          </React.Suspense>
-        </BrowserRouter>
-      </PersistGate>
-    </Provider>
-  </I18nextProvider>
-  // </React.StrictMode>
+  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_DI}>
+    {/* <React.StrictMode> */}
+    <I18nextProvider i18n={i18n}>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <BrowserRouter>
+            <React.Suspense fallback="loading...">
+              <App />
+            </React.Suspense>
+          </BrowserRouter>
+        </PersistGate>
+      </Provider>
+    </I18nextProvider>
+    {/* </React.StrictMode> */}
+  </GoogleOAuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
