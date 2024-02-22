@@ -154,7 +154,7 @@ export const WrapLinks = styled.div`
   gap: 24px;
 `;
 
-export const StyledNavLink = styled(NavLink)`
+export const StyledNavLink = styled.a`
   width: 70px;
   display: flex;
   flex-direction: column;

@@ -52,6 +52,7 @@ const ModalRegister = ({ handleCloseModal }) => {
       [button2]: !prevStates[button2],
     }));
   };
+
   return (
     <ModalWindow>
       <WrapForm>
@@ -125,7 +126,9 @@ const ModalRegister = ({ handleCloseModal }) => {
             <IconFacebook />
             <DescriptionLink>{t('Facebook')}</DescriptionLink>
           </StyledNavLink>
-          <StyledNavLink>
+          <StyledNavLink
+            href={`${process.env.REACT_APP_BACKEND_BASE_URL}/api/users/google/`}
+          >
             <IconGoogle />
             <DescriptionLink>{t('Google')}</DescriptionLink>
           </StyledNavLink>
