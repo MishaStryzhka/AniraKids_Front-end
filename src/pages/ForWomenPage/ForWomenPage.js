@@ -9,7 +9,6 @@ import FilterForPregnantWomen from 'components/Filters/FilterForPregnantWomen/Fi
 import FilterPrice from 'components/Filters/FilterPrice/FilterPrice';
 import FilterSizeAdult from 'components/Filters/FilterSizeAdult/FilterSizeAdult';
 import FilterColor from 'components/Filters/FilterColor/FilterColor';
-import ProductCard from 'components/ProductCard/ProductCard';
 import { useTranslation } from 'react-i18next';
 import FilterSort from 'components/Filters/FilterSort/FilterSort';
 import FilterType from 'components/Filters/FilterType/FilterType';
@@ -21,6 +20,7 @@ import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import NotFound from 'components/NotFound/NotFound';
+import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 
 const api = require('../../api/product');
 
@@ -95,7 +95,7 @@ const ForWomenPage = () => {
               <ProductList>
                 {products?.map(product => (
                   <li key={product._id}>
-                    <ProductCard product={product} />
+                    <UsersProductCard product={product} />
                   </li>
                 ))}
               </ProductList>

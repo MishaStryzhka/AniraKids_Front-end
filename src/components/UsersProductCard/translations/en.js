@@ -4,4 +4,5 @@ export const UsersProductCardTranslationsEn = {
   Size: 'Size',
   Sale: 'Sale',
   Rental: 'Rental',
+  ratings: 'ratings',
 };

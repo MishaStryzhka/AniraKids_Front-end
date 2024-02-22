@@ -13,6 +13,7 @@ export const TitleFilter = styled.h2`
 `;
 
 export const Wrap = styled.div`
+  width: inherit;
   display: flex;
   justify-content: space-between;
   @media screen and (min-width: 1280px) {

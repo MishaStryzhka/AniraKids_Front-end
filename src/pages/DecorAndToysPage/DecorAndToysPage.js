@@ -20,7 +20,7 @@ import { useTitle } from 'hooks';
 import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
-import ProductCard from 'components/ProductCard/ProductCard';
+import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 
 const api = require('../../api/product');
 
@@ -95,7 +95,7 @@ const DecorAndToysPage = () => {
               <ProductList>
                 {products?.map(product => (
                   <li key={product._id}>
-                    <ProductCard product={product} />
+                    <UsersProductCard product={product} />
                   </li>
                 ))}
               </ProductList>

@@ -22,6 +22,8 @@ import { useDispatch } from 'react-redux';
 
 const ProductCard = ({ product, onRemoveFavorite }) => {
   const { user, currentTheme, isLoading } = useAuth();
+  console.log(product);
+  console.log([product.brand]);
   const dispatch = useDispatch();
 
   const { t } = useTranslation('translation', {
@@ -60,10 +62,10 @@ const ProductCard = ({ product, onRemoveFavorite }) => {
       </ButtonAddToFavorites>
       <WrapText>
         <Wrap>
-          <TextName>HOUSE OF THE BREND</TextName>
+          <TextName>{product.brand}</TextName>
           <TextSize>
             <Span>{t('Size')}:</Span>
-            XXXL
+            {product.size}
           </TextSize>
         </Wrap>
         <Wrap>

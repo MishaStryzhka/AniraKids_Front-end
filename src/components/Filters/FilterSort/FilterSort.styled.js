@@ -1,11 +1,9 @@
 import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
-export const MainItem = styled.div`
-  max-width: 210px;
-  list-style: none;
+export const MainWrapFilter = styled.div`
+  min-width: 200px;
   display: flex;
-  flex-direction: column;
   position: relative;
   gap: 4px;
   margin-bottom: 24px;
@@ -38,7 +36,6 @@ export const FilterTitle = styled.h3`
   font-size: 20px;
   font-weight: 400;
   line-height: 1.4;
-  letter-spacing: 0.02px;
   text-transform: uppercase;
 
   color: ${({ theme }) => theme.color.mainColor5};

@@ -5,7 +5,7 @@ import {
   Button,
   FilterTitle,
   List,
-  MainItem,
+  MainWrapFilter,
   StyledIconArrowUp,
   Wrap,
 } from './FilterSort.styled';
@@ -45,7 +45,7 @@ const FilterSort = () => {
     });
   };
   return (
-    <MainItem>
+    <MainWrapFilter>
       <Wrap $openOutfitsList={isFilterSortList === true}>
         <div
           style={{
@@ -79,7 +79,7 @@ const FilterSort = () => {
           </List>
         )}
       </Wrap>
-    </MainItem>
+    </MainWrapFilter>
   );
 };
 export default FilterSort;
