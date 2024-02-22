@@ -1,11 +1,12 @@
 import * as React from 'react';
-const IconStar = props => (
+const IconStar = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={24}
-    height={24}
-    fill="#C6A58D"
-    {...props}
+    className={className}
+    // width={24}
+    // height={24}
+    // fill="#C6A58D"
+    viewBox="0 0 24 24"
   >
     <g clipPath="url(#a)">
       <path

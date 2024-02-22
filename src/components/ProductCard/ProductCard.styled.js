@@ -34,6 +34,9 @@ export const WrapText = styled.div`
   display: flex;
   gap: 8px;
   flex-direction: column;
+  @media screen and (min-width: 768px) {
+    gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
+  }
 `;
 
 export const Wrap = styled.div`

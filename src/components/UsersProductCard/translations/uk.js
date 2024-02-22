@@ -4,4 +4,5 @@ export const UsersProductCardTranslationsUk = {
   Size: 'Розмір',
   Sale: 'Продаж',
   Rental: 'Оренда',
+  ratings: 'оцінки',
 };
