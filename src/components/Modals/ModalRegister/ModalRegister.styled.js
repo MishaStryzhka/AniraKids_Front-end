@@ -2,7 +2,6 @@ import styled from 'styled-components';
 import PhotoBgClothes from 'images/clothes.jpg';
 import PhotoBgMobileClothers from 'images/bg-clothers-mobile.jpg';
 import PhotoBgTabletClothers from 'images/bg-clothers-tablet.jpg';
-import { NavLink } from 'react-router-dom';
 
 export const ModalWindow = styled.div`
   width: 428px;
