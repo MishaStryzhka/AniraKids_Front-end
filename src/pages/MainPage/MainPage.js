@@ -25,11 +25,8 @@ const MainPage = () => {
     code &&
       dispatch(
         authBySeznam({
-          grant_type: 'authorization_code',
           code: code,
           redirect_uri: origin,
-          client_secret: process.env.REACT_APP_SEZNAM_CLIENT_SECRET,
-          client_id: process.env.REACT_APP_SEZNAM_CLIENT_ID,
         })
       );
 
