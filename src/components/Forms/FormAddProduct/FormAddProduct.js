@@ -51,7 +51,6 @@ import {
   LabelStatusAgree,
   WrapTextAgree,
   WrapBtnAdd,
-  BoxLarge,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
@@ -62,7 +61,6 @@ import IconPlus from 'images/icons/IconPlus';
 import { useTranslation } from 'react-i18next';
 import { BeatLoader } from 'react-spinners';
 import { useNavigate } from 'react-router-dom';
-import IconBigCheck from 'images/icons/IconBigCheck';
 import {
   arrayAgeProduct,
   arrayColorsProduct,
@@ -187,6 +185,7 @@ const FormAddProduct = () => {
         priceRental: '',
         priceSale: '',
         isAddPhoto: '',
+        colorCode: '',
       }}
       validationSchema={validationProductSchema}
       onSubmit={handleFormSubmit}
@@ -723,8 +722,8 @@ const FormAddProduct = () => {
                       <LabelColor color={colorCode}>
                         <Input
                           type="radio"
-                          name="color"
-                          value={color}
+                          name={{ color, colorCode }}
+                          value={{ color, colorCode }}
                           onChange={handleChange}
                           onBlur={handleBlur}
                         />
@@ -887,6 +886,15 @@ const FormAddProduct = () => {
                           ) {
                             // Заборонити вибір більше ніж 10 файлів
                             alert(t('maxFiles'));
+                            return;
+                          }
+
+                          if (
+                            selectedFiles.length + selectedPhotos.length <
+                            3
+                          ) {
+                            // Не менше 3-х файлів
+                            alert(t('minFiles'));
                             return;
                           }
 
@@ -1444,8 +1452,8 @@ const FormAddProduct = () => {
                           <LabelColor color={colorCode}>
                             <Input
                               type="radio"
-                              name="color"
-                              value={color}
+                              name={{ color, colorCode }}
+                              value={{ color, colorCode }}
                               onChange={handleChange}
                               onBlur={handleBlur}
                             />
@@ -1489,9 +1497,7 @@ const FormAddProduct = () => {
                       <GeneralWrap>
                         <WrapCondition>
                           <LabelStatus>
-                            <BoxLarge>
-                              {values.rental && <IconBigCheck />}
-                            </BoxLarge>
+                            <Box>{values.rental && <IconCheck />}</Box>
                             {t('Rental')}
                             <Input
                               type="checkbox"
@@ -1520,9 +1526,7 @@ const FormAddProduct = () => {
                         </WrapCondition>
                         <WrapCondition>
                           <LabelStatus>
-                            <BoxLarge>
-                              {values.sale && <IconBigCheck />}
-                            </BoxLarge>
+                            <Box>{values.sale && <IconCheck />}</Box>
                             {t('Sale')}
                             <Input
                               type="checkbox"
@@ -1578,9 +1582,9 @@ const FormAddProduct = () => {
                     {/*  AGREE ADD PHOTO of Product */}
 
                     <LabelStatusAgree>
-                      <BoxLarge>
-                        {values.isAddPhoto && <IconBigCheck />}
-                      </BoxLarge>
+                      <Box style={{ minWidth: '24px' }}>
+                        {values.isAddPhoto && <IconCheck />}
+                      </Box>
                       <WrapTextAgree>
                         {t('yourAgree')}
                         <StyledNavLink>{t('linkAgree')}</StyledNavLink>

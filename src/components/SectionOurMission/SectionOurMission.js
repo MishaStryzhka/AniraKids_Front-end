@@ -11,9 +11,9 @@ import ClosetMobileWebp1x from 'images/photo-mission/closet-mobile-1x.webp';
 import ClosetMobileWebp2x from 'images/photo-mission/closet-mobile-2x.webp';
 import ClosetMobile1x from 'images/photo-mission/closet-mobile-1x.jpg';
 import ClosetMobile2x from 'images/photo-mission/closet-mobile-2x.jpg';
-import IconCheck from 'images/icons/IconCheck';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import IconCheck from 'images/icons/IconCheck';
 
 const {
   Section,

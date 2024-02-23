@@ -3,9 +3,9 @@ import {
   Border,
   Color,
   ImagesPerson,
-  ItemDescription,
+  // ItemDescription,
   ItemReview,
-  ListDescription,
+  // ListDescription,
   ListReviews,
   MainImage,
   PicturePerson,
@@ -45,9 +45,6 @@ import {
   GeneralWrap,
   List,
 } from './ProductPage.styled';
-import SecondaryImage1 from '../../images/product-card-1.jpg';
-import SecondaryImage2 from '../../images/product-card-2.jpg';
-import SecondaryImage3 from '../../images/product-card-3.jpg';
 import IconHeart from 'images/icons/IconHeart';
 import { useTranslation } from 'react-i18next';
 import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
@@ -61,19 +58,11 @@ import { Scrollbar, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/navigation';
-
-const secondaryImages = [
-  SecondaryImage1,
-  SecondaryImage2,
-  SecondaryImage3,
-  SecondaryImage1,
-  SecondaryImage2,
-  SecondaryImage3,
-];
+import IconChat from 'images/icons/IconChat';
 
 const api = require('../../api/product');
 
-const ProductPage = () => {
+const ProductPage = index => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
@@ -90,8 +79,6 @@ const ProductPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
-
-  console.log('product', product);
 
   useEffect(() => {
     setIsLoading(true);
@@ -116,24 +103,23 @@ const ProductPage = () => {
       <WrapProductCard>
         <WrapAllImages>
           <MainImage
-            srcSet={secondaryImages[currentImageIndex] || secondaryImages[0]}
+            srcSet={product?.photos[currentImageIndex].path}
             alt="Main photo"
           />
 
           <WrapSecondaryImages>
             <List>
               <Swiper
-                // ref={swiperRef}
                 modules={[Scrollbar, Navigation]}
                 spaceBetween={8}
                 slidesPerView={3}
                 scrollbar={{ draggable: true }}
                 direction={width ? 'horizontal' : 'vertical'}
               >
-                {secondaryImages.map((image, index) => (
+                {product?.photos.map(({ path }, index) => (
                   <SwiperSlide key={index}>
                     <SecondaryImages
-                      srcSet={image}
+                      srcSet={`${path}`}
                       alt="All photos"
                       onClick={() => {
                         handleSecondaryImageClick(index);
@@ -149,37 +135,54 @@ const ProductPage = () => {
         <TextWrap>
           <WrapInformation>
             <Wrap>
-              <Title>{product.name}</Title>
+              <Title>{product?.name}</Title>
               <WrapInside>
-                <TextSale>{t('sale')}</TextSale>
+                {product?.rental ? (
+                  <TextSale>{t('rental')}</TextSale>
+                ) : (
+                  product?.sale && <TextSale>{t('sale')}</TextSale>
+                )}
+
                 <TextSeller>
-                  {t('seller')}: <span>ann_25</span>
+                  {t('seller')}: <span>{product?.owner?.nickname}</span>
                 </TextSeller>
               </WrapInside>
             </Wrap>
             <TextSize>
-              {t('size')}:<TextValueSize>XXXL</TextValueSize>
+              {t('size')}: <TextValueSize>{product?.size}</TextValueSize>
             </TextSize>
-            <TextPrice>
-              100 <span>CZK</span>
-            </TextPrice>
-            <WrapCalendar>
-              <ButtonCalendarTime>
-                <IconCalendarTime />
-              </ButtonCalendarTime>
-              <TextCalendar>{t('Rental calendar')}</TextCalendar>
-            </WrapCalendar>
+            {product?.rentalPrice && (
+              <TextPrice>
+                {product?.rentalPrice}
+                <span>CZK</span>
+              </TextPrice>
+            )}
+            {product?.salePrice && (
+              <TextPrice>
+                {product?.salePrice}
+                <span>CZK</span>
+              </TextPrice>
+            )}
+            {product?.rental && (
+              <WrapCalendar>
+                <ButtonCalendarTime>
+                  <IconCalendarTime />
+                </ButtonCalendarTime>
+                <TextCalendar>{t('Rental calendar')}</TextCalendar>
+              </WrapCalendar>
+            )}
             <WrapBtn>
               <Button>{t('addToCart')}</Button>
               <IconHeart />
+              <IconChat />
             </WrapBtn>
           </WrapInformation>
 
           <WrapDescription>
             <Border />
             <TitleDescription>{t('Product Description')}</TitleDescription>
-
-            <ListDescription>
+            <TextDescription>{product.description}</TextDescription>
+            {/* <ListDescription>
               <ItemDescription>
                 <TextDescription>Сукня Довга</TextDescription>
               </ItemDescription>
@@ -218,11 +221,21 @@ const ProductPage = () => {
                   66-70- на ОГ 132-142, ОБ до 170
                 </TextDescription>
               </ItemDescription>
-            </ListDescription>
-            <TitleDescription>{t('color')}</TitleDescription>
+            </ListDescription> */}
+            <TitleDescription
+              style={{
+                marginTop: '24px',
+              }}
+            >
+              {t('color')}
+            </TitleDescription>
             <WrapColor>
-              <Color />
-              <TextDescription>{t('black')}</TextDescription>
+              <Color
+                style={{
+                  backgroundColor: product?.colorCode,
+                }}
+              />
+              <TextDescription>{t(product.color)}</TextDescription>
             </WrapColor>
           </WrapDescription>
         </TextWrap>

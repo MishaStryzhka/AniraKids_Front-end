@@ -22,8 +22,6 @@ import { useDispatch } from 'react-redux';
 
 const ProductCard = ({ product, onRemoveFavorite }) => {
   const { user, currentTheme, isLoading } = useAuth();
-  console.log(product);
-  console.log([product.brand]);
   const dispatch = useDispatch();
 
   const { t } = useTranslation('translation', {

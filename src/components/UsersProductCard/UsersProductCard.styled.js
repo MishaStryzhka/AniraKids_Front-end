@@ -2,14 +2,16 @@ import Button from 'components/Button/Button';
 import IconBasket from 'images/icons/IconBasket';
 import IconPencil from 'images/icons/IconPencil';
 import IconStar from 'images/icons/IconStart';
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const Card = styled.div`
+export const Card = styled(NavLink)`
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
   display: flex;
   flex-direction: column;
+  text-decoration: none;
   gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '8px')};
-  /* gap: 16px; */
+  cursor: pointer;
   @media screen and (min-width: 768px) {
     gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '12px')};
   }
@@ -168,6 +170,7 @@ export const ButtonUpdate = styled(Button)`
 
   &:hover {
     color: ${({ theme }) => theme.color.btnColorBG};
+    background-color: ${({ theme }) => theme.color.mainColor1};
   }
 
   &:active {
@@ -191,20 +194,20 @@ export const ButtonRemove = styled(Button)`
   justify-content: center;
   align-items: self-end;
 
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background-color: ${({ theme }) => theme.color.mainColor3};
-  }
+  } */
 
   &:active > ${IconBasketStyled} {
     stroke: ${({ theme }) => theme.color.mainColor5};
   }
 
-  &:active {
+  /* &:active {
     background-color: ${({ theme }) => theme.color.mainColor3};
     color: ${({ theme }) => theme.color.mainColor5};
-  }
+  } */
 `;
 
 export const WrapPartSeller = styled.div`

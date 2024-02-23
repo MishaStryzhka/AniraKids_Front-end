@@ -22,7 +22,6 @@ import {
   WrapIconsStars,
   StyledIconStar,
   TextRating,
-  // StyledIconStarOutline,
   SecondWrap,
   FirstWrap,
 } from './UsersProductCard.styled';
@@ -80,7 +79,11 @@ const UsersProductCard = ({
     // });
   };
   return (
-    <Card $pageRentOut={pathname === '/my-account/rent-out'}>
+    <Card
+      to={pathname !== '/my-account/rent-out' && `./${product?._id}`}
+      $pageRentOut={pathname === '/my-account/rent-out'}
+      // {pathname !== '/my-account/rent-out' && ()}
+    >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
         {pathname !== '/my-account/rent-out' && (
           <ButtonAddToFavorites
