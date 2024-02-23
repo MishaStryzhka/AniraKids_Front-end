@@ -37,13 +37,15 @@ export const register = createAsyncThunk(
 
 /*
  * POST @ /users/authByGoogle
- * body: { name, email, password }
+ * body: { credential }
  */
 export const authByGoogle = createAsyncThunk(
   'auth/authByGoogle',
-  async (credentials, thunkAPI) => {
+  async ({ credential }, thunkAPI) => {
     try {
-      const res = await axios.post('api/users/authByGoogle', credentials);
+      const res = await axios.post('api/users/authByGoogle', {
+        credential,
+      });
       // After successful registration, add the token to the HTTP header
       setAuthHeader(res.data.token);
       return res.data;
@@ -58,27 +60,16 @@ export const authByGoogle = createAsyncThunk(
 
 /*
  * POST https://login.szn.cz/api/v1/oauth/token
- * body: {
-	"grant_type": "authorization_code",
-	"code": "..."
-	"redirect_uri": "...",
-	"client_secret": "...",
-	"client_id": "..."
-}
+ * body: { code, redirect_uri }
  */
 export const authBySeznam = createAsyncThunk(
   'auth/authBySeznam',
   async (credentials, thunkAPI) => {
     try {
-      const resSeznam = await axios.post(
-        'https://login.szn.cz/api/v1/oauth/token',
-        credentials
-      );
+      const res = await axios.post('api/users/authBySeznam', credentials);
 
       // After successful registration, add the token to the HTTP header
-      setAuthHeader(resSeznam.data.access_token);
-
-      const res = await axios.post('api/users/authBySeznam', resSeznam.data);
+      setAuthHeader(res.data.token);
 
       return res.data;
     } catch (error) {
@@ -155,6 +146,23 @@ export const refreshUser = createAsyncThunk(
     }
   }
 );
+
+/*
+ * PATCH @ /api/users/current/update
+ * headers: { 'content-type': 'multipart/form-data' }
+ * body: {
+      avatarUrl,
+      firstName,
+      lastName,
+      companyName,
+      nickname,
+      primaryPhoneNumber,
+      email,
+      newPassword,
+      confirmNewPassword,
+      ico,
+    }
+ */
 export const updateUserInfo = createAsyncThunk(
   'auth/update',
   async (
@@ -206,6 +214,11 @@ export const updateUserInfo = createAsyncThunk(
   }
 );
 
+/*
+ * PATCH @ /api/users/current/update-billing-details
+ * headers: { 'content-type': 'multipart/form-data' }
+ * body: { VATID, city, companyID, name, street, vatMode, zip, сountry }
+ */
 export const updateUserBillingDetails = createAsyncThunk(
   'auth/update-billing-details',
   async (credentials, thunkAPI) => {
@@ -227,6 +240,7 @@ export const updateUserBillingDetails = createAsyncThunk(
     }
   }
 );
+
 export const updateUserBankAccount = createAsyncThunk(
   'auth/update-bank-account',
   async (credentials, thunkAPI) => {
