@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-// axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
-axios.defaults.baseURL = 'http://Localhost:4000';
+axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
+// axios.defaults.baseURL = 'http://Localhost:4000';
 
 // Utility to add JWT
 const setAuthHeader = token => {
@@ -70,25 +70,15 @@ export const authBySeznam = createAsyncThunk(
   'auth/authBySeznam',
   async (credentials, thunkAPI) => {
     try {
-      const res = await axios.post(
+      const resSeznam = await axios.post(
         'https://login.szn.cz/api/v1/oauth/token',
         credentials
       );
-      console.log('res', res);
 
       // After successful registration, add the token to the HTTP header
-      setAuthHeader(res.data.access_token);
+      setAuthHeader(resSeznam.data.access_token);
 
-      axios
-        .get('https://login.szn.cz/api/v1/user')
-        .then(response => {
-          // Обработка ответа от API
-          console.log('Ответ от API:', response.data);
-        })
-        .catch(error => {
-          // Обработка ошибки при запросе
-          console.error('Ошибка при выполнении запроса:', error);
-        });
+      const res = await axios.post('api/users/authBySeznam', resSeznam.data);
 
       return res.data;
     } catch (error) {

@@ -12,6 +12,7 @@ import {
   addToFavorites,
   removeFromFavorites,
   authByGoogle,
+  authBySeznam,
 } from './operations';
 
 const initialState = {
@@ -55,7 +56,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // register
+      // authByGoogle
       .addCase(authByGoogle.pending, state => {
         state.isLoading = true;
         state.error = null;
@@ -71,6 +72,24 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+
+      // authBySeznam
+      .addCase(authBySeznam.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(authBySeznam.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isLoggedIn = true;
+        state.isFirstLogin = true;
+      })
+      .addCase(authBySeznam.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
       // logIn
       .addCase(logIn.pending, state => {
         state.isLoading = true;
