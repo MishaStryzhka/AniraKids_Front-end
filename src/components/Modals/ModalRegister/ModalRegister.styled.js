@@ -155,13 +155,25 @@ export const WrapLinks = styled.div`
 `;
 
 export const StyledNavLink = styled.a`
-  width: 70px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   text-decoration: none;
   align-items: center;
   cursor: pointer;
+`;
+
+export const StyledSeznamWrap = styled.div`
+  display: flex;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #cc0000;
+  border-radius: 4px;
+  &:hover {
+    box-shadow: ${({ theme }) => theme.color.boxShadow};
+  }
 `;
 
 export const DescriptionLink = styled.p`
