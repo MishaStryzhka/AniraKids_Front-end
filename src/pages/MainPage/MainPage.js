@@ -1,7 +1,7 @@
 import SectionAboutAniraK from 'components/SectionAboutAniraK/SectionAboutAniraK';
 import SectionHero from 'components/SectionHero/SectionHero';
 import SectionAboutUs from 'components/SectionAboutUs/SectionAboutUs';
-import { useAuth, useTitle } from 'hooks';
+import { useAuth, useStorage, useTitle } from 'hooks';
 import SectionOurMission from 'components/SectionOurMission/SectionOurMission';
 import SectionSimpleSteps from 'components/SectionSimpleSteps/SectionSimpleSteps';
 import SectionAreYouReady from 'components/SectionAreYouReady/SectionAreYouReady';
@@ -17,12 +17,15 @@ const MainPage = () => {
   const { isLoading, user } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const storage = useStorage();
   const code = searchParams.get('code');
 
   useEffect(() => {
     const { origin } = new URL(window.location.href);
+    const state = searchParams.get('state');
 
     code &&
+      state === storage.get('requestSecretSeznam') &&
       dispatch(
         authBySeznam({
           code: code,
@@ -31,7 +34,7 @@ const MainPage = () => {
       );
 
     code && user && navigate('/my-account/profile', { replace: true });
-  }, [code, dispatch, navigate, setSearchParams, user]);
+  }, [code, dispatch, navigate, searchParams, setSearchParams, storage, user]);
 
   return isLoading ? (
     <p>loading</p>

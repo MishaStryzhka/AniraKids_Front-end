@@ -7,6 +7,7 @@ import {
   ModalWindow,
   Separation,
   StyledNavLink,
+  StyledSeznamWrap,
   Wrap,
   WrapButton,
   WrapForm,
@@ -15,21 +16,21 @@ import {
 import FormRegistrationPhoneNumber from 'components/Forms/FormRegistrationPhoneNumber/FormRegistrationPhoneNumber';
 import FormRegistrationEmail from '../../Forms/FormRegistrationEmail/FormRegistrationEmail';
 import AuthForm from 'components/Forms/AuthForm/AuthForm';
-import IconFacebook from 'images/icons/IconFacebook';
-import IconEmail from 'images/icons/IcomEmail';
 import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
 import { authByGoogle } from '../../../redux/auth/operations';
 import { useDispatch } from 'react-redux';
 import IconSeznamLogoEskoCervena from 'images/icons/IconSeznamLogoEskoCervena';
 import { nanoid } from '@reduxjs/toolkit';
+import { useStorage } from 'hooks';
 
 const ModalRegister = ({ handleCloseModal }) => {
-  const [typeNavigation, setTypeNavigation] = useState('registration');
-  const [typeRegistration, setTypeRegistration] = useState('email');
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalRegister',
   });
+  const [typeRegistration, setTypeRegistration] = useState('email');
+  const [typeNavigation, setTypeNavigation] = useState('registration');
+  const storage = useStorage();
   const dispatch = useDispatch();
 
   const [isActiveBtn, setIsActiveBtn] = useState({
@@ -57,10 +58,8 @@ const ModalRegister = ({ handleCloseModal }) => {
     }));
   };
 
-  const qwe = nanoid();
-
-  console.log('qwe', qwe);
-
+  const requestSecretSeznam = nanoid();
+  storage.set('requestSecretSeznam', requestSecretSeznam);
   const { origin } = new URL(window.location.href);
 
   return (
@@ -132,20 +131,21 @@ const ModalRegister = ({ handleCloseModal }) => {
         )}
         <Separation>{t('Or')}</Separation>
         <WrapLinks>
-          <StyledNavLink>
+          {/* <StyledNavLink>
             <IconFacebook />
-            {/* <DescriptionLink>{t('Facebook')}</DescriptionLink> */}
-          </StyledNavLink>
+            <DescriptionLink>{t('Facebook')}</DescriptionLink>
+          </StyledNavLink> */}
           <StyledNavLink
             href={`https://login.szn.cz/api/v1/oauth/auth
-	?client_id=f392b5e098cac39ddb00620731b57d1caf7b99b531542a4d
+	?client_id=${process.env.REACT_APP_SEZNAM_CLIENT_ID}
 	&scope=identity
 	&response_type=code
 	&redirect_uri=${origin}
-	&state=${qwe}`}
+	&state=${requestSecretSeznam}`}
           >
-            <IconSeznamLogoEskoCervena />
-            {/* <DescriptionLink>{t('Facebook')}</DescriptionLink> */}
+            <StyledSeznamWrap>
+              <IconSeznamLogoEskoCervena />
+            </StyledSeznamWrap>
           </StyledNavLink>
           <GoogleLogin
             type="icon"
@@ -158,10 +158,10 @@ const ModalRegister = ({ handleCloseModal }) => {
               console.log('Login Failed');
             }}
           />
-          <StyledNavLink>
+          {/* <StyledNavLink>
             <IconEmail />
-            {/* <DescriptionLink>{t('Other')}</DescriptionLink> */}
-          </StyledNavLink>
+            <DescriptionLink>{t('Other')}</DescriptionLink>
+          </StyledNavLink> */}
         </WrapLinks>
       </WrapForm>
     </ModalWindow>
