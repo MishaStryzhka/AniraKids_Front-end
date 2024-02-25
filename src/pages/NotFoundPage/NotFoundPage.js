@@ -11,6 +11,7 @@ import {
   WrapText,
 } from './NotFoundPage.styled';
 import Button from 'components/Button/Button';
+import { NavLink } from 'react-router-dom';
 
 const NotFoundPage = () => {
   const { t } = useTranslation('translation', {
@@ -29,7 +30,9 @@ const NotFoundPage = () => {
           </Title>
           <TitleDescription>{t('Page not found')}</TitleDescription>
           <Description>{t('Problem explanation')}</Description>
-          <Button>{t('Homepage')}</Button>
+          <NavLink to={`./`}>
+            <Button>{t('Homepage')}</Button>
+          </NavLink>
         </WrapText>
       </WrapPage>
     </Container>

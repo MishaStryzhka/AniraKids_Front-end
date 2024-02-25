@@ -35,6 +35,7 @@ export const MainImage = styled.img`
   display: block;
   width: 388px;
   height: 388px;
+  object-fit: cover;
   border-radius: 2px;
   @media screen and (min-width: 768px) {
     width: 482px;
@@ -52,6 +53,7 @@ export const SecondaryImages = styled.img`
   height: 113px;
   border-radius: 2px;
   cursor: pointer;
+  object-fit: cover;
   /* &:hover,
   &:active {
     border: 2px solid;
@@ -82,7 +84,7 @@ export const TextWrap = styled.div`
   flex-direction: column;
   gap: 40px;
   @media screen and (min-width: 1280px) {
-    max-width: 522px;
+    width: 522px;
   }
 `;
 
@@ -97,7 +99,7 @@ export const WrapDescription = styled.div``;
 export const Wrap = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  /* align-items: center; */
 `;
 
 export const WrapInside = styled.div`
@@ -119,14 +121,16 @@ export const Title = styled.h2`
 
 export const TextSale = styled.p`
   font-family: 'Open Sans Hebrew', sans-serif;
-  color: #00542c;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.43;
   margin-right: 0;
   text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 50px;
 
-  color: ${({ theme }) => theme.color.additionalColorGreen};
+  color: ${({ theme }) => theme.color.mainColor4};
+  background-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 export const TextSeller = styled.p`
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -160,6 +164,8 @@ export const TextPrice = styled.p`
   font-size: 32px;
   font-weight: 700;
   line-height: 1.25;
+  display: flex;
+  gap: 8px;
 
   color: ${({ theme }) => theme.color.btnColorBG};
 `;
@@ -202,8 +208,9 @@ export const Color = styled.div`
   height: 18px;
   padding: 3px;
   border-radius: 2px;
+  border: 1px solid #00000030;
 
-  background-color: ${({ theme }) => theme.color.mainColor5};
+  /* background-color: ; */
 `;
 
 export const WrapReviews = styled.div`

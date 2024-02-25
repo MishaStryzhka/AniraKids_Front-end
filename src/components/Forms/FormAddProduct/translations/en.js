@@ -4,6 +4,7 @@ export const FormAddProductTranslationsEn = {
   'instruction upload photo':
     'You can change the order of photos by rearranging them.',
   maxFiles: 'Maximum 10 files can be selected.',
+  minFiles: 'You need to add at least 3 files.',
   maxSize:
     'The maximum file size is 10485760, elements exceeding this size were not added.',
 

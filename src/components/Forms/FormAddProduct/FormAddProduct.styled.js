@@ -423,9 +423,12 @@ export const InputPrice = styled.input`
 `;
 
 export const Box = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: 1px solid;
-  display: inline-block;
   border-radius: 2px;
+  display: inline-block;
   width: 24px;
   height: 24px;
   background-color: transparent;
