@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
@@ -69,8 +69,9 @@ const ProductPage = index => {
     keyPrefix: 'pages.productPage',
   });
   const { user } = useAuth();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,11 +98,44 @@ const ProductPage = index => {
     // swiperRef.current.slideTo(index);
   };
 
-  const width = window.innerWidth < 767;
-
   console.log('product', product);
-  console.log('product.owner._id', product?.owner?._id);
-  console.log('user._id', user?.userID);
+
+  const handleClickRent = e => {
+    setIsLoading(true);
+    api
+      .addToOrder({
+        productId: product._id,
+        serviceType: 'rent',
+        price:
+          product?.dailyRentalPrice ||
+          product?.hourlyRentalPrice ||
+          product?.rentalPrice,
+        owner: product?.owner?._id,
+      })
+      .then(data => {
+        console.log('data', data);
+        setIsLoading(false);
+        navigate('/my-account/cart');
+      });
+  };
+
+  const handleClickBuy = e => {
+    setIsLoading(true);
+    api
+      .addToOrder({
+        productId: product?._id,
+        serviceType: 'buy',
+        price: product?.salePrice,
+        owner: product?.owner?._id,
+      })
+      .then(data => {
+        console.log('data', data);
+        setIsLoading(false);
+        navigate('/my-account/cart');
+      });
+  };
+
+  const width = window.innerWidth < 767;
 
   return isLoading ? (
     <p>Loading...</p>
@@ -192,34 +226,28 @@ const ProductPage = index => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product._id,
-                    serviceType: 'rent',
-                    price: product?.dailyRentalPrice || product?.rentalPrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Орендувати
-              </Button>
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product?._id,
-                    serviceType: 'buy',
-                    price: product?.salePrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Купити
-              </Button>
+              {(product?.dailyRentalPrice ||
+                product?.hourlyRentalPrice ||
+                product?.rentalPrice) && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickRent}
+                  ariaLabel="rent"
+                >
+                  Орендувати
+                </Button>
+              )}
+              {product?.salePrice && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickBuy}
+                  ariaLabel="buy"
+                >
+                  Купити
+                </Button>
+              )}
               <IconHeart />
               <IconChat />
             </WrapBtn>
