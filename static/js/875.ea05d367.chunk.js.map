@@ -1,1 +1,0 @@
-{"version":3,"file":"static/js/875.ea05d367.chunk.js","mappings":"kJAAA,MAIA,EAJeA,KACNC,EAAAA,EAAAA,KAAA,KAAAC,SAAG,U","sources":["pages/UserPage/Pages/Order1/Order1.js"],"sourcesContent":["const Order1 = () => {\n  return <p>Order1</p>;\n};\n\nexport default Order1;\n"],"names":["Order1","_jsx","children"],"sourceRoot":""}
