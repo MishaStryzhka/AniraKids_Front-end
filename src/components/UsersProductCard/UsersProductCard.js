@@ -24,6 +24,8 @@ import {
   TextRating,
   SecondWrap,
   FirstWrap,
+  ButtonRemoveFromFevorites,
+  StyledIconCross,
 } from './UsersProductCard.styled';
 import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
@@ -82,31 +84,46 @@ const UsersProductCard = ({
     <Card
       to={pathname !== '/my-account/rent-out' && `./${product?._id}`}
       $pageRentOut={pathname === '/my-account/rent-out'}
-      // {pathname !== '/my-account/rent-out' && ()}
+      handleRemove={handleRemove}
+      onRemoveFavorite={() => onRemoveFavorite()}
     >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-        {pathname !== '/my-account/rent-out' && (
-          <ButtonAddToFavorites
+        {pathname !== '/my-account/rent-out' &&
+          pathname !== '/my-account/favorite' && (
+            <ButtonAddToFavorites
+              disabled={isLoading}
+              onClick={e => {
+                e.preventDefault();
+                handleAddToFavorites(product?._id);
+              }}
+            >
+              <IconLittleHeart
+                fill={
+                  user?.favorites.includes(product?._id)
+                    ? '#fff'
+                    : 'transparent'
+                }
+                stroke={theme[currentTheme].color.mainColor1}
+              />
+            </ButtonAddToFavorites>
+          )}
+        {pathname === '/my-account/favorite' && (
+          <ButtonRemoveFromFevorites
             disabled={isLoading}
             onClick={e => {
               e.preventDefault();
-              handleAddToFavorites(product?._id);
+              dispatch(removeFromFavorites(product?._id));
             }}
           >
-            <IconLittleHeart
-              fill={
-                user?.favorites.includes(product?._id) ? '#fff' : 'transparent'
-              }
-              stroke={theme[currentTheme].color.mainColor1}
-            />
-          </ButtonAddToFavorites>
+            <StyledIconCross />
+          </ButtonRemoveFromFevorites>
         )}
         <PictureCard $pageRentOut={pathname === '/my-account/rent-out'}>
           <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
         </PictureCard>
         <WrapText $pageRentOut={pathname === '/my-account/rent-out'}>
           <FirstWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-            <TextName>{product?.brand || 'brand'}</TextName>
+            <TextName>{product?.name || 'brand'}</TextName>
             <TextSize>
               <Span>{t('Size')}:</Span>
               {product?.size}

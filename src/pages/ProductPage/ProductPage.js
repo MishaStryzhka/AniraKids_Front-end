@@ -1,11 +1,9 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
   ImagesPerson,
-  // ItemDescription,
   ItemReview,
-  // ListDescription,
   ListReviews,
   MainImage,
   PicturePerson,
@@ -43,7 +41,9 @@ import {
   TextCalendar,
   ButtonCalendarTime,
   GeneralWrap,
-  List,
+  ButtonAddToFavorite,
+  // List,
+  // WrapList,
 } from './ProductPage.styled';
 import IconHeart from 'images/icons/IconHeart';
 import { useTranslation } from 'react-i18next';
@@ -59,20 +59,26 @@ import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/navigation';
 import IconChat from 'images/icons/IconChat';
+import { useDispatch } from 'react-redux';
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from '../../redux/auth/operations';
+import { useAuth } from 'hooks';
 
 const api = require('../../api/product');
 
-const ProductPage = index => {
+const ProductPage = onRemoveFavorite => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
+  const { pathname } = useLocation();
   // const swiperRef = useRef(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { id } = useParams();
 
   const handleSecondaryImageClick = index => {
     setCurrentImageIndex(index);
-    // swiperRef.current.slideTo(index);
   };
 
   const [product, setProduct] = useState([]);
@@ -94,13 +100,27 @@ const ProductPage = index => {
         setIsLoading(false);
       });
   }, [id]);
+  console.log(product);
 
+  const dispatch = useDispatch();
+  const { user } = useAuth();
+
+  console.log(user);
+
+  const handleAddToFavorites = id => {
+    // onRemoveFavorite && onRemoveFavorite();
+    user?.favorites.includes(id)
+      ? dispatch(removeFromFavorites(id))
+      : dispatch(addToFavorites(id));
+  };
   const width = window.innerWidth < 767;
   return isLoading ? (
     <p>Loading...</p>
   ) : (
     <GeneralWrap>
-      <WrapProductCard>
+      <WrapProductCard
+        $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+      >
         <WrapAllImages>
           <MainImage
             srcSet={product?.photos[currentImageIndex].path}
@@ -108,33 +128,40 @@ const ProductPage = index => {
           />
 
           <WrapSecondaryImages>
-            <List>
-              <Swiper
-                modules={[Scrollbar, Navigation]}
-                spaceBetween={8}
-                slidesPerView={3}
-                scrollbar={{ draggable: true }}
-                direction={width ? 'horizontal' : 'vertical'}
-              >
-                {product?.photos.map(({ path }, index) => (
-                  <SwiperSlide key={index}>
-                    <SecondaryImages
-                      srcSet={`${path}`}
-                      alt="All photos"
-                      onClick={() => {
-                        handleSecondaryImageClick(index);
-                      }}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </List>
+            <Swiper
+              modules={[Scrollbar, Navigation]}
+              spaceBetween={8}
+              slidesPerView={3}
+              scrollbar={{ draggable: product?.photos.length > 3 && true }}
+              direction={width ? 'horizontal' : 'vertical'}
+              height={'auto'}
+            >
+              {product?.photos.map(({ path }, index) => (
+                <SwiperSlide key={index}>
+                  <SecondaryImages
+                    srcSet={`${path}`}
+                    alt="All photos"
+                    onClick={() => {
+                      handleSecondaryImageClick(index);
+                    }}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </WrapSecondaryImages>
         </WrapAllImages>
 
-        <TextWrap>
-          <WrapInformation>
-            <Wrap>
+        <TextWrap
+          $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+        >
+          <WrapInformation
+            $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+          >
+            <Wrap
+              $pageFavorites={
+                pathname === `/my-account/favorite/${product?._id}`
+              }
+            >
               <Title>{product?.name}</Title>
               <WrapInside>
                 {product?.rental ? (
@@ -173,55 +200,32 @@ const ProductPage = index => {
             )}
             <WrapBtn>
               <Button>{t('addToCart')}</Button>
-              <IconHeart />
-              <IconChat />
+              {pathname !== `/my-account/favorite/${product?._id}` && (
+                <ButtonAddToFavorite
+                  onClick={e => {
+                    e.preventDefault();
+                    handleAddToFavorites(product?._id);
+                  }}
+                >
+                  <IconHeart
+                    fill={
+                      user?.favorites.includes(product?._id)
+                        ? '#000'
+                        : 'transparent'
+                    }
+                  />
+                </ButtonAddToFavorite>
+              )}
+              {pathname !== `/my-account/favorite/${product?._id}` && (
+                <IconChat />
+              )}
             </WrapBtn>
           </WrapInformation>
 
           <WrapDescription>
             <Border />
             <TitleDescription>{t('Product Description')}</TitleDescription>
-            <TextDescription>{product.description}</TextDescription>
-            {/* <ListDescription>
-              <ItemDescription>
-                <TextDescription>Сукня Довга</TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>Арт 05706.4*15</TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  Матеріал - щильний шовк, перед і рукава - дороге італійське
-                  мереживо: вишивка на сітки з легким блиском.
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  Довжина 145 см, одягається на запах, перетинками по ліфу можна
-                  регулювати декольте.
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  48-52 - на ОГ 96-105, ОБ до 125
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  54-58- на ОГ 107-118, ОБ до 135
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  60-64 - на ОГ 120- 130, ОБ до 150
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  66-70- на ОГ 132-142, ОБ до 170
-                </TextDescription>
-              </ItemDescription>
-            </ListDescription> */}
+            <TextDescription>{product?.description}</TextDescription>
             <TitleDescription
               style={{
                 marginTop: '24px',
@@ -235,12 +239,14 @@ const ProductPage = index => {
                   backgroundColor: product?.colorCode,
                 }}
               />
-              <TextDescription>{t(product.color)}</TextDescription>
+              <TextDescription>{t(product?.color)}</TextDescription>
             </WrapColor>
           </WrapDescription>
         </TextWrap>
       </WrapProductCard>
-      <WrapReviews>
+      <WrapReviews
+        $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+      >
         <Title>{t('reviews')}</Title>
         <ListReviews>
           <ItemReview>

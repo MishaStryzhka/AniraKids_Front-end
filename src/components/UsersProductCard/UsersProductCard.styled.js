@@ -1,5 +1,6 @@
 import Button from 'components/Button/Button';
 import IconBasket from 'images/icons/IconBasket';
+import IconCross from 'images/icons/IconCross';
 import IconPencil from 'images/icons/IconPencil';
 import IconStar from 'images/icons/IconStart';
 import { NavLink } from 'react-router-dom';
@@ -62,9 +63,11 @@ export const ButtonAddToFavorites = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-
+  box-shadow: 0 4px 6px 0 rgba(17, 17, 17, 0.1);
   background-color: ${({ theme }) => theme.color.lightBGColor};
 `;
+
+export const ButtonRemoveFromFevorites = styled(ButtonAddToFavorites)``;
 
 export const WrapText = styled.div`
   display: flex;
@@ -277,4 +280,12 @@ export const TextRating = styled.p`
   }
 
   color: ${({ theme }) => theme.color.mainColor4};
+`;
+
+export const StyledIconCross = styled(IconCross)`
+  stroke: ${({ theme }) => theme.color.mainColor1};
+  transition: stroke 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    stroke: ${({ theme }) => theme.color.mainColor3};
+  }
 `;
