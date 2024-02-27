@@ -6,6 +6,7 @@ const IconCross = props => (
     height={24}
     fill="none"
     stroke="#000"
+    viewBox="0 0 24 24"
     {...props}
   >
     <g

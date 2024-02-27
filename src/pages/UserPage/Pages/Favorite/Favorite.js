@@ -2,6 +2,7 @@ import NotFound from 'components/NotFound/NotFound';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import { useEffect, useState } from 'react';
 import { Outlet, useParams, useSearchParams } from 'react-router-dom';
+import { ListCards } from './Favorite.styled';
 
 const api = require('../../../../api');
 
@@ -52,14 +53,7 @@ const Favorite = () => {
         <p>loading...</p>
       ) : products.length ? (
         <>
-          <ul
-            style={{
-              display: 'flex',
-              rowGap: 64,
-              columnGap: 20,
-              flexWrap: 'wrap',
-            }}
-          >
+          <ListCards>
             {products.map(product => (
               <li key={product._id}>
                 <UsersProductCard
@@ -70,7 +64,7 @@ const Favorite = () => {
                 />
               </li>
             ))}
-          </ul>
+          </ListCards>
 
           {/* <p>page {page}</p> */}
           {pageSize * page < totalProducts && (

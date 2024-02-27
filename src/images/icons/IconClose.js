@@ -1,11 +1,10 @@
 import * as React from 'react';
-const IconClose = props => (
+const IconClose = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    width="24px"
-    height="24px"
-    {...props}
+    className={className}
+    viewBox="0 0 24 24"
   >
     <g
       stroke="#000"

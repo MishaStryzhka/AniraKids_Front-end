@@ -4,11 +4,11 @@ import {
   FooterNavigate,
   FooterWrap,
   StyledFooter,
+  StyledIconLogo,
   Wrap,
 } from './Footer.styled';
-import Logo from 'components/Logo/Logo';
 import SectionNavLinks from 'components/BoxNavLinks/BoxNavLinks';
-import { useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import FooterSelectLanguage from 'components/FooterSelectLanguage/FooterSelectLanguage';
 
 const Footer = () => {
@@ -17,7 +17,9 @@ const Footer = () => {
     <StyledFooter $mainPage={pathname === `/`}>
       <FooterContainer>
         <FooterNavigate>
-          <Logo />
+          <NavLink to="./" style={{ display: 'flex' }}>
+            <StyledIconLogo />
+          </NavLink>
           <Wrap>
             <SectionNavLinks />
             <FooterSelectLanguage />
@@ -25,7 +27,7 @@ const Footer = () => {
         </FooterNavigate>
         <FooterWrap>
           <FooterCopyright>
-          AniraKids © 2023 - 2024 GlamGarb Rentals s.r.o
+            AniraKids © 2023 - 2024 GlamGarb Rentals s.r.o
           </FooterCopyright>
         </FooterWrap>
       </FooterContainer>
