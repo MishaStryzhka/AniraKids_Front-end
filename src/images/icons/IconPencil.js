@@ -3,12 +3,13 @@ const IconPencil = props => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    width={24}
-    height={24}
+    width={18}
+    height={18}
+    viewBox="-1 1 23 23"
     {...props}
   >
     <g
-      // stroke="#000"
+      stroke="#fff"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}

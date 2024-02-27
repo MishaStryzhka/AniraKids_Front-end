@@ -1,9 +1,9 @@
 import NotFound from 'components/NotFound/NotFound';
-import ProductCard from 'components/ProductCard/ProductCard';
+import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import { useEffect, useState } from 'react';
 import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 
-const api = require('../../../../api/product');
+const api = require('../../../../api');
 
 const Favorite = () => {
   const { id } = useParams();
@@ -13,6 +13,8 @@ const Favorite = () => {
   const [pageSize, setPageSize] = useState(9);
 
   const [products, setProducts] = useState([]);
+  console.log('products', products);
+
   // eslint-disable-next-line no-unused-vars
   const [totalProducts, setTotalProducts] = useState();
 
@@ -22,8 +24,6 @@ const Favorite = () => {
 
   // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-
-  console.log('products', products);
 
   useEffect(() => {
     setIsLoading(true);
@@ -62,7 +62,7 @@ const Favorite = () => {
           >
             {products.map(product => (
               <li key={product._id}>
-                <ProductCard
+                <UsersProductCard
                   onRemoveFavorite={() =>
                     setProducts(products.filter(el => el._id !== product._id))
                   }
@@ -72,7 +72,7 @@ const Favorite = () => {
             ))}
           </ul>
 
-          <p>page {page}</p>
+          {/* <p>page {page}</p> */}
           {pageSize * page < totalProducts && (
             <button
               type="button"

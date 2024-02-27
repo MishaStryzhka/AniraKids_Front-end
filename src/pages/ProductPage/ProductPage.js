@@ -3,9 +3,7 @@ import {
   Border,
   Color,
   ImagesPerson,
-  // ItemDescription,
   ItemReview,
-  // ListDescription,
   ListReviews,
   MainImage,
   PicturePerson,
@@ -15,7 +13,6 @@ import {
   TextRent,
   TextRentValue,
   TextReview,
-  TextSale,
   TextSeller,
   TextSize,
   TextValueSize,
@@ -59,21 +56,21 @@ import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/navigation';
 import IconChat from 'images/icons/IconChat';
+import {
+  Price,
+  SecondWrap,
+} from 'components/UsersProductCard/UsersProductCard.styled';
+import { useAuth } from 'hooks';
 
-const api = require('../../api/product');
+const api = require('../../api');
 
 const ProductPage = index => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
-  // const swiperRef = useRef(0);
+  const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { id } = useParams();
-
-  const handleSecondaryImageClick = index => {
-    setCurrentImageIndex(index);
-    // swiperRef.current.slideTo(index);
-  };
 
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +92,17 @@ const ProductPage = index => {
       });
   }, [id]);
 
+  const handleSecondaryImageClick = index => {
+    setCurrentImageIndex(index);
+    // swiperRef.current.slideTo(index);
+  };
+
   const width = window.innerWidth < 767;
+
+  console.log('product', product);
+  console.log('product.owner._id', product?.owner?._id);
+  console.log('user._id', user?.userID);
+
   return isLoading ? (
     <p>Loading...</p>
   ) : (
@@ -137,32 +144,45 @@ const ProductPage = index => {
             <Wrap>
               <Title>{product?.name}</Title>
               <WrapInside>
-                {product?.rental ? (
-                  <TextSale>{t('rental')}</TextSale>
-                ) : (
-                  product?.sale && <TextSale>{t('sale')}</TextSale>
-                )}
-
                 <TextSeller>
                   {t('seller')}: <span>{product?.owner?.nickname}</span>
                 </TextSeller>
               </WrapInside>
             </Wrap>
             <TextSize>
-              {t('size')}: <TextValueSize>{product?.size}</TextValueSize>
+              {t('size')}:{' '}
+              <TextValueSize>
+                {product?.size || product?.childSize}
+              </TextValueSize>
             </TextSize>
-            {product?.rentalPrice && (
-              <TextPrice>
-                {product?.rentalPrice}
-                <span>CZK</span>
-              </TextPrice>
-            )}
-            {product?.salePrice && (
-              <TextPrice>
-                {product?.salePrice}
-                <span>CZK</span>
-              </TextPrice>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {product?.rental && (
+                <SecondWrap>
+                  <Price style={{ width: 'max-content' }}>{t('rental')}</Price>
+                  <div>
+                    {product.dailyRentalPrice && (
+                      <TextPrice>{product.dailyRentalPrice} kč/den</TextPrice>
+                    )}
+                    {product.hourlyRentalPrice && (
+                      <TextPrice>{product.hourlyRentalPrice} Kč/hod</TextPrice>
+                    )}
+                    {product.rentalPrice && (
+                      <TextPrice>{product.rentalPrice} kč/den</TextPrice>
+                    )}
+                  </div>
+                </SecondWrap>
+              )}
+              {product?.sale && (
+                <SecondWrap>
+                  <Price style={{ width: 'max-content', marginLeft: 'auto' }}>
+                    {t('sale')}
+                  </Price>
+                  <TextPrice style={{ textAlign: 'end' }}>
+                    {product.salePrice} Kč
+                  </TextPrice>
+                </SecondWrap>
+              )}
+            </div>
             {product?.rental && (
               <WrapCalendar>
                 <ButtonCalendarTime>
@@ -172,7 +192,34 @@ const ProductPage = index => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              <Button>{t('addToCart')}</Button>
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product._id,
+                    serviceType: 'rent',
+                    price: product?.dailyRentalPrice || product?.rentalPrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Орендувати
+              </Button>
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product?._id,
+                    serviceType: 'buy',
+                    price: product?.salePrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Купити
+              </Button>
               <IconHeart />
               <IconChat />
             </WrapBtn>
@@ -182,46 +229,6 @@ const ProductPage = index => {
             <Border />
             <TitleDescription>{t('Product Description')}</TitleDescription>
             <TextDescription>{product.description}</TextDescription>
-            {/* <ListDescription>
-              <ItemDescription>
-                <TextDescription>Сукня Довга</TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>Арт 05706.4*15</TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  Матеріал - щильний шовк, перед і рукава - дороге італійське
-                  мереживо: вишивка на сітки з легким блиском.
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  Довжина 145 см, одягається на запах, перетинками по ліфу можна
-                  регулювати декольте.
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  48-52 - на ОГ 96-105, ОБ до 125
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  54-58- на ОГ 107-118, ОБ до 135
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  60-64 - на ОГ 120- 130, ОБ до 150
-                </TextDescription>
-              </ItemDescription>
-              <ItemDescription>
-                <TextDescription>
-                  66-70- на ОГ 132-142, ОБ до 170
-                </TextDescription>
-              </ItemDescription>
-            </ListDescription> */}
             <TitleDescription
               style={{
                 marginTop: '24px',

@@ -1,17 +1,27 @@
 import Button from 'components/Button/Button';
 import IconBasket from 'images/icons/IconBasket';
 import IconPencil from 'images/icons/IconPencil';
-import IconStar from 'images/icons/IconStart';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Card = styled(NavLink)`
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+
   display: flex;
   flex-direction: column;
   text-decoration: none;
   gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '8px')};
   cursor: pointer;
+
+  box-shadow: ${({ theme }) => theme.boxShadow};
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.boxShadowHover};
+  }
+
   @media screen and (min-width: 768px) {
     gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '12px')};
   }
@@ -24,10 +34,10 @@ export const Card = styled(NavLink)`
 export const GeneralWrap = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  @media screen and (min-width: 768px) {
-    gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
-  }
+  // gap: 8px;
+  // @media screen and (min-width: 768px) {
+  //   gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
+  // }
 `;
 
 export const PictureCard = styled.picture`
@@ -55,9 +65,6 @@ export const ButtonAddToFavorites = styled.button`
   padding: 3px;
   border: none;
 
-  position: absolute;
-  top: 8px;
-  right: 8px;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -84,9 +91,9 @@ export const FirstWrap = styled.div`
 `;
 
 export const SecondWrap = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  // display: flex;
+  // align-items: center;
+  // justify-content: space-between;
 `;
 
 export const TextName = styled.p`
@@ -120,16 +127,16 @@ export const Price = styled.p`
   line-height: 1.43;
   text-transform: uppercase;
 
-  width: ${({ $pageRentOut }) => ($pageRentOut ? '180px' : '')};
-  padding: 8px;
+  // width: ${({ $pageRentOut }) => ($pageRentOut ? '180px' : '')};
+  padding: 8px 14px;
   display: flex;
   justify-content: center;
 
   border-radius: 50px;
 
   @media screen and (min-width: 768px) {
-    width: 180px;
-    padding: 8px 0;
+    // width: 180px;
+    padding: 8px 14px;
   }
   background-color: ${({ theme }) => theme.color.lightBGColor};
 
@@ -143,71 +150,6 @@ export const TextPrice = styled.p`
   line-height: 1.43;
 
   color: ${({ theme }) => theme.color.mainColor3};
-`;
-export const IconPencilStyled = styled(IconPencil)`
-  stroke: ${({ theme }) => theme.color.mainColor4};
-  transition: stroke 250ms cubic-bezier(0.4, 0, 0.2, 1);
-`;
-
-export const ButtonUpdate = styled(Button)`
-  border: 1px solid;
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: self-end;
-
-  background-color: ${({ theme }) => theme.color.mainColor1};
-  color: ${({ theme }) => theme.color.mainColor4};
-  border-color: ${({ theme }) => theme.color.btnColorBG};
-  stroke: ${({ theme }) => theme.color.mainColor4};
-
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  // наводячи на кнопку ховер спрацьовує на дочірний елемент - іконку
-  &:hover > ${IconPencilStyled} {
-    stroke: ${({ theme }) => theme.color.btnColorBG};
-  }
-
-  &:hover {
-    color: ${({ theme }) => theme.color.btnColorBG};
-    background-color: ${({ theme }) => theme.color.mainColor1};
-  }
-
-  &:active {
-    color: ${({ theme }) => theme.color.mainColor1};
-    background-color: ${({ theme }) => theme.color.btnColorBG};
-  }
-
-  &:active > ${IconPencilStyled} {
-    stroke: ${({ theme }) => theme.color.mainColor1};
-  }
-`;
-
-export const IconBasketStyled = styled(IconBasket)`
-  stroke: ${({ theme }) => theme.color.mainColor1};
-  transition: stroke 250ms cubic-bezier(0.4, 0, 0.2, 1);
-`;
-
-export const ButtonRemove = styled(Button)`
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: self-end;
-
-  /* transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    background-color: ${({ theme }) => theme.color.mainColor3};
-  } */
-
-  &:active > ${IconBasketStyled} {
-    stroke: ${({ theme }) => theme.color.mainColor5};
-  }
-
-  /* &:active {
-    background-color: ${({ theme }) => theme.color.mainColor3};
-    color: ${({ theme }) => theme.color.mainColor5};
-  } */
 `;
 
 export const WrapPartSeller = styled.div`
@@ -250,18 +192,6 @@ export const UserNickname = styled.p`
 export const WrapIconsStars = styled.div`
   display: flex;
   gap: 2px;
-`;
-
-export const StyledIconStar = styled(IconStar)`
-  width: 12px;
-  height: 12px;
-  fill: ${({ theme }) => theme.color.mainColor2};
-`;
-
-export const StyledIconStarOutline = styled(IconStar)`
-  width: 12px;
-  height: 12px;
-  stroke: ${({ theme }) => theme.color.mainColor2};
 `;
 
 export const TextRating = styled.p`

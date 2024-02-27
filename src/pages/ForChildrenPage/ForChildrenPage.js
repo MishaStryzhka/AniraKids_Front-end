@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 
-const api = require('../../api/product');
+const api = require('../../api');
 
 const ForChildrenPage = () => {
   const { t } = useTranslation('translation', {

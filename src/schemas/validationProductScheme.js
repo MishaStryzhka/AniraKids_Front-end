@@ -79,8 +79,14 @@ export const validationProductSchema = Yup.object().shape({
   ),
 
   sale: Yup.boolean(),
-
-  rentalPrice: Yup.number().test(
+  dailyRentalPrice: Yup.number().test(
+    'required',
+    'Required field',
+    function (value) {
+      return this.parent.rental ? !!value : true;
+    }
+  ),
+  hourlyRentalPrice: Yup.number().test(
     'required',
     'Required field',
     function (value) {

@@ -31,9 +31,12 @@ export const ButtonAddToFavorites = styled.button`
 `;
 
 export const WrapText = styled.div`
+  min-height: 105px;
+  padding: 10px;
   display: flex;
   gap: 8px;
   flex-direction: column;
+
   @media screen and (min-width: 768px) {
     gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
   }

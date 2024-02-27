@@ -74,7 +74,7 @@ import {
   arrayOfOutfits,
 } from 'data';
 
-const api = require('./../../../api/product');
+const api = require('../../../api');
 
 const FormAddProduct = () => {
   const { t } = useTranslation('translation', {
@@ -180,9 +180,10 @@ const FormAddProduct = () => {
         decor: '',
         color: '',
         saleOrRental: '',
-        sale: '',
         rental: '',
-        priceRental: '',
+        dailyRentalPrice: '',
+        hourlyRentalPrice: '',
+        sale: '',
         priceSale: '',
         isAddPhoto: '',
         colorCode: '',
@@ -201,8 +202,6 @@ const FormAddProduct = () => {
           handleSubmit,
           handleBlur,
         } = formikProps;
-
-        console.log('errors', errors);
 
         const resetInitialValuesForCategories = () => {
           setFieldValue('familyLook', '');
@@ -717,23 +716,27 @@ const FormAddProduct = () => {
               <div>
                 <Title>{t('Color')}</Title>
                 <ListColor>
-                  {arrayColorsProduct.map(({ colorCode, color }, index) => (
-                    <ItemButton key={index}>
-                      <LabelColor color={colorCode}>
-                        <Input
-                          type="radio"
-                          name={{ color, colorCode }}
-                          value={{ color, colorCode }}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        />
-                        <WrapBoxColor $check={values.color === color}>
-                          <BoxColor color={colorCode} />
-                          {t(color)}
-                        </WrapBoxColor>
-                      </LabelColor>
-                    </ItemButton>
-                  ))}
+                  {arrayColorsProduct.map(({ colorCode, color }, index) => {
+                    return (
+                      <ItemButton key={index}>
+                        <LabelColor>
+                          <Input
+                            type="radio"
+                            name={color}
+                            value={color}
+                            onChange={e =>
+                              setFieldValue('color', e.currentTarget.value)
+                            }
+                            onBlur={handleBlur}
+                          />
+                          <WrapBoxColor $check={values.color === color}>
+                            <BoxColor color={colorCode} />
+                            {t(color)}
+                          </WrapBoxColor>
+                        </LabelColor>
+                      </ItemButton>
+                    );
+                  })}
                 </ListColor>
                 <TextInstruction>{t('descriptionColor')}</TextInstruction>
 
@@ -765,12 +768,24 @@ const FormAddProduct = () => {
                       />
                     </LabelStatus>
                     <LabelPrice>
-                      {t('Price')} (Kč)
+                      {t('Price')} (Kč/den)
                       <InputPrice
                         placeholder={t('pricePlaceholder')}
                         type="number"
-                        name="rentalPrice"
-                        value={values.rentalPrice}
+                        name="dailyRentalPrice"
+                        value={values.dailyRentalPrice}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        disabled={!values.rental}
+                      />
+                    </LabelPrice>
+                    <LabelPrice>
+                      {t('Price')} (Kč/hod)
+                      <InputPrice
+                        placeholder={t('pricePlaceholder')}
+                        type="number"
+                        name="hourlyRentalPrice"
+                        value={values.hourlyRentalPrice}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         disabled={!values.rental}

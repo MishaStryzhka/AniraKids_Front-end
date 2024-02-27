@@ -6,9 +6,11 @@ const Button = ({
   onClick,
   disabled = false,
   className,
+  style,
 }) => {
   return (
     <StyleButton
+      style={style}
       type={type}
       onClick={onClick}
       disabled={disabled}
