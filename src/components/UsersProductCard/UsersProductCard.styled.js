@@ -1,6 +1,3 @@
-import Button from 'components/Button/Button';
-import IconBasket from 'images/icons/IconBasket';
-import IconPencil from 'images/icons/IconPencil';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
