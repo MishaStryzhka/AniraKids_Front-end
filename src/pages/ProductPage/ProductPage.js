@@ -78,10 +78,7 @@ const ProductPage = onRemoveFavorite => {
   const { pathname } = useLocation();
   const { id } = useParams();
   const { user } = useAuth();
-
-  const handleSecondaryImageClick = index => {
-    setCurrentImageIndex(index);
-  };
+  const dispatch = useDispatch();
 
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,10 +100,7 @@ const ProductPage = onRemoveFavorite => {
         setIsLoading(false);
       });
   }, [id]);
-
-  const dispatch = useDispatch();
-  const { user } = useAuth();
-
+  
   const handleAddToFavorites = id => {
     // onRemoveFavorite && onRemoveFavorite();
     user?.favorites.includes(id)
