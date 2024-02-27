@@ -43,7 +43,7 @@ const MyPurchases = lazy(() =>
   import('../pages/UserPage/Pages/MyPurchases/MyPurchases')
 );
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
-const Order1 = lazy(() => import('../pages/UserPage/Pages/Order1/Order1'));
+const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 
 function App() {
@@ -103,7 +103,9 @@ function App() {
             <Route path="favorite/" element={<Favorite />}>
               <Route path=":id" element={<ProductPage />} />
             </Route>
-            <Route path="rent-out/" element={<RentOut />} />
+            <Route path="rent-out/" element={<RentOut />}>
+              <Route path=":id" element={<ProductPage />} />
+            </Route>
             <Route path="rent-out/add-product/" element={<AddProduct />} />
             <Route
               path="rent-out/update-product/:id"
@@ -113,7 +115,7 @@ function App() {
             <Route path="my-orders/" element={<MyOrders />} />
             <Route path="my-purchases/" element={<MyPurchases />} />
             <Route path="wallet/" element={<Wallet />} />
-            <Route path="order1/" element={<Order1 />} />
+            <Route path="cart/" element={<Cart />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>

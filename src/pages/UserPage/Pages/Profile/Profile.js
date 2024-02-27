@@ -54,8 +54,6 @@ const Profile = () => {
   const { user, currentTheme, isLoading } = useAuth();
   let { error, isDone } = useAuth();
 
-  console.log('isDone', isDone);
-
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
@@ -128,9 +126,6 @@ const Profile = () => {
           handleBlur,
           handleSubmit,
         }) => {
-          console.log('errors', errors);
-          console.log('touched', touched);
-
           return (
             <ProfileForm>
               <Wrap>

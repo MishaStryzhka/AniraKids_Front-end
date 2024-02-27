@@ -8,7 +8,7 @@ import {
   Wrap,
 } from './ModalRemoveProduct.styled';
 
-const ModalRemoveProduct = ({ onClick }) => {
+const ModalRemoveProduct = ({ onClick, on }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalRemoveProduct',
   });
@@ -20,7 +20,13 @@ const ModalRemoveProduct = ({ onClick }) => {
           onClick();
         }}
       />
-      <ModalTitle>{t('titleRemoveProduct')}</ModalTitle>
+      <ModalTitle
+        onClick={() => {
+          onClick();
+        }}
+      >
+        {t('titleRemoveProduct')}
+      </ModalTitle>
       <Wrap>
         <ButtonAgree>{t('yes')}</ButtonAgree>
         <ButtonReject

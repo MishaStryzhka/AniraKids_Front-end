@@ -22,7 +22,7 @@ import { ProductList } from 'pages/pages.styled';
 import NotFound from 'components/NotFound/NotFound';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 
-const api = require('../../api/product');
+const api = require('../../api');
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {

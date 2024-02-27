@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 import { ListCards } from './Favorite.styled';
 
-const api = require('../../../../api/product');
+const api = require('../../../../api');
 
 const Favorite = () => {
   const { id } = useParams();
@@ -14,6 +14,8 @@ const Favorite = () => {
   const [pageSize, setPageSize] = useState(9);
 
   const [products, setProducts] = useState([]);
+  console.log('products', products);
+
   // eslint-disable-next-line no-unused-vars
   const [totalProducts, setTotalProducts] = useState();
 
@@ -23,8 +25,6 @@ const Favorite = () => {
 
   // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-
-  console.log('products', products);
 
   useEffect(() => {
     setIsLoading(true);
@@ -66,7 +66,7 @@ const Favorite = () => {
             ))}
           </ListCards>
 
-          <p>page {page}</p>
+          {/* <p>page {page}</p> */}
           {pageSize * page < totalProducts && (
             <button
               type="button"

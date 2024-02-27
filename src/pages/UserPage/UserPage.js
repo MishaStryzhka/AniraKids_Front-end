@@ -68,7 +68,7 @@ const UserPage = () => {
           <StyledNavLink to="./wallet">
             <IconCard /> {t('wallet')}
           </StyledNavLink>
-          <StyledNavLink to="./order1">
+          <StyledNavLink to="./cart">
             <IconBag /> {t('basket')}
           </StyledNavLink>
           <StyledButton

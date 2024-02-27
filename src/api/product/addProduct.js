@@ -18,7 +18,8 @@ export const addProduct = async credentials => {
     priceRental,
     priceSale,
     rental,
-    rentalPrice,
+    dailyRentalPrice,
+    hourlyRentalPrice,
     sale,
     salePrice,
     size,
@@ -50,7 +51,8 @@ export const addProduct = async credentials => {
   priceRental && formData.append(`priceRental`, priceRental);
   priceSale && formData.append(`priceSale`, priceSale);
   rental && formData.append(`rental`, rental);
-  rentalPrice && formData.append(`rentalPrice`, rentalPrice);
+  dailyRentalPrice && formData.append(`dailyRentalPrice`, dailyRentalPrice);
+  hourlyRentalPrice && formData.append(`hourlyRentalPrice`, hourlyRentalPrice);
   sale && formData.append(`sale`, sale);
   salePrice && formData.append(`salePrice`, salePrice);
   size && formData.append(`size`, size);

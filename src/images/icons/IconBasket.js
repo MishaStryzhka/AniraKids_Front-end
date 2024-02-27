@@ -2,13 +2,14 @@ import * as React from 'react';
 const IconBasket = props => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={24}
-    height={24}
+    width={18}
+    height={18}
+    viewBox="0 1 23 23"
     fill="none"
     {...props}
   >
     <g
-      //   stroke="#fff"
+      stroke="#fff"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}

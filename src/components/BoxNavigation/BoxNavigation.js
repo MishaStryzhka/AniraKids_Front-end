@@ -59,7 +59,7 @@ const BoxNavigation = ({ $mainPage }) => {
 
       <Button
         type="button"
-        onClick={() => navigate('/my-account/order1', { replace: true })}
+        onClick={() => navigate('/my-account/cart', { replace: true })}
       >
         <IconBag
           stroke={

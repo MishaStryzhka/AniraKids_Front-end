@@ -13,7 +13,6 @@ import {
   TextRent,
   TextRentValue,
   TextReview,
-  TextSale,
   TextSeller,
   TextSize,
   TextValueSize,
@@ -64,18 +63,21 @@ import {
   addToFavorites,
   removeFromFavorites,
 } from '../../redux/auth/operations';
+import {
+  Price,
+  SecondWrap,
+} from 'components/UsersProductCard/UsersProductCard.styled';
 import { useAuth } from 'hooks';
 
-const api = require('../../api/product');
+const api = require('../../api');
 
 const ProductPage = onRemoveFavorite => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
   const { pathname } = useLocation();
-  // const swiperRef = useRef(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { id } = useParams();
+  const { user } = useAuth();
 
   const handleSecondaryImageClick = index => {
     setCurrentImageIndex(index);
@@ -85,6 +87,7 @@ const ProductPage = onRemoveFavorite => {
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -100,12 +103,9 @@ const ProductPage = onRemoveFavorite => {
         setIsLoading(false);
       });
   }, [id]);
-  console.log(product);
 
   const dispatch = useDispatch();
   const { user } = useAuth();
-
-  console.log(user);
 
   const handleAddToFavorites = id => {
     // onRemoveFavorite && onRemoveFavorite();
@@ -113,7 +113,14 @@ const ProductPage = onRemoveFavorite => {
       ? dispatch(removeFromFavorites(id))
       : dispatch(addToFavorites(id));
   };
+  
+  const handleSecondaryImageClick = index => {
+    setCurrentImageIndex(index);
+    // swiperRef.current.slideTo(index);
+  };
+  
   const width = window.innerWidth < 767;
+
   return isLoading ? (
     <p>Loading...</p>
   ) : (
@@ -164,32 +171,45 @@ const ProductPage = onRemoveFavorite => {
             >
               <Title>{product?.name}</Title>
               <WrapInside>
-                {product?.rental ? (
-                  <TextSale>{t('rental')}</TextSale>
-                ) : (
-                  product?.sale && <TextSale>{t('sale')}</TextSale>
-                )}
-
                 <TextSeller>
                   {t('seller')}: <span>{product?.owner?.nickname}</span>
                 </TextSeller>
               </WrapInside>
             </Wrap>
             <TextSize>
-              {t('size')}: <TextValueSize>{product?.size}</TextValueSize>
+              {t('size')}:{' '}
+              <TextValueSize>
+                {product?.size || product?.childSize}
+              </TextValueSize>
             </TextSize>
-            {product?.rentalPrice && (
-              <TextPrice>
-                {product?.rentalPrice}
-                <span>CZK</span>
-              </TextPrice>
-            )}
-            {product?.salePrice && (
-              <TextPrice>
-                {product?.salePrice}
-                <span>CZK</span>
-              </TextPrice>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {product?.rental && (
+                <SecondWrap>
+                  <Price style={{ width: 'max-content' }}>{t('rental')}</Price>
+                  <div>
+                    {product.dailyRentalPrice && (
+                      <TextPrice>{product.dailyRentalPrice} kč/den</TextPrice>
+                    )}
+                    {product.hourlyRentalPrice && (
+                      <TextPrice>{product.hourlyRentalPrice} Kč/hod</TextPrice>
+                    )}
+                    {product.rentalPrice && (
+                      <TextPrice>{product.rentalPrice} kč/den</TextPrice>
+                    )}
+                  </div>
+                </SecondWrap>
+              )}
+              {product?.sale && (
+                <SecondWrap>
+                  <Price style={{ width: 'max-content', marginLeft: 'auto' }}>
+                    {t('sale')}
+                  </Price>
+                  <TextPrice style={{ textAlign: 'end' }}>
+                    {product.salePrice} Kč
+                  </TextPrice>
+                </SecondWrap>
+              )}
+            </div>
             {product?.rental && (
               <WrapCalendar>
                 <ButtonCalendarTime>
@@ -199,7 +219,37 @@ const ProductPage = onRemoveFavorite => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              <Button>{t('addToCart')}</Button>
+              {pathname !== `/my-account/favorite/${product?._id}` && (
+                <IconChat />
+              )}
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product._id,
+                    serviceType: 'rent',
+                    price: product?.dailyRentalPrice || product?.rentalPrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Орендувати
+              </Button>
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product?._id,
+                    serviceType: 'buy',
+                    price: product?.salePrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Купити
+              </Button>
               {pathname !== `/my-account/favorite/${product?._id}` && (
                 <ButtonAddToFavorite
                   onClick={e => {
@@ -216,9 +266,7 @@ const ProductPage = onRemoveFavorite => {
                   />
                 </ButtonAddToFavorite>
               )}
-              {pathname !== `/my-account/favorite/${product?._id}` && (
-                <IconChat />
-              )}
+              <IconChat />
             </WrapBtn>
           </WrapInformation>
 

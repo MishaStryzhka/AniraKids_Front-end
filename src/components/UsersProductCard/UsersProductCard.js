@@ -1,10 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
-  ButtonRemove,
-  ButtonUpdate,
   GeneralWrap,
-  IconBasketStyled,
-  IconPencilStyled,
   Image,
   Card,
   PictureCard,
@@ -20,12 +16,9 @@ import {
   WrapTextSeller,
   UserNickname,
   WrapIconsStars,
-  StyledIconStar,
   TextRating,
   SecondWrap,
   FirstWrap,
-  ButtonRemoveFromFevorites,
-  StyledIconCross,
 } from './UsersProductCard.styled';
 import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
@@ -37,6 +30,10 @@ import {
   removeFromFavorites,
 } from '../../redux/auth/operations';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
+import RatingStars from 'components/RatingStars/RatingStars';
+import IconPencil from 'images/icons/IconPencil';
+import IconBasket from 'images/icons/IconBasket';
+import IconCross from 'images/icons/IconCross';
 
 const UsersProductCard = ({
   product,
@@ -60,36 +57,27 @@ const UsersProductCard = ({
   };
 
   const { pathname } = useLocation();
-  console.log(product);
 
-  const renderStars = () => {
-    const starsCount = (Math.ceil(product.rating), 0); // Запобігаємо від'ємним значенням
-    console.log(starsCount);
-    if (starsCount === 0) {
-      // Якщо рейтинг 0, повертаємо 5  зірок
-      return Array.from({ length: 5 }, (_, index) => (
-        <StyledIconStar key={index} />
-      ));
-    }
+  console.log('pathname', pathname);
 
-    // return Array.from({ length: 5 }, (_, index) => {
-    //   return index < starsCount ? (
-    //     <StyledIconStar key={index} />
-    //   ) : (
-    //     <StyledIconStarOutline key={index} />
-    //   );
-    // });
-  };
   return (
     <Card
-      to={pathname !== '/my-account/rent-out' && `./${product?._id}`}
+      to={`./${product?._id}`}
       $pageRentOut={pathname === '/my-account/rent-out'}
       handleRemove={handleRemove}
       onRemoveFavorite={() => onRemoveFavorite()}
     >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-        {pathname !== '/my-account/rent-out' &&
-          pathname !== '/my-account/favorite' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            display: 'flex',
+            gap: 8,
+          }}
+        >
+          {pathname === '/my-account/favorite' && (
             <ButtonAddToFavorites
               disabled={isLoading}
               onClick={e => {
@@ -97,27 +85,44 @@ const UsersProductCard = ({
                 handleAddToFavorites(product?._id);
               }}
             >
-              <IconLittleHeart
-                fill={
-                  user?.favorites.includes(product?._id)
-                    ? '#fff'
-                    : 'transparent'
-                }
-                stroke={theme[currentTheme].color.mainColor1}
-              />
+              {pathname === '/my-account/favorite' ? (
+                <IconCross />
+              ) : (
+                <IconLittleHeart
+                  fill={
+                    user?.favorites.includes(product?._id)
+                      ? '#fff'
+                      : 'transparent'
+                  }
+                  stroke={theme[currentTheme].color.mainColor1}
+                />
+              )}
             </ButtonAddToFavorites>
           )}
-        {pathname === '/my-account/favorite' && (
-          <ButtonRemoveFromFevorites
-            disabled={isLoading}
-            onClick={e => {
-              e.preventDefault();
-              dispatch(removeFromFavorites(product?._id));
-            }}
-          >
-            <StyledIconCross />
-          </ButtonRemoveFromFevorites>
-        )}
+          {pathname === '/my-account/rent-out' && (
+            <ButtonAddToFavorites
+              type="button"
+              onClick={e => {
+                e.preventDefault();
+                handleUpdate(product._id);
+              }}
+            >
+              <IconPencil />
+            </ButtonAddToFavorites>
+          )}
+          {pathname === '/my-account/rent-out' && (
+            <ButtonAddToFavorites
+              type="button"
+              onClick={e => {
+                e.preventDefault();
+                handleRemove(product._id);
+              }}
+            >
+              <IconBasket />
+            </ButtonAddToFavorites>
+          )}
+        </div>
+
         <PictureCard $pageRentOut={pathname === '/my-account/rent-out'}>
           <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
         </PictureCard>
@@ -126,56 +131,59 @@ const UsersProductCard = ({
             <TextName>{product?.name || 'brand'}</TextName>
             <TextSize>
               <Span>{t('Size')}:</Span>
-              {product?.size}
+              {product?.size || product?.childSize}
             </TextSize>
           </FirstWrap>
-          <SecondWrap>
-            {product?.rental ? (
-              <Price $pageRentOut={pathname === '/my-account/rent-out'}>
-                {t('Rental')}
-              </Price>
-            ) : (
-              product?.sale && (
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {product?.rental && (
+              <SecondWrap>
+                <Price $pageRentOut={pathname === '/my-account/rent-out'}>
+                  {t('Rental')}
+                </Price>
+                <div>
+                  {product.dailyRentalPrice && (
+                    <TextPrice>{product.dailyRentalPrice} kč/den</TextPrice>
+                  )}
+                  {product.hourlyRentalPrice && (
+                    <TextPrice>{product.hourlyRentalPrice} Kč/hod</TextPrice>
+                  )}
+                  {product.rentalPrice && (
+                    <TextPrice>{product.rentalPrice} kč/den</TextPrice>
+                  )}
+                </div>
+              </SecondWrap>
+            )}
+            {product?.sale && (
+              <SecondWrap>
                 <Price $pageRentOut={pathname === '/my-account/rent-out'}>
                   {t('Sale')}
                 </Price>
-              )
+                <TextPrice style={{ textAlign: 'end' }}>
+                  {product.salePrice} Kč
+                </TextPrice>
+              </SecondWrap>
             )}
-            {product?.rentalPrice && (
-              <TextPrice>{product.rentalPrice} CZK</TextPrice>
-            )}
-            {product?.salePrice && (
-              <TextPrice>{product.salePrice} CZK</TextPrice>
-            )}
-          </SecondWrap>
+          </div>
+          <WrapPartSeller>
+            <PictureSeller>
+              <ImageSeller src={product?.owner?.avatar} />
+            </PictureSeller>
+            <div>
+              <WrapTextSeller>
+                <WrapIconsStars>
+                  <RatingStars rating={product?.owner?.rating || 5} />
+                </WrapIconsStars>
+                <TextRating>
+                  {product?.owner?.rating?.toFixed(1) || '5.0'}
+                  {product?.owner?.ratingCount > 0 &&
+                    `(${product?.owner?.ratingCount} ${t('ratings')})`}
+                </TextRating>
+              </WrapTextSeller>
+              <UserNickname>{user?.nickname}</UserNickname>
+            </div>
+          </WrapPartSeller>
         </WrapText>
       </GeneralWrap>
-      {pathname === '/my-account/rent-out' && (
-        <ButtonUpdate type="button" onClick={() => handleUpdate(product._id)}>
-          {t('update')}
-          <IconPencilStyled />
-        </ButtonUpdate>
-      )}
-      {pathname === '/my-account/rent-out' && (
-        <ButtonRemove type="button" onClick={() => handleRemove(product._id)}>
-          {t('remove')}
-          <IconBasketStyled />
-        </ButtonRemove>
-      )}
-      {pathname !== '/my-account/rent-out' && (
-        <WrapPartSeller>
-          <PictureSeller>
-            <ImageSeller src={user?.avatar} />
-          </PictureSeller>
-          <div>
-            <WrapTextSeller>
-              <WrapIconsStars>{renderStars()}</WrapIconsStars>
-              <TextRating>5.0 (4 {t('ratings')})</TextRating>
-            </WrapTextSeller>
-            <UserNickname>{user?.nickname}</UserNickname>
-          </div>
-        </WrapPartSeller>
-      )}
     </Card>
   );
 };
