@@ -1,4 +1,4 @@
-import { useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
@@ -75,11 +75,12 @@ const ProductPage = onRemoveFavorite => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
-  const { pathname } = useLocation();
-  const { id } = useParams();
   const { user } = useAuth();
+  const { id } = useParams();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
@@ -111,6 +112,41 @@ const ProductPage = onRemoveFavorite => {
   const handleSecondaryImageClick = index => {
     setCurrentImageIndex(index);
     // swiperRef.current.slideTo(index);
+  };
+
+  const handleClickRent = e => {
+    setIsLoading(true);
+    api
+      .addToOrder({
+        productId: product._id,
+        serviceType: 'rent',
+        price:
+          product?.dailyRentalPrice ||
+          product?.hourlyRentalPrice ||
+          product?.rentalPrice,
+        owner: product?.owner?._id,
+      })
+      .then(data => {
+        console.log('data', data);
+        setIsLoading(false);
+        navigate('/my-account/cart');
+      });
+  };
+
+  const handleClickBuy = e => {
+    setIsLoading(true);
+    api
+      .addToOrder({
+        productId: product?._id,
+        serviceType: 'buy',
+        price: product?.salePrice,
+        owner: product?.owner?._id,
+      })
+      .then(data => {
+        console.log('data', data);
+        setIsLoading(false);
+        navigate('/my-account/cart');
+      });
   };
   
   const width = window.innerWidth < 767;
@@ -213,37 +249,28 @@ const ProductPage = onRemoveFavorite => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              {pathname !== `/my-account/favorite/${product?._id}` && (
-                <IconChat />
+              {(product?.dailyRentalPrice ||
+                product?.hourlyRentalPrice ||
+                product?.rentalPrice) && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickRent}
+                  ariaLabel="rent"
+                >
+                  Орендувати
+                </Button>
               )}
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product._id,
-                    serviceType: 'rent',
-                    price: product?.dailyRentalPrice || product?.rentalPrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Орендувати
-              </Button>
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product?._id,
-                    serviceType: 'buy',
-                    price: product?.salePrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Купити
-              </Button>
+              {product?.salePrice && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickBuy}
+                  ariaLabel="buy"
+                >
+                  Купити
+                </Button>
+              )}
               {pathname !== `/my-account/favorite/${product?._id}` && (
                 <ButtonAddToFavorite
                   onClick={e => {

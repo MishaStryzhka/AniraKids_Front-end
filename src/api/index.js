@@ -1,4 +1,5 @@
 const { addToOrder } = require('./order/addToOrder');
+const { getOrders } = require('./order/getOrders');
 const { addProduct } = require('./product/addProduct');
 const { getCurrentUserProducts } = require('./product/getCurrentUserProducts');
 const { getFavorites } = require('./product/getFavorites');
@@ -17,4 +18,5 @@ module.exports = {
 
   // Order
   addToOrder,
+  getOrders,
 };
