@@ -249,34 +249,28 @@ const ProductPage = onRemoveFavorite => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product._id,
-                    serviceType: 'rent',
-                    price: product?.dailyRentalPrice || product?.rentalPrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Орендувати
-              </Button>
-              <Button
-                disabled={product?.owner?._id === user?.userID}
-                style={{ width: 'auto' }}
-                onClick={() => {
-                  api.addToOrder({
-                    productId: product?._id,
-                    serviceType: 'buy',
-                    price: product?.salePrice,
-                    owner: product?.owner?._id,
-                  });
-                }}
-              >
-                Купити
-              </Button>
+              {(product?.dailyRentalPrice ||
+                product?.hourlyRentalPrice ||
+                product?.rentalPrice) && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickRent}
+                  ariaLabel="rent"
+                >
+                  Орендувати
+                </Button>
+              )}
+              {product?.salePrice && (
+                <Button
+                  disabled={product?.owner?._id === user?.userID}
+                  style={{ width: 'auto' }}
+                  onClick={handleClickBuy}
+                  ariaLabel="buy"
+                >
+                  Купити
+                </Button>
+              )}
               {pathname !== `/my-account/favorite/${product?._id}` && (
                 <ButtonAddToFavorite
                   onClick={e => {
