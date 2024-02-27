@@ -66,7 +66,7 @@ export const ButtonAddToFavorites = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-
+  box-shadow: 0 4px 6px 0 rgba(17, 17, 17, 0.1);
   background-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 

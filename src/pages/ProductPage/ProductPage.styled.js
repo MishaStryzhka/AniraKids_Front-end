@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const GeneralWrap = styled.div`
   margin-bottom: 80px;
   @media screen and (min-width: 1280px) {
-    margin-bottom: 132px;
+    margin-bottom: 132px - 40px;
   }
 `;
 
@@ -14,7 +14,8 @@ export const WrapProductCard = styled.div`
   gap: 40px;
   min-width: 0;
   @media screen and (min-width: 1280px) {
-    flex-direction: row;
+    flex-direction: ${({ $pageFavorites }) =>
+      $pageFavorites ? 'column' : 'row'};
     /* gap: 20px; */
     justify-content: space-between;
   }
@@ -54,11 +55,7 @@ export const SecondaryImages = styled.img`
   border-radius: 2px;
   cursor: pointer;
   object-fit: cover;
-  /* &:hover,
-  &:active {
-    border: 2px solid;
-    border-color: ${({ theme }) => theme.color.mainColor2};
-  } */
+
   @media screen and (min-width: 768px) {
     width: 186px;
     height: 175px;
@@ -70,12 +67,17 @@ export const SecondaryImages = styled.img`
 `;
 
 export const WrapSecondaryImages = styled.div`
-  width: 388px;
+  /* width: 388px; */
   height: 113px;
-
+  min-width: 0;
+  overflow: auto;
   @media screen and (min-width: 768px) {
-    height: 540px;
+    min-height: 540px;
     width: 186px;
+  }
+  @media screen and (min-width: 1280px) {
+    min-height: 690px;
+    width: 196px;
   }
 `;
 
@@ -84,14 +86,14 @@ export const TextWrap = styled.div`
   flex-direction: column;
   gap: 40px;
   @media screen and (min-width: 1280px) {
-    width: 522px;
+    width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
   }
 `;
 
 export const WrapInformation = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: ${({ $pageFavorites }) => ($pageFavorites ? '24px' : '16px')};
 `;
 
 export const WrapDescription = styled.div``;
@@ -100,6 +102,8 @@ export const Wrap = styled.div`
   display: flex;
   justify-content: space-between;
   /* align-items: center; */
+  align-items: ${({ $pageFavorites }) =>
+    $pageFavorites ? 'center' : 'stretch'};
 `;
 
 export const WrapInside = styled.div`
@@ -186,10 +190,7 @@ export const Border = styled.div`
 export const TitleDescription = styled(Title)`
   margin-bottom: 8px;
 `;
-export const ListDescription = styled.ul`
-  margin-bottom: 24px;
-`;
-export const ItemDescription = styled.li``;
+
 export const TextDescription = styled.p`
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -222,6 +223,7 @@ export const WrapReviews = styled.div`
   @media screen and (min-width: 1280px) {
     width: 1064px;
     margin: 40px auto 0;
+    margin-left: ${({ $pageFavorites }) => $pageFavorites && '-220px'};
   }
 `;
 
@@ -344,13 +346,31 @@ export const TextCalendar = styled.p`
 export const List = styled.ul`
   display: flex;
   gap: 8px;
-  min-width: 0;
+
   @media screen and (min-width: 768px) {
     flex-direction: column;
-    height: 540px;
+  }
+`;
+
+export const WrapList = styled.div`
+  min-width: 0;
+  height: 113px;
+  width: 388px;
+
+  @media screen and (min-width: 768px) {
+    height: 541px;
+    width: 186px;
   }
   @media screen and (min-width: 1280px) {
     height: 690px;
     width: 196px;
   }
+`;
+
+export const ButtonAddToFavorite = styled.button`
+  cursor: pointer;
+  background-color: transparent;
+  padding: 0;
+  padding-top: 4px;
+  border: none;
 `;

@@ -1,4 +1,5 @@
 import { Container } from 'components/Container/Container';
+import IconLogo from 'images/icons/IconLogo';
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
@@ -21,6 +22,14 @@ export const FooterContainer = styled(Container)`
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+`;
+export const StyledIconLogo = styled(IconLogo)`
+  width: 40px;
+  height: 40px;
+  @media screen and (min-width: 768px) {
+    width: 80px;
+    height: 80px;
   }
 `;
 

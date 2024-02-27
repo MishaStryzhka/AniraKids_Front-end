@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
@@ -40,7 +40,9 @@ import {
   TextCalendar,
   ButtonCalendarTime,
   GeneralWrap,
-  List,
+  ButtonAddToFavorite,
+  // List,
+  // WrapList,
 } from './ProductPage.styled';
 import IconHeart from 'images/icons/IconHeart';
 import { useTranslation } from 'react-i18next';
@@ -56,6 +58,11 @@ import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/navigation';
 import IconChat from 'images/icons/IconChat';
+import { useDispatch } from 'react-redux';
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from '../../redux/auth/operations';
 import {
   Price,
   SecondWrap,
@@ -64,19 +71,21 @@ import { useAuth } from 'hooks';
 
 const api = require('../../api');
 
-const ProductPage = index => {
+const ProductPage = onRemoveFavorite => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
   const { user } = useAuth();
   const { id } = useParams();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const dispatch = useDispatch();
+  
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -92,13 +101,18 @@ const ProductPage = index => {
         setIsLoading(false);
       });
   }, [id]);
-
+  
+  const handleAddToFavorites = id => {
+    // onRemoveFavorite && onRemoveFavorite();
+    user?.favorites.includes(id)
+      ? dispatch(removeFromFavorites(id))
+      : dispatch(addToFavorites(id));
+  };
+  
   const handleSecondaryImageClick = index => {
     setCurrentImageIndex(index);
     // swiperRef.current.slideTo(index);
   };
-
-  console.log('product', product);
 
   const handleClickRent = e => {
     setIsLoading(true);
@@ -134,14 +148,16 @@ const ProductPage = index => {
         navigate('/my-account/cart');
       });
   };
-
+  
   const width = window.innerWidth < 767;
 
   return isLoading ? (
     <p>Loading...</p>
   ) : (
     <GeneralWrap>
-      <WrapProductCard>
+      <WrapProductCard
+        $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+      >
         <WrapAllImages>
           <MainImage
             srcSet={product?.photos[currentImageIndex].path}
@@ -149,33 +165,40 @@ const ProductPage = index => {
           />
 
           <WrapSecondaryImages>
-            <List>
-              <Swiper
-                modules={[Scrollbar, Navigation]}
-                spaceBetween={8}
-                slidesPerView={3}
-                scrollbar={{ draggable: true }}
-                direction={width ? 'horizontal' : 'vertical'}
-              >
-                {product?.photos.map(({ path }, index) => (
-                  <SwiperSlide key={index}>
-                    <SecondaryImages
-                      srcSet={`${path}`}
-                      alt="All photos"
-                      onClick={() => {
-                        handleSecondaryImageClick(index);
-                      }}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </List>
+            <Swiper
+              modules={[Scrollbar, Navigation]}
+              spaceBetween={8}
+              slidesPerView={3}
+              scrollbar={{ draggable: product?.photos.length > 3 && true }}
+              direction={width ? 'horizontal' : 'vertical'}
+              height={'auto'}
+            >
+              {product?.photos.map(({ path }, index) => (
+                <SwiperSlide key={index}>
+                  <SecondaryImages
+                    srcSet={`${path}`}
+                    alt="All photos"
+                    onClick={() => {
+                      handleSecondaryImageClick(index);
+                    }}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </WrapSecondaryImages>
         </WrapAllImages>
 
-        <TextWrap>
-          <WrapInformation>
-            <Wrap>
+        <TextWrap
+          $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+        >
+          <WrapInformation
+            $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+          >
+            <Wrap
+              $pageFavorites={
+                pathname === `/my-account/favorite/${product?._id}`
+              }
+            >
               <Title>{product?.name}</Title>
               <WrapInside>
                 <TextSeller>
@@ -226,29 +249,50 @@ const ProductPage = index => {
               </WrapCalendar>
             )}
             <WrapBtn>
-              {(product?.dailyRentalPrice ||
-                product?.hourlyRentalPrice ||
-                product?.rentalPrice) && (
-                <Button
-                  disabled={product?.owner?._id === user?.userID}
-                  style={{ width: 'auto' }}
-                  onClick={handleClickRent}
-                  ariaLabel="rent"
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product._id,
+                    serviceType: 'rent',
+                    price: product?.dailyRentalPrice || product?.rentalPrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Орендувати
+              </Button>
+              <Button
+                disabled={product?.owner?._id === user?.userID}
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  api.addToOrder({
+                    productId: product?._id,
+                    serviceType: 'buy',
+                    price: product?.salePrice,
+                    owner: product?.owner?._id,
+                  });
+                }}
+              >
+                Купити
+              </Button>
+              {pathname !== `/my-account/favorite/${product?._id}` && (
+                <ButtonAddToFavorite
+                  onClick={e => {
+                    e.preventDefault();
+                    handleAddToFavorites(product?._id);
+                  }}
                 >
-                  Орендувати
-                </Button>
+                  <IconHeart
+                    fill={
+                      user?.favorites.includes(product?._id)
+                        ? '#000'
+                        : 'transparent'
+                    }
+                  />
+                </ButtonAddToFavorite>
               )}
-              {product?.salePrice && (
-                <Button
-                  disabled={product?.owner?._id === user?.userID}
-                  style={{ width: 'auto' }}
-                  onClick={handleClickBuy}
-                  ariaLabel="buy"
-                >
-                  Купити
-                </Button>
-              )}
-              <IconHeart />
               <IconChat />
             </WrapBtn>
           </WrapInformation>
@@ -256,7 +300,7 @@ const ProductPage = index => {
           <WrapDescription>
             <Border />
             <TitleDescription>{t('Product Description')}</TitleDescription>
-            <TextDescription>{product.description}</TextDescription>
+            <TextDescription>{product?.description}</TextDescription>
             <TitleDescription
               style={{
                 marginTop: '24px',
@@ -270,12 +314,14 @@ const ProductPage = index => {
                   backgroundColor: product?.colorCode,
                 }}
               />
-              <TextDescription>{t(product.color)}</TextDescription>
+              <TextDescription>{t(product?.color)}</TextDescription>
             </WrapColor>
           </WrapDescription>
         </TextWrap>
       </WrapProductCard>
-      <WrapReviews>
+      <WrapReviews
+        $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
+      >
         <Title>{t('reviews')}</Title>
         <ListReviews>
           <ItemReview>

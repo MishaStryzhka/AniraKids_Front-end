@@ -33,6 +33,7 @@ import IconLittleHeart from 'images/icons/IconLittleHeart';
 import RatingStars from 'components/RatingStars/RatingStars';
 import IconPencil from 'images/icons/IconPencil';
 import IconBasket from 'images/icons/IconBasket';
+import IconCross from 'images/icons/IconCross';
 
 const UsersProductCard = ({
   product,
@@ -57,11 +58,14 @@ const UsersProductCard = ({
 
   const { pathname } = useLocation();
 
+  console.log('pathname', pathname);
+
   return (
     <Card
       to={`./${product?._id}`}
       $pageRentOut={pathname === '/my-account/rent-out'}
-      // {pathname !== '/my-account/rent-out' && ()}
+      handleRemove={handleRemove}
+      onRemoveFavorite={() => onRemoveFavorite()}
     >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
         <div
@@ -73,7 +77,7 @@ const UsersProductCard = ({
             gap: 8,
           }}
         >
-          {pathname !== '/my-account/rent-out' && (
+          {pathname === '/my-account/favorite' && (
             <ButtonAddToFavorites
               disabled={isLoading}
               onClick={e => {
@@ -81,14 +85,18 @@ const UsersProductCard = ({
                 handleAddToFavorites(product?._id);
               }}
             >
-              <IconLittleHeart
-                fill={
-                  user?.favorites.includes(product?._id)
-                    ? '#fff'
-                    : 'transparent'
-                }
-                stroke={theme[currentTheme].color.mainColor1}
-              />
+              {pathname === '/my-account/favorite' ? (
+                <IconCross />
+              ) : (
+                <IconLittleHeart
+                  fill={
+                    user?.favorites.includes(product?._id)
+                      ? '#fff'
+                      : 'transparent'
+                  }
+                  stroke={theme[currentTheme].color.mainColor1}
+                />
+              )}
             </ButtonAddToFavorites>
           )}
           {pathname === '/my-account/rent-out' && (
@@ -114,12 +122,13 @@ const UsersProductCard = ({
             </ButtonAddToFavorites>
           )}
         </div>
+
         <PictureCard $pageRentOut={pathname === '/my-account/rent-out'}>
           <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
         </PictureCard>
         <WrapText $pageRentOut={pathname === '/my-account/rent-out'}>
           <FirstWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-            <TextName>{product?.brand || 'brand'}</TextName>
+            <TextName>{product?.name || 'brand'}</TextName>
             <TextSize>
               <Span>{t('Size')}:</Span>
               {product?.size || product?.childSize}
