@@ -52,7 +52,7 @@ export const Item = styled.li`
 `;
 
 export const Description = styled.p`
-  display: block;
+  /* display: block; */
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -83,3 +83,9 @@ export const Picture = styled.picture`
 export const AddWrap = styled.div`
   max-width: 590px;
 `;
+
+// export const StyledIconCheck = styled(IconCheck)`
+//   width: 24px;
+//   height: 24px;
+//   stroke: ${({ theme }) => theme.color.mainColor5};
+// `;

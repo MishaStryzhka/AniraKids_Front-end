@@ -1,9 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  ModalTitle,
-  ModalWindow,
-  StyledIconCross,
-} from './ModalFilters.styled';
+import { ModalTitle, ModalWindow } from './ModalFilters.styled';
 import FilterType from 'components/Filters/FilterType/FilterType';
 import { useLocation } from 'react-router-dom';
 import FilterFamilyLookWomen from 'components/Filters/FilterFamilyLook/FilterFamilyLookWomen';
@@ -28,12 +24,6 @@ const ModalFilters = ({ onClick }) => {
   console.log(t);
   return (
     <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
       <ModalTitle>{t('filters')}</ModalTitle>
       <FilterType />
       {pathname === '/forWomen' && <FilterForPregnantWomen />}

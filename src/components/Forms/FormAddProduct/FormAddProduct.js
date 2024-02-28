@@ -73,6 +73,8 @@ import {
   arrayofDecorProduct,
   arrayOfOutfits,
 } from 'data';
+import Modal from 'components/Modals/Modal';
+import ModalAttention from 'components/Modals/ModalAttention/ModalAttention';
 
 const api = require('../../../api');
 
@@ -83,7 +85,7 @@ const FormAddProduct = () => {
   const [stepValue, setStepValue] = useState(1);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
-
+  const [isModal, setIsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -227,15 +229,18 @@ const FormAddProduct = () => {
                   accept=".jpg, .jpeg, .png"
                   onChange={e => {
                     const selectedFiles = Array.from(e.target.files);
-
+                    console.log(selectedPhotos);
+                    console.log(selectedPhotos.length);
                     if (selectedFiles.length + selectedPhotos.length > 10) {
                       // Заборонити вибір більше ніж 10 файлів
-                      alert(t('maxFiles'));
+                      setIsModal(true);
                       return;
                     }
 
                     if (selectedFiles.some(file => file.size > 10485760)) {
-                      alert(t('maxSize'));
+                      // alert(t('maxSize'));
+                      setIsModal(true);
+                      return;
                     }
 
                     setTouched({ ...touched, photoUrls: true });
@@ -1635,6 +1640,19 @@ const FormAddProduct = () => {
                 </>
               )}
             </FormMobile>
+            {isModal && (
+              <Modal
+                onClick={() => {
+                  setIsModal(false);
+                }}
+              >
+                <ModalAttention
+                  onClick={() => {
+                    setIsModal(false);
+                  }}
+                />
+              </Modal>
+            )}
           </>
         );
       }}

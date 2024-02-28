@@ -1,9 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  ModalWindow,
-  StyledIconCrossToWindow,
-  TextDescription,
-} from '../Modal.styled';
+import { ModalWindow, TextDescription } from '../Modal.styled';
 import Button from 'components/Button/Button';
 
 const ModalVideoResolved = ({ onClick }) => {
@@ -12,12 +8,6 @@ const ModalVideoResolved = ({ onClick }) => {
   });
   return (
     <ModalWindow>
-      <StyledIconCrossToWindow
-        onClick={() => {
-          onClick();
-        }}
-      />
-
       <TextDescription>{t('Video sent resorved')}</TextDescription>
       <Button type="submit">{t('backToMainPage')}</Button>
     </ModalWindow>

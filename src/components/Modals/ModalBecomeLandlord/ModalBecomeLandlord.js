@@ -1,5 +1,4 @@
 import { ModalDescription, ModalTitle, ModalWindow } from '../Modal.styled';
-import { StyledIconCross } from '../ModalLogOut/ModalLogOut.styled';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'hooks';
 import { useDispatch } from 'react-redux';
@@ -32,12 +31,6 @@ const ModalBecomeLandlord = ({ onClick }) => {
 
   return (
     <ModalWindow width="448px">
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
       {step === 'first' && (
         <>
           <ModalTitle>{t('becomeLandlord')}</ModalTitle>

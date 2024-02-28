@@ -6,6 +6,7 @@
 import { useCallback, useEffect } from 'react';
 import {
   Backdrop,
+  CloseButton,
   ModalContainer,
   ScrollBox,
   StyledIconCross,
@@ -51,12 +52,14 @@ const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
       >
         <ModalContainer>
           {onClick && (
-            <StyledIconCross
+            <CloseButton
               onClick={() => {
                 document.body.style.overflow = 'auto';
                 onClick();
               }}
-            />
+            >
+              <StyledIconCross />
+            </CloseButton>
           )}
           {children}
         </ModalContainer>

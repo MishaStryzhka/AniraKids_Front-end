@@ -16,6 +16,9 @@ export const StyledIconCross = styled(IconCross)`
   top: 8px;
   right: 8px;
   cursor: pointer;
+  stroke: ${({ theme }) => theme.color.mainColor3};
+  fill: ${({ theme }) => theme.color.mainColor3};
+  z-index: 1;
 `;
 
 export const StyledIconCrossToWindow = styled(IconCross)`
@@ -183,4 +186,14 @@ export const ErrorMessage = styled.p`
   font-style: normal;
   font-weight: 700;
   line-height: 20px; /* 142.857% */
+`;
+
+export const CloseButton = styled.button`
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
 `;

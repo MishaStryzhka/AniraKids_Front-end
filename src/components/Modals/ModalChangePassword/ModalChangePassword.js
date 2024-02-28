@@ -10,12 +10,7 @@ import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { validPasswordScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
-import {
-  GeneralModalWindow,
-  InputModal,
-  ModalTitle,
-  StyledIconCross,
-} from '../Modal.styled';
+import { GeneralModalWindow, InputModal, ModalTitle } from '../Modal.styled';
 
 const ModalChangePassword = ({ onClick }) => {
   const dispatch = useDispatch();
@@ -50,12 +45,6 @@ const ModalChangePassword = ({ onClick }) => {
       >
         {({ values, errors, touched, handleChange, handleSubmit }) => (
           <Form onSubmit={handleSubmit}>
-            <StyledIconCross
-              onClick={() => {
-                document.body.style.overflow = 'auto';
-                onClick();
-              }}
-            />
             <ModalTitle>{t('changePassword')}</ModalTitle>
             <LabelModal>
               {t('yourPassword')}
