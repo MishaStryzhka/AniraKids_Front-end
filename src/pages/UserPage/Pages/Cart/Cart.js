@@ -12,8 +12,6 @@ const Cart = () => {
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState([]);
 
-  console.log('orders', orders);
-
   useEffect(() => {
     api
       .getOrders()
@@ -28,12 +26,25 @@ const Cart = () => {
       });
   }, []);
 
+  const handleRemoveOrder = orderId => {
+    api.removeOrder(orderId).then(({ message }) => {
+      message === 'Order successfully removed' &&
+        setOrders(prefOrders =>
+          prefOrders.filter(item => item._id !== orderId)
+        );
+    });
+  };
+
   return !orders.length ? (
     <p>Ваш кошик поки пустий</p>
   ) : (
     <>
       {orders.map(order => (
-        <Order key={order._id} order={order} />
+        <Order
+          handleRemoveOrder={() => handleRemoveOrder(order._id)}
+          key={order._id}
+          order={order}
+        />
       ))}
     </>
   );

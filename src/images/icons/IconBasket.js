@@ -1,5 +1,5 @@
 import * as React from 'react';
-const IconBasket = props => (
+const IconBasket = ({ stroke, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={18}
@@ -9,7 +9,7 @@ const IconBasket = props => (
     {...props}
   >
     <g
-      stroke="#fff"
+      stroke={stroke || '#fff'}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}
