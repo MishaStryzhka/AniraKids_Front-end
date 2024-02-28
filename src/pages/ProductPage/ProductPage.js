@@ -41,10 +41,7 @@ import {
   ButtonCalendarTime,
   GeneralWrap,
   ButtonAddToFavorite,
-  // List,
-  // WrapList,
 } from './ProductPage.styled';
-import IconHeart from 'images/icons/IconHeart';
 import { useTranslation } from 'react-i18next';
 import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
 import IconStar from 'images/icons/IconStart';
@@ -67,25 +64,35 @@ import {
   Price,
   SecondWrap,
 } from 'components/UsersProductCard/UsersProductCard.styled';
-import { useAuth } from 'hooks';
+import { useAuth, useStorage } from 'hooks';
+import IconLittleHeart from 'images/icons/IconLittleHeart';
+import theme from 'components/theme';
 
 const api = require('../../api');
 
-const ProductPage = onRemoveFavorite => {
+const ProductPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.productPage',
   });
-  const { user } = useAuth();
+  const { user, currentTheme } = useAuth();
   const { id } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const storage = useStorage();
+  const [favorites, setFavorites] = useState(
+    user?.favorites || storage.get('favorites') || []
+  );
+
+  useEffect(() => {
+    user?.favorites && setFavorites(user?.favorites);
+  }, [user?.favorites]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -101,14 +108,28 @@ const ProductPage = onRemoveFavorite => {
         setIsLoading(false);
       });
   }, [id]);
-  
+
   const handleAddToFavorites = id => {
-    // onRemoveFavorite && onRemoveFavorite();
-    user?.favorites.includes(id)
-      ? dispatch(removeFromFavorites(id))
-      : dispatch(addToFavorites(id));
+    if (user) {
+      user?.favorites?.includes(id)
+        ? dispatch(removeFromFavorites(id))
+        : dispatch(addToFavorites(id));
+    } else {
+      if (storage.get('favorites')?.includes(id)) {
+        storage.set(
+          'favorites',
+          storage.get('favorites').filter(favorite => favorite !== id)
+        );
+        setFavorites(prevFavorites =>
+          prevFavorites.filter(favorite => favorite !== id)
+        );
+      } else {
+        storage.set('favorites', [...storage.get('favorites'), id]);
+        setFavorites(prevFavorites => [...prevFavorites, id]);
+      }
+    }
   };
-  
+
   const handleSecondaryImageClick = index => {
     setCurrentImageIndex(index);
     // swiperRef.current.slideTo(index);
@@ -127,7 +148,6 @@ const ProductPage = onRemoveFavorite => {
         owner: product?.owner?._id,
       })
       .then(data => {
-        console.log('data', data);
         setIsLoading(false);
         navigate('/my-account/cart');
       });
@@ -143,12 +163,11 @@ const ProductPage = onRemoveFavorite => {
         owner: product?.owner?._id,
       })
       .then(data => {
-        console.log('data', data);
         setIsLoading(false);
         navigate('/my-account/cart');
       });
   };
-  
+
   const width = window.innerWidth < 767;
 
   return isLoading ? (
@@ -278,12 +297,15 @@ const ProductPage = onRemoveFavorite => {
                     handleAddToFavorites(product?._id);
                   }}
                 >
-                  <IconHeart
+                  <IconLittleHeart
+                    width={24}
+                    height={24}
                     fill={
-                      user?.favorites.includes(product?._id)
-                        ? '#000'
-                        : 'transparent'
+                      favorites?.includes(product?._id)
+                        ? theme[currentTheme].color.mainColor3
+                        : '#fff'
                     }
+                    stroke={theme[currentTheme].color.mainColor3}
                   />
                 </ButtonAddToFavorite>
               )}

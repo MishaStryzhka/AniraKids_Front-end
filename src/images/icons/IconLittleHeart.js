@@ -1,15 +1,16 @@
 import * as React from 'react';
-const IconLittleHeart = props => (
+const IconLittleHeart = ({ stroke, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={18}
     height={18}
     fill="none"
+    viewBox="0 0 18 18"
     {...props}
   >
     <g clipPath="url(#a)">
       <path
-        stroke="#fff"
+        stroke={stroke}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.5}

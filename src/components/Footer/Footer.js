@@ -10,6 +10,7 @@ import {
 import SectionNavLinks from 'components/BoxNavLinks/BoxNavLinks';
 import { NavLink, useLocation } from 'react-router-dom';
 import FooterSelectLanguage from 'components/FooterSelectLanguage/FooterSelectLanguage';
+import IconInfo from 'images/icons/IconInfo';
 
 const Footer = () => {
   const { pathname } = useLocation();
@@ -29,6 +30,19 @@ const Footer = () => {
           <FooterCopyright>
             AniraKids © 2023 - 2024 GlamGarb Rentals s.r.o
           </FooterCopyright>
+          <NavLink
+            style={{
+              marginLeft: 20,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: 'currentcolor',
+            }}
+            to={'/privacy-policy'}
+          >
+            <IconInfo width={18} height={18} color="#000" /> Ochrana osobních
+            údajů
+          </NavLink>
         </FooterWrap>
       </FooterContainer>
     </StyledFooter>

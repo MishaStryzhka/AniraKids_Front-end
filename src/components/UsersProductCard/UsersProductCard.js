@@ -24,7 +24,7 @@ import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import theme from 'components/theme';
-import { useAuth } from 'hooks';
+import { useAuth, useStorage } from 'hooks';
 import {
   addToFavorites,
   removeFromFavorites,
@@ -34,6 +34,7 @@ import RatingStars from 'components/RatingStars/RatingStars';
 import IconPencil from 'images/icons/IconPencil';
 import IconBasket from 'images/icons/IconBasket';
 import IconCross from 'images/icons/IconCross';
+import { useEffect, useState } from 'react';
 
 const UsersProductCard = ({
   product,
@@ -44,28 +45,46 @@ const UsersProductCard = ({
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.usersProductCard',
   });
-
   const { user, currentTheme, isLoading } = useAuth();
-  console.log(user);
+  const storage = useStorage();
+  const [favorites, setFavorites] = useState(
+    user?.favorites || storage.get('favorites') || []
+  );
+
+  useEffect(() => {
+    user?.favorites && setFavorites(user?.favorites);
+  }, [user?.favorites]);
+
   const dispatch = useDispatch();
 
   const handleAddToFavorites = id => {
-    onRemoveFavorite && onRemoveFavorite();
-    user?.favorites.includes(id)
-      ? dispatch(removeFromFavorites(id))
-      : dispatch(addToFavorites(id));
+    if (user) {
+      onRemoveFavorite && onRemoveFavorite();
+      user?.favorites?.includes(id)
+        ? dispatch(removeFromFavorites(id))
+        : dispatch(addToFavorites(id));
+    } else {
+      if (storage.get('favorites').includes(id)) {
+        storage.set(
+          'favorites',
+          storage.get('favorites').filter(favorite => favorite !== id)
+        );
+        setFavorites(prevFavorites =>
+          prevFavorites.filter(favorite => favorite !== id)
+        );
+      } else {
+        storage.set('favorites', [...storage.get('favorites'), id]);
+        setFavorites(prevFavorites => [...prevFavorites, id]);
+      }
+    }
   };
 
   const { pathname } = useLocation();
-
-  console.log('pathname', pathname);
 
   return (
     <Card
       to={`./${product?._id}`}
       $pageRentOut={pathname === '/my-account/rent-out'}
-      handleRemove={handleRemove}
-      onRemoveFavorite={() => onRemoveFavorite()}
     >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
         <div
@@ -77,7 +96,7 @@ const UsersProductCard = ({
             gap: 8,
           }}
         >
-          {pathname === '/my-account/favorite' && (
+          {pathname !== '/my-account/rent-out' && (
             <ButtonAddToFavorites
               disabled={isLoading}
               onClick={e => {
@@ -90,9 +109,7 @@ const UsersProductCard = ({
               ) : (
                 <IconLittleHeart
                   fill={
-                    user?.favorites.includes(product?._id)
-                      ? '#fff'
-                      : 'transparent'
+                    favorites?.includes(product?._id) ? '#fff' : 'transparent'
                   }
                   stroke={theme[currentTheme].color.mainColor1}
                 />
@@ -179,7 +196,7 @@ const UsersProductCard = ({
                     `(${product?.owner?.ratingCount} ${t('ratings')})`}
                 </TextRating>
               </WrapTextSeller>
-              <UserNickname>{user?.nickname}</UserNickname>
+              <UserNickname>{product?.owner?.nickname}</UserNickname>
             </div>
           </WrapPartSeller>
         </WrapText>

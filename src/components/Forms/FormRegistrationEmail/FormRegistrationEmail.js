@@ -15,7 +15,7 @@ import {
 import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
-import { useAuth } from 'hooks';
+import { useAuth, useStorage } from 'hooks';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from '../Form.styled';
 import { BeatLoader } from 'react-spinners';
@@ -27,6 +27,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme, error, isLoading } = useAuth();
+  const storage = useStorage();
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -34,7 +35,9 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
 
   const handleRegistrationEmailSubmit = values => {
     const { email, password } = values;
-    dispatch(register({ email, password }));
+    dispatch(
+      register({ email, password, favorites: storage.get('favorites') || [] })
+    );
   };
 
   return (

@@ -14,7 +14,7 @@ import {
 import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
 import theme from 'components/theme';
-import { useAuth } from 'hooks';
+import { useAuth, useStorage } from 'hooks';
 import { validRegistrationPhoneNumberScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from '../Form.styled';
@@ -27,6 +27,7 @@ const FormRegistrationPhoneNumber = () => {
   const dispatch = useDispatch();
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme, error, isLoading } = useAuth();
+  const storage = useStorage();
 
   const handleOpenPassword = () =>
     setOpenPassword(openPassword => !openPassword);
@@ -34,7 +35,13 @@ const FormRegistrationPhoneNumber = () => {
   const handleRegistrationSubmit = values => {
     const { primaryPhoneNumber, password } = values;
 
-    dispatch(register({ primaryPhoneNumber, password }));
+    dispatch(
+      register({
+        primaryPhoneNumber,
+        password,
+        favorites: storage.get('favorites') || [],
+      })
+    );
   };
   return (
     <>
