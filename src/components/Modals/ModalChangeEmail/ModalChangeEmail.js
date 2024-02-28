@@ -10,7 +10,6 @@ import {
   GeneralModalWindow,
   InputModal,
   ModalTitle,
-  StyledIconCross,
   TextDone,
 } from '../Modal.styled';
 import { clearDone, clearError } from '../../../redux/auth/slice';
@@ -63,12 +62,6 @@ const ModalChangeEmail = ({ onClick }) => {
             </TextDone>
           ) : (
             <Form onSubmit={handleSubmit}>
-              <StyledIconCross
-                onClick={() => {
-                  document.body.style.overflow = 'auto';
-                  onClick();
-                }}
-              />
               <ModalTitle>{t('changeEmailTitle')}</ModalTitle>
               <LabelModal>
                 {t('enterEmailLabel')}

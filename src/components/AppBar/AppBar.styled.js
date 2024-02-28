@@ -72,9 +72,9 @@ export const Item = styled.li`
 `;
 
 export const BoxShadow = styled.div`
-  @media screen and (min-width: 768px) {
-    box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
-  }
+  /* @media screen and (min-width: 768px) { */
+  box-shadow: 0px 4px 6px 0px rgba(17, 17, 17, 0.1);
+  /* } */
 `;
 
 export const ButtonMenu = styled.button`

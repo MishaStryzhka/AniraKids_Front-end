@@ -6,7 +6,6 @@ import {
   GeneralModalWindow,
   InputModal,
   ModalTitle,
-  StyledIconCross,
 } from '../Modal.styled';
 
 const { useTranslation } = require('react-i18next');
@@ -40,12 +39,6 @@ const ModalChangeNickname = ({ onClick }) => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <StyledIconCross
-              onClick={() => {
-                document.body.style.overflow = 'auto';
-                onClick();
-              }}
-            />
             <ModalTitle>{t('changeNickname')}</ModalTitle>
             <Label>
               {t('Nickname')}

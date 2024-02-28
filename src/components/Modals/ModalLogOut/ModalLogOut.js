@@ -3,7 +3,6 @@ import {
   ButtonBack,
   ModalTitle,
   ModalWindow,
-  StyledIconCross,
   Wrap,
 } from './ModalLogOut.styled';
 import { useDispatch } from 'react-redux';
@@ -23,12 +22,6 @@ const ModalLogOut = ({ onClick }) => {
 
   return (
     <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
       <ModalTitle>{t('LogOut')}</ModalTitle>
 
       <Wrap>

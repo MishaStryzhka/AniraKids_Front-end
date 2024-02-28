@@ -5,12 +5,7 @@ import { useDispatch } from 'react-redux';
 import { updateUserInfo } from '../../../redux/auth/operations';
 import { validPhoneNumberScheme } from 'schemas';
 import { useTranslation } from 'react-i18next';
-import {
-  GeneralModalWindow,
-  InputModal,
-  ModalTitle,
-  StyledIconCross,
-} from '../Modal.styled';
+import { GeneralModalWindow, InputModal, ModalTitle } from '../Modal.styled';
 
 const ModalChangePhoneNumber = ({ onClick }) => {
   const dispatch = useDispatch();
@@ -43,12 +38,6 @@ const ModalChangePhoneNumber = ({ onClick }) => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <StyledIconCross
-              onClick={() => {
-                document.body.style.overflow = 'auto';
-                onClick();
-              }}
-            />
             <ModalTitle>{t('changePhoneNumber')}</ModalTitle>
             <Label>
               {t('phoneNumber')}

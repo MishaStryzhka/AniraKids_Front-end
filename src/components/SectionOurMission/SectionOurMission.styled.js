@@ -52,12 +52,15 @@ export const Item = styled.li`
 `;
 
 export const Description = styled.p`
-  display: block;
+  /* display: block; */
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.43;
-  max-width: 580px;
+  max-width: 360px;
+  @media screen and (min-width: 768px) {
+    max-width: 580px;
+  }
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
@@ -83,3 +86,9 @@ export const Picture = styled.picture`
 export const AddWrap = styled.div`
   max-width: 590px;
 `;
+
+// export const StyledIconCheck = styled(IconCheck)`
+//   width: 24px;
+//   height: 24px;
+//   stroke: ${({ theme }) => theme.color.mainColor5};
+// `;

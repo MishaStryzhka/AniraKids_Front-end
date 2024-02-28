@@ -1,11 +1,5 @@
 import { ModalWindow } from '../Modal.styled';
-import {
-  Input,
-  Label,
-  StyledIconCross,
-  StyledIconSend,
-  Title,
-} from './ModalAddVideo.styled';
+import { Input, Label, StyledIconSend, Title } from './ModalAddVideo.styled';
 import { useTranslation } from 'react-i18next';
 import ImgAddVideo from '../../../images/img-add-video-product.jpg';
 
@@ -15,7 +9,6 @@ const ModalAddVideo = () => {
   });
   return (
     <ModalWindow>
-      <StyledIconCross />
       <Title>{t('addVideo')}</Title>
       <img src={ImgAddVideo} alt="ImgAddVideo" />
       <Label>

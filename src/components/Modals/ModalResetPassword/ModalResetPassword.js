@@ -4,7 +4,6 @@ import {
   GeneralModalWindow,
   InputModal,
   ModalTitle,
-  StyledIconCross,
 } from '../Modal.styled';
 import Button from 'components/Button/Button';
 import {
@@ -46,12 +45,6 @@ const ModalResetPassword = ({ onClick }) => {
           //     </TextDone>
           //   ) :
           <Form onSubmit={handleSubmit}>
-            <StyledIconCross
-              onClick={() => {
-                document.body.style.overflow = 'auto';
-                onClick();
-              }}
-            />
             <Wrap>
               <ModalTitle>{t('resetPassword')}</ModalTitle>
               <Description>{t('enterYourEmail')}</Description>

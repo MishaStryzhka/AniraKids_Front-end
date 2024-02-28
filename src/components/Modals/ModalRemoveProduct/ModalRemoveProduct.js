@@ -4,7 +4,6 @@ import {
   ButtonReject,
   ModalTitle,
   ModalWindow,
-  StyledIconCross,
   Wrap,
 } from './ModalRemoveProduct.styled';
 
@@ -14,12 +13,6 @@ const ModalRemoveProduct = ({ onClick, on }) => {
   });
   return (
     <ModalWindow>
-      <StyledIconCross
-        onClick={() => {
-          document.body.style.overflow = 'auto';
-          onClick();
-        }}
-      />
       <ModalTitle
         onClick={() => {
           onClick();
