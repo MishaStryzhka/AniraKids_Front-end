@@ -57,7 +57,10 @@ export const Description = styled.p`
   font-size: 14px;
   font-weight: 400;
   line-height: 1.43;
-  max-width: 580px;
+  max-width: 360px;
+  @media screen and (min-width: 768px) {
+    max-width: 580px;
+  }
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
