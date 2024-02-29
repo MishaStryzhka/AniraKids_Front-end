@@ -45,6 +45,7 @@ import { ModalAttentionTranslationsCs } from 'components/Modals/ModalAttention/t
 import { ModalVideoResolvedTranslationsCs } from 'components/Modals/ModalVideoResolved/translations/cs';
 import { ModalAddVideoTranslationsCs } from 'components/Modals/ModalAddVideo/translations/cs';
 import { UsersProductCardTranslationsCs } from 'components/UsersProductCard/translations/cs';
+import { EmptyCartTranslationsCs } from 'components/EmptyCart/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -102,4 +103,6 @@ export const ComponentTranslationsCs = {
   sectionAnswers: SectionAnswersTranslationsCs,
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
+
+  emptyCart: EmptyCartTranslationsCs,
 };

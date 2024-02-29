@@ -1,3 +1,4 @@
+import IconBag from 'images/icons/IconBag';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -46,4 +47,9 @@ export const StyledButton = styled.button`
   color: ${({ theme }) => theme.color.mainColor5};
 
   cursor: pointer;
+`;
+export const StyledIconBag = styled(IconBag)`
+  width: 24px;
+  height: 24px;
+  stroke: ${({ theme }) => theme.color.mainColor5};
 `;
