@@ -23,7 +23,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
     user
       ? navigate('/my-account/profile', { replace: true })
       : setIsModal(true);
-    onClick && onClick();
+    user && onClick && onClick();
   };
   return (
     <Box>
