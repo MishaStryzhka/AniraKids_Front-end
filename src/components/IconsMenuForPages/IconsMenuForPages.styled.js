@@ -29,3 +29,5 @@ export const ButtonFilters = styled.button`
     display: none;
   }
 `;
+
+export const MenuCalendar = styled.div``;

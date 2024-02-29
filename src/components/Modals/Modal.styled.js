@@ -174,8 +174,6 @@ export const ScrollBox = styled.div`
   width: 100vw;
 
   display: flex;
-
-  padding: 40px;
 `;
 
 export const ErrorMessage = styled.p`

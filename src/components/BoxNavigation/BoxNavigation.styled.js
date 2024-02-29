@@ -6,6 +6,9 @@ export const Box = styled.div`
 `;
 
 export const Button = styled.button`
+  display: flex;
+  align-items: center;
+
   background-color: transparent;
   border: none;
   cursor: pointer;
