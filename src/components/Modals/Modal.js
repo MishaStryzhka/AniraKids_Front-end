@@ -24,8 +24,6 @@ const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
     [onClick]
   );
 
-  console.log('prohibitClosingByBackdrop', prohibitClosingByBackdrop);
-
   document.body.style.overflow = 'hidden';
 
   const handleBackdropClick = evt => {
@@ -45,10 +43,14 @@ const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
 
   return createPortal(
     <Backdrop
-      onClick={!prohibitClosingByBackdrop ? handleBackdropClick : () => {}}
+      onClick={
+        onClick && !prohibitClosingByBackdrop ? handleBackdropClick : () => {}
+      }
     >
       <ScrollBox
-        onClick={!prohibitClosingByBackdrop ? handleBackdropClick : () => {}}
+        onClick={
+          onClick && !prohibitClosingByBackdrop ? handleBackdropClick : () => {}
+        }
       >
         <ModalContainer>
           {onClick && (

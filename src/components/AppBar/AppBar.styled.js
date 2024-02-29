@@ -87,3 +87,12 @@ export const ButtonMenu = styled.button`
     display: none;
   }
 `;
+
+export const Wrapper = styled.div`
+  display: none;
+  @media screen and (min-width: 1280px) {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+`;

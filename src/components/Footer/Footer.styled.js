@@ -1,5 +1,5 @@
 import { Container } from 'components/Container/Container';
-import IconLogo from 'images/icons/IconLogo';
+import IconLogo from 'images/icons/Icon';
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
@@ -64,6 +64,7 @@ export const Wrap = styled.div`
     flex-direction: row;
     justify-content: space-between;
     gap: 80px;
+    margin-bottom: 0;
   }
   @media screen and (min-width: 1280px) {
     flex-direction: row;

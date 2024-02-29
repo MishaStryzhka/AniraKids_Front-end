@@ -46,6 +46,7 @@ import { ModalAttentionTranslationsUk } from 'components/Modals/ModalAttention/t
 import { ModalVideoResolvedTranslationsUk } from 'components/Modals/ModalVideoResolved/translations/uk';
 import { ModalAddVideoTranslationsUk } from 'components/Modals/ModalAddVideo/translations/uk';
 import { UsersProductCardTranslationsUk } from 'components/UsersProductCard/translations/uk';
+import { CalendarTranslationsUk } from 'components/Calendar/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -104,4 +105,5 @@ export const ComponentTranslationsUk = {
   searchInput: SearchInputTranslationsUk,
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
+  calendar: CalendarTranslationsUk,
 };

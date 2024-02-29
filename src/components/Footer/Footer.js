@@ -4,13 +4,13 @@ import {
   FooterNavigate,
   FooterWrap,
   StyledFooter,
-  StyledIconLogo,
   Wrap,
 } from './Footer.styled';
 import SectionNavLinks from 'components/BoxNavLinks/BoxNavLinks';
 import { NavLink, useLocation } from 'react-router-dom';
 import FooterSelectLanguage from 'components/FooterSelectLanguage/FooterSelectLanguage';
 import IconInfo from 'images/icons/IconInfo';
+import Logo from 'components/Logo/Logo';
 
 const Footer = () => {
   const { pathname } = useLocation();
@@ -18,9 +18,7 @@ const Footer = () => {
     <StyledFooter $mainPage={pathname === `/`}>
       <FooterContainer>
         <FooterNavigate>
-          <NavLink to="./" style={{ display: 'flex' }}>
-            <StyledIconLogo />
-          </NavLink>
+          <Logo />
           <Wrap>
             <SectionNavLinks />
             <FooterSelectLanguage />

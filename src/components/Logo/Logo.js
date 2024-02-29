@@ -1,11 +1,13 @@
-import { NavLink } from 'react-router-dom';
-import { StyledIconLogo } from './Logo.styled';
+import { useLocation } from 'react-router-dom';
+import { StyledIconLogo, StyledNavLink } from './Logo.styled.js';
 
-const Logo = () => {
+const Logo = ({ $isHeader }) => {
+  const { pathname } = useLocation();
+
   return (
-    <NavLink to="./" style={{ display: 'flex' }}>
-      <StyledIconLogo />
-    </NavLink>
+    <StyledNavLink $isHeader={$isHeader} to="./">
+      <StyledIconLogo fill={pathname === '/' ? '#fff' : '#000'} />
+    </StyledNavLink>
   );
 };
 

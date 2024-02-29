@@ -9,7 +9,7 @@ import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
 import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
 
-const BoxNavigation = ({ $mainPage }) => {
+const BoxNavigation = ({ onClick, $mainPage }) => {
   const [isModal, setIsModal] = useState(false);
   const { user, currentTheme } = useAuth();
   const navigate = useNavigate();
@@ -23,12 +23,16 @@ const BoxNavigation = ({ $mainPage }) => {
     user
       ? navigate('/my-account/profile', { replace: true })
       : setIsModal(true);
+    onClick && onClick();
   };
   return (
     <Box>
       <Button
         type="button"
-        onClick={() => navigate('/my-account/favorite', { replace: true })}
+        onClick={() => {
+          onClick && onClick();
+          navigate('/my-account/favorite', { replace: true });
+        }}
       >
         <IconHeart
           stroke={
@@ -47,19 +51,13 @@ const BoxNavigation = ({ $mainPage }) => {
           }
         />
       </Button>
-      {isModal && !user && (
-        <Modal
-          onClick={() => {
-            setIsModal(false);
-          }}
-        >
-          <ModalRegister handleCloseModal={() => setIsModal(false)} />
-        </Modal>
-      )}
 
       <Button
         type="button"
-        onClick={() => navigate('/my-account/cart', { replace: true })}
+        onClick={() => {
+          onClick && onClick();
+          navigate('/my-account/cart', { replace: true });
+        }}
       >
         <IconBag
           stroke={
@@ -69,6 +67,15 @@ const BoxNavigation = ({ $mainPage }) => {
           }
         />
       </Button>
+      {isModal && !user && (
+        <Modal
+          onClick={() => {
+            setIsModal(false);
+          }}
+        >
+          <ModalRegister handleCloseModal={() => setIsModal(false)} />
+        </Modal>
+      )}
     </Box>
   );
 };

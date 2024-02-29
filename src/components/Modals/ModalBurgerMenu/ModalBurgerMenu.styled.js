@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  box-sizing: border-box;
+  width: 378px;
   display: flex;
   padding: 24px;
   gap: 24px;
@@ -13,7 +15,7 @@ export const ModalWindow = styled.div`
 
 export const Wrap = styled.div`
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
 `;
 
 export const Button = styled.button`
