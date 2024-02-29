@@ -7,7 +7,7 @@ import { useAuth, useTitle } from 'hooks';
 import { useDispatch } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
-import { StyledButton, StyledNavLink } from './UserPage.styled';
+import { StyledButton, StyledIconBag, StyledNavLink } from './UserPage.styled';
 import IconPerson from 'images/icons/IconPerson';
 import IconChat from 'images/icons/IconChat';
 import IconHeart from 'images/icons/IconHeart';
@@ -16,7 +16,6 @@ import IconHanger from 'images/icons/IconHanger';
 import IconBag2 from 'images/icons/IconBag2';
 import IconShopCart from 'images/icons/IconShopCart';
 import IconCard from 'images/icons/IconCard';
-import IconBag from 'images/icons/IconBag';
 import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 
@@ -69,7 +68,7 @@ const UserPage = () => {
             <IconCard /> {t('wallet')}
           </StyledNavLink>
           <StyledNavLink to="./cart">
-            <IconBag /> {t('basket')}
+            <StyledIconBag /> {t('basket')}
           </StyledNavLink>
           <StyledButton
             type="button"
