@@ -85,7 +85,7 @@ const FormAddProduct = () => {
   const [stepValue, setStepValue] = useState(1);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
-  const [isModal, setIsModal] = useState(false);
+  const [isOpenModalMaxSize, setIsOpenModalMaxSize] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -233,13 +233,13 @@ const FormAddProduct = () => {
                     console.log(selectedPhotos.length);
                     if (selectedFiles.length + selectedPhotos.length > 10) {
                       // Заборонити вибір більше ніж 10 файлів
-                      setIsModal(true);
+                      setIsOpenModalMaxSize(true);
                       return;
                     }
 
                     if (selectedFiles.some(file => file.size > 10485760)) {
                       // alert(t('maxSize'));
-                      setIsModal(true);
+                      setIsOpenModalMaxSize(true);
                       return;
                     }
 
@@ -1640,15 +1640,15 @@ const FormAddProduct = () => {
                 </>
               )}
             </FormMobile>
-            {isModal && (
+            {isOpenModalMaxSize && (
               <Modal
                 onClick={() => {
-                  setIsModal(false);
+                  setIsOpenModalMaxSize(false);
                 }}
               >
                 <ModalAttention
                   onClick={() => {
-                    setIsModal(false);
+                    setIsOpenModalMaxSize(false);
                   }}
                 />
               </Modal>

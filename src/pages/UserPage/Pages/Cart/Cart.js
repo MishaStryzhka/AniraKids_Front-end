@@ -1,3 +1,4 @@
+import EmptyCart from 'components/EmptyCart/EmptyCart';
 import Order from 'components/Order/Order';
 import { useEffect, useState } from 'react';
 
@@ -36,7 +37,7 @@ const Cart = () => {
   };
 
   return !orders.length ? (
-    <p>Ваш кошик поки пустий</p>
+    <EmptyCart />
   ) : (
     <>
       {orders.map(order => (
