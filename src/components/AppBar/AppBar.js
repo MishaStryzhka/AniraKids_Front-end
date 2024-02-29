@@ -34,11 +34,7 @@ const AppBar = () => {
                 <IconBurgerMenu />
               </ButtonMenu>
               {isModal && (
-                <Modal
-                // onClick={() => {
-                //   setIsModal(false);
-                // }}
-                >
+                <Modal>
                   <ModalBurgerMenu onClick={() => setIsModal(false)} />
                 </Modal>
               )}

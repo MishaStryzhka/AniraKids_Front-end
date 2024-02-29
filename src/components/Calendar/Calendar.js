@@ -4,6 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import addMonths from 'date-fns/addMonths';
 import { addDays, getMonth } from 'date-fns';
 import enGB from 'date-fns/locale/en-GB';
+import cs from 'date-fns/locale/cs';
 import uk from 'date-fns/locale/uk';
 import { useTranslation } from 'react-i18next';
 
@@ -45,7 +46,7 @@ const Calendar = () => {
 
   return (
     <DatePicker
-      locale={uk}
+      locale={i18n.language === 'en' ? enGB : i18n.language === 'cs' ? cs : uk}
       selected={startDate}
       onChange={onChange}
       minDate={new Date()}

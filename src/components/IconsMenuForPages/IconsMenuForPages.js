@@ -1,7 +1,7 @@
 import Calendar from 'components/Calendar/Calendar';
 import Modal from 'components/Modals/Modal';
 import ModalFilters from 'components/Modals/ModalFiltes/ModalFilters';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const { default: IconCalendar } = require('images/icons/IconCalendar');
 const { default: IconFilters } = require('images/icons/IconFilters');
@@ -16,6 +16,24 @@ const IconsMenuForPages = () => {
   const [isOpenModalFilters, setIsOpenModalFilters] = useState(false);
   const [isOpenModalCalendar, setIsOpenModalCalendar] = useState(false);
 
+  const menuRef = useRef(null);
+
+  console.log('menuRef', menuRef);
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpenModalCalendar(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isOpenModalCalendar]);
+
   return (
     <WrapMenu>
       <ButtonFilters type="button" onClick={() => setIsOpenModalFilters(true)}>
@@ -23,7 +41,10 @@ const IconsMenuForPages = () => {
       </ButtonFilters>
       <ButtonCalendar
         type="button"
-        onClick={() => setIsOpenModalCalendar(true)}
+        onClick={e => {
+          e.stopPropagation();
+          setIsOpenModalCalendar(true);
+        }}
       >
         <IconCalendar />
       </ButtonCalendar>
@@ -38,6 +59,7 @@ const IconsMenuForPages = () => {
       )}
       {isOpenModalCalendar && (
         <MenuCalendar
+          ref={menuRef}
           style={{ position: 'absolute', zIndex: 999, backgroundColor: '#fff' }}
         >
           <div>
