@@ -51,6 +51,7 @@ import {
   LabelStatusAgree,
   WrapTextAgree,
   WrapBtnAdd,
+  WrapButtons,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
@@ -1025,13 +1026,15 @@ const FormAddProduct = () => {
                       </LabelDescription>
                     </div>
                   </WrapInsideSection>
-                  <ButtonNext
-                    onClick={() => {
-                      setStepValue(2);
-                    }}
-                  >
-                    {t('btnNext')} 1/4
-                  </ButtonNext>
+                  <WrapButtons>
+                    <ButtonNext
+                      onClick={() => {
+                        setStepValue(2);
+                      }}
+                    >
+                      {t('btnNext')} 1/4
+                    </ButtonNext>
+                  </WrapButtons>
                 </Section>
               )}
               {stepValue === 2 && (
@@ -1142,20 +1145,22 @@ const FormAddProduct = () => {
                       )}
                     </GeneralList>
                   </div>
-                  <ButtonBack
-                    onClick={() => {
-                      setStepValue(1);
-                    }}
-                  >
-                    Назад
-                  </ButtonBack>
-                  <ButtonNext
-                    onClick={() => {
-                      setStepValue(3);
-                    }}
-                  >
-                    {t('btnNext')} 2/4
-                  </ButtonNext>
+                  <WrapButtons>
+                    <ButtonNext
+                      onClick={() => {
+                        setStepValue(3);
+                      }}
+                    >
+                      {t('btnNext')} 2/4
+                    </ButtonNext>
+                    <ButtonBack
+                      onClick={() => {
+                        setStepValue(1);
+                      }}
+                    >
+                      Назад
+                    </ButtonBack>
+                  </WrapButtons>
                 </Section>
               )}
               {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
@@ -1446,20 +1451,22 @@ const FormAddProduct = () => {
                       </BoxCategory>
                     </Wrap>
                   )}
-                  <ButtonBack
-                    onClick={() => {
-                      setStepValue(2);
-                    }}
-                  >
-                    Назад
-                  </ButtonBack>
-                  <ButtonNext
-                    onClick={() => {
-                      setStepValue(4);
-                    }}
-                  >
-                    Далі 3/4
-                  </ButtonNext>
+                  <WrapButtons>
+                    <ButtonNext
+                      onClick={() => {
+                        setStepValue(4);
+                      }}
+                    >
+                      {t('btnNext')} 3/4
+                    </ButtonNext>
+                    <ButtonBack
+                      onClick={() => {
+                        setStepValue(2);
+                      }}
+                    >
+                      Назад
+                    </ButtonBack>
+                  </WrapButtons>
                 </Section>
               )}
               {stepValue === 4 && (
@@ -1492,20 +1499,22 @@ const FormAddProduct = () => {
                       </ErrorMessage>
                     </WrapError>
                   </div>
-                  <ButtonBack
-                    onClick={() => {
-                      setStepValue(3);
-                    }}
-                  >
-                    Назад
-                  </ButtonBack>
-                  <ButtonNext
-                    onClick={() => {
-                      setStepValue(5);
-                    }}
-                  >
-                    Далі 4/4
-                  </ButtonNext>
+                  <WrapButtons>
+                    <ButtonNext
+                      onClick={() => {
+                        setStepValue(5);
+                      }}
+                    >
+                      {t('btnNext')} 4/4
+                    </ButtonNext>
+                    <ButtonBack
+                      onClick={() => {
+                        setStepValue(3);
+                      }}
+                    >
+                      Назад
+                    </ButtonBack>
+                  </WrapButtons>
                 </Section>
               )}
               {stepValue === 5 && (
@@ -1618,25 +1627,27 @@ const FormAddProduct = () => {
                       />
                     </LabelStatusAgree>
                   </SectionCondition>
-                  <ButtonBack
-                    onClick={() => {
-                      setStepValue(3);
-                    }}
-                  >
-                    Назад
-                  </ButtonBack>
-                  <WrapBtnAdd>
-                    <ButtonSubmit type="submit" disabled={isLoading}>
-                      {!isLoading ? (
-                        <>
-                          {t('addItem')}
-                          <IconPlus />
-                        </>
-                      ) : (
-                        <BeatLoader color="#EBDAD1" />
-                      )}
-                    </ButtonSubmit>
-                  </WrapBtnAdd>
+                  <WrapButtons>
+                    <WrapBtnAdd>
+                      <ButtonSubmit type="submit" disabled={isLoading}>
+                        {!isLoading ? (
+                          <>
+                            {t('addItem')}
+                            <IconPlus />
+                          </>
+                        ) : (
+                          <BeatLoader color="#EBDAD1" />
+                        )}
+                      </ButtonSubmit>
+                    </WrapBtnAdd>
+                    <ButtonBack
+                      onClick={() => {
+                        setStepValue(4);
+                      }}
+                    >
+                      Назад
+                    </ButtonBack>
+                  </WrapButtons>
                 </>
               )}
             </FormMobile>

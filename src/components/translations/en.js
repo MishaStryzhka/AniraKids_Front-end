@@ -48,6 +48,7 @@ import { ModalAddVideoTranslationsEn } from 'components/Modals/ModalAddVideo/tra
 import { UsersProductCardTranslationsEn } from 'components/UsersProductCard/translations/en';
 import { CalendarTranslationsEn } from 'components/Calendar/translations/en';
 import { EmptyCartTranslationsEn } from 'components/EmptyCart/translations/en';
+import { OrderTranslationsEn } from 'components/Order/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -107,5 +108,8 @@ export const ComponentTranslationsEn = {
   ...NavigationOverlayTranslationsEn,
   ...UserPageTranslationsEn,
   calendar: CalendarTranslationsEn,
+
+  //
   emptyCart: EmptyCartTranslationsEn,
+  order: OrderTranslationsEn,
 };

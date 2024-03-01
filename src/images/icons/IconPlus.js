@@ -5,10 +5,11 @@ const IconPlus = props => (
     fill="none"
     width={24}
     height={24}
+    viewBox="0 0 24 24"
     {...props}
   >
     <g
-      stroke="#6C6158"
+      stroke="#000"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}
