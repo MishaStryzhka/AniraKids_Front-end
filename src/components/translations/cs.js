@@ -48,6 +48,7 @@ import { UsersProductCardTranslationsCs } from 'components/UsersProductCard/tran
 import { CalendarTranslationsCs } from 'components/Calendar/translations/cs';
 import { EmptyCartTranslationsCs } from 'components/EmptyCart/translations/cs';
 import { OrderTranslationsCs } from 'components/Order/translations/cs';
+import { FormOrderTranslationsCs } from 'components/Forms/FormOrder/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -57,6 +58,7 @@ export const ComponentTranslationsCs = {
   authForm: AuthFormTranslationsCs,
   formAddProduct: FormAddProductTranslationsCs,
   formBankAccount: FormBankAccountTranslationsCs,
+  formOrder: FormOrderTranslationsCs,
 
   // modals
   modalAddVideo: ModalAddVideoTranslationsCs,

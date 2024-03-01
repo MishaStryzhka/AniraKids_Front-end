@@ -19,10 +19,11 @@ import {
   StyledMinus,
   StyledIconBasket,
   WrapGeneralText,
-  // WrapRent,
+  ButtonCalendar,
 } from './Order.styled';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
+import IconCalendarTime from 'images/icons/IconCalendarTime';
 
 const api = require('../../api');
 
@@ -72,7 +73,6 @@ const Order = ({ order, handleRemoveOrder }) => {
         );
     }
   };
-  console.log(items);
   return (
     <WrapCardOrder>
       <TitleOrder>
@@ -87,6 +87,11 @@ const Order = ({ order, handleRemoveOrder }) => {
                 <Image src={item.product.photos[0].path} alt="product" />
               </WrapImage>
               <WrapGeneralText>
+                {item.serviceType === 'rent' && (
+                  <ButtonCalendar>
+                    <IconCalendarTime />
+                  </ButtonCalendar>
+                )}
                 <WrapText>
                   <TextSeller>
                     {t('seller')}: {item.owner.nickname}
@@ -128,38 +133,7 @@ const Order = ({ order, handleRemoveOrder }) => {
           );
         })}
       </div>
-      {/* <WrapRent>
-          <LabelStatus>
-                            <Box>{values.rental && <IconCheck />}</Box>
-                            {t('Rental')}
-                            <Input
-                              type="checkbox"
-                              name="rental"
-                              value={values.rental}
-                              onChange={e => {
-                                e.currentTarget.value === 'true' &&
-                                  setFieldValue('rentalPrice', '');
-                                handleChange(e);
-                              }}
-                              onBlur={handleBlur}
-          />
-           </LabelStatus>
-           <LabelStatus>
-                            <Box>{values.sale && <IconCheck />}</Box>
-                            {t('Sale')}
-                            <Input
-                              type="checkbox"
-                              name="sale"
-                              value={values.sale}
-                              onChange={e => {
-                                e.currentTarget.value === 'true' &&
-                                  setFieldValue('salePrice', '');
-                                handleChange(e);
-                              }}
-                              onBlur={handleBlur}
-                            />
-                          </LabelStatus>
-      </WrapRent> */}
+
       <FormOrder />
     </WrapCardOrder>
   );

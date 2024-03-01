@@ -2,10 +2,10 @@ import IconBasket from 'images/icons/IconBasket';
 import styled from 'styled-components';
 
 export const WrapCardOrder = styled.div`
+  gap: 32px;
   @media screen and (min-width: 768px) {
     display: flex;
     flex-direction: column;
-    gap: 32px;
   }
 `;
 export const TitleOrder = styled.h2`
@@ -47,6 +47,7 @@ export const Image = styled.img`
   object-fit: cover;
 `;
 export const WrapGeneralText = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -58,6 +59,25 @@ export const WrapGeneralText = styled.div`
     width: 765px;
     flex-direction: row;
     justify-content: space-between;
+  }
+`;
+export const ButtonCalendar = styled.button`
+  cursor: pointer;
+  background-color: transparent;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  @media screen and (min-width: 768px) {
+    right: 0;
+  }
+  @media screen and (min-width: 1280px) {
+    top: 0px;
+    right: 350px;
   }
 `;
 export const WrapText = styled.div`
@@ -140,5 +160,3 @@ export const StyledIconBasket = styled(IconBasket)`
   height: 24pc;
   stroke: ${({ theme }) => theme.color.mainColor5};
 `;
-
-export const WrapRent = styled.div``;

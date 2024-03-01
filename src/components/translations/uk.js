@@ -49,6 +49,7 @@ import { UsersProductCardTranslationsUk } from 'components/UsersProductCard/tran
 import { CalendarTranslationsUk } from 'components/Calendar/translations/uk';
 import { EmptyCartTranslationsUk } from 'components/EmptyCart/translations/uk';
 import { OrderTranslationsUk } from 'components/Order/translations/uk';
+import { FormOrderTranslationsUk } from 'components/Forms/FormOrder/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -58,6 +59,7 @@ export const ComponentTranslationsUk = {
   authForm: AuthFormTranslationsUk,
   formBillingDetails: FormBillingDetailsTranslationsUk,
   formBankAccount: FormBankAccountTranslationsUk,
+  formOrder: FormOrderTranslationsUk,
 
   // modals
   modalAddVideo: ModalAddVideoTranslationsUk,
