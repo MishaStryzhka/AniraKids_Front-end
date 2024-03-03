@@ -19,6 +19,7 @@ const {
   validationBankAccountScheme,
 } = require('./validationBankAccountScheme');
 
+const { validationFormOrderScheme } = require('./validationFormOrderScheme');
 module.exports = {
   validationProfileSchema,
   validRegistrationEmailScheme,
@@ -31,4 +32,5 @@ module.exports = {
   validationProductSchema,
   validationBillingDetailsScheme,
   validationBankAccountScheme,
+  validationFormOrderScheme,
 };

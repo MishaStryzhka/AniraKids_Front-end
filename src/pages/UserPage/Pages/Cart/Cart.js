@@ -1,6 +1,7 @@
 import EmptyCart from 'components/EmptyCart/EmptyCart';
 import Order from 'components/Order/Order';
 import { useEffect, useState } from 'react';
+import { ListOrders } from './Cart.styled';
 
 const api = require('../../../../api');
 
@@ -39,15 +40,16 @@ const Cart = () => {
   return !orders.length ? (
     <EmptyCart />
   ) : (
-    <>
+    <ListOrders>
       {orders.map(order => (
-        <Order
-          handleRemoveOrder={() => handleRemoveOrder(order._id)}
-          key={order._id}
-          order={order}
-        />
+        <li key={order._id}>
+          <Order
+            handleRemoveOrder={() => handleRemoveOrder(order._id)}
+            order={order}
+          />
+        </li>
       ))}
-    </>
+    </ListOrders>
   );
 };
 

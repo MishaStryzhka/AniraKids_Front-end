@@ -48,6 +48,8 @@ import { ModalAddVideoTranslationsUk } from 'components/Modals/ModalAddVideo/tra
 import { UsersProductCardTranslationsUk } from 'components/UsersProductCard/translations/uk';
 import { CalendarTranslationsUk } from 'components/Calendar/translations/uk';
 import { EmptyCartTranslationsUk } from 'components/EmptyCart/translations/uk';
+import { OrderTranslationsUk } from 'components/Order/translations/uk';
+import { FormOrderTranslationsUk } from 'components/Forms/FormOrder/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -57,6 +59,7 @@ export const ComponentTranslationsUk = {
   authForm: AuthFormTranslationsUk,
   formBillingDetails: FormBillingDetailsTranslationsUk,
   formBankAccount: FormBankAccountTranslationsUk,
+  formOrder: FormOrderTranslationsUk,
 
   // modals
   modalAddVideo: ModalAddVideoTranslationsUk,
@@ -107,5 +110,8 @@ export const ComponentTranslationsUk = {
   ...NavigationOverlayTranslationsUk,
   ...UserPageTranslationsUk,
   calendar: CalendarTranslationsUk,
+
+  //
   emptyCart: EmptyCartTranslationsUk,
+  order: OrderTranslationsUk,
 };

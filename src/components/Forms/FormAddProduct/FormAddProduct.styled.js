@@ -1,4 +1,6 @@
+import { StyleButton } from 'components/Button/Button.styled';
 import { NavLink } from 'react-router-dom';
+// import {Button}
 import styled from 'styled-components';
 
 export const FormTablet = styled.form`
@@ -488,27 +490,27 @@ export const WrapInsideSection = styled.div`
   flex-direction: column;
   gap: 32px;
 `;
+export const WrapButtons = styled.div`
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+`;
 
-export const ButtonNext = styled.button`
-  font-family: 'Open Sans Hebrew', sans-serif;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.43;
+export const ButtonNext = styled(StyleButton)`
   color: ${({ theme }) => theme.color.mainColor3};
 
-  margin-top: 80px;
-  margin-left: 40px;
-
-  width: 305px;
-  padding: 14px 0;
   background-color: transparent;
-  border-radius: 2px;
   border: 1px solid;
   border-color: ${({ theme }) => theme.color.mainColor3};
 `;
 
-export const ButtonBack = styled.button``;
+export const ButtonBack = styled(StyleButton)`
+  &:hover {
+    background-color: ${({ theme }) => theme.color.mainColor2};
+  }
+`;
 
 export const SectionCondition = styled.section`
   display: flex;

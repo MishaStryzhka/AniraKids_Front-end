@@ -1,10 +1,37 @@
 import FormOrder from 'components/Forms/FormOrder/FormOrder';
-import IconBasket from 'images/icons/IconBasket';
 import { useState } from 'react';
+import {
+  TitleOrder,
+  WrapCardOrder,
+  MainWrap,
+  WrapImage,
+  Image,
+  TextSeller,
+  TextName,
+  TextValue,
+  SecondaryTitle,
+  WrapSection,
+  ButtonDelete,
+  Wrap,
+  WrapCalc,
+  WrapText,
+  ButtonMath,
+  StyledMinus,
+  StyledIconBasket,
+  WrapGeneralText,
+  ButtonCalendar,
+} from './Order.styled';
+import { useTranslation } from 'react-i18next';
+import IconPlus from 'images/icons/IconPlus';
+import IconCalendarTime from 'images/icons/IconCalendarTime';
 
 const api = require('../../api');
 
 const Order = ({ order, handleRemoveOrder }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.order',
+  });
+
   const [items, setItems] = useState(order.items);
 
   const handleIncrement = ({ _id: productId, quantity }) => {
@@ -46,48 +73,69 @@ const Order = ({ order, handleRemoveOrder }) => {
         );
     }
   };
-
   return (
-    <div>
-      <h2>Оформлення замовлення {`( ${items[0].serviceType} )`}</h2>
+    <WrapCardOrder>
+      <TitleOrder>
+        {t('order processing')} {`( ${items[0].serviceType} )`}
+      </TitleOrder>
 
       <div>
         {items.map(item => {
           return (
-            <div key={item._id}>
-              <div>
-                <img
-                  width="150px"
-                  height="150px"
-                  src={item.product.photos[0].path}
-                  alt="product"
-                />
-                <div>
-                  <p>Продавець: {item.owner.nickname}</p>
-                  <p>{item.product.name}</p>
-                </div>
-              </div>
-              <div>
-                <p>{item.price}</p>
-                <button onClick={() => handleIncrement(item)}>+</button>
-                <p>{item.quantity}</p>
-                <button
-                  disabled={item.quantity === 1}
-                  onClick={() => handleDecrement(item)}
-                >
-                  -
-                </button>
-                <p>{item.price * item.quantity}</p>
-                <button onClick={() => handleRemove(item._id)}>
-                  <IconBasket stroke={'#000'} />
-                </button>
-              </div>
-            </div>
+            <MainWrap key={item._id}>
+              <WrapImage>
+                <Image src={item.product.photos[0].path} alt="product" />
+              </WrapImage>
+              <WrapGeneralText>
+                {item.serviceType === 'rent' && (
+                  <ButtonCalendar>
+                    <IconCalendarTime />
+                  </ButtonCalendar>
+                )}
+                <WrapText>
+                  <TextSeller>
+                    {t('seller')}: {item.owner.nickname}
+                  </TextSeller>
+                  <TextName>{item.product.name}</TextName>
+                </WrapText>
+                <WrapSection>
+                  <Wrap>
+                    <SecondaryTitle>{t('price')}:</SecondaryTitle>
+                    <TextValue>{item.price} kč</TextValue>
+                  </Wrap>
+                  <Wrap style={{ alignItems: 'center' }}>
+                    <SecondaryTitle>{t('quantity')}:</SecondaryTitle>
+                    <WrapCalc>
+                      <ButtonMath
+                        disabled={item.quantity === 1}
+                        onClick={() => handleDecrement(item)}
+                      >
+                        <StyledMinus $disabled={item.quantity === 1} />
+                      </ButtonMath>
+                      <TextValue style={{ fontWeight: 400 }}>
+                        {item.quantity}
+                      </TextValue>
+                      <ButtonMath onClick={() => handleIncrement(item)}>
+                        <IconPlus />
+                      </ButtonMath>
+                    </WrapCalc>
+                  </Wrap>
+                  <Wrap>
+                    <SecondaryTitle>{t('amount')}:</SecondaryTitle>
+                    <TextValue>{item.price * item.quantity} kč</TextValue>
+                  </Wrap>
+                  <ButtonDelete onClick={() => handleRemove(item._id)}>
+                    <StyledIconBasket />
+                  </ButtonDelete>
+                </WrapSection>
+              </WrapGeneralText>
+            </MainWrap>
           );
         })}
       </div>
+
       <FormOrder />
-    </div>
+    </WrapCardOrder>
   );
 };
 
