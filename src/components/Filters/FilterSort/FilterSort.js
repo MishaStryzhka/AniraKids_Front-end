@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -18,12 +18,29 @@ const arrayParamsSort = [
 ];
 
 const FilterSort = () => {
-  const [isFilterSortList, setIsFilterSortList] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterSort',
   });
+
+  const [isFilterSortList, setIsFilterSortList] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (sortRef.current && !sortRef.current.contains(event.target)) {
+        handleToggleList();
+      }
+    };
+
+    if (isFilterSortList) {
+      document.addEventListener('click', handleClickOutside);
+
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }
+  }, [isFilterSortList]);
 
   const handleToggleList = () => {
     setIsFilterSortList(prevIsFilterOutfitsList => !prevIsFilterOutfitsList);
@@ -45,7 +62,7 @@ const FilterSort = () => {
     });
   };
   return (
-    <MainWrapFilter>
+    <MainWrapFilter ref={sortRef}>
       <Wrap $openOutfitsList={isFilterSortList === true}>
         <div
           style={{
@@ -70,6 +87,7 @@ const FilterSort = () => {
                     sort === searchParams.get('sort')
                       ? removeParam('sort')
                       : newSetSearchParams('sort', sort);
+                    handleToggleList();
                   }}
                 >
                   {t(sort)}

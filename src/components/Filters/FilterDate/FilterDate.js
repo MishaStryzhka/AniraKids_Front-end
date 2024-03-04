@@ -23,11 +23,8 @@ const FilteDate = () => {
   const [isOpenModalCalendar, setIsOpenModalCalendar] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef(null);
-  const [rentalPeriods, setRentalPeriods] = useState(null);
-
-  console.log(
-    "searchParams.get('rentalPeriods')",
-    searchParams.get('rentalPeriods')
+  const [rentalPeriods, setRentalPeriods] = useState(
+    searchParams.get('rentalPeriods') || null
   );
 
   const newSetSearchParams = (key, value) => {
@@ -37,14 +34,6 @@ const FilteDate = () => {
       return params;
     });
   };
-
-  // const removeParam = param => {
-  //   setSearchParams(pref => {
-  //     const params = new URLSearchParams(pref);
-  //     params.delete(param);
-  //     return params;
-  //   });
-  // };
 
   useEffect(() => {
     const handleClickOutside = event => {
@@ -62,6 +51,7 @@ const FilteDate = () => {
 
   const setFilterDate = () => {
     newSetSearchParams('rentalPeriods', rentalPeriods);
+    setIsOpenModalCalendar(false);
   };
 
   return (

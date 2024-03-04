@@ -79,7 +79,7 @@ export const StyledSlider = styled(Range)`
 
   .rc-slider-track {
     /* Трек */
-    background-color: #000;
+    background-color: #ebdad1;
     height: 3px;
     border-radius: 0;
   }
@@ -90,7 +90,7 @@ export const StyledSlider = styled(Range)`
     height: 12px;
     margin-top: -4.5px;
     overflow: hidden;
-    border: 5px solid #000;
+    border: 5px solid #ebdad1;
     opacity: 1;
     border-radius: 50%;
     cursor: pointer;

@@ -52,10 +52,10 @@
 }
 
 .option {
+  background-color: #fff;
+}
+option:checked {
   background-color: #ebdad1;
-  &:hover {
-    background-color: #fff;
-  }
 }
 
 .react-datepicker__day {
