@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[299],{23299:(e,t,a)=>{a.r(t),a.d(t,{default:()=>c});var s=a(72791),u=a(80184);const r=a(29396),c=()=>{const[e,t]=(0,s.useState)([]),[a,c]=(0,s.useState)(!0),[n,o]=(0,s.useState)();return console.log("productsByCategory",e),(0,s.useEffect)((()=>{c(!0),r.getPopular().then((e=>{t(e),c(!1)})).catch((e=>{o(e),c(!1)}))}),[]),(0,u.jsx)("p",{children:"popularPage"})}}}]);
+//# sourceMappingURL=299.bac8cd3d.chunk.js.map

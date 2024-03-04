@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[871],{8871:(s,a,e)=>{e.r(a),e.d(a,{default:()=>c});var r=e(184);const c=()=>(0,r.jsx)("p",{children:"MyPurchases"})}}]);
-//# sourceMappingURL=871.90c88c1e.chunk.js.map
