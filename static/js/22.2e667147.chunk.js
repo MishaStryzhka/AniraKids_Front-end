@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[22],{76022:(a,s,e)=>{e.r(s),e.d(s,{default:()=>k});var i=e(80184);const k=()=>(0,i.jsx)("p",{children:"Chat"})}}]);
-//# sourceMappingURL=22.2e667147.chunk.js.map
