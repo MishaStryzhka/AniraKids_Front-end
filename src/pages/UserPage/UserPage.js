@@ -5,9 +5,15 @@ import SideBar from 'components/SideBar/SideBar';
 import WrapMainContent from 'components/WrapMainContent/WrapMainContent';
 import { useAuth, useTitle } from 'hooks';
 import { useDispatch } from 'react-redux';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
-import { StyledButton, StyledIconBag, StyledNavLink } from './UserPage.styled';
+import {
+  SecondBox,
+  StyledButton,
+  StyledIconBag,
+  StyledNavLink,
+  StyledSecondButton,
+} from './UserPage.styled';
 import IconPerson from 'images/icons/IconPerson';
 import IconChat from 'images/icons/IconChat';
 import IconHeart from 'images/icons/IconHeart';
@@ -18,12 +24,14 @@ import IconShopCart from 'images/icons/IconShopCart';
 import IconCard from 'images/icons/IconCard';
 import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
+import IconPlus from 'images/icons/IconPlus';
 
 const UserPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.userPage',
   });
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const { user } = useAuth();
 
@@ -31,7 +39,22 @@ const UserPage = () => {
 
   return (
     <Container>
-      <NavigationOverlay />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }}
+      >
+        <NavigationOverlay />
+        <SecondBox>
+          {location.pathname === '/my-account/rent-out' && (
+            <StyledSecondButton to="/my-account/rent-out/add-product">
+              {t('addProduct')} <IconPlus />
+            </StyledSecondButton>
+          )}
+        </SecondBox>
+      </div>
 
       <WrapMainContent>
         <SideBar>

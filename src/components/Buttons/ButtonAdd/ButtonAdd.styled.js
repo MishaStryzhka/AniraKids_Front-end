@@ -1,26 +1,48 @@
 import styled from 'styled-components';
 
 export const StyledButtonAdd = styled.button`
-  box-sizing: border-box;
-  width: 305px;
+  text-decoration: none;
+  text-transform: uppercase;
+  border: none;
+  outline: none;
+
+  border: 1px solid ${({ theme }) => theme.color.mainColor3};
+  border-radius: 2px;
   padding: 14px 40px;
+
+  box-sizing: border-box;
+  width: ${({ width }) => width || '305px'};
+  height: ${({ height }) => height || '48px'};
 
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
 
-  border-radius: 2px;
-  border: 1px solid ${({ theme }) => theme.color.mainColor3};
+  background-color: ${({ theme }) => theme.color.mainColor3};
 
-  color: ${({ theme }) => theme.color.mainColor3};
   text-align: center;
 
   font-family: Open Sans, sans-serif;
-  font-size: 14px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 142.857% */
+  font-size: 14px;
+  line-height: 143%;
+  text-align: center;
 
-  text-decoration: none;
+  color: ${({ theme }) => theme.color.mainColor1};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color.mainColor2};
+    color: ${({ theme }) => theme.color.mainColor5};
+  }
+
+  &:active {
+    background-color: ${({ theme }) => theme.color.additionalColorMain3};
+    color: ${({ theme }) => theme.color.mainColor5};
+  }
+
+  &[disabled] {
+    background-color: ${({ theme }) => theme.color.additionalColorGray};
+    color: ${({ theme }) => theme.color.mainColor5};
+  }
 `;

@@ -12,5 +12,5 @@ export const UserPageTranslationsCs = {
   basket: 'Košík',
   logOut: 'Odhlásit se',
   profilePage: ProfileTranslationsCs,
-
+  addProduct: 'Přidat produkt',
 };

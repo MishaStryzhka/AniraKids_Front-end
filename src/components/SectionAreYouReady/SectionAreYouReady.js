@@ -7,7 +7,6 @@ import {
   WrapText,
 } from './SectionAreYouReady.styled';
 
-import Button from 'components/Button/Button';
 import { useTranslation } from 'react-i18next';
 import AreYouReadyDesktopWebp1x from 'images/photo-ready-woman/photo-ready-desktop-1x.webp';
 import AreYouReadyDesktopWebp2x from 'images/photo-ready-woman/photo-ready-desktop-2x.webp';
@@ -21,6 +20,7 @@ import ReadyTabletWebp1x from 'images/photo-ready-woman/photo-ready-tablet-1x.we
 import ReadyTabletWebp2x from 'images/photo-ready-woman/photo-ready-tablet-2x.webp';
 import ReadyTablet1x from 'images/photo-ready-woman/photo-ready-tablet-1x.jpg';
 import ReadyTablet2x from 'images/photo-ready-woman/photo-ready-tablet-2x.jpg';
+import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
 const SectionAreYouReady = () => {
   const { t } = useTranslation('translation', {
@@ -68,7 +68,7 @@ const SectionAreYouReady = () => {
         </ImageWrap>
         <WrapText>
           <Title>{t('Ready to start')}</Title>
-          <Button>{t('Rent')}</Button>
+          <ButtonRent to="/popular">{t('rent')}</ButtonRent>
         </WrapText>
       </PictureContainer>
     </Section>

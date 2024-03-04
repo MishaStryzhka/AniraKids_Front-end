@@ -35,7 +35,6 @@ import {
   verifiedEmail,
 } from '../../../../redux/auth/operations';
 import { useTranslation } from 'react-i18next';
-import { StyledSecondButton } from 'components/NavigationOverlay/NavigationOverlay.styled';
 import ModalBecomeLandlord from 'components/Modals/ModalBecomeLandlord/ModalBecomeLandlord';
 import { BeatLoader } from 'react-spinners';
 import {
@@ -46,6 +45,7 @@ import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingD
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
 import { clearDone } from '../../../../redux/auth/slice';
 import { TextDone } from 'components/Modals/Modal.styled';
+import { StyledSecondButton } from 'pages/UserPage/UserPage.styled';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {

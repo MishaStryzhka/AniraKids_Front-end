@@ -1,4 +1,3 @@
-import Button from 'components/Button/Button';
 import {
   AddWrap,
   Description,
@@ -21,6 +20,7 @@ import Border from 'components/Border/Border';
 import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
 const SectionAboutAniraK = () => {
   const { t } = useTranslation('translation', {
@@ -107,7 +107,7 @@ const SectionAboutAniraK = () => {
           </Swiper>
         </List>
         <WrapButton>
-          <Button>{t('rent')}</Button>
+          <ButtonRent to="/popular">{t('rent')}</ButtonRent>
         </WrapButton>
       </Container>
     </Section>

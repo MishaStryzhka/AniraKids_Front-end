@@ -11,7 +11,6 @@ import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { RestrictedRoute } from './RestrictedRoute';
-import UpdateProduct from 'pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -35,6 +34,9 @@ const Favorite = lazy(() =>
   import('../pages/UserPage/Pages/Favorite/Favorite')
 );
 const RentOut = lazy(() => import('../pages/UserPage/Pages/RentOut/RentOut'));
+const UpdateProduct = lazy(() =>
+  import('../pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct')
+);
 const RentIn = lazy(() => import('../pages/UserPage/Pages/RentIn/RentIn'));
 const MyOrders = lazy(() =>
   import('../pages/UserPage/Pages/MyOrders/MyOrders')
@@ -45,6 +47,7 @@ const MyPurchases = lazy(() =>
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
+const PopularPage = lazy(() => import('../pages/PopularPage/PopularPage'));
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
@@ -71,6 +74,8 @@ function App() {
           }
         >
           <Route path="/" element={<MainPage />} />
+          <Route path="/popular" element={<PopularPage />} />
+
           <Route path="/forMen" element={<ForMenPage />}>
             <Route path=":id" element={<ProductPage />} />
           </Route>

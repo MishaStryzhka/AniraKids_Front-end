@@ -12,4 +12,5 @@ export const UserPageTranslationsEn = {
   basket: 'Basket',
   logOut: 'Log Out',
   profilePage: ProfileTranslationsEn,
+  addProduct: 'Add Product',
 };
