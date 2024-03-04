@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import NotFound from 'components/NotFound/NotFound';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
-import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
+// import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
 
 const api = require('../../api');
 
@@ -80,7 +80,7 @@ const ForWomenPage = () => {
         <WrapMainContent>
           <SideBar>
             <TitleFilter>{t('Filters')}</TitleFilter>
-            <SelectedFilters />
+            {/* <SelectedFilters /> */}
             <FilterType />
             <FilterForPregnantWomen />
             <FilterFamilyLookWomen />
