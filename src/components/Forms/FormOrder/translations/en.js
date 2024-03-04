@@ -16,4 +16,9 @@ export const FormOrderTranslationsEn = {
 
   //
   'Required field': 'Required field',
+  'Invalid phone number format': 'Invalid phone number format',
+  'Invalid email format': 'Invalid email format',
+  'Only characters and spaces': 'Allowed only Latin characters and spaces',
+  'Address must consist correct format `street number/flat number`':
+    'Enter the correct format Street house number / apartment number',
 };

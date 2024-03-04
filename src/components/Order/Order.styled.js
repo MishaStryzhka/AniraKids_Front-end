@@ -2,10 +2,11 @@ import IconBasket from 'images/icons/IconBasket';
 import styled from 'styled-components';
 
 export const WrapCardOrder = styled.div`
-  gap: 32px;
   @media screen and (min-width: 768px) {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 80px;
+  }
+  @media screen and (min-width: 1280px) {
+    margin-bottom: 90px;
   }
 `;
 export const TitleOrder = styled.h2`
@@ -17,7 +18,24 @@ export const TitleOrder = styled.h2`
     font-weight: 700;
     line-height: 1.4;
 
+    margin-bottom: 32px;
+
     color: ${({ theme }) => theme.color.mainColor5};
+  }
+`;
+
+export const WrapInside = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 64px;
+  gap: 64px;
+  @media screen and (min-width: 768px) {
+    align-items: center;
+  }
+  @media screen and (min-width: 1280px) {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
   }
 `;
 export const MainWrap = styled.div`
@@ -25,6 +43,9 @@ export const MainWrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
+  border: 1px solid;
+  border-radius: 2px;
+  border-color: ${({ theme }) => theme.color.mainColor2};
   @media screen and (min-width: 768px) {
     flex-direction: row;
     align-items: center;
@@ -159,4 +180,30 @@ export const StyledIconBasket = styled(IconBasket)`
   width: 24px;
   height: 24pc;
   stroke: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const WrapAmount = styled.div`
+  width: 304px;
+  margin: 0 auto;
+  @media screen and (min-width: 1280px) {
+    margin: 0;
+  }
+`;
+export const TextAmount = styled.p`
+  display: flex;
+  justify-content: space-between;
+
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.4;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const BorderAmount = styled.div`
+  width: 100%;
+  height: 1px;
+  margin: 20px 0 20px;
+  background-color: ${({ theme }) => theme.color.mainColor2};
 `;

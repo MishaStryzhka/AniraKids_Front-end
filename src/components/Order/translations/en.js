@@ -4,4 +4,8 @@ export const OrderTranslationsEn = {
   quantity: 'Quantity',
   amount: 'Amount',
   seller: 'Seller',
+
+  Continue: 'Continue',
+  orderTotal: 'Order total',
+  totalAmount: 'Total amount',
 };

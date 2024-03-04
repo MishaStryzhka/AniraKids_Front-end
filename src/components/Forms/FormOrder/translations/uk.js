@@ -16,4 +16,9 @@ export const FormOrderTranslationsUk = {
 
   //
   'Required field': 'Обов`язкове поле',
+  'Invalid phone number format': 'Неправильний формат номера телефону',
+  'Invalid email format': 'Неправильний формат електронної пошти',
+  'Only characters and spaces': 'Дозволено лише латинські літери та пробіли',
+  'Address must consist correct format `street number/flat number`':
+    'Введіть правильний формат `Вулиця номер вулиці/номер квартири` ',
 };

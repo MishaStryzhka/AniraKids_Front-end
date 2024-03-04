@@ -15,7 +15,7 @@ export const validationBillingDetailsScheme = Yup.object().shape({
     ),
   city: Yup.string()
     .required('City is required')
-    .matches(/^[a-zA-Z\u00C0-\u017F\s]+$/, 'Only Czech characters are allowed'),
+    .matches(/^[a-zA-Z\u00C0-\u017F\s]+$/, 'Only characters are allowed'),
   zip: Yup.string()
     .required('ZIP code is required')
     .matches(/^\d{5}$/, 'Invalid ZIP code'),

@@ -45,7 +45,7 @@ const FormOrder = () => {
           handleSubmit,
           setFieldValue,
         }) => (
-          <StyledForm onSubmit={handleSubmit}>
+          <StyledForm id="orderForm" onSubmit={handleSubmit}>
             <LabelOrder>
               {t('urerFullName')}*
               <FieldOrder
@@ -103,6 +103,9 @@ const FormOrder = () => {
                 <option value="UkrPost">{t('UkrPost')}</option>
                 <option value="Meest">Meest</option>
               </FieldSelect>
+              {errors.deliveryService && touched.deliveryService && (
+                <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
+              )}
             </LabelOrder>
             <LabelOrder>
               {t('Delivery type')}*
@@ -116,7 +119,11 @@ const FormOrder = () => {
                 <option value="postOffice">{t('postOffice')}</option>
                 <option value="section">{t('section')}</option>
               </FieldSelect>
+              {errors.deliveryType && touched.deliveryType && (
+                <ErrorMessage>{t(errors.deliveryType)}</ErrorMessage>
+              )}
             </LabelOrder>
+
             <LabelOrder>
               {t('city')}*
               <FieldOrder
@@ -146,7 +153,6 @@ const FormOrder = () => {
               )}
             </LabelOrder>
             <TextDescription>*{t('Text required')}</TextDescription>
-            <button type="submit">Submit</button>
           </StyledForm>
         )}
       </Formik>

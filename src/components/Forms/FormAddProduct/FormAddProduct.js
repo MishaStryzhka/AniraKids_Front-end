@@ -1300,16 +1300,16 @@ const FormAddProduct = () => {
                       <div>
                         <Title>{t('Age')}</Title>
                         <WrapChildrenParams>
-                          {arrayAgeProduct.map(({ valueAge }, index) => (
+                          {arrayAgeProduct.map(({ age }, index) => (
                             <li key={index}>
                               <LabelChildren>
-                                <BoxSize $check={values.age === valueAge}>
-                                  {t(valueAge)}
+                                <BoxSize $check={values.age === age}>
+                                  {t(age)}
                                 </BoxSize>
                                 <Input
                                   type="radio"
                                   name="age"
-                                  value={valueAge}
+                                  value={age}
                                   onChange={handleChange}
                                   onBlur={handleBlur}
                                 />
@@ -1328,11 +1328,11 @@ const FormAddProduct = () => {
                         <Title>{t('Size')}</Title>
                         <WrapChildrenSize>
                           {arraySizeChildrenProduct.map(
-                            ({ descriptionSize, valueSize }, index) => (
+                            ({ descriptionSize, childSize }, index) => (
                               <li key={index}>
                                 <LabelChildren>
                                   <BoxSize
-                                    $check={values.childSize === valueSize}
+                                    $check={values.childSize === childSize}
                                   >
                                     {descriptionSize}
                                     {t('sizecm')}
@@ -1340,7 +1340,7 @@ const FormAddProduct = () => {
                                   <Input
                                     type="radio"
                                     name="childSize"
-                                    value={valueSize}
+                                    value={childSize}
                                     onChange={handleChange}
                                   />
                                 </LabelChildren>
@@ -1476,12 +1476,14 @@ const FormAddProduct = () => {
                     <ListColor>
                       {arrayColorsProduct.map(({ colorCode, color }, index) => (
                         <ItemButton key={index}>
-                          <LabelColor color={colorCode}>
+                          <LabelColor>
                             <Input
                               type="radio"
-                              name={{ color, colorCode }}
-                              value={{ color, colorCode }}
-                              onChange={handleChange}
+                              name={color}
+                              value={color}
+                              onChange={e =>
+                                setFieldValue('color', e.currentTarget.value)
+                              }
                               onBlur={handleBlur}
                             />
                             <WrapBoxColor $check={values.color === color}>

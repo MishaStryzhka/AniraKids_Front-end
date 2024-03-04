@@ -19,4 +19,9 @@ export const FormOrderTranslationsCs = {
   // errors
 
   'Required field': 'Povinné pole',
+  'Invalid phone number format': 'Neplatný formát telefonního čísla',
+  'Invalid email format': 'Nesprávný formát e-mailu',
+  'Only characters and spaces': 'Povoleno pouze latinské znaky a mezery',
+  'Address must consist correct format `street number/flat number`':
+    'Zadejte správný formát Ulice číslo ulice / číslo bytu',
 };
