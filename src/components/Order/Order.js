@@ -20,10 +20,15 @@ import {
   StyledIconBasket,
   WrapGeneralText,
   ButtonCalendar,
+  WrapAmount,
+  TextAmount,
+  BorderAmount,
+  WrapInside,
 } from './Order.styled';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
+import Button from 'components/Button/Button';
 
 const api = require('../../api');
 
@@ -33,6 +38,8 @@ const Order = ({ order, handleRemoveOrder }) => {
   });
 
   const [items, setItems] = useState(order.items);
+
+  let totalAmount;
 
   const handleIncrement = ({ _id: productId, quantity }) => {
     api
@@ -122,7 +129,9 @@ const Order = ({ order, handleRemoveOrder }) => {
                   </Wrap>
                   <Wrap>
                     <SecondaryTitle>{t('amount')}:</SecondaryTitle>
-                    <TextValue>{item.price * item.quantity} kč</TextValue>
+                    <TextValue>
+                      {(totalAmount = item.price * item.quantity)} kč
+                    </TextValue>
                   </Wrap>
                   <ButtonDelete onClick={() => handleRemove(item._id)}>
                     <StyledIconBasket />
@@ -133,8 +142,22 @@ const Order = ({ order, handleRemoveOrder }) => {
           );
         })}
       </div>
-
-      <FormOrder />
+      <WrapInside>
+        <FormOrder />
+        <WrapAmount>
+          <TextAmount>
+            {t('orderTotal')} <span>{totalAmount} kč</span>
+          </TextAmount>
+          <BorderAmount />
+          <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
+            {t('totalAmount')}
+            <span>{totalAmount} kč</span>
+          </TextAmount>
+          <Button form="orderForm" type="submit">
+            {t('Continue')}
+          </Button>
+        </WrapAmount>
+      </WrapInside>
     </WrapCardOrder>
   );
 };

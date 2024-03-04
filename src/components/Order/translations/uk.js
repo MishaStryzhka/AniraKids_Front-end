@@ -4,4 +4,8 @@ export const OrderTranslationsUk = {
   quantity: 'Кількість',
   amount: 'Сума',
   seller: 'Продавець',
+
+  orderTotal: 'Сума замовлення',
+  totalAmount: 'Загальна сума',
+  Continue: 'Продовжити',
 };

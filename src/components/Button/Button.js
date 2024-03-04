@@ -8,6 +8,7 @@ const Button = ({
   className,
   style,
   ariaLabel,
+  form,
 }) => {
   return (
     <StyleButton
@@ -17,6 +18,7 @@ const Button = ({
       disabled={disabled}
       className={className}
       aria-label={ariaLabel}
+      form={form}
     >
       {children}
     </StyleButton>

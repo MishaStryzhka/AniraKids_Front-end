@@ -23,6 +23,9 @@ export const FieldOrder = styled(Field)`
   padding: 8px;
   border-radius: 2px;
   outline: none;
+  @media screen and (min-width: 768px) {
+    width: 397px;
+  }
 
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -35,9 +38,31 @@ export const FieldOrder = styled(Field)`
 `;
 
 export const FieldSelect = styled(FieldOrder)`
+  width: 370px;
   color: ${({ theme }) => theme.color.mainColor5};
-  min-width: 370px;
+  @media screen and (min-width: 768px) {
+    width: 415px;
+  }
+  select {
+    padding: 8px;
+  }
+  option {
+    width: inherit;
+    border-color: ${({ theme }) => theme.color.mainColor4};
+    color: ${({ theme }) => theme.color.mainColor4};
+    margin: 8px;
+  }
+  /* option:focus {
+    background-color: ${({ theme }) => theme.color.additionalColorBrown};
+  } */
+  option:checked {
+    background-color: ${({ theme }) => theme.color.mainColor1};
+  }
+  option:hover {
+    background-color: ${({ theme }) => theme.color.additionalColorBrown};
+  }
 `;
+
 export const TextDescription = styled.p`
   font-family: 'Open Sans Hebrew', sans-serif;
   line-height: 1.43;

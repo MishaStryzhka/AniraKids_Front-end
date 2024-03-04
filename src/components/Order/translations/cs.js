@@ -4,4 +4,8 @@ export const OrderTranslationsCs = {
   quantity: 'Počet',
   amount: 'Сástka',
   seller: 'Prodavač',
+
+  orderTotal: 'Celková cena objednávky',
+  totalAmount: 'Celková suma',
+  Continue: 'Pokračovat',
 };
