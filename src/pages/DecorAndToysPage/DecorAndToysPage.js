@@ -21,6 +21,7 @@ import FilterSubject from 'components/Filters/FilterSubject/FilterSubject';
 import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
+import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
 
 const api = require('../../api');
 
@@ -79,6 +80,7 @@ const DecorAndToysPage = () => {
         <WrapMainContent>
           <SideBar>
             <TitleFilter>{t('Filters')}</TitleFilter>
+            <SelectedFilters />
             <FilterType />
             <FilterDecor />
             <FilterSubject />

@@ -125,7 +125,10 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
             onClick={decreaseMonth}
             disabled={prevMonthButtonDisabled}
           >
-            <IconArrow style={{ transform: 'rotate(180deg)' }} />
+            <IconArrow
+              style={{ transform: 'rotate(180deg)' }}
+              fill={prevMonthButtonDisabled ? '#ccc' : '#000'}
+            />
           </button>
           {/* <select
             value={getYear(date)}
@@ -157,7 +160,7 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
             onClick={increaseMonth}
             disabled={nextMonthButtonDisabled}
           >
-            <IconArrow />
+            <IconArrow fill={nextMonthButtonDisabled ? '#ccc' : '#000'} />
           </button>
         </div>
       )}

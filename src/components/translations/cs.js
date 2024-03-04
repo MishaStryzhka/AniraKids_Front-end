@@ -49,6 +49,7 @@ import { CalendarTranslationsCs } from 'components/Calendar/translations/cs';
 import { EmptyCartTranslationsCs } from 'components/EmptyCart/translations/cs';
 import { OrderTranslationsCs } from 'components/Order/translations/cs';
 import { FormOrderTranslationsCs } from 'components/Forms/FormOrder/translations/cs';
+import { SelectedFiltrsTranslationsCs } from 'components/Filters/SelectedFiltrs/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -95,6 +96,7 @@ export const ComponentTranslationsCs = {
   filterDecor: FilterDecorTranslationsCs,
   filterColor: FilterColorTranslationsCs,
   filterAge: FilterAgeTranslationsCs,
+  selectedFiltrs: SelectedFiltrsTranslationsCs,
 
   appBar: AppBarTranslationsCs,
   sectionHero: SectionHeroTranslationsCs,

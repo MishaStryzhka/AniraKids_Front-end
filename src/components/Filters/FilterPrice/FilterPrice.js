@@ -18,8 +18,6 @@ const FilterPrice = () => {
   const [isPriceList, setIsPriceList] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // console.log('qqq', searchParams.get('price').split('-').map(Number));
-
   const [rangeValues, setRangeValues] = useState([
     searchParams.get('price')
       ? searchParams.get('price').split('-').map(Number)[0]
@@ -28,7 +26,6 @@ const FilterPrice = () => {
       ? searchParams.get('price').split('-').map(Number)[1]
       : 10000,
   ]);
-  // eslint-disable-next-line no-unused-vars
 
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.filterPrice',
