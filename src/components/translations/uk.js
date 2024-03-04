@@ -50,6 +50,7 @@ import { CalendarTranslationsUk } from 'components/Calendar/translations/uk';
 import { EmptyCartTranslationsUk } from 'components/EmptyCart/translations/uk';
 import { OrderTranslationsUk } from 'components/Order/translations/uk';
 import { FormOrderTranslationsUk } from 'components/Forms/FormOrder/translations/uk';
+import { SelectedFiltrsTranslationsUk } from 'components/Filters/SelectedFiltrs/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -96,6 +97,7 @@ export const ComponentTranslationsUk = {
   filterDecor: FilterDecorTranslationsUk,
   filterColor: FilterColorTranslationsUk,
   filterAge: FilterAgeTranslationsUk,
+  selectedFiltrs: SelectedFiltrsTranslationsUk,
 
   appBar: AppBarTranslationsUk,
   sectionHero: SectionHeroTranslationsUk,
