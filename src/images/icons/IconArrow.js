@@ -1,10 +1,11 @@
 import * as React from 'react';
-const IconArrow = ({ fill, ...props }) => (
+const IconArrow = ({ className, fill, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     width="24px"
     height="24px"
+    className={className}
     {...props}
   >
     <g clipPath="url(#a)">

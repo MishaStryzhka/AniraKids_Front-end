@@ -1,4 +1,3 @@
-import Button from 'components/Button/Button';
 import {
   Description,
   MainTitle,
@@ -8,6 +7,7 @@ import {
 } from './SectionHero.styled';
 import { Container } from 'components/Container/Container';
 import { useTranslation } from 'react-i18next';
+import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
 const SectionHero = () => {
   const { t } = useTranslation('translation', {
@@ -21,7 +21,7 @@ const SectionHero = () => {
         </MainTitle>
         <Description>{t('Platform Description')}</Description>
         <WrapButton>
-          <Button>{t('rent')}</Button>
+          <ButtonRent to="/popular">{t('rent')}</ButtonRent>
         </WrapButton>
       </Container>
     </WrapSection>

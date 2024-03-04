@@ -1,9 +1,13 @@
 const darktheme = {
   mainColor1: '#FFF',
   mainColor2: '#C6A58D',
-  mainColor3: '#6C6158',
+  mainColor3: '#77695E',
   mainColor4: '#303130',
   mainColor5: '#000',
+
+  // +
+  additionalColorMain3: '#6C6158',
+
   additionalColorGray: '#EFEFEF',
   additionalColorBrown: '#EBDAD1',
   additionalColorRed: '#ad0000',
@@ -18,9 +22,13 @@ const darktheme = {
 const lightTheme = {
   mainColor1: '#FFF',
   mainColor2: '#C6A58D',
-  mainColor3: '#6C6158',
+  mainColor3: '#77695E',
   mainColor4: '#303130',
   mainColor5: '#000',
+
+  // +
+  additionalColorMain3: '#6C6158',
+
   additionalColorGray: '#EFEFEF',
   additionalColorBrown: '#EBDAD1',
   additionalColorRed: '#ad0000',

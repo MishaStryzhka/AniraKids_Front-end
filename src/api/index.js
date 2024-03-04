@@ -6,6 +6,7 @@ const { setQuantity } = require('./order/setQuantity');
 const { addProduct } = require('./product/addProduct');
 const { getCurrentUserProducts } = require('./product/getCurrentUserProducts');
 const { getFavorites } = require('./product/getFavorites');
+const { getPopular } = require('./product/getPopular');
 const { getProductById } = require('./product/getProductById');
 const { getProducts } = require('./product/getProducts');
 const { removeProductById } = require('./product/removeProductById');
@@ -13,6 +14,7 @@ const { removeProductById } = require('./product/removeProductById');
 module.exports = {
   // Product
   addProduct,
+  getPopular,
   getProducts,
   getFavorites,
   getProductById,

@@ -12,4 +12,5 @@ export const UserPageTranslationsUk = {
   basket: 'Кошик',
   logOut: 'Вийти',
   profilePage: ProfileTranslationsUk,
+  addProduct: 'Додати товар',
 };
