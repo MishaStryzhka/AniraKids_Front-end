@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[381],{4381:(s,a,e)=>{e.r(a),e.d(a,{default:()=>i});var n=e(184);const i=()=>(0,n.jsx)("p",{children:"RentIn"})}}]);
-//# sourceMappingURL=381.5c0bf66c.chunk.js.map

@@ -1,1 +1,0 @@
-{"version":3,"file":"static/js/22.9e38546b.chunk.js","mappings":"iJAAA,MAIA,EAJaA,KACJC,EAAAA,EAAAA,KAAA,KAAAC,SAAG,Q","sources":["pages/UserPage/Pages/Chat/Chat.js"],"sourcesContent":["const Chat = () => {\n  return <p>Chat</p>;\n};\n\nexport default Chat;\n"],"names":["Chat","_jsx","children"],"sourceRoot":""}
