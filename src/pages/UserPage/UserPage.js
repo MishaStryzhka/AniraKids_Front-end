@@ -12,7 +12,6 @@ import {
   StyledButton,
   StyledIconBag,
   StyledNavLink,
-  StyledSecondButton,
 } from './UserPage.styled';
 import IconPerson from 'images/icons/IconPerson';
 import IconChat from 'images/icons/IconChat';
@@ -25,6 +24,7 @@ import IconCard from 'images/icons/IconCard';
 import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
+import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 
 const UserPage = () => {
   const { t } = useTranslation('translation', {
@@ -49,9 +49,9 @@ const UserPage = () => {
         <NavigationOverlay />
         <SecondBox>
           {location.pathname === '/my-account/rent-out' && (
-            <StyledSecondButton to="/my-account/rent-out/add-product">
+            <ButtonAdd to="/my-account/rent-out/add-product">
               {t('addProduct')} <IconPlus />
-            </StyledSecondButton>
+            </ButtonAdd>
           )}
         </SecondBox>
       </div>

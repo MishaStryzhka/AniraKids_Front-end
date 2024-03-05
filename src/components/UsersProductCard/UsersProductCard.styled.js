@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const Card = styled(NavLink)`
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
   height: 100%;
-  border-radius: 10px;
+  border-radius: 2px;
   overflow: hidden;
 
   display: flex;
