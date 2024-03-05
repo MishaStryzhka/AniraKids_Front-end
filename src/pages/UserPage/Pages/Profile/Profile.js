@@ -45,7 +45,7 @@ import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingD
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
 import { clearDone } from '../../../../redux/auth/slice';
 import { TextDone } from 'components/Modals/Modal.styled';
-import { StyledSecondButton } from 'pages/UserPage/UserPage.styled';
+import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
@@ -461,11 +461,9 @@ const Profile = () => {
                   )}
                 </AvatarLabel>
                 {user.typeUser !== 'owner' && (
-                  <StyledSecondButton
-                    onClick={() => setIsOpenModalBecomeLandlord(true)}
-                  >
+                  <ButtonAdd onClick={() => setIsOpenModalBecomeLandlord(true)}>
                     {t('BECOME_LANDLORD')}
-                  </StyledSecondButton>
+                  </ButtonAdd>
                 )}
                 {isOpenModalBecomeLandlord && (
                   <Modal
