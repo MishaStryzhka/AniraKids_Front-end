@@ -4,10 +4,12 @@ import { ForChildrenPageTranslationsUk } from 'pages/ForChildrenPage/translation
 import { ForMenPageTranslationsUk } from 'pages/ForMenPage/translations/uk';
 import { ForWomenPageTranslationsUk } from 'pages/ForWomenPage/translations/uk';
 import { NotFoundPageTranslationsUk } from 'pages/NotFoundPage/translations/uk';
+import { PopularPageTranslationsUk } from 'pages/PopularPage/translations/uk';
 import { ProductPageTranslationsUk } from 'pages/ProductPage/translations/uk';
 import { UserPageTranslationsUk } from 'pages/UserPage/translations/uk';
 
 export const PagesTranslationsUk = {
+  popularPage: PopularPageTranslationsUk,
   notFoundPage: NotFoundPageTranslationsUk,
   productPage: ProductPageTranslationsUk,
   aboutUsPage: AboutUsPageTranslationsUk,
