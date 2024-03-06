@@ -47,6 +47,7 @@ const UsersProductCard = ({
   });
   const { user, currentTheme, isLoading } = useAuth();
   const storage = useStorage();
+  const { pathname } = useLocation();
   const [favorites, setFavorites] = useState(
     user?.favorites || storage.get('favorites') || []
   );
@@ -78,8 +79,6 @@ const UsersProductCard = ({
       }
     }
   };
-
-  const { pathname } = useLocation();
 
   return (
     <Card
