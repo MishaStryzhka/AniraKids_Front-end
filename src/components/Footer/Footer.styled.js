@@ -1,5 +1,6 @@
 import { Container } from 'components/Container/Container';
 import IconLogo from 'images/icons/Icon';
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
@@ -51,7 +52,16 @@ export const FooterWrap = styled.div`
   justify-content: center;
 `;
 
-export const FooterCopyright = styled.p``;
+export const FooterCopyright = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
+  font-size: 14px;
+  width: 200px;
+  @media screen and (min-width: 768px) {
+    width: 350px;
+  }
+`;
 
 export const Wrap = styled.div`
   display: flex;
@@ -71,4 +81,15 @@ export const Wrap = styled.div`
     gap: 32px;
     align-items: center;
   }
+`;
+export const StyledNavLink = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
+  font-size: 14px;
+  margin-left: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: ${({ theme }) => theme.color.mainColor5};
 `;

@@ -11,6 +11,9 @@ export const Section = styled.section`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 8vw;
+  }
   text-align: center;
   font-family: 'Cormorant SC';
   font-size: 32px;
@@ -22,12 +25,18 @@ export const Title = styled.h2`
 `;
 
 export const List = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    gap: 5vw;
+  }
   display: flex;
   gap: 20px;
   margin-bottom: 48px;
 `;
 
 export const Item = styled.li`
+  @media screen and (max-width: 427.5px) {
+    width: 56vw;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -47,6 +56,9 @@ export const AddWrap = styled.div`
 `;
 
 export const TitleDescription = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -58,6 +70,9 @@ export const TitleDescription = styled.h3`
 `;
 
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.5vw;
+  }
   max-width: 240px;
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;

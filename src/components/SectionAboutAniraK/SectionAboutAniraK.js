@@ -35,11 +35,15 @@ const SectionAboutAniraK = () => {
 
         <List>
           <Swiper
-            spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 1.5,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 1.5,
+                spaceBetween: 20,
               },
               768: {
                 slidesPerView: 2.7,

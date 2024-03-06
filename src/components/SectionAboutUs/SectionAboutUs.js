@@ -1,6 +1,7 @@
 import Border from 'components/Border/Border';
 import {
   Description,
+  Image,
   Picture,
   PictureContainer,
   Section,
@@ -65,7 +66,7 @@ const SectionAboutUs = () => {
             srcSet={`${PhotoAboutMobile1x} 1x, ${PhotoAboutMobile2x} 2x`}
           />
 
-          <img srcSet={`${PhotoAbout1x}`} alt="Гардероб" />
+          <Image srcSet={`${PhotoAbout1x}`} alt="Гардероб" />
         </Picture>
       </PictureContainer>
       <Container>

@@ -2,6 +2,10 @@ import styled from 'styled-components';
 import { StyledButton } from '../Button.styled';
 
 export const StyledButtonRent = styled(StyledButton)`
+  @media screen and (max-width: 427.5px) {
+    width: 90vw;
+    max-width: 305px;
+  }
   color: ${({ theme }) => theme.color.mainColor1};
   background-color: ${({ theme }) => theme.color.mainColor3};
 

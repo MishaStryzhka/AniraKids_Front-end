@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 88vw;
+  }
   box-sizing: border-box;
   width: 378px;
   display: flex;

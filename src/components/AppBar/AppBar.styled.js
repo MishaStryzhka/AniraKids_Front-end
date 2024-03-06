@@ -1,6 +1,10 @@
 import styled from 'styled-components';
 
 export const ContainerAppBar = styled.header`
+  @media screen and (max-width: 427.5px) {
+    width: 100vw;
+    /* margin-left: -20px; */
+  }
   width: 388px;
   margin: 0 auto;
   background-color: ${({ $mainPage }) =>
@@ -20,6 +24,9 @@ export const ContainerAppBar = styled.header`
 `;
 
 export const FirstHeader = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 90vw;
+  }
   width: inherit;
   display: flex;
   padding: 12px 0;

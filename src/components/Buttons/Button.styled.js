@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const StyledButton = styled.button`
+  @media screen and (max-width: 427.5) {
+    padding: 3vw 9vw;
+  }
   text-decoration: none;
   text-transform: uppercase;
   border: none;

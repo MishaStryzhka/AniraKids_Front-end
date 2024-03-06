@@ -27,6 +27,10 @@ const SectionSimpleSteps = () => {
             // spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 1.9,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 1.9,
                 spaceBetween: 10,

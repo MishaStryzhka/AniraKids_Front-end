@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 
 export const StyledContainer = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 100vw;
+    padding: 0 4vw;
+    margin: 0;
+  }
   box-sizing: border-box;
   width: 100%;
   height: 100%;
