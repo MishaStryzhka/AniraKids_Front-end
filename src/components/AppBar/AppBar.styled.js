@@ -3,9 +3,7 @@ import styled from 'styled-components';
 export const ContainerAppBar = styled.header`
   @media screen and (max-width: 427.5px) {
     width: 100vw;
-    /* margin-left: -20px; */
   }
-  width: 388px;
   margin: 0 auto;
   background-color: ${({ $mainPage }) =>
     $mainPage ? 'transparent' : 'transparent'};
@@ -13,6 +11,9 @@ export const ContainerAppBar = styled.header`
   position: ${({ $mainPage }) => ($mainPage ? 'absolute' : 'relative')};
   top: 0;
   z-index: 3;
+  @media screen and (min-width: 428px) {
+    width: 388px;
+  }
   @media screen and (min-width: 768px) {
     width: 688px;
   }
