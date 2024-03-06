@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const ContainerAppBar = styled.header`
   @media screen and (max-width: 427.5px) {
-    width: 100vw;
+    width: 90vw;
   }
   margin: 0 auto;
   background-color: ${({ $mainPage }) =>
