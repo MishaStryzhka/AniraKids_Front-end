@@ -1,3 +1,4 @@
+import ImageLoader from 'components/ImageLoader/ImageLoader';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -49,7 +50,7 @@ export const PictureCard = styled.picture`
   }
 `;
 
-export const Image = styled.img`
+export const Image = styled(ImageLoader)`
   display: block;
   width: 100%;
   height: 100%;
@@ -71,9 +72,14 @@ export const ButtonAddToFavorites = styled.button`
 `;
 
 export const WrapText = styled.div`
+  padding: 10px;
   display: flex;
   gap: 8px;
   flex-direction: column;
+
+  @media screen and (min-width: 768px) {
+    gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
+  }
 `;
 
 export const FirstWrap = styled.div`

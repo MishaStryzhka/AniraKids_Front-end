@@ -6,6 +6,7 @@ import { Container } from 'components/Container/Container';
 import { ButtonViewMore } from 'components/Buttons/ButtonViewMore/ButtonViewMore';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
 
 const api = require('../../api');
 
@@ -61,13 +62,32 @@ const PopularPage = () => {
             navigation
             pagination={{ clickable: true, el: '.swiper-pagination' }}
           >
-            {productsByCategory['women`s category']?.map(product => {
-              return (
-                <SwiperSlide key={product._id}>
-                  <UsersProductCard product={product} />
+            {!isLoading ? (
+              productsByCategory['women`s category']?.map(product => {
+                console.log('product', product);
+
+                return (
+                  <SwiperSlide key={product._id}>
+                    <UsersProductCard product={product} />
+                  </SwiperSlide>
+                );
+              })
+            ) : (
+              <>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
                 </SwiperSlide>
-              );
-            })}
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+              </>
+            )}
           </Swiper>
           <ButtonViewMore to={`../forWomen`}>{t('viewMore')}</ButtonViewMore>
         </Section>
@@ -91,13 +111,30 @@ const PopularPage = () => {
             navigation
             pagination={{ clickable: true, el: '.swiper-pagination' }}
           >
-            {productsByCategory['men`s category']?.map(product => {
-              return (
-                <SwiperSlide key={product._id}>
-                  <UsersProductCard product={product} />
+            {!isLoading ? (
+              productsByCategory['men`s category']?.map(product => {
+                return (
+                  <SwiperSlide key={product._id}>
+                    <UsersProductCard product={product} />
+                  </SwiperSlide>
+                );
+              })
+            ) : (
+              <>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
                 </SwiperSlide>
-              );
-            })}
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+              </>
+            )}
           </Swiper>
           <ButtonViewMore to="../forMen">{t('viewMore')}</ButtonViewMore>
         </Section>
@@ -121,13 +158,30 @@ const PopularPage = () => {
             navigation
             pagination={{ clickable: true, el: '.swiper-pagination' }}
           >
-            {productsByCategory['children`s category']?.map(product => {
-              return (
-                <SwiperSlide key={product._id}>
-                  <UsersProductCard product={product} />
+            {!isLoading ? (
+              productsByCategory['children`s category']?.map(product => {
+                return (
+                  <SwiperSlide key={product._id}>
+                    <UsersProductCard product={product} />
+                  </SwiperSlide>
+                );
+              })
+            ) : (
+              <>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
                 </SwiperSlide>
-              );
-            })}
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+              </>
+            )}
           </Swiper>
           <ButtonViewMore to="../forChildren">{t('viewMore')}</ButtonViewMore>
         </Section>
@@ -151,13 +205,30 @@ const PopularPage = () => {
             navigation
             pagination={{ clickable: true, el: '.swiper-pagination' }}
           >
-            {productsByCategory['decoration category']?.map(product => {
-              return (
-                <SwiperSlide key={product._id}>
-                  <UsersProductCard product={product} />
+            {!isLoading ? (
+              productsByCategory['decoration category']?.map(product => {
+                return (
+                  <SwiperSlide key={product._id}>
+                    <UsersProductCard product={product} />
+                  </SwiperSlide>
+                );
+              })
+            ) : (
+              <>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
                 </SwiperSlide>
-              );
-            })}
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <SceletonUsersProductCard />
+                </SwiperSlide>
+              </>
+            )}
           </Swiper>
           <ButtonViewMore to="../decorAndToys">{t('viewMore')}</ButtonViewMore>
         </Section>
