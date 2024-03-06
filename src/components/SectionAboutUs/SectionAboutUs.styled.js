@@ -15,6 +15,9 @@ export const Section = styled.section`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 8vw;
+  }
   text-align: center;
   font-family: 'Cormorant SC';
   font-size: 32px;
@@ -27,14 +30,26 @@ export const Title = styled.h2`
 `;
 
 export const PictureContainer = styled(Container)`
+  width: 100vw;
   padding: 0;
+  @media screen and (min-width: 1280px) {
+    width: 1440px;
+  }
 `;
 export const Picture = styled.picture`
   display: block;
-  // width: 1440px;
-  /* box-sizing: border-box; */
-  /* margin: 0 auto; */
+  width: 100vw;
   margin-bottom: 40px;
+  @media screen and (min-width: 1280px) {
+    width: 1440px;
+  }
+`;
+
+export const Image = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 export const Description = styled.p`

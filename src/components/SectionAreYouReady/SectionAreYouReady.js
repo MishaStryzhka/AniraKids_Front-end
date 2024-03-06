@@ -1,4 +1,5 @@
 import {
+  Image,
   ImageWrap,
   Picture,
   PictureContainer,
@@ -59,7 +60,7 @@ const SectionAreYouReady = () => {
               srcSet={`${ReadyMobile1x} 1x, ${ReadyMobile2x} 2x`}
             />
 
-            <img
+            <Image
               srcSet={`${AreYouReadyDesktop1x}`}
               alt="Вишукана пані"
               // width="730"

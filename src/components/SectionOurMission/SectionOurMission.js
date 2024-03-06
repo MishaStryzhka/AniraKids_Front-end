@@ -27,6 +27,7 @@ const {
   Picture,
   AddWrap,
   PictureContainer,
+  Image,
 } = require('./SectionOurMission.styled');
 
 const SectionOurMission = () => {
@@ -101,7 +102,7 @@ const SectionOurMission = () => {
               srcSet={`${ClosetMobile1x} 1x, ${ClosetMobile2x} 2x`}
             />
 
-            <img srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
+            <Image srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
           </Picture>
         </PictureContainer>
       </ImageWrap>

@@ -11,6 +11,9 @@ export const Section = styled.section`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 8vw;
+  }
   text-align: center;
   font-family: 'Cormorant SC';
   font-size: 32px;
@@ -24,7 +27,8 @@ export const Title = styled.h2`
 
 export const ListSteps = styled.ul`
   display: flex;
-  justify-content: space-between;
+  gap: 5px;
+  /* justify-content: space-between; */
   @media screen and (min-width: 1280px) {
     padding: 0 70px;
     justify-content: space-between;
@@ -33,6 +37,9 @@ export const ListSteps = styled.ul`
 `;
 
 export const ItemStep = styled.li`
+  @media screen and (max-width: 427.5px) {
+    width: 42vw;
+  }
   width: 180px;
   display: flex;
   flex-direction: column;
@@ -60,6 +67,9 @@ export const ItemStep = styled.li`
 `;
 
 export const Step = styled.span`
+  @media screen and (max-width: 427.5px) {
+    font-size: 11.2vw;
+  }
   text-align: center;
   font-family: 'Cormorant SC';
   font-size: 48px;
@@ -71,6 +81,9 @@ export const Step = styled.span`
 `;
 
 export const TitleStep = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
@@ -83,6 +96,9 @@ export const TitleStep = styled.h3`
 `;
 
 export const DescriptionStep = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;

@@ -50,6 +50,9 @@ export const WrapText = styled.div`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 8vw;
+  }
   font-family: 'Cormorant SC';
   text-transform: uppercase;
   font-size: 32px;
@@ -65,4 +68,11 @@ export const Title = styled.h2`
     margin-bottom: 48px;
   }
   color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const Image = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;

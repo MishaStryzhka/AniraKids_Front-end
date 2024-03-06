@@ -4,6 +4,9 @@ import BgPhotoMobileUrl from 'images/bg-photo/photo-bg-mobile-1x.jpg';
 import BgPhotoTabletUrl from 'images/bg-photo/photo-bg-tablet-1x.jpg';
 
 export const WrapSection = styled.section`
+  @media screen and (max-width: 427.5px) {
+    width: 100vw;
+  }
   background-color: ${({ theme }) => theme.color.btnColorBG};
   display: flex;
   flex-direction: column;
@@ -28,6 +31,9 @@ export const WrapSection = styled.section`
 `;
 
 export const MainTitle = styled.h1`
+  @media screen and (max-width: 427.5px) {
+    font-size: 16vw;
+  }
   font-family: 'Cormorant SC';
   /* font-size - тимчасово має бути 100px */
   font-size: 70px;
@@ -48,6 +54,9 @@ export const Span = styled.span`
 `;
 
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-style: normal;
@@ -60,6 +69,10 @@ export const Description = styled.p`
 `;
 
 export const WrapButton = styled.div`
+  @media screen and (max-width: 427.5px) {
+    /* width: 60vw; */
+    margin: 0;
+  }
   margin: 0 auto;
   width: 304px;
   @media screen and (min-width: 768px) {

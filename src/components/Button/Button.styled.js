@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const StyleButton = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+  }
   padding: 14px 40px;
   width: 304px;
   border: none;

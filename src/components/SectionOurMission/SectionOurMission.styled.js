@@ -81,14 +81,18 @@ export const ImageWrap = styled.div`
 export const Picture = styled.picture`
   display: block;
   width: inherit;
+  @media screen and (min-width: 1280px) {
+    width: 710px;
+  }
 `;
 
 export const AddWrap = styled.div`
   max-width: 590px;
 `;
 
-// export const StyledIconCheck = styled(IconCheck)`
-//   width: 24px;
-//   height: 24px;
-//   stroke: ${({ theme }) => theme.color.mainColor5};
-// `;
+export const Image = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;

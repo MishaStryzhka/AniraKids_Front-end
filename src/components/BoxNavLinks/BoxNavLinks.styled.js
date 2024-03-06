@@ -2,6 +2,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const NavList = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    gap: 3.7vw;
+  }
   display: flex;
   flex-direction: ${({ $mainPage }) => ($mainPage ? 'row' : 'column')};
   @media screen and (min-width: 1280px) {
@@ -11,6 +14,9 @@ export const NavList = styled.ul`
 `;
 
 export const StyledNavLink = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
