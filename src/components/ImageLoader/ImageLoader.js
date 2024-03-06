@@ -12,7 +12,7 @@ const ImageLoader = ({ src, alt, className, ...props }) => {
         alt={alt}
         {...props}
         className={className}
-        onLoad={() => setLoading(true)}
+        onLoad={() => setLoading(false)}
         style={{ display: loading ? 'none' : 'block' }}
       />
     </>
