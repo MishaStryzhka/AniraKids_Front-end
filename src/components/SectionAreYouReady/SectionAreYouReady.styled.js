@@ -2,6 +2,9 @@ import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
 export const Section = styled.section`
+  @media screen and (max-width: 427.5px) {
+    width: 100vw;
+  }
   padding-bottom: 80px;
   width: 428px;
   display: flex;
