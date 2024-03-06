@@ -10,7 +10,6 @@ import {
   SceletonTextRating,
   SceletonUserNickname,
 } from './SceletonUsersProductCard.styled';
-import RatingStars from 'components/RatingStars/RatingStars';
 const {
   GeneralWrap,
   FirstWrap,
@@ -26,59 +25,6 @@ const SceletonUsersProductCard = () => {
   return (
     <SceletonCard $pageRentOut={pathname === '/my-account/rent-out'}>
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-        {/* <div
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            display: 'flex',
-            gap: 8,
-          }}
-        >
-          {pathname !== '/my-account/rent-out' && (
-            <ButtonAddToFavorites
-              disabled={isLoading}
-              onClick={e => {
-                e.preventDefault();
-                handleAddToFavorites(product?._id);
-              }}
-            >
-              {pathname === '/my-account/favorite' ? (
-                <IconCross />
-              ) : (
-                <IconLittleHeart
-                  fill={
-                    favorites?.includes(product?._id) ? '#fff' : 'transparent'
-                  }
-                  stroke={theme[currentTheme].color.mainColor1}
-                />
-              )}
-            </ButtonAddToFavorites>
-          )}
-          {pathname === '/my-account/rent-out' && (
-            <ButtonAddToFavorites
-              type="button"
-              onClick={e => {
-                e.preventDefault();
-                handleUpdate(product._id);
-              }}
-            >
-              <IconPencil />
-            </ButtonAddToFavorites>
-          )}
-          {pathname === '/my-account/rent-out' && (
-            <ButtonAddToFavorites
-              type="button"
-              onClick={e => {
-                e.preventDefault();
-                handleRemove(product._id);
-              }}
-            >
-              <IconBasket />
-            </ButtonAddToFavorites>
-          )}
-        </div> */}
-
         <SceletonPictureCard
           $pageRentOut={pathname === '/my-account/rent-out'}
         ></SceletonPictureCard>
