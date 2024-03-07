@@ -10,6 +10,9 @@ export const MainWrap = styled.div`
 export const Section = styled.section``;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 7.5vw;
+  }
   font-family: 'Cormorant SC', serif;
   font-size: 32px;
   font-weight: 500;

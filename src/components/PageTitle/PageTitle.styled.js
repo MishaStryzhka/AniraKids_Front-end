@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 7.5vw;
+  }
   text-transform: uppercase;
 
   margin-top: 24px;

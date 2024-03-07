@@ -31,6 +31,9 @@ export const ButtonAddToFavorites = styled.button`
 `;
 
 export const WrapText = styled.div`
+  @media screen and (max-width: 427.5px) {
+    padding: 2vw;
+  }
   min-height: 105px;
   padding: 10px;
   display: flex;

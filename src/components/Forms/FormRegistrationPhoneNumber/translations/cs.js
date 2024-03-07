@@ -5,7 +5,7 @@ export const FormRegistrationPhoneNumberTranslationsCs = {
   passwordLabel: 'Heslo',
   passwordPlaceholder: '****',
   passwordErrorMessage: 'Zadejte platné heslo',
-  privacyPolicyText: 'Kliknutím na Registrovat souhlasíte s našimi',
+  privacyPolicyText: 'Kliknutím na Registrovat souhlasíte s',
   privacyPolicyLinkText: 'Podmínkami ochrany osobních údajů',
   registerButton: 'Registrovat',
 

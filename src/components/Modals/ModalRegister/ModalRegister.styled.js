@@ -4,6 +4,9 @@ import PhotoBgMobileClothers from 'images/bg-clothers-mobile.jpg';
 import PhotoBgTabletClothers from 'images/bg-clothers-tablet.jpg';
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 100vw;
+  }
   width: 428px;
   height: 628px;
 
@@ -14,6 +17,7 @@ export const ModalWindow = styled.div`
   background-size: cover;
   z-index: 1;
   position: relative;
+
   @media screen and (min-width: 768px) {
     background-image: url(${PhotoBgTabletClothers});
     width: 768px;
@@ -26,10 +30,12 @@ export const ModalWindow = styled.div`
 `;
 
 export const WrapForm = styled.div`
+  @media screen and (max-width: 427.5px) {
+    max-width: 100vw;
+  }
   background-color: rgba(255, 255, 255, 0.9);
   position: absolute;
   z-index: 3;
-  height: inherit;
   max-width: 428px;
   height: 588px;
   padding: 20px 14px;
@@ -56,6 +62,10 @@ export const BoxButtonsNavigation = styled.div`
 `;
 
 export const ButtonNav = styled.button`
+  @media screen and (max-width: 427.5px) {
+    font-size: 5.2vw;
+    width: 46.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -77,6 +87,9 @@ export const ButtonNav = styled.button`
 `;
 
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -91,6 +104,10 @@ export const WrapButton = styled.div`
 `;
 
 export const ButtonContact = styled.button`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+    width: 46.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -110,6 +127,9 @@ export const ButtonContact = styled.button`
 `;
 
 export const Separation = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -123,6 +143,9 @@ export const Separation = styled.p`
   color: ${({ theme }) => theme.color.mainColor5};
 
   &::before {
+    @media screen and (max-width: 427.5px) {
+      width: 34vw;
+    }
     content: '';
     display: block;
     height: 2px;
@@ -135,6 +158,9 @@ export const Separation = styled.p`
   }
 
   &::after {
+    @media screen and (max-width: 427.5px) {
+      width: 34vw;
+    }
     content: '';
     display: block;
     height: 2px;
@@ -164,6 +190,9 @@ export const StyledNavLink = styled.a`
 `;
 
 export const StyledSeznamWrap = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 8.4vw;
+  }
   display: flex;
   width: 36px;
   height: 36px;
@@ -177,6 +206,9 @@ export const StyledSeznamWrap = styled.div`
 `;
 
 export const DescriptionLink = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;
