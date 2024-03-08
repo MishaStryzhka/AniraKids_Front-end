@@ -15,6 +15,10 @@ export const WrapInput = styled.div`
 `;
 
 export const ButtonLabel = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 2.8vw;
+    padding: 2vw;
+  }
   cursor: pointer;
 
   text-align: center;

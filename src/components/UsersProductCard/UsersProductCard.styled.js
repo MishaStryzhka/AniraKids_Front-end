@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 export const Card = styled(NavLink)`
   @media screen and (max-width: 427.5px) {
-    width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '43vw')};
+    width: ${({ $pageRentOut }) => ($pageRentOut ? '295px' : '43vw')};
   }
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
   height: 100%;

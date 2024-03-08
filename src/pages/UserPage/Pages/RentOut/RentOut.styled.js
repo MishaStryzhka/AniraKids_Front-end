@@ -19,3 +19,12 @@ export const ListProducts = styled.ul`
     margin: 0;
   }
 `;
+
+export const SecondBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+`;
