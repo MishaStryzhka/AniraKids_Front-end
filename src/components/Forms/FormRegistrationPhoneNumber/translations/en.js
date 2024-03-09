@@ -5,7 +5,7 @@ export const FormRegistrationPhoneNumberTranslationsEn = {
   passwordLabel: 'Password',
   passwordPlaceholder: '****',
   passwordErrorMessage: 'Please enter a valid password',
-  privacyPolicyText: 'By clicking Register, you accept our',
+  privacyPolicyText: 'By clicking Register, you accept',
   privacyPolicyLinkText: 'Privacy Policy',
   registerButton: 'Register',
 

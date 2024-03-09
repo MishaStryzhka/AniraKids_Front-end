@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Button,
   FilterTitle,
+  InnerWrap,
   List,
   MainWrapFilter,
   StyledIconArrowUp,
@@ -64,19 +65,13 @@ const FilterSort = () => {
   return (
     <MainWrapFilter ref={sortRef}>
       <Wrap $openOutfitsList={isFilterSortList === true}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: 12,
-          }}
-        >
+        <InnerWrap>
           <FilterTitle>{t('Sort by')}</FilterTitle>
           <StyledIconArrowUp
             onClick={handleToggleList}
             $openOutfitsList={isFilterSortList === true}
           />
-        </div>
+        </InnerWrap>
         {isFilterSortList && (
           <List>
             {arrayParamsSort.map((sort, index) => (

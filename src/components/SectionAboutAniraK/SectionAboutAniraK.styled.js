@@ -84,6 +84,9 @@ export const Description = styled.p`
 `;
 
 export const WrapButton = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 71.3vw;
+  }
   width: 305px;
   margin: 0 auto;
 `;

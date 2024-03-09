@@ -10,6 +10,10 @@ export const Form = styled.form`
 `;
 
 export const Label = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+    width: 93.5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -32,6 +36,9 @@ export const FieldStyled = styled(Field)`
   border-color: ${({ theme }) => theme.color.mainColor2};
 
   &::placeholder {
+    @media screen and (max-width: 427.5px) {
+      font-size: 3.7vw;
+    }
     font-family: 'Open Sans Hebrew', sans-serif;
     font-size: 14px;
     font-weight: 400;
@@ -49,6 +56,10 @@ export const WrapIcon = styled.div`
 `;
 
 export const Button = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+    padding: 3.3vw 9.3vw;
+  }
   padding: 14px 40px;
   width: 304px;
   border: none;
@@ -70,6 +81,9 @@ export const Button = styled.button`
 `;
 
 export const TextCondition = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   text-align: center;
   font-size: 14px;
@@ -80,6 +94,9 @@ export const TextCondition = styled.p`
 `;
 
 export const StyledNavLinkCondition = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;

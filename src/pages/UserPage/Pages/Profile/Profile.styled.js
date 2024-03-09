@@ -14,6 +14,9 @@ export const ProfileForm = styled(Form)`
 `;
 
 export const Wrap = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 93.5vw;
+  }
   width: 400px;
 
   display: flex;

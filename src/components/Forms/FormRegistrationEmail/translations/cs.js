@@ -2,7 +2,7 @@ export const FormRegistrationEmailTranslationsCs = {
   email: 'Email',
   password: 'Heslo',
   registration: 'Registrovat',
-  privacyPolicyText: 'Kliknutím na Registrovat souhlasíte s našimi',
+  privacyPolicyText: 'Kliknutím na Registrovat souhlasíte s',
   privacyPolicyLinkText: 'Podmínkami ochrany osobních údajů',
 
   // errors

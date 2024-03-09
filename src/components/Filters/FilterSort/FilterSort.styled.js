@@ -2,6 +2,9 @@ import IconArrow from 'images/icons/IconArrow';
 import styled from 'styled-components';
 
 export const MainWrapFilter = styled.div`
+  @media screen and (max-width: 427.5px) {
+    min-width: 46.7vw;
+  }
   min-width: 200px;
   display: flex;
   position: relative;
@@ -12,8 +15,6 @@ export const MainWrapFilter = styled.div`
   @media screen and (min-width: 768px) {
     min-width: 305px;
     justify-content: space-between;
-  }
-  @media screen and (min-width: 1280px) {
   }
 `;
 
@@ -32,6 +33,9 @@ export const Wrap = styled.div`
 `;
 
 export const FilterTitle = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 400;
@@ -72,4 +76,14 @@ export const StyledIconArrowUp = styled(IconArrow)`
   transform: ${({ $openOutfitsList }) =>
     $openOutfitsList ? 'rotate(270deg)' : 'rotate(90deg)'};
   cursor: pointer;
+`;
+
+export const InnerWrap = styled.div`
+  @media screen and (max-width: 427.5px) {
+    padding-bottom: 2.8vw;
+  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
 `;

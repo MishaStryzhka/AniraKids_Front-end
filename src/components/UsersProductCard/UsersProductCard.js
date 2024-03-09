@@ -19,6 +19,7 @@ import {
   TextRating,
   SecondWrap,
   FirstWrap,
+  SpanPrice,
 } from './UsersProductCard.styled';
 import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
@@ -158,13 +159,20 @@ const UsersProductCard = ({
                 </Price>
                 <div>
                   {product.dailyRentalPrice && (
-                    <TextPrice>{product.dailyRentalPrice} kč/den</TextPrice>
+                    <TextPrice>
+                      {product.dailyRentalPrice} <SpanPrice> kč/den</SpanPrice>
+                    </TextPrice>
                   )}
                   {product.hourlyRentalPrice && (
-                    <TextPrice>{product.hourlyRentalPrice} Kč/hod</TextPrice>
+                    <TextPrice>
+                      {product.hourlyRentalPrice} <SpanPrice> kč/hod</SpanPrice>
+                    </TextPrice>
                   )}
                   {product.rentalPrice && (
-                    <TextPrice>{product.rentalPrice} kč/den</TextPrice>
+                    <TextPrice>
+                      {product.rentalPrice}
+                      <SpanPrice> kč/den</SpanPrice>
+                    </TextPrice>
                   )}
                 </div>
               </SecondWrap>

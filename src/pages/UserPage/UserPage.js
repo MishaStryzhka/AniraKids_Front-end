@@ -9,6 +9,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
 import {
   SecondBox,
+  // SecondBox,
   StyledButton,
   StyledIconBag,
   StyledNavLink,

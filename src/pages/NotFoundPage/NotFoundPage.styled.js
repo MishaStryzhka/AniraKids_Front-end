@@ -31,6 +31,9 @@ export const WrapText = styled.div`
   }
 `;
 export const Title = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 16.4vw;
+  }
   font-family: 'Cormorant SC', serif;
   font-size: 70px;
   font-weight: 500;
@@ -55,6 +58,9 @@ export const Span = styled.span`
 `;
 
 export const TitleDescription = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 6vw;
+  }
   font-family: 'Cormorant SC';
   font-size: 26px;
   font-weight: 500;
@@ -72,6 +78,10 @@ export const TitleDescription = styled.p`
   color: ${({ theme }) => theme.color.mainColor4};
 `;
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+    max-width: 88.8vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -91,6 +101,10 @@ export const Description = styled.p`
 `;
 
 export const StyledIconGirl = styled(IconGirl)`
+  @media screen and (max-width: 427.5px) {
+    width: 32.5vw;
+    height: 41.4vw;
+  }
   width: 139px;
   height: 177px;
   @media screen and (min-width: 768px) {

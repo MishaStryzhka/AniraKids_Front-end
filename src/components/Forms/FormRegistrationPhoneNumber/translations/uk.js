@@ -4,7 +4,7 @@ export const FormRegistrationPhoneNumberTranslationsUk = {
   passwordLabel: 'Пароль',
   passwordPlaceholder: '****',
   passwordErrorMessage: 'Будь ласка, введіть правильний пароль',
-  privacyPolicyText: 'Натисканням на Зареєструватися ви приймаєте нашу',
+  privacyPolicyText: 'Натисканням на Зареєструватися ви приймаєте',
   privacyPolicyLinkText: 'Політику конфіденційності',
   registerButton: 'Зареєструватися',
 

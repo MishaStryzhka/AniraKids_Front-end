@@ -1,12 +1,13 @@
 import BoxNavigation from 'components/BoxNavigation/BoxNavigation';
 import {
   Button,
+  CloseButton,
   ModalWindow,
+  StyledIconBag,
   Wrap,
   WrapBoxNav,
   WrapNavLinks,
 } from './ModalBurgerAdmin.styled';
-import IconCross from 'images/icons/IconCross';
 import { StyledButton, StyledNavLink } from 'pages/UserPage/UserPage.styled';
 import IconPerson from 'images/icons/IconPerson';
 import IconChat from 'images/icons/IconChat';
@@ -18,10 +19,10 @@ import IconShopCart from 'images/icons/IconShopCart';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'hooks';
 import IconCard from 'images/icons/IconCard';
-import IconBag from 'images/icons/IconBag';
 import { useDispatch } from 'react-redux';
 import { logOut } from '../../../redux/auth/operations';
 import IconExit from 'images/icons/IconExit';
+import { StyledIconCross } from '../Modal.styled';
 
 const ModalBurgerAdmin = ({ onClick }) => {
   const { t } = useTranslation('translation', {
@@ -37,12 +38,14 @@ const ModalBurgerAdmin = ({ onClick }) => {
           <BoxNavigation />
         </WrapBoxNav>
         <Button>
-          <IconCross
-            onClick={() =>
-              // document.body.style.overflow = 'auto';
-              onClick()
-            }
-          />
+          <CloseButton
+            onClick={() => {
+              document.body.style.overflow = 'auto';
+              onClick();
+            }}
+          >
+            <StyledIconCross />
+          </CloseButton>
           <WrapNavLinks>
             <StyledNavLink to="./profile" onClick={() => onClick()}>
               <IconPerson />
@@ -77,7 +80,7 @@ const ModalBurgerAdmin = ({ onClick }) => {
               <IconCard /> {t('wallet')}
             </StyledNavLink>
             <StyledNavLink to="./order1" onClick={() => onClick()}>
-              <IconBag /> {t('basket')}
+              <StyledIconBag /> {t('basket')}
             </StyledNavLink>
             <StyledButton
               type="button"
