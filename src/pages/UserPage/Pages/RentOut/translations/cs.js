@@ -1,3 +1,4 @@
-export const RentOutTranslationsCs = {
+export const RentOutPageTranslationsCs = {
+  removeProduct: 'Chcete smazat položku',
   addProduct: 'Přidat produkt',
 };

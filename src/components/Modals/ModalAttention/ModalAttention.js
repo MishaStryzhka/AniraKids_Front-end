@@ -5,26 +5,34 @@ import {
   GeneralModalWindow,
   TextDescriptionPhoto,
 } from './ModalAttention.styled';
+import Modal from '../Modal';
 
 const ModalAttention = ({ onClick }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalAttention',
   });
   return (
-    <GeneralModalWindow>
-      <ModalTitle>{t('Attention')}</ModalTitle>
-      <TextDescriptionPhoto>
-        {t('Description about the photo')}
-      </TextDescriptionPhoto>
-      <Button
-        type="submit"
-        onClick={() => {
-          onClick();
-        }}
-      >
-        {t('saveButton')}
-      </Button>
-    </GeneralModalWindow>
+    <Modal
+      onClick={() => {
+        onClick();
+      }}
+    >
+      <GeneralModalWindow>
+        <ModalTitle>{t('Attention')}</ModalTitle>
+        <TextDescriptionPhoto>
+          {t('Description about the photo')}
+        </TextDescriptionPhoto>
+        <Button
+          type="submit"
+          onClick={() => {
+            document.body.style.overflow = 'auto';
+            onClick();
+          }}
+        >
+          {t('saveButton')}
+        </Button>
+      </GeneralModalWindow>
+    </Modal>
   );
 };
 export default ModalAttention;

@@ -9,31 +9,53 @@ import {
 import { Formik } from 'formik';
 import { validationFormOrderScheme } from 'schemas';
 import { ErrorMessage } from '../Form.styled';
+import { useAuth } from 'hooks';
+import Modal from 'components/Modals/Modal';
+import { useEffect, useState } from 'react';
+import { GeneralModalWindow } from 'components/Modals/Modal.styled';
 
 const FormOrder = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.formOrder',
   });
+  const [isOpenModaldeliveryService, setIsOpenModalDeliveryService] =
+    useState(false);
+
+  function iframeListener(event) {
+    if (event.data.message === 'pickerResult') {
+      console.log('event.data', event.data);
+      setIsOpenModalDeliveryService(false);
+    }
+  }
+
+  useEffect(() => {
+    isOpenModaldeliveryService &&
+      window.addEventListener('message', iframeListener);
+
+    return () => {
+      window.addEventListener('message', iframeListener);
+    };
+  }, [isOpenModaldeliveryService]);
+
+  const { user } = useAuth();
 
   const handleFormOrderSubmit = (values, { resetForm }) => {
     console.log(values);
-
     resetForm();
   };
   return (
     <>
       <Formik
         initialValues={{
-          fullName: '',
-          phoneNumber: '',
-          email: '',
+          fullName: `${user.firstName} ${user.lastName}`,
+          phoneNumber: user.primaryPhoneNumber,
+          email: user.email,
           deliveryService: '',
           deliveryType: '',
           city: '',
           address: '',
         }}
         validationSchema={validationFormOrderScheme}
-        // validateOnChange={false}
         onSubmit={handleFormOrderSubmit}
       >
         {({
@@ -93,21 +115,26 @@ const FormOrder = () => {
               <FieldSelect
                 as="select"
                 name="deliveryService"
-                onChange={e => setFieldValue('deliveryService', e.target.value)}
+                onChange={e => {
+                  setIsOpenModalDeliveryService(true);
+                  handleChange(e);
+                }}
                 value={values.deliveryService}
               >
                 <option value="">
                   --- {t('Select delivery services')} ---
                 </option>
-                <option value="NovaPost">{t('NovaPost')}</option>
-                <option value="UkrPost">{t('UkrPost')}</option>
-                <option value="Meest">Meest</option>
+                <option value="Balíkovna">Balíkovna</option>
+                <option value="Zasilkovna">Zasilkovna</option>
+                <option value="PPL">PPL</option>
+                <option value="DHL">DHL</option>
               </FieldSelect>
               {errors.deliveryService && touched.deliveryService && (
                 <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
               )}
             </LabelOrder>
-            <LabelOrder>
+
+            {/* <LabelOrder>
               {t('Delivery type')}*
               <FieldSelect
                 as="select"
@@ -151,11 +178,24 @@ const FormOrder = () => {
               {errors.address && touched.address && (
                 <ErrorMessage>{t(errors.address)}</ErrorMessage>
               )}
-            </LabelOrder>
+            </LabelOrder> */}
             <TextDescription>*{t('Text required')}</TextDescription>
           </StyledForm>
         )}
       </Formik>
+      {isOpenModaldeliveryService && (
+        <Modal onClick={() => setIsOpenModalDeliveryService(false)}>
+          <GeneralModalWindow>
+            <iframe
+              width={850}
+              height={700}
+              title="Výběr místa pro vyzvednutí zásilky"
+              src="https://b2c.cpost.cz/locations/?type=BALIKOVNY"
+              allow="geolocation"
+            />
+          </GeneralModalWindow>
+        </Modal>
+      )}
     </>
   );
 };

@@ -34,7 +34,6 @@ import { ModalChangePasswordTranslationsEn } from 'components/Modals/ModalChange
 import { ModalChangePhoneNumberTranslationsEn } from 'components/Modals/ModalChangePhoneNumber/translations/en';
 import { ModalChangePhotoTranslationsEn } from 'components/Modals/ModalChangePhoto/translations/en';
 import { ModalLogOutTranslationsEn } from 'components/Modals/ModalLogOut/translations/en';
-import { ModalRemoveProductTranslationsEn } from 'components/Modals/ModalRemoveProduct/translations/en';
 import { FormAddProductTranslationsEn } from 'components/Forms/FormAddProduct/translations/en';
 import { ModalBecomeLandlordTranslationsEn } from 'components/Modals/ModalBecomeLandlord/translations/en';
 import { FormBillingDetailsTranslationsEn } from 'components/Forms/FormBillingDetails/translations/en';
@@ -51,6 +50,7 @@ import { EmptyCartTranslationsEn } from 'components/EmptyCart/translations/en';
 import { OrderTranslationsEn } from 'components/Order/translations/en';
 import { FormOrderTranslationsEn } from 'components/Forms/FormOrder/translations/en';
 import { SelectedFiltrsTranslationsEn } from 'components/Filters/SelectedFiltrs/translations/en';
+import { ModalConfirmTranslationsEn } from 'components/Modals/ModalConfirm/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -69,7 +69,6 @@ export const ComponentTranslationsEn = {
   modalResetPassword: ModalResetPasswordTranslationsEn,
   modalChangeNickname: ModalChangeNicknameTranslationsEn,
   modalFilters: ModalFiltersTranslationsEn,
-  modalRemoveProduct: ModalRemoveProductTranslationsEn,
   modalLogOut: ModalLogOutTranslationsEn,
   modalChangePhoto: ModalChangePhotoTranslationsEn,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsEn,
@@ -78,6 +77,7 @@ export const ComponentTranslationsEn = {
   modalBecomeLandlord: ModalBecomeLandlordTranslationsEn,
   modalRegister: ModalRegisterTranslationsEn,
   modalChangeEmail: ModalChangeEmailTranslationsEn,
+  modalConfirm: ModalConfirmTranslationsEn,
 
   //cards
   productCard: ProductCardTranslationsEn,

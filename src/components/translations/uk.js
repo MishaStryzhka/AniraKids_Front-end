@@ -34,7 +34,6 @@ import { ModalChangePasswordTranslationsUk } from 'components/Modals/ModalChange
 import { ModalChangePhoneNumberTranslationsUk } from 'components/Modals/ModalChangePhoneNumber/translations/uk';
 import { ModalChangePhotoTranslationsUk } from 'components/Modals/ModalChangePhoto/translations/uk';
 import { ModalLogOutTranslationsUk } from 'components/Modals/ModalLogOut/translations/uk';
-import { ModalRemoveProductTranslationsUk } from 'components/Modals/ModalRemoveProduct/translations/uk';
 import { FormAddProductTranslationsUk } from 'components/Forms/FormAddProduct/translations/uk';
 import { ModalBecomeLandlordTranslationsUk } from 'components/Modals/ModalBecomeLandlord/translations/uk';
 import { FormBillingDetailsTranslationsUk } from 'components/Forms/FormBillingDetails/translations/uk';
@@ -51,6 +50,7 @@ import { EmptyCartTranslationsUk } from 'components/EmptyCart/translations/uk';
 import { OrderTranslationsUk } from 'components/Order/translations/uk';
 import { FormOrderTranslationsUk } from 'components/Forms/FormOrder/translations/uk';
 import { SelectedFiltrsTranslationsUk } from 'components/Filters/SelectedFiltrs/translations/uk';
+import { ModalConfirmTranslationsUk } from 'components/Modals/ModalConfirm/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -69,7 +69,6 @@ export const ComponentTranslationsUk = {
   modalResetPassword: ModalResetPasswordTranslationsUk,
   modalChangeNickname: ModalChangeNicknameTranslationsUk,
   modalFilters: ModalFiltersTranslationsUk,
-  modalRemoveProduct: ModalRemoveProductTranslationsUk,
   modalLogOut: ModalLogOutTranslationsUk,
   modalChangePhoto: ModalChangePhotoTranslationsUk,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsUk,
@@ -78,6 +77,7 @@ export const ComponentTranslationsUk = {
   modalChangeEmail: ModalChangeEmailTranslationsUk,
   modalRegister: ModalRegisterTranslationsUk,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsUk,
+  modalConfirm: ModalConfirmTranslationsUk,
 
   //cards
   productCard: ProductCardTranslationsUk,
