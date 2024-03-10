@@ -86,7 +86,7 @@ const Order = ({ order, handleRemoveOrder }) => {
         {t('order processing')} {`( ${items[0].serviceType} )`}
       </TitleOrder>
 
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {items.map(item => {
           return (
             <MainWrap key={item._id}>

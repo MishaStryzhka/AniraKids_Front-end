@@ -59,7 +59,7 @@ export const ButtonAgree = styled.button`
   background-color: ${({ theme }) => theme.color.additionalColorGray};
 `;
 
-export const ButtonReject = styled.button`
+export const ButtonDisagree = styled.button`
   padding: 14px 40px;
   width: 304px;
   border: none;

@@ -33,7 +33,6 @@ import { ModalChangePasswordTranslationsCs } from 'components/Modals/ModalChange
 import { ModalChangePhoneNumberTranslationsCs } from 'components/Modals/ModalChangePhoneNumber/translations/cs';
 import { ModalChangePhotoTranslationsCs } from 'components/Modals/ModalChangePhoto/translations/cs';
 import { ModalLogOutTranslationsCs } from 'components/Modals/ModalLogOut/translations/cs';
-import { ModalRemoveProductTranslationsCs } from 'components/Modals/ModalRemoveProduct/translations/cs';
 import { FormAddProductTranslationsCs } from 'components/Forms/FormAddProduct/translations/cs';
 import { ModalBecomeLandlordTranslationsCs } from 'components/Modals/ModalBecomeLandlord/translations/cs';
 import { FormBillingDetailsTranslationsCs } from 'components/Forms/FormBillingDetails/translations/cs';
@@ -50,6 +49,7 @@ import { EmptyCartTranslationsCs } from 'components/EmptyCart/translations/cs';
 import { OrderTranslationsCs } from 'components/Order/translations/cs';
 import { FormOrderTranslationsCs } from 'components/Forms/FormOrder/translations/cs';
 import { SelectedFiltrsTranslationsCs } from 'components/Filters/SelectedFiltrs/translations/cs';
+import { ModalConfirmTranslationsCs } from 'components/Modals/ModalConfirm/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -68,7 +68,6 @@ export const ComponentTranslationsCs = {
   modalResetPassword: ModalResetPasswordTranslationsCs,
   modalChangeNickname: ModalChangeNicknameTranslationsCs,
   modalFilters: ModalFiltersTranslationsCs,
-  modalRemoveProduct: ModalRemoveProductTranslationsCs,
   modalLogOut: ModalLogOutTranslationsCs,
   modalChangePhoto: ModalChangePhotoTranslationsCs,
   modalChangePhoneNumber: ModalChangePhoneNumberTranslationsCs,
@@ -77,6 +76,7 @@ export const ComponentTranslationsCs = {
   modalAddAvatar: ModalAddAvatarTranslationsCs,
   modalRegister: ModalRegisterTranslationsCs,
   modalBecomeLandlord: ModalBecomeLandlordTranslationsCs,
+  modalConfirm: ModalConfirmTranslationsCs,
 
   //cards
   productCard: ProductCardTranslationsCs,

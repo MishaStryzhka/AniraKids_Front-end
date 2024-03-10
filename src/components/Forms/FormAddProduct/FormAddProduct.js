@@ -74,7 +74,6 @@ import {
   arrayofDecorProduct,
   arrayOfOutfits,
 } from 'data';
-import Modal from 'components/Modals/Modal';
 import ModalAttention from 'components/Modals/ModalAttention/ModalAttention';
 
 const api = require('../../../api');
@@ -206,6 +205,8 @@ const FormAddProduct = () => {
           handleBlur,
         } = formikProps;
 
+        console.log('errors', errors);
+
         const resetInitialValuesForCategories = () => {
           setFieldValue('familyLook', '');
           setFieldValue('isPregnancy', '');
@@ -229,17 +230,23 @@ const FormAddProduct = () => {
                   name="photoUrls"
                   accept=".jpg, .jpeg, .png"
                   onChange={e => {
+                    console.log('e.target.files', e.target.files);
+
                     const selectedFiles = Array.from(e.target.files);
+                    console.log('selectedFiles', selectedFiles);
+                    console.log(
+                      'selectedFiles.length + selectedPhotos.length',
+                      selectedFiles.length + selectedPhotos.length
+                    );
+
                     console.log(selectedPhotos);
                     console.log(selectedPhotos.length);
                     if (selectedFiles.length + selectedPhotos.length > 10) {
-                      // Заборонити вибір більше ніж 10 файлів
                       setIsOpenModalMaxSize(true);
                       return;
                     }
 
                     if (selectedFiles.some(file => file.size > 10485760)) {
-                      // alert(t('maxSize'));
                       setIsOpenModalMaxSize(true);
                       return;
                     }
@@ -785,6 +792,13 @@ const FormAddProduct = () => {
                         disabled={!values.rental}
                       />
                     </LabelPrice>
+                    {errors.dailyRentalPrice && touched.dailyRentalPrice && (
+                      <WrapError>
+                        <ErrorMessage>
+                          {t(errors.dailyRentalPrice)}
+                        </ErrorMessage>
+                      </WrapError>
+                    )}
                     <LabelPrice>
                       {t('Price')} (Kč/hod)
                       <InputPrice
@@ -797,6 +811,13 @@ const FormAddProduct = () => {
                         disabled={!values.rental}
                       />
                     </LabelPrice>
+                    {errors.hourlyRentalPrice && touched.hourlyRentalPrice && (
+                      <WrapError>
+                        <ErrorMessage>
+                          {t(errors.hourlyRentalPrice)}
+                        </ErrorMessage>
+                      </WrapError>
+                    )}
                   </WrapCondition>
                   <WrapCondition>
                     <LabelStatus>
@@ -1543,17 +1564,45 @@ const FormAddProduct = () => {
                             />
                           </LabelStatus>
                           <LabelPrice>
-                            {t('Price')} (Kč)
+                            {t('Price')} (Kč/den)
                             <InputPrice
                               placeholder={t('pricePlaceholder')}
                               type="number"
-                              name="rentalPrice"
-                              value={values.rentalPrice}
+                              name="dailyRentalPrice"
+                              value={values.dailyRentalPrice}
                               onChange={handleChange}
                               onBlur={handleBlur}
                               disabled={!values.rental}
                             />
                           </LabelPrice>
+                          {errors.dailyRentalPrice &&
+                            touched.dailyRentalPrice && (
+                              <WrapError>
+                                <ErrorMessage>
+                                  {t(errors.dailyRentalPrice)}
+                                </ErrorMessage>
+                              </WrapError>
+                            )}
+                          <LabelPrice>
+                            {t('Price')} (Kč/hod)
+                            <InputPrice
+                              placeholder={t('pricePlaceholder')}
+                              type="number"
+                              name="hourlyRentalPrice"
+                              value={values.hourlyRentalPrice}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              disabled={!values.rental}
+                            />
+                          </LabelPrice>
+                          {errors.hourlyRentalPrice &&
+                            touched.hourlyRentalPrice && (
+                              <WrapError>
+                                <ErrorMessage>
+                                  {t(errors.hourlyRentalPrice)}
+                                </ErrorMessage>
+                              </WrapError>
+                            )}
                         </WrapCondition>
                         <WrapCondition>
                           <LabelStatus>
@@ -1654,17 +1703,11 @@ const FormAddProduct = () => {
               )}
             </FormMobile>
             {isOpenModalMaxSize && (
-              <Modal
+              <ModalAttention
                 onClick={() => {
                   setIsOpenModalMaxSize(false);
                 }}
-              >
-                <ModalAttention
-                  onClick={() => {
-                    setIsOpenModalMaxSize(false);
-                  }}
-                />
-              </Modal>
+              />
             )}
           </>
         );

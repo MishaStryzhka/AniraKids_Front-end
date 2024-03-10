@@ -3,12 +3,15 @@ import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ListProducts } from './RentOut.styled';
-import Modal from 'components/Modals/Modal';
-import ModalRemoveProduct from 'components/Modals/ModalRemoveProduct/ModalRemoveProduct';
+import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
+import { useTranslation } from 'react-i18next';
 
 const api = require('../../../../api');
 
 const RentOut = () => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.rentOut',
+  });
   const { id } = useParams();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
@@ -92,17 +95,16 @@ const RentOut = () => {
         <NotFound>Тут поки пусто</NotFound>
       )}
       {isOpenModalRemove && (
-        <Modal>
-          <ModalRemoveProduct
-            onClick={() => setIsOpenModalRemove(false)}
-            onTrue={async () => {
-              await api.removeProductById(isOpenModalRemove);
-              setProducts(
-                products.filter(product => product._id !== isOpenModalRemove)
-              );
-            }}
-          />
-        </Modal>
+        <ModalConfirm
+          onCloseModal={() => setIsOpenModalRemove(false)}
+          confirm={async () => {
+            await api.removeProductById(isOpenModalRemove);
+            setProducts(
+              products.filter(product => product._id !== isOpenModalRemove)
+            );
+          }}
+          title={t('removeProduct')}
+        />
       )}
     </>
   );

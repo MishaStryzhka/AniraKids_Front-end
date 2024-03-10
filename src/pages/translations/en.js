@@ -6,6 +6,7 @@ import { ForWomenPageTranslationsEn } from 'pages/ForWomenPage/translations/en';
 import { NotFoundPageTranslationsEn } from 'pages/NotFoundPage/translations/en';
 import { PopularPageTranslationsEn } from 'pages/PopularPage/translations/en';
 import { ProductPageTranslationsEn } from 'pages/ProductPage/translations/en';
+import { RentOutPageTranslationsEn } from 'pages/UserPage/Pages/RentOut/translations/en';
 import { UserPageTranslationsEn } from 'pages/UserPage/translations/en';
 
 export const PagesTranslationsEn = {
@@ -16,6 +17,9 @@ export const PagesTranslationsEn = {
   forWomenPage: ForWomenPageTranslationsEn,
   forMenPage: ForMenPageTranslationsEn,
   forChildrenPage: ForChildrenPageTranslationsEn,
-  userPage: UserPageTranslationsEn,
+
+  userPage: UserPageTranslationsEn, // =>
+  rentOut: RentOutPageTranslationsEn,
+
   decorAndToysPage: DecorAndToysPageTranslationsEn,
 };
