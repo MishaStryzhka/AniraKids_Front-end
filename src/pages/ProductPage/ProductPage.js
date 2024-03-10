@@ -67,6 +67,7 @@ import {
 import { useAuth, useStorage } from 'hooks';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
 import theme from 'components/theme';
+import { usePageMeta } from 'hooks/usePageMeta';
 
 const api = require('../../api');
 
@@ -89,6 +90,7 @@ const ProductPage = () => {
   const [favorites, setFavorites] = useState(
     user?.favorites || storage.get('favorites') || []
   );
+  usePageMeta(product._id);
 
   useEffect(() => {
     user?.favorites && setFavorites(user?.favorites);
