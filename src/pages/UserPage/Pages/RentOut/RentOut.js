@@ -28,11 +28,7 @@ const RentOut = () => {
   error && console.log('error', error);
   const location = useLocation();
   const navigation = useNavigate();
-
-  const { t } = useTranslation('translation', {
-    keyPrefix: 'pages.rentOut',
-  });
-
+  
   useEffect(() => {
     api
       .getCurrentUserProducts({ page, pageSize })
