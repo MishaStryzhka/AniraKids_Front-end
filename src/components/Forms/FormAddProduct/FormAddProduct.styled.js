@@ -26,6 +26,9 @@ export const WrapLabels = styled.div`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -109,6 +112,9 @@ export const TextPhoto = styled.p`
 `;
 
 export const TextInstruction = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 2.5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 10px;
   font-weight: 300;
@@ -120,6 +126,9 @@ export const TextInstruction = styled.p`
 `;
 
 export const LabelDescription = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -135,6 +144,10 @@ export const LabelDescription = styled.label`
 `;
 
 export const Field = styled.input`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+    padding: 3.7vw;
+  }
   box-sizing: border-box;
   width: 100%;
   padding: 16px;
@@ -170,12 +183,19 @@ export const FieldComments = styled.textarea`
 `;
 
 export const GeneralList = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    gap: 2vw;
+  }
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 `;
 
 export const Button = styled.button`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+    padding: 3.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -198,6 +218,9 @@ export const List = styled.ul`
 `;
 
 export const ListHorizont = styled(List)`
+  @media screen and (max-width: 427.5px) {
+    gap: 3.7vw;
+  }
   flex-direction: row;
   gap: 16px;
 `;
@@ -220,6 +243,9 @@ export const WrapCategory = styled.div`
   margin-bottom: ${({ $isCategoryMan }) => ($isCategoryMan ? '48px' : '0')};
 `;
 export const Label = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -237,6 +263,9 @@ export const Input = styled.input`
 `;
 
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -250,6 +279,9 @@ export const Description = styled.p`
 `;
 
 export const BoxCategory = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 4.7vw;
+  }
   display: flex;
   gap: 20px;
 
@@ -276,6 +308,9 @@ export const ButtonVariant = styled.button`
 `;
 
 export const ListColor = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    width: 90.7vw;
+  }
   width: 388px;
   display: flex;
   flex-wrap: wrap;
@@ -304,11 +339,19 @@ export const LabelSize = styled.label`
 `;
 
 export const LabelChildren = styled(LabelSize)`
+  @media screen and (max-width: 427.5px) {
+    width: 35vw;
+    font-size: 3.3vw;
+  }
   width: 150px;
   display: block;
+  font-size: 14px;
 `;
 
 export const BoxSize = styled.div`
+  @media screen and (max-width: 427.5px) {
+    padding: 2px 1.9vw;
+  }
   text-align: center;
   padding: 2px 8px;
   background-color: ${({ $check, theme }) =>
@@ -316,6 +359,9 @@ export const BoxSize = styled.div`
 `;
 
 export const LabelColor = styled.label`
+  @media screen and (max-width: 427.5px) {
+    width: 43vw;
+  }
   border: none;
   background-color: transparent;
   width: 184px;
@@ -347,6 +393,10 @@ export const BoxColor = styled.div`
 `;
 
 export const WrapChildrenParams = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    max-width: 154vw;
+    gap: 3.7vw;
+  }
   display: flex;
   flex-wrap: wrap;
   max-width: 660px;
@@ -362,6 +412,9 @@ export const WrapChildrenSize = styled(WrapChildrenParams)`
 `;
 
 export const GeneralWrap = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 4.7vw;
+  }
   display: flex;
   gap: 20px;
   @media screen and (min-width: 768px) {
@@ -370,12 +423,18 @@ export const GeneralWrap = styled.div`
 `;
 
 export const WrapCondition = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 3.7vw;
+  }
   display: flex;
   flex-direction: column;
   gap: 16px;
 `;
 
 export const LabelStatus = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -407,6 +466,10 @@ export const LabelPrice = styled.label`
 `;
 
 export const InputPrice = styled.input`
+  @media screen and (max-width: 427.5px) {
+    padding: 3.7vw;
+    width: 35vw;
+  }
   padding: 16px;
   border: 1px solid;
   border-radius: 2px;
@@ -425,14 +488,18 @@ export const InputPrice = styled.input`
 `;
 
 export const Box = styled.div`
+  @media screen and (max-width: 427.5px) {
+    min-width: 5.6vw;
+    min-height: 5.6vw;
+  }
   display: flex;
   justify-content: center;
   align-items: center;
   border: 1px solid;
   border-radius: 2px;
   display: inline-block;
-  width: 24px;
-  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
@@ -442,6 +509,10 @@ export const StyledNavLink = styled(NavLink)`
 `;
 
 export const ButtonSubmit = styled.button`
+  @media screen and (max-width: 427.5px) {
+    padding: 3.3vw 0;
+    width: 71.3vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -468,6 +539,9 @@ export const WrapError = styled.div`
 `;
 
 export const WrapBtnAdd = styled.div`
+  @media screen and (max-width: 427.5px) {
+    margin-top: 18.7vw;
+  }
   margin-top: 80px;
 `;
 

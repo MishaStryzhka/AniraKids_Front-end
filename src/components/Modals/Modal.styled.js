@@ -138,6 +138,9 @@ export const ModalWindow = styled.div`
 `;
 
 export const LabelModal = styled.label`
+  @media screen and (max-width: 427.5px) {
+    width: 93.5vw;
+  }
   width: 400px;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;

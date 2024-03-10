@@ -1,9 +1,10 @@
 import * as React from 'react';
-const IconLongArrow = props => (
+const IconLongArrow = ({ className }, ...props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={50}
     height={24}
+    className={className}
     fill="none"
     {...props}
   >

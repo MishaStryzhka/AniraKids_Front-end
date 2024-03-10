@@ -46,11 +46,15 @@ const PopularPage = () => {
           <Title>{t("Women's Clothing")}</Title>
           <Border />
           <Swiper
-            spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 2,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 2,
+                spaceBetween: 20,
               },
               768: {
                 slidesPerView: 2,
@@ -95,11 +99,15 @@ const PopularPage = () => {
           <Title>{t('Men suits')}</Title>
           <Border />
           <Swiper
-            spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 2,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 2,
+                spaceBetween: 20,
               },
               768: {
                 slidesPerView: 2,
@@ -142,11 +150,15 @@ const PopularPage = () => {
           <Title>{t("Children's Clothing")}</Title>
           <Border />
           <Swiper
-            spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 2,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 2,
+                spaceBetween: 20,
               },
               768: {
                 slidesPerView: 2,
@@ -189,11 +201,15 @@ const PopularPage = () => {
           <Title>{t('Decor And Toys')}</Title>
           <Border />
           <Swiper
-            spaceBetween={20}
             breakpoints={{
               // Розміри Media
+              320: {
+                slidesPerView: 2,
+                spaceBetween: 10,
+              },
               428: {
                 slidesPerView: 2,
+                spaceBetween: 20,
               },
               768: {
                 slidesPerView: 2,

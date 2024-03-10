@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ListProducts } from './RentOut.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
+import IconPlus from 'images/icons/IconPlus';
+import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 import { useTranslation } from 'react-i18next';
 
 const api = require('../../../../api');
@@ -24,8 +26,12 @@ const RentOut = () => {
   const [isOpenModalRemove, setIsOpenModalRemove] = useState(false);
 
   error && console.log('error', error);
-
+  const location = useLocation();
   const navigation = useNavigate();
+
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.rentOut',
+  });
 
   useEffect(() => {
     api
@@ -60,6 +66,14 @@ const RentOut = () => {
         <p>loading...</p>
       ) : products.length ? (
         <>
+          <SecondBox>
+            {location.pathname === '/my-account/rent-out' && (
+              <ButtonAdd to="/my-account/rent-out/add-product">
+                {t('addProduct')}
+                <IconPlus />
+              </ButtonAdd>
+            )}
+          </SecondBox>
           <ListProducts>
             {products.map(product => (
               <li key={product._id}>

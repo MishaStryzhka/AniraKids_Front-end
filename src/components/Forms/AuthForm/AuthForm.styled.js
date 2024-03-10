@@ -3,14 +3,15 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Form = styled.form`
-  /* width: 400px; */
-
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 24px;
 `;
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -20,6 +21,10 @@ export const Description = styled.p`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 export const Label = styled.label`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+    width: 93.4vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -42,6 +47,9 @@ export const FieldStyled = styled(Field)`
   border-color: ${({ theme }) => theme.color.mainColor2};
 
   &::placeholder {
+    @media screen and (max-width: 427.5px) {
+      font-size: 3.7vw;
+    }
     font-family: 'Open Sans Hebrew', sans-serif;
     font-size: 14px;
     font-weight: 400;
@@ -57,6 +65,9 @@ export const Wrap = styled.div`
   gap: 16px;
 `;
 export const TitleLogin = styled.p`
+  @media screen and (max-width: 427.5px) {
+    width: 93.4vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   text-align: center;
   font-size: 14px;
@@ -72,6 +83,10 @@ export const TitleLogin = styled.p`
 `;
 
 export const Button = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+    padding: 3.3vw 9.3vw;
+  }
   padding: 14px 40px;
   width: 304px;
   border: none;
