@@ -42,6 +42,7 @@ const UsersProductCard = ({
   handleRemove,
   handleUpdate,
   onRemoveFavorite,
+  to,
 }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.usersProductCard',
@@ -81,9 +82,11 @@ const UsersProductCard = ({
     }
   };
 
+  console.log('pathname', pathname);
+
   return (
     <Card
-      to={`./${product?._id}`}
+      to={to || `./${product?._id}`}
       $pageRentOut={pathname === '/my-account/rent-out'}
     >
       <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
