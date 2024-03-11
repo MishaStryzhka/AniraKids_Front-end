@@ -1,10 +1,11 @@
 import * as React from 'react';
-const IconPencil = props => (
+const IconPencil = ({ className, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     width={18}
     height={18}
+    className={className}
     viewBox="-1 1 23 23"
     {...props}
   >

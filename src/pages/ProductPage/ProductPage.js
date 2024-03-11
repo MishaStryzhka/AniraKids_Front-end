@@ -41,6 +41,7 @@ import {
   ButtonCalendarTime,
   GeneralWrap,
   ButtonAddToFavorite,
+  StyledButton,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
 import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
@@ -68,6 +69,7 @@ import { useAuth, useStorage } from 'hooks';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
 import theme from 'components/theme';
 import { usePageMeta } from 'hooks/usePageMeta';
+import { arrayColorsProduct } from 'data';
 
 const api = require('../../api');
 
@@ -171,6 +173,11 @@ const ProductPage = () => {
   };
 
   const width = window.innerWidth < 767;
+  const colorProduct = arrayColorsProduct.find(
+    item => item.color === product?.color
+  );
+  console.log(2);
+  console.log(colorProduct);
 
   return isLoading ? (
     <p>Loading...</p>
@@ -216,9 +223,9 @@ const ProductPage = () => {
             $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
           >
             <Wrap
-              $pageFavorites={
-                pathname === `/my-account/favorite/${product?._id}`
-              }
+            // $pageFavorites={
+            //   pathname === `/my-account/favorite/${product?._id}`
+            // }
             >
               <Title>{product?.name}</Title>
               <WrapInside>
@@ -252,7 +259,9 @@ const ProductPage = () => {
               )}
               {product?.sale && (
                 <SecondWrap>
-                  <Price style={{ width: 'max-content', marginLeft: 'auto' }}>
+                  <Price
+                  // style={{ width: 'max-content', marginLeft: 'auto' }}
+                  >
                     {t('sale')}
                   </Price>
                   <TextPrice style={{ textAlign: 'end' }}>
@@ -273,24 +282,22 @@ const ProductPage = () => {
               {(product?.dailyRentalPrice ||
                 product?.hourlyRentalPrice ||
                 product?.rentalPrice) && (
-                <Button
+                <StyledButton
                   disabled={product?.owner?._id === user?.userID}
-                  style={{ width: 'auto' }}
                   onClick={handleClickRent}
                   ariaLabel="rent"
                 >
                   Орендувати
-                </Button>
+                </StyledButton>
               )}
               {product?.salePrice && (
-                <Button
+                <StyledButton
                   disabled={product?.owner?._id === user?.userID}
-                  style={{ width: 'auto' }}
                   onClick={handleClickBuy}
                   ariaLabel="buy"
                 >
                   Купити
-                </Button>
+                </StyledButton>
               )}
               {pathname !== `/my-account/favorite/${product?._id}` && (
                 <ButtonAddToFavorite
@@ -329,7 +336,7 @@ const ProductPage = () => {
             <WrapColor>
               <Color
                 style={{
-                  backgroundColor: product?.colorCode,
+                  backgroundColor: colorProduct.colorCode,
                 }}
               />
               <TextDescription>{t(product?.color)}</TextDescription>

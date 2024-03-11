@@ -1,3 +1,4 @@
+import Button from 'components/Button/Button';
 import { StyleButton } from 'components/Button/Button.styled';
 import styled from 'styled-components';
 
@@ -33,6 +34,10 @@ export const WrapAllImages = styled.div`
 `;
 
 export const MainImage = styled.img`
+  @media screen and (max-width: 427.5px) {
+    width: 90.7vw;
+    height: 90.7vw;
+  }
   display: block;
   width: 388px;
   height: 388px;
@@ -49,6 +54,9 @@ export const MainImage = styled.img`
 `;
 
 export const SecondaryImages = styled.img`
+  @media screen and (max-width: 427.5px) {
+    width: 30vw;
+  }
   display: block;
   width: 124px;
   height: 113px;
@@ -67,7 +75,9 @@ export const SecondaryImages = styled.img`
 `;
 
 export const WrapSecondaryImages = styled.div`
-  /* width: 388px; */
+  @media screen and (max-width: 427.5px) {
+    width: 90.7vw;
+  }
   height: 113px;
   min-width: 0;
   overflow: auto;
@@ -101,9 +111,9 @@ export const WrapDescription = styled.div``;
 export const Wrap = styled.div`
   display: flex;
   justify-content: space-between;
-  /* align-items: center; */
-  align-items: ${({ $pageFavorites }) =>
-    $pageFavorites ? 'center' : 'stretch'};
+  align-items: center;
+  /* align-items: ${({ $pageFavorites }) =>
+    $pageFavorites ? 'center' : 'stretch'}; */
 `;
 
 export const WrapInside = styled.div`
@@ -164,6 +174,9 @@ export const TextValueSize = styled.span`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 export const TextPrice = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 7.5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 32px;
   font-weight: 700;
@@ -175,9 +188,12 @@ export const TextPrice = styled.p`
 `;
 
 export const WrapBtn = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 2.8vw;
+  }
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin: 0 auto;
 `;
 
@@ -373,4 +389,19 @@ export const ButtonAddToFavorite = styled.button`
   padding: 0;
   padding-top: 4px;
   border: none;
+`;
+
+export const StyledButton = styled(Button)`
+  @media screen and (max-width: 427.5px) {
+    padding: 2.3vw 3.3vw;
+    width: 35vw;
+    font-size: 3.3vw;
+  }
+  padding: 10px 14px;
+  width: 150px;
+  font-size: 14px;
+  @media screen and (min-width: 768px) {
+    width: 220px;
+    gap: 16px;
+  }
 `;

@@ -1,12 +1,16 @@
 import ImageLoader from 'components/ImageLoader/ImageLoader';
+import IconBasket from 'images/icons/IconBasket';
+import IconPencil from 'images/icons/IconPencil';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Card = styled(NavLink)`
   @media screen and (max-width: 427.5px) {
-    width: ${({ $pageRentOut }) => ($pageRentOut ? '295px' : '43vw')};
+    /* width: ${({ $pageRentOut }) => ($pageRentOut ? '295px' : '43vw')}; */
+    width: 43vw;
   }
-  width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
+  /* width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')}; */
+  width: 184px;
   height: 100%;
   border-radius: 2px;
   overflow: hidden;
@@ -14,7 +18,8 @@ export const Card = styled(NavLink)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '8px')};
+  /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '8px')}; */
+  gap: 8px;
   cursor: pointer;
 
   box-shadow: ${({ theme }) => theme.boxShadow};
@@ -24,7 +29,8 @@ export const Card = styled(NavLink)`
   }
 
   @media screen and (min-width: 768px) {
-    gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '12px')};
+    /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '12px')}; */
+    gap: 12px;
   }
   position: relative;
   @media screen and (min-width: 768px) {
@@ -39,11 +45,14 @@ export const GeneralWrap = styled.div`
 
 export const PictureCard = styled.picture`
   @media screen and (max-width: 427.5px) {
-    height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '46.7vw')};
+    /* height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '46.7vw')}; */
+    height: 46.7vw;
   }
   width: inherit;
-  height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '200px')};
-  width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
+  /* height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '200px')}; */
+  /* width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')}; */
+  height: 200px;
+  width: 184px;
   border-radius: 2px;
   overflow: hidden;
   @media screen and (min-width: 768px) {
@@ -52,6 +61,23 @@ export const PictureCard = styled.picture`
   }
 `;
 
+export const StyledIconPencil = styled(IconPencil)`
+  @media screen and (max-width: 427.5px) {
+    width: 4.2vw;
+    height: 4.2vw;
+  }
+  width: 18px;
+  height: 18px;
+`;
+
+export const StyledIconBasket = styled(IconBasket)`
+  @media screen and (max-width: 427.5px) {
+    width: 4.2vw;
+    height: 4.2vw;
+  }
+  width: 18px;
+  height: 18px;
+`;
 export const Image = styled(ImageLoader)`
   display: block;
   width: 100%;
@@ -59,6 +85,10 @@ export const Image = styled(ImageLoader)`
   object-fit: cover;
 `;
 export const ButtonAddToFavorites = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 4.2vw;
+    height: 4.2vw;
+  }
   width: 24px;
   height: 24px;
   border-radius: 50px;
@@ -80,15 +110,20 @@ export const WrapText = styled.div`
   flex-direction: column;
 
   @media screen and (min-width: 768px) {
-    gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
+    /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')}; */
+    gap: 12px;
   }
 `;
 
 export const FirstWrap = styled.div`
   display: flex;
-  flex-direction: ${({ $pageRentOut }) => ($pageRentOut ? 'row' : 'column')};
+  /* flex-direction: ${({ $pageRentOut }) =>
+    $pageRentOut ? 'row' : 'column'}; */
+  flex-direction: column;
   justify-content: space-between;
-  align-items: ${({ $pageRentOut }) => ($pageRentOut ? 'center' : 'stretch')};
+  /* align-items: ${({ $pageRentOut }) =>
+    $pageRentOut ? 'center' : 'stretch'}; */
+  align-items: stretch;
   @media screen and (min-width: 768px) {
     flex-direction: row;
     align-items: center;
@@ -127,8 +162,8 @@ export const Span = styled.span`
 
 export const Price = styled.p`
   @media screen and (max-width: 427.5px) {
-    font-size: 3.3vw;
-    padding: 1vw 1.8vw;
+    font-size: ${({ $productPage }) => ($productPage ? '14px' : '3.3vw')};
+    padding: ${({ $productPage }) => ($productPage ? '8px 14px' : '1vw 1.8vw')};
   }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -136,16 +171,14 @@ export const Price = styled.p`
   line-height: 1.43;
   text-transform: uppercase;
 
-  // width: ${({ $pageRentOut }) => ($pageRentOut ? '180px' : '')};
+  width: ${({ $productPage }) => ($productPage ? '500px' : '')};
   padding: 8px 14px;
-  padding: 4px 8px;
   display: flex;
   justify-content: center;
 
   border-radius: 50px;
 
   @media screen and (min-width: 768px) {
-    // width: 180px;
     padding: 8px 14px;
   }
   background-color: ${({ theme }) => theme.color.lightBGColor};

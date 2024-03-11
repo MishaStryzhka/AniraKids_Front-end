@@ -20,6 +20,9 @@ const animateFill = keyframes`
 `;
 
 export const StyledSceleton = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: ${({ width }) => width || '100px'};
+  }
   width: inherit;
   height: ${({ height }) => height || '40px'};
   width: ${({ width }) => width || '100px'};

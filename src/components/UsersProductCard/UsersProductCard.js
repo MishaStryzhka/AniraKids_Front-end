@@ -20,6 +20,8 @@ import {
   SecondWrap,
   FirstWrap,
   SpanPrice,
+  StyledIconPencil,
+  StyledIconBasket,
 } from './UsersProductCard.styled';
 import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
@@ -32,8 +34,6 @@ import {
 } from '../../redux/auth/operations';
 import IconLittleHeart from 'images/icons/IconLittleHeart';
 import RatingStars from 'components/RatingStars/RatingStars';
-import IconPencil from 'images/icons/IconPencil';
-import IconBasket from 'images/icons/IconBasket';
 import IconCross from 'images/icons/IconCross';
 import { useEffect, useState } from 'react';
 
@@ -84,9 +84,11 @@ const UsersProductCard = ({
   return (
     <Card
       to={`./${product?._id}`}
-      $pageRentOut={pathname === '/my-account/rent-out'}
+      // $pageRentOut={pathname === '/my-account/rent-out'}
     >
-      <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
+      <GeneralWrap
+      // $pageRentOut={pathname === '/my-account/rent-out'}
+      >
         <div
           style={{
             position: 'absolute',
@@ -124,7 +126,7 @@ const UsersProductCard = ({
                 handleUpdate(product._id);
               }}
             >
-              <IconPencil />
+              <StyledIconPencil />
             </ButtonAddToFavorites>
           )}
           {pathname === '/my-account/rent-out' && (
@@ -135,16 +137,22 @@ const UsersProductCard = ({
                 handleRemove(product._id);
               }}
             >
-              <IconBasket />
+              <StyledIconBasket />
             </ButtonAddToFavorites>
           )}
         </div>
 
-        <PictureCard $pageRentOut={pathname === '/my-account/rent-out'}>
+        <PictureCard
+        // $pageRentOut={pathname === '/my-account/rent-out'}
+        >
           <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
         </PictureCard>
-        <WrapText $pageRentOut={pathname === '/my-account/rent-out'}>
-          <FirstWrap $pageRentOut={pathname === '/my-account/rent-out'}>
+        <WrapText
+        // $pageRentOut={pathname === '/my-account/rent-out'}
+        >
+          <FirstWrap
+          // $pageRentOut={pathname === '/my-account/rent-out'}
+          >
             <TextName>{product?.name || 'brand'}</TextName>
             <TextSize>
               <Span>{t('Size')}:</Span>
@@ -154,7 +162,7 @@ const UsersProductCard = ({
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {product?.rental && (
               <SecondWrap>
-                <Price $pageRentOut={pathname === '/my-account/rent-out'}>
+                <Price $productPage={pathname === `./${product?._id}`}>
                   {t('Rental')}
                 </Price>
                 <div>
@@ -179,7 +187,7 @@ const UsersProductCard = ({
             )}
             {product?.sale && (
               <SecondWrap>
-                <Price $pageRentOut={pathname === '/my-account/rent-out'}>
+                <Price $productPage={pathname === `./${product?._id}`}>
                   {t('Sale')}
                 </Price>
                 <TextPrice style={{ textAlign: 'end' }}>

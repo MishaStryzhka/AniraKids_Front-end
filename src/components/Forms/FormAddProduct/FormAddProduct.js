@@ -52,6 +52,7 @@ import {
   WrapTextAgree,
   WrapBtnAdd,
   WrapButtons,
+  StyledIconCheck,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
@@ -1209,7 +1210,7 @@ const FormAddProduct = () => {
                               <Label key={index}>
                                 <Box>
                                   {values.familyLook === valueVariant && (
-                                    <IconCheck />
+                                    <StyledIconCheck />
                                   )}
                                 </Box>
                                 {t(valueVariant)}
@@ -1234,7 +1235,9 @@ const FormAddProduct = () => {
                             <Description>{t('For pregnant women')}</Description>
 
                             <Label>
-                              <Box>{values.isPregnancy && <IconCheck />}</Box>
+                              <Box>
+                                {values.isPregnancy && <StyledIconCheck />}
+                              </Box>
                               {t(true)}
                               <Input
                                 type="checkbox"
@@ -1300,7 +1303,7 @@ const FormAddProduct = () => {
                               <Label key={index}>
                                 <Box>
                                   {values.outfits === valueOutfits && (
-                                    <IconCheck />
+                                    <StyledIconCheck />
                                   )}
                                 </Box>
                                 {t(valueOutfits)}
@@ -1394,7 +1397,7 @@ const FormAddProduct = () => {
                               <Label key={index}>
                                 <Box>
                                   {values.subject === valueSubject && (
-                                    <IconCheck />
+                                    <StyledIconCheck />
                                   )}
                                 </Box>
                                 {t(valueSubject)}
@@ -1421,7 +1424,7 @@ const FormAddProduct = () => {
                                 <Label key={index}>
                                   <Box>
                                     {values.decor === searchDecor && (
-                                      <IconCheck />
+                                      <StyledIconCheck />
                                     )}
                                   </Box>
                                   {t(searchDecor)}
@@ -1450,7 +1453,9 @@ const FormAddProduct = () => {
                             {arrayOfToysProduct.map(({ typeOfToys }, index) => (
                               <Label key={index}>
                                 <Box>
-                                  {values.toys === typeOfToys && <IconCheck />}
+                                  {values.toys === typeOfToys && (
+                                    <StyledIconCheck />
+                                  )}
                                 </Box>
                                 {t(typeOfToys)}
                                 <Input
@@ -1549,7 +1554,7 @@ const FormAddProduct = () => {
                       <GeneralWrap>
                         <WrapCondition>
                           <LabelStatus>
-                            <Box>{values.rental && <IconCheck />}</Box>
+                            <Box>{values.rental && <StyledIconCheck />}</Box>
                             {t('Rental')}
                             <Input
                               type="checkbox"
@@ -1606,7 +1611,7 @@ const FormAddProduct = () => {
                         </WrapCondition>
                         <WrapCondition>
                           <LabelStatus>
-                            <Box>{values.sale && <IconCheck />}</Box>
+                            <Box>{values.sale && <StyledIconCheck />}</Box>
                             {t('Sale')}
                             <Input
                               type="checkbox"
@@ -1662,7 +1667,7 @@ const FormAddProduct = () => {
                     {/*  AGREE ADD PHOTO of Product */}
 
                     <LabelStatusAgree>
-                      <Box>{values.isAddPhoto && <IconCheck />}</Box>
+                      <Box>{values.isAddPhoto && <StyledIconCheck />}</Box>
                       <WrapTextAgree>
                         {t('yourAgree')}
                         <StyledNavLink>{t('linkAgree')}</StyledNavLink>
