@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { arraySizeChildrenProduct } from 'data';
 import { MainFilterWrap } from '../filter.styled';
+import CheckBox from 'components/CheckBox/CheckBox';
 
 const FilterSizeChildren = () => {
   const [isSizeChildrenList, setIsSizeChildrenList] = useState(false);
@@ -53,22 +54,43 @@ const FilterSizeChildren = () => {
       {isSizeChildrenList && (
         <List>
           <WrapButtons>
-            {arraySizeChildrenProduct.map(
-              ({ descriptionSize, childSize }, index) => (
-                <li key={index}>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      childSize === searchParams.get('childSize')
+            {arraySizeChildrenProduct.map((childSize, index) => (
+              <li key={index}>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const paramsChildSize =
+                      searchParams.get('childSize')?.split(',') || [];
+
+                    if (paramsChildSize?.includes(childSize)) {
+                      const newParamsChildSize = paramsChildSize.filter(
+                        param => param !== childSize
+                      );
+                      newParamsChildSize.length === 0
                         ? removeParam('childSize')
-                        : newSetSearchParams('childSize', childSize);
-                    }}
-                  >
-                    {descriptionSize} {t('cm')}
-                  </Button>
-                </li>
-              )
-            )}
+                        : newSetSearchParams(
+                            'childSize',
+                            newParamsChildSize.join(',')
+                          );
+                    } else {
+                      paramsChildSize.push(childSize);
+                      newSetSearchParams(
+                        'childSize',
+                        paramsChildSize.join(',')
+                      );
+                    }
+                  }}
+                >
+                  <CheckBox
+                    value={searchParams
+                      .get('childSize')
+                      ?.split(',')
+                      ?.includes(childSize)}
+                  />
+                  {childSize} {t('cm')}
+                </Button>
+              </li>
+            ))}
           </WrapButtons>
         </List>
       )}

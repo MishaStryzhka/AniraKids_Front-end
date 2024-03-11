@@ -62,23 +62,6 @@ export const FormAddProductTranslationsUk = {
 
   // part - age for children
   Age: 'Вкажіть вік',
-  'for premature babies': 'для передчасно народжених',
-  'for newborns': 'для новонароджених',
-  '0-3-months': '0-3 місяці',
-  '4-6-months': '4-6 місяців',
-  '7-9-months': '7-9 місяців',
-  '10-12-months': '10-12 місяців',
-  '13-18-months': '13-18 місяців',
-  '1.5-2-years': '1,5-2 роки',
-  '2-3-years': '2-3 роки',
-  '3-4-years': '3-4 роки',
-  '4-5-years': '4-5 роки',
-  '6-7-years': '6-7 років',
-  '8-9-years': '8-9 років',
-  '10-years': '10 років',
-  '11-years': '11 років',
-  '12-years': '12 років',
-  '13-years': '13 років',
 
   // part - size for children
   Size: 'Вкажіть розмір',
@@ -134,6 +117,7 @@ export const FormAddProductTranslationsUk = {
   'light-blue': 'Блакитний',
   peachy: 'Персиковий',
   mustard: 'Гірчичний',
+  raspberry: 'Малиновий',
   descriptionColor: 'Ви можете обрати до двох відтінків',
 
   // part - rental and sale

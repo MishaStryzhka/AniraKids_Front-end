@@ -48,6 +48,10 @@ export const Button = styled.button`
   line-height: 1.43;
 
   color: ${({ theme }) => theme.color.mainColor5};
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const StyledIconArrowUp = styled(IconArrow)`

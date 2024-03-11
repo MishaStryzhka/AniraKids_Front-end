@@ -21,17 +21,12 @@ export const FilterTitle = styled.h3`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const List = styled.ul`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid #ebdad1;
-`;
-
 export const ListButtons = styled.ul`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  justify-content: center;
+  border-bottom: 1px solid #ebdad1;
 `;
 
 export const ItemButton = styled.li`
@@ -40,7 +35,7 @@ export const ItemButton = styled.li`
 
 export const Button = styled.button`
   border: ${({ color }) => (color === '#FFF' ? '1px solid black' : 'none')};
-  border-radius: 2px;
+  border-radius: ${({ check }) => (check ? '20px' : '2px')};
   width: 18px;
   height: 18px;
   cursor: pointer;
