@@ -178,11 +178,14 @@ export const ButtonDelete = styled.button`
 `;
 export const StyledIconBasket = styled(IconBasket)`
   width: 24px;
-  height: 24pc;
+  height: 24px;
   stroke: ${({ theme }) => theme.color.mainColor5};
 `;
 
 export const WrapAmount = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+  }
   width: 304px;
   margin: 0 auto;
   @media screen and (min-width: 1280px) {
@@ -190,6 +193,9 @@ export const WrapAmount = styled.div`
   }
 `;
 export const TextAmount = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 5.5vw;
+  }
   display: flex;
   justify-content: space-between;
 

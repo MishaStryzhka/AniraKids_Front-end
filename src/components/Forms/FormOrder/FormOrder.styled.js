@@ -19,6 +19,9 @@ export const LabelOrder = styled.label`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 export const FieldOrder = styled(Field)`
+  @media screen and (max-width: 427.5px) {
+    width: 86vw;
+  }
   width: 370px;
   padding: 8px;
   border-radius: 2px;
@@ -38,7 +41,10 @@ export const FieldOrder = styled(Field)`
 `;
 
 export const FieldSelect = styled(FieldOrder)`
-  width: 370px;
+  @media screen and (max-width: 427.5px) {
+    min-width: 90.5vw;
+  }
+  min-width: 388px;
   color: ${({ theme }) => theme.color.mainColor5};
   @media screen and (min-width: 768px) {
     width: 415px;

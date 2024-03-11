@@ -1,4 +1,5 @@
 import { StyleButton } from 'components/Button/Button.styled';
+import IconCheck from 'images/icons/IconCheck';
 import { NavLink } from 'react-router-dom';
 // import {Button}
 import styled from 'styled-components';
@@ -491,6 +492,8 @@ export const Box = styled.div`
   @media screen and (max-width: 427.5px) {
     min-width: 5.6vw;
     min-height: 5.6vw;
+    max-height: 5.6vw;
+    overflow: hidden;
   }
   display: flex;
   justify-content: center;
@@ -500,6 +503,7 @@ export const Box = styled.div`
   display: inline-block;
   min-width: 24px;
   min-height: 24px;
+  max-height: 24px;
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
@@ -600,4 +604,13 @@ export const BoxLarge = styled.div`
   border: 1px solid;
   background-color: transparent;
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+
+export const StyledIconCheck = styled(IconCheck)`
+  @media screen and (max-width: 427.5px) {
+    max-width: 5.6vw;
+    max-height: 5vw;
+  }
+  width: 24px;
+  height: 24px;
 `;

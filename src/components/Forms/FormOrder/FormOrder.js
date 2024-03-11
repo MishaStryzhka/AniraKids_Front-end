@@ -134,7 +134,7 @@ const FormOrder = () => {
               )}
             </LabelOrder>
 
-            {/* <LabelOrder>
+            <LabelOrder>
               {t('Delivery type')}*
               <FieldSelect
                 as="select"
@@ -178,7 +178,7 @@ const FormOrder = () => {
               {errors.address && touched.address && (
                 <ErrorMessage>{t(errors.address)}</ErrorMessage>
               )}
-            </LabelOrder> */}
+            </LabelOrder>
             <TextDescription>*{t('Text required')}</TextDescription>
           </StyledForm>
         )}

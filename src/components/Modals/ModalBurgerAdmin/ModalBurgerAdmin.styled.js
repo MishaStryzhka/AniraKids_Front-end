@@ -58,11 +58,14 @@ export const StyledIconBag = styled(IconBag)`
 `;
 
 export const CloseButton = styled.button`
+  @media screen and (max-width: 427.5px) {
+    top: 4vw;
+  }
   padding: 0;
   cursor: pointer;
   background-color: transparent;
   border: none;
   position: absolute;
-  top: 24px;
+  top: 16px;
   right: 24px;
 `;

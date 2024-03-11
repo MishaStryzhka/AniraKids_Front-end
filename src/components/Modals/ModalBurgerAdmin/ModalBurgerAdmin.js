@@ -1,6 +1,5 @@
 import BoxNavigation from 'components/BoxNavigation/BoxNavigation';
 import {
-  Button,
   CloseButton,
   ModalWindow,
   StyledIconBag,
@@ -37,61 +36,59 @@ const ModalBurgerAdmin = ({ onClick }) => {
         <WrapBoxNav>
           <BoxNavigation />
         </WrapBoxNav>
-        <Button>
-          <CloseButton
-            onClick={() => {
-              document.body.style.overflow = 'auto';
-              onClick();
-            }}
+        <CloseButton
+          onClick={() => {
+            document.body.style.overflow = 'auto';
+            onClick();
+          }}
+        >
+          <StyledIconCross />
+        </CloseButton>
+        <WrapNavLinks>
+          <StyledNavLink to="./profile" onClick={() => onClick()}>
+            <IconPerson />
+            {t('profile')}
+          </StyledNavLink>
+          <StyledNavLink to="./chat" onClick={() => onClick()}>
+            <IconChat /> {t('chat')}
+          </StyledNavLink>
+          <StyledNavLink to="./favorite" onClick={() => onClick()}>
+            <IconHeart />
+            {t('favorite')}
+          </StyledNavLink>
+          {user.typeUser === 'owner' && (
+            <StyledNavLink to="./rent-out" onClick={() => onClick()}>
+              <IconCloth /> {t('rentOut')}
+            </StyledNavLink>
+          )}
+          <StyledNavLink to="./rent-in" onClick={() => onClick()}>
+            <IconHanger />
+            {t('rentIn')}
+          </StyledNavLink>
+          <StyledNavLink to="./my-orders" onClick={() => onClick()}>
+            <IconBag2 />
+            {t('myPurchases')}
+          </StyledNavLink>
+          {user.typeUser === 'owner' && (
+            <StyledNavLink to="./my-purchases" onClick={() => onClick()}>
+              <IconShopCart /> {t('mySales')}
+            </StyledNavLink>
+          )}
+          <StyledNavLink to="./wallet" onClick={() => onClick()}>
+            <IconCard /> {t('wallet')}
+          </StyledNavLink>
+          <StyledNavLink to="./order1" onClick={() => onClick()}>
+            <StyledIconBag /> {t('basket')}
+          </StyledNavLink>
+          <StyledButton
+            type="button"
+            title={t('logOut')}
+            onClick={() => dispatch(logOut())}
           >
-            <StyledIconCross />
-          </CloseButton>
-          <WrapNavLinks>
-            <StyledNavLink to="./profile" onClick={() => onClick()}>
-              <IconPerson />
-              {t('profile')}
-            </StyledNavLink>
-            <StyledNavLink to="./chat" onClick={() => onClick()}>
-              <IconChat /> {t('chat')}
-            </StyledNavLink>
-            <StyledNavLink to="./favorite" onClick={() => onClick()}>
-              <IconHeart />
-              {t('favorite')}
-            </StyledNavLink>
-            {user.typeUser === 'owner' && (
-              <StyledNavLink to="./rent-out" onClick={() => onClick()}>
-                <IconCloth /> {t('rentOut')}
-              </StyledNavLink>
-            )}
-            <StyledNavLink to="./rent-in" onClick={() => onClick()}>
-              <IconHanger />
-              {t('rentIn')}
-            </StyledNavLink>
-            <StyledNavLink to="./my-orders" onClick={() => onClick()}>
-              <IconBag2 />
-              {t('myPurchases')}
-            </StyledNavLink>
-            {user.typeUser === 'owner' && (
-              <StyledNavLink to="./my-purchases" onClick={() => onClick()}>
-                <IconShopCart /> {t('mySales')}
-              </StyledNavLink>
-            )}
-            <StyledNavLink to="./wallet" onClick={() => onClick()}>
-              <IconCard /> {t('wallet')}
-            </StyledNavLink>
-            <StyledNavLink to="./order1" onClick={() => onClick()}>
-              <StyledIconBag /> {t('basket')}
-            </StyledNavLink>
-            <StyledButton
-              type="button"
-              title={t('logOut')}
-              onClick={() => dispatch(logOut())}
-            >
-              <IconExit />
-              {t('logOut')}
-            </StyledButton>
-          </WrapNavLinks>
-        </Button>
+            <IconExit />
+            {t('logOut')}
+          </StyledButton>
+        </WrapNavLinks>
       </Wrap>
     </ModalWindow>
   );
