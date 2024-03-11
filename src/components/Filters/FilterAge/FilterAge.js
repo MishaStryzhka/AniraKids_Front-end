@@ -10,13 +10,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import { arrayAgeProduct } from 'data';
 import { MainFilterWrap } from '../filter.styled';
+import CheckBox from 'components/CheckBox/CheckBox';
 
 const FilterAge = () => {
   const [isFilterAgeList, setIsFilterAgeList] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { t } = useTranslation('translation', {
+  const { t, i18n } = useTranslation('translation', {
     keyPrefix: 'components.filterAge',
   });
 
@@ -51,17 +52,33 @@ const FilterAge = () => {
       </Wrap>
       {isFilterAgeList && (
         <List>
-          {arrayAgeProduct.map(({ age }, index) => (
+          {arrayAgeProduct.map((productAge, index) => (
             <li key={index}>
               <Button
                 type="button"
                 onClick={() => {
-                  age === searchParams.get('age')
-                    ? removeParam('age')
-                    : newSetSearchParams('age', age);
+                  const paramsAge = searchParams.get('age')?.split(',') || [];
+
+                  if (paramsAge?.includes(productAge.age)) {
+                    const newParamsAge = paramsAge.filter(
+                      param => param !== productAge.age
+                    );
+                    newParamsAge.length === 0
+                      ? removeParam('age')
+                      : newSetSearchParams('age', newParamsAge.join(','));
+                  } else {
+                    paramsAge.push(productAge.age);
+                    newSetSearchParams('age', paramsAge.join(','));
+                  }
                 }}
               >
-                {t(age)}
+                <CheckBox
+                  value={searchParams
+                    .get('age')
+                    ?.split(',')
+                    ?.includes(productAge.age)}
+                />
+                {productAge[i18n.language]}
               </Button>
             </li>
           ))}

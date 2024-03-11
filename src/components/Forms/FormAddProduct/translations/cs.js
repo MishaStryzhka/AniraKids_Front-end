@@ -61,23 +61,6 @@ export const FormAddProductTranslationsCs = {
 
   // part - age for children
   Age: 'Uveďte věk',
-  'for premature babies': 'pro nedonošené novorozence',
-  'for newborns': 'pro novorozence',
-  '0-3-months': '0-3 měsíce',
-  '4-6-months': '4-6 měsíců',
-  '7-9-months': '7-9 měsíců',
-  '10-12-months': '10-12 měsíců',
-  '13-18-months': '13-18 měsíců',
-  '1.5-2-years': '1,5-2 roky',
-  '2-3-years': '2-3 roky',
-  '3-4-years': '3-4 roky',
-  '4-5-years': '4-5 let',
-  '6-7-years': '6-7 let',
-  '8-9-years': '8-9 let',
-  '10-years': '10 let',
-  '11-years': '11 let',
-  '12-years': '12 let',
-  '13-years': '13 let',
 
   // part - size for children
   Size: 'Uveďte velikost',
@@ -133,6 +116,7 @@ export const FormAddProductTranslationsCs = {
   'light-blue': 'Světle modrá',
   peachy: 'Broskvový',
   mustard: 'Hořčičný',
+  raspberry: 'Malinová',
   descriptionColor: 'Můžete vybrat až dvě odstíny',
 
   // part - rental and sale

@@ -42,6 +42,7 @@ const UsersProductCard = ({
   handleRemove,
   handleUpdate,
   onRemoveFavorite,
+  to,
 }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.usersProductCard',
@@ -83,8 +84,8 @@ const UsersProductCard = ({
 
   return (
     <Card
-      to={`./${product?._id}`}
-      // $pageRentOut={pathname === '/my-account/rent-out'}
+      to={to || `./${product?._id}`}
+      $pageRentOut={pathname === '/my-account/rent-out'}
     >
       <GeneralWrap
       // $pageRentOut={pathname === '/my-account/rent-out'}
@@ -134,7 +135,7 @@ const UsersProductCard = ({
               type="button"
               onClick={e => {
                 e.preventDefault();
-                handleRemove(product._id);
+                handleRemove(product);
               }}
             >
               <StyledIconBasket />

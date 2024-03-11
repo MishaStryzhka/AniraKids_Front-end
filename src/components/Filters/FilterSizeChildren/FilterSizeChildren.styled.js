@@ -49,6 +49,10 @@ export const Button = styled.button`
   text-align: start;
 
   color: ${({ theme }) => theme.color.mainColor5};
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const StyledIconArrowUp = styled(IconArrow)`
