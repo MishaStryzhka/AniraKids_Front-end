@@ -46,7 +46,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
 import IconStar from 'images/icons/IconStart';
-import Button from 'components/Button/Button';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
 import 'react-alice-carousel/lib/alice-carousel.css';
 import { useEffect, useState } from 'react';
