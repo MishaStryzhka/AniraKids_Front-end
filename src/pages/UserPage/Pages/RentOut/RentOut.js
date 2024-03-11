@@ -21,7 +21,7 @@ const RentOut = () => {
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [isOpenModalRemove, setIsOpenModalRemove] = useState(false);
+  const [productForRemove, setProductForRemove] = useState(false);
 
   error && console.log('error', error);
 
@@ -41,15 +41,13 @@ const RentOut = () => {
       });
   }, [page, pageSize]);
 
-  const handleRemove = async productId => {
-    setIsOpenModalRemove(productId);
-    // await api.removeProductById(productId);
-    // setProducts(products.filter(product => product._id !== productId));
+  const handleRemove = async product => {
+    setProductForRemove(product);
+    // await api.removeProductById(product);
+    // setProducts(products.filter(el => el._id !== product._id));
   };
 
   const handleUpdate = productId => {
-    console.log('productId', productId);
-
     navigation(`/my-account/rent-out/update-product/${productId}`);
   };
   return id ? (
@@ -94,16 +92,17 @@ const RentOut = () => {
       ) : (
         <NotFound>Тут поки пусто</NotFound>
       )}
-      {isOpenModalRemove && (
+      {productForRemove && (
         <ModalConfirm
-          onCloseModal={() => setIsOpenModalRemove(false)}
+          onCloseModal={() => setProductForRemove(false)}
           confirm={async () => {
-            await api.removeProductById(isOpenModalRemove);
+            await api.removeProductById(productForRemove);
             setProducts(
-              products.filter(product => product._id !== isOpenModalRemove)
+              products.filter(product => product._id !== productForRemove._id)
             );
           }}
           title={t('removeProduct')}
+          description={productForRemove.name}
         />
       )}
     </>

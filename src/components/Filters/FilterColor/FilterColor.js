@@ -51,22 +51,32 @@ const FilterColor = () => {
         />
       </Wrap>
       {isFilterColorList && (
-        <List>
-          <ListButtons>
-            {arrayColorsProduct.map(({ color, colorCode }, index) => (
-              <ItemButton key={index}>
-                <Button
-                  color={colorCode}
-                  onClick={() => {
-                    color === searchParams.get('color')
+        <ListButtons>
+          {arrayColorsProduct.map(({ color, colorCode }, index) => (
+            <ItemButton key={index}>
+              <Button
+                color={colorCode}
+                check={searchParams.get('color')?.split(',')?.includes(color)}
+                onClick={() => {
+                  const paramsColor =
+                    searchParams.get('color')?.split(',') || [];
+
+                  if (paramsColor?.includes(color)) {
+                    const newParamsColor = paramsColor.filter(
+                      param => param !== color
+                    );
+                    newParamsColor.length === 0
                       ? removeParam('color')
-                      : newSetSearchParams('color', color);
-                  }}
-                />
-              </ItemButton>
-            ))}
-          </ListButtons>
-        </List>
+                      : newSetSearchParams('color', newParamsColor.join(','));
+                  } else {
+                    paramsColor.push(color);
+                    newSetSearchParams('color', paramsColor.join(','));
+                  }
+                }}
+              />
+            </ItemButton>
+          ))}
+        </ListButtons>
       )}
     </MainFilterWrap>
   );

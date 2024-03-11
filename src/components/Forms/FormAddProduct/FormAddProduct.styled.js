@@ -295,12 +295,7 @@ export const ItemButton = styled.li`
 `;
 
 export const LabelSize = styled.label`
-  border: 1px solid;
-  border-radius: 2px;
-  display: flex;
   cursor: pointer;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
 
 export const LabelChildren = styled(LabelSize)`
@@ -309,10 +304,9 @@ export const LabelChildren = styled(LabelSize)`
 `;
 
 export const BoxSize = styled.div`
-  text-align: center;
-  padding: 2px 8px;
-  background-color: ${({ $check, theme }) =>
-    $check ? theme.color.additionalColorBrown : 'transparent'};
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const LabelColor = styled.label`
@@ -349,7 +343,6 @@ export const BoxColor = styled.div`
 export const WrapChildrenParams = styled.ul`
   display: flex;
   flex-wrap: wrap;
-  max-width: 660px;
   gap: 16px;
   column-count: 4;
   @media screen and (min-width: 768px) {

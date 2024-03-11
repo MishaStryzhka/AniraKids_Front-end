@@ -75,13 +75,15 @@ import {
   arrayOfOutfits,
 } from 'data';
 import ModalAttention from 'components/Modals/ModalAttention/ModalAttention';
+import CheckBox from 'components/CheckBox/CheckBox';
 
 const api = require('../../../api');
 
 const FormAddProduct = () => {
-  const { t } = useTranslation('translation', {
+  const { t, i18n } = useTranslation('translation', {
     keyPrefix: 'components.formAddProduct',
   });
+
   const [stepValue, setStepValue] = useState(1);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [photoOrder, setPhotoOrder] = useState([]);
@@ -217,6 +219,8 @@ const FormAddProduct = () => {
           setFieldValue('decor', '');
           setFieldValue('toys', '');
         };
+
+        console.log('values', values);
 
         return (
           <>
@@ -582,18 +586,22 @@ const FormAddProduct = () => {
                     <div>
                       <Title>{t('Age')}</Title>
                       <WrapChildrenParams>
-                        {arrayAgeProduct.map(({ age }, index) => (
+                        {arrayAgeProduct.map((productAge, index) => (
                           <li key={index}>
                             <LabelChildren>
-                              <BoxSize $check={values.age === age}>
-                                {t(age)}
+                              <BoxSize $check={values.age === productAge.age}>
+                                <CheckBox
+                                  value={values.age.includes(productAge.age)}
+                                />
+                                {productAge[i18n.language]}
                               </BoxSize>
-                              <Input
-                                type="radio"
+                              <Field
+                                style={{ display: 'none' }}
+                                type="checkbox"
                                 name="age"
-                                value={age}
+                                value={productAge.age}
+                                id={productAge.age}
                                 onChange={handleChange}
-                                onBlur={handleBlur}
                               />
                             </LabelChildren>
                           </li>
@@ -609,26 +617,26 @@ const FormAddProduct = () => {
                     <div>
                       <Title>{t('Size')}</Title>
                       <WrapChildrenSize>
-                        {arraySizeChildrenProduct.map(
-                          ({ descriptionSize, childSize }, index) => (
-                            <li key={index}>
-                              <LabelChildren>
-                                <BoxSize
-                                  $check={values.childSize === childSize}
-                                >
-                                  {descriptionSize}
-                                  {t('sizecm')}
-                                </BoxSize>
-                                <Input
-                                  type="radio"
-                                  name="childSize"
-                                  value={childSize}
-                                  onChange={handleChange}
+                        {arraySizeChildrenProduct.map((childSize, index) => (
+                          <li key={index}>
+                            <LabelChildren>
+                              <BoxSize $check={values.childSize === childSize}>
+                                <CheckBox
+                                  value={values.childSize.includes(childSize)}
                                 />
-                              </LabelChildren>
-                            </li>
-                          )
-                        )}
+                                {`${childSize} ${t('sizecm')}`}
+                              </BoxSize>
+                              <Field
+                                style={{ display: 'none' }}
+                                type="checkbox"
+                                name="childSize"
+                                value={childSize}
+                                id={childSize}
+                                onChange={handleChange}
+                              />
+                            </LabelChildren>
+                          </li>
+                        ))}
                       </WrapChildrenSize>
 
                       {errors.childSize && touched.childSize && (

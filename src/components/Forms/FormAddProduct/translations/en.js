@@ -63,23 +63,6 @@ export const FormAddProductTranslationsEn = {
 
   // part - age for children
   Age: 'Specify the age',
-  'for premature babies': 'for premature babies',
-  'for newborns': 'for newborns',
-  '0-3-months': '0-3 months',
-  '4-6-months': '4-6 months',
-  '7-9-months': '7-9 months',
-  '10-12-months': '10-12 months',
-  '13-18-months': '13-18 months',
-  '1.5-2-years': '1.5-2 years',
-  '2-3-years': '2-3 years',
-  '3-4-years': '3-4 years',
-  '4-5-years': '4-5 years',
-  '6-7-years': '6-7 years',
-  '8-9-years': '8-9 years',
-  '10-years': '10 years',
-  '11-years': '11 years',
-  '12-years': '12 years',
-  '13-years': '13 years',
 
   // part - size for children
   Size: 'Specify the size',
@@ -135,6 +118,7 @@ export const FormAddProductTranslationsEn = {
   'light-blue': 'Light blue',
   peachy: 'Peachy',
   mustard: 'Mustard',
+  raspberry: 'Raspberry',
   descriptionColor: 'You can choose up to two shades',
 
   // part - rental and sale

@@ -39,6 +39,18 @@ export const ModalTitle = styled.h2`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
+export const Description = styled.p`
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  margin: 12px auto;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.43;
+  max-width: 200px;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+`;
+
 export const ButtonAgree = styled.button`
   padding: 14px 40px;
   width: 304px;

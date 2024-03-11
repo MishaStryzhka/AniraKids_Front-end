@@ -131,7 +131,7 @@ const UsersProductCard = ({
               type="button"
               onClick={e => {
                 e.preventDefault();
-                handleRemove(product._id);
+                handleRemove(product);
               }}
             >
               <IconBasket />
