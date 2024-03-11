@@ -14,6 +14,9 @@ export const Section = styled.section`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 7.5vw;
+  }
   text-align: center;
   font-family: 'Cormorant SC';
   font-size: 32px;
@@ -30,6 +33,9 @@ export const Title = styled.h2`
 `;
 
 export const ListQ = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    margin: 0 4.7vw;
+  }
   display: flex;
   flex-direction: column;
   margin: 0 20px;
@@ -49,6 +55,10 @@ export const Item = styled.li`
 `;
 
 export const Wrap = styled.div`
+  @media screen and (max-width: 427.5px) {
+    padding: 16px 3.7vw;
+    gap: 3.7vw;
+  }
   padding: 16px;
   display: flex;
   gap: 16px;
@@ -65,6 +75,10 @@ export const StyledIconArrowUp = styled(IconArrow)`
 `;
 
 export const QuestionDescription = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.8vw;
+    width: 73.8vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 16px;
   font-weight: 700;

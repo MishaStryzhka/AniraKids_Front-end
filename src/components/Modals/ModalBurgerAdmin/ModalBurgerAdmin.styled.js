@@ -1,8 +1,12 @@
+import IconBag from 'images/icons/IconBag';
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 79.4vw;
+  }
   width: 340px;
-  height: 552px;
+  height: 628px;
   display: flex;
   padding: 24px;
   gap: 24px;
@@ -33,6 +37,9 @@ export const Button = styled.button`
 `;
 
 export const WrapNavLinks = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 71.3vw;
+  }
   display: block;
   width: 305px;
   position: absolute;
@@ -42,4 +49,20 @@ export const WrapNavLinks = styled.div`
 
 export const WrapBoxNav = styled.div`
   margin: 0 auto;
+`;
+
+export const StyledIconBag = styled(IconBag)`
+  stroke: ${({ theme }) => theme.color.mainColor5};
+  width: 24px;
+  height: 24px;
+`;
+
+export const CloseButton = styled.button`
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: 24px;
+  right: 24px;
 `;

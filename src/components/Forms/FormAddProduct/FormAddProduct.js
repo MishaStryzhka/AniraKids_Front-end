@@ -1670,9 +1670,7 @@ const FormAddProduct = () => {
                     {/*  AGREE ADD PHOTO of Product */}
 
                     <LabelStatusAgree>
-                      <Box style={{ minWidth: '24px' }}>
-                        {values.isAddPhoto && <IconCheck />}
-                      </Box>
+                      <Box>{values.isAddPhoto && <IconCheck />}</Box>
                       <WrapTextAgree>
                         {t('yourAgree')}
                         <StyledNavLink>{t('linkAgree')}</StyledNavLink>

@@ -97,8 +97,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
               </WrapIcon>
             </Label>
             <TextCondition>
-              {t('privacyPolicyText')}:
-              <br />
+              {t('privacyPolicyText')}
               <StyledNavLinkCondition
                 to="/privacy-policy"
                 onClick={() => handleCloseModal()}

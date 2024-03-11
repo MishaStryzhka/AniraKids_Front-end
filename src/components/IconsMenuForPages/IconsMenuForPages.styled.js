@@ -6,6 +6,9 @@ export const WrapMenu = styled.div`
 `;
 
 export const ButtonFilters = styled.button`
+  @media screen and (max-width: 427.5px) {
+    padding: 2vw;
+  }
   border: none;
   padding: 14px;
   cursor: pointer;

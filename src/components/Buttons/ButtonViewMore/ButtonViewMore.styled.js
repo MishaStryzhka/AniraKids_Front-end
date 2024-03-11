@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 
 export const StyledButtonViewMore = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 72vw;
+    font-size: 4.7vw;
+    justify-content: space-between;
+  }
   width: 287px;
   padding: 8px;
   margin-left: 0;

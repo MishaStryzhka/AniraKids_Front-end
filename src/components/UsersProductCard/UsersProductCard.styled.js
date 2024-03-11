@@ -3,6 +3,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Card = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    width: ${({ $pageRentOut }) => ($pageRentOut ? '295px' : '43vw')};
+  }
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
   height: 100%;
   border-radius: 2px;
@@ -32,13 +35,12 @@ export const Card = styled(NavLink)`
 export const GeneralWrap = styled.div`
   display: flex;
   flex-direction: column;
-  // gap: 8px;
-  // @media screen and (min-width: 768px) {
-  //   gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')};
-  // }
 `;
 
 export const PictureCard = styled.picture`
+  @media screen and (max-width: 427.5px) {
+    height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '46.7vw')};
+  }
   width: inherit;
   height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '200px')};
   width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')};
@@ -94,9 +96,9 @@ export const FirstWrap = styled.div`
 `;
 
 export const SecondWrap = styled.div`
-  // display: flex;
-  // align-items: center;
-  // justify-content: space-between;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 `;
 
 export const TextName = styled.p`
@@ -124,6 +126,10 @@ export const Span = styled.span`
 `;
 
 export const Price = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+    padding: 1vw 1.8vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -132,6 +138,7 @@ export const Price = styled.p`
 
   // width: ${({ $pageRentOut }) => ($pageRentOut ? '180px' : '')};
   padding: 8px 14px;
+  padding: 4px 8px;
   display: flex;
   justify-content: center;
 
@@ -147,12 +154,22 @@ export const Price = styled.p`
 `;
 
 export const TextPrice = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.43;
 
   color: ${({ theme }) => theme.color.mainColor3};
+`;
+
+export const SpanPrice = styled.span`
+  @media screen and (max-width: 427.5px) {
+    font-size: 2.8vw;
+  }
+  font-size: 12px;
 `;
 
 export const WrapPartSeller = styled.div`

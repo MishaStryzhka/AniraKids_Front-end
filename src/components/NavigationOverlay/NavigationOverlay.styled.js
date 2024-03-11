@@ -13,14 +13,15 @@ export const NavigationWrapper = styled.div`
 `;
 
 export const StyledNavLink = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+  }
   color: ${({ theme }) => theme.color.mainColor5};
   text-align: center;
-
   font-family: 'Open Sans', sans-serif;
-  font-style: normal;
   font-weight: 400;
   font-size: 14px;
-  line-height: 20px; /* 142.857% */
+  line-height: 1.43;
   text-decoration-line: none;
   padding: 8px 4px;
   @media screen and (min-width: 1280px) {

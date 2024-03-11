@@ -2,7 +2,14 @@ import IconBag from 'images/icons/IconBag';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const SecondBox = styled.div``;
+export const SecondBox = styled.div`
+  display: none;
+  @media screen and (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+`;
 
 export const StyledSecondButton = styled(NavLink)`
   box-sizing: border-box;

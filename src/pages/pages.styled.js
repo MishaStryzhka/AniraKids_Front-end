@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const ProductList = styled.ul`
+  @media screen and (max-width: 427.5px) {
+    gap: 15vw 4.7vw;
+  }
   display: flex;
   flex-wrap: wrap;
   gap: 64px 20px;

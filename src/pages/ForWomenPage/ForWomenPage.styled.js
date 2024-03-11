@@ -16,6 +16,7 @@ export const Wrap = styled.div`
   width: inherit;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   @media screen and (min-width: 1280px) {
     justify-content: flex-end;
     gap: 6px;
