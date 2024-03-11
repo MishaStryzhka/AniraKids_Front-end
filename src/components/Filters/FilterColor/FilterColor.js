@@ -4,7 +4,6 @@ import {
   Button,
   FilterTitle,
   ItemButton,
-  List,
   ListButtons,
   StyledIconArrowUp,
   Wrap,

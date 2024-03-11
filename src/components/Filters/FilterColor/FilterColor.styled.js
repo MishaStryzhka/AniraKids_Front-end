@@ -21,13 +21,6 @@ export const FilterTitle = styled.h3`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const List = styled.ul`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid #ebdad1;
-`;
-
 export const ListButtons = styled.ul`
   display: flex;
   flex-wrap: wrap;
