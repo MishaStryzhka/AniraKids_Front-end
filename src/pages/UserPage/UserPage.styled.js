@@ -2,12 +2,25 @@ import IconBag from 'images/icons/IconBag';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const SecondBox = styled.div`
-  display: none;
+export const HeaderBox = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-direction: column;
+
   @media screen and (min-width: 768px) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+  }
+`;
+
+export const SecondBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media screen and (max-width: 767px) {
+    margin: auto;
+    width: 100%;
   }
 `;
 

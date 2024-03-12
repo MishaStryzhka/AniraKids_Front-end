@@ -345,11 +345,9 @@ export const LabelChildren = styled(LabelSize)`
 `;
 
 export const BoxSize = styled.div`
-<<<<<<< HEAD
   display: flex;
   align-items: center;
   gap: 8px;
-=======
   @media screen and (max-width: 427.5px) {
     padding: 2px 1.9vw;
   }
@@ -357,7 +355,6 @@ export const BoxSize = styled.div`
   padding: 2px 8px;
   background-color: ${({ $check, theme }) =>
     $check ? theme.color.additionalColorBrown : 'transparent'};
->>>>>>> 6fc55f0f071ddd946ad7ec9f9a7d5d26abfafc97
 `;
 
 export const LabelColor = styled.label`

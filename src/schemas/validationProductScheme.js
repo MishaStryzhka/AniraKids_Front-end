@@ -19,7 +19,27 @@ const subjectOptions = [
   'unicors-&-rainbows',
 ];
 
+const FILE_SIZE_LIMIT = 10 * 1024 * 1024;
+const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'];
+
 export const validationProductSchema = Yup.object().shape({
+  photoUrls: Yup.array()
+    .of(
+      Yup.mixed()
+        .test(
+          'fileSize',
+          'Файл занадто великий',
+          value => !value || (value && value.size <= FILE_SIZE_LIMIT)
+        )
+        .test(
+          'fileFormat',
+          'Непідтримуваний формат файла',
+          value => !value || (value && SUPPORTED_FORMATS.includes(value.type))
+        )
+    )
+    .required('Необхідно вибрати хоча б один файл')
+    .min(1, 'Виберіть хоча б один файл')
+    .max(10, 'Можна завантажити не більше 5 файлів'),
   videoUrl: Yup.string().matches(
     /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/,
     'valid video URL'
@@ -55,12 +75,12 @@ export const validationProductSchema = Yup.object().shape({
 
   color: Yup.string().required('Required field'),
 
-  age: Yup.string().test('required', 'Required field', function (value) {
+  age: Yup.array().test('required', 'Required field', function (value) {
     const category = this.parent.category;
     return category === 'children`s category' ? !!value : true;
   }),
 
-  childSize: Yup.string().test('required', 'Required field', function (value) {
+  childSize: Yup.array().test('required', 'Required field', function (value) {
     const category = this.parent.category;
     return category === 'children`s category' ? !!value : true;
   }),
