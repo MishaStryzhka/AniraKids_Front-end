@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { Outlet, useLocation } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
 import {
+  HeaderBox,
   SecondBox,
   // SecondBox,
   StyledButton,
@@ -40,13 +41,7 @@ const UserPage = () => {
 
   return (
     <Container>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-        }}
-      >
+      <HeaderBox>
         <NavigationOverlay />
         <SecondBox>
           {location.pathname === '/my-account/rent-out' && (
@@ -55,7 +50,7 @@ const UserPage = () => {
             </ButtonAdd>
           )}
         </SecondBox>
-      </div>
+      </HeaderBox>
 
       <WrapMainContent>
         <SideBar>
