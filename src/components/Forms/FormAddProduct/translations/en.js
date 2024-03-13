@@ -144,6 +144,14 @@ export const FormAddProductTranslationsEn = {
   addItem: 'Add item',
   btnNext: 'Next',
 
+  // error File
+
+  fileSize: 'File is too large',
+  fileFormat: 'Unsupported file format',
+  requiredFileSelection: 'At least one file must be selected',
+  minimumFileSelection: 'Select at least one file',
+  maximumFileSelection: 'No more than 5 files can be uploaded',
+
   // error
   'Required field': 'Required field',
   'valid video URL': 'Enter a valid YouTube video link',

@@ -143,6 +143,13 @@ export const FormAddProductTranslationsCs = {
   addItem: 'Přidat položku',
   btnNext: 'dále',
 
+  // error File
+  fileSize: 'Soubor je příliš velký',
+  fileFormat: 'Nepodporovaný formát souboru',
+  requiredFileSelection: 'Je nutné vybrat alespoň jeden soubor',
+  minimumFileSelection: 'Vyberte alespoň jeden soubor',
+  maximumFileSelection: 'Lze nahrát maximálně 5 souborů',
+
   // error
   'Required field': 'Povinné pole',
   'valid video URL': 'Zadejte platný odkaz na YouTube video',
