@@ -83,13 +83,8 @@ const UsersProductCard = ({
   };
 
   return (
-    <Card
-      to={to || `./${product?._id}`}
-      $pageRentOut={pathname === '/my-account/rent-out'}
-    >
-      <GeneralWrap
-      // $pageRentOut={pathname === '/my-account/rent-out'}
-      >
+    <Card to={to || `./${product?._id}`}>
+      <GeneralWrap>
         <div
           style={{
             position: 'absolute',

@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
 export const Form = styled.form`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+  }
   display: flex;
   position: relative;
   width: 305px;
@@ -14,6 +17,9 @@ export const Form = styled.form`
 `;
 
 export const Label = styled.label`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+  }
   width: 305px;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;

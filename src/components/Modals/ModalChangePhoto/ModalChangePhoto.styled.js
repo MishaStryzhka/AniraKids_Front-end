@@ -42,6 +42,9 @@ export const LabelModal = styled.label`
 `;
 
 export const InputModal = styled.input`
+  @media screen and (max-width: 427.5px) {
+    width: 93.5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 400;

@@ -16,6 +16,9 @@ export const WrapInsideList = styled.div`
 `;
 
 export const FilterTitle = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 5vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 400;
