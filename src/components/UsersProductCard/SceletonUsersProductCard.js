@@ -1,4 +1,3 @@
-import { useLocation } from 'react-router-dom';
 import {
   SceletonCard,
   SceletonPictureCard,
@@ -21,31 +20,24 @@ const {
 } = require('./UsersProductCard.styled');
 
 const SceletonUsersProductCard = () => {
-  const { pathname } = useLocation();
   return (
-    <SceletonCard $pageRentOut={pathname === '/my-account/rent-out'}>
-      <GeneralWrap $pageRentOut={pathname === '/my-account/rent-out'}>
-        <SceletonPictureCard
-          $pageRentOut={pathname === '/my-account/rent-out'}
-        ></SceletonPictureCard>
-        <WrapText $pageRentOut={pathname === '/my-account/rent-out'}>
-          <FirstWrap $pageRentOut={pathname === '/my-account/rent-out'}>
+    <SceletonCard>
+      <GeneralWrap>
+        <SceletonPictureCard></SceletonPictureCard>
+        <WrapText>
+          <FirstWrap>
             <SceletonTextName />
             <SceletonTextName />
           </FirstWrap>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <SecondWrap>
-              <SceletonPrice
-                $pageRentOut={pathname === '/my-account/rent-out'}
-              ></SceletonPrice>
+              <SceletonPrice></SceletonPrice>
               <div>
                 <SceletonTextPrice />
               </div>
             </SecondWrap>
             <SecondWrap>
-              <SceletonPrice
-                $pageRentOut={pathname === '/my-account/rent-out'}
-              ></SceletonPrice>
+              <SceletonPrice></SceletonPrice>
               <div>
                 <SceletonTextPrice />
               </div>
