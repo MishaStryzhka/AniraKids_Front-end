@@ -144,6 +144,13 @@ export const FormAddProductTranslationsUk = {
   addItem: 'Додати товар',
   btnNext: 'Далі',
 
+  // error File
+  fileSize: 'Файл занадто великий',
+  fileFormat: 'Непідтримуваний формат файла',
+  requiredFileSelection: 'Необхідно вибрати хоча б один файл',
+  minimumFileSelection: 'Виберіть хоча б один файл',
+  maximumFileSelection: 'Можна завантажити не більше 5 файлів',
+
   // error
   'Required field': 'Обов`язкове поле',
   'valid video URL': 'Введіть правильне посилання на YouTube відео',

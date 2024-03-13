@@ -28,18 +28,18 @@ export const validationProductSchema = Yup.object().shape({
       Yup.mixed()
         .test(
           'fileSize',
-          'Файл занадто великий',
+          'fileSize',
           value => !value || (value && value.size <= FILE_SIZE_LIMIT)
         )
         .test(
           'fileFormat',
-          'Непідтримуваний формат файла',
+          'fileFormat',
           value => !value || (value && SUPPORTED_FORMATS.includes(value.type))
         )
     )
-    .required('Необхідно вибрати хоча б один файл')
-    .min(1, 'Виберіть хоча б один файл')
-    .max(10, 'Можна завантажити не більше 5 файлів'),
+    .required('requiredFileSelection')
+    .min(1, 'minimumFileSelection')
+    .max(10, 'maximumFileSelection'),
   videoUrl: Yup.string().matches(
     /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/,
     'valid video URL'
