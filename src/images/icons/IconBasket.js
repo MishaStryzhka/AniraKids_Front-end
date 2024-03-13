@@ -6,7 +6,7 @@ const IconBasket = ({ className }, ...props) => (
     height={18}
     stroke={'#fff'}
     className={className}
-    viewBox="-1 1 23 23"
+    viewBox="0 1 23 23"
     fill="none"
     props
   >

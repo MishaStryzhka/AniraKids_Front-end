@@ -6,6 +6,7 @@ export const StyledButton = styled.button`
   }
   text-decoration: none;
   text-transform: uppercase;
+  background-color: transparent;
   border: none;
   outline: none;
 

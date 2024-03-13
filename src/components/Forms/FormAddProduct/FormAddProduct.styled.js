@@ -1,7 +1,6 @@
 import { StyleButton } from 'components/Button/Button.styled';
 import IconCheck from 'images/icons/IconCheck';
 import { NavLink } from 'react-router-dom';
-// import {Button}
 import styled from 'styled-components';
 
 export const FormTablet = styled.form`
@@ -71,7 +70,9 @@ export const WrapperPhotos = styled.div`
   }
 `;
 
-export const WrapPhoto = styled.label`
+export const WrapPhoto = styled.div`
+  position: relative;
+
   flex: 0 0 auto;
   overflow: hidden;
 
@@ -82,6 +83,46 @@ export const WrapPhoto = styled.label`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  cursor: pointer;
+`;
+
+export const WrapPhotoLabel = styled.label`
+  position: relative;
+
+  flex: 0 0 auto;
+  overflow: hidden;
+
+  width: 200px;
+  height: 230px;
+  border: 1px dashed;
+  border-color: ${({ theme }) => theme.color.lightBGColor};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const ButtonDeletePhoto = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  text-decoration: none;
+  text-transform: uppercase;
+  background-color: ;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  background-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
 
 export const PhotoImg = styled.img`
@@ -579,12 +620,6 @@ export const ButtonNext = styled(StyleButton)`
   background-color: transparent;
   border: 1px solid;
   border-color: ${({ theme }) => theme.color.mainColor3};
-`;
-
-export const ButtonBack = styled(StyleButton)`
-  &:hover {
-    background-color: ${({ theme }) => theme.color.mainColor2};
-  }
 `;
 
 export const SectionCondition = styled.section`

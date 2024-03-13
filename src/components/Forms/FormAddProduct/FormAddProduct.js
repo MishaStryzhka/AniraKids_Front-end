@@ -43,7 +43,6 @@ import {
   FormMobile,
   Section,
   ButtonNext,
-  ButtonBack,
   WrapInsideSection,
   WrapLabels,
   TitleCategory,
@@ -53,6 +52,8 @@ import {
   WrapBtnAdd,
   WrapButtons,
   StyledIconCheck,
+  ButtonDeletePhoto,
+  WrapPhotoLabel,
 } from './FormAddProduct.styled';
 import { Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
@@ -78,6 +79,8 @@ import {
 import ModalAttention from 'components/Modals/ModalAttention/ModalAttention';
 import CheckBox from 'components/CheckBox/CheckBox';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
+import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
+import IconBasket from 'images/icons/IconBasket';
 
 const api = require('../../../api');
 
@@ -88,7 +91,9 @@ const FormAddProduct = () => {
 
   const [stepValue, setStepValue] = useState(1);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+
   const [photoOrder, setPhotoOrder] = useState([]);
+
   const [isOpenModalMaxSize, setIsOpenModalMaxSize] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -157,13 +162,11 @@ const FormAddProduct = () => {
     api
       .addProduct(values)
       .then(data => {
-        console.log('data', data);
         setIsLoading(false);
         navigate('/my-account/rent-out', { replace: true });
       })
       .catch(error => {
         setIsLoading(false);
-        console.log('error', error);
       });
   };
 
@@ -211,9 +214,6 @@ const FormAddProduct = () => {
             handleBlur,
             validateField,
           } = formikProps;
-
-          console.log('values', values);
-
           const resetInitialValuesForCategories = () => {
             setFieldValue('familyLook', '');
             setFieldValue('isPregnancy', '');
@@ -229,9 +229,6 @@ const FormAddProduct = () => {
             const errorSection = document.getElementById(
               `section-${Object.keys(errors)[0]}`
             );
-
-            console.log('touched', touched);
-            console.log('errors', errors);
 
             if (
               Object.keys(errors)[0] === 'photoUrls' &&
@@ -269,6 +266,18 @@ const FormAddProduct = () => {
             }
           }
 
+          const handleDeletePhoto = index => {
+            const updatedSelectedPhotos = [...selectedPhotos];
+            updatedSelectedPhotos.splice(index, 1);
+            setSelectedPhotos(updatedSelectedPhotos);
+
+            const updatedPhotoOrder = [...photoOrder];
+            updatedPhotoOrder.splice(index, 1);
+            setPhotoOrder(
+              updatedPhotoOrder.map(el => (el > index ? el - 1 : el))
+            );
+          };
+
           return (
             <>
               <FormTablet onSubmit={handleSubmit}>
@@ -281,17 +290,8 @@ const FormAddProduct = () => {
                     name="photoUrls"
                     accept=".jpg, .jpeg, .png"
                     onChange={e => {
-                      console.log('e.target.files', e.target.files);
-
                       const selectedFiles = Array.from(e.target.files);
-                      console.log('selectedFiles', selectedFiles);
-                      console.log(
-                        'selectedFiles.length + selectedPhotos.length',
-                        selectedFiles.length + selectedPhotos.length
-                      );
 
-                      console.log(selectedPhotos);
-                      console.log(selectedPhotos.length);
                       if (selectedFiles.length + selectedPhotos.length > 10) {
                         setIsOpenModalMaxSize(true);
                         return;
@@ -359,6 +359,11 @@ const FormAddProduct = () => {
                           handleDrop(e, photo);
                         }}
                       >
+                        <ButtonDeletePhoto
+                          onClick={() => handleDeletePhoto(index)}
+                        >
+                          <IconBasket />
+                        </ButtonDeletePhoto>
                         <PhotoImg
                           src={URL.createObjectURL(selectedPhotos[photo])}
                           alt={`photo_${index}`}
@@ -366,12 +371,12 @@ const FormAddProduct = () => {
                       </WrapPhoto>
                     ))}
                     {selectedPhotos.length < 10 && (
-                      <WrapPhoto htmlFor="photoUrls">
+                      <WrapPhotoLabel htmlFor="photoUrls">
                         <Picture>
                           <IconPhoto />
                           <TextPhoto>{t('Upload photo')}</TextPhoto>
                         </Picture>
-                      </WrapPhoto>
+                      </WrapPhotoLabel>
                     )}
                   </WrapperPhotos>
                   <TextInstruction>
