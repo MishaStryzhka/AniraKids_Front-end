@@ -27,7 +27,6 @@ import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
-import lib from 'rc-slider';
 import Sceleton from 'components/Sceleton/Sceleton';
 // import { useState } from 'react';
 export const sceletonArrayMenuLinks = Array.from({ length: 10 });

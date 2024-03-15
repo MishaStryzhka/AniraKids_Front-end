@@ -26,7 +26,6 @@ import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
 import { ErrorMessage, InputField } from 'components/Forms/Form.styled';
 import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
-import IconPencil from 'images/icons/IconPencil';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
 import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
@@ -60,7 +59,6 @@ import {
   SceletonText,
   SceletonTitle,
 } from './SceletonProfile.styled';
-import Sceleton from 'components/Sceleton/Sceleton';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
