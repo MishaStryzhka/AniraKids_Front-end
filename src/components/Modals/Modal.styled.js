@@ -12,6 +12,10 @@ export const GeneralModalWindow = styled.div`
 `;
 
 export const StyledIconCross = styled(IconCross)`
+  @media screen and (max-width: 427.5px) {
+    width: 5.6vw;
+    height: 5.6vw;
+  }
   position: absolute;
   top: 8px;
   right: 8px;
@@ -200,6 +204,10 @@ export const ErrorMessage = styled.p`
 `;
 
 export const CloseButton = styled.button`
+  @media screen and (max-width: 427.5px) {
+    top: 1.9vw;
+    right: 1.9vw;
+  }
   padding: 0;
   cursor: pointer;
   background-color: transparent;

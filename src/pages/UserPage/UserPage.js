@@ -27,15 +27,18 @@ import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
-
+import lib from 'rc-slider';
+import Sceleton from 'components/Sceleton/Sceleton';
+// import { useState } from 'react';
+export const sceletonArrayMenuLinks = Array.from({ length: 10 });
 const UserPage = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.userPage',
   });
   const dispatch = useDispatch();
   const location = useLocation();
-
-  const { user } = useAuth();
+  //  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useAuth();
 
   useTitle('Акаунт');
 
@@ -53,51 +56,59 @@ const UserPage = () => {
       </HeaderBox>
 
       <WrapMainContent>
-        <SideBar>
-          <StyledNavLink to="./profile">
-            <IconPerson />
-            {t('profile')}
-          </StyledNavLink>
-          <StyledNavLink to="./chat">
-            <IconChat /> {t('chat')}
-          </StyledNavLink>
-          <StyledNavLink to="./favorite">
-            <IconHeart />
-            {t('favorite')}
-          </StyledNavLink>
-          {user.typeUser === 'owner' && (
-            <StyledNavLink to="./rent-out">
-              <IconCloth /> {t('rentOut')}
+        {!isLoading ? (
+          <SideBar>
+            <StyledNavLink to="./profile">
+              <IconPerson />
+              {t('profile')}
             </StyledNavLink>
-          )}
-          <StyledNavLink to="./rent-in">
-            <IconHanger />
-            {t('rentIn')}
-          </StyledNavLink>
-          <StyledNavLink to="./my-orders">
-            <IconBag2 />
-            {t('myPurchases')}
-          </StyledNavLink>
-          {user.typeUser === 'owner' && (
-            <StyledNavLink to="./my-purchases">
-              <IconShopCart /> {t('mySales')}
+            <StyledNavLink to="./chat">
+              <IconChat /> {t('chat')}
             </StyledNavLink>
-          )}
-          <StyledNavLink to="./wallet">
-            <IconCard /> {t('wallet')}
-          </StyledNavLink>
-          <StyledNavLink to="./cart">
-            <StyledIconBag /> {t('basket')}
-          </StyledNavLink>
-          <StyledButton
-            type="button"
-            title={t('logOut')}
-            onClick={() => dispatch(logOut())}
-          >
-            <IconExit />
-            {t('logOut')}
-          </StyledButton>
-        </SideBar>
+            <StyledNavLink to="./favorite">
+              <IconHeart />
+              {t('favorite')}
+            </StyledNavLink>
+            {user.typeUser === 'owner' && (
+              <StyledNavLink to="./rent-out">
+                <IconCloth /> {t('rentOut')}
+              </StyledNavLink>
+            )}
+            <StyledNavLink to="./rent-in">
+              <IconHanger />
+              {t('rentIn')}
+            </StyledNavLink>
+            <StyledNavLink to="./my-orders">
+              <IconBag2 />
+              {t('myPurchases')}
+            </StyledNavLink>
+            {user.typeUser === 'owner' && (
+              <StyledNavLink to="./my-purchases">
+                <IconShopCart /> {t('mySales')}
+              </StyledNavLink>
+            )}
+            <StyledNavLink to="./wallet">
+              <IconCard /> {t('wallet')}
+            </StyledNavLink>
+            <StyledNavLink to="./cart">
+              <StyledIconBag /> {t('basket')}
+            </StyledNavLink>
+            <StyledButton
+              type="button"
+              title={t('logOut')}
+              onClick={() => dispatch(logOut())}
+            >
+              <IconExit />
+              {t('logOut')}
+            </StyledButton>
+          </SideBar>
+        ) : (
+          <SideBar style={{ gap: '4px' }}>
+            {sceletonArrayMenuLinks.map((_, index) => (
+              <Sceleton key={index} width="305px" height="50px" />
+            ))}
+          </SideBar>
+        )}
         <MainContent>
           <Outlet />
         </MainContent>

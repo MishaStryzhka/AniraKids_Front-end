@@ -33,6 +33,9 @@ export const StyledIconCross = styled(IconCross)`
 `;
 
 export const ModalTitle = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
