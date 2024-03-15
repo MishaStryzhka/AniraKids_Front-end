@@ -109,7 +109,6 @@ export const ButtonDeletePhoto = styled.button`
 
   text-decoration: none;
   text-transform: uppercase;
-  background-color: ;
   border: none;
   outline: none;
   padding: 0;

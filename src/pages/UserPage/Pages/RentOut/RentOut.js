@@ -89,7 +89,7 @@ const RentOut = () => {
           )}
         </>
       ) : (
-        <NotFound>Тут поки пусто</NotFound>
+        <NotFound>{t('Here is empty')}</NotFound>
       )}
       {productForRemove && (
         <ModalConfirm

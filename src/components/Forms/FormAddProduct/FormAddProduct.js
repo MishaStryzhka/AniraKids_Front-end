@@ -995,24 +995,15 @@ const FormAddProduct = () => {
                               selectedFiles.length + selectedPhotos.length >
                               10
                             ) {
-                              // Заборонити вибір більше ніж 10 файлів
-                              alert(t('maxFiles'));
-                              return;
-                            }
-
-                            if (
-                              selectedFiles.length + selectedPhotos.length <
-                              3
-                            ) {
-                              // Не менше 3-х файлів
-                              alert(t('minFiles'));
+                              setIsOpenModalMaxSize(true);
                               return;
                             }
 
                             if (
                               selectedFiles.some(file => file.size > 10485760)
                             ) {
-                              alert(t('maxSize'));
+                              setIsOpenModalMaxSize(true);
+                              return;
                             }
 
                             setTouched({ ...touched, photoUrls: true });
@@ -1074,6 +1065,11 @@ const FormAddProduct = () => {
                                 handleDrop(e, photo);
                               }}
                             >
+                              <ButtonDeletePhoto
+                                onClick={() => handleDeletePhoto(index)}
+                              >
+                                <IconBasket />
+                              </ButtonDeletePhoto>
                               <PhotoImg
                                 src={URL.createObjectURL(selectedPhotos[photo])}
                                 alt={`photo_${index}`}
@@ -1081,12 +1077,12 @@ const FormAddProduct = () => {
                             </WrapPhoto>
                           ))}
                           {selectedPhotos.length < 10 && (
-                            <WrapPhoto htmlFor="photoUrls">
+                            <WrapPhotoLabel htmlFor="photoUrls">
                               <Picture>
                                 <IconPhoto />
                                 <TextPhoto>{t('Upload photo')}</TextPhoto>
                               </Picture>
-                            </WrapPhoto>
+                            </WrapPhotoLabel>
                           )}
                         </WrapperPhotos>
                         <TextInstruction>

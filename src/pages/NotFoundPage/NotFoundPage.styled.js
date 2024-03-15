@@ -2,6 +2,11 @@ import IconGirl from 'images/icons/IconGirl';
 import styled from 'styled-components';
 
 export const WrapPage = styled.div`
+  @media screen and (max-width: 427.5px) {
+    margin-top: 5.6vw;
+    margin-bottom: 18.7vw;
+    gap: 5.6vw;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,6 +27,9 @@ export const WrapPage = styled.div`
 `;
 export const Picture = styled.picture``;
 export const WrapText = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 3.7vw;
+  }
   display: flex;
   flex-direction: column;
   gap: 16px;

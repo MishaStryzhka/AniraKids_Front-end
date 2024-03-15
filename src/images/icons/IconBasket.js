@@ -1,5 +1,5 @@
 import * as React from 'react';
-const IconBasket = ({ className }, ...props) => (
+const IconBasket = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={18}
@@ -8,7 +8,6 @@ const IconBasket = ({ className }, ...props) => (
     className={className}
     viewBox="0 1 23 23"
     fill="none"
-    props
   >
     <g
       strokeLinecap="round"
