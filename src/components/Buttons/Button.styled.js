@@ -10,7 +10,7 @@ export const StyledButton = styled.button`
   background-color: transparent;
   border: none;
   outline: none;
-
+  cursor: pointer;
   border-radius: 2px;
   padding: 14px 40px;
 
