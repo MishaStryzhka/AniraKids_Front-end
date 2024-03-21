@@ -22,8 +22,8 @@ import {
   SpanPrice,
   StyledIconPencil,
   StyledIconBasket,
+  WrapText,
 } from './UsersProductCard.styled';
-import { WrapText } from 'components/ProductCard/ProductCard.styled';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import theme from 'components/theme';
@@ -43,6 +43,7 @@ const UsersProductCard = ({
   handleUpdate,
   onRemoveFavorite,
   to,
+  state,
 }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.usersProductCard',
@@ -85,6 +86,7 @@ const UsersProductCard = ({
   return (
     <Card
       to={to || `./${product?._id}`}
+      state={state || null}
       $pageRentOut={pathname === '/my-account/rent-out'}
     >
       <GeneralWrap

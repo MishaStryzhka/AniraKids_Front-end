@@ -77,7 +77,6 @@ export const ButtonDisagree = styled.button`
   border: none;
   border-radius: 2px;
   cursor: pointer;
-  margin-top: 16px;
   text-align: center;
 
   font-family: 'Open Sans Hebrew', sans-serif;
@@ -93,6 +92,8 @@ export const ButtonDisagree = styled.button`
 
 export const Wrap = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
 `;

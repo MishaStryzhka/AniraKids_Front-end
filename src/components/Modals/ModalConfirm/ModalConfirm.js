@@ -9,13 +9,20 @@ import {
 import Modal from '../Modal';
 import { GeneralModalWindow } from '../Modal.styled';
 
-const ModalConfirm = ({ onCloseModal, confirm, title, description }) => {
+const ModalConfirm = ({
+  onCloseModal,
+  confirm,
+  title,
+  onClickDisagree,
+  titleButtonDisagree,
+  description,
+}) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalConfirm',
   });
   return (
     <Modal
-      onClick={() => {
+      onCloseModal={() => {
         onCloseModal();
       }}
     >
@@ -27,16 +34,25 @@ const ModalConfirm = ({ onCloseModal, confirm, title, description }) => {
             onClick={() => {
               confirm();
               onCloseModal();
+              document.body.style.overflow = 'auto';
             }}
           >
             {t('yes')}
           </ButtonAgree>
           <ButtonDisagree
-            onClick={() => {
-              onCloseModal();
-            }}
+            onClick={
+              onClickDisagree
+                ? () => {
+                    onClickDisagree();
+                    document.body.style.overflow = 'auto';
+                  }
+                : () => {
+                    onCloseModal();
+                    document.body.style.overflow = 'auto';
+                  }
+            }
           >
-            {t('no')}
+            {titleButtonDisagree || t('no')}
           </ButtonDisagree>
         </Wrap>
       </GeneralModalWindow>

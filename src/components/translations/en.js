@@ -28,7 +28,6 @@ import { FilterSubjectTranslationsEn } from 'components/Filters/FilterSubject/tr
 import { FilterSortTranslationsEn } from 'components/Filters/FilterSort/translations/en';
 import { FilterTypeTranslationsEn } from 'components/Filters/FilterType/translations/en';
 import { FilterOfToysTranslationsEn } from 'components/Filters/FilterToys/translations/en';
-import { ProductCardTranslationsEn } from 'components/ProductCard/translations/en';
 import { ModalAddAvatarTranslationsEn } from 'components/Modals/ModalAddAvatar/translations/en';
 import { ModalChangePasswordTranslationsEn } from 'components/Modals/ModalChangePassword/translations/en';
 import { ModalChangePhoneNumberTranslationsEn } from 'components/Modals/ModalChangePhoneNumber/translations/en';
@@ -80,7 +79,6 @@ export const ComponentTranslationsEn = {
   modalConfirm: ModalConfirmTranslationsEn,
 
   //cards
-  productCard: ProductCardTranslationsEn,
   usersProductCard: UsersProductCardTranslationsEn,
 
   // filters

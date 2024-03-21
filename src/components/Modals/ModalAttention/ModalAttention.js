@@ -13,7 +13,7 @@ const ModalAttention = ({ onClick }) => {
   });
   return (
     <Modal
-      onClick={() => {
+      onCloseModal={() => {
         onClick();
       }}
     >

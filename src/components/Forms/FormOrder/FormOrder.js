@@ -110,6 +110,24 @@ const FormOrder = () => {
                 <ErrorMessage>{t(errors.email)}</ErrorMessage>
               )}
             </LabelOrder>
+
+            <LabelOrder>
+              {t('Delivery type')}*
+              <FieldSelect
+                as="select"
+                name="deliveryType"
+                onChange={e => setFieldValue('deliveryType', e.target.value)}
+                value={values.deliveryType}
+              >
+                <option value="">--- {t('Select branch type')} ---</option>
+                <option value="postOffice">{t('postOffice')}</option>
+                <option value="section">{t('section')}</option>
+              </FieldSelect>
+              {errors.deliveryType && touched.deliveryType && (
+                <ErrorMessage>{t(errors.deliveryType)}</ErrorMessage>
+              )}
+            </LabelOrder>
+
             <LabelOrder>
               {t('Delivery service')}*
               <FieldSelect
@@ -131,23 +149,6 @@ const FormOrder = () => {
               </FieldSelect>
               {errors.deliveryService && touched.deliveryService && (
                 <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
-              )}
-            </LabelOrder>
-
-            <LabelOrder>
-              {t('Delivery type')}*
-              <FieldSelect
-                as="select"
-                name="deliveryType"
-                onChange={e => setFieldValue('deliveryType', e.target.value)}
-                value={values.deliveryType}
-              >
-                <option value="">--- {t('Select branch type')} ---</option>
-                <option value="postOffice">{t('postOffice')}</option>
-                <option value="section">{t('section')}</option>
-              </FieldSelect>
-              {errors.deliveryType && touched.deliveryType && (
-                <ErrorMessage>{t(errors.deliveryType)}</ErrorMessage>
               )}
             </LabelOrder>
 

@@ -1,5 +1,5 @@
 // ========
-// onClick for close Modal
+// onCloseModal for close Modal
 //
 // prohibitClosingByBackdrop
 // ========
@@ -13,15 +13,19 @@ import {
 } from './Modal.styled';
 import { createPortal } from 'react-dom';
 
-const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
+const Modal = ({
+  children,
+  onCloseModal,
+  prohibitClosingByBackdrop = false,
+}) => {
   const handleKeyDown = useCallback(
     evt => {
       document.body.style.overflow = 'auto';
       if (evt.code === 'Escape') {
-        onClick();
+        onCloseModal();
       }
     },
-    [onClick]
+    [onCloseModal]
   );
 
   document.body.style.overflow = 'hidden';
@@ -29,7 +33,7 @@ const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
   const handleBackdropClick = evt => {
     if (evt.currentTarget === evt.target) {
       document.body.style.overflow = 'auto';
-      onClick();
+      onCloseModal();
     }
   };
 
@@ -44,20 +48,24 @@ const Modal = ({ children, onClick, prohibitClosingByBackdrop = false }) => {
   return createPortal(
     <Backdrop
       onClick={
-        onClick && !prohibitClosingByBackdrop ? handleBackdropClick : () => {}
+        onCloseModal && !prohibitClosingByBackdrop
+          ? handleBackdropClick
+          : () => {}
       }
     >
       <ScrollBox
         onClick={
-          onClick && !prohibitClosingByBackdrop ? handleBackdropClick : () => {}
+          onCloseModal && !prohibitClosingByBackdrop
+            ? handleBackdropClick
+            : () => {}
         }
       >
         <ModalContainer>
-          {onClick && (
+          {onCloseModal && (
             <CloseButton
               onClick={() => {
                 document.body.style.overflow = 'auto';
-                onClick();
+                onCloseModal();
               }}
             >
               <StyledIconCross />

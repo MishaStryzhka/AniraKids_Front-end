@@ -21,7 +21,7 @@ import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
-// import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
+import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
 
 const api = require('../../api');
 
@@ -80,7 +80,7 @@ const ForChildrenPage = () => {
         <WrapMainContent>
           <SideBar>
             <TitleFilter>{t('Filters')}</TitleFilter>
-            {/* <SelectedFilters /> */}
+            <SelectedFilters />
             <FilterType />
             <FilterOutfits />
             <FilterAge />
@@ -97,7 +97,12 @@ const ForChildrenPage = () => {
               <ProductList>
                 {products?.map(product => (
                   <li key={product._id}>
-                    <UsersProductCard product={product} />
+                    <UsersProductCard
+                      state={{
+                        rentalPeriods: searchParams.get('rentalPeriods'),
+                      }}
+                      product={product}
+                    />
                   </li>
                 ))}
               </ProductList>

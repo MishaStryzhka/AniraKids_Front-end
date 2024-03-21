@@ -1,35 +1,9 @@
 import styled from 'styled-components';
 
-export const ButtonCalendar = styled.button`
-  border: none;
-  padding: 14px;
-  cursor: pointer;
-
-  background-color: transparent;
-  @media screen and (min-width: 768px) {
-  }
-  @media screen and (min-width: 1280px) {
-  }
-`;
-
-export const MenuCalendar = styled.div`
-  padding: 24px;
-  background-color: ${({ theme }) => theme.color.mainColor1};
-  border-radius: 10px;
-  box-shadow: ${({ theme }) => theme.boxShadow};
-  border: 2px solid ${({ theme }) => theme.color.additionalColorBrown};
-
-  width: 360px;
-  box-sizing: border-box;
-`;
-
-export const MenuHeader = styled.div`
-  position: relative;
-
-  height: 40px;
+export const WrapCalendar = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
 `;
 
 export const MenuTitle = styled.h2`

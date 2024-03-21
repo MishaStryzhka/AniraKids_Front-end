@@ -1,21 +1,12 @@
 import IconCalendar from 'images/icons/IconCalendar';
 import {
   ButtonCalendar,
-  ItemInfo,
-  ListInfo,
-  MarkerDelivery,
-  MarkerRent,
-  MarkerReturn,
   MenuButtonClose,
   MenuCalendar,
-  MenuDescription,
-  MenuHeader,
-  MenuTitle,
 } from './FilteDate.styled';
-import Calendar from 'components/Calendar/Calendar';
 import { useSearchParams } from 'react-router-dom';
 import IconClose from 'images/icons/IconClose';
-import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
+import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
 
 const { useState, useRef, useEffect } = require('react');
 
@@ -49,7 +40,7 @@ const FilteDate = () => {
     };
   }, [isOpenModalCalendar]);
 
-  const setFilterDate = () => {
+  const saveSelectedDate = () => {
     newSetSearchParams('rentalPeriods', rentalPeriods);
     setIsOpenModalCalendar(false);
   };
@@ -70,35 +61,14 @@ const FilteDate = () => {
           ref={menuRef}
           style={{ position: 'absolute', zIndex: 999, backgroundColor: '#fff' }}
         >
-          <MenuHeader>
-            <MenuTitle>Календар оренди</MenuTitle>
-            <MenuButtonClose onClick={() => setIsOpenModalCalendar(false)}>
-              <IconClose width={24} height={24} />
-            </MenuButtonClose>
-          </MenuHeader>
-          <Calendar
+          <MenuButtonClose onClick={() => setIsOpenModalCalendar(false)}>
+            <IconClose width={24} height={24} />
+          </MenuButtonClose>
+          <CalendarSelectDate
             rentalPeriods={rentalPeriods}
-            setRentalPeriods={rentalPeriods => setRentalPeriods(rentalPeriods)}
+            setRentalPeriods={setRentalPeriods}
+            saveSelectedDate={() => saveSelectedDate()}
           />
-          <ListInfo>
-            <ItemInfo>
-              <MarkerDelivery /> <p>дні доставки</p> <br />
-            </ItemInfo>
-            <ItemInfo>
-              <MarkerRent /> <p>оренда</p> <br />
-            </ItemInfo>
-            <ItemInfo>
-              <MarkerReturn />
-              <p>день повернення</p> <br />
-            </ItemInfo>
-          </ListInfo>
-          <MenuDescription>
-            Виберіть день оренди <br />
-            (або дату початку та кінця оренди)
-          </MenuDescription>
-          <ButtonAdd disabled={!rentalPeriods} onClick={() => setFilterDate()}>
-            ЗБЕРЕГТИ ЗМІНИ
-          </ButtonAdd>
         </MenuCalendar>
       )}
     </>
