@@ -11,8 +11,9 @@ const darktheme = {
   additionalColorGray: '#EFEFEF',
   additionalColorBrown: '#EBDAD1',
   additionalColorRed: '#ad0000',
+  additionalSecondColorRed: '#f3d9d9',
   additionalColorGreen: '#00542c',
-
+  additionalSecondColorGreen: '#D9E6E0',
   // primary: '#FFC107',
   // secondary: '#111111',
   btnColorBG: '#77695e',
@@ -28,11 +29,12 @@ const lightTheme = {
 
   // +
   additionalColorMain3: '#6C6158',
-
+  additionalSecondColorRed: '#f3d9d9',
   additionalColorGray: '#EFEFEF',
   additionalColorBrown: '#EBDAD1',
   additionalColorRed: '#ad0000',
   additionalColorGreen: '#00542c',
+  additionalSecondColorGreen: '#D9E6E0',
   // primary: '#FFC107',
   // secondary: '#111111',
   btnColorBG: '#77695e',

@@ -51,6 +51,8 @@ import { OrderTranslationsEn } from 'components/Order/translations/en';
 import { FormOrderTranslationsEn } from 'components/Forms/FormOrder/translations/en';
 import { SelectedFiltrsTranslationsEn } from 'components/Filters/SelectedFiltrs/translations/en';
 import { ModalConfirmTranslationsEn } from 'components/Modals/ModalConfirm/translations/en';
+import { RentalCardTranslationsEn } from 'components/RentalCard/translations/en';
+import { OrderCardTranslationsEn } from 'components/OrderCard/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -82,6 +84,8 @@ export const ComponentTranslationsEn = {
   //cards
   productCard: ProductCardTranslationsEn,
   usersProductCard: UsersProductCardTranslationsEn,
+  rentalCard: RentalCardTranslationsEn,
+  orderCard: OrderCardTranslationsEn,
 
   // filters
   filterOfToys: FilterOfToysTranslationsEn,
