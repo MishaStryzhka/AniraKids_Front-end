@@ -7,12 +7,14 @@ import {
   AvatarWrap,
   ButtonEdit,
   ButtonShow,
+  ButtonVerify,
   InputText,
   Label,
   Placeholder,
   ProfileForm,
   SecondWrap,
   StyledButton,
+  StyledIconPencil,
   Wrap,
   Wrapper,
   WrapperBiling,
@@ -24,7 +26,6 @@ import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
 import { ErrorMessage, InputField } from 'components/Forms/Form.styled';
 import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
-import IconPencil from 'images/icons/IconPencil';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
 import IconEyeOpen from 'images/icons/IconEyeOpen';
 import IconEyeClosed from 'images/icons/IconEyeClosed';
@@ -46,6 +47,18 @@ import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
 import { clearDone } from '../../../../redux/auth/slice';
 import { TextDone } from 'components/Modals/Modal.styled';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
+import {
+  SceletonAvatar,
+  SceletonBtn,
+  SceletonBtnAdd,
+  SceletonBtnVerify,
+  SceletonDescription,
+  SceletonField,
+  SceletonFieldInput,
+  SceletonIcon,
+  SceletonText,
+  SceletonTitle,
+} from './SceletonProfile.styled';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
@@ -130,24 +143,36 @@ const Profile = () => {
             <ProfileForm>
               <Wrap>
                 <Label>
-                  <Placeholder>{t('lastName')}</Placeholder>
+                  {!isLoading ? (
+                    <Placeholder>{t('lastName')}</Placeholder>
+                  ) : (
+                    <SceletonField />
+                  )}
                   {user?.lastName ? (
                     <Wrapper>
-                      <InputText>{user?.lastName}</InputText>
+                      {!isLoading ? (
+                        <InputText>{user?.lastName}</InputText>
+                      ) : (
+                        <SceletonField />
+                      )}
                     </Wrapper>
                   ) : (
                     <>
-                      <InputField
-                        type="text"
-                        id="lastName"
-                        value={values.lastName}
-                        name="lastName"
-                        placeholder="Каріна"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
+                      {!isLoading ? (
+                        <InputField
+                          type="text"
+                          id="lastName"
+                          value={values.lastName}
+                          name="lastName"
+                          placeholder="Каріна"
+                          onChange={e => {
+                            error = null;
+                            handleChange(e);
+                          }}
+                        />
+                      ) : (
+                        <SceletonFieldInput />
+                      )}
                       <ErrorMessage>
                         {errors?.lastName &&
                           touched?.lastName &&
@@ -158,24 +183,36 @@ const Profile = () => {
                 </Label>
 
                 <Label>
-                  <Placeholder>{t('firstName')}</Placeholder>
+                  {!isLoading ? (
+                    <Placeholder>{t('firstName')}</Placeholder>
+                  ) : (
+                    <SceletonField />
+                  )}
                   {user?.firstName ? (
                     <Wrapper>
-                      <InputText>{user?.firstName}</InputText>
+                      {!isLoading ? (
+                        <InputText>{user?.firstName}</InputText>
+                      ) : (
+                        <SceletonField />
+                      )}
                     </Wrapper>
                   ) : (
                     <>
-                      <InputField
-                        type="text"
-                        id="firstName"
-                        value={values.firstName}
-                        name="firstName"
-                        placeholder="Стрижка"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
+                      {!isLoading ? (
+                        <InputField
+                          type="text"
+                          id="firstName"
+                          value={values.firstName}
+                          name="firstName"
+                          placeholder="Стрижка"
+                          onChange={e => {
+                            error = null;
+                            handleChange(e);
+                          }}
+                        />
+                      ) : (
+                        <SceletonFieldInput />
+                      )}
                       <ErrorMessage>
                         {errors?.firstName &&
                           touched?.firstName &&
@@ -186,27 +223,45 @@ const Profile = () => {
                 </Label>
 
                 <Label>
-                  <Placeholder>Nickname</Placeholder>
+                  {!isLoading ? (
+                    <Placeholder>Nickname</Placeholder>
+                  ) : (
+                    <SceletonField />
+                  )}
                   {user?.nickname ? (
                     <Wrapper>
-                      <InputText>{user?.nickname}</InputText>
+                      {!isLoading ? (
+                        <InputText>{user?.nickname}</InputText>
+                      ) : (
+                        <SceletonField />
+                      )}
                     </Wrapper>
                   ) : (
-                    <InputField
-                      type="text"
-                      id="nickname"
-                      value={values.nickname}
-                      name="nickname"
-                      placeholder="@karina.s"
-                      onChange={e => {
-                        e.currentTarget.value =
-                          e.currentTarget.value.replaceAll('@', '').length < 1
-                            ? ''
-                            : `@${e.currentTarget.value.replaceAll('@', '')}`;
-                        error = null;
-                        handleChange(e);
-                      }}
-                    />
+                    <div>
+                      {!isLoading ? (
+                        <InputField
+                          type="text"
+                          id="nickname"
+                          value={values.nickname}
+                          name="nickname"
+                          placeholder="@karina.s"
+                          onChange={e => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replaceAll('@', '').length <
+                              1
+                                ? ''
+                                : `@${e.currentTarget.value.replaceAll(
+                                    '@',
+                                    ''
+                                  )}`;
+                            error = null;
+                            handleChange(e);
+                          }}
+                        />
+                      ) : (
+                        <SceletonFieldInput />
+                      )}
+                    </div>
                   )}
                   <ErrorMessage>
                     {(errors?.nickname &&
@@ -218,31 +273,48 @@ const Profile = () => {
                 </Label>
 
                 <Label>
-                  <Placeholder>{t('phoneNumber')}</Placeholder>
+                  {!isLoading ? (
+                    <Placeholder>{t('phoneNumber')}</Placeholder>
+                  ) : (
+                    <SceletonField />
+                  )}
                   {user?.primaryPhoneNumber ? (
                     <Wrapper>
-                      <InputText>{user?.primaryPhoneNumber}</InputText>
-                      <ButtonEdit
-                        type="button"
-                        title="change phone number"
-                        onClick={() => setIsOpenModalChangePhoneNomber(true)}
-                      >
-                        <IconPencil />
-                      </ButtonEdit>
+                      {!isLoading ? (
+                        <InputText>{user?.primaryPhoneNumber}</InputText>
+                      ) : (
+                        <SceletonField />
+                      )}
+                      {!isLoading ? (
+                        <ButtonEdit
+                          type="button"
+                          title="change phone number"
+                          onClick={() => setIsOpenModalChangePhoneNomber(true)}
+                        >
+                          <StyledIconPencil />
+                        </ButtonEdit>
+                      ) : (
+                        <SceletonBtn />
+                      )}
                     </Wrapper>
                   ) : (
                     <>
-                      <InputField
-                        type="text"
-                        id="primaryPhoneNumber"
-                        value={values.primaryPhoneNumber}
-                        name="primaryPhoneNumber"
-                        placeholder="+380"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
+                      {!isLoading ? (
+                        <InputField
+                          type="text"
+                          id="primaryPhoneNumber"
+                          value={values.primaryPhoneNumber}
+                          name="primaryPhoneNumber"
+                          placeholder="+380"
+                          onChange={e => {
+                            error = null;
+                            handleChange(e);
+                          }}
+                        />
+                      ) : (
+                        <SceletonFieldInput />
+                      )}
+
                       <ErrorMessage>
                         {errors?.primaryPhoneNumber &&
                           touched?.primaryPhoneNumber &&
@@ -262,47 +334,69 @@ const Profile = () => {
                 </Label>
 
                 <Label>
-                  <Placeholder>{t('email')}</Placeholder>
+                  {!isLoading ? (
+                    <Placeholder>{t('email')}</Placeholder>
+                  ) : (
+                    <SceletonField />
+                  )}
                   {user?.email ? (
                     <Wrapper>
-                      <InputText>{user?.email}</InputText>
-                      <ButtonEdit
-                        type="button"
-                        title="change email"
-                        onClick={() => setIsOpenModalChangeEmail(true)}
-                      >
-                        <IconPencil />
-                      </ButtonEdit>
+                      {!isLoading ? (
+                        <InputText>{user?.email}</InputText>
+                      ) : (
+                        <SceletonField />
+                      )}
+                      {!isLoading ? (
+                        <ButtonEdit
+                          type="button"
+                          title="change email"
+                          onClick={() => setIsOpenModalChangeEmail(true)}
+                        >
+                          <StyledIconPencil />
+                        </ButtonEdit>
+                      ) : (
+                        <SceletonBtn />
+                      )}
                       {user.emailVerified ? (
                         <p>{t('verified')}</p>
                       ) : (
-                        <button
-                          type="button"
-                          title="verify email"
-                          onClick={() => verifyEmail()}
-                          disabled={isLoading}
-                        >
+                        <>
                           {!isLoading ? (
-                            t('verify')
+                            <ButtonVerify
+                              type="button"
+                              title="verify email"
+                              onClick={() => verifyEmail()}
+                              disabled={isLoading}
+                            >
+                              {!isLoading ? (
+                                t('verify')
+                              ) : (
+                                <BeatLoader color="#fff" />
+                              )}
+                            </ButtonVerify>
                           ) : (
-                            <BeatLoader color="#fff" />
+                            <SceletonBtnVerify />
                           )}
-                        </button>
+                        </>
                       )}
                     </Wrapper>
                   ) : (
                     <>
-                      <InputField
-                        type="email"
-                        id="email"
-                        value={values.email}
-                        name="email"
-                        placeholder="***@gmail.com"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
+                      {!isLoading ? (
+                        <InputField
+                          type="email"
+                          id="email"
+                          value={values.email}
+                          name="email"
+                          placeholder="***@gmail.com"
+                          onChange={e => {
+                            error = null;
+                            handleChange(e);
+                          }}
+                        />
+                      ) : (
+                        <SceletonFieldInput />
+                      )}
                       <ErrorMessage>
                         {(errors?.email &&
                           touched?.email &&
@@ -402,17 +496,23 @@ const Profile = () => {
 
                 {((Object.entries(touched).length !== 0 && user.isFirstLogin) ||
                   touched?.avatarUrl) && (
-                  <StyledButton
-                    type="submit"
-                    title={t('saveChanges')}
-                    disabled={isLoading}
-                  >
+                  <>
                     {!isLoading ? (
-                      t('saveChanges')
+                      <StyledButton
+                        type="submit"
+                        title={t('saveChanges')}
+                        disabled={isLoading}
+                      >
+                        {!isLoading ? (
+                          t('saveChanges')
+                        ) : (
+                          <BeatLoader color="#fff" />
+                        )}
+                      </StyledButton>
                     ) : (
-                      <BeatLoader color="#fff" />
+                      <SceletonBtnAdd />
                     )}
-                  </StyledButton>
+                  </>
                 )}
               </Wrap>
               <SecondWrap>
@@ -430,22 +530,42 @@ const Profile = () => {
                   />
                   <AvatarWrap $avatar={values.avatarUrl} htmlFor="avatarUrl">
                     {values.avatarUrl ? (
-                      <Avatar
-                        width={197}
-                        height={197}
-                        src={
-                          typeof values.avatarUrl === 'object'
-                            ? URL.createObjectURL(values.avatarUrl)
-                            : values.avatarUrl
-                        }
-                        alt="avatar"
-                      />
+                      <>
+                        {!isLoading ? (
+                          <Avatar
+                            width={197}
+                            height={197}
+                            src={
+                              typeof values.avatarUrl === 'object'
+                                ? URL.createObjectURL(values.avatarUrl)
+                                : values.avatarUrl
+                            }
+                            alt="avatar"
+                          />
+                        ) : (
+                          <SceletonAvatar />
+                        )}
+                      </>
                     ) : (
-                      <img src={AvatarImage} alt="avatar" />
+                      <>
+                        {!isLoading ? (
+                          <img src={AvatarImage} alt="avatar" />
+                        ) : (
+                          <SceletonAvatar />
+                        )}
+                      </>
                     )}
                   </AvatarWrap>
-                  <Placeholder>{t('profilePhoto')}</Placeholder>
-                  <AvatarDescription>{t('maxFileSize')}</AvatarDescription>
+                  {!isLoading ? (
+                    <Placeholder>{t('profilePhoto')}</Placeholder>
+                  ) : (
+                    <SceletonText />
+                  )}
+                  {!isLoading ? (
+                    <AvatarDescription>{t('maxFileSize')}</AvatarDescription>
+                  ) : (
+                    <SceletonDescription />
+                  )}
                   {isOpenModalAddAvatar && (
                     <Modal
                       onClick={() => {
@@ -461,9 +581,17 @@ const Profile = () => {
                   )}
                 </AvatarLabel>
                 {user.typeUser !== 'owner' && (
-                  <ButtonAdd onClick={() => setIsOpenModalBecomeLandlord(true)}>
-                    {t('BECOME_LANDLORD')}
-                  </ButtonAdd>
+                  <>
+                    {!isLoading ? (
+                      <ButtonAdd
+                        onClick={() => setIsOpenModalBecomeLandlord(true)}
+                      >
+                        {t('BECOME_LANDLORD')}
+                      </ButtonAdd>
+                    ) : (
+                      <SceletonBtnAdd />
+                    )}
+                  </>
                 )}
                 {isOpenModalBecomeLandlord && (
                   <Modal
@@ -490,11 +618,19 @@ const Profile = () => {
                 marginBottom: 14,
               }}
             >
-              <QuestionDescription>{'BillingDetails'}</QuestionDescription>
-              <StyledIconArrowUp
-                $openAnswer={isOpenBillingDetails}
-                onClick={() => setIsOpenBillingDetails(!isOpenBillingDetails)}
-              />
+              {isLoading ? (
+                <QuestionDescription>{'BillingDetails'}</QuestionDescription>
+              ) : (
+                <SceletonTitle />
+              )}
+              {isLoading ? (
+                <StyledIconArrowUp
+                  $openAnswer={isOpenBillingDetails}
+                  onClick={() => setIsOpenBillingDetails(!isOpenBillingDetails)}
+                />
+              ) : (
+                <SceletonIcon />
+              )}
             </div>
             <div
               style={{
@@ -514,11 +650,19 @@ const Profile = () => {
                 marginBottom: 14,
               }}
             >
-              <QuestionDescription>{'BankAccount'}</QuestionDescription>
-              <StyledIconArrowUp
-                $openAnswer={isOpenBankAccount}
-                onClick={() => setIsOpenBankAccount(!isOpenBankAccount)}
-              />
+              {isLoading ? (
+                <QuestionDescription>{'BankAccount'}</QuestionDescription>
+              ) : (
+                <SceletonTitle />
+              )}
+              {isLoading ? (
+                <StyledIconArrowUp
+                  $openAnswer={isOpenBankAccount}
+                  onClick={() => setIsOpenBankAccount(!isOpenBankAccount)}
+                />
+              ) : (
+                <SceletonIcon />
+              )}
             </div>
             <div
               style={{

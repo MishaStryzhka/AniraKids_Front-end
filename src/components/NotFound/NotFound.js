@@ -1,10 +1,10 @@
-import IconBeauty from 'images/icons/IconBeauty';
-import { Text, WrapNotFound } from './NotFound.styled';
+// import IconBeauty from 'images/icons/IconBeauty';
+import { StyledIconBeauty, Text, WrapNotFound } from './NotFound.styled';
 
 const NotFound = ({ children }) => {
   return (
     <WrapNotFound>
-      <IconBeauty />
+      <StyledIconBeauty />
       <Text>{children}</Text>
     </WrapNotFound>
   );

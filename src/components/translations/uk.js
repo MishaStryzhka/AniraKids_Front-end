@@ -50,6 +50,8 @@ import { OrderTranslationsUk } from 'components/Order/translations/uk';
 import { FormOrderTranslationsUk } from 'components/Forms/FormOrder/translations/uk';
 import { SelectedFiltrsTranslationsUk } from 'components/Filters/SelectedFiltrs/translations/uk';
 import { ModalConfirmTranslationsUk } from 'components/Modals/ModalConfirm/translations/uk';
+import { RentalCardTranslationsUk } from 'components/RentalCard/translations/uk';
+import { OrderCardTranslationsUk } from 'components/OrderCard/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -80,6 +82,8 @@ export const ComponentTranslationsUk = {
 
   //cards
   usersProductCard: UsersProductCardTranslationsUk,
+  rentalCard: RentalCardTranslationsUk,
+  orderCard: OrderCardTranslationsUk,
 
   // filters
   filterOfToys: FilterOfToysTranslationsUk,

@@ -2,6 +2,10 @@ import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 90.7vw;
+    padding: 3.7vw;
+  }
   width: 388px;
   display: flex;
   padding: 16px;
@@ -29,6 +33,9 @@ export const StyledIconCross = styled(IconCross)`
 `;
 
 export const ModalTitle = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
@@ -40,6 +47,9 @@ export const ModalTitle = styled.h2`
 `;
 
 export const Description = styled.p`
+  @media screen and (max-width: 427.5px) {
+    max-width: 46.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   margin: 12px auto;
@@ -52,6 +62,10 @@ export const Description = styled.p`
 `;
 
 export const ButtonAgree = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+    padding: 3.3vw 9.3vw;
+  }
   padding: 14px 40px;
   width: 304px;
   border: none;
@@ -72,6 +86,10 @@ export const ButtonAgree = styled.button`
 `;
 
 export const ButtonDisagree = styled.button`
+  @media screen and (max-width: 427.5px) {
+    width: 71vw;
+    padding: 3.3vw 9.3vw;
+  }
   padding: 14px 40px;
   width: 304px;
   border: none;

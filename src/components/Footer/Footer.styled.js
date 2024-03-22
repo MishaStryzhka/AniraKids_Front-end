@@ -91,5 +91,6 @@ export const StyledNavLink = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 6px;
+  text-decoration: none;
   color: ${({ theme }) => theme.color.mainColor5};
 `;

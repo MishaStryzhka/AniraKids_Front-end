@@ -1,5 +1,6 @@
 import Button from 'components/Button/Button';
 import { Form } from 'formik';
+import IconPencil from 'images/icons/IconPencil';
 import styled from 'styled-components';
 
 export const ProfileForm = styled(Form)`
@@ -71,30 +72,30 @@ export const Placeholder = styled.p`
   font-size: 14px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 142.857% */
+  line-height: 1.43;
 `;
 
 export const Wrapper = styled.div`
   display: flex;
   padding: 8px 0;
   gap: 8px;
-  align-items: center;
 `;
 
 export const InputText = styled.p`
   font-family: Open Sans, sans-serif;
   font-size: 14px;
-  font-style: normal;
   font-weight: 400;
-  line-height: 20px; /* 142.857% */
+  line-height: 1.43;
 `;
 
 export const ButtonEdit = styled.button`
   padding: 0;
   background-color: transparent;
   border: none;
-
+  width: 24px;
+  height: 24px;
   display: flex;
+  cursor: pointer;
 `;
 
 export const ButtonShow = styled.button`
@@ -113,9 +114,36 @@ export const StyledButton = styled(Button)`
   margin: 0 auto;
 `;
 
+export const ButtonVerify = styled.button`
+  cursor: pointer;
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  text-transform: uppercase;
+  border: 1px solid;
+
+  color: ${({ theme }) => theme.color.mainColor5};
+  border-color: ${({ theme }) => theme.color.mainColor3};
+  background-color: transparent;
+
+  &:hover {
+    color: ${({ theme }) => theme.color.mainColor3};
+  }
+  &:active {
+    background-color: ${({ theme }) => theme.color.mainColor3};
+  }
+`;
+
 export const WrapperBiling = styled.div`
   padding: 8px;
   border-bottom: 1px solid;
 
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+
+export const StyledIconPencil = styled(IconPencil)`
+  width: 20px;
+  height: 20px;
+  stroke: ${({ theme }) => theme.color.mainColor5};
 `;

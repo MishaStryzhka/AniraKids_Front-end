@@ -2,11 +2,15 @@ import styled from 'styled-components';
 
 export const StyledButtonViewMore = styled.button`
   @media screen and (max-width: 427.5px) {
-    width: 72vw;
+    width: ${({ $pageMyOrders, $pageMyPurchases }) =>
+      $pageMyOrders || $pageMyPurchases ? '74.8vw' : '72vw'};
     font-size: 4.7vw;
     justify-content: space-between;
+    padding: 1.5vw;
   }
-  width: 287px;
+  width: ${({ $pageMyOrders, $pageMyPurchases }) =>
+    $pageMyOrders || $pageMyPurchases ? '297px' : '287px'};
+
   padding: 8px;
   margin-left: 0;
 
@@ -25,6 +29,10 @@ export const StyledButtonViewMore = styled.button`
   border: none;
   background-color: transparent;
 
+  @media screen and (min-width: 768px) {
+    width: ${({ $pageMyOrders, $pageMyPurchases }) =>
+      $pageMyOrders || $pageMyPurchases ? '320px' : '287px'};
+  }
   @media screen and (min-width: 1280px) {
     float: right;
   }

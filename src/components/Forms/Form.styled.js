@@ -2,6 +2,9 @@ import { Field } from 'formik';
 import styled from 'styled-components';
 
 export const InputField = styled(Field)`
+  @media screen and (max-width: 427.5px) {
+    width: 90.6vw;
+  }
   width: ${({ width = '100%' }) => width};
   box-sizing: border-box;
 
@@ -13,6 +16,13 @@ export const InputField = styled(Field)`
   border: 1px solid;
   padding: 8px;
   outline: none;
+  width: 388px;
+  @media screen and (min-width: 768px) {
+    width: 334px;
+  }
+  @media screen and (min-width: 1280px) {
+    width: 400px;
+  }
 
   border-color: ${({ theme }) => theme.color.mainColor2};
   color: ${({ theme }) => theme.color.mainColor2};

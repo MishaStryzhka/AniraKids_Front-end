@@ -90,7 +90,6 @@ const UsersProductCard = ({
       $pageRentOut={pathname === '/my-account/rent-out'}
     >
       <GeneralWrap
-      // $pageRentOut={pathname === '/my-account/rent-out'}
       >
         <div
           style={{

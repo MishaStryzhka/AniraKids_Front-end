@@ -10,7 +10,7 @@ const IconPencil = ({ className, ...props }) => (
     {...props}
   >
     <g
-      stroke="#fff"
+      stroke={className || '#fff'}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}

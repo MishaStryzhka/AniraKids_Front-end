@@ -6,10 +6,8 @@ import styled from 'styled-components';
 
 export const Card = styled(NavLink)`
   @media screen and (max-width: 427.5px) {
-    /* width: ${({ $pageRentOut }) => ($pageRentOut ? '295px' : '43vw')}; */
     width: 43vw;
   }
-  /* width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')}; */
   width: 184px;
   height: 100%;
   border-radius: 2px;
@@ -18,7 +16,6 @@ export const Card = styled(NavLink)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '8px')}; */
   gap: 8px;
   cursor: pointer;
 
@@ -29,7 +26,6 @@ export const Card = styled(NavLink)`
   }
 
   @media screen and (min-width: 768px) {
-    /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '16px' : '12px')}; */
     gap: 12px;
   }
   position: relative;
@@ -45,12 +41,9 @@ export const GeneralWrap = styled.div`
 
 export const PictureCard = styled.picture`
   @media screen and (max-width: 427.5px) {
-    /* height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '46.7vw')}; */
     height: 46.7vw;
   }
-  width: inherit;
-  /* height: ${({ $pageRentOut }) => ($pageRentOut ? '350px' : '200px')}; */
-  /* width: ${({ $pageRentOut }) => ($pageRentOut ? '305px' : '184px')}; */
+  /* width: inherit; */
   height: 200px;
   width: 184px;
   border-radius: 2px;
@@ -110,19 +103,14 @@ export const WrapText = styled.div`
   flex-direction: column;
 
   @media screen and (min-width: 768px) {
-    /* gap: ${({ $pageRentOut }) => ($pageRentOut ? '8px' : '12px')}; */
     gap: 12px;
   }
 `;
 
 export const FirstWrap = styled.div`
   display: flex;
-  /* flex-direction: ${({ $pageRentOut }) =>
-    $pageRentOut ? 'row' : 'column'}; */
   flex-direction: column;
   justify-content: space-between;
-  /* align-items: ${({ $pageRentOut }) =>
-    $pageRentOut ? 'center' : 'stretch'}; */
   align-items: stretch;
   @media screen and (min-width: 768px) {
     flex-direction: row;

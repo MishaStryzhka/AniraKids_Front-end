@@ -12,6 +12,10 @@ export const GeneralModalWindow = styled.div`
 `;
 
 export const StyledIconCross = styled(IconCross)`
+  @media screen and (max-width: 427.5px) {
+    width: 5.6vw;
+    height: 5.6vw;
+  }
   position: absolute;
   top: 8px;
   right: 8px;
@@ -44,6 +48,9 @@ export const ModalTitle = styled.h2`
 `;
 
 export const TextDescription = styled.p`
+  @media screen and (max-width: 427.5px) {
+    max-width: 46.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   margin-top: 0;
@@ -56,6 +63,9 @@ export const TextDescription = styled.p`
 `;
 
 export const TextDone = styled.p`
+  @media screen and (max-width: 427.5px) {
+    padding: 11.2vw;
+  }
   padding: 48px 48px;
 
   text-align: center;
@@ -119,6 +129,10 @@ export const ModalDescription = styled.p`
 `;
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 84vw;
+    padding: 3.7vw;
+  }
   box-sizing: border-box;
   /* ${({ width }) => `width: ${width};`} */
   width: 360px;
@@ -190,6 +204,10 @@ export const ErrorMessage = styled.p`
 `;
 
 export const CloseButton = styled.button`
+  @media screen and (max-width: 427.5px) {
+    top: 1.9vw;
+    right: 1.9vw;
+  }
   padding: 0;
   cursor: pointer;
   background-color: transparent;

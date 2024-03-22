@@ -21,9 +21,10 @@ import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import NotFound from 'components/NotFound/NotFound';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
-// import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
+import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
 
 const api = require('../../api');
+export const sceletonArray = Array.from({ length: 9 });
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -102,7 +103,13 @@ const ForWomenPage = () => {
                 ))}
               </ProductList>
             ) : isLoading ? (
-              <p>Loading...</p>
+              <ProductList>
+                {sceletonArray.map((_, index) => (
+                  <li key={index}>
+                    <SceletonUsersProductCard id={index} />
+                  </li>
+                ))}
+              </ProductList>
             ) : (
               <NotFound>{t('nothing_found')}</NotFound>
             )}
