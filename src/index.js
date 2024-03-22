@@ -19,6 +19,10 @@ import { PagesTranslationsCs } from 'pages/translations/cs';
 import { PagesTranslationsEn } from 'pages/translations/en';
 import { PagesTranslationsUk } from 'pages/translations/uk';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { APIProvider } from '@vis.gl/react-google-maps';
+import { dataTranslationsUk } from 'data/translations/uk';
+import { dataTranslationsCs } from 'data/translations/cs';
+import { dataTranslationsEn } from 'data/translations/en';
 
 const persistLanguage = JSON.parse(
   localStorage.getItem('persist:settings')
@@ -35,6 +39,7 @@ i18n.use(LanguageDetector).init({
         ...ComponentTranslationsUk,
         components: ComponentTranslationsUk,
         pages: PagesTranslationsUk,
+        data: dataTranslationsUk,
       },
     },
     cs: {
@@ -42,6 +47,7 @@ i18n.use(LanguageDetector).init({
         ...ComponentTranslationsCs,
         components: ComponentTranslationsCs,
         pages: PagesTranslationsCs,
+        data: dataTranslationsCs,
       },
     },
     en: {
@@ -49,6 +55,7 @@ i18n.use(LanguageDetector).init({
         ...ComponentTranslationsEn,
         components: ComponentTranslationsEn,
         pages: PagesTranslationsEn,
+        data: dataTranslationsEn,
       },
     },
   },
@@ -57,19 +64,19 @@ i18n.use(LanguageDetector).init({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_DI}>
-    {/* <React.StrictMode> */}
-    <I18nextProvider i18n={i18n}>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <BrowserRouter>
-            <React.Suspense fallback="loading...">
-              <App />
-            </React.Suspense>
-          </BrowserRouter>
-        </PersistGate>
-      </Provider>
-    </I18nextProvider>
-    {/* </React.StrictMode> */}
+    <APIProvider apiKey={'AIzaSyD9M_UvPQJNBGQqGp3RswMsdMJ1_GDcaQI'}>
+      <I18nextProvider i18n={i18n}>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <BrowserRouter>
+              <React.Suspense fallback="loading...">
+                <App />
+              </React.Suspense>
+            </BrowserRouter>
+          </PersistGate>
+        </Provider>
+      </I18nextProvider>
+    </APIProvider>
   </GoogleOAuthProvider>
 );
 

@@ -2,6 +2,12 @@ import IconBasket from 'images/icons/IconBasket';
 import styled from 'styled-components';
 
 export const WrapCardOrder = styled.div`
+  position: relative;
+  padding: 12px;
+  border: 1px solid;
+  border-radius: 2px;
+  border-color: ${({ theme }) => theme.color.mainColor2};
+
   @media screen and (min-width: 768px) {
     margin-bottom: 80px;
   }
@@ -9,6 +15,20 @@ export const WrapCardOrder = styled.div`
     margin-bottom: 90px;
   }
 `;
+
+export const ButtonRemoveOrder = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  cursor: pointer;
+
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  outline: none;
+`;
+
 export const TitleOrder = styled.h2`
   display: none;
   @media screen and (min-width: 768px) {
@@ -130,6 +150,7 @@ export const TextValue = styled(TextName)`
 export const WrapSection = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   @media screen and (min-width: 1280px) {
     width: 308px;
   }
@@ -138,6 +159,7 @@ export const Wrap = styled.div`
   min-width: 60px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
 `;
 export const WrapCalc = styled.div`

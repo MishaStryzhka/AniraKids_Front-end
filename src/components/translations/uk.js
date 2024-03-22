@@ -28,7 +28,6 @@ import { FilterTypeTranslationsUk } from 'components/Filters/FilterType/translat
 import { FilterOutfitsTranslationsUk } from 'components/Filters/FilterOutfits/translations/uk';
 import { FilterSizeChildrenTranslationsUk } from 'components/Filters/FilterSizeChildren/translations/uk';
 import { FilterOfToysTranslationsUk } from 'components/Filters/FilterToys/translations/uk';
-import { ProductCardTranslationsUk } from 'components/ProductCard/translations/uk';
 import { ModalAddAvatarTranslationsUk } from 'components/Modals/ModalAddAvatar/translations/uk';
 import { ModalChangePasswordTranslationsUk } from 'components/Modals/ModalChangePassword/translations/uk';
 import { ModalChangePhoneNumberTranslationsUk } from 'components/Modals/ModalChangePhoneNumber/translations/uk';
@@ -82,7 +81,6 @@ export const ComponentTranslationsUk = {
   modalConfirm: ModalConfirmTranslationsUk,
 
   //cards
-  productCard: ProductCardTranslationsUk,
   usersProductCard: UsersProductCardTranslationsUk,
   rentalCard: RentalCardTranslationsUk,
   orderCard: OrderCardTranslationsUk,

@@ -19,6 +19,7 @@ import { useAuth, useStorage } from 'hooks';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from '../Form.styled';
 import { BeatLoader } from 'react-spinners';
+import { useNavigate } from 'react-router-dom';
 
 const FormRegistrationEmail = ({ handleCloseModal }) => {
   const { t } = useTranslation('translation', {
@@ -28,6 +29,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
   const [openPassword, setOpenPassword] = useState(false);
   const { currentTheme, error, isLoading } = useAuth();
   const storage = useStorage();
+  const navigate = useNavigate();
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -38,6 +40,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
     dispatch(
       register({ email, password, favorites: storage.get('favorites') || [] })
     );
+    navigate('/my-account/profile', { replace: true });
   };
 
   return (

@@ -213,6 +213,6 @@ export const CloseButton = styled.button`
   background-color: transparent;
   border: none;
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 4px;
+  right: 4px;
 `;

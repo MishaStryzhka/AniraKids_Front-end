@@ -16,13 +16,13 @@ import Calendar from 'components/Calendar/Calendar';
 import { useSearchParams } from 'react-router-dom';
 import IconClose from 'images/icons/IconClose';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
-
 const { useState, useRef, useEffect } = require('react');
 
 const FilterDate = () => {
   const [isOpenModalCalendar, setIsOpenModalCalendar] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef(null);
+
   const [rentalPeriods, setRentalPeriods] = useState(
     searchParams.get('rentalPeriods') || null
   );

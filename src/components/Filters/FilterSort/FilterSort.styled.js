@@ -9,7 +9,8 @@ export const MainWrapFilter = styled.div`
   display: flex;
   position: relative;
   gap: 4px;
-  margin-bottom: 24px;
+  height: 55px;
+  // margin-bottom: 24px;
   position: relative;
   z-index: 2;
   @media screen and (min-width: 768px) {
@@ -80,10 +81,10 @@ export const StyledIconArrowUp = styled(IconArrow)`
 
 export const InnerWrap = styled.div`
   @media screen and (max-width: 427.5px) {
-    padding-bottom: 2.8vw;
+    padding: 2.8vw;
   }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
+  padding: 12px;
 `;

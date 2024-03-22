@@ -81,6 +81,7 @@ import CheckBox from 'components/CheckBox/CheckBox';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
 import IconBasket from 'images/icons/IconBasket';
+import { Map, Marker } from '@vis.gl/react-google-maps';
 
 const api = require('../../../api');
 
@@ -193,8 +194,13 @@ const FormAddProduct = () => {
           rental: '',
           dailyRentalPrice: '',
           hourlyRentalPrice: '',
+
           sale: '',
           priceSale: '',
+
+          allowPickup: false,
+          pickupAddress: '',
+
           isAddPhoto: '',
           colorCode: '',
         }}
@@ -277,6 +283,8 @@ const FormAddProduct = () => {
               updatedPhotoOrder.map(el => (el > index ? el - 1 : el))
             );
           };
+
+          const position = { lat: 53.54992, lng: 10.00678 };
 
           return (
             <>
@@ -924,6 +932,50 @@ const FormAddProduct = () => {
                       <ErrorMessage>{t(errors.rental)}</ErrorMessage>
                     </WrapError>
                   )}
+                </div>
+
+                {/* asdasd */}
+
+                <div>
+                  <Title> Allow self-pickup</Title>
+                  <GeneralWrap>
+                    <WrapCondition>
+                      <LabelStatus>
+                        <Box>{values.allowPickup && <IconCheck />}</Box>
+                        Allow self-pickup
+                        <Input
+                          type="checkbox"
+                          name="allowPickup"
+                          value={values.allowPickup}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </LabelStatus>
+                      <LabelPrice>
+                        Pickup address:
+                        <InputPrice
+                          placeholder="address"
+                          type="adress"
+                          name="pickupAddress"
+                          value={values.pickupAddress}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          disabled={!values.allowPickup}
+                        />
+                      </LabelPrice>
+                      {errors.pickupAddress && touched.pickupAddress && (
+                        <WrapError>
+                          <ErrorMessage>{t(errors.pickupAddress)}</ErrorMessage>
+                        </WrapError>
+                      )}
+
+                      <div style={{ width: 600, height: 400 }}>
+                        <Map defaultCenter={position} defaultZoom={10}>
+                          <Marker position={position} />
+                        </Map>
+                      </div>
+                    </WrapCondition>
+                  </GeneralWrap>
                 </div>
 
                 {/* KEYWORDS of Product */}

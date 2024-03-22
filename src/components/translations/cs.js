@@ -27,7 +27,6 @@ import { FilterSortTranslationsCs } from 'components/Filters/FilterSort/translat
 import { FilterTypeTranslationsCs } from 'components/Filters/FilterType/translations/cs';
 import { FilterOfToysTranslationsCs } from 'components/Filters/FilterToys/translations/cs';
 import { SectionAnswersTranslationsCs } from 'components/SectionAnswers/translations/cs';
-import { ProductCardTranslationsCs } from 'components/ProductCard/translations/cs';
 import { ModalAddAvatarTranslationsCs } from 'components/Modals/ModalAddAvatar/translations/cs';
 import { ModalChangePasswordTranslationsCs } from 'components/Modals/ModalChangePassword/translations/cs';
 import { ModalChangePhoneNumberTranslationsCs } from 'components/Modals/ModalChangePhoneNumber/translations/cs';
@@ -81,7 +80,6 @@ export const ComponentTranslationsCs = {
   modalConfirm: ModalConfirmTranslationsCs,
 
   //cards
-  productCard: ProductCardTranslationsCs,
   usersProductCard: UsersProductCardTranslationsCs,
   rentalCard: RentalCardTranslationsCs,
   orderCard: OrderCardTranslationsCs,

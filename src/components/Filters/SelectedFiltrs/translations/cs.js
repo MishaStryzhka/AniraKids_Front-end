@@ -4,6 +4,11 @@ export const SelectedFiltrsTranslationsCs = {
   sale: 'Prodej',
   rent: 'Pronájem',
 
+  // Outfits
+  'for-girls': 'Pro holčičky',
+  'for-boys': 'Pro chlapečky',
+  'for-babies': 'Pro miminka',
+
   //FilterToys
   Toys: 'Hračky',
   'toys-for-baby': 'Hračky pro miminka',
@@ -44,12 +49,6 @@ export const SelectedFiltrsTranslationsCs = {
 
   // Price
   Price: 'Cena',
-
-  // FilterOutfits
-  Outfits: 'Oblečení',
-  'for-girls': 'Pro holčičky',
-  'for-boys': 'Pro chlapečky',
-  'for-babies': 'Pro miminka',
 
   // FilterForPregnantWomen
   'For pregnant women': 'Pro těhotné',
