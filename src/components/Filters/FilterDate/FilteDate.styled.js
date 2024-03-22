@@ -19,6 +19,10 @@ export const MenuCalendar = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow};
   border: 2px solid ${({ theme }) => theme.color.additionalColorBrown};
 
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
   width: 360px;
   box-sizing: border-box;
 `;
