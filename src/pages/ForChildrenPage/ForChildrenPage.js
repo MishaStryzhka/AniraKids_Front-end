@@ -21,9 +21,7 @@ import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
-import { sceletonArray } from 'pages/ForWomenPage/ForWomenPage';
-import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
-// import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
+import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
 
 const api = require('../../api');
 
@@ -82,7 +80,7 @@ const ForChildrenPage = () => {
         <WrapMainContent>
           <SideBar>
             <TitleFilter>{t('Filters')}</TitleFilter>
-            {/* <SelectedFilters /> */}
+            <SelectedFilters />
             <FilterType />
             <FilterOutfits />
             <FilterAge />
@@ -99,18 +97,17 @@ const ForChildrenPage = () => {
               <ProductList>
                 {products?.map(product => (
                   <li key={product._id}>
-                    <UsersProductCard product={product} />
+                    <UsersProductCard
+                      state={{
+                        rentalPeriods: searchParams.get('rentalPeriods'),
+                      }}
+                      product={product}
+                    />
                   </li>
                 ))}
               </ProductList>
             ) : isLoading ? (
-              <ProductList>
-                {sceletonArray.map((_, index) => (
-                  <li key={index}>
-                    <SceletonUsersProductCard id={index} />
-                  </li>
-                ))}
-              </ProductList>
+              <p>Loading...</p>
             ) : (
               <NotFound>{t('nothing_found')}</NotFound>
             )}
