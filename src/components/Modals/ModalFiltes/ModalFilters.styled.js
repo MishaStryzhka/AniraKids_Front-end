@@ -2,6 +2,9 @@ import IconCross from 'images/icons/IconCross';
 import styled from 'styled-components';
 
 export const ModalWindow = styled.div`
+  @media screen and (max-width: 427.5px) {
+    padding: 5.6vw;
+  }
   display: flex;
   padding: 24px;
   flex-direction: column;
@@ -19,6 +22,9 @@ export const StyledIconCross = styled(IconCross)`
 `;
 
 export const ModalTitle = styled.h2`
+  /* @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  } */
   text-align: center;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;

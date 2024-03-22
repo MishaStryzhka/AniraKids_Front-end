@@ -1,9 +1,11 @@
 import * as React from 'react';
-const IconBeauty = props => (
+const IconBeauty = ({ className }, ...props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={181}
     height={180}
+    className={className}
+    viewBox="0 0 181 180"
     fill="none"
     {...props}
   >

@@ -49,6 +49,8 @@ import { OrderTranslationsCs } from 'components/Order/translations/cs';
 import { FormOrderTranslationsCs } from 'components/Forms/FormOrder/translations/cs';
 import { SelectedFiltrsTranslationsCs } from 'components/Filters/SelectedFiltrs/translations/cs';
 import { ModalConfirmTranslationsCs } from 'components/Modals/ModalConfirm/translations/cs';
+import { RentalCardTranslationsCs } from 'components/RentalCard/translations/cs';
+import { OrderCardTranslationsCs } from 'components/OrderCard/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -79,6 +81,8 @@ export const ComponentTranslationsCs = {
 
   //cards
   usersProductCard: UsersProductCardTranslationsCs,
+  rentalCard: RentalCardTranslationsCs,
+  orderCard: OrderCardTranslationsCs,
 
   // filters
   filterOfToys: FilterOfToysTranslationsCs,
