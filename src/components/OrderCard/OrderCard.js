@@ -23,7 +23,6 @@ const OrderCard = ({ product }) => {
     keyPrefix: 'components.orderCard',
   });
 
-  const { id } = useParams();
   const location = useLocation();
   const { pathname } = useLocation();
 
