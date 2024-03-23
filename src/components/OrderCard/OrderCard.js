@@ -15,7 +15,7 @@ import {
   TextPrice,
 } from './OrderCard.styled';
 import { ButtonViewMore } from 'components/Buttons/ButtonViewMore/ButtonViewMore';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 // import IconShopCartRejected from 'images/icons/IconShopCartRejected';
 
 const OrderCard = ({ product }) => {
