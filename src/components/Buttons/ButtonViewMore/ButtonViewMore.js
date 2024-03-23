@@ -5,6 +5,7 @@ import IconLongArrow from 'images/icons/IconLongArrow';
 export const ButtonViewMore = ({
   type,
   to,
+  state,
   className,
   onClick,
   disabled,
@@ -15,6 +16,7 @@ export const ButtonViewMore = ({
     <StyledButtonViewMore
       as={to && NavLink}
       to={to}
+      state={state}
       type={type}
       className={className}
       onClick={() => (onClick ? onClick() : null)}

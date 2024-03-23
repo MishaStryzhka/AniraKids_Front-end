@@ -8,8 +8,12 @@ export const StyledIconStar = styled(IconStar)`
 `;
 
 export const StyledIconStarOutline = styled(IconStar)`
-  width: 12px;
-  height: 12px;
+  /* width: 12px;
+  height: 12px; */
+  width: ${({ $pageMyPurchases, $pageMyOrders }) =>
+    $pageMyPurchases || $pageMyOrders ? '20px' : '100px'};
+  height: ${({ $pageMyPurchases, $pageMyOrders }) =>
+    $pageMyPurchases || $pageMyOrders ? '20px' : '100px'};
   stroke: ${({ theme }) => theme.color.mainColor2};
   fill: ${({ theme }) => theme.color.mainColor1};
 `;

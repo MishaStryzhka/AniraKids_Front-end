@@ -52,6 +52,7 @@ import { SelectedFiltrsTranslationsUk } from 'components/Filters/SelectedFiltrs/
 import { ModalConfirmTranslationsUk } from 'components/Modals/ModalConfirm/translations/uk';
 import { RentalCardTranslationsUk } from 'components/RentalCard/translations/uk';
 import { OrderCardTranslationsUk } from 'components/OrderCard/translations/uk';
+import { ViewOrderProductTranslationsUk } from 'components/ViewOrderProduct/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -118,4 +119,5 @@ export const ComponentTranslationsUk = {
   //
   emptyCart: EmptyCartTranslationsUk,
   order: OrderTranslationsUk,
+  viewOrderProduct: ViewOrderProductTranslationsUk,
 };
