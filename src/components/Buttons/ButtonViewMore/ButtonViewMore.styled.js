@@ -10,7 +10,7 @@ export const StyledButtonViewMore = styled.button`
   }
   width: ${({ $pageMyOrders, $pageMyPurchases }) =>
     $pageMyOrders || $pageMyPurchases ? '297px' : '287px'};
-
+  cursor: pointer;
   padding: 8px;
   margin-left: 0;
 

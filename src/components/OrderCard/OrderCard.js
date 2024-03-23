@@ -15,7 +15,7 @@ import {
   TextPrice,
 } from './OrderCard.styled';
 import { ButtonViewMore } from 'components/Buttons/ButtonViewMore/ButtonViewMore';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 // import IconShopCartRejected from 'images/icons/IconShopCartRejected';
 
 const OrderCard = ({ product }) => {
@@ -23,7 +23,11 @@ const OrderCard = ({ product }) => {
     keyPrefix: 'components.orderCard',
   });
 
+  const { id } = useParams();
+  const location = useLocation();
   const { pathname } = useLocation();
+
+  console.log(product);
   const $pageMyOrders = pathname === '/my-account/my-orders';
   const $pageMyPurchases = pathname === `/my-account/my-purchases`;
   return (
@@ -57,13 +61,13 @@ const OrderCard = ({ product }) => {
             <TextName
               $pageMyPurchases={pathname === `/my-account/my-purchases`}
             >
-              {product.name}
+              {product?.name}
             </TextName>
             {$pageMyOrders && (
               <TextSize>
                 {t('size')}:
                 <span style={{ marginLeft: '6px' }}>
-                  {product.size || product.childSize}
+                  {product?.size || product?.childSize}
                 </span>
               </TextSize>
             )}
@@ -72,8 +76,16 @@ const OrderCard = ({ product }) => {
         {t('rejected')}
         <IconShopCartRejected />
       </StatusRejected> */}
-
-          <ButtonViewMore>{t('viewMore')}</ButtonViewMore>
+          <ButtonViewMore
+            state={location}
+            to={
+              $pageMyOrders
+                ? `/my-account/my-orders/order/${product?._id}`
+                : `/my-account/my-purchases/purchase/${product?._id}`
+            }
+          >
+            {t('viewMore')}
+          </ButtonViewMore>
         </SecondWrap>
       </Wrap>
     </WrapCard>

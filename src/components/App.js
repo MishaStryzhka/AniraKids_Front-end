@@ -11,6 +11,7 @@ import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { RestrictedRoute } from './RestrictedRoute';
+// import ViewProduct from 'pages/UserPage/Pages/RentIn/ViewProduct/ViewProduct';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() =>
@@ -43,6 +44,13 @@ const MyOrders = lazy(() =>
 );
 const MyPurchases = lazy(() =>
   import('../pages/UserPage/Pages/MyPurchases/MyPurchases')
+);
+const ViewOrder = lazy(() =>
+  import('../pages/UserPage/Pages/MyOrders/Pages/ViewOrder/ViewOrder')
+);
+
+const ViewPurchase = lazy(() =>
+  import('../pages/UserPage/Pages/MyPurchases/Pages/ViewPurchase/ViewPurchase')
 );
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
@@ -118,7 +126,12 @@ function App() {
             />
             <Route path="rent-in/" element={<RentIn />} />
             <Route path="my-orders/" element={<MyOrders />} />
+            <Route path="my-orders/order/:id" element={<ViewOrder />} />
             <Route path="my-purchases/" element={<MyPurchases />} />
+            <Route
+              path="my-purchases/purchase/:id"
+              element={<ViewPurchase />}
+            />
             <Route path="wallet/" element={<Wallet />} />
             <Route path="cart/" element={<Cart />} />
           </Route>
