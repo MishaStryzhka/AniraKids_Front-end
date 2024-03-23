@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[438],{52438:(s,a,e)=>{e.r(a),e.d(a,{default:()=>n});var k=e(49714),i=e(80184);const n=()=>(0,i.jsx)(k.Z,{})}}]);
+//# sourceMappingURL=438.9b2969dc.chunk.js.map
