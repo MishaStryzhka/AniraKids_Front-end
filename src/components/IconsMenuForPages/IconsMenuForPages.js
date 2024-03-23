@@ -1,4 +1,4 @@
-import FilteDate from 'components/Filters/FilterDate/FilterDate';
+import FilterDate from 'components/Filters/FilterDate/FilterDate';
 import Modal from 'components/Modals/Modal';
 import ModalFilters from 'components/Modals/ModalFiltes/ModalFilters';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ const IconsMenuForPages = () => {
       <ButtonFilters type="button" onClick={() => setIsOpenModalFilters(true)}>
         <IconFilters />
       </ButtonFilters>
-      <FilteDate />
+      <FilterDate />
 
       {isOpenModalFilters && (
         <Modal

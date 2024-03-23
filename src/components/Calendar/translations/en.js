@@ -11,4 +11,14 @@ export const CalendarTranslationsEn = {
   October: 'October',
   November: 'November',
   December: 'December',
+
+  // selectDate
+  selectDate: {
+    menuTitle: 'Select Date',
+    daysDelivery: 'delivery days',
+    rental: 'rental',
+    returnDay: 'return day',
+    menuDescription: 'Select rental day (or start and end date of rental)',
+    buttonSaveChanges: 'SAVE CHANGES',
+  },
 };
