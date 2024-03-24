@@ -11,4 +11,14 @@ export const CalendarTranslationsUk = {
   October: 'Жовтень',
   November: 'Листопад',
   December: 'Грудень',
+
+  // selectDate
+  selectDate: {
+    menuTitle: 'Вибрати дату',
+    daysDelivery: 'дні доставки',
+    rental: 'оренда',
+    returnDay: 'день повернення',
+    menuDescription: 'Виберіть день оренди (або дату початку та кінця оренди)',
+    buttonSaveChanges: 'ЗБЕРЕГТИ ЗМІНИ',
+  },
 };
