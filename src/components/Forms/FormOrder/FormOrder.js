@@ -185,7 +185,7 @@ const FormOrder = () => {
         )}
       </Formik>
       {isOpenModaldeliveryService && (
-        <Modal onClick={() => setIsOpenModalDeliveryService(false)}>
+        <Modal closeModal={() => setIsOpenModalDeliveryService(false)}>
           <GeneralModalWindow>
             <iframe
               width={850}
