@@ -5,9 +5,7 @@ import {
   ImagesPerson,
   ItemReview,
   ListReviews,
-  MainImage,
   PicturePerson,
-  SecondaryImages,
   TextDescription,
   TextPrice,
   TextRent,
@@ -50,10 +48,17 @@ import IconCalendarTime from 'images/icons/IconCalendarTime';
 import 'react-alice-carousel/lib/alice-carousel.css';
 import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Scrollbar, Navigation } from 'swiper/modules';
+import {
+  Navigation,
+  FreeMode,
+  Thumbs,
+  Pagination,
+  Mousewheel,
+} from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import IconChat from 'images/icons/IconChat';
 import { useDispatch } from 'react-redux';
 import {
@@ -95,7 +100,6 @@ const ProductPage = () => {
     useState(false);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const storage = useStorage();
   const [favorites, setFavorites] = useState(
     user?.favorites || storage.get('favorites') || []
@@ -142,11 +146,6 @@ const ProductPage = () => {
     }
   };
 
-  const handleSecondaryImageClick = index => {
-    setCurrentImageIndex(index);
-    // swiperRef.current.slideTo(index);
-  };
-
   const handleClickRent = e => {
     console.log('qwe');
     rentalPeriods
@@ -173,6 +172,7 @@ const ProductPage = () => {
   const colorProduct = arrayColorsProduct.find(
     item => item.color === product?.color
   );
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
   return isLoading ? (
     <p>Loading...</p>
@@ -183,28 +183,58 @@ const ProductPage = () => {
           $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
         >
           <WrapAllImages>
-            <MainImage
-              srcSet={product?.photos[currentImageIndex].path}
-              alt="Main photo"
-            />
-
+            <Swiper
+              style={{
+                '--swiper-navigation-color': '#fff',
+                '--swiper-pagination-color': '#fff',
+                width: '520px',
+                height: '690px',
+              }}
+              spaceBetween={10}
+              navigation={true}
+              thumbs={{ swiper: thumbsSwiper }}
+              modules={[FreeMode, Navigation, Thumbs]}
+              className="mySwiper2"
+            >
+              {product?.photos.map(({ path }, index) => (
+                <SwiperSlide key={index}>
+                  <img
+                    src={path}
+                    height={690}
+                    width={520}
+                    style={{ objectFit: 'cover' }}
+                    aria-label="imageProduct"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
             <WrapSecondaryImages>
               <Swiper
-                modules={[Scrollbar, Navigation]}
-                spaceBetween={8}
-                slidesPerView={3}
-                scrollbar={{ draggable: product?.photos.length > 3 && true }}
+                onSwiper={setThumbsSwiper}
+                style={{
+                  '--swiper-navigation-color': '#fff',
+                  '--swiper-pagination-color': '#fff',
+                  width: '196px',
+                  height: '690px',
+                }}
                 direction={width ? 'horizontal' : 'vertical'}
-                height={'auto'}
+                slidesPerView={3}
+                spaceBetween={8}
+                mousewheel={true}
+                pagination={{
+                  clickable: true,
+                }}
+                modules={[Mousewheel, Pagination]}
+                className="mySwiper"
               >
                 {product?.photos.map(({ path }, index) => (
                   <SwiperSlide key={index}>
-                    <SecondaryImages
-                      srcSet={`${path}`}
-                      alt="All photos"
-                      onClick={() => {
-                        handleSecondaryImageClick(index);
-                      }}
+                    <img
+                      src={path}
+                      width={196}
+                      height={225}
+                      style={{ objectFit: 'cover' }}
+                      aria-label="imageProduct"
                     />
                   </SwiperSlide>
                 ))}

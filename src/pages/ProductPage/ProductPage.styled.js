@@ -27,6 +27,8 @@ export const WrapAllImages = styled.div`
   gap: 8px;
   flex-direction: column;
   min-width: 0;
+  height: 700px;
+
   @media screen and (min-width: 768px) {
     flex-direction: row;
     gap: 20px;
@@ -75,6 +77,10 @@ export const SecondaryImages = styled.img`
 `;
 
 export const WrapSecondaryImages = styled.div`
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
   @media screen and (max-width: 427.5px) {
     width: 90.7vw;
   }

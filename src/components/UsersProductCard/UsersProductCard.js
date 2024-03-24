@@ -68,7 +68,7 @@ const UsersProductCard = ({
         ? dispatch(removeFromFavorites(id))
         : dispatch(addToFavorites(id));
     } else {
-      if (storage.get('favorites').includes(id)) {
+      if (storage?.get('favorites')?.includes(id)) {
         storage.set(
           'favorites',
           storage.get('favorites').filter(favorite => favorite !== id)
@@ -77,7 +77,10 @@ const UsersProductCard = ({
           prevFavorites.filter(favorite => favorite !== id)
         );
       } else {
-        storage.set('favorites', [...storage.get('favorites'), id]);
+        const favorites = storage.get('favorites')
+          ? [...storage.get('favorites'), id]
+          : [id];
+        storage.set('favorites', favorites);
         setFavorites(prevFavorites => [...prevFavorites, id]);
       }
     }
@@ -89,8 +92,7 @@ const UsersProductCard = ({
       state={state || null}
       $pageRentOut={pathname === '/my-account/rent-out'}
     >
-      <GeneralWrap
-      >
+      <GeneralWrap>
         <div
           style={{
             position: 'absolute',
