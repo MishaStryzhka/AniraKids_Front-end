@@ -69,7 +69,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
       </Button>
       {isModal && !user && (
         <Modal
-          onClick={() => {
+          closeModal={() => {
             setIsModal(false);
           }}
         >
