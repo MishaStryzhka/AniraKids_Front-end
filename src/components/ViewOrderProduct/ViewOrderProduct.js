@@ -80,7 +80,7 @@ const ViewOrderProduct = () => {
         </StyledNavLink>
       )}
       <MainWrap>
-        <OrderCard product={order} />
+        <OrderCard product={order} id={id} />
         <WrapFirst>
           <Text>
             {t('Order total')}:<span style={{ fontWeight: 400 }}>2500 kč</span>
@@ -123,7 +123,7 @@ const ViewOrderProduct = () => {
                   {t('responds within 12 hours')}
                 </DescriptionSeller>
               </div>
-              <MessageSeller>
+              <MessageSeller to="/my-account/chat">
                 <IconChats />
                 {t('Write to the seller')}
               </MessageSeller>

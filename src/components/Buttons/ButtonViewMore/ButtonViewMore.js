@@ -1,6 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { StyledButtonViewMore } from './ButtonViewMore.styled';
-import IconLongArrow from 'images/icons/IconLongArrow';
+import {
+  StyledButtonViewMore,
+  StyledIconLongArrow,
+} from './ButtonViewMore.styled';
 
 export const ButtonViewMore = ({
   type,
@@ -25,7 +27,7 @@ export const ButtonViewMore = ({
       $pageMyPurchases={pathname === `/my-account/my-purchases`}
     >
       {children}
-      <IconLongArrow />
+      <StyledIconLongArrow />
     </StyledButtonViewMore>
   );
 };

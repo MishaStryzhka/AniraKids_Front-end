@@ -97,6 +97,15 @@ export const WrapSecondaryImages = styled.div`
   }
 `;
 
+export const Image = styled.img`
+  width: 388px;
+  height: 388px;
+  @media screen and (min-width: 768px) {
+    width: 482px;
+    height: 540px;
+  }
+`;
+
 export const TextWrap = styled.div`
   display: flex;
   flex-direction: column;

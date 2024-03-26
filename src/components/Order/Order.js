@@ -115,31 +115,31 @@ const Order = ({
             console.log('item', item);
 
             return (
-              <MainWrap key={item._id}>
+              <MainWrap key={item?._id}>
                 <WrapImage>
-                  <Image src={item.product.photos[0].path} alt="product" />
+                  <Image src={item?.product?.photos[0]?.path} alt="product" />
                 </WrapImage>
                 <WrapGeneralText>
                   <WrapText>
                     <TextSeller>
                       {t('seller')}: {owner?.nickname}
                     </TextSeller>
-                    <TextName>{item.product.name}</TextName>
+                    <TextName>{item?.product?.name}</TextName>
                   </WrapText>
                   <WrapSection>
                     <Wrap>
                       <SecondaryTitle>{t('price')}:</SecondaryTitle>
-                      <TextValue>{item.price} kč</TextValue>
+                      <TextValue>{item?.price} kč</TextValue>
                     </Wrap>
                     <Wrap style={{ alignItems: 'center' }}>
                       <SecondaryTitle>{t('quantity')}:</SecondaryTitle>
                       <WrapCalc>
                         {!rentalPeriods && (
                           <ButtonMath
-                            disabled={item.quantity === 1}
+                            disabled={item?.quantity === 1}
                             onClick={() => handleDecrement(item)}
                           >
-                            <StyledMinus $disabled={item.quantity === 1} />
+                            <StyledMinus $disabled={item?.quantity === 1} />
                           </ButtonMath>
                         )}
                         <TextValue>
@@ -156,7 +156,7 @@ const Order = ({
                     <Wrap>
                       <SecondaryTitle>{t('amount')}:</SecondaryTitle>
                       <TextValue>
-                        {(totalAmount = item.price * item.quantity)} kč
+                        {(totalAmount = item?.price * item?.quantity)} kč
                       </TextValue>
                     </Wrap>
                     <ButtonDelete

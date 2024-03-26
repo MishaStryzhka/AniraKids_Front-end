@@ -1,3 +1,4 @@
+import IconLongArrow from 'images/icons/IconLongArrow';
 import styled from 'styled-components';
 
 export const StyledButtonViewMore = styled.button`
@@ -5,7 +6,6 @@ export const StyledButtonViewMore = styled.button`
     width: ${({ $pageMyOrders, $pageMyPurchases }) =>
       $pageMyOrders || $pageMyPurchases ? '74.8vw' : '72vw'};
     font-size: 4.7vw;
-    justify-content: space-between;
     padding: 1.5vw;
   }
   width: ${({ $pageMyOrders, $pageMyPurchases }) =>
@@ -38,4 +38,11 @@ export const StyledButtonViewMore = styled.button`
   }
 
   color: ${({ theme }) => theme.color.mainColor5};
+`;
+
+export const StyledIconLongArrow = styled(IconLongArrow)`
+  @media screen and (max-width: 427.5px) {
+    width: 11.7vw;
+    height: 5.6vw;
+  }
 `;
