@@ -11,19 +11,16 @@ const MyOrders = () => {
   // const [page, setPage] = useState(1);
   // const [pageSize, setPageSize] = useState(9);
   // const [error, setError] = useState(null);
-  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     setIsLoading(true);
 
     api
-      .getProducts({
-        // page,
-        // pageSize,
-      })
+      .getProducts()
       .then(data => {
-        setProducts(data.products);
-        console.log(data.products);
+        setOrders(data.products);
+        console.log(data);
         setIsLoading(false);
       })
       .catch(error => {
@@ -38,9 +35,9 @@ const MyOrders = () => {
         <p>Loading</p>
       ) : (
         <List>
-          {products?.map(product => (
-            <li key={product?._id}>
-              <OrderCard state={location} product={product} />
+          {orders?.map(order => (
+            <li key={order?._id}>
+              <OrderCard state={location} product={order} />
             </li>
           ))}
         </List>

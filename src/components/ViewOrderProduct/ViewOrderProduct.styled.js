@@ -4,6 +4,11 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const StyledNavLink = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    width: 60.7vw;
+    font-size: 4.7vw;
+    gap: 1.9vw;
+  }
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,6 +26,10 @@ export const StyledNavLink = styled(NavLink)`
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 export const StyledIconLongArrow = styled(IconLongArrow)`
+  @media screen and (max-width: 427.5px) {
+    width: 11.7vw;
+    height: 5.6vw;
+  }
   transform: rotate(180deg);
 `;
 
@@ -29,37 +38,35 @@ export const MainWrap = styled.div`
   flex-direction: column;
   gap: 24px;
 `;
-export const WrapFirst = styled.div`
-  width: 522px;
+
+export const GeneralWrapStyles = styled.div`
+  @media screen and (max-width: 427.5px) {
+    width: 90.7vw;
+  }
+  width: 388px;
   display: flex;
   flex-direction: column;
+  padding-bottom: 24px;
+  border-bottom: 1px solid;
+
+  @media screen and (min-width: 768px) {
+    width: 522px;
+  }
+
+  border-color: ${({ theme }) => theme.color.additionalColorBrown};
+`;
+export const WrapFirst = styled(GeneralWrapStyles)`
   gap: 16px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
-export const WrapInfoSeller = styled.div`
-  width: 522px;
-  display: flex;
-  flex-direction: column;
+export const WrapInfoSeller = styled(GeneralWrapStyles)`
   gap: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
-export const WrapInfoDelivery = styled.div`
-  width: 522px;
-  display: flex;
-  flex-direction: column;
+export const WrapInfoDelivery = styled(GeneralWrapStyles)`
   gap: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
-
+export const WrapInfoPay = styled(GeneralWrapStyles)`
+  gap: 24px;
+`;
 export const InnerWrap = styled.div`
   display: flex;
   gap: 4px;
@@ -69,16 +76,6 @@ export const Wrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-`;
-export const WrapInfoPay = styled.div`
-  width: 522px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
 
 export const MainWrapText = styled.div`
@@ -100,6 +97,9 @@ export const Text = styled.p`
 `;
 
 export const GeneralText = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 400;
@@ -112,6 +112,9 @@ export const GeneralText = styled.p`
 `;
 
 export const Title = styled.h3`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -202,7 +205,11 @@ export const StyledIconBag = styled(IconBag)`
   stroke: ${({ theme }) => theme.color.mainColor5};
 `;
 
-export const MessageSeller = styled.p`
+export const MessageSeller = styled(NavLink)`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
+  text-decoration: none;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 400;

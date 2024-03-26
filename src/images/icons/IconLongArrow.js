@@ -5,6 +5,7 @@ const IconLongArrow = ({ className }, ...props) => (
     width={50}
     height={24}
     className={className}
+    viewBox="0 0 50 24"
     fill="none"
     {...props}
   >
