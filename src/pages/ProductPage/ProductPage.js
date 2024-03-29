@@ -40,6 +40,10 @@ import {
   GeneralWrap,
   ButtonAddToFavorite,
   StyledButton,
+  Image,
+  StyledSwiper,
+  StyledSecondSwiper,
+  SecondImage,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
 import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
@@ -183,62 +187,53 @@ const ProductPage = () => {
           $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
         >
           <WrapAllImages>
-            <Swiper
-              style={{
-                '--swiper-navigation-color': '#fff',
-                '--swiper-pagination-color': '#fff',
-                width: '520px',
-                height: '690px',
-              }}
-              spaceBetween={10}
-              navigation={true}
-              thumbs={{ swiper: thumbsSwiper }}
-              modules={[FreeMode, Navigation, Thumbs]}
-              className="mySwiper2"
-            >
-              {product?.photos.map(({ path }, index) => (
-                <SwiperSlide key={index}>
-                  <img
-                    src={path}
-                    height={690}
-                    width={520}
-                    style={{ objectFit: 'cover' }}
-                    aria-label="imageProduct"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-            <WrapSecondaryImages>
+            <StyledSwiper>
               <Swiper
-                onSwiper={setThumbsSwiper}
                 style={{
                   '--swiper-navigation-color': '#fff',
                   '--swiper-pagination-color': '#fff',
-                  width: '196px',
-                  height: '690px',
                 }}
-                direction={width ? 'horizontal' : 'vertical'}
-                slidesPerView={3}
-                spaceBetween={8}
-                mousewheel={true}
-                pagination={{
-                  clickable: true,
-                }}
-                modules={[Mousewheel, Pagination]}
-                className="mySwiper"
+                spaceBetween={10}
+                navigation={true}
+                thumbs={{ swiper: thumbsSwiper }}
+                modules={[FreeMode, Navigation, Thumbs]}
               >
                 {product?.photos.map(({ path }, index) => (
                   <SwiperSlide key={index}>
-                    <img
+                    <Image
                       src={path}
-                      width={196}
-                      height={225}
                       style={{ objectFit: 'cover' }}
                       aria-label="imageProduct"
                     />
                   </SwiperSlide>
                 ))}
               </Swiper>
+            </StyledSwiper>
+            <WrapSecondaryImages>
+              <StyledSecondSwiper>
+                <Swiper
+                  onSwiper={setThumbsSwiper}
+                  style={{
+                    '--swiper-navigation-color': '#fff',
+                    '--swiper-pagination-color': '#fff',
+                  }}
+                  direction={width ? 'horizontal' : 'vertical'}
+                  slidesPerView={3}
+                  spaceBetween={8}
+                  mousewheel={true}
+                  pagination={{
+                    clickable: true,
+                  }}
+                  modules={[Mousewheel, Pagination]}
+                  className="mySwiper"
+                >
+                  {product?.photos.map(({ path }, index) => (
+                    <SwiperSlide key={index}>
+                      <SecondImage src={path} aria-label="imageProduct" />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </StyledSecondSwiper>
             </WrapSecondaryImages>
           </WrapAllImages>
 
@@ -263,7 +258,7 @@ const ProductPage = () => {
                 </WrapInside>
               </Wrap>
               <TextSize>
-                {t('size')}:{' '}
+                {t('size')}:
                 <TextValueSize>
                   {product?.size || product?.childSize}
                 </TextValueSize>

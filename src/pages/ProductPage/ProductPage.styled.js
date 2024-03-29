@@ -10,6 +10,9 @@ export const GeneralWrap = styled.div`
 `;
 
 export const WrapProductCard = styled.div`
+  @media screen and (max-width: 427.5px) {
+    gap: 9.3vw;
+  }
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -27,7 +30,6 @@ export const WrapAllImages = styled.div`
   gap: 8px;
   flex-direction: column;
   min-width: 0;
-  height: 700px;
 
   @media screen and (min-width: 768px) {
     flex-direction: row;
@@ -84,16 +86,17 @@ export const WrapSecondaryImages = styled.div`
   @media screen and (max-width: 427.5px) {
     width: 90.7vw;
   }
-  height: 113px;
   min-width: 0;
   overflow: auto;
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
   @media screen and (min-width: 768px) {
-    min-height: 540px;
-    width: 186px;
+    flex-direction: column;
   }
   @media screen and (min-width: 1280px) {
     min-height: 690px;
-    width: 196px;
+    min-width: 196px;
   }
 `;
 
@@ -101,8 +104,9 @@ export const TextWrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 40px;
+
   @media screen and (min-width: 1280px) {
-    width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
+    min-width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
   }
 `;
 
@@ -130,6 +134,9 @@ export const WrapInside = styled.div`
 `;
 
 export const Title = styled.h2`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -153,6 +160,9 @@ export const TextSale = styled.p`
   background-color: ${({ theme }) => theme.color.lightBGColor};
 `;
 export const TextSeller = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -161,6 +171,9 @@ export const TextSeller = styled.p`
   color: ${({ theme }) => theme.color.btnColorBG};
 `;
 export const TextSize = styled.p`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -170,6 +183,9 @@ export const TextSize = styled.p`
 `;
 
 export const TextValueSize = styled.span`
+  @media screen and (max-width: 427.5px) {
+    font-size: 4.7vw;
+  }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
 
@@ -409,5 +425,68 @@ export const StyledButton = styled(Button)`
   @media screen and (min-width: 768px) {
     width: 220px;
     gap: 16px;
+  }
+`;
+
+export const StyledSwiper = styled.div`
+  .swiper-wrapper {
+    @media screen and (max-width: 427.5px) {
+      width: 90.7vw;
+      height: 90.7vw;
+    }
+    width: 388px;
+    height: 388px;
+    @media screen and (min-width: 768px) {
+      width: 482px;
+      min-height: 541px;
+    }
+    @media screen and (min-width: 1280px) {
+      width: 522px;
+      height: 691px;
+    }
+  }
+`;
+
+export const StyledSecondSwiper = styled.div`
+  .swiper-wrapper {
+    @media screen and (max-width: 427.5px) {
+      width: 93vw;
+      min-height: 26.4vw;
+      height: 26.4vw;
+    }
+    width: 388px;
+    min-height: 113px;
+    height: 113px;
+    object-fit: cover;
+    @media screen and (min-width: 768px) {
+      width: 186px;
+      height: 541px;
+    }
+    @media screen and (min-width: 1280px) {
+      width: 196px;
+      height: 691px;
+    }
+  }
+`;
+
+export const Image = styled.img`
+  display: block;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+`;
+
+export const SecondImage = styled.img`
+  @media screen and (max-width: 427.5px) {
+    width: 100%;
+    height: 100%;
+  }
+  display: block;
+  object-fit: cover;
+  width: 124px;
+  height: 113px;
+  @media screen and (min-width: 768px) {
+    width: 100%;
+    height: 100%;
   }
 `;
