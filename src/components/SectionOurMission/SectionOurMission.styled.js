@@ -14,6 +14,9 @@ export const Section = styled.section`
 
 export const PictureContainer = styled(Container)`
   padding: 0;
+  @media screen and (min-width: 1280px) {
+    width: 710px;
+  }
 `;
 
 export const Title = styled.h3`
