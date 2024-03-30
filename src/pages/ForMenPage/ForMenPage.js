@@ -82,7 +82,6 @@ const ForMenPage = () => {
         <WrapMainContent>
           <SideBar>
             <TitleFilter>{t('Filters')}</TitleFilter>
-            {/* <SelectedFilters /> */}
             <FilterType />
             <FilterFamilyLookMen />
             <FilterPrice />
