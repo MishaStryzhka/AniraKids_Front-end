@@ -1,7 +1,10 @@
 import FormAddProduct from 'components/Forms/FormAddProduct/FormAddProduct';
+import { useParams } from 'react-router-dom';
 
 const UpdateProduct = () => {
-  return <FormAddProduct />;
+  const { id } = useParams();
+
+  return <FormAddProduct id={id} />;
 };
 
 export default UpdateProduct;

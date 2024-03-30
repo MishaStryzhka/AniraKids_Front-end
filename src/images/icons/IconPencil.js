@@ -6,11 +6,11 @@ const IconPencil = ({ className, ...props }) => (
     width={18}
     height={18}
     className={className}
-    viewBox="-1 1 23 23"
+    viewBox="0 1 23 23"
     {...props}
   >
     <g
-      stroke={className || '#fff'}
+      stroke="#fff"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}

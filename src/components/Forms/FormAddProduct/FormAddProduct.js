@@ -81,14 +81,20 @@ import CheckBox from 'components/CheckBox/CheckBox';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
 import IconBasket from 'images/icons/IconBasket';
-import { Map, Marker } from '@vis.gl/react-google-maps';
+import { addProduct, getProductById } from 'api';
+import PlaceAutocomplete from './PlaceAutocomplete';
 
-const api = require('../../../api');
-
-const FormAddProduct = () => {
+const FormAddProduct = ({ id }) => {
   const { t, i18n } = useTranslation('translation', {
     keyPrefix: 'components.formAddProduct',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState();
+  const navigate = useNavigate();
+
+  // update product
+  const [product, setProduct] = useState();
 
   const [stepValue, setStepValue] = useState(1);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
@@ -96,9 +102,26 @@ const FormAddProduct = () => {
   const [photoOrder, setPhotoOrder] = useState([]);
 
   const [isOpenModalMaxSize, setIsOpenModalMaxSize] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!product && id) {
+      setIsLoading(true);
+
+      getProductById(id)
+        .then(data => {
+          setProduct(data.product);
+          console.log('data.product.photos', data.product.photos);
+
+          setSelectedPhotos(data.product.photos);
+          setPhotoOrder(data.product.photos.map((_, index) => index));
+          setIsLoading(false);
+        })
+        .catch(error => {
+          setError(error);
+          setIsLoading(false);
+        });
+    }
+  }, [id, photoOrder, product, selectedPhotos]);
 
   // ===========
 
@@ -134,34 +157,34 @@ const FormAddProduct = () => {
   const wrapPhototsRef = useRef(null);
 
   useEffect(() => {
-    const wrapPhotots = wrapPhototsRef.current;
+    const wrapPhotots = wrapPhototsRef?.current;
+    if (wrapPhotots) {
+      const handleScroll = event => {
+        const wrapPhotots = wrapPhototsRef.current;
 
-    const handleScroll = event => {
-      const wrapPhotots = wrapPhototsRef.current;
+        const scrollStep = 25;
 
-      const scrollStep = 25;
+        if (event.deltaY > 0) {
+          wrapPhotots.scrollLeft += scrollStep;
+        } else {
+          wrapPhotots.scrollLeft -= scrollStep;
+        }
 
-      if (event.deltaY > 0) {
-        wrapPhotots.scrollLeft += scrollStep;
-      } else {
-        wrapPhotots.scrollLeft -= scrollStep;
-      }
+        event.preventDefault();
+      };
 
-      event.preventDefault();
-    };
+      wrapPhotots.addEventListener('wheel', handleScroll);
 
-    wrapPhotots.addEventListener('wheel', handleScroll);
-
-    return () => {
-      wrapPhotots.removeEventListener('wheel', handleScroll);
-    };
+      return () => {
+        wrapPhotots.removeEventListener('wheel', handleScroll);
+      };
+    }
   }, []);
 
   // ===========
   const handleFormSubmit = values => {
     setIsLoading(true);
-    api
-      .addProduct(values)
+    addProduct(values)
       .then(data => {
         setIsLoading(false);
         navigate('/my-account/rent-out', { replace: true });
@@ -171,38 +194,40 @@ const FormAddProduct = () => {
       });
   };
 
-  return (
+  return isLoading ? (
+    <p>Loading</p>
+  ) : (
     <>
       <Formik
         initialValues={{
           photoUrls: photoOrder.map(i => selectedPhotos[i]),
-          category: '',
-          videoUrl: '',
-          name: '',
-          description: '',
-          brand: '',
-          familyLook: '',
-          size: '',
-          isPregnancy: '',
-          subject: '',
-          outfits: '',
-          age: '',
-          childSize: '',
-          decor: '',
-          color: '',
-          saleOrRental: '',
-          rental: '',
-          dailyRentalPrice: '',
-          hourlyRentalPrice: '',
+          category: product?.category || '',
+          videoUrl: product?.videoUrl || '',
+          name: product?.name || '',
+          description: product?.description || '',
+          brand: product?.brand || '',
+          familyLook: product?.familyLook || '',
+          size: product?.size || '',
+          isPregnancy: product?.isPregnancy || '',
+          subject: product?.subject || '',
+          outfits: product?.outfits || '',
+          age: product?.age || '',
+          childSize: product?.childSize || '',
+          decor: product?.decor || '',
+          color: product?.color || '',
+          saleOrRental: product?.saleOrRental || '',
+          rental: product?.rental || '',
+          dailyRentalPrice: product?.dailyRentalPrice || '',
+          hourlyRentalPrice: product?.hourlyRentalPrice || '',
 
-          sale: '',
-          priceSale: '',
+          sale: product?.sale || '',
+          priceSale: product?.priceSale || '',
 
-          allowPickup: false,
-          pickupAddress: '',
+          allowPickup: product?.allowPickup || false,
+          pickupAddress: product?.pickupAddress,
 
-          isAddPhoto: '',
-          colorCode: '',
+          isAddPhoto: product?.isAddPhoto || '',
+          colorCode: product?.colorCode || '',
         }}
         validationSchema={validationProductSchema}
         onSubmit={handleFormSubmit}
@@ -220,6 +245,9 @@ const FormAddProduct = () => {
             handleBlur,
             validateField,
           } = formikProps;
+
+          console.log('errors', errors);
+
           const resetInitialValuesForCategories = () => {
             setFieldValue('familyLook', '');
             setFieldValue('isPregnancy', '');
@@ -283,8 +311,6 @@ const FormAddProduct = () => {
               updatedPhotoOrder.map(el => (el > index ? el - 1 : el))
             );
           };
-
-          const position = { lat: 53.54992, lng: 10.00678 };
 
           return (
             <>
@@ -373,7 +399,11 @@ const FormAddProduct = () => {
                           <IconBasket />
                         </ButtonDeletePhoto>
                         <PhotoImg
-                          src={URL.createObjectURL(selectedPhotos[photo])}
+                          src={
+                            selectedPhotos[photo]?.path
+                              ? selectedPhotos[photo].path
+                              : URL.createObjectURL(selectedPhotos[photo])
+                          }
                           alt={`photo_${index}`}
                         />
                       </WrapPhoto>
@@ -937,45 +967,40 @@ const FormAddProduct = () => {
                 {/* asdasd */}
 
                 <div>
-                  <Title> Allow self-pickup</Title>
-                  <GeneralWrap>
-                    <WrapCondition>
-                      <LabelStatus>
-                        <Box>{values.allowPickup && <IconCheck />}</Box>
-                        Allow self-pickup
-                        <Input
-                          type="checkbox"
-                          name="allowPickup"
-                          value={values.allowPickup}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        />
-                      </LabelStatus>
-                      <LabelPrice>
-                        Pickup address:
-                        <InputPrice
-                          placeholder="address"
-                          type="adress"
-                          name="pickupAddress"
-                          value={values.pickupAddress}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          disabled={!values.allowPickup}
-                        />
-                      </LabelPrice>
-                      {errors.pickupAddress && touched.pickupAddress && (
-                        <WrapError>
-                          <ErrorMessage>{t(errors.pickupAddress)}</ErrorMessage>
-                        </WrapError>
-                      )}
-
-                      <div style={{ width: 600, height: 400 }}>
-                        <Map defaultCenter={position} defaultZoom={10}>
-                          <Marker position={position} />
-                        </Map>
-                      </div>
-                    </WrapCondition>
-                  </GeneralWrap>
+                  <Title>Самовивіз</Title>
+                  {/* <GeneralWrap> */}
+                  <WrapCondition>
+                    <LabelStatus>
+                      <Box>{values.allowPickup && <IconCheck />}</Box>
+                      Самовивіз
+                      <Input
+                        type="checkbox"
+                        name="allowPickup"
+                        value={values.allowPickup}
+                        onChange={e => {
+                          if (e.currentTarget.value)
+                            setFieldValue('pickupAddress', null);
+                          handleChange(e);
+                        }}
+                        onBlur={handleBlur}
+                      />
+                    </LabelStatus>
+                    <PlaceAutocomplete
+                      value={values.pickupAddress}
+                      name="pickupAddress"
+                      placeholder="Адрес"
+                      onPlaceSelect={pickupAddress =>
+                        setFieldValue('pickupAddress', pickupAddress)
+                      }
+                      disabled={!values.allowPickup}
+                    />
+                    {errors.pickupAddress && touched.pickupAddress && (
+                      <WrapError>
+                        <ErrorMessage>{t(errors.pickupAddress)}</ErrorMessage>
+                      </WrapError>
+                    )}
+                  </WrapCondition>
+                  {/* </GeneralWrap> */}
                 </div>
 
                 {/* KEYWORDS of Product */}
@@ -1123,7 +1148,11 @@ const FormAddProduct = () => {
                                 <IconBasket />
                               </ButtonDeletePhoto>
                               <PhotoImg
-                                src={URL.createObjectURL(selectedPhotos[photo])}
+                                src={
+                                  product
+                                    ? selectedPhotos[photo].path
+                                    : URL.createObjectURL(selectedPhotos[photo])
+                                }
                                 alt={`photo_${index}`}
                               />
                             </WrapPhoto>
@@ -2010,3 +2039,85 @@ const FormAddProduct = () => {
 };
 
 export default FormAddProduct;
+
+// const PlacesAutocomplete = ({ setSelected }) => {
+//   const { ready, value, suggestions, setValue, clearSuggestions } =
+//     usePlacesAutocomplete({ callbackName: 'initMap' });
+//   const { status, data } = suggestions;
+//   console.log('vsuggestions', suggestions);
+
+//   const { isLoaded } = useLoadScript({
+//     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+//     libraries: ['places'],
+//   });
+
+//   return (
+//     <LabelPrice>
+//       Pickup address:
+//       <InputPrice
+//         placeholder="address"
+//         type="adress"
+//         name="pickupAddress"
+//         value={value}
+//         onChange={e => {
+//           console.log('e.target.value', e.target.value);
+
+//           setValue(e.target.value);
+//         }}
+//         // disabled={!ready}
+//       />
+//       <ul>
+//         {status === 'OK' &&
+//           data.map(({ place_id, description }) => (
+//             <li key={place_id}>{description}</li>
+//           ))}
+//       </ul>
+//     </LabelPrice>
+//   );
+// };
+
+// const PlacesAutocomplete = ({ setSelected }) => {
+//   const {
+//     ready,
+//     value,
+//     setValue,
+//     suggestions: { status, data },
+//     clearSuggestions,
+//   } = usePlacesAutocomplete({
+//     fields: ['geometry', 'name', 'formatted_address'],
+//   });
+
+//   console.log('data', data);
+
+//   const handleSelect = async address => {
+//     setValue(address, false);
+//     clearSuggestions();
+
+//     const results = await getGeocode({ address });
+//     const { lat, lng } = await getLatLng(results[0]);
+//     setSelected({ address, geoCode: { lat, lng } });
+//   };
+
+//   return (
+//     <>
+//       <InputPrice
+//         value={value}
+//         name="pickupAddress"
+//         onChange={e => setValue(e.target.value)}
+//         className="combobox-input"
+//         placeholder="Search an address"
+//         disabled={!ready}
+//       />
+//       <ul>
+//         {status === 'OK' &&
+//           data.map(({ place_id, description }) => (
+//             <li key={place_id}>
+//               <button onClick={() => handleSelect(description)}>
+//                 {description}
+//               </button>
+//             </li>
+//           ))}
+//       </ul>
+//     </>
+//   );
+// };
