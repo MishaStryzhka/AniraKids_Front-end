@@ -11,6 +11,7 @@ import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { RestrictedRoute } from './RestrictedRoute';
+import { useLoadScript } from '@react-google-maps/api';
 // import ViewProduct from 'pages/UserPage/Pages/RentIn/ViewProduct/ViewProduct';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
@@ -68,6 +69,12 @@ function App() {
     dispatch(refreshUser());
   }, [dispatch, token]);
 
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    libraries: ['places'],
+  });
+
+  if (!isLoaded) return <div>Loading...</div>;
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <Routes>

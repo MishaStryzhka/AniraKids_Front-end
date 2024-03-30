@@ -446,8 +446,8 @@ const ProductPage = () => {
         />
       )}
       {isOpenModalSelectDateRent && (
-        <Modal onCloseModal={() => setIsOpenModalSelectDateRent(false)}>
-          <GeneralModalWindow>
+        <Modal closeModal={() => setIsOpenModalSelectDateRent(false)}>
+          <GeneralModalWindow style={{ width: 360, boxSizing: 'border-box' }}>
             <CalendarSelectDate
               rentalPeriods={rentalPeriods}
               setRentalPeriods={setRentalPeriods}

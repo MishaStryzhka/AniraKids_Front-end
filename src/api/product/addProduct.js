@@ -27,7 +27,12 @@ export const addProduct = async credentials => {
     outfits,
     toys,
     videoUrl,
+    allowPickup,
+    pickupAddress,
   } = credentials;
+
+  console.log('pickupAddress', pickupAddress);
+  console.log('first', JSON.stringify(pickupAddress));
 
   const formData = new FormData();
 
@@ -60,6 +65,9 @@ export const addProduct = async credentials => {
   outfits && formData.append(`outfits`, outfits);
   toys && formData.append(`toys`, toys);
   videoUrl && formData.append(`videoUrl`, videoUrl);
+  allowPickup && formData.append(`allowPickup`, allowPickup);
+  pickupAddress &&
+    formData.append(`pickupAddress`, JSON.stringify(pickupAddress));
 
   const res = await axios.post(`api/product/addProduct`, formData, {
     headers: { 'content-type': 'multipart/form-data' },
