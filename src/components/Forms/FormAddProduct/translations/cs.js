@@ -139,6 +139,10 @@ export const FormAddProductTranslationsCs = {
     'Přidal(a) jsem minimálně jednu fotku věci, kterou jsem udělal(a) sám(a).',
   linkAgree: 'Proč je to důležité?',
 
+  //
+  pickup: 'Osobní odvoz',
+  address: 'Adres',
+
   // buttonAdd in form
   addItem: 'Přidat položku',
   btnNext: 'dále',

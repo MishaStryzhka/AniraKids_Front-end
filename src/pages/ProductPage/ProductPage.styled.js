@@ -100,14 +100,14 @@ export const WrapSecondaryImages = styled.div`
   }
 `;
 
-export const Image = styled.img`
-  width: 388px;
-  height: 388px;
-  @media screen and (min-width: 768px) {
-    width: 482px;
-    height: 540px;
-  }
-`;
+// export const Image = styled.img`
+//   width: 388px;
+//   height: 388px;
+//   @media screen and (min-width: 768px) {
+//     width: 482px;
+//     height: 540px;
+//   }
+// `;
 
 export const TextWrap = styled.div`
   display: flex;
@@ -115,7 +115,7 @@ export const TextWrap = styled.div`
   gap: 40px;
 
   @media screen and (min-width: 1280px) {
-    min-width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
+    width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
   }
 `;
 

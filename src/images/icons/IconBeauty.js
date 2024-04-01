@@ -1,5 +1,5 @@
 import * as React from 'react';
-const IconBeauty = ({ className }, ...props) => (
+const IconBeauty = ({ className, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={181}

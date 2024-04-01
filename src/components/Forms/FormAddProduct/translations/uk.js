@@ -140,6 +140,10 @@ export const FormAddProductTranslationsUk = {
     'Я додав (-ла) як мінімум одне фото речі, яке зробив (-ла) сам (-а).',
   linkAgree: 'Чому це важливо?',
 
+  //
+  pickup: 'Самовивіз',
+  address: 'Адрес',
+
   // buttonAdd in form
   addItem: 'Додати товар',
   btnNext: 'Далі',
