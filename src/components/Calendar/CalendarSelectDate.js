@@ -11,6 +11,8 @@ import {
   WrapCalendar,
 } from './CalendarSelectDate.styled';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import SelectTypeRent from 'components/SelectTypeRent/SelectTypeRent';
 
 const CalendarSelectDate = ({
   rentalPeriods,
@@ -21,23 +23,62 @@ const CalendarSelectDate = ({
     keyPrefix: 'components.calendar.selectDate',
   });
 
+  const [typeRent, setTypeRent] = useState('celebration');
+
+  console.log('typeRent', typeRent);
+  console.log("typeRent === 'celebration'", typeRent === 'celebration');
+
   return (
     <WrapCalendar>
       <MenuTitle>{t('menuTitle')}</MenuTitle>
+
+      <SelectTypeRent
+        setTypeRent={e => {
+          setTypeRent(e);
+          setRentalPeriods(null);
+        }}
+        typeRent={typeRent}
+      />
       <Calendar
+        selectsRange={typeRent === 'celebration'}
         rentalPeriods={rentalPeriods}
         setRentalPeriods={rentalPeriods => setRentalPeriods(rentalPeriods)}
       />
       <ListInfo>
         <ItemInfo>
-          <MarkerDelivery /> <p>{t('daysDelivery')}</p> <br />
+          {typeRent === 'celebration' ? (
+            <>
+              <MarkerDelivery /> <p>{t('daysDelivery')}</p>
+            </>
+          ) : (
+            <>
+              <MarkerRent />
+              <p>самовивіз</p>
+            </>
+          )}
+          <br />
         </ItemInfo>
         <ItemInfo>
-          <MarkerRent /> <p>{t('rental')}</p> <br />
+          <MarkerRent />{' '}
+          <p>
+            {t('rental')}
+            {typeRent !== 'celebration' && ' на 6 годин'}
+          </p>{' '}
+          <br />
         </ItemInfo>
         <ItemInfo>
-          <MarkerReturn />
-          <p>{t('returnDay')}</p> <br />
+          {typeRent === 'celebration' ? (
+            <>
+              <MarkerReturn />
+              <p>{t('returnDay')}</p>
+            </>
+          ) : (
+            <>
+              <MarkerRent />
+              <p>!!!повернення до 6 годин!!!</p>
+            </>
+          )}
+          <br />
         </ItemInfo>
       </ListInfo>
       <MenuDescription>{t('menuDescription')}</MenuDescription>

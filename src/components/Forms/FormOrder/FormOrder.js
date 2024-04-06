@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import {
-  FieldOrder,
   FieldSelect,
   LabelOrder,
   StyledForm,
@@ -8,7 +7,7 @@ import {
 } from './FormOrder.styled';
 import { Formik } from 'formik';
 import { validationFormOrderScheme } from 'schemas';
-import { ErrorMessage } from '../Form.styled';
+import { ErrorMessage, InputField } from '../Form.styled';
 import { useAuth } from 'hooks';
 import Modal from 'components/Modals/Modal';
 import { useEffect, useState } from 'react';
@@ -70,7 +69,7 @@ const FormOrder = () => {
           <StyledForm id="orderForm" onSubmit={handleSubmit}>
             <LabelOrder>
               {t('urerFullName')}*
-              <FieldOrder
+              <InputField
                 name="fullName"
                 value={values.fullName}
                 type="text"
@@ -84,7 +83,7 @@ const FormOrder = () => {
             </LabelOrder>
             <LabelOrder>
               {t('userPhoneNumber')}*
-              <FieldOrder
+              <InputField
                 name="phoneNumber"
                 value={values.phoneNumber}
                 type="text"
@@ -98,7 +97,7 @@ const FormOrder = () => {
             </LabelOrder>
             <LabelOrder>
               {t('email')}*
-              <FieldOrder
+              <InputField
                 name="email"
                 value={values.email}
                 type="text"
@@ -154,7 +153,7 @@ const FormOrder = () => {
 
             <LabelOrder>
               {t('city')}*
-              <FieldOrder
+              <InputField
                 name="city"
                 value={values.city}
                 type="text"
@@ -168,7 +167,7 @@ const FormOrder = () => {
             </LabelOrder>
             <LabelOrder>
               {t('address')}*
-              <FieldOrder
+              <InputField
                 name="address"
                 value={values.address}
                 type="text"

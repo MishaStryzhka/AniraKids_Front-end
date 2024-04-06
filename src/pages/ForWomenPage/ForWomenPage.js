@@ -24,7 +24,6 @@ import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
 
 const api = require('../../api');
-export const sceletonArray = Array.from({ length: 9 });
 
 const ForWomenPage = () => {
   const { t } = useTranslation('translation', {
@@ -104,7 +103,7 @@ const ForWomenPage = () => {
               </ProductList>
             ) : isLoading ? (
               <ProductList>
-                {sceletonArray.map((_, index) => (
+                {Array.from({ length: 9 }).map((_, index) => (
                   <li key={index}>
                     <SceletonUsersProductCard id={index} />
                   </li>

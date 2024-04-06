@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
+import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
 
 const api = require('../../api');
 
@@ -107,7 +108,13 @@ const ForChildrenPage = () => {
                 ))}
               </ProductList>
             ) : isLoading ? (
-              <p>Loading...</p>
+              <ProductList>
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <li key={index}>
+                    <SceletonUsersProductCard id={index} />
+                  </li>
+                ))}
+              </ProductList>
             ) : (
               <NotFound>{t('nothing_found')}</NotFound>
             )}

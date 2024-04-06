@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from 'react';
+import { createContext, lazy, useEffect, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import theme from './theme';
 import { Route, Routes } from 'react-router-dom';
@@ -58,8 +58,11 @@ const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 const PopularPage = lazy(() => import('../pages/PopularPage/PopularPage'));
 
+export const ModalAuthContext = createContext(null);
+
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
+  const [isOpenModalAuth, setIsOpenModalAuth] = useState(false);
   const dispatch = useDispatch();
   const { token } = useAuth();
 
@@ -77,74 +80,81 @@ function App() {
   if (!isLoaded) return <div>Loading...</div>;
   return (
     <ThemeProvider theme={theme[currentTheme]}>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <RestrictedRoute
-              redirectTo="/"
-              redirectBack="/my-account"
-              component={<SharedLayout />}
-            />
-          }
-        >
-          <Route path="/" element={<MainPage />} />
-          <Route path="/popular" element={<PopularPage />} />
-
-          <Route path="/forMen" element={<ForMenPage />}>
-            <Route path=":id" element={<ProductPage />} />
-          </Route>
-          <Route path="/forWomen" element={<ForWomenPage />}>
-            <Route path=":id" element={<ProductPage />} />
-          </Route>
-          <Route path="/forChildren" element={<ForChildrenPage />}>
-            <Route path=":id" element={<ProductPage />} />
-          </Route>
-          <Route path="/decorAndToys" element={<DecorAndToysPage />}>
-            <Route path=":id" element={<ProductPage />} />
-          </Route>
-          <Route path="/aboutUs" element={<AboutUsPage />} />
-          <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
-          <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <ModalAuthContext.Provider
+        value={{
+          isOpenModalAuth,
+          setIsOpenModalAuth,
+        }}
+      >
+        <Routes>
           <Route
-            path="/my-account"
+            path="/"
             element={
-              <PrivateRoute
+              <RestrictedRoute
                 redirectTo="/"
-                redirectBack="/my-account/profile"
-                component={<UserPage />}
+                redirectBack="/my-account"
+                component={<SharedLayout />}
               />
             }
           >
-            <Route index element={<Profile />} />
-            <Route path="profile/" element={<Profile />} />
-            <Route path="chat/" element={<Chat />} />
-            <Route path="favorite/" element={<Favorite />}>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/popular" element={<PopularPage />} />
+
+            <Route path="/forMen" element={<ForMenPage />}>
               <Route path=":id" element={<ProductPage />} />
             </Route>
-            <Route path="rent-out/" element={<RentOut />}>
+            <Route path="/forWomen" element={<ForWomenPage />}>
               <Route path=":id" element={<ProductPage />} />
             </Route>
-            <Route path="rent-out/add-product/" element={<AddProduct />} />
+            <Route path="/forChildren" element={<ForChildrenPage />}>
+              <Route path=":id" element={<ProductPage />} />
+            </Route>
+            <Route path="/decorAndToys" element={<DecorAndToysPage />}>
+              <Route path=":id" element={<ProductPage />} />
+            </Route>
+            <Route path="/aboutUs" element={<AboutUsPage />} />
+            <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
+            <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route
-              path="rent-out/update-product/:id"
-              element={<UpdateProduct />}
-            />
-            <Route path="rent-in/" element={<RentIn />} />
-            <Route path="my-orders/" element={<MyOrders />} />
-            <Route path="my-orders/order/:id" element={<ViewOrder />} />
-            <Route path="my-purchases/" element={<MyPurchases />} />
-            <Route
-              path="my-purchases/purchase/:id"
-              element={<ViewPurchase />}
-            />
-            <Route path="wallet/" element={<Wallet />} />
-            <Route path="cart/" element={<Cart />} />
+              path="/my-account"
+              element={
+                <PrivateRoute
+                  redirectTo="/"
+                  redirectBack="/my-account/profile"
+                  component={<UserPage />}
+                />
+              }
+            >
+              <Route index element={<Profile />} />
+              <Route path="profile/" element={<Profile />} />
+              <Route path="chat/" element={<Chat />} />
+              <Route path="favorite/" element={<Favorite />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="rent-out/" element={<RentOut />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="rent-out/add-product/" element={<AddProduct />} />
+              <Route
+                path="rent-out/update-product/:id"
+                element={<UpdateProduct />}
+              />
+              <Route path="rent-in/" element={<RentIn />} />
+              <Route path="my-orders/" element={<MyOrders />} />
+              <Route path="my-orders/order/:id" element={<ViewOrder />} />
+              <Route path="my-purchases/" element={<MyPurchases />} />
+              <Route
+                path="my-purchases/purchase/:id"
+                element={<ViewPurchase />}
+              />
+              <Route path="wallet/" element={<Wallet />} />
+              <Route path="cart/" element={<Cart />} />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
+        </Routes>
+      </ModalAuthContext.Provider>
     </ThemeProvider>
   );
 }

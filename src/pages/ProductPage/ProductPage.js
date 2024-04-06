@@ -2,38 +2,38 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
-  ImagesPerson,
-  ItemReview,
-  ListReviews,
-  PicturePerson,
+  // ImagesPerson,
+  // ItemReview,
+  // ListReviews,
+  // PicturePerson,
   TextDescription,
   TextPrice,
-  TextRent,
-  TextRentValue,
-  TextReview,
+  // TextRent,
+  // TextRentValue,
+  // TextReview,
   TextSeller,
   TextSize,
   TextValueSize,
   TextWrap,
   Title,
   TitleDescription,
-  TitleName,
+  // TitleName,
   Wrap,
   WrapAllImages,
   WrapBtn,
   WrapColor,
   WrapDescription,
-  WrapIconsStars,
-  WrapInfo,
+  // WrapIconsStars,
+  // WrapInfo,
   WrapInformation,
   WrapInside,
-  WrapPerson,
-  WrapPersonInfo,
+  // WrapPerson,
+  // WrapPersonInfo,
   WrapProductCard,
-  WrapReviews,
+  // WrapReviews,
   WrapSecondaryImages,
-  WrapTimeRent,
-  ButtonPreview,
+  // WrapTimeRent,
+  // ButtonPreview,
   WrapCalendar,
   TextCalendar,
   ButtonCalendarTime,
@@ -46,11 +46,11 @@ import {
   SecondImage,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
-import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
-import IconStar from 'images/icons/IconStart';
+// import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
+// import IconStar from 'images/icons/IconStart';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
 import 'react-alice-carousel/lib/alice-carousel.css';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
   Navigation,
@@ -82,6 +82,7 @@ import Modal from 'components/Modals/Modal';
 import { GeneralModalWindow } from 'components/Modals/Modal.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
+import { ModalAuthContext } from 'components/App';
 
 const api = require('../../api');
 
@@ -102,6 +103,7 @@ const ProductPage = () => {
   const [isOpenModalRent, setIsOpenModalRent] = useState(false);
   const [isOpenModalSelectDateRent, setIsOpenModalSelectDateRent] =
     useState(false);
+  const { setIsOpenModalAuth } = useContext(ModalAuthContext);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState();
   const storage = useStorage();
@@ -151,8 +153,11 @@ const ProductPage = () => {
   };
 
   const handleClickRent = e => {
-    console.log('qwe');
-    rentalPeriods
+    console.log('user', user);
+
+    !user
+      ? setIsOpenModalAuth(true)
+      : rentalPeriods
       ? setIsOpenModalRent(true)
       : setIsOpenModalSelectDateRent(true);
   };
@@ -371,7 +376,7 @@ const ProductPage = () => {
             </WrapDescription>
           </TextWrap>
         </WrapProductCard>
-        <WrapReviews
+        {/* <WrapReviews
           $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
         >
           <Title>{t('reviews')}</Title>
@@ -402,7 +407,7 @@ const ProductPage = () => {
             </ItemReview>
           </ListReviews>
           <ButtonPreview>{t('Leave a review')}</ButtonPreview>
-        </WrapReviews>
+        </WrapReviews> */}
       </GeneralWrap>
       {isOpenModalRent && (
         <ModalConfirm
