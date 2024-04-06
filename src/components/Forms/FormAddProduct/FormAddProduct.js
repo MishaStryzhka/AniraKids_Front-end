@@ -964,15 +964,15 @@ const FormAddProduct = ({ id }) => {
                   )}
                 </div>
 
-                {/* asdasd */}
+                {/* самовивіз */}
 
                 <div>
-                  <Title>Самовивіз</Title>
+                  <Title>{t('pickup')}</Title>
                   {/* <GeneralWrap> */}
                   <WrapCondition>
                     <LabelStatus>
                       <Box>{values.allowPickup && <IconCheck />}</Box>
-                      Самовивіз
+                      {t('pickup')}
                       <Input
                         type="checkbox"
                         name="allowPickup"
@@ -988,7 +988,7 @@ const FormAddProduct = ({ id }) => {
                     <PlaceAutocomplete
                       value={values.pickupAddress}
                       name="pickupAddress"
-                      placeholder="Адрес"
+                      placeholder={t('address')}
                       onPlaceSelect={pickupAddress =>
                         setFieldValue('pickupAddress', pickupAddress)
                       }
@@ -1963,6 +1963,46 @@ const FormAddProduct = ({ id }) => {
                             <ErrorMessage>{t(errors.rental)}</ErrorMessage>
                           </WrapError>
                         )}
+                      </div>
+                      {/* самовивіз */}
+
+                      <div>
+                        <Title>{t('pickup')}</Title>
+                        {/* <GeneralWrap> */}
+                        <WrapCondition>
+                          <LabelStatus>
+                            <Box>{values.allowPickup && <IconCheck />}</Box>
+                            {t('pickup')}
+                            <Input
+                              type="checkbox"
+                              name="allowPickup"
+                              value={values.allowPickup}
+                              onChange={e => {
+                                if (e.currentTarget.value)
+                                  setFieldValue('pickupAddress', null);
+                                handleChange(e);
+                              }}
+                              onBlur={handleBlur}
+                            />
+                          </LabelStatus>
+                          <PlaceAutocomplete
+                            value={values.pickupAddress}
+                            name="pickupAddress"
+                            placeholder={t('address')}
+                            onPlaceSelect={pickupAddress =>
+                              setFieldValue('pickupAddress', pickupAddress)
+                            }
+                            disabled={!values.allowPickup}
+                          />
+                          {errors.pickupAddress && touched.pickupAddress && (
+                            <WrapError>
+                              <ErrorMessage>
+                                {t(errors.pickupAddress)}
+                              </ErrorMessage>
+                            </WrapError>
+                          )}
+                        </WrapCondition>
+                        {/* </GeneralWrap> */}
                       </div>
 
                       {/* KEYWORDS of Product */}
