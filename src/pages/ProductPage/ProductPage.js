@@ -83,6 +83,7 @@ import { GeneralModalWindow } from 'components/Modals/Modal.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
 import { ModalAuthContext } from 'components/App';
+import SceletonProductPage from './SceletonProductPage';
 
 const api = require('../../api');
 
@@ -184,7 +185,7 @@ const ProductPage = () => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
   return isLoading ? (
-    <p>Loading...</p>
+    <SceletonProductPage />
   ) : (
     <>
       <GeneralWrap>
@@ -250,11 +251,7 @@ const ProductPage = () => {
                 pathname === `/my-account/favorite/${product?._id}`
               }
             >
-              <Wrap
-              // $pageFavorites={
-              //   pathname === `/my-account/favorite/${product?._id}`
-              // }
-              >
+              <Wrap>
                 <Title>{product?.name}</Title>
                 <WrapInside>
                   <TextSeller>

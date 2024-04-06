@@ -464,6 +464,7 @@ export const WrapCondition = styled.div`
   @media screen and (max-width: 427.5px) {
     gap: 3.7vw;
   }
+
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -644,4 +645,22 @@ export const StyledIconCheck = styled(IconCheck)`
   }
   width: 24px;
   height: 24px;
+`;
+
+export const WrapMap = styled.div`
+  width: 320px;
+  height: 400px;
+  margin: 0 auto;
+  @media screen and (min-width: 428px) {
+    width: 388px;
+    height: 400px;
+    margin: 0;
+  }
+
+  @media screen and (min-width: 768px) {
+    width: 688px;
+  }
+  @media screen and (min-width: 1280px) {
+    width: 955px;
+  }
 `;

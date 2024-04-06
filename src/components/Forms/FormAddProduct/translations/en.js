@@ -140,6 +140,10 @@ export const FormAddProductTranslationsEn = {
   yourAgree: 'I added at least one photo of the item I made myself.',
   linkAgree: 'Why is this important?',
 
+  //
+  pickup: 'Pickup',
+  address: 'Address',
+
   // buttonAdd in form
   addItem: 'Add item',
   btnNext: 'Next',

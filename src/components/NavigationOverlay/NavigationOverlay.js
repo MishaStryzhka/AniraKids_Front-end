@@ -179,6 +179,11 @@ const NavigationOverlay = () => {
           {location.pathname.includes('my-orders') && (
             <StyledNavLink to="./my-orders">{t('myOrders')}</StyledNavLink>
           )}
+          {location.pathname.includes('my-purchases') && (
+            <StyledNavLink to="./my-purchases">
+              {t('myPurchases')}
+            </StyledNavLink>
+          )}
         </>
       )}
     </NavigationWrapper>

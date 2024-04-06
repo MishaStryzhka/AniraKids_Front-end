@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Map, Marker, useMapsLibrary } from '@vis.gl/react-google-maps';
-import { Field, LabelDescription } from './FormAddProduct.styled';
+import { Field, LabelDescription, WrapMap } from './FormAddProduct.styled';
 import MapHandler from './MapHandler';
 
 const PlaceAutocomplete = ({
@@ -82,7 +82,7 @@ const PlaceAutocomplete = ({
       </LabelDescription>
 
       {place && (
-        <div style={{ width: 955, height: 400 }}>
+        <WrapMap>
           <Map
             defaultCenter={{ lat: 50.074465122666346, lng: 14.434535050418326 }}
             defaultZoom={11}
@@ -117,7 +117,7 @@ const PlaceAutocomplete = ({
 
             <MapHandler place={place} />
           </Map>
-        </div>
+        </WrapMap>
       )}
     </>
   );
