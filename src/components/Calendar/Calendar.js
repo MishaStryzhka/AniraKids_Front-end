@@ -30,7 +30,7 @@ const months = [
   'December',
 ];
 
-const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
+const Calendar = ({ rentalPeriods, setRentalPeriods, selectsRange }) => {
   const { t, i18n } = useTranslation('translation', {
     keyPrefix: 'components.calendar',
   });
@@ -59,7 +59,16 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
   }
 
   const onChange = dates => {
-    const [start, end] = dates;
+    console.log('dates', dates);
+    let [start, end] = [];
+
+    if (dates.length === 2) {
+      [start, end] = dates;
+    } else {
+      start = dates;
+      end = dates;
+    }
+    // const [start, end] = dates;
 
     if (end) {
       const newRentalPeriods = `${format(new Date(start), 'dd.MM.yyyy')}-${
@@ -75,6 +84,8 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
   };
 
   const dayClassName = date => {
+    if (!selectsRange) return '';
+
     if (startDate && endDate) {
       if (date >= addDays(startDate, -2) && date <= addDays(startDate, -1)) {
         return 'highlight-start-date';
@@ -90,9 +101,6 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
       if (date >= addDays(startDate, 1) && date <= addDays(startDate, 1)) {
         return 'highlight-end-date';
       }
-      // if (date >= addDays(endDate, -2) && date <= addDays(endDate, 2)) {
-      //   return 'highlight-end-date';
-      // }
     }
     return '';
   };
@@ -106,7 +114,7 @@ const Calendar = ({ rentalPeriods, setRentalPeriods }) => {
       maxDate={addMonths(new Date(), 6)}
       startDate={startDate}
       endDate={endDate}
-      selectsRange
+      selectsRange={selectsRange}
       inline
       dayClassName={dayClassName}
       // showDisabledMonthNavigation

@@ -23,7 +23,6 @@ import { ProductList } from 'pages/pages.styled';
 import UsersProductCard from 'components/UsersProductCard/UsersProductCard';
 import SelectedFilters from 'components/Filters/SelectedFiltrs/SelectedFiltrs';
 import SceletonUsersProductCard from 'components/UsersProductCard/SceletonUsersProductCard';
-import { sceletonArray } from 'pages/ForWomenPage/ForWomenPage';
 
 const api = require('../../api');
 
@@ -110,7 +109,8 @@ const ForChildrenPage = () => {
               </ProductList>
             ) : isLoading ? (
               <ProductList>
-                {sceletonArray.map((_, index) => (
+                {Array.from({ length: 9 }).map((_, index) => (
+
                   <li key={index}>
                     <SceletonUsersProductCard id={index} />
                   </li>

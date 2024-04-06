@@ -102,7 +102,7 @@ const UsersProductCard = ({
             gap: 8,
           }}
         >
-          {pathname !== '/my-account/rent-out' && (
+          {user && pathname !== '/my-account/rent-out' && (
             <ButtonAddToFavorites
               disabled={isLoading}
               onClick={e => {

@@ -4,25 +4,28 @@ import IconPerson from '../../images/icons/IconPerson';
 import { Box, Button } from './BoxNavigation.styled';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
 import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
+import { ModalAuthContext } from 'components/App';
 
 const BoxNavigation = ({ onClick, $mainPage }) => {
-  const [isModal, setIsModal] = useState(false);
+  const { isOpenModalAuth, setIsOpenModalAuth } = useContext(ModalAuthContext);
   const { user, currentTheme } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    isModal && user && navigate('/my-account/profile', { replace: true });
-    isModal && user && setIsModal(false);
-  }, [isModal, user, navigate]);
+    isOpenModalAuth &&
+      user &&
+      navigate('/my-account/profile', { replace: true });
+    isOpenModalAuth && user && setIsOpenModalAuth(false);
+  }, [isOpenModalAuth, user, navigate, setIsOpenModalAuth]);
 
   const isOpenModal = () => {
     user
       ? navigate('/my-account/profile', { replace: true })
-      : setIsModal(true);
+      : setIsOpenModalAuth(true);
     user && onClick && onClick();
   };
   return (
@@ -67,13 +70,13 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
           }
         />
       </Button>
-      {isModal && !user && (
+      {isOpenModalAuth && !user && (
         <Modal
           closeModal={() => {
-            setIsModal(false);
+            setIsOpenModalAuth(false);
           }}
         >
-          <ModalRegister handleCloseModal={() => setIsModal(false)} />
+          <ModalRegister handleCloseModal={() => setIsOpenModalAuth(false)} />
         </Modal>
       )}
     </Box>
