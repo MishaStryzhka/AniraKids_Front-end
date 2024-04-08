@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Form, Field } from 'formik';
+import { Form } from 'formik';
+import { InputField } from '../Form.styled';
 
 export const StyledForm = styled(Form)`
   display: flex;
@@ -18,26 +19,14 @@ export const LabelOrder = styled.label`
 
   color: ${({ theme }) => theme.color.mainColor5};
 `;
-export const FieldOrder = styled(Field)`
+export const FieldOrder = styled(InputField)`
   @media screen and (max-width: 427.5px) {
     width: 86vw;
   }
-  width: 370px;
-  padding: 8px;
-  border-radius: 2px;
-  outline: none;
+  min-width: 388px;
   @media screen and (min-width: 768px) {
-    width: 397px;
+    width: 415px;
   }
-
-  font-family: 'Open Sans Hebrew', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.43;
-  border: 1px solid;
-
-  color: ${({ theme }) => theme.color.additionalColorBrown};
-  border-color: ${({ theme }) => theme.color.mainColor2};
 `;
 
 export const FieldSelect = styled(FieldOrder)`

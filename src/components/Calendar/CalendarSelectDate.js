@@ -11,22 +11,18 @@ import {
   WrapCalendar,
 } from './CalendarSelectDate.styled';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
 import SelectTypeRent from 'components/SelectTypeRent/SelectTypeRent';
 
 const CalendarSelectDate = ({
   rentalPeriods,
   setRentalPeriods,
+  typeRent = 'celebration',
+  setTypeRent,
   saveSelectedDate,
 }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.calendar.selectDate',
   });
-
-  const [typeRent, setTypeRent] = useState('celebration');
-
-  console.log('typeRent', typeRent);
-  console.log("typeRent === 'celebration'", typeRent === 'celebration');
 
   return (
     <WrapCalendar>

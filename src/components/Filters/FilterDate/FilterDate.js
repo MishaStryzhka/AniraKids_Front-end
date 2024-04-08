@@ -7,16 +7,21 @@ import {
 import { useSearchParams } from 'react-router-dom';
 import IconClose from 'images/icons/IconClose';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
+import { useStorage } from 'hooks';
 const { useState, useRef, useEffect } = require('react');
 
 const FilterDate = () => {
   const [isOpenModalCalendar, setIsOpenModalCalendar] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef(null);
-
   const [rentalPeriods, setRentalPeriods] = useState(
     searchParams.get('rentalPeriods') || null
   );
+
+  const sessionStorage = useStorage('typeRent', 'session');
+  const [typeRent, setTypeRent] = useState(
+    sessionStorage.get('typeRent') || 'celebration'
+  ); // 'celebration' , 'photosession'
 
   const newSetSearchParams = (key, value) => {
     setSearchParams(pref => {
@@ -66,7 +71,12 @@ const FilterDate = () => {
           </MenuButtonClose>
           <CalendarSelectDate
             rentalPeriods={rentalPeriods}
-            setRentalPeriods={rentalPeriods => setRentalPeriods(rentalPeriods)}
+            setRentalPeriods={setRentalPeriods}
+            typeRent={typeRent}
+            setTypeRent={typeRent => {
+              sessionStorage.set('typeRent', typeRent);
+              setTypeRent(typeRent);
+            }}
             saveSelectedDate={() => setFilterDate()}
           />
         </MenuCalendar>

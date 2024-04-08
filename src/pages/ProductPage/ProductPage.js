@@ -96,6 +96,11 @@ const ProductPage = () => {
   const { pathname, state } = useLocation();
   const [rentalPeriods, setRentalPeriods] = useState(state?.rentalPeriods);
 
+  const sessionStorage = useStorage('typeRent', 'session');
+  const [typeRent, setTypeRent] = useState(
+    sessionStorage.get('typeRent') || 'celebration'
+  ); // 'celebration' , 'photosession'
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -421,6 +426,7 @@ const ProductPage = () => {
                   product?.rentalPrice,
                 owner: product?.owner?._id,
                 rentalPeriods,
+                typeRent,
               })
               .then(data => {
                 setIsLoading(false);
@@ -448,8 +454,12 @@ const ProductPage = () => {
             <CalendarSelectDate
               rentalPeriods={rentalPeriods}
               setRentalPeriods={setRentalPeriods}
+              typeRent={typeRent}
+              setTypeRent={setTypeRent}
               saveSelectedDate={() => {
                 setIsLoading(true);
+                console.log('typeRent', typeRent);
+
                 api
                   .addToOrder({
                     productId: product._id,
@@ -460,6 +470,7 @@ const ProductPage = () => {
                       product?.rentalPrice,
                     owner: product?.owner?._id,
                     rentalPeriods,
+                    typeRent,
                   })
                   .then(data => {
                     setIsLoading(false);
