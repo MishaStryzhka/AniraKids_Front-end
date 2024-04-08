@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   RadioInput,
   RadioLabel,
@@ -5,6 +6,10 @@ import {
 } from './SelectTypeRent.styled';
 
 const SelectTypeRent = ({ typeRent = 'celebration', setTypeRent }) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'components.selectTypeRent',
+  });
+
   return (
     <StyledSelectTypeRent>
       <RadioLabel>
@@ -15,7 +20,7 @@ const SelectTypeRent = ({ typeRent = 'celebration', setTypeRent }) => {
           checked={typeRent === 'celebration'}
           onChange={e => setTypeRent(e.currentTarget.value)}
         />
-        Celebration
+        {t('celebration')}
       </RadioLabel>
       <RadioLabel>
         <RadioInput
@@ -25,7 +30,7 @@ const SelectTypeRent = ({ typeRent = 'celebration', setTypeRent }) => {
           checked={typeRent === 'photosession'}
           onChange={e => setTypeRent(e.currentTarget.value)}
         />
-        Photosession
+        {t('photosession')}
       </RadioLabel>
     </StyledSelectTypeRent>
   );

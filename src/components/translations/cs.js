@@ -52,6 +52,7 @@ import { ModalConfirmTranslationsCs } from 'components/Modals/ModalConfirm/trans
 import { RentalCardTranslationsCs } from 'components/RentalCard/translations/cs';
 import { OrderCardTranslationsCs } from 'components/OrderCard/translations/cs';
 import { ViewOrderProductTranslationsCs } from 'components/ViewOrderProduct/translations/cs';
+import { SelectTypeRentTranslationsCs } from 'components/SelectTypeRent/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -113,6 +114,7 @@ export const ComponentTranslationsCs = {
   searchInput: SearchInputTranslationsCs,
   ...NavigationOverlayTranslationsCs,
   calendar: CalendarTranslationsCs,
+  selectTypeRent: SelectTypeRentTranslationsCs,
 
   //
   emptyCart: EmptyCartTranslationsCs,

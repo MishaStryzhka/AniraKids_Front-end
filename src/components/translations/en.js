@@ -53,6 +53,7 @@ import { ModalConfirmTranslationsEn } from 'components/Modals/ModalConfirm/trans
 import { RentalCardTranslationsEn } from 'components/RentalCard/translations/en';
 import { OrderCardTranslationsEn } from 'components/OrderCard/translations/en';
 import { ViewOrderProductTranslationsEn } from 'components/ViewOrderProduct/translations/en';
+import { SelectTypeRentTranslationsEn } from 'components/SelectTypeRent/translations/en';
 
 export const ComponentTranslationsEn = {
   // forms
@@ -115,6 +116,7 @@ export const ComponentTranslationsEn = {
   ...NavigationOverlayTranslationsEn,
   ...UserPageTranslationsEn,
   calendar: CalendarTranslationsEn,
+  selectTypeRent: SelectTypeRentTranslationsEn,
 
   //
   emptyCart: EmptyCartTranslationsEn,
