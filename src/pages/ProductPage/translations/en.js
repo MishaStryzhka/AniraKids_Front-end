@@ -36,4 +36,8 @@ export const ProductPageTranslationsEn = {
   'light-blue': 'Light blue',
   peachy: 'Peachy',
   mustard: 'Mustard',
+
+  rentProductFromTo: 'Rent product from {{from}} to {{to}}',
+  rentProductFor: 'Rent product for {{date}}',
+  'No, choose another date': 'No, choose another date',
 };

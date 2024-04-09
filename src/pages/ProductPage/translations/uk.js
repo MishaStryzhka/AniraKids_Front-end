@@ -37,4 +37,8 @@ export const ProductPageTranslationsUk = {
   'light-blue': 'Блакитний',
   peachy: 'Персиковий',
   mustard: 'Гірчичний',
+
+  rentProductFromTo: 'Орендувати продукт з {{from}} по {{to}}',
+  rentProductFor: 'Орендувати продукт на {{date}}',
+  'No, choose another date': 'Ні, вибрати іншу дату',
 };
