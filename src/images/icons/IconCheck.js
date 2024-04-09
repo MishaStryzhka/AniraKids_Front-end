@@ -11,7 +11,7 @@ const IconCheck = ({ className, ...props }) => (
   >
     <g clipPath="url(#a)">
       <path
-        stroke={className || '#77695E'}
+        stroke="#77695E"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.5}

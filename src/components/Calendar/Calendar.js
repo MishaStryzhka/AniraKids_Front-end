@@ -59,16 +59,13 @@ const Calendar = ({ rentalPeriods, setRentalPeriods, selectsRange }) => {
   }
 
   const onChange = dates => {
-    console.log('dates', dates);
     let [start, end] = [];
 
     if (dates.length === 2) {
       [start, end] = dates;
     } else {
       start = dates;
-      end = dates;
     }
-    // const [start, end] = dates;
 
     if (end) {
       const newRentalPeriods = `${format(new Date(start), 'dd.MM.yyyy')}-${
@@ -117,10 +114,8 @@ const Calendar = ({ rentalPeriods, setRentalPeriods, selectsRange }) => {
       selectsRange={selectsRange}
       inline
       dayClassName={dayClassName}
-      // showDisabledMonthNavigation
       renderCustomHeader={({
         date,
-        changeYear,
         changeMonth,
         decreaseMonth,
         increaseMonth,

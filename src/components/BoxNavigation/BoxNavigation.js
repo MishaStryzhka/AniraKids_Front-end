@@ -22,10 +22,13 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
     isOpenModalAuth && user && setIsOpenModalAuth(false);
   }, [isOpenModalAuth, user, navigate, setIsOpenModalAuth]);
 
-  const isOpenModal = () => {
-    user
-      ? navigate('/my-account/profile', { replace: true })
-      : setIsOpenModalAuth(true);
+  const onClickAuth = () => {
+    if (user) {
+      document.body.style.overflowY = 'auto';
+      navigate('/my-account/profile', { replace: true });
+    } else {
+      setIsOpenModalAuth(true);
+    }
     user && onClick && onClick();
   };
   return (
@@ -34,6 +37,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
         type="button"
         onClick={() => {
           onClick && onClick();
+          document.body.style.overflowY = 'auto';
           navigate('/my-account/favorite', { replace: true });
         }}
       >
@@ -45,7 +49,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
           }
         />
       </Button>
-      <Button type="button" onClick={isOpenModal}>
+      <Button type="button" onClick={onClickAuth}>
         <IconPerson
           stroke={
             $mainPage
@@ -59,6 +63,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
         type="button"
         onClick={() => {
           onClick && onClick();
+          document.body.style.overflowY = 'auto';
           navigate('/my-account/cart', { replace: true });
         }}
       >

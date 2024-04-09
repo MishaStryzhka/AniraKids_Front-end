@@ -648,7 +648,7 @@ export const StyledIconCheck = styled(IconCheck)`
 `;
 
 export const WrapMap = styled.div`
-  width: 320px;
+  width: 100%;
   height: 400px;
   margin: 0 auto;
   @media screen and (min-width: 428px) {
