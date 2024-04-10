@@ -72,10 +72,6 @@ option:checked {
   text-transform: uppercase;
 }
 
-.react-datepicker__day--today {
-  /* background-color: #ebdad1; */
-}
-
 .react-datepicker__day {
   width: 37px;
   height: 37px;
@@ -83,11 +79,17 @@ option:checked {
   margin: 0;
 }
 
+.react-datepicker__day.react-datepicker__day--today {
+  background-color: #eaeaea;
+  border-radius: 20px;
+}
+
 .react-datepicker__day--in-range {
   background-color: #ebdad1;
 }
 
-.react-datepicker__day.react-datepicker__day--selected.react-datepicker__day--in-selecting-range.react-datepicker__day--selecting-range-start.react-datepicker__day--selecting-range-end {
+.react-datepicker__day.react-datepicker__day--selected.react-datepicker__day--in-selecting-range.react-datepicker__day--selecting-range-start.react-datepicker__day--selecting-range-end,
+.react-datepicker__day.react-datepicker__day--selected {
   background-color: #ebdad1;
   border-radius: 20px;
 }

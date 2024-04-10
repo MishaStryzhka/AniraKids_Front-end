@@ -36,4 +36,8 @@ export const ProductPageTranslationsCs = {
   'light-blue': 'Světle modrá',
   peachy: 'Broskvový',
   mustard: 'Hořčičný',
+
+  rentProductFromTo: 'Pronajměte si produkt od {{from}} do {{to}}',
+  rentProductFor: 'Pronajměte si produkt na {{date}}',
+  'No, choose another date': 'Ne, vyberte jiné datum',
 };

@@ -49,7 +49,7 @@ const CalendarSelectDate = ({
           ) : (
             <>
               <MarkerRent />
-              <p>самовивіз</p>
+              <p>{t('self_pickup')}</p>
             </>
           )}
           <br />
@@ -58,7 +58,7 @@ const CalendarSelectDate = ({
           <MarkerRent />{' '}
           <p>
             {t('rental')}
-            {typeRent !== 'celebration' && ' на 6 годин'}
+            {typeRent !== 'celebration' && ` ${t('up_to_6_hours')}`}
           </p>{' '}
           <br />
         </ItemInfo>
@@ -71,7 +71,7 @@ const CalendarSelectDate = ({
           ) : (
             <>
               <MarkerRent />
-              <p>!!!повернення до 6 годин!!!</p>
+              <p>!!!{t('return_within_6_hours')}!!!</p>
             </>
           )}
           <br />

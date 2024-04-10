@@ -17,8 +17,11 @@ export const CalendarTranslationsUk = {
     menuTitle: 'Вибрати дату',
     daysDelivery: 'дні доставки',
     rental: 'оренда',
+    up_to_6_hours: 'до 6 годин',
     returnDay: 'день повернення',
     menuDescription: 'Виберіть день оренди (або дату початку та кінця оренди)',
     buttonSaveChanges: 'ЗБЕРЕГТИ ЗМІНИ',
+    self_pickup: 'Самовивіз',
+    return_within_6_hours: 'Повернення до 6 годин',
   },
 };

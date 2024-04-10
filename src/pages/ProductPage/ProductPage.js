@@ -437,15 +437,23 @@ const ProductPage = () => {
             setIsOpenModalRent(false);
             setIsOpenModalSelectDateRent(true);
           }}
-          title={`Орендувати продукт
-              ${
-                rentalPeriods.split('-').length > 1
-                  ? `з ${rentalPeriods.split('-')[0]} по ${
-                      rentalPeriods.split('-')[1]
-                    }`
-                  : `на ${rentalPeriods}`
-              }`}
-          titleButtonDisagree={'Ні, вибрати іншу дату'}
+          // title={`Орендувати продукт
+          //     ${
+          //       rentalPeriods.split('-').length > 1
+          //         ? `з ${rentalPeriods.split('-')[0]} по ${
+          //             rentalPeriods.split('-')[1]
+          //           }`
+          //         : `на ${rentalPeriods}`
+          //     }`}
+          title={
+            rentalPeriods.split('-').length > 1
+              ? t('rentProductFromTo', {
+                  from: rentalPeriods.split('-')[0],
+                  to: rentalPeriods.split('-')[1],
+                })
+              : t('rentProductFor', { date: rentalPeriods })
+          }
+          titleButtonDisagree={t('No, choose another date')}
         />
       )}
       {isOpenModalSelectDateRent && (

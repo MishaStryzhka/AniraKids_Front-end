@@ -1397,10 +1397,11 @@ const FormAddProduct = ({ id }) => {
                     </WrapButtons>
                   </Section>
                 )}
-                {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
 
                 {stepValue === 3 && (
                   <Section>
+                    {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
+
                     {(values.category === 'women`s category' ||
                       values.category === 'men`s category') && (
                       <Wrap>
