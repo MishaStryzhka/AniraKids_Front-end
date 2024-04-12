@@ -159,8 +159,6 @@ const ProductPage = () => {
   };
 
   const handleClickRent = e => {
-    console.log('user', user);
-
     !user
       ? setIsOpenModalAuth(true)
       : rentalPeriods
@@ -466,8 +464,6 @@ const ProductPage = () => {
               setTypeRent={setTypeRent}
               saveSelectedDate={() => {
                 setIsLoading(true);
-                console.log('typeRent', typeRent);
-
                 api
                   .addToOrder({
                     productId: product._id,

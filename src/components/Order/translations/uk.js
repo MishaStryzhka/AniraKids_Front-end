@@ -1,5 +1,10 @@
 export const OrderTranslationsUk = {
   'order processing': 'Оформлення замовлення',
+
+  'Purchase Order': 'Оформлення замовлення покупки',
+  'Rental Order':
+    'Оформлення замовлення оренди на {{typeRent}} {{rentalPeriods}}',
+
   price: 'Ціна',
   quantity: 'Кількість',
   amount: 'Сума',
@@ -8,4 +13,7 @@ export const OrderTranslationsUk = {
   orderTotal: 'Сума замовлення',
   totalAmount: 'Загальна сума',
   Continue: 'Продовжити',
+
+  celebration: 'святкування',
+  photosession: 'фотосесія',
 };
