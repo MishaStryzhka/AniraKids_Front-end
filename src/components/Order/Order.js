@@ -42,7 +42,14 @@ import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 const api = require('../../api');
 
 const Order = ({
-  order: { _id: orderId, items: orderItems, owner, serviceType, rentalPeriods },
+  order: {
+    _id: orderId,
+    items: orderItems,
+    owner,
+    serviceType,
+    rentalPeriods,
+    typeRent,
+  },
   handleRemoveOrder,
 }) => {
   const { t } = useTranslation('translation', {
@@ -104,10 +111,9 @@ const Order = ({
           <StyledIconBasket />
         </ButtonRemoveOrder>
         <TitleOrder>
-          {t('order processing')}{' '}
-          {`( ${
-            serviceType === 'rent' ? `оренди на ${rentalPeriods}` : 'покупка'
-          } )`}
+          {serviceType === 'rent'
+            ? t('Rental Order', { typeRent: t(typeRent), rentalPeriods })
+            : t('Purchase Order')}
         </TitleOrder>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
