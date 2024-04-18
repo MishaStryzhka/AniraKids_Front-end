@@ -5,7 +5,7 @@ export const UserPageTranslationsCs = {
   chat: 'Chat',
   favorite: 'Oblíbené',
   rentOut: 'Nabízím',
-  rentIn: 'Pronajímám',
+  rentIn: 'Pronájem',
   myPurchases: 'Moje nákupy',
   mySales: 'Moje prodeje',
   wallet: 'Peněženka',
