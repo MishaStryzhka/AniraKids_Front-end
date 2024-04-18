@@ -144,6 +144,9 @@ function App() {
               <Route path="wallet/" element={<Wallet />} />
               <Route path="cart/" element={<Cart />} />
             </Route>
+
+            <Route path="favorite/" element={<Favorite />}></Route>
+            <Route path="cart/" element={<Cart />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
