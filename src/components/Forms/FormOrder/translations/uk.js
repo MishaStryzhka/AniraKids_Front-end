@@ -11,8 +11,10 @@ export const FormOrderTranslationsUk = {
   city: 'Місто',
   address: 'Адреса',
   'Text required': 'Обов`язкові поля для заповнення',
+
   postOffice: 'Поштомат',
   section: 'Відділення',
+  selfPickup: 'Самовивіз',
 
   //
   'Required field': 'Обов`язкове поле',
