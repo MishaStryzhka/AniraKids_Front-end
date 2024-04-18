@@ -184,6 +184,9 @@ const NavigationOverlay = () => {
               {t('myPurchases')}
             </StyledNavLink>
           )}
+          {location.pathname.includes('cart') && (
+            <StyledNavLink to="./cart">{t('basket')}</StyledNavLink>
+          )}
         </>
       )}
     </NavigationWrapper>
