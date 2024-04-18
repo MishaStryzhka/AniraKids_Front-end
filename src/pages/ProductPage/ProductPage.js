@@ -29,7 +29,6 @@ import {
   WrapInside,
   // WrapPerson,
   // WrapPersonInfo,
-  WrapProductCard,
   // WrapReviews,
   WrapSecondaryImages,
   // WrapTimeRent,
@@ -44,6 +43,7 @@ import {
   StyledSwiper,
   StyledSecondSwiper,
   SecondImage,
+  WrapProduct,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
 // import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
@@ -192,9 +192,7 @@ const ProductPage = () => {
   ) : (
     <>
       <GeneralWrap>
-        <WrapProductCard
-          $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
-        >
+        <WrapProduct $column={pathname.includes('my-account')}>
           <WrapAllImages>
             <StyledSwiper>
               <Swiper
@@ -246,14 +244,8 @@ const ProductPage = () => {
             </WrapSecondaryImages>
           </WrapAllImages>
 
-          <TextWrap
-            $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
-          >
-            <WrapInformation
-              $pageFavorites={
-                pathname === `/my-account/favorite/${product?._id}`
-              }
-            >
+          <TextWrap $pageMyAccount={pathname.includes('my-account')}>
+            <WrapInformation $pageMyAccount={pathname.includes('my-account')}>
               <Wrap>
                 <Title>{product?.name}</Title>
                 <WrapInside>
@@ -302,56 +294,59 @@ const ProductPage = () => {
                   </SecondWrap>
                 )}
               </div>
-              {product?.rental && (
-                <WrapCalendar>
-                  <ButtonCalendarTime>
-                    <IconCalendarTime />
-                  </ButtonCalendarTime>
-                  <TextCalendar>{t('Rental calendar')}</TextCalendar>
-                </WrapCalendar>
+              {pathname !== `/my-account/rent-out/${product?._id}` &&
+                product?.rental && (
+                  <WrapCalendar>
+                    <ButtonCalendarTime>
+                      <IconCalendarTime />
+                    </ButtonCalendarTime>
+                    <TextCalendar>{t('Rental calendar')}</TextCalendar>
+                  </WrapCalendar>
+                )}
+              {pathname !== `/my-account/rent-out/${product?._id}` && (
+                <WrapBtn>
+                  {(product?.dailyRentalPrice ||
+                    product?.hourlyRentalPrice ||
+                    product?.rentalPrice) && (
+                    <StyledButton
+                      // disabled={product?.owner?._id === user?.userID}
+                      onClick={handleClickRent}
+                      ariaLabel="rent"
+                    >
+                      Орендувати
+                    </StyledButton>
+                  )}
+                  {product?.salePrice && (
+                    <StyledButton
+                      // disabled={product?.owner?._id === user?.userID}
+                      onClick={handleClickBuy}
+                      ariaLabel="buy"
+                    >
+                      Купити
+                    </StyledButton>
+                  )}
+                  {pathname !== `/my-account/favorite/${product?._id}` && (
+                    <ButtonAddToFavorite
+                      onClick={e => {
+                        e.preventDefault();
+                        handleAddToFavorites(product?._id);
+                      }}
+                    >
+                      <IconLittleHeart
+                        width={24}
+                        height={24}
+                        fill={
+                          favorites?.includes(product?._id)
+                            ? theme[currentTheme].color.mainColor3
+                            : '#fff'
+                        }
+                        stroke={theme[currentTheme].color.mainColor3}
+                      />
+                    </ButtonAddToFavorite>
+                  )}
+                  <IconChat />
+                </WrapBtn>
               )}
-              <WrapBtn>
-                {(product?.dailyRentalPrice ||
-                  product?.hourlyRentalPrice ||
-                  product?.rentalPrice) && (
-                  <StyledButton
-                    // disabled={product?.owner?._id === user?.userID}
-                    onClick={handleClickRent}
-                    ariaLabel="rent"
-                  >
-                    Орендувати
-                  </StyledButton>
-                )}
-                {product?.salePrice && (
-                  <StyledButton
-                    // disabled={product?.owner?._id === user?.userID}
-                    onClick={handleClickBuy}
-                    ariaLabel="buy"
-                  >
-                    Купити
-                  </StyledButton>
-                )}
-                {pathname !== `/my-account/favorite/${product?._id}` && (
-                  <ButtonAddToFavorite
-                    onClick={e => {
-                      e.preventDefault();
-                      handleAddToFavorites(product?._id);
-                    }}
-                  >
-                    <IconLittleHeart
-                      width={24}
-                      height={24}
-                      fill={
-                        favorites?.includes(product?._id)
-                          ? theme[currentTheme].color.mainColor3
-                          : '#fff'
-                      }
-                      stroke={theme[currentTheme].color.mainColor3}
-                    />
-                  </ButtonAddToFavorite>
-                )}
-                <IconChat />
-              </WrapBtn>
             </WrapInformation>
 
             <WrapDescription>
@@ -375,7 +370,7 @@ const ProductPage = () => {
               </WrapColor>
             </WrapDescription>
           </TextWrap>
-        </WrapProductCard>
+        </WrapProduct>
         {/* <WrapReviews
           $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
         >
@@ -424,6 +419,7 @@ const ProductPage = () => {
                   product?.rentalPrice,
                 owner: product?.owner?._id,
                 rentalPeriods,
+                pickupAddress: product?.pickupAddress,
                 typeRent,
               })
               .then(data => {
@@ -475,6 +471,7 @@ const ProductPage = () => {
                     owner: product?.owner?._id,
                     rentalPeriods,
                     typeRent,
+                    pickupAddress: product?.pickupAddress,
                   })
                   .then(data => {
                     setIsLoading(false);
