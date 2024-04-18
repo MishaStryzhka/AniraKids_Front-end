@@ -29,29 +29,21 @@ import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import Button from 'components/Button/Button';
 import Calendar from 'components/Calendar/Calendar';
-import {
-  ItemInfo,
-  ListInfo,
-  MarkerDelivery,
-  MarkerRent,
-  MarkerReturn,
-  WrapCalendar,
-} from 'components/Calendar/CalendarSelectDate.styled';
+import { WrapCalendar } from 'components/Calendar/CalendarSelectDate.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
+import CalendarDescription from 'components/Calendar/components/CalendarDescription/CalendarDescription';
 
 const api = require('../../api');
 
-const Order = ({
-  order: {
+const Order = ({ order, handleRemoveOrder }) => {
+  const {
     _id: orderId,
     items: orderItems,
     owner,
     serviceType,
     rentalPeriods,
     typeRent,
-  },
-  handleRemoveOrder,
-}) => {
+  } = order;
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.order',
   });
@@ -177,26 +169,16 @@ const Order = ({
           })}
         </div>
         <WrapInside>
-          <FormOrder />
+          <FormOrder order={order} />
           <WrapAmount>
             {serviceType === 'rent' && (
               <WrapCalendar>
-                <ListInfo>
-                  <ItemInfo>
-                    <MarkerDelivery /> <p>дні доставки</p> <br />
-                  </ItemInfo>
-                  <ItemInfo>
-                    <MarkerRent /> <p>оренда</p> <br />
-                  </ItemInfo>
-                  <ItemInfo>
-                    <MarkerReturn />
-                    <p>день повернення</p> <br />
-                  </ItemInfo>
-                </ListInfo>
                 <Calendar
+                  selectsRange={typeRent === 'celebration'}
                   rentalPeriods={rentalPeriods}
                   setRentalPeriods={rentalPeriods => {}}
                 />
+                <CalendarDescription typeRent={typeRent} />
               </WrapCalendar>
             )}
             <TextAmount>
