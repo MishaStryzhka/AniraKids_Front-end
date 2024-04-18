@@ -18,7 +18,7 @@ import { WrapButton } from '../ModalRegister/ModalRegister.styled';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from 'components/Forms/Form.styled';
 
-const ModalChangeEmail = ({ onClick }) => {
+const ModalChangeEmail = ({ closeModal }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalChangeEmail',
   });
@@ -30,9 +30,9 @@ const ModalChangeEmail = ({ onClick }) => {
       setTimeout(() => {
         dispatch(clearDone());
         document.body.style.overflow = 'auto';
-        onClick();
+        closeModal();
       }, 5000);
-  }, [dispatch, isDone, onClick]);
+  }, [dispatch, isDone, closeModal]);
 
   const handleSubmitEmail = async ({ email }) => {
     dispatch(clearError());
