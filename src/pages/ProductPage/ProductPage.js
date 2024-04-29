@@ -105,7 +105,9 @@ const ProductPage = () => {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [isOpenModalRent, setIsOpenModalRent] = useState(false);
   const [isOpenModalSelectDateRent, setIsOpenModalSelectDateRent] =
     useState(false);
@@ -123,17 +125,15 @@ const ProductPage = () => {
   }, [user?.favorites]);
 
   useEffect(() => {
-    setIsLoading(true);
-
     api
       .getProductById(id)
       .then(data => {
         setProduct(data.product);
-        setIsLoading(false);
+        setIsLoadingPage(false);
       })
       .catch(error => {
         setError(error);
-        setIsLoading(false);
+        setIsLoadingPage(false);
       });
   }, [id]);
 
@@ -187,7 +187,7 @@ const ProductPage = () => {
   );
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  return isLoading ? (
+  return isLoadingPage ? (
     <SceletonProductPage />
   ) : (
     <>
@@ -419,12 +419,19 @@ const ProductPage = () => {
                   product?.rentalPrice,
                 owner: product?.owner?._id,
                 rentalPeriods,
-                pickupAddress: product?.pickupAddress,
                 typeRent,
+                pickupAddress: product?.pickupAddress,
               })
               .then(data => {
                 setIsLoading(false);
-                navigate('/my-account/cart');
+                navigate(`/my-account/cart#${data._id}`);
+              })
+              .catch(({ response: { data, status } }) => {
+                setIsLoading(false);
+                document.body.style.overflow = 'auto';
+                if (status === 409) {
+                  navigate(`/my-account/cart#${data.orderId}`);
+                }
               });
           }}
           onClickDisagree={() => {
@@ -475,8 +482,16 @@ const ProductPage = () => {
                   })
                   .then(data => {
                     setIsLoading(false);
-                    navigate('/my-account/cart');
                     document.body.style.overflow = 'auto';
+                    navigate(`/my-account/cart#${data._id}`);
+                  })
+                  .catch(({ response: { data, status } }) => {
+                    setIsLoading(false);
+                    document.body.style.overflow = 'auto';
+                    if (status === 409) {
+                      navigate(`/my-account/cart#${data.orderId}`);
+                    }
+                    console.log('error');
                   });
               }}
             />

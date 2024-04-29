@@ -1,7 +1,8 @@
 import EmptyCart from 'components/EmptyCart/EmptyCart';
 import Order from 'components/Order/Order';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ListOrders } from './Cart.styled';
+import { useLocation } from 'react-router-dom';
 
 const api = require('../../../../api');
 
@@ -10,9 +11,25 @@ const Cart = () => {
   // eslint-disable-next-line no-unused-vars
   const [totalOrders, setTotalOrders] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [isLoading, setIsLoading] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
-  const [error, setError] = useState([]);
+  const [error, setError] = useState(null);
+  const location = useLocation();
+
+  const scrollOrderRef = useRef();
+
+  useEffect(() => {
+    if (location.hash) {
+      const orderId = location.hash.slice(1);
+      const orderIndex = orders.findIndex(order => order._id === orderId);
+      if (orderIndex !== -1 && scrollOrderRef.current) {
+        scrollOrderRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  }, [location.hash, orders]);
 
   useEffect(() => {
     api
@@ -42,7 +59,10 @@ const Cart = () => {
   ) : (
     <ListOrders>
       {orders.map(order => (
-        <li key={order._id}>
+        <li
+          key={order._id}
+          ref={order._id === location.hash.slice(1) ? scrollOrderRef : null}
+        >
           <Order
             handleRemoveOrder={() => handleRemoveOrder(order._id)}
             order={order}

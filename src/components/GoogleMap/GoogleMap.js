@@ -1,12 +1,19 @@
 import { Map, Marker, useMapsLibrary } from '@vis.gl/react-google-maps';
 import MapHandler from './MapHandler';
 
-const GoogleMap = ({
-  disabled,
-  place,
-  defaultCenter = { lat: 50.074465122666346, lng: 14.434535050418326 },
-  createPlace,
-}) => {
+const GoogleMap = props => {
+  const {
+    disabled,
+    place,
+    defaultCenter = { lat: 50.074465122666346, lng: 14.434535050418326 },
+    createPlace,
+    className,
+    style,
+  } = props;
+  console.log('props', props);
+
+  console.log('className', className);
+
   const geocoding = useMapsLibrary('geocoding');
 
   const onClickMapCreatMarker = async e => {
@@ -40,6 +47,8 @@ const GoogleMap = ({
       onClick={e => {
         !disabled && onClickMapCreatMarker(e);
       }}
+      className={className}
+      style={style}
     >
       {/* <AdvancedMarker
     position={{ lat: 30, lng: 10 }}

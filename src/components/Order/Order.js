@@ -41,8 +41,11 @@ const Order = ({ order, handleRemoveOrder }) => {
     items: orderItems,
     owner,
     serviceType,
-    rentalPeriods,
     typeRent,
+    totalPrice,
+    totalOrderPrice,
+    quantityDays,
+    rentalPeriods,
   } = order;
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.order',
@@ -52,7 +55,6 @@ const Order = ({ order, handleRemoveOrder }) => {
   const [isOpenModalRemoveProduct, setIsOpenModalRemoveProduct] =
     useState(false);
 
-  let totalAmount;
   const handleIncrement = ({ _id: productId, quantity }) => {
     api
       .setQuantity({ productId, quantity: quantity + 1 })
@@ -92,9 +94,10 @@ const Order = ({ order, handleRemoveOrder }) => {
         );
     }
   };
+
   return (
     <>
-      <WrapCardOrder>
+      <WrapCardOrder name={orderId}>
         <ButtonRemoveOrder
           onClick={() => {
             setIsOpenModalRemoveOrder(true);
@@ -110,7 +113,7 @@ const Order = ({ order, handleRemoveOrder }) => {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {items.map(item => {
-            console.log('item', item);
+            // console.log('item', item);
 
             return (
               <MainWrap key={item?._id}>
@@ -140,10 +143,7 @@ const Order = ({ order, handleRemoveOrder }) => {
                             <StyledMinus $disabled={item?.quantity === 1} />
                           </ButtonMath>
                         )}
-                        <TextValue>
-                          {item.quantity}
-                          {rentalPeriods && ' дні'}
-                        </TextValue>
+                        <TextValue>{item.quantity}</TextValue>
                         {!rentalPeriods && (
                           <ButtonMath onClick={() => handleIncrement(item)}>
                             <IconPlus />
@@ -153,9 +153,7 @@ const Order = ({ order, handleRemoveOrder }) => {
                     </Wrap>
                     <Wrap>
                       <SecondaryTitle>{t('amount')}:</SecondaryTitle>
-                      <TextValue>
-                        {(totalAmount = item?.price * item?.quantity)} kč
-                      </TextValue>
+                      <TextValue>{item?.price * item?.quantity} kč</TextValue>
                     </Wrap>
                     <ButtonDelete
                       onClick={() => setIsOpenModalRemoveProduct(item)}
@@ -182,12 +180,17 @@ const Order = ({ order, handleRemoveOrder }) => {
               </WrapCalendar>
             )}
             <TextAmount>
-              {t('orderTotal')} <span>{totalAmount} kč</span>
+              {t('totalPrice')} <span>{totalPrice} kč</span>
             </TextAmount>
+            <TextAmount>
+              {console.log('rentalPeriods', rentalPeriods)}
+              Počet dni <span>{quantityDays}</span>
+            </TextAmount>
+
             <BorderAmount />
             <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
-              {t('totalAmount')}
-              <span>{totalAmount} kč</span>
+              {t('orderTotal')}
+              <span>{totalOrderPrice} kč</span>
             </TextAmount>
             <Button form="orderForm" type="submit">
               {t('Continue')}

@@ -223,7 +223,6 @@ const FormAddProduct = ({ id }) => {
           sale: product?.sale || '',
           priceSale: product?.priceSale || '',
 
-          allowPickup: product?.allowPickup || false,
           pickupAddress: product?.pickupAddress,
 
           isAddPhoto: product?.isAddPhoto || '',
@@ -970,21 +969,6 @@ const FormAddProduct = ({ id }) => {
                   <Title>{t('pickup')}</Title>
                   {/* <GeneralWrap> */}
                   <WrapCondition>
-                    <LabelStatus>
-                      <Box>{values.allowPickup && <IconCheck />}</Box>
-                      {t('pickup')}
-                      <Input
-                        type="checkbox"
-                        name="allowPickup"
-                        value={values.allowPickup}
-                        onChange={e => {
-                          if (e.currentTarget.value)
-                            setFieldValue('pickupAddress', null);
-                          handleChange(e);
-                        }}
-                        onBlur={handleBlur}
-                      />
-                    </LabelStatus>
                     <PlaceAutocomplete
                       value={values.pickupAddress}
                       name="pickupAddress"
@@ -992,7 +976,6 @@ const FormAddProduct = ({ id }) => {
                       onPlaceSelect={pickupAddress =>
                         setFieldValue('pickupAddress', pickupAddress)
                       }
-                      disabled={!values.allowPickup}
                     />
                     {errors.pickupAddress && touched.pickupAddress && (
                       <WrapError>
@@ -1971,21 +1954,6 @@ const FormAddProduct = ({ id }) => {
                         <Title>{t('pickup')}</Title>
                         {/* <GeneralWrap> */}
                         <WrapCondition>
-                          <LabelStatus>
-                            <Box>{values.allowPickup && <IconCheck />}</Box>
-                            {t('pickup')}
-                            <Input
-                              type="checkbox"
-                              name="allowPickup"
-                              value={values.allowPickup}
-                              onChange={e => {
-                                if (e.currentTarget.value)
-                                  setFieldValue('pickupAddress', null);
-                                handleChange(e);
-                              }}
-                              onBlur={handleBlur}
-                            />
-                          </LabelStatus>
                           <PlaceAutocomplete
                             value={values.pickupAddress}
                             name="pickupAddress"
@@ -1993,7 +1961,6 @@ const FormAddProduct = ({ id }) => {
                             onPlaceSelect={pickupAddress =>
                               setFieldValue('pickupAddress', pickupAddress)
                             }
-                            disabled={!values.allowPickup}
                           />
                           {errors.pickupAddress && touched.pickupAddress && (
                             <WrapError>

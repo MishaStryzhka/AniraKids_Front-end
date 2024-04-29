@@ -3,8 +3,10 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const StyledNavLink = styled(NavLink)`
+  height: 40px;
   @media screen and (min-width: 1280px) {
     ${({ $isHeader }) => $isHeader && 'margin: 0 160px;'}
+    height: 80px;
   }
 `;
 

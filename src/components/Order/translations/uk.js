@@ -11,7 +11,7 @@ export const OrderTranslationsUk = {
   seller: 'Продавець',
 
   orderTotal: 'Сума замовлення',
-  totalAmount: 'Загальна сума',
+  totalPrice: 'Загальна сума товарів',
   Continue: 'Продовжити',
 
   celebration: 'святкування',

@@ -65,3 +65,10 @@ export const TextDescription = styled.p`
 
   color: ${({ theme }) => theme.color.mainColor};
 `;
+
+export const ModalDeliveryTitle = styled.div`
+  background-color: #fff;
+  height: 56px;
+  padding: 18px 20px;
+  box-sizing: border-box;
+`;

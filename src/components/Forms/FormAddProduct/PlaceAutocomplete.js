@@ -58,6 +58,7 @@ const PlaceAutocomplete = ({
           value={inputValue}
           onChange={e => setInputValue(e.currentTarget.value)}
           disabled={disabled}
+          autoComplete={false}
         />
       </LabelDescription>
 
