@@ -36,6 +36,9 @@ export const FirstHeader = styled.div`
 `;
 export const SecondHeader = styled.div`
   display: none;
+  height: 60px;
+  box-sizing: border-box;
+
   @media screen and (min-width: 1280px) {
     display: block;
     padding: 12px 0;
