@@ -98,6 +98,8 @@ option:checked {
   background-color: #ebdad1;
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .react-datepicker__day.react-datepicker__day--range-end.react-datepicker__day--in-range {
