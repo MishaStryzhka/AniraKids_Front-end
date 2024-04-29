@@ -9,8 +9,8 @@ export const OrderTranslationsCs = {
   amount: 'Сástka',
   seller: 'Prodavač',
 
-  orderTotal: 'Celková cena objednávky',
-  totalAmount: 'Celková suma',
+  orderTotal: 'Celková cena',
+  totalPrice: 'Celková suma zboží',
   Continue: 'Pokračovat',
 
   celebration: 'oslava',

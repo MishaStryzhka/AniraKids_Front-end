@@ -38,7 +38,9 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
         onClick={() => {
           onClick && onClick();
           document.body.style.overflowY = 'auto';
-          navigate('/my-account/favorite', { replace: true });
+          navigate(user ? '/my-account/favorite' : 'favorite', {
+            replace: true,
+          });
         }}
       >
         <IconHeart
@@ -64,7 +66,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
         onClick={() => {
           onClick && onClick();
           document.body.style.overflowY = 'auto';
-          navigate('/my-account/cart', { replace: true });
+          navigate(user ? '/my-account/cart' : 'cart', { replace: true });
         }}
       >
         <IconBag

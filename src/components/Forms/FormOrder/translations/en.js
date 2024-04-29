@@ -11,8 +11,10 @@ export const FormOrderTranslationsEn = {
   city: 'City',
   address: 'Address',
   'Text required': 'Required fields',
+
   postOffice: 'Post Office',
   section: 'Section',
+  selfPickup: 'Self Pickup',
 
   //
   'Required field': 'Required field',

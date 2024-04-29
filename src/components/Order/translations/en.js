@@ -9,9 +9,9 @@ export const OrderTranslationsEn = {
   amount: 'Amount',
   seller: 'Seller',
 
-  Continue: 'Continue',
   orderTotal: 'Order total',
-  totalAmount: 'Total amount',
+  totalPrice: 'Total amount products',
+  Continue: 'Continue',
 
   celebration: 'celebration',
   photosession: 'photosession',

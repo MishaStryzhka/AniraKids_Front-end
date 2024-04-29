@@ -6,7 +6,7 @@ import {
   WrapCart,
   WrapText,
 } from './EmptyCart.styled';
-import Button from 'components/Button/Button';
+import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
 const EmptyCart = () => {
   const { t } = useTranslation('translation', {
@@ -19,7 +19,7 @@ const EmptyCart = () => {
         <Title>{t('Your cart is currently empty')}</Title>
         <Description>{t('Check out the news')}</Description>
       </WrapText>
-      <Button>{t('Rent')}</Button>
+      <ButtonRent to="/popular">{t('Rent')}</ButtonRent>
     </WrapCart>
   );
 };

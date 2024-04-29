@@ -29,7 +29,6 @@ import {
   WrapInside,
   // WrapPerson,
   // WrapPersonInfo,
-  WrapProductCard,
   // WrapReviews,
   WrapSecondaryImages,
   // WrapTimeRent,
@@ -44,6 +43,7 @@ import {
   StyledSwiper,
   StyledSecondSwiper,
   SecondImage,
+  WrapProduct,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
 // import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
@@ -105,7 +105,9 @@ const ProductPage = () => {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [isOpenModalRent, setIsOpenModalRent] = useState(false);
   const [isOpenModalSelectDateRent, setIsOpenModalSelectDateRent] =
     useState(false);
@@ -123,17 +125,15 @@ const ProductPage = () => {
   }, [user?.favorites]);
 
   useEffect(() => {
-    setIsLoading(true);
-
     api
       .getProductById(id)
       .then(data => {
         setProduct(data.product);
-        setIsLoading(false);
+        setIsLoadingPage(false);
       })
       .catch(error => {
         setError(error);
-        setIsLoading(false);
+        setIsLoadingPage(false);
       });
   }, [id]);
 
@@ -187,14 +187,12 @@ const ProductPage = () => {
   );
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  return isLoading ? (
+  return isLoadingPage ? (
     <SceletonProductPage />
   ) : (
     <>
       <GeneralWrap>
-        <WrapProductCard
-          $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
-        >
+        <WrapProduct $column={pathname.includes('my-account')}>
           <WrapAllImages>
             <StyledSwiper>
               <Swiper
@@ -246,14 +244,8 @@ const ProductPage = () => {
             </WrapSecondaryImages>
           </WrapAllImages>
 
-          <TextWrap
-            $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
-          >
-            <WrapInformation
-              $pageFavorites={
-                pathname === `/my-account/favorite/${product?._id}`
-              }
-            >
+          <TextWrap $pageMyAccount={pathname.includes('my-account')}>
+            <WrapInformation $pageMyAccount={pathname.includes('my-account')}>
               <Wrap>
                 <Title>{product?.name}</Title>
                 <WrapInside>
@@ -302,56 +294,59 @@ const ProductPage = () => {
                   </SecondWrap>
                 )}
               </div>
-              {product?.rental && (
-                <WrapCalendar>
-                  <ButtonCalendarTime>
-                    <IconCalendarTime />
-                  </ButtonCalendarTime>
-                  <TextCalendar>{t('Rental calendar')}</TextCalendar>
-                </WrapCalendar>
+              {pathname !== `/my-account/rent-out/${product?._id}` &&
+                product?.rental && (
+                  <WrapCalendar>
+                    <ButtonCalendarTime>
+                      <IconCalendarTime />
+                    </ButtonCalendarTime>
+                    <TextCalendar>{t('Rental calendar')}</TextCalendar>
+                  </WrapCalendar>
+                )}
+              {pathname !== `/my-account/rent-out/${product?._id}` && (
+                <WrapBtn>
+                  {(product?.dailyRentalPrice ||
+                    product?.hourlyRentalPrice ||
+                    product?.rentalPrice) && (
+                    <StyledButton
+                      // disabled={product?.owner?._id === user?.userID}
+                      onClick={handleClickRent}
+                      ariaLabel="rent"
+                    >
+                      Орендувати
+                    </StyledButton>
+                  )}
+                  {product?.salePrice && (
+                    <StyledButton
+                      // disabled={product?.owner?._id === user?.userID}
+                      onClick={handleClickBuy}
+                      ariaLabel="buy"
+                    >
+                      Купити
+                    </StyledButton>
+                  )}
+                  {pathname !== `/my-account/favorite/${product?._id}` && (
+                    <ButtonAddToFavorite
+                      onClick={e => {
+                        e.preventDefault();
+                        handleAddToFavorites(product?._id);
+                      }}
+                    >
+                      <IconLittleHeart
+                        width={24}
+                        height={24}
+                        fill={
+                          favorites?.includes(product?._id)
+                            ? theme[currentTheme].color.mainColor3
+                            : '#fff'
+                        }
+                        stroke={theme[currentTheme].color.mainColor3}
+                      />
+                    </ButtonAddToFavorite>
+                  )}
+                  <IconChat />
+                </WrapBtn>
               )}
-              <WrapBtn>
-                {(product?.dailyRentalPrice ||
-                  product?.hourlyRentalPrice ||
-                  product?.rentalPrice) && (
-                  <StyledButton
-                    // disabled={product?.owner?._id === user?.userID}
-                    onClick={handleClickRent}
-                    ariaLabel="rent"
-                  >
-                    Орендувати
-                  </StyledButton>
-                )}
-                {product?.salePrice && (
-                  <StyledButton
-                    // disabled={product?.owner?._id === user?.userID}
-                    onClick={handleClickBuy}
-                    ariaLabel="buy"
-                  >
-                    Купити
-                  </StyledButton>
-                )}
-                {pathname !== `/my-account/favorite/${product?._id}` && (
-                  <ButtonAddToFavorite
-                    onClick={e => {
-                      e.preventDefault();
-                      handleAddToFavorites(product?._id);
-                    }}
-                  >
-                    <IconLittleHeart
-                      width={24}
-                      height={24}
-                      fill={
-                        favorites?.includes(product?._id)
-                          ? theme[currentTheme].color.mainColor3
-                          : '#fff'
-                      }
-                      stroke={theme[currentTheme].color.mainColor3}
-                    />
-                  </ButtonAddToFavorite>
-                )}
-                <IconChat />
-              </WrapBtn>
             </WrapInformation>
 
             <WrapDescription>
@@ -375,7 +370,7 @@ const ProductPage = () => {
               </WrapColor>
             </WrapDescription>
           </TextWrap>
-        </WrapProductCard>
+        </WrapProduct>
         {/* <WrapReviews
           $pageFavorites={pathname === `/my-account/favorite/${product?._id}`}
         >
@@ -425,10 +420,18 @@ const ProductPage = () => {
                 owner: product?.owner?._id,
                 rentalPeriods,
                 typeRent,
+                pickupAddress: product?.pickupAddress,
               })
               .then(data => {
                 setIsLoading(false);
-                navigate('/my-account/cart');
+                navigate(`/my-account/cart#${data._id}`);
+              })
+              .catch(({ response: { data, status } }) => {
+                setIsLoading(false);
+                document.body.style.overflow = 'auto';
+                if (status === 409) {
+                  navigate(`/my-account/cart#${data.orderId}`);
+                }
               });
           }}
           onClickDisagree={() => {
@@ -475,11 +478,20 @@ const ProductPage = () => {
                     owner: product?.owner?._id,
                     rentalPeriods,
                     typeRent,
+                    pickupAddress: product?.pickupAddress,
                   })
                   .then(data => {
                     setIsLoading(false);
-                    navigate('/my-account/cart');
                     document.body.style.overflow = 'auto';
+                    navigate(`/my-account/cart#${data._id}`);
+                  })
+                  .catch(({ response: { data, status } }) => {
+                    setIsLoading(false);
+                    document.body.style.overflow = 'auto';
+                    if (status === 409) {
+                      navigate(`/my-account/cart#${data.orderId}`);
+                    }
+                    console.log('error');
                   });
               }}
             />

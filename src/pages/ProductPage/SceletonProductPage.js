@@ -8,7 +8,7 @@ import {
   WrapDescription,
   WrapInformation,
   WrapInside,
-  WrapProductCard,
+  WrapProduct,
   WrapSecondaryImages,
 } from './ProductPage.styled';
 import {
@@ -33,7 +33,7 @@ const SceletonProductPage = () => {
   return (
     <>
       <GeneralWrap>
-        <WrapProductCard>
+        <WrapProduct>
           <WrapAllImages>
             <SceletonMainImage />
             <WrapSecondaryImages>
@@ -81,7 +81,7 @@ const SceletonProductPage = () => {
               <SceletonDescription />
             </WrapDescription>
           </TextWrap>
-        </WrapProductCard>
+        </WrapProduct>
       </GeneralWrap>
     </>
   );

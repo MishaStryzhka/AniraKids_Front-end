@@ -27,7 +27,6 @@ export const addProduct = async credentials => {
     outfits,
     toys,
     videoUrl,
-    allowPickup,
     pickupAddress,
   } = credentials;
 
@@ -65,7 +64,6 @@ export const addProduct = async credentials => {
   outfits && formData.append(`outfits`, outfits);
   toys && formData.append(`toys`, toys);
   videoUrl && formData.append(`videoUrl`, videoUrl);
-  allowPickup && formData.append(`allowPickup`, allowPickup);
   pickupAddress &&
     formData.append(`pickupAddress`, JSON.stringify(pickupAddress));
 

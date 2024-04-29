@@ -407,15 +407,17 @@ const Profile = () => {
                     </>
                   )}
                   {isOpenModalChangeEmail && (
-                    <Modal onClick={() => setIsOpenModalChangeEmail(false)}>
+                    <Modal closeModal={() => setIsOpenModalChangeEmail(false)}>
                       <ModalChangeEmail
-                        onClick={() => setIsOpenModalChangeEmail(false)}
+                        closeModal={() => setIsOpenModalChangeEmail(false)}
                       ></ModalChangeEmail>
                     </Modal>
                   )}
                   {isOpenModalEmailSentSuccessfully && (
                     <Modal
-                      onClick={() => setIsOpenModalEmailSentSuccessfully(false)}
+                      closeModal={() =>
+                        setIsOpenModalEmailSentSuccessfully(false)
+                      }
                     >
                       <TextDone>
                         {t('changeEmailMessage', { email: values.email })}
@@ -568,7 +570,7 @@ const Profile = () => {
                   )}
                   {isOpenModalAddAvatar && (
                     <Modal
-                      onClick={() => {
+                      closeModal={() => {
                         setIsOpenModalAddAvatar(false);
                       }}
                     >
@@ -596,7 +598,7 @@ const Profile = () => {
                 {isOpenModalBecomeLandlord && (
                   <Modal
                     prohibitClosingByBackdrop
-                    onClick={() => setIsOpenModalBecomeLandlord(false)}
+                    closeModal={() => setIsOpenModalBecomeLandlord(false)}
                   >
                     <ModalBecomeLandlord
                       onClick={() => setIsOpenModalBecomeLandlord(false)}

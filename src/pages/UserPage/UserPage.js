@@ -16,13 +16,11 @@ import {
   StyledNavLink,
 } from './UserPage.styled';
 import IconPerson from 'images/icons/IconPerson';
-import IconChat from 'images/icons/IconChat';
 import IconHeart from 'images/icons/IconHeart';
 import IconCloth from 'images/icons/IconCloth';
 import IconHanger from 'images/icons/IconHanger';
 import IconBag2 from 'images/icons/IconBag2';
 import IconShopCart from 'images/icons/IconShopCart';
-import IconCard from 'images/icons/IconCard';
 import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
@@ -61,9 +59,9 @@ const UserPage = () => {
               <IconPerson />
               {t('profile')}
             </StyledNavLink>
-            <StyledNavLink to="./chat">
+            {/* <StyledNavLink to="./chat">
               <IconChat /> {t('chat')}
-            </StyledNavLink>
+            </StyledNavLink> */}
             <StyledNavLink to="./favorite">
               <IconHeart />
               {t('favorite')}
@@ -86,9 +84,9 @@ const UserPage = () => {
                 <IconShopCart /> {t('mySales')}
               </StyledNavLink>
             )}
-            <StyledNavLink to="./wallet">
+            {/* <StyledNavLink to="./wallet">
               <IconCard /> {t('wallet')}
-            </StyledNavLink>
+            </StyledNavLink> */}
             <StyledNavLink to="./cart">
               <StyledIconBag /> {t('basket')}
             </StyledNavLink>

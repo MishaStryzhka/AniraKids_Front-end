@@ -18,23 +18,24 @@ const MainPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const storage = useStorage();
-  const code = searchParams.get('code');
 
   useEffect(() => {
+    const code = searchParams.get('code');
     const { origin } = new URL(window.location.href);
     const state = searchParams.get('state');
 
-    code &&
+    if (code && !isLoading) {
       state === storage.get('requestSecretSeznam') &&
-      dispatch(
-        authBySeznam({
-          code: code,
-          redirect_uri: origin,
-        })
-      );
+        dispatch(
+          authBySeznam({
+            code: code,
+            redirect_uri: origin,
+          })
+        );
+    }
 
     code && user && navigate('/my-account/profile', { replace: true });
-  }, [code, dispatch, navigate, searchParams, setSearchParams, storage, user]);
+  }, [dispatch, isLoading, navigate, searchParams, storage, user]);
 
   return isLoading ? (
     <p>loading</p>

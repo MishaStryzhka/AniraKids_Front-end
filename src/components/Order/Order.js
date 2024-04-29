@@ -29,29 +29,24 @@ import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import Button from 'components/Button/Button';
 import Calendar from 'components/Calendar/Calendar';
-import {
-  ItemInfo,
-  ListInfo,
-  MarkerDelivery,
-  MarkerRent,
-  MarkerReturn,
-  WrapCalendar,
-} from 'components/Calendar/CalendarSelectDate.styled';
+import { WrapCalendar } from 'components/Calendar/CalendarSelectDate.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
+import CalendarDescription from 'components/Calendar/components/CalendarDescription/CalendarDescription';
 
 const api = require('../../api');
 
-const Order = ({
-  order: {
+const Order = ({ order, handleRemoveOrder }) => {
+  const {
     _id: orderId,
     items: orderItems,
     owner,
     serviceType,
-    rentalPeriods,
     typeRent,
-  },
-  handleRemoveOrder,
-}) => {
+    totalPrice,
+    totalOrderPrice,
+    quantityDays,
+    rentalPeriods,
+  } = order;
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.order',
   });
@@ -60,7 +55,6 @@ const Order = ({
   const [isOpenModalRemoveProduct, setIsOpenModalRemoveProduct] =
     useState(false);
 
-  let totalAmount;
   const handleIncrement = ({ _id: productId, quantity }) => {
     api
       .setQuantity({ productId, quantity: quantity + 1 })
@@ -100,9 +94,10 @@ const Order = ({
         );
     }
   };
+
   return (
     <>
-      <WrapCardOrder>
+      <WrapCardOrder name={orderId}>
         <ButtonRemoveOrder
           onClick={() => {
             setIsOpenModalRemoveOrder(true);
@@ -118,7 +113,7 @@ const Order = ({
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {items.map(item => {
-            console.log('item', item);
+            // console.log('item', item);
 
             return (
               <MainWrap key={item?._id}>
@@ -148,10 +143,7 @@ const Order = ({
                             <StyledMinus $disabled={item?.quantity === 1} />
                           </ButtonMath>
                         )}
-                        <TextValue>
-                          {item.quantity}
-                          {rentalPeriods && ' дні'}
-                        </TextValue>
+                        <TextValue>{item.quantity}</TextValue>
                         {!rentalPeriods && (
                           <ButtonMath onClick={() => handleIncrement(item)}>
                             <IconPlus />
@@ -161,9 +153,7 @@ const Order = ({
                     </Wrap>
                     <Wrap>
                       <SecondaryTitle>{t('amount')}:</SecondaryTitle>
-                      <TextValue>
-                        {(totalAmount = item?.price * item?.quantity)} kč
-                      </TextValue>
+                      <TextValue>{item?.price * item?.quantity} kč</TextValue>
                     </Wrap>
                     <ButtonDelete
                       onClick={() => setIsOpenModalRemoveProduct(item)}
@@ -177,35 +167,30 @@ const Order = ({
           })}
         </div>
         <WrapInside>
-          <FormOrder />
+          <FormOrder order={order} />
           <WrapAmount>
             {serviceType === 'rent' && (
               <WrapCalendar>
-                <ListInfo>
-                  <ItemInfo>
-                    <MarkerDelivery /> <p>дні доставки</p> <br />
-                  </ItemInfo>
-                  <ItemInfo>
-                    <MarkerRent /> <p>оренда</p> <br />
-                  </ItemInfo>
-                  <ItemInfo>
-                    <MarkerReturn />
-                    <p>день повернення</p> <br />
-                  </ItemInfo>
-                </ListInfo>
                 <Calendar
+                  selectsRange={typeRent === 'celebration'}
                   rentalPeriods={rentalPeriods}
                   setRentalPeriods={rentalPeriods => {}}
                 />
+                <CalendarDescription typeRent={typeRent} />
               </WrapCalendar>
             )}
             <TextAmount>
-              {t('orderTotal')} <span>{totalAmount} kč</span>
+              {t('totalPrice')} <span>{totalPrice} kč</span>
             </TextAmount>
+            <TextAmount>
+              {console.log('rentalPeriods', rentalPeriods)}
+              Počet dni <span>{quantityDays}</span>
+            </TextAmount>
+
             <BorderAmount />
             <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
-              {t('totalAmount')}
-              <span>{totalAmount} kč</span>
+              {t('orderTotal')}
+              <span>{totalOrderPrice} kč</span>
             </TextAmount>
             <Button form="orderForm" type="submit">
               {t('Continue')}

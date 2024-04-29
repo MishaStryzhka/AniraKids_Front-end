@@ -9,7 +9,7 @@ export const GeneralWrap = styled.div`
   }
 `;
 
-export const WrapProductCard = styled.div`
+export const WrapProduct = styled.div`
   @media screen and (max-width: 427.5px) {
     gap: 9.3vw;
   }
@@ -18,8 +18,7 @@ export const WrapProductCard = styled.div`
   gap: 40px;
   min-width: 0;
   @media screen and (min-width: 1280px) {
-    flex-direction: ${({ $pageFavorites }) =>
-      $pageFavorites ? 'column' : 'row'};
+    flex-direction: ${({ $column }) => ($column ? 'column' : 'row')};
     /* gap: 20px; */
     justify-content: space-between;
   }
@@ -27,10 +26,11 @@ export const WrapProductCard = styled.div`
 
 export const WrapAllImages = styled.div`
   display: flex;
-  gap: 8px;
   flex-direction: column;
-  min-width: 0;
+  justify-content: center;
+  gap: 8px;
 
+  min-width: 0;
   @media screen and (min-width: 768px) {
     flex-direction: row;
     gap: 20px;
@@ -115,14 +115,14 @@ export const TextWrap = styled.div`
   gap: 40px;
 
   @media screen and (min-width: 1280px) {
-    width: ${({ $pageFavorites }) => ($pageFavorites ? '738px' : '522px')};
+    ${({ $pageMyAccount }) => !$pageMyAccount && 'width: 522px;'};
   }
 `;
 
 export const WrapInformation = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ $pageFavorites }) => ($pageFavorites ? '24px' : '16px')};
+  gap: ${({ $pageMyAccount }) => (!$pageMyAccount ? '24px' : '16px')};
 `;
 
 export const WrapDescription = styled.div``;

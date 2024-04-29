@@ -9,12 +9,14 @@ export const FormOrderTranslationsCs = {
   NovaPost: 'Nova Post',
   UkrPost: 'UkrPost',
   'Delivery type': 'Typ doručení',
-  'Select branch type': 'Vyberte typ pobočky',
+  'Select branch type': 'Vyberte typ doručení',
   city: 'Město',
   address: 'Adresa',
   'Text required': 'Povinná pole',
+
   postOffice: 'Poštovní schránka',
   section: 'Pobočka',
+  selfPickup: 'Osobní odběr',
 
   // errors
 
