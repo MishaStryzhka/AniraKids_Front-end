@@ -30,15 +30,6 @@ export const SceletonFieldInput = styled(Sceleton)`
     width: 400px;
   }
 `;
-export const SceletonBtn = styled(Sceleton)`
-  width: 24px;
-  height: 20px;
-`;
-
-export const SceletonBtnVerify = styled(Sceleton)`
-  width: 80px;
-  height: 20px;
-`;
 
 export const SceletonAvatar = styled(Sceleton)`
   width: 197px;
@@ -53,19 +44,4 @@ export const SceletonText = styled(Sceleton)`
 export const SceletonDescription = styled(Sceleton)`
   width: 197px;
   height: 20px;
-`;
-
-export const SceletonTitle = styled(Sceleton)`
-  width: 150px;
-  height: 30px;
-`;
-export const SceletonIcon = styled(Sceleton)`
-  width: 30px;
-  height: 30px;
-`;
-export const SceletonBtnAdd = styled(Sceleton)`
-  @media screen and (max-width: 427.5px) {
-    width: 71.3vw;
-  }
-  width: 305px;
 `;

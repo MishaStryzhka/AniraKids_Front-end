@@ -38,27 +38,22 @@ import {
 import { useTranslation } from 'react-i18next';
 import ModalBecomeLandlord from 'components/Modals/ModalBecomeLandlord/ModalBecomeLandlord';
 import { BeatLoader } from 'react-spinners';
+import { clearDone } from '../../../../redux/auth/slice';
+import { TextDone } from 'components/Modals/Modal.styled';
+import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
+import {
+  SceletonAvatar,
+  SceletonDescription,
+  SceletonField,
+  SceletonFieldInput,
+  SceletonText,
+} from './SceletonProfile.styled';
 import {
   QuestionDescription,
   StyledIconArrowUp,
 } from 'components/SectionAnswers/SectionAnswers.styled';
 import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
 import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
-import { clearDone } from '../../../../redux/auth/slice';
-import { TextDone } from 'components/Modals/Modal.styled';
-import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
-import {
-  SceletonAvatar,
-  SceletonBtn,
-  SceletonBtnAdd,
-  SceletonBtnVerify,
-  SceletonDescription,
-  SceletonField,
-  SceletonFieldInput,
-  SceletonIcon,
-  SceletonText,
-  SceletonTitle,
-} from './SceletonProfile.styled';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
@@ -285,17 +280,14 @@ const Profile = () => {
                       ) : (
                         <SceletonField />
                       )}
-                      {!isLoading ? (
-                        <ButtonEdit
-                          type="button"
-                          title="change phone number"
-                          onClick={() => setIsOpenModalChangePhoneNomber(true)}
-                        >
-                          <StyledIconPencil />
-                        </ButtonEdit>
-                      ) : (
-                        <SceletonBtn />
-                      )}
+                      <ButtonEdit
+                        type="button"
+                        title="change phone number"
+                        onClick={() => setIsOpenModalChangePhoneNomber(true)}
+                        disabled={isLoading}
+                      >
+                        <StyledIconPencil />
+                      </ButtonEdit>
                     </Wrapper>
                   ) : (
                     <>
@@ -346,38 +338,29 @@ const Profile = () => {
                       ) : (
                         <SceletonField />
                       )}
-                      {!isLoading ? (
-                        <ButtonEdit
-                          type="button"
-                          title="change email"
-                          onClick={() => setIsOpenModalChangeEmail(true)}
-                        >
-                          <StyledIconPencil />
-                        </ButtonEdit>
-                      ) : (
-                        <SceletonBtn />
-                      )}
+                      <ButtonEdit
+                        type="button"
+                        title="change email"
+                        onClick={() => setIsOpenModalChangeEmail(true)}
+                        disabled={isLoading}
+                      >
+                        <StyledIconPencil />
+                      </ButtonEdit>
                       {user.emailVerified ? (
                         <p>{t('verified')}</p>
                       ) : (
-                        <>
+                        <ButtonVerify
+                          type="button"
+                          title="verify email"
+                          onClick={() => verifyEmail()}
+                          disabled={isLoading}
+                        >
                           {!isLoading ? (
-                            <ButtonVerify
-                              type="button"
-                              title="verify email"
-                              onClick={() => verifyEmail()}
-                              disabled={isLoading}
-                            >
-                              {!isLoading ? (
-                                t('verify')
-                              ) : (
-                                <BeatLoader color="#fff" />
-                              )}
-                            </ButtonVerify>
+                            t('verify')
                           ) : (
-                            <SceletonBtnVerify />
+                            <BeatLoader color="#fff" />
                           )}
-                        </>
+                        </ButtonVerify>
                       )}
                     </Wrapper>
                   ) : (
@@ -498,23 +481,17 @@ const Profile = () => {
 
                 {((Object.entries(touched).length !== 0 && user.isFirstLogin) ||
                   touched?.avatarUrl) && (
-                  <>
+                  <StyledButton
+                    type="submit"
+                    title={t('saveChanges')}
+                    disabled={isLoading}
+                  >
                     {!isLoading ? (
-                      <StyledButton
-                        type="submit"
-                        title={t('saveChanges')}
-                        disabled={isLoading}
-                      >
-                        {!isLoading ? (
-                          t('saveChanges')
-                        ) : (
-                          <BeatLoader color="#fff" />
-                        )}
-                      </StyledButton>
+                      t('saveChanges')
                     ) : (
-                      <SceletonBtnAdd />
+                      <BeatLoader color="#fff" />
                     )}
-                  </>
+                  </StyledButton>
                 )}
               </Wrap>
               <SecondWrap>
@@ -584,15 +561,12 @@ const Profile = () => {
                 </AvatarLabel>
                 {user.typeUser !== 'owner' && (
                   <>
-                    {!isLoading ? (
-                      <ButtonAdd
-                        onClick={() => setIsOpenModalBecomeLandlord(true)}
-                      >
-                        {t('BECOME_LANDLORD')}
-                      </ButtonAdd>
-                    ) : (
-                      <SceletonBtnAdd />
-                    )}
+                    <ButtonAdd
+                      onClick={() => setIsOpenModalBecomeLandlord(true)}
+                      disabled={isLoading}
+                    >
+                      {t('BECOME_LANDLORD')}
+                    </ButtonAdd>
                   </>
                 )}
                 {isOpenModalBecomeLandlord && (
@@ -620,19 +594,11 @@ const Profile = () => {
                 marginBottom: 14,
               }}
             >
-              {isLoading ? (
-                <QuestionDescription>{'BillingDetails'}</QuestionDescription>
-              ) : (
-                <SceletonTitle />
-              )}
-              {isLoading ? (
-                <StyledIconArrowUp
-                  $openAnswer={isOpenBillingDetails}
-                  onClick={() => setIsOpenBillingDetails(!isOpenBillingDetails)}
-                />
-              ) : (
-                <SceletonIcon />
-              )}
+              <QuestionDescription>{'BillingDetails'}</QuestionDescription>
+              <StyledIconArrowUp
+                $openAnswer={isOpenBillingDetails}
+                onClick={() => setIsOpenBillingDetails(!isOpenBillingDetails)}
+              />
             </div>
             <div
               style={{
@@ -652,19 +618,11 @@ const Profile = () => {
                 marginBottom: 14,
               }}
             >
-              {isLoading ? (
-                <QuestionDescription>{'BankAccount'}</QuestionDescription>
-              ) : (
-                <SceletonTitle />
-              )}
-              {isLoading ? (
-                <StyledIconArrowUp
-                  $openAnswer={isOpenBankAccount}
-                  onClick={() => setIsOpenBankAccount(!isOpenBankAccount)}
-                />
-              ) : (
-                <SceletonIcon />
-              )}
+              <QuestionDescription>{'BankAccount'}</QuestionDescription>
+              <StyledIconArrowUp
+                $openAnswer={isOpenBankAccount}
+                onClick={() => setIsOpenBankAccount(!isOpenBankAccount)}
+              />
             </div>
             <div
               style={{
