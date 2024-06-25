@@ -607,7 +607,6 @@ const Profile = () => {
               }}
             >
               {isOpenBillingDetails && <FormBillingDetails />}
-              <div style={{ width: 305 }} />
             </div>
           </WrapperBiling>
           <WrapperBiling>
@@ -631,7 +630,6 @@ const Profile = () => {
               }}
             >
               {isOpenBankAccount && <FormBankAccount />}
-              <div style={{ width: 305 }} />
             </div>
           </WrapperBiling>
         </>

@@ -7,7 +7,9 @@ export const ProfileForm = styled(Form)`
   display: flex;
   flex-direction: column-reverse;
   gap: 40px;
-  justify-content: space-evenly;
+  padding: 0 8px;
+  justify-content: space-between;
+
   @media screen and (min-width: 768px) {
     flex-direction: row;
     gap: 0;
