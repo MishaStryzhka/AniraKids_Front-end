@@ -53,8 +53,8 @@ const UserPage = () => {
       </HeaderBox>
 
       <WrapMainContent>
-        {!isLoading ? (
-          <SideBar>
+        <SideBar>
+          <div>
             <StyledNavLink to="./profile">
               <IconPerson />
               {t('profile')}
@@ -98,14 +98,8 @@ const UserPage = () => {
               <IconExit />
               {t('logOut')}
             </StyledButton>
-          </SideBar>
-        ) : (
-          <SideBar style={{ gap: '4px' }}>
-            {sceletonArrayMenuLinks.map((_, index) => (
-              <Sceleton key={index} width="305px" height="50px" />
-            ))}
-          </SideBar>
-        )}
+          </div>
+        </SideBar>
         <MainContent>
           <Outlet />
         </MainContent>
