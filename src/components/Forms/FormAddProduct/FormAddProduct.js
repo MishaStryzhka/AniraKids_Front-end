@@ -83,6 +83,8 @@ import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
 import IconBasket from 'images/icons/IconBasket';
 import { addProduct, getProductById } from 'api';
 import PlaceAutocomplete from './PlaceAutocomplete';
+import { addPickupAddress, clearDone } from './../../../redux/auth/slice';
+import { useDispatch } from 'react-redux';
 
 const FormAddProduct = ({ id }) => {
   const { t, i18n } = useTranslation('translation', {
@@ -102,6 +104,7 @@ const FormAddProduct = ({ id }) => {
   const [photoOrder, setPhotoOrder] = useState([]);
 
   const [isOpenModalMaxSize, setIsOpenModalMaxSize] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!product && id) {
@@ -110,8 +113,6 @@ const FormAddProduct = ({ id }) => {
       getProductById(id)
         .then(data => {
           setProduct(data.product);
-          console.log('data.product.photos', data.product.photos);
-
           setSelectedPhotos(data.product.photos);
           setPhotoOrder(data.product.photos.map((_, index) => index));
           setIsLoading(false);
@@ -181,11 +182,15 @@ const FormAddProduct = ({ id }) => {
     }
   }, []);
 
+  addPickupAddress();
+  clearDone();
+
   // ===========
   const handleFormSubmit = values => {
     setIsLoading(true);
     addProduct(values)
       .then(data => {
+        dispatch(addPickupAddress(data.product.pickupAddress));
         setIsLoading(false);
         navigate('/my-account/rent-out', { replace: true });
       })
@@ -323,7 +328,7 @@ const FormAddProduct = ({ id }) => {
                     name="photoUrls"
                     accept=".jpg, .jpeg, .png"
                     onChange={e => {
-                      const selectedFiles = Array.from(e.target.files);
+                      let selectedFiles = Array.from(e.target.files);
 
                       if (selectedFiles.length + selectedPhotos.length > 10) {
                         setIsOpenModalMaxSize(true);
@@ -331,8 +336,11 @@ const FormAddProduct = ({ id }) => {
                       }
 
                       if (selectedFiles.some(file => file.size > 10485760)) {
+                        selectedFiles = selectedFiles.filter(
+                          file => file.size < 10485760
+                        );
                         setIsOpenModalMaxSize(true);
-                        return;
+                        // return;
                       }
 
                       setTouched({ ...touched, photoUrls: true });
@@ -973,9 +981,11 @@ const FormAddProduct = ({ id }) => {
                       value={values.pickupAddress}
                       name="pickupAddress"
                       placeholder={t('address')}
-                      onPlaceSelect={pickupAddress =>
-                        setFieldValue('pickupAddress', pickupAddress)
-                      }
+                      onPlaceSelect={pickupAddress => {
+                        console.log('pickupAddress', pickupAddress);
+
+                        return setFieldValue('pickupAddress', pickupAddress);
+                      }}
                     />
                     {errors.pickupAddress && touched.pickupAddress && (
                       <WrapError>
