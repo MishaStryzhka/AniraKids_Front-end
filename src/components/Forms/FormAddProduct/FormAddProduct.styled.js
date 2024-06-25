@@ -205,6 +205,31 @@ export const Field = styled.input`
   border-color: ${({ theme }) => theme.color.additionalColorBrown};
 `;
 
+export const FieldMap = styled.input`
+  position: absolute;
+
+  @media screen and (max-width: 427.5px) {
+    font-size: 3.3vw;
+    padding: 3.7vw;
+  }
+  box-sizing: border-box;
+  width: 98%;
+  height: 96%;
+  margin: 1px;
+  padding: 16px;
+  border-radius: 5px;
+
+  font-family: 'Open Sans Hebrew', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  border: 1.5px solid;
+  outline: transparent;
+
+  color: ${({ theme }) => theme.color.mainColor3};
+  border: transparent;
+`;
+
 export const FieldComments = styled.textarea`
   box-sizing: border-box;
   width: 100%;

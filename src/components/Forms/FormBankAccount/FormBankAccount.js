@@ -46,8 +46,6 @@ const FormBankAccount = () => {
         handleBlur,
         handleSubmit,
       }) => {
-        console.log('errors', errors);
-
         return (
           <StyledForm onSubmit={handleSubmit}>
             <WrapInput>

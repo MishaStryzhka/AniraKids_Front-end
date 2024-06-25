@@ -34,7 +34,7 @@ const ModalBurgerAdmin = ({ onClick }) => {
     <ModalWindow>
       <Wrap>
         <WrapBoxNav>
-          <BoxNavigation />
+          <BoxNavigation onClick={onClick} />
         </WrapBoxNav>
         <CloseButton
           onClick={() => {
@@ -77,7 +77,7 @@ const ModalBurgerAdmin = ({ onClick }) => {
           <StyledNavLink to="./wallet" onClick={() => onClick()}>
             <IconCard /> {t('wallet')}
           </StyledNavLink>
-          <StyledNavLink to="./order1" onClick={() => onClick()}>
+          <StyledNavLink to="./cart" onClick={() => onClick()}>
             <StyledIconBag /> {t('basket')}
           </StyledNavLink>
           <StyledButton

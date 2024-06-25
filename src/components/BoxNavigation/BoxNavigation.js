@@ -1,7 +1,7 @@
 import IconHeart from 'images/icons/IconHeart';
 import IconBag from '../../images/icons/IconBag';
 import IconPerson from '../../images/icons/IconPerson';
-import { Box, Button } from './BoxNavigation.styled';
+import { Box, Button, Caunt } from './BoxNavigation.styled';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
 import { useContext, useEffect } from 'react';
@@ -13,8 +13,8 @@ import { ModalAuthContext } from 'components/App';
 const BoxNavigation = ({ onClick, $mainPage }) => {
   const { isOpenModalAuth, setIsOpenModalAuth } = useContext(ModalAuthContext);
   const { user, currentTheme } = useAuth();
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   useEffect(() => {
     isOpenModalAuth &&
       user &&
@@ -50,6 +50,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
               : theme[currentTheme].color.mainColor5
           }
         />
+        {user?.favorites?.length && <Caunt>{user?.favorites?.length}</Caunt>}
       </Button>
       <Button type="button" onClick={onClickAuth}>
         <IconPerson
@@ -76,6 +77,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
               : theme[currentTheme].color.mainColor5
           }
         />
+        {user?.cart?.length && <Caunt>{user?.cart?.length}</Caunt>}
       </Button>
       {isOpenModalAuth && !user && (
         <Modal

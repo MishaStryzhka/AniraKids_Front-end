@@ -36,6 +36,8 @@ const authSlice = createSlice({
     clearDone: state => {
       state.isDone = null;
     },
+    addPickupAddress: ({ user }, { payload }) =>
+      user.pickupAddresses.push(payload),
   },
   extraReducers: builder => {
     builder
@@ -238,4 +240,4 @@ const authSlice = createSlice({
 });
 
 export const authReducer = authSlice.reducer;
-export const { clearError, clearDone } = authSlice.actions;
+export const { clearError, clearDone, addPickupAddress } = authSlice.actions;

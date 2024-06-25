@@ -1,7 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
-import { Field, LabelDescription, WrapMap } from './FormAddProduct.styled';
+import {
+  Field,
+  FieldMap,
+  LabelDescription,
+  WrapMap,
+} from './FormAddProduct.styled';
 import GoogleMap from 'components/GoogleMap/GoogleMap';
+import { useAuth } from 'hooks';
 
 const PlaceAutocomplete = ({
   value = {
@@ -12,6 +18,7 @@ const PlaceAutocomplete = ({
   disabled = false,
   placeholder = 'address',
 }) => {
+  const { user } = useAuth();
   const [inputValue, setInputValue] = useState(value?.formatted_address);
 
   const [place, setPlace] = useState(value);
@@ -50,16 +57,38 @@ const PlaceAutocomplete = ({
   return (
     <>
       <LabelDescription className="autocomplete-container">
-        <Field
-          ref={inputRef}
-          placeholder={placeholder}
-          type="adress"
-          name={name}
-          value={inputValue}
-          onChange={e => setInputValue(e.currentTarget.value)}
-          disabled={disabled}
-          autoComplete={false}
-        />
+        <div style={{ position: 'relative' }}>
+          <FieldMap
+            ref={inputRef}
+            placeholder={placeholder}
+            type="adress"
+            name={name}
+            value={inputValue}
+            onChange={e => setInputValue(e.currentTarget.value)}
+            disabled={disabled}
+            autoComplete={'false'}
+          />
+          <Field
+            as="select"
+            placeholder={placeholder}
+            type="adress"
+            name={name}
+            // value={inputValue}
+            onChange={({ currentTarget: { value } }) =>
+              createPlace(
+                user.pickupAddresses.find(adr => adr.place_id === value)
+              )
+            }
+            disabled={disabled}
+            autoComplete={'false'}
+          >
+            {user?.pickupAddresses?.map(adress => (
+              <option key={adress.place_id} value={adress.place_id}>
+                {adress.formatted_address}
+              </option>
+            ))}
+          </Field>
+        </div>
       </LabelDescription>
 
       {place && (

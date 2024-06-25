@@ -6,6 +6,8 @@ export const StyledForm = styled(Form)`
   flex-direction: column;
   align-items: center;
   gap: 40px;
+
+  width: 100%;
 `;
 
 export const WrapInput = styled.div`
