@@ -25,7 +25,6 @@ import IconExit from 'images/icons/IconExit';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
-import Sceleton from 'components/Sceleton/Sceleton';
 // import { useState } from 'react';
 export const sceletonArrayMenuLinks = Array.from({ length: 10 });
 const UserPage = () => {
@@ -35,7 +34,7 @@ const UserPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   //  const [isLoading, setIsLoading] = useState(true);
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
 
   useTitle('Акаунт');
 
