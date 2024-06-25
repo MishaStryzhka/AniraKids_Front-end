@@ -10,9 +10,6 @@ const GoogleMap = props => {
     className,
     style,
   } = props;
-  console.log('props', props);
-
-  console.log('className', className);
 
   const geocoding = useMapsLibrary('geocoding');
 
