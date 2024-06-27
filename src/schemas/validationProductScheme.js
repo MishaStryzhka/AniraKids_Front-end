@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
 
 const categoryOptions = [
-  'women`s category',
-  'men`s category',
-  'children`s category',
-  'decoration category',
+  'forWomen', // 'women`s category'
+  'forMen', // 'men`s category'
+  'forChildren', // 'children`s category'
+  'decorAndToys', // 'decoration category'
 ];
 
 // eslint-disable-next-line no-unused-vars

@@ -56,7 +56,7 @@ const DecorAndToysPage = () => {
       .getProducts({
         page,
         pageSize,
-        category: 'decoration category',
+        category: 'decorAndToys',
         ...Object.fromEntries(searchParams.entries()),
       })
       .then(data => {

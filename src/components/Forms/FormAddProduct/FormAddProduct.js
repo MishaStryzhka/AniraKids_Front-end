@@ -507,11 +507,11 @@ const FormAddProduct = ({ id }) => {
                   <GeneralList>
                     <li>
                       <Button
-                        $active={values.category === 'women`s category'}
+                        $active={values.category === 'forWomen'}
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
-                          setFieldValue('category', 'women`s category');
+                          setFieldValue('category', 'forWomen');
                         }}
                       >
                         {t("Women's Clothing")}
@@ -519,11 +519,11 @@ const FormAddProduct = ({ id }) => {
                     </li>
                     <li>
                       <Button
-                        $active={values.category === 'men`s category'}
+                        $active={values.category === 'forMen'}
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
-                          setFieldValue('category', 'men`s category');
+                          setFieldValue('category', 'forMen');
                         }}
                       >
                         {t("Men's Suits")}
@@ -531,11 +531,11 @@ const FormAddProduct = ({ id }) => {
                     </li>
                     <li>
                       <Button
-                        $active={values.category === 'children`s category'}
+                        $active={values.category === 'forChildren'}
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
-                          setFieldValue('category', 'children`s category');
+                          setFieldValue('category', 'forChildren');
                         }}
                       >
                         {t("Children's Clothing")}
@@ -544,11 +544,11 @@ const FormAddProduct = ({ id }) => {
 
                     <li>
                       <Button
-                        $active={values.category === 'decoration category'}
+                        $active={values.category === 'decorAndToys'}
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
-                          setFieldValue('category', 'decoration category');
+                          setFieldValue('category', 'decorAndToys');
                         }}
                       >
                         {t('Decor and Toys')}
@@ -562,17 +562,17 @@ const FormAddProduct = ({ id }) => {
                     </WrapError>
                   )}
 
-                  {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
+                  {/* forWomen / forMen */}
 
-                  {(values.category === 'women`s category' ||
-                    values.category === 'men`s category') && (
+                  {(values.category === 'forWomen' ||
+                    values.category === 'forMen') && (
                     <Wrap>
                       <BoxCategory>
                         <WrapCategory>
                           <Description>Family look</Description>
                           <List>
                             {[
-                              ...(values.category === 'women`s category'
+                              ...(values.category === 'forWomen'
                                 ? arrayFamilyLookProductWomen
                                 : arrayFamilyLookProductMen),
                             ].map((valueVariant, index) => (
@@ -599,7 +599,7 @@ const FormAddProduct = ({ id }) => {
                             )}
                           </List>
                         </WrapCategory>
-                        {values.category === 'women`s category' && (
+                        {values.category === 'forWomen' && (
                           <WrapCategory>
                             <Description>{t('For pregnant women')}</Description>
                             <Label>
@@ -652,9 +652,9 @@ const FormAddProduct = ({ id }) => {
                     </Wrap>
                   )}
 
-                  {/* CHILDREN`S CATEGORY */}
+                  {/* forChildren */}
 
-                  {values.category === 'children`s category' && (
+                  {values.category === 'forChildren' && (
                     <Wrap>
                       <BoxCategory>
                         <WrapCategory>
@@ -751,9 +751,9 @@ const FormAddProduct = ({ id }) => {
                     </Wrap>
                   )}
 
-                  {/* DECORATION CATEGORY */}
+                  {/* decorAndToys */}
 
-                  {values.category === 'decoration category' && (
+                  {values.category === 'decorAndToys' && (
                     <Wrap>
                       <BoxCategory>
                         <WrapCategory>
@@ -1295,11 +1295,11 @@ const FormAddProduct = ({ id }) => {
                       <GeneralList>
                         <li>
                           <Button
-                            $active={values.category === 'women`s category'}
+                            $active={values.category === 'forWomen'}
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
-                              setFieldValue('category', 'women`s category');
+                              setFieldValue('category', 'forWomen');
                             }}
                           >
                             {t("Women's Clothing")}
@@ -1307,11 +1307,11 @@ const FormAddProduct = ({ id }) => {
                         </li>
                         <li>
                           <Button
-                            $active={values.category === 'men`s category'}
+                            $active={values.category === 'forMen'}
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
-                              setFieldValue('category', 'men`s category');
+                              setFieldValue('category', 'forMen');
                             }}
                           >
                             {t("Men's Suits")}
@@ -1319,11 +1319,11 @@ const FormAddProduct = ({ id }) => {
                         </li>
                         <li>
                           <Button
-                            $active={values.category === 'children`s category'}
+                            $active={values.category === 'forChildren'}
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
-                              setFieldValue('category', 'children`s category');
+                              setFieldValue('category', 'forChildren');
                             }}
                           >
                             {t("Children's Clothing")}
@@ -1331,11 +1331,11 @@ const FormAddProduct = ({ id }) => {
                         </li>
                         <li>
                           <Button
-                            $active={values.category === 'decoration category'}
+                            $active={values.category === 'decorAndToys'}
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
-                              setFieldValue('category', 'decoration category');
+                              setFieldValue('category', 'decorAndToys');
                             }}
                           >
                             {t('Decor and Toys')}
@@ -1393,15 +1393,15 @@ const FormAddProduct = ({ id }) => {
 
                 {stepValue === 3 && (
                   <Section>
-                    {/* WOMEN`S CATEGORY / MEN`S CATEGORY */}
+                    {/* forWomen / forMen */}
 
-                    {(values.category === 'women`s category' ||
-                      values.category === 'men`s category') && (
+                    {(values.category === 'forWomen' ||
+                      values.category === 'forMen') && (
                       <Wrap>
-                        {values.category === 'women`s category' && (
+                        {values.category === 'forWomen' && (
                           <TitleCategory>{t("Women's Clothing")}</TitleCategory>
                         )}
-                        {values.category === 'men`s category' && (
+                        {values.category === 'forMen' && (
                           <TitleCategory> {t("Men's Suits")}</TitleCategory>
                         )}
                         <BoxCategory>
@@ -1409,7 +1409,7 @@ const FormAddProduct = ({ id }) => {
                             <Description>Family look</Description>
                             <List>
                               {[
-                                ...(values.category === 'women`s category'
+                                ...(values.category === 'forWomen'
                                   ? arrayFamilyLookProductWomen
                                   : arrayFamilyLookProductMen),
                               ].map((valueVariant, index) => (
@@ -1445,7 +1445,7 @@ const FormAddProduct = ({ id }) => {
                               )}
                             </List>
                           </WrapCategory>
-                          {values.category === 'women`s category' && (
+                          {values.category === 'forWomen' && (
                             <WrapCategory id="section-isPregnancy">
                               <Description>
                                 {t('For pregnant women')}
@@ -1505,11 +1505,11 @@ const FormAddProduct = ({ id }) => {
                       </Wrap>
                     )}
 
-                    {/* CHILDREN`S CATEGORY */}
+                    {/* forChildren */}
 
-                    {values.category === 'children`s category' && (
+                    {values.category === 'forChildren' && (
                       <Wrap>
-                        {values.category === 'children`s category' && (
+                        {values.category === 'forChildren' && (
                           <TitleCategory>
                             {t("Children's Clothing")}
                           </TitleCategory>
@@ -1615,11 +1615,11 @@ const FormAddProduct = ({ id }) => {
                       </Wrap>
                     )}
 
-                    {/* DECORATION CATEGORY */}
+                    {/* decorAndToys */}
 
-                    {values.category === 'decoration category' && (
+                    {values.category === 'decorAndToys' && (
                       <Wrap>
-                        {values.category === 'decoration category' && (
+                        {values.category === 'decorAndToys' && (
                           <TitleCategory>{t('Decor and Toys')}</TitleCategory>
                         )}
                         <BoxCategory>
@@ -1727,7 +1727,7 @@ const FormAddProduct = ({ id }) => {
                           if (errors?.category)
                             newErrors.category = errors.category;
 
-                          if (values.category === 'women`s category') {
+                          if (values.category === 'forWomen') {
                             validateField('familyLook');
                             validateField('size');
                             if (errors?.familyLook)
@@ -1737,7 +1737,7 @@ const FormAddProduct = ({ id }) => {
                             if (errors?.size) newErrors.size = errors.size;
                           }
 
-                          if (values.category === 'men`s category') {
+                          if (values.category === 'forMen') {
                             validateField('familyLook');
                             validateField('size');
                             if (errors?.familyLook)
@@ -1745,7 +1745,7 @@ const FormAddProduct = ({ id }) => {
                             if (errors?.size) newErrors.size = errors.size;
                           }
 
-                          if (values.category === 'children`s category') {
+                          if (values.category === 'forChildren') {
                             validateField('outfits');
                             validateField('age');
                             validateField('childSize');
@@ -1756,7 +1756,7 @@ const FormAddProduct = ({ id }) => {
                               newErrors.childSize = errors.childSize;
                           }
 
-                          if (values.category === 'decoration category') {
+                          if (values.category === 'decorAndToys') {
                             validateField('subject');
                             validateField('decor');
                             validateField('toys');
@@ -2057,85 +2057,3 @@ const FormAddProduct = ({ id }) => {
 };
 
 export default FormAddProduct;
-
-// const PlacesAutocomplete = ({ setSelected }) => {
-//   const { ready, value, suggestions, setValue, clearSuggestions } =
-//     usePlacesAutocomplete({ callbackName: 'initMap' });
-//   const { status, data } = suggestions;
-//   console.log('vsuggestions', suggestions);
-
-//   const { isLoaded } = useLoadScript({
-//     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-//     libraries: ['places'],
-//   });
-
-//   return (
-//     <LabelPrice>
-//       Pickup address:
-//       <InputPrice
-//         placeholder="address"
-//         type="adress"
-//         name="pickupAddress"
-//         value={value}
-//         onChange={e => {
-//           console.log('e.target.value', e.target.value);
-
-//           setValue(e.target.value);
-//         }}
-//         // disabled={!ready}
-//       />
-//       <ul>
-//         {status === 'OK' &&
-//           data.map(({ place_id, description }) => (
-//             <li key={place_id}>{description}</li>
-//           ))}
-//       </ul>
-//     </LabelPrice>
-//   );
-// };
-
-// const PlacesAutocomplete = ({ setSelected }) => {
-//   const {
-//     ready,
-//     value,
-//     setValue,
-//     suggestions: { status, data },
-//     clearSuggestions,
-//   } = usePlacesAutocomplete({
-//     fields: ['geometry', 'name', 'formatted_address'],
-//   });
-
-//   console.log('data', data);
-
-//   const handleSelect = async address => {
-//     setValue(address, false);
-//     clearSuggestions();
-
-//     const results = await getGeocode({ address });
-//     const { lat, lng } = await getLatLng(results[0]);
-//     setSelected({ address, geoCode: { lat, lng } });
-//   };
-
-//   return (
-//     <>
-//       <InputPrice
-//         value={value}
-//         name="pickupAddress"
-//         onChange={e => setValue(e.target.value)}
-//         className="combobox-input"
-//         placeholder="Search an address"
-//         disabled={!ready}
-//       />
-//       <ul>
-//         {status === 'OK' &&
-//           data.map(({ place_id, description }) => (
-//             <li key={place_id}>
-//               <button onClick={() => handleSelect(description)}>
-//                 {description}
-//               </button>
-//             </li>
-//           ))}
-//       </ul>
-//     </>
-//   );
-// };

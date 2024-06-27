@@ -56,7 +56,7 @@ const ForMenPage = () => {
       .getProducts({
         page,
         pageSize,
-        category: 'men`s category',
+        category: 'forMen',
         ...Object.fromEntries(searchParams.entries()),
       })
       .then(data => {

@@ -42,7 +42,7 @@ const PopularPage = () => {
   return (
     <Container>
       <MainWrap>
-        {productsByCategory['women`s category']?.length !== 0 && (
+        {productsByCategory['forWomen']?.length !== 0 && (
           <Section>
             <Title>{t("Women's Clothing")}</Title>
             <Border />
@@ -68,7 +68,7 @@ const PopularPage = () => {
               pagination={{ clickable: true, el: '.swiper-pagination' }}
             >
               {!isLoading ? (
-                productsByCategory['women`s category']?.map(product => {
+                productsByCategory['forWomen']?.map(product => {
                   console.log('product', product);
 
                   return (
@@ -100,7 +100,7 @@ const PopularPage = () => {
             <ButtonViewMore to={`../forWomen`}>{t('viewMore')}</ButtonViewMore>
           </Section>
         )}
-        {productsByCategory['men`s category']?.length !== 0 && (
+        {productsByCategory['forMen']?.length !== 0 && (
           <Section>
             <Title>{t('Men suits')}</Title>
             <Border />
@@ -126,7 +126,7 @@ const PopularPage = () => {
               pagination={{ clickable: true, el: '.swiper-pagination' }}
             >
               {!isLoading ? (
-                productsByCategory['men`s category']?.map(product => {
+                productsByCategory['forMen']?.map(product => {
                   return (
                     <SwiperSlide key={product._id}>
                       <UsersProductCard
@@ -156,7 +156,7 @@ const PopularPage = () => {
             <ButtonViewMore to="../forMen">{t('viewMore')}</ButtonViewMore>
           </Section>
         )}
-        {productsByCategory['children`s category']?.length !== 0 && (
+        {productsByCategory['forChildren']?.length !== 0 && (
           <Section>
             <Title>{t("Children's Clothing")}</Title>
             <Border />
@@ -182,7 +182,7 @@ const PopularPage = () => {
               pagination={{ clickable: true, el: '.swiper-pagination' }}
             >
               {!isLoading ? (
-                productsByCategory['children`s category']?.map(product => {
+                productsByCategory['forChildren']?.map(product => {
                   return (
                     <SwiperSlide key={product._id}>
                       <UsersProductCard
@@ -212,7 +212,7 @@ const PopularPage = () => {
             <ButtonViewMore to="../forChildren">{t('viewMore')}</ButtonViewMore>
           </Section>
         )}
-        {productsByCategory['decoration category']?.length !== 0 && (
+        {productsByCategory['decorAndToys']?.length !== 0 && (
           <Section>
             <Title>{t('Decor And Toys')}</Title>
             <Border />
@@ -238,7 +238,7 @@ const PopularPage = () => {
               pagination={{ clickable: true, el: '.swiper-pagination' }}
             >
               {!isLoading ? (
-                productsByCategory['decoration category']?.map(product => {
+                productsByCategory['decorAndToys']?.map(product => {
                   return (
                     <SwiperSlide key={product._id}>
                       <UsersProductCard

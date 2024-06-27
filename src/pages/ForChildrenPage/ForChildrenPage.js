@@ -56,7 +56,7 @@ const ForChildrenPage = () => {
       .getProducts({
         page,
         pageSize,
-        category: 'children`s category',
+        category: 'forChildren',
         ...Object.fromEntries(searchParams.entries()),
       })
       .then(data => {
@@ -110,7 +110,6 @@ const ForChildrenPage = () => {
             ) : isLoading ? (
               <ProductList>
                 {Array.from({ length: 9 }).map((_, index) => (
-
                   <li key={index}>
                     <SceletonUsersProductCard id={index} />
                   </li>
