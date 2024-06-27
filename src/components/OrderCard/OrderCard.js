@@ -27,7 +27,6 @@ const OrderCard = ({ product, id }) => {
   const location = useLocation();
   const { pathname } = useLocation();
 
-  console.log(product);
   const $pageMyOrders = pathname === '/my-account/my-orders';
   const $pageMyPurchases = pathname === `/my-account/my-purchases`;
   return (
