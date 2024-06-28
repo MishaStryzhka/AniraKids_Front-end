@@ -17,7 +17,7 @@ export const CalendarTranslationsCs = {
     menuTitle: 'Vyberte datum',
     daysDelivery: 'dny doručení',
     rental: 'pronájem',
-    up_to_6_hours: 'až 6 hodin',
+    min_5_hours: 'min. 5 hodin',
     returnDay: 'den vrácení',
     menuDescription:
       'Vyberte den pronájmu (nebo datum začátku a konce pronájmu)',

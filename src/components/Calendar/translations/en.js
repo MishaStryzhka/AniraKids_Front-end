@@ -17,7 +17,7 @@ export const CalendarTranslationsEn = {
     menuTitle: 'Select Date',
     daysDelivery: 'delivery days',
     rental: 'rental',
-    up_to_6_hours: 'up to 6 hours',
+    min_5_hours: '"min. 5 hours"',
     returnDay: 'return day',
     menuDescription: 'Select rental day (or start and end date of rental)',
     buttonSaveChanges: 'SAVE CHANGES',
