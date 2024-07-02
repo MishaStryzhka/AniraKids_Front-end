@@ -6,6 +6,8 @@ export const OrderTranslationsEn = {
 
   price: 'Price',
   quantity: 'Quantity',
+  quantity_of_hours: 'Quantity of hours',
+  quantity_of_days: 'quantity of days',
   amount: 'Amount',
   seller: 'Seller',
 

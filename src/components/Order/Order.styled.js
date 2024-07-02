@@ -72,8 +72,8 @@ export const MainWrap = styled.div`
   }
 `;
 export const WrapImage = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   border-radius: 2px;
   overflow: hidden;
   margin: 0 auto;
@@ -186,6 +186,7 @@ export const StyledMinus = styled.div`
   margin: 0 auto;
 `;
 export const ButtonDelete = styled.button`
+  z-index: 1;
   cursor: pointer;
   padding: 8px;
   width: 40px;

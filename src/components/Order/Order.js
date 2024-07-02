@@ -27,15 +27,18 @@ import {
 } from './Order.styled';
 import { useTranslation } from 'react-i18next';
 import IconPlus from 'images/icons/IconPlus';
-import Button from 'components/Button/Button';
 import Calendar from 'components/Calendar/Calendar';
 import { WrapCalendar } from 'components/Calendar/CalendarSelectDate.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarDescription from 'components/Calendar/components/CalendarDescription/CalendarDescription';
+import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
 const api = require('../../api');
 
-const Order = ({ order, handleRemoveOrder }) => {
+const Order = ({ order: dataOrder, handleRemoveOrder }) => {
+  const [order, setOrder] = useState(dataOrder);
+  console.log('order', order);
+
   const {
     _id: orderId,
     items: orderItems,
@@ -55,10 +58,11 @@ const Order = ({ order, handleRemoveOrder }) => {
   const [isOpenModalRemoveProduct, setIsOpenModalRemoveProduct] =
     useState(false);
 
-  const handleIncrement = ({ _id: productId, quantity }) => {
+  const handleIncrementQuantity = ({ _id: productId, quantity }) => {
     api
       .setQuantity({ productId, quantity: quantity + 1 })
-      .then(({ updatedItem }) => {
+      .then(({ order, updatedItem }) => {
+        setOrder(order);
         setItems(prevItems =>
           prevItems.map(item =>
             item._id === updatedItem._id ? updatedItem : item
@@ -67,11 +71,12 @@ const Order = ({ order, handleRemoveOrder }) => {
       });
   };
 
-  const handleDecrement = ({ _id: productId, quantity }) => {
+  const handleDecrementQuantity = ({ _id: productId, quantity }) => {
     if (quantity > 1) {
       api
         .setQuantity({ productId, quantity: quantity - 1 })
-        .then(({ updatedItem }) => {
+        .then(({ order, updatedItem }) => {
+          setOrder(order);
           setItems(prevItems =>
             prevItems.map(item =>
               item._id === updatedItem._id ? updatedItem : item
@@ -81,19 +86,40 @@ const Order = ({ order, handleRemoveOrder }) => {
     }
   };
 
+  const handleIncrementQuantityHours = ({ _id: orderId, quantityHours }) => {
+    api
+      .setQuantityHours({ orderId, quantityHours: quantityHours + 1 })
+      .then(({ order }) => {
+        setOrder(prevOrder => ({
+          ...prevOrder,
+          quantityHours: order.quantityHours,
+        }));
+      });
+  };
+
+  const handleDecrementQuantityHours = ({ _id: orderId, quantityHours }) => {
+    api
+      .setQuantityHours({ orderId, quantityHours: quantityHours - 1 })
+      .then(({ order }) => {
+        setOrder(prevOrder => ({
+          ...prevOrder,
+          quantityHours: order.quantityHours,
+        }));
+      });
+  };
+
   const handleRemove = productId => {
     if (items.length === 1) {
       handleRemoveOrder();
     } else {
-      api
-        .removeProductFromOrder(orderId, productId)
-        .then(data =>
-          setItems(prefItems =>
-            prefItems.filter(item => item._id !== productId)
-          )
-        );
+      api.removeProductFromOrder(orderId, productId).then(data => {
+        setOrder(data.order);
+        setItems(prefItems => prefItems.filter(item => item._id !== productId));
+      });
     }
   };
+
+  console.log('items', items);
 
   return (
     <>
@@ -111,58 +137,155 @@ const Order = ({ order, handleRemoveOrder }) => {
             : t('Purchase Order')}
         </TitleOrder>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+            position: 'relative',
+          }}
+        >
           {items.map(item => {
-            // console.log('item', item);
+            console.log('order', order);
 
             return (
-              <MainWrap key={item?._id}>
-                <WrapImage>
-                  <Image src={item?.product?.photos[0]?.path} alt="product" />
-                </WrapImage>
-                <WrapGeneralText>
-                  <WrapText>
-                    <TextSeller>
-                      {t('seller')}: {owner?.nickname}
-                    </TextSeller>
-                    <TextName>{item?.product?.name}</TextName>
-                  </WrapText>
-                  <WrapSection>
-                    <Wrap>
-                      <SecondaryTitle>{t('price')}:</SecondaryTitle>
-                      <TextValue>{item?.price} kč</TextValue>
-                    </Wrap>
-                    <Wrap style={{ alignItems: 'center' }}>
-                      <SecondaryTitle>{t('quantity')}:</SecondaryTitle>
-                      <WrapCalc>
-                        {!rentalPeriods && (
-                          <ButtonMath
-                            disabled={item?.quantity === 1}
-                            onClick={() => handleDecrement(item)}
-                          >
-                            <StyledMinus $disabled={item?.quantity === 1} />
-                          </ButtonMath>
+              <div
+                key={item?._id}
+                style={{
+                  position: 'relative',
+                }}
+              >
+                <MainWrap key={item?._id}>
+                  <WrapImage>
+                    <Image src={item?.product?.photos[0]?.path} alt="product" />
+                  </WrapImage>
+                  <WrapGeneralText>
+                    <WrapText>
+                      <TextSeller>
+                        {t('seller')}: {owner?.nickname}
+                      </TextSeller>
+                      <TextName>{item?.product?.name}</TextName>
+                    </WrapText>
+                    <WrapSection>
+                      <Wrap>
+                        <SecondaryTitle>{t('price')}:</SecondaryTitle>
+                        {!rentalPeriods ? (
+                          <TextValue>{item?.price?.salePrice} kč</TextValue>
+                        ) : typeRent === 'celebration' ? (
+                          <TextValue>
+                            {item?.price?.dailyRentalPrice} kč
+                          </TextValue>
+                        ) : (
+                          <TextValue>
+                            {item?.price?.hourlyRentalPrice} kč
+                          </TextValue>
                         )}
-                        <TextValue>{item.quantity}</TextValue>
-                        {!rentalPeriods && (
-                          <ButtonMath onClick={() => handleIncrement(item)}>
-                            <IconPlus />
-                          </ButtonMath>
+                      </Wrap>
+                      <Wrap style={{ alignItems: 'center' }}>
+                        {typeRent === 'photosession' && (
+                          <>
+                            <SecondaryTitle>
+                              {t('quantity_of_hours')}:
+                            </SecondaryTitle>
+                            <WrapCalc>
+                              <ButtonMath
+                                disabled={order?.quantityHours <= 5}
+                                onClick={() =>
+                                  handleDecrementQuantityHours(order)
+                                }
+                              >
+                                <StyledMinus $disabled={item?.quantity === 1} />
+                              </ButtonMath>
+                              <TextValue>{order?.quantityHours}</TextValue>
+                              <ButtonMath
+                                disabled={order?.quantityHours >= 24}
+                                onClick={() =>
+                                  handleIncrementQuantityHours(order)
+                                }
+                              >
+                                <IconPlus />
+                              </ButtonMath>
+                            </WrapCalc>
+                          </>
                         )}
-                      </WrapCalc>
-                    </Wrap>
-                    <Wrap>
-                      <SecondaryTitle>{t('amount')}:</SecondaryTitle>
-                      <TextValue>{item?.price * item?.quantity} kč</TextValue>
-                    </Wrap>
-                    <ButtonDelete
-                      onClick={() => setIsOpenModalRemoveProduct(item)}
-                    >
-                      <StyledIconBasket />
-                    </ButtonDelete>
-                  </WrapSection>
-                </WrapGeneralText>
-              </MainWrap>
+                        {typeRent === 'celebration' && (
+                          <>
+                            <SecondaryTitle>
+                              {t('quantity_of_days')}:
+                            </SecondaryTitle>
+                            <TextValue>{order.quantityDays}</TextValue>
+                          </>
+                        )}
+                        {serviceType === 'buy' && (
+                          <>
+                            <SecondaryTitle>{t('quantity')}:</SecondaryTitle>
+                            <WrapCalc>
+                              <ButtonMath
+                                disabled={item?.quantity === 1}
+                                onClick={() => handleDecrementQuantity(item)}
+                              >
+                                <StyledMinus $disabled={item?.quantity === 1} />
+                              </ButtonMath>
+                              <TextValue>{item.quantity}</TextValue>
+                              <ButtonMath
+                                onClick={() => handleIncrementQuantity(item)}
+                              >
+                                <IconPlus />
+                              </ButtonMath>
+                            </WrapCalc>
+                          </>
+                        )}
+                      </Wrap>
+                      <Wrap>
+                        <SecondaryTitle>{t('amount')}:</SecondaryTitle>
+                        {typeRent === 'photosession' && (
+                          <TextValue>
+                            {item?.price?.hourlyRentalPrice *
+                              order?.quantityHours}{' '}
+                            kč
+                          </TextValue>
+                        )}
+                        {typeRent === 'celebration' && (
+                          <TextValue>
+                            {item?.price?.dailyRentalPrice *
+                              order?.quantityDays}{' '}
+                            kč
+                          </TextValue>
+                        )}
+                        {serviceType === 'buy' && (
+                          <TextValue>
+                            {item?.price?.salePrice * item?.quantity} kč
+                          </TextValue>
+                        )}
+                      </Wrap>
+                      <ButtonDelete
+                        onClick={() => setIsOpenModalRemoveProduct(item)}
+                      >
+                        <StyledIconBasket />
+                      </ButtonDelete>
+                    </WrapSection>
+                  </WrapGeneralText>
+                </MainWrap>
+                {item?.product?.status === 'inactive' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: '#EFEFEF80',
+                      backdropFilter: 'blur(1px)',
+                      WebkitBackdropFilter: 'blur(1px)',
+                      textAlign: 'center',
+                      alignContent: 'center',
+                      fontWeight: 700,
+                      fontSize: 18,
+                    }}
+                  >
+                    Цей продукт недоступний!
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -179,22 +302,32 @@ const Order = ({ order, handleRemoveOrder }) => {
                 <CalendarDescription typeRent={typeRent} />
               </WrapCalendar>
             )}
+            <BorderAmount />
             <TextAmount>
               {t('totalPrice')} <span>{totalPrice} kč</span>
             </TextAmount>
-            <TextAmount>
-              {console.log('rentalPeriods', rentalPeriods)}
-              Počet dni <span>{quantityDays}</span>
-            </TextAmount>
+            {typeRent === 'celebration' && (
+              <TextAmount>
+                Počet dni <span>{quantityDays}</span>
+              </TextAmount>
+            )}
 
             <BorderAmount />
             <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
               {t('orderTotal')}
               <span>{totalOrderPrice} kč</span>
             </TextAmount>
-            <Button form="orderForm" type="submit">
-              {t('Continue')}
-            </Button>
+            <ButtonRent
+              form="orderForm"
+              type="submit"
+              disabled={items.some(
+                item => item?.product?.status === 'inactive'
+              )}
+            >
+              {items.some(item => item?.product?.status === 'inactive')
+                ? 'Замовлення містить недоступні продукти!'
+                : t('Continue')}
+            </ButtonRent>
           </WrapAmount>
         </WrapInside>
       </WrapCardOrder>
