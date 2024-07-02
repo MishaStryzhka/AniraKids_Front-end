@@ -95,12 +95,13 @@ export const ModalContainer = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color.mainColor1};
   margin: auto;
+  max-width: 360px;
   border-radius: 2px;
   z-index: 2000;
   height: max-content;
 
   @media screen and (min-width: 768px) {
-    // min-width: 580px;
+    max-width: 448px;
     /* height: 326px; */
   }
   @media screen and (min-width: 1440px) {

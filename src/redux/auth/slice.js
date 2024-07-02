@@ -30,6 +30,9 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setUserCart: (state, { payload }) => {
+      state.user.cart = payload;
+    },
     clearError: state => {
       state.error = null;
     },
@@ -240,4 +243,5 @@ const authSlice = createSlice({
 });
 
 export const authReducer = authSlice.reducer;
-export const { clearError, clearDone, addPickupAddress } = authSlice.actions;
+export const { setUserCart, clearError, clearDone, addPickupAddress } =
+  authSlice.actions;

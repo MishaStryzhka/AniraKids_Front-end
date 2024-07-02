@@ -50,7 +50,9 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
               : theme[currentTheme].color.mainColor5
           }
         />
-        {user?.favorites?.length && <Caunt>{user?.favorites?.length}</Caunt>}
+        {user?.favorites?.length !== 0 && (
+          <Caunt>{user?.favorites?.length}</Caunt>
+        )}
       </Button>
       <Button type="button" onClick={onClickAuth}>
         <IconPerson
@@ -77,7 +79,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
               : theme[currentTheme].color.mainColor5
           }
         />
-        {user?.cart?.length && <Caunt>{user?.cart?.length}</Caunt>}
+        {user?.cart?.length !== 0 && <Caunt>{user?.cart?.length}</Caunt>}
       </Button>
       {isOpenModalAuth && !user && (
         <Modal

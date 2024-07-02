@@ -84,6 +84,7 @@ import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
 import { ModalAuthContext } from 'components/App';
 import SceletonProductPage from './SceletonProductPage';
+import { setUserCart } from '../../redux/auth/slice';
 
 const api = require('../../api');
 
@@ -92,6 +93,8 @@ const ProductPage = () => {
     keyPrefix: 'pages.productPage',
   });
   const { user, currentTheme } = useAuth();
+  console.log('user', user);
+
   const { id } = useParams();
   const { pathname, state } = useLocation();
   const [rentalPeriods, setRentalPeriods] = useState(state?.rentalPeriods);
@@ -172,12 +175,16 @@ const ProductPage = () => {
       .addToOrder({
         productId: product?._id,
         serviceType: 'buy',
-        price: product?.salePrice,
+        price: { salePrice: product?.salePrice },
         owner: product?.owner?._id,
       })
-      .then(data => {
+      .then(({ currentOrder, userCart }) => {
+        console.log('currentOrder', currentOrder);
+
+        dispatch(setUserCart(userCart));
+
         setIsLoading(false);
-        navigate('/my-account/cart');
+        navigate(`/my-account/cart#${currentOrder._id}`);
       });
   };
 
@@ -186,6 +193,8 @@ const ProductPage = () => {
     item => item.color === product?.color
   );
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
+
+  console.log('product', product);
 
   return isLoadingPage ? (
     <SceletonProductPage />
@@ -413,18 +422,18 @@ const ProductPage = () => {
               .addToOrder({
                 productId: product._id,
                 serviceType: 'rent',
-                price:
-                  product?.dailyRentalPrice ||
-                  product?.hourlyRentalPrice ||
-                  product?.rentalPrice,
+                price: {
+                  dailyRentalPrice: product?.dailyRentalPrice,
+                  hourlyRentalPrice: product?.hourlyRentalPrice,
+                },
                 owner: product?.owner?._id,
                 rentalPeriods,
                 typeRent,
                 pickupAddress: product?.pickupAddress,
               })
-              .then(data => {
+              .then(({ currentOrder }) => {
                 setIsLoading(false);
-                navigate(`/my-account/cart#${data._id}`);
+                navigate(`/my-account/cart#${currentOrder._id}`);
               })
               .catch(({ response: { data, status } }) => {
                 setIsLoading(false);
@@ -471,19 +480,19 @@ const ProductPage = () => {
                   .addToOrder({
                     productId: product._id,
                     serviceType: 'rent',
-                    price:
-                      product?.dailyRentalPrice ||
-                      product?.hourlyRentalPrice ||
-                      product?.rentalPrice,
+                    price: {
+                      dailyRentalPrice: product?.dailyRentalPrice,
+                      hourlyRentalPrice: product?.hourlyRentalPrice,
+                    },
                     owner: product?.owner?._id,
                     rentalPeriods,
                     typeRent,
                     pickupAddress: product?.pickupAddress,
                   })
-                  .then(data => {
+                  .then(({ currentOrder }) => {
                     setIsLoading(false);
                     document.body.style.overflow = 'auto';
-                    navigate(`/my-account/cart#${data._id}`);
+                    navigate(`/my-account/cart#${currentOrder._id}`);
                   })
                   .catch(({ response: { data, status } }) => {
                     setIsLoading(false);

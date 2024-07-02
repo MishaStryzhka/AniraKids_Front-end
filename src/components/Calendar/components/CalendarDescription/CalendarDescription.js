@@ -31,7 +31,7 @@ const CalendarDescription = ({ typeRent }) => {
         <MarkerRent />{' '}
         <p>
           {t('rental')}
-          {typeRent !== 'celebration' && ` ${t('up_to_6_hours')}`}
+          {typeRent !== 'celebration' && ` ${t('min_5_hours')}`}
         </p>{' '}
         <br />
       </ItemInfo>
@@ -41,12 +41,7 @@ const CalendarDescription = ({ typeRent }) => {
             <MarkerReturn />
             <p>{t('returnDay')}</p>
           </>
-        ) : (
-          <>
-            <MarkerRent />
-            <p>!!!{t('return_within_6_hours')}!!!</p>
-          </>
-        )}
+        ) : null}
         <br />
       </ItemInfo>
     </ListInfo>

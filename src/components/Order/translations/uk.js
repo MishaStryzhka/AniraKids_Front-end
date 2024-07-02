@@ -7,6 +7,8 @@ export const OrderTranslationsUk = {
 
   price: 'Ціна',
   quantity: 'Кількість',
+  quantity_of_hours: 'Кількість годин',
+  quantity_of_days: 'Кількість днів',
   amount: 'Сума',
   seller: 'Продавець',
 

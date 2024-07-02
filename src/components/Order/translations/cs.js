@@ -6,6 +6,8 @@ export const OrderTranslationsCs = {
 
   price: 'Cena',
   quantity: 'Počet',
+  quantity_of_hours: 'Počet hodin',
+  quantity_of_days: 'Počet dnů',
   amount: 'Сástka',
   seller: 'Prodavač',
 
