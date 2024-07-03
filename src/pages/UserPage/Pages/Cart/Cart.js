@@ -3,6 +3,8 @@ import Order from 'components/Order/Order';
 import { useEffect, useRef, useState } from 'react';
 import { ListOrders } from './Cart.styled';
 import { useLocation } from 'react-router-dom';
+import { removeOrderIdFromUserCart } from '../../../../redux/auth/slice';
+import { useDispatch } from 'react-redux';
 
 const api = require('../../../../api');
 
@@ -15,6 +17,7 @@ const Cart = () => {
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const scrollOrderRef = useRef();
 
@@ -47,10 +50,12 @@ const Cart = () => {
 
   const handleRemoveOrder = orderId => {
     api.removeOrder(orderId).then(({ message }) => {
-      message === 'Order successfully removed' &&
+      if (message === 'Order successfully removed') {
         setOrders(prefOrders =>
           prefOrders.filter(item => item._id !== orderId)
         );
+        dispatch(removeOrderIdFromUserCart(orderId));
+      }
     });
   };
 

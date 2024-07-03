@@ -37,7 +37,6 @@ const api = require('../../api');
 
 const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   const [order, setOrder] = useState(dataOrder);
-  console.log('order', order);
 
   const {
     _id: orderId,
@@ -119,8 +118,6 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     }
   };
 
-  console.log('items', items);
-
   return (
     <>
       <WrapCardOrder name={orderId}>
@@ -146,8 +143,6 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
           }}
         >
           {items.map(item => {
-            console.log('order', order);
-
             return (
               <div
                 key={item?._id}

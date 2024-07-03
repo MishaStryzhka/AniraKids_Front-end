@@ -5,7 +5,6 @@ const RatingStars = ({ rating }) => {
   const stars = [];
   const { id } = useParams();
   const { pathname } = useLocation();
-  console.log(pathname);
   for (let i = 1; i <= 5; i++) {
     if (i <= rating) {
       stars.push(

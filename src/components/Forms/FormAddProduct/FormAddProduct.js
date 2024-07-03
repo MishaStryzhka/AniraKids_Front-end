@@ -982,8 +982,6 @@ const FormAddProduct = ({ id }) => {
                       name="pickupAddress"
                       placeholder={t('address')}
                       onPlaceSelect={pickupAddress => {
-                        console.log('pickupAddress', pickupAddress);
-
                         return setFieldValue('pickupAddress', pickupAddress);
                       }}
                     />

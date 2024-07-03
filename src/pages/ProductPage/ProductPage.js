@@ -2,37 +2,22 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Border,
   Color,
-  // ImagesPerson,
-  // ItemReview,
-  // ListReviews,
-  // PicturePerson,
   TextDescription,
   TextPrice,
-  // TextRent,
-  // TextRentValue,
-  // TextReview,
   TextSeller,
   TextSize,
   TextValueSize,
   TextWrap,
   Title,
   TitleDescription,
-  // TitleName,
   Wrap,
   WrapAllImages,
   WrapBtn,
   WrapColor,
   WrapDescription,
-  // WrapIconsStars,
-  // WrapInfo,
   WrapInformation,
   WrapInside,
-  // WrapPerson,
-  // WrapPersonInfo,
-  // WrapReviews,
   WrapSecondaryImages,
-  // WrapTimeRent,
-  // ButtonPreview,
   WrapCalendar,
   TextCalendar,
   ButtonCalendarTime,
@@ -46,8 +31,6 @@ import {
   WrapProduct,
 } from './ProductPage.styled';
 import { useTranslation } from 'react-i18next';
-// import Avatar from 'images/photo-ready-woman/photo-ready-mobile-1x.jpg';
-// import IconStar from 'images/icons/IconStart';
 import IconCalendarTime from 'images/icons/IconCalendarTime';
 import 'react-alice-carousel/lib/alice-carousel.css';
 import { useContext, useEffect, useState } from 'react';
@@ -84,7 +67,7 @@ import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
 import { ModalAuthContext } from 'components/App';
 import SceletonProductPage from './SceletonProductPage';
-import { setUserCart } from '../../redux/auth/slice';
+import { addOrderIdToUserCart } from '../../redux/auth/slice';
 
 const api = require('../../api');
 
@@ -93,8 +76,6 @@ const ProductPage = () => {
     keyPrefix: 'pages.productPage',
   });
   const { user, currentTheme } = useAuth();
-  console.log('user', user);
-
   const { id } = useParams();
   const { pathname, state } = useLocation();
   const [rentalPeriods, setRentalPeriods] = useState(state?.rentalPeriods);
@@ -178,10 +159,8 @@ const ProductPage = () => {
         price: { salePrice: product?.salePrice },
         owner: product?.owner?._id,
       })
-      .then(({ currentOrder, userCart }) => {
-        console.log('currentOrder', currentOrder);
-
-        dispatch(setUserCart(userCart));
+      .then(({ currentOrder }) => {
+        dispatch(addOrderIdToUserCart(currentOrder._id));
 
         setIsLoading(false);
         navigate(`/my-account/cart#${currentOrder._id}`);
@@ -194,7 +173,9 @@ const ProductPage = () => {
   );
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  console.log('product', product);
+  useEffect(() => {
+    document.body.style.overflow = 'auto';
+  }, [user]);
 
   return isLoadingPage ? (
     <SceletonProductPage />
@@ -432,7 +413,11 @@ const ProductPage = () => {
                 pickupAddress: product?.pickupAddress,
               })
               .then(({ currentOrder }) => {
+                document.body.style.overflow = 'auto';
+                dispatch(addOrderIdToUserCart(currentOrder._id));
+
                 setIsLoading(false);
+
                 navigate(`/my-account/cart#${currentOrder._id}`);
               })
               .catch(({ response: { data, status } }) => {
@@ -447,14 +432,6 @@ const ProductPage = () => {
             setIsOpenModalRent(false);
             setIsOpenModalSelectDateRent(true);
           }}
-          // title={`Орендувати продукт
-          //     ${
-          //       rentalPeriods.split('-').length > 1
-          //         ? `з ${rentalPeriods.split('-')[0]} по ${
-          //             rentalPeriods.split('-')[1]
-          //           }`
-          //         : `на ${rentalPeriods}`
-          //     }`}
           title={
             rentalPeriods.split('-').length > 1
               ? t('rentProductFromTo', {
@@ -490,8 +467,11 @@ const ProductPage = () => {
                     pickupAddress: product?.pickupAddress,
                   })
                   .then(({ currentOrder }) => {
-                    setIsLoading(false);
                     document.body.style.overflow = 'auto';
+                    dispatch(addOrderIdToUserCart(currentOrder._id));
+
+                    setIsLoading(false);
+                    setIsOpenModalSelectDateRent(false);
                     navigate(`/my-account/cart#${currentOrder._id}`);
                   })
                   .catch(({ response: { data, status } }) => {

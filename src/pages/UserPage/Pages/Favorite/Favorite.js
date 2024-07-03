@@ -14,7 +14,6 @@ const Favorite = () => {
   const [pageSize, setPageSize] = useState(9);
 
   const [products, setProducts] = useState([]);
-  console.log('products', products);
 
   // eslint-disable-next-line no-unused-vars
   const [totalProducts, setTotalProducts] = useState();
