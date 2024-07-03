@@ -30,8 +30,14 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setUserCart: (state, { payload }) => {
-      state.user.cart = payload;
+    addOrderIdToUserCart: (state, { payload }) => {
+      const orderIdExists = state.user.cart.some(order => order === payload);
+      if (!orderIdExists) {
+        state.user.cart.push(payload);
+      }
+    },
+    removeOrderIdFromUserCart: (state, { payload }) => {
+      state.user.cart = state.user.cart.filter(order => order !== payload);
     },
     clearError: state => {
       state.error = null;
@@ -243,5 +249,10 @@ const authSlice = createSlice({
 });
 
 export const authReducer = authSlice.reducer;
-export const { setUserCart, clearError, clearDone, addPickupAddress } =
-  authSlice.actions;
+export const {
+  addOrderIdToUserCart,
+  removeOrderIdFromUserCart,
+  clearError,
+  clearDone,
+  addPickupAddress,
+} = authSlice.actions;

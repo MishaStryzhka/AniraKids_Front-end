@@ -3,6 +3,7 @@ const { getOrders } = require('./order/getOrders');
 const { removeOrder } = require('./order/removeOrder');
 const { removeProductFromOrder } = require('./order/removeProductFromOrder');
 const { setQuantity } = require('./order/setQuantity');
+const { setQuantityHours } = require('./order/setQuantityHours');
 const { addProduct } = require('./product/addProduct');
 const { getCurrentUserProducts } = require('./product/getCurrentUserProducts');
 const { getFavorites } = require('./product/getFavorites');
@@ -25,6 +26,7 @@ module.exports = {
   addToOrder,
   getOrders,
   setQuantity,
+  setQuantityHours,
   removeOrder,
   removeProductFromOrder,
 };

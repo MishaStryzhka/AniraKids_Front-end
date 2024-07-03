@@ -90,10 +90,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     api
       .setQuantityHours({ orderId, quantityHours: quantityHours + 1 })
       .then(({ order }) => {
-        setOrder(prevOrder => ({
-          ...prevOrder,
-          quantityHours: order.quantityHours,
-        }));
+        setOrder(order);
       });
   };
 
@@ -118,8 +115,6 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
       });
     }
   };
-
-  console.log('items', items);
 
   return (
     <>
@@ -146,8 +141,6 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
           }}
         >
           {items.map(item => {
-            console.log('order', order);
-
             return (
               <div
                 key={item?._id}
