@@ -37,6 +37,7 @@ const api = require('../../api');
 
 const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   const [order, setOrder] = useState(dataOrder);
+  console.log('order', order);
 
   const {
     _id: orderId,
@@ -89,10 +90,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     api
       .setQuantityHours({ orderId, quantityHours: quantityHours + 1 })
       .then(({ order }) => {
-        setOrder(prevOrder => ({
-          ...prevOrder,
-          quantityHours: order.quantityHours,
-        }));
+        setOrder(order);
       });
   };
 
