@@ -40,4 +40,7 @@ export const ProductPageTranslationsEn = {
   rentProductFromTo: 'Rent product from {{from}} to {{to}}',
   rentProductFor: 'Rent product for {{date}}',
   'No, choose another date': 'No, choose another date',
+
+  rent: 'Rent',
+  buy: 'Buy',
 };
