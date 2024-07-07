@@ -17,5 +17,5 @@ export const OrderTranslationsUk = {
   Continue: 'Продовжити',
 
   celebration: 'святкування',
-  photosession: 'фотосесія',
+  photosession: 'фотосесію',
 };

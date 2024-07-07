@@ -54,6 +54,8 @@ const PlaceAutocomplete = ({
     setInputValue(place.formatted_address);
   };
 
+  console.log('user?.pickupAddresses', user?.pickupAddresses);
+
   return (
     <>
       <LabelDescription className="autocomplete-container">
@@ -82,11 +84,15 @@ const PlaceAutocomplete = ({
             disabled={disabled}
             autoComplete={'false'}
           >
-            {user?.pickupAddresses?.map(adress => (
-              <option key={adress.place_id} value={adress.place_id}>
-                {adress.formatted_address}
-              </option>
-            ))}
+            {user?.pickupAddresses?.map(adress => {
+              console.log('adress', adress);
+
+              return (
+                <option key={adress.place_id} value={adress.place_id}>
+                  {adress.formatted_address}
+                </option>
+              );
+            })}
           </Field>
         </div>
       </LabelDescription>

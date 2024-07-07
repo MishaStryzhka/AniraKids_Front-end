@@ -19,15 +19,21 @@ const FormOrder = ({ order }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.formOrder',
   });
+  const [deliveryAddress, setDeliveryAddress] = useState({});
+
+  const { user } = useAuth();
   const [isOpenModalDeliveryService, setIsOpenModalDeliveryService] =
     useState(false);
 
-  function iframeListener(event) {
+  const iframeListener = event => {
     if (event.data.message === 'pickerResult') {
-      console.log('event.data', event.data);
+      document.body.style.overflow = 'auto';
       setIsOpenModalDeliveryService(false);
+
+      const { zip, name, type, address } = event.data.point;
+      setDeliveryAddress({ zip, name, type, address });
     }
-  }
+  };
 
   useEffect(() => {
     isOpenModalDeliveryService &&
@@ -37,8 +43,6 @@ const FormOrder = ({ order }) => {
       window.addEventListener('message', iframeListener);
     };
   }, [isOpenModalDeliveryService]);
-
-  const { user } = useAuth();
 
   const handleFormOrderSubmit = (values, { resetForm }) => {
     resetForm();
@@ -55,6 +59,7 @@ const FormOrder = ({ order }) => {
           deliveryType: '',
           city: '',
           address: '',
+          typePay: '',
         }}
         validationSchema={validationFormOrderScheme}
         onSubmit={handleFormOrderSubmit}
@@ -67,94 +72,95 @@ const FormOrder = ({ order }) => {
           handleBlur,
           handleSubmit,
           setFieldValue,
-        }) => (
-          <StyledForm id="orderForm" onSubmit={handleSubmit}>
-            <LabelOrder>
-              {t('urerFullName')}*
-              <FieldOrder
-                name="fullName"
-                value={values.fullName}
-                type="text"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Бондаренко А.А."
-              />
-              {errors.fullName && touched.fullName && (
-                <ErrorMessage>{t(errors.fullName)}</ErrorMessage>
-              )}
-            </LabelOrder>
-            <LabelOrder>
-              {t('userPhoneNumber')}*
-              <FieldOrder
-                name="phoneNumber"
-                value={values.phoneNumber}
-                type="text"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="+380"
-              />
-              {errors.phoneNumber && touched.phoneNumber && (
-                <ErrorMessage>{t(errors.phoneNumber)}</ErrorMessage>
-              )}
-            </LabelOrder>
-            <LabelOrder>
-              {t('email')}*
-              <FieldOrder
-                name="email"
-                value={values.email}
-                type="text"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="example@gmail.com"
-              />
-              {errors.email && touched.email && (
-                <ErrorMessage>{t(errors.email)}</ErrorMessage>
-              )}
-            </LabelOrder>
+        }) => {
+          return (
+            <StyledForm id="orderForm" onSubmit={handleSubmit}>
+              <LabelOrder>
+                {t('urerFullName')}*
+                <FieldOrder
+                  name="fullName"
+                  value={values.fullName}
+                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Бондаренко А.А."
+                />
+                {errors.fullName && touched.fullName && (
+                  <ErrorMessage>{t(errors.fullName)}</ErrorMessage>
+                )}
+              </LabelOrder>
+              <LabelOrder>
+                {t('userPhoneNumber')}*
+                <FieldOrder
+                  name="phoneNumber"
+                  value={values.phoneNumber}
+                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="+380"
+                />
+                {errors.phoneNumber && touched.phoneNumber && (
+                  <ErrorMessage>{t(errors.phoneNumber)}</ErrorMessage>
+                )}
+              </LabelOrder>
+              <LabelOrder>
+                {t('email')}*
+                <FieldOrder
+                  name="email"
+                  value={values.email}
+                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="example@gmail.com"
+                />
+                {errors.email && touched.email && (
+                  <ErrorMessage>{t(errors.email)}</ErrorMessage>
+                )}
+              </LabelOrder>
 
-            <LabelOrder>
-              {t('Delivery service')}*
-              <FieldSelect
-                as="select"
-                name="deliveryService"
-                onChange={e => {
-                  handleChange(e);
-                  if (
-                    e.currentTarget.value === 'Balikovna' ||
-                    e.currentTarget.value === 'czechPost'
-                  ) {
-                    setIsOpenModalDeliveryService(true);
-                  }
-                }}
-                value={values.deliveryService}
-                disabled={order.typeRent === 'photosession'}
-              >
-                <option value="" disabled>
-                  --- {t('Select delivery services')} ---
-                </option>
-                <option value="Balikovna">Balíkovna</option>
-                <option value="czechPost">Česka pošta</option>
-                <option value="selfPickup">{t('selfPickup')}</option>
-                {/* <option value="Zasilkovna">Zasilkovna</option>
+              <LabelOrder>
+                {t('Delivery service')}*
+                <FieldSelect
+                  as="select"
+                  name="deliveryService"
+                  onChange={e => {
+                    handleChange(e);
+                    if (
+                      e.currentTarget.value === 'Balikovna' ||
+                      e.currentTarget.value === 'POST_OFFICE'
+                    ) {
+                      setIsOpenModalDeliveryService(true);
+                    }
+                  }}
+                  value={values.deliveryService}
+                  disabled={order.typeRent === 'photosession'}
+                >
+                  <option value="" disabled>
+                    --- {t('Select delivery services')} ---
+                  </option>
+                  <option value="Balikovna">Balíkovna</option>
+                  <option value="POST_OFFICE">Česka pošta</option>
+                  <option value="selfPickup">{t('selfPickup')}</option>
+                  {/* <option value="Zasilkovna">Zasilkovna</option>
                     <option value="PPL">PPL</option>
                     <option value="DHL">DHL</option> */}
-              </FieldSelect>
-              {errors.deliveryService && touched.deliveryService && (
-                <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
+                </FieldSelect>
+                {errors.deliveryService && touched.deliveryService && (
+                  <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
+                )}
+              </LabelOrder>
+
+              {values.deliveryService === 'selfPickup' && (
+                <>
+                  <p>{order?.pickupAddress?.formatted_address}</p>
+                  <GoogleMap
+                    style={{ height: 230 }}
+                    place={order?.pickupAddress}
+                  />
+                </>
               )}
-            </LabelOrder>
 
-            {values.deliveryService === 'selfPickup' && (
-              <>
-                <p>{order?.pickupAddress?.formatted_address}</p>
-                <GoogleMap
-                  style={{ height: 230 }}
-                  place={order?.pickupAddress}
-                />
-              </>
-            )}
-
-            {/* {values.deliveryService === 'Balikovna' && (
+              {/* {values.deliveryService === 'Balikovna' && (
               <LabelOrder>
                 {t('Delivery type')}*
                 <FieldSelect
@@ -178,7 +184,7 @@ const FormOrder = ({ order }) => {
               </LabelOrder>
             )} */}
 
-            {/* <LabelOrder>
+              {/* <LabelOrder>
               {t('city')}*
               <FieldOrder
                 name="city"
@@ -191,43 +197,72 @@ const FormOrder = ({ order }) => {
               {errors.city && touched.city && (
                 <ErrorMessage>{t(errors.city)}</ErrorMessage>
               )}
-            </LabelOrder>
-
-            <LabelOrder>
-              {t('address')}*
-              <FieldOrder
-                name="address"
-                value={values.address}
-                type="text"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Sanocka 10/48"
-              />
-              {errors.address && touched.address && (
-                <ErrorMessage>{t(errors.address)}</ErrorMessage>
-              )}
             </LabelOrder> */}
 
-            <TextDescription>*{t('Text required')}</TextDescription>
+              {(values.deliveryService === 'Balikovna' ||
+                values.deliveryService === 'POST_OFFICE') && (
+                <LabelOrder>
+                  {t('address')}*
+                  <FieldOrder
+                    name="address"
+                    value={deliveryAddress.address}
+                    type="text"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Sanocka 10/48"
+                    disabled
+                  />
+                  {errors.address && touched.address && (
+                    <ErrorMessage>{t(errors.address)}</ErrorMessage>
+                  )}
+                </LabelOrder>
+              )}
 
-            {isOpenModalDeliveryService && (
-              <Modal closeModal={() => setIsOpenModalDeliveryService(false)}>
-                <ModalDeliveryTitle>Vyberte Balíkovnu</ModalDeliveryTitle>
-                <iframe
-                  width={850}
-                  height={700}
-                  title="Výběr místa pro vyzvednutí zásilky"
-                  src={`https://b2c.cpost.cz/locations/?type=${
-                    values.deliveryService === 'Balikovna'
-                      ? 'BALIKOVNY'
-                      : 'POST_OFFICE'
-                  }`}
-                  allow="geolocation"
-                />
-              </Modal>
-            )}
-          </StyledForm>
-        )}
+              <LabelOrder>
+                {t('typePay')}*
+                <FieldSelect
+                  as="select"
+                  name="typePay"
+                  onChange={handleChange}
+                  value={values.typePay}
+                >
+                  <option value="" disabled>
+                    --- {t('selectTypePay')} ---
+                  </option>
+                  <option value="cash">{t('cash')}</option>
+                  <option disabled value="card">
+                    {t('card')} ({t('unavailable')})
+                  </option>
+                  <option disabled value="bankTransfer">
+                    {t('bank_transfer')} ({t('unavailable')})
+                  </option>
+                </FieldSelect>
+                {errors.deliveryService && touched.deliveryService && (
+                  <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
+                )}
+              </LabelOrder>
+
+              <TextDescription>*{t('Text required')}</TextDescription>
+
+              {isOpenModalDeliveryService && (
+                <Modal closeModal={() => setIsOpenModalDeliveryService(false)}>
+                  <ModalDeliveryTitle>Vyberte Balíkovnu</ModalDeliveryTitle>
+                  <iframe
+                    width={850}
+                    height={700}
+                    title="Výběr místa pro vyzvednutí zásilky"
+                    src={`https://b2c.cpost.cz/locations/?type=${
+                      values.deliveryService === 'Balikovna'
+                        ? 'BALIKOVNY'
+                        : 'POST_OFFICE'
+                    }`}
+                    allow="geolocation"
+                  />
+                </Modal>
+              )}
+            </StyledForm>
+          );
+        }}
       </Formik>
     </>
   );
