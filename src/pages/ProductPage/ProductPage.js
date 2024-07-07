@@ -303,7 +303,7 @@ const ProductPage = () => {
                       onClick={handleClickRent}
                       ariaLabel="rent"
                     >
-                      Орендувати
+                      {t('rent')}
                     </StyledButton>
                   )}
                   {product?.salePrice && (
@@ -312,7 +312,7 @@ const ProductPage = () => {
                       onClick={handleClickBuy}
                       ariaLabel="buy"
                     >
-                      Купити
+                      {t('buy')}
                     </StyledButton>
                   )}
                   {pathname !== `/my-account/favorite/${product?._id}` && (

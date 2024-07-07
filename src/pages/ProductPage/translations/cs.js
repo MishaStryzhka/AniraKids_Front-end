@@ -40,4 +40,7 @@ export const ProductPageTranslationsCs = {
   rentProductFromTo: 'Pronajměte si produkt od {{from}} do {{to}}',
   rentProductFor: 'Pronajměte si produkt na {{date}}',
   'No, choose another date': 'Ne, vyberte jiné datum',
+
+  rent: 'Pronajmout',
+  buy: 'Koupit',
 };
