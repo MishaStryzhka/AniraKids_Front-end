@@ -1,20 +1,5 @@
 import styled from 'styled-components';
 
-export const MainTitle = styled.h1`
-  @media screen and (max-width: 427.5px) {
-    font-size: 8vw;
-  }
-  text-align: center;
-  font-family: 'Cormorant SC';
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 1.25;
-  margin-bottom: 16px;
-  text-transform: uppercase;
-
-  color: ${({ theme }) => theme.color.mainColor4};
-`;
-
 export const Title = styled.h2`
   @media screen and (max-width: 427.5px) {
     font-size: 4.7vw;
@@ -24,7 +9,8 @@ export const Title = styled.h2`
   font-weight: 700;
   line-height: 1.4;
   text-transform: uppercase;
-  margin-top: 10px;
+  margin-top: 40px;
+  margin-left: 30px;
   color: ${({ theme }) => theme.color.mainColor5};
 `;
 
@@ -38,6 +24,8 @@ export const Text = styled.p`
   line-height: 1.43;
 
   color: ${({ theme }) => theme.color.mainColor5};
+
+  margin-top: 10px;
 `;
 
 export const List = styled.ul`

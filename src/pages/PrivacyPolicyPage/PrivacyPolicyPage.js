@@ -1,13 +1,18 @@
 import { Container } from 'components/Container/Container';
-import { Item, List, MainTitle, Text, Title } from './PrivacyPolicyPage.styled';
+import { Item, List, Text, Title } from './PrivacyPolicyPage.styled';
+import PageTitle from 'components/PageTitle/PageTitle';
+import Border from 'components/Border/Border';
 
 const PrivacyPolicyPage = () => {
   return (
-    <Container>
-      <MainTitle>Zásady ochrany osobních údajů</MainTitle>
-      <Text>Poslední aktualizace: 28.02.2024</Text>
+    <Container style={{ padding: '30px 70px 100px' }}>
+      <PageTitle>Zásady ochrany osobních údajů</PageTitle>
+      <Border />
+      <Text style={{ textAlign: 'right' }}>
+        Poslední aktualizace: 28.02.2024
+      </Text>
 
-      <Text>
+      <Text style={{ marginTop: 20 }}>
         Děkujeme vám za používání našich služeb. V těchto zásadách ochrany
         osobních údajů je popsáno, jak shromažďujeme, používáme a chráníme
         osobní údaje, které nám poskytnete.
