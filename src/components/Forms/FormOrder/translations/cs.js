@@ -18,6 +18,13 @@ export const FormOrderTranslationsCs = {
   section: 'Pobočka',
   selfPickup: 'Osobní odběr',
 
+  typePay: 'Typ platby',
+  selectTypePay: 'vyberte typ platby',
+  card: 'Karta',
+  bank_transfer: 'Bankovní převod',
+  cash: 'Hotovost',
+  unavailable: 'nedostupné',
+
   // errors
 
   'Required field': 'Povinné pole',

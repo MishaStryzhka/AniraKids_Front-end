@@ -16,6 +16,13 @@ export const FormOrderTranslationsEn = {
   section: 'Section',
   selfPickup: 'Self Pickup',
 
+  typePay: 'Type pay',
+  selectTypePay: 'select type pay',
+  card: 'Card',
+  bank_transfer: 'Bank Transfer',
+  cash: 'Cash',
+  unavailable: 'unavailable',
+
   //
   'Required field': 'Required field',
   'Invalid phone number format': 'Invalid phone number format',

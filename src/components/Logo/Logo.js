@@ -6,7 +6,11 @@ const Logo = ({ $isHeader }) => {
 
   return (
     <StyledNavLink $isHeader={$isHeader} to="./">
-      <StyledIconLogo fill={pathname === '/' ? '#fff' : '#000'} />
+      <StyledIconLogo
+        className="text"
+        fill={pathname === '/' ? '#fff' : '#000'}
+      ></StyledIconLogo>
+      {/* <div className="text">анімоване слово</div> */}
     </StyledNavLink>
   );
 };

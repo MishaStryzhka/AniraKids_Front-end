@@ -16,6 +16,13 @@ export const FormOrderTranslationsUk = {
   section: 'Відділення',
   selfPickup: 'Самовивіз',
 
+  typePay: 'Тип оплати',
+  selectTypePay: 'виберіть тип оплати',
+  card: 'Картка',
+  bank_transfer: 'Банківський переказ',
+  cash: 'Готівка',
+  unavailable: 'недоступно',
+
   //
   'Required field': 'Обов`язкове поле',
   'Invalid phone number format': 'Неправильний формат номера телефону',
