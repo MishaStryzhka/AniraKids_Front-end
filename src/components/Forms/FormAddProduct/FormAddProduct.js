@@ -81,12 +81,16 @@ import CheckBox from 'components/CheckBox/CheckBox';
 import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
 import IconBasket from 'images/icons/IconBasket';
-import { addProduct, getProductById } from 'api';
+import { addProduct, getProductById, updateProduct } from 'api';
 import PlaceAutocomplete from './PlaceAutocomplete';
 import { addPickupAddress, clearDone } from './../../../redux/auth/slice';
 import { useDispatch } from 'react-redux';
+import { nanoid } from '@reduxjs/toolkit';
 
 const FormAddProduct = ({ id }) => {
+  // eslint-disable-next-line no-unused-vars
+  const [isUpdate, setIsUpdate] = useState(!!id);
+
   const { t, i18n } = useTranslation('translation', {
     keyPrefix: 'components.formAddProduct',
   });
@@ -99,22 +103,17 @@ const FormAddProduct = ({ id }) => {
   const [product, setProduct] = useState();
 
   const [stepValue, setStepValue] = useState(1);
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
-
-  const [photoOrder, setPhotoOrder] = useState([]);
 
   const [isOpenModalMaxSize, setIsOpenModalMaxSize] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!product && id) {
+    if (!product && isUpdate) {
       setIsLoading(true);
 
       getProductById(id)
         .then(data => {
           setProduct(data.product);
-          setSelectedPhotos(data.product.photos);
-          setPhotoOrder(data.product.photos.map((_, index) => index));
           setIsLoading(false);
         })
         .catch(error => {
@@ -122,7 +121,7 @@ const FormAddProduct = ({ id }) => {
           setIsLoading(false);
         });
     }
-  }, [id, photoOrder, product, selectedPhotos]);
+  }, [id, isUpdate, product]);
 
   // ===========
 
@@ -130,28 +129,28 @@ const FormAddProduct = ({ id }) => {
     e.dataTransfer.setData('text/plain', index.toString());
   };
 
-  const handleDrop = (e, targetIndex) => {
+  const handleDrop = ({ event: e, targetPhoto, photoUrls, setPhotoUrls }) => {
     e.preventDefault();
     const draggedPhotoId = e.dataTransfer.getData('text/plain');
 
     // Отримуємо індекс фотографії, яку перетягували
-    const draggedPhotoIndex = photoOrder.findIndex(
-      photo => photo === parseInt(draggedPhotoId, 10)
+    const draggedPhotoIndex = photoUrls.findIndex(
+      photo => photo._id === draggedPhotoId
     );
 
     // Отримуємо індекс фотографії, на яку перетягували
-    const targetPhotoIndex = photoOrder.findIndex(
-      photo => photo === targetIndex
+    const targetPhotoIndex = photoUrls.findIndex(
+      photo => photo._id === targetPhoto._id
     );
 
-    // Міняємо місцями фотографії в масиві
-    const newOrder = [...photoOrder];
+    const elem = photoUrls[draggedPhotoIndex];
+    const newOrderTest = [...photoUrls];
 
-    const el = newOrder[draggedPhotoIndex];
-    newOrder.splice(draggedPhotoIndex, 1);
-    newOrder.splice(targetPhotoIndex, 0, el);
+    // // Міняємо місцями фотографії в масиві
+    newOrderTest.splice(draggedPhotoIndex, 1);
+    newOrderTest.splice(targetPhotoIndex, 0, elem);
 
-    setPhotoOrder(newOrder);
+    setPhotoUrls(newOrderTest);
   };
 
   // ===========
@@ -188,16 +187,30 @@ const FormAddProduct = ({ id }) => {
   // ===========
   const handleFormSubmit = values => {
     setIsLoading(true);
-    addProduct(values)
-      .then(data => {
-        dispatch(addPickupAddress(data.product.pickupAddress));
-        setIsLoading(false);
-        navigate('/my-account/rent-out', { replace: true });
-      })
-      .catch(error => {
-        setIsLoading(false);
-      });
+    if (isUpdate) {
+      updateProduct({ id, ...values })
+        .then(data => {
+          setProduct(data.product);
+          dispatch(addPickupAddress(data.product.pickupAddress));
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
+    } else {
+      addProduct(values)
+        .then(data => {
+          dispatch(addPickupAddress(data.product.pickupAddress));
+          setIsLoading(false);
+          navigate('/my-account/rent-out', { replace: true });
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
+    }
   };
+
+  if (isUpdate && !product) return;
 
   return isLoading ? (
     <p>Loading</p>
@@ -205,7 +218,7 @@ const FormAddProduct = ({ id }) => {
     <>
       <Formik
         initialValues={{
-          photoUrls: photoOrder.map(i => selectedPhotos[i]),
+          photoUrls: product?.photos || [],
           category: product?.category || '',
           videoUrl: product?.videoUrl || '',
           name: product?.name || '',
@@ -216,22 +229,28 @@ const FormAddProduct = ({ id }) => {
           isPregnancy: product?.isPregnancy || '',
           subject: product?.subject || '',
           outfits: product?.outfits || '',
-          age: product?.age || '',
-          childSize: product?.childSize || '',
+          age: Array.isArray(product?.age)
+            ? [...product?.age]
+            : [product?.age] || [],
+          childSize: Array.isArray(product?.childSize)
+            ? [...product?.childSize]
+            : [product?.childSize] || [],
           decor: product?.decor || '',
           color: product?.color || '',
           saleOrRental: product?.saleOrRental || '',
           rental: product?.rental || '',
           dailyRentalPrice: product?.dailyRentalPrice || '',
           hourlyRentalPrice: product?.hourlyRentalPrice || '',
+          deposit: product?.deposit || '',
 
           sale: product?.sale || '',
-          priceSale: product?.priceSale || '',
+          salePrice: product?.salePrice || '',
 
           pickupAddress: product?.pickupAddress,
 
           isAddPhoto: product?.isAddPhoto || '',
           colorCode: product?.colorCode || '',
+          keyWord: product?.keyWord || '',
         }}
         validationSchema={validationProductSchema}
         onSubmit={handleFormSubmit}
@@ -249,8 +268,6 @@ const FormAddProduct = ({ id }) => {
             handleBlur,
             validateField,
           } = formikProps;
-
-          console.log('errors', errors);
 
           const resetInitialValuesForCategories = () => {
             setFieldValue('familyLook', '');
@@ -305,15 +322,7 @@ const FormAddProduct = ({ id }) => {
           }
 
           const handleDeletePhoto = index => {
-            const updatedSelectedPhotos = [...selectedPhotos];
-            updatedSelectedPhotos.splice(index, 1);
-            setSelectedPhotos(updatedSelectedPhotos);
-
-            const updatedPhotoOrder = [...photoOrder];
-            updatedPhotoOrder.splice(index, 1);
-            setPhotoOrder(
-              updatedPhotoOrder.map(el => (el > index ? el - 1 : el))
-            );
+            setFieldValue('photoUrls', [...values.photoUrls].splice(index, 1));
           };
 
           return (
@@ -330,7 +339,7 @@ const FormAddProduct = ({ id }) => {
                     onChange={e => {
                       let selectedFiles = Array.from(e.target.files);
 
-                      if (selectedFiles.length + selectedPhotos.length > 10) {
+                      if (selectedFiles.length + values.photoUrls.length > 10) {
                         setIsOpenModalMaxSize(true);
                         return;
                       }
@@ -340,82 +349,65 @@ const FormAddProduct = ({ id }) => {
                           file => file.size < 10485760
                         );
                         setIsOpenModalMaxSize(true);
-                        // return;
                       }
 
                       setTouched({ ...touched, photoUrls: true });
-                      setSelectedPhotos([
-                        ...photoOrder.map(i => selectedPhotos[i]),
-                        ...Array.from(e.target.files).filter(
-                          file =>
+
+                      selectedFiles = selectedFiles.map(file => ({
+                        file,
+                        _id: nanoid(),
+                      }));
+
+                      setFieldValue('photoUrls', [
+                        ...values.photoUrls,
+                        ...selectedFiles.filter(
+                          ({ file }) =>
                             file.type !== 'video/quicktime' &&
                             file.size < 10485760
                         ),
                       ]);
-                      setPhotoOrder(
-                        [...selectedPhotos, ...Array.from(e.target.files)]
-                          .filter(
-                            file =>
-                              file.type !== 'video/quicktime' &&
-                              file.size < 10485760
-                          )
-                          .map((_, index) => index)
-                      );
-                      setFieldValue(
-                        'photoUrls',
-                        [
-                          ...photoOrder,
-                          ...Array.from(e.target.files)
-                            .filter(
-                              file =>
-                                file.type !== 'video/quicktime' &&
-                                file.size < 10485760
-                            )
-                            .map((_, index) => photoOrder.length - 0 + index),
-                        ].map(
-                          index =>
-                            [
-                              ...selectedPhotos,
-                              ...Array.from(e.target.files).filter(
-                                file =>
-                                  file.type !== 'video/quicktime' &&
-                                  file.size < 10485760
-                              ),
-                            ][index]
-                        )
-                      );
                     }}
                     onBlur={handleBlur}
                     multiple
                   />
                   <Title>{t('Upload photo')}</Title>
                   <WrapperPhotos ref={wrapPhototsRef}>
-                    {photoOrder.map((photo, index) => (
-                      <WrapPhoto
-                        key={photo}
-                        draggable
-                        onDragStart={e => handleDragStart(e, photo)}
-                        onDragOver={e => e.preventDefault()}
-                        onDrop={e => {
-                          handleDrop(e, photo);
-                        }}
-                      >
-                        <ButtonDeletePhoto
-                          onClick={() => handleDeletePhoto(index)}
+                    {values?.photoUrls?.map((photo, index) => {
+                      return (
+                        <WrapPhoto
+                          key={photo._id}
+                          draggable
+                          onDragStart={e => handleDragStart(e, photo._id)}
+                          onDragOver={e => e.preventDefault()}
+                          onDrop={event => {
+                            handleDrop({
+                              event,
+                              targetPhoto: photo,
+                              photoUrls: values.photoUrls,
+                              setPhotoUrls: e => {
+                                setFieldValue('photoUrls', e);
+                              },
+                            });
+                          }}
                         >
-                          <IconBasket />
-                        </ButtonDeletePhoto>
-                        <PhotoImg
-                          src={
-                            selectedPhotos[photo]?.path
-                              ? selectedPhotos[photo].path
-                              : URL.createObjectURL(selectedPhotos[photo])
-                          }
-                          alt={`photo_${index}`}
-                        />
-                      </WrapPhoto>
-                    ))}
-                    {selectedPhotos.length < 10 && (
+                          <ButtonDeletePhoto
+                            type="button"
+                            onClick={() => handleDeletePhoto(index)}
+                          >
+                            <IconBasket />
+                          </ButtonDeletePhoto>
+                          <PhotoImg
+                            src={
+                              photo?.path
+                                ? photo.path
+                                : URL.createObjectURL(photo.file)
+                            }
+                            alt={`photo_${index}`}
+                          />
+                        </WrapPhoto>
+                      );
+                    })}
+                    {values?.photoUrls?.length < 10 && (
                       <WrapPhotoLabel htmlFor="photoUrls">
                         <Picture>
                           <IconPhoto />
@@ -511,6 +503,7 @@ const FormAddProduct = ({ id }) => {
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
+                          setTouched({ ...touched, category: true });
                           setFieldValue('category', 'forWomen');
                         }}
                       >
@@ -523,6 +516,7 @@ const FormAddProduct = ({ id }) => {
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
+                          setTouched({ ...touched, category: true });
                           setFieldValue('category', 'forMen');
                         }}
                       >
@@ -535,19 +529,20 @@ const FormAddProduct = ({ id }) => {
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
+                          setTouched({ ...touched, category: true });
                           setFieldValue('category', 'forChildren');
                         }}
                       >
                         {t("Children's Clothing")}
                       </Button>
                     </li>
-
                     <li>
                       <Button
                         $active={values.category === 'decorAndToys'}
                         type="button"
                         onClick={() => {
                           resetInitialValuesForCategories();
+                          setTouched({ ...touched, category: true });
                           setFieldValue('category', 'decorAndToys');
                         }}
                       >
@@ -932,6 +927,23 @@ const FormAddProduct = ({ id }) => {
                             </ErrorMessage>
                           </WrapError>
                         )}
+                      <LabelPrice>
+                        {t('deposit')}
+                        <InputPrice
+                          placeholder={2000}
+                          type="number"
+                          name="deposit"
+                          value={values.deposit}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          disabled={!values.rental}
+                        />
+                      </LabelPrice>
+                      {errors.deposit && touched.deposit && (
+                        <WrapError>
+                          <ErrorMessage>{t(errors.deposit)}</ErrorMessage>
+                        </WrapError>
+                      )}
                     </WrapCondition>
                     <WrapCondition>
                       <LabelStatus>
@@ -1031,8 +1043,8 @@ const FormAddProduct = ({ id }) => {
                 <ButtonSubmit type="submit" disabled={isLoading}>
                   {!isLoading ? (
                     <>
-                      {t('addItem')}
-                      <IconPlus />
+                      {isUpdate ? t('save') : t('addProduct')}
+                      {!isUpdate && <IconPlus />}
                     </>
                   ) : (
                     <BeatLoader color="#EBDAD1" />
@@ -1057,10 +1069,10 @@ const FormAddProduct = ({ id }) => {
                           name="photoUrls"
                           accept=".jpg, .jpeg, .png"
                           onChange={e => {
-                            const selectedFiles = Array.from(e.target.files);
+                            let selectedFiles = Array.from(e.target.files);
 
                             if (
-                              selectedFiles.length + selectedPhotos.length >
+                              selectedFiles.length + values.photoUrls.length >
                               10
                             ) {
                               setIsOpenModalMaxSize(true);
@@ -1070,85 +1082,69 @@ const FormAddProduct = ({ id }) => {
                             if (
                               selectedFiles.some(file => file.size > 10485760)
                             ) {
+                              selectedFiles = selectedFiles.filter(
+                                file => file.size < 10485760
+                              );
                               setIsOpenModalMaxSize(true);
-                              return;
                             }
 
                             setTouched({ ...touched, photoUrls: true });
-                            setSelectedPhotos([
-                              ...photoOrder.map(i => selectedPhotos[i]),
-                              ...Array.from(e.target.files).filter(
-                                file =>
+
+                            selectedFiles = selectedFiles.map(file => ({
+                              file,
+                              _id: nanoid(),
+                            }));
+
+                            setFieldValue('photoUrls', [
+                              ...values.photoUrls,
+                              ...selectedFiles.filter(
+                                ({ file }) =>
                                   file.type !== 'video/quicktime' &&
                                   file.size < 10485760
                               ),
                             ]);
-                            setPhotoOrder(
-                              [...selectedPhotos, ...Array.from(e.target.files)]
-                                .filter(
-                                  file =>
-                                    file.type !== 'video/quicktime' &&
-                                    file.size < 10485760
-                                )
-                                .map((_, index) => index)
-                            );
-                            setFieldValue(
-                              'photoUrls',
-                              [
-                                ...photoOrder,
-                                ...Array.from(e.target.files)
-                                  .filter(
-                                    file =>
-                                      file.type !== 'video/quicktime' &&
-                                      file.size < 10485760
-                                  )
-                                  .map(
-                                    (_, index) => photoOrder.length - 0 + index
-                                  ),
-                              ].map(
-                                index =>
-                                  [
-                                    ...selectedPhotos,
-                                    ...Array.from(e.target.files).filter(
-                                      file =>
-                                        file.type !== 'video/quicktime' &&
-                                        file.size < 10485760
-                                    ),
-                                  ][index]
-                              )
-                            );
                           }}
                           onBlur={handleBlur}
                           multiple
                         />
                         <Title>{t('Upload photo')}</Title>
                         <WrapperPhotos ref={wrapPhototsRef}>
-                          {photoOrder.map((photo, index) => (
-                            <WrapPhoto
-                              key={photo}
-                              draggable
-                              onDragStart={e => handleDragStart(e, photo)}
-                              onDragOver={e => e.preventDefault()}
-                              onDrop={e => {
-                                handleDrop(e, photo);
-                              }}
-                            >
-                              <ButtonDeletePhoto
-                                onClick={() => handleDeletePhoto(index)}
+                          {values?.photoUrls?.map((photo, index) => {
+                            return (
+                              <WrapPhoto
+                                key={photo._id}
+                                draggable
+                                onDragStart={e => handleDragStart(e, photo._id)}
+                                onDragOver={e => e.preventDefault()}
+                                onDrop={event => {
+                                  handleDrop({
+                                    event,
+                                    targetPhoto: photo,
+                                    photoUrls: values.photoUrls,
+                                    setPhotoUrls: e => {
+                                      setFieldValue('photoUrls', e);
+                                    },
+                                  });
+                                }}
                               >
-                                <IconBasket />
-                              </ButtonDeletePhoto>
-                              <PhotoImg
-                                src={
-                                  product
-                                    ? selectedPhotos[photo].path
-                                    : URL.createObjectURL(selectedPhotos[photo])
-                                }
-                                alt={`photo_${index}`}
-                              />
-                            </WrapPhoto>
-                          ))}
-                          {selectedPhotos.length < 10 && (
+                                <ButtonDeletePhoto
+                                  type="button"
+                                  onClick={() => handleDeletePhoto(index)}
+                                >
+                                  <IconBasket />
+                                </ButtonDeletePhoto>
+                                <PhotoImg
+                                  src={
+                                    photo?.path
+                                      ? photo.path
+                                      : URL.createObjectURL(photo.file)
+                                  }
+                                  alt={`photo_${index}`}
+                                />
+                              </WrapPhoto>
+                            );
+                          })}
+                          {values?.photoUrls?.length < 10 && (
                             <WrapPhotoLabel htmlFor="photoUrls">
                               <Picture>
                                 <IconPhoto />
@@ -1297,6 +1293,7 @@ const FormAddProduct = ({ id }) => {
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
+                              setTouched({ ...touched, category: true });
                               setFieldValue('category', 'forWomen');
                             }}
                           >
@@ -1309,6 +1306,7 @@ const FormAddProduct = ({ id }) => {
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
+                              setTouched({ ...touched, category: true });
                               setFieldValue('category', 'forMen');
                             }}
                           >
@@ -1321,6 +1319,7 @@ const FormAddProduct = ({ id }) => {
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
+                              setTouched({ ...touched, category: true });
                               setFieldValue('category', 'forChildren');
                             }}
                           >
@@ -1333,6 +1332,7 @@ const FormAddProduct = ({ id }) => {
                             type="button"
                             onClick={() => {
                               resetInitialValuesForCategories();
+                              setTouched({ ...touched, category: true });
                               setFieldValue('category', 'decorAndToys');
                             }}
                           >
@@ -1517,20 +1517,27 @@ const FormAddProduct = ({ id }) => {
                             <Description>{t('Outfits')}</Description>
                             <List>
                               {arrayOfOutfits.map((valueOutfits, index) => (
-                                <Label key={index}>
-                                  <Box>
-                                    {values.outfits === valueOutfits && (
-                                      <StyledIconCheck />
+                                <LabelChildren key={index}>
+                                  <BoxSize
+                                    $check={values.outfits.includes(
+                                      valueOutfits
                                     )}
-                                  </Box>
-                                  {t(valueOutfits)}
+                                  >
+                                    <CheckBox
+                                      value={values.outfits.includes(
+                                        valueOutfits
+                                      )}
+                                    />
+                                    {/* {productAge[i18n.language]} */}
+                                    {t(valueOutfits)}
+                                  </BoxSize>
                                   <Input
                                     type="radio"
                                     name="outfits"
                                     value={valueOutfits}
                                     onChange={handleChange}
                                   />
-                                </Label>
+                                </LabelChildren>
                               ))}
                             </List>
                             {errors.outfits && touched.outfits && (
@@ -1545,7 +1552,7 @@ const FormAddProduct = ({ id }) => {
                               <li key={index}>
                                 <LabelChildren>
                                   <BoxSize
-                                    $check={values.age === productAge.age}
+                                    $check={values.age.includes(productAge.age)}
                                   >
                                     <CheckBox
                                       value={values.age.includes(
@@ -1581,7 +1588,9 @@ const FormAddProduct = ({ id }) => {
                                 <li key={index}>
                                   <LabelChildren>
                                     <BoxSize
-                                      $check={values.childSize === childSize}
+                                      $check={values.childSize.includes(
+                                        childSize
+                                      )}
                                     >
                                       <CheckBox
                                         value={values.childSize.includes(
@@ -1918,6 +1927,25 @@ const FormAddProduct = ({ id }) => {
                                   </ErrorMessage>
                                 </WrapError>
                               )}
+                            <LabelPrice>
+                              {t('deposit')} (Kč)
+                              <InputPrice
+                                placeholder={t('pricePlaceholder')}
+                                type="number"
+                                name="deposit"
+                                value={values.deposit}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                disabled={!values.rental}
+                              />
+                            </LabelPrice>
+                            {errors.deposit && touched.deposit && (
+                              <WrapError>
+                                <ErrorMessage>
+                                  {t(errors.hourlyRentalPrice)}
+                                </ErrorMessage>
+                              </WrapError>
+                            )}
                           </WrapCondition>
                           <WrapCondition>
                             <LabelStatus>
@@ -2020,8 +2048,8 @@ const FormAddProduct = ({ id }) => {
                         <ButtonSubmit type="submit" disabled={isLoading}>
                           {!isLoading ? (
                             <>
-                              {t('addItem')}
-                              <IconPlus />
+                              {isUpdate ? t('save') : t('addProduct')}
+                              {!isUpdate && <IconPlus />}
                             </>
                           ) : (
                             <BeatLoader color="#EBDAD1" />
