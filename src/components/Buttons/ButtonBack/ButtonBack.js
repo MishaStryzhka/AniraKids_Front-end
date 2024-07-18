@@ -2,7 +2,15 @@ import { NavLink } from 'react-router-dom';
 
 const { StyledButtonBack } = require('./ButtonBack.styled');
 
-const ButtonBack = ({ type, to, className, onClick, disabled, children }) => {
+const ButtonBack = ({
+  type,
+  to,
+  className,
+  onClick,
+  disabled,
+  children,
+  form,
+}) => {
   return (
     <StyledButtonBack
       as={to && NavLink}
@@ -11,6 +19,7 @@ const ButtonBack = ({ type, to, className, onClick, disabled, children }) => {
       className={className}
       onClick={() => (onClick ? onClick() : null)}
       disabled={disabled}
+      form={form}
     >
       {children}
     </StyledButtonBack>

@@ -2,7 +2,15 @@ import { NavLink } from 'react-router-dom';
 
 const { StyledButtonRemove } = require('./ButtonRemove.styled');
 
-const ButtonRemove = ({ type, to, className, onClick, disabled, children }) => {
+const ButtonRemove = ({
+  type,
+  to,
+  className,
+  onClick,
+  disabled,
+  children,
+  form,
+}) => {
   return (
     <StyledButtonRemove
       as={to && NavLink}
@@ -11,6 +19,7 @@ const ButtonRemove = ({ type, to, className, onClick, disabled, children }) => {
       className={className}
       onClick={() => (onClick ? onClick() : null)}
       disabled={disabled}
+      form={form}
     >
       {children}
     </StyledButtonRemove>

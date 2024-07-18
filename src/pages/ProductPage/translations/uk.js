@@ -1,6 +1,7 @@
 export const ProductPageTranslationsUk = {
   sale: 'Продаж',
   rental: 'Оренда',
+  deposit: 'Завдаток',
   seller: 'Продавець',
   size: 'Розмір',
   addToCart: 'Додати в корзину',

@@ -1,5 +1,6 @@
 export const FormOrderTranslationsUk = {
-  urerFullName: 'ПІБ отримувача',
+  lastName: 'Прізвище',
+  firstName: "Ім'я",
   userPhoneNumber: 'Номер телефону отримувача',
   email: 'Електронна пошта',
   'Delivery service': 'Служба доставки',

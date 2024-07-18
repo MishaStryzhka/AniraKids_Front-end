@@ -160,7 +160,9 @@ const UsersProductCard = ({
             <TextName>{product?.name || 'brand'}</TextName>
             <TextSize>
               <Span>{t('Size')}:</Span>
-              {product?.size || product?.childSize}
+              {[...(product?.size || product?.childSize)].map(
+                size => `${size} `
+              )}
             </TextSize>
           </FirstWrap>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>

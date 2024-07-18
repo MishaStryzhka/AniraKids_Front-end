@@ -116,6 +116,10 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     }
   };
 
+  const handleOrderConfirmationByTheUser = e => {
+    api.orderConfirmationByTheUser({ orderId, ...e });
+  };
+
   return (
     <>
       <WrapCardOrder name={orderId}>
@@ -283,7 +287,10 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
           })}
         </div>
         <WrapInside>
-          <FormOrder order={order} />
+          <FormOrder
+            order={order}
+            handleOrderConfirmationByTheUser={handleOrderConfirmationByTheUser}
+          />
           <WrapAmount>
             {serviceType === 'rent' && (
               <WrapCalendar>
@@ -313,9 +320,9 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
             <ButtonRent
               form="orderForm"
               type="submit"
-              disabled={items.some(
-                item => item?.product?.status === 'inactive'
-              )}
+              // disabled={items.some(
+              //   item => item?.product?.status === 'inactive'
+              // )}
             >
               {items.some(item => item?.product?.status === 'inactive')
                 ? 'Замовлення містить недоступні продукти!'

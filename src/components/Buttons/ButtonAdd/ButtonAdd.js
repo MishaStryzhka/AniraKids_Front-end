@@ -2,7 +2,15 @@ import { NavLink } from 'react-router-dom';
 
 const { StyledButtonAdd } = require('./ButtonAdd.styled');
 
-const ButtonAdd = ({ type, to, className, onClick, disabled, children }) => {
+const ButtonAdd = ({
+  type,
+  to,
+  className,
+  onClick,
+  disabled,
+  children,
+  form,
+}) => {
   return (
     <StyledButtonAdd
       as={to && NavLink}
@@ -11,6 +19,7 @@ const ButtonAdd = ({ type, to, className, onClick, disabled, children }) => {
       className={className}
       onClick={() => (onClick ? onClick() : null)}
       disabled={disabled}
+      form={form}
     >
       {children}
     </StyledButtonAdd>

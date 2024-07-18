@@ -12,6 +12,7 @@ export const ButtonViewMore = ({
   onClick,
   disabled,
   children,
+  form,
 }) => {
   const { pathname } = useLocation();
   return (
@@ -25,6 +26,7 @@ export const ButtonViewMore = ({
       disabled={disabled}
       $pageMyOrders={pathname === `/my-account/my-orders`}
       $pageMyPurchases={pathname === `/my-account/my-purchases`}
+      form={form}
     >
       {children}
       <StyledIconLongArrow />

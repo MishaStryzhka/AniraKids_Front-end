@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-export const addProduct = async credentials => {
+export const updateProduct = async credentials => {
   const {
+    id,
     age,
     brand,
     category,
@@ -32,12 +33,24 @@ export const addProduct = async credentials => {
   } = credentials;
 
   const formData = new FormData();
+  const metaData = [];
+  photoUrls.forEach((photo, index) => {
+    if (!photo.path) {
+      // new file
+      formData.append(`photos`, photo.file);
+      metaData.push(photo.file.name);
+    } else {
+      // old file
+      metaData.push(photo._id);
+    }
+  });
+  formData.append(`metaData`, JSON.stringify(metaData));
 
-  photoUrls.forEach(file => file && formData.append(`photos`, file));
   age && formData.append(`age`, JSON.stringify(age));
+  childSize && formData.append(`childSize`, JSON.stringify(childSize));
+
   brand && formData.append(`brand`, brand);
   category && formData.append(`category`, category);
-  childSize && formData.append(`childSize`, JSON.stringify(childSize));
   color && formData.append(`color`, color);
   decor && formData.append(`decor`, decor);
   description && formData.append(`description`, description);
@@ -62,7 +75,7 @@ export const addProduct = async credentials => {
   pickupAddress &&
     formData.append(`pickupAddress`, JSON.stringify(pickupAddress));
 
-  const res = await axios.post(`api/product/addProduct`, formData, {
+  const res = await axios.patch(`api/product/updateProduct/${id}`, formData, {
     headers: { 'content-type': 'multipart/form-data' },
   });
 

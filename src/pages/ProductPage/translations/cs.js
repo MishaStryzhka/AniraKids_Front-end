@@ -1,6 +1,7 @@
 export const ProductPageTranslationsCs = {
   sale: 'Prodej',
   rental: 'Pronájem',
+  deposit: 'Záloha',
   seller: 'Prodejce',
   size: 'Velikost',
   addToCart: 'Přidat do košíku',

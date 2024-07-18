@@ -1,6 +1,7 @@
 export const ProductPageTranslationsEn = {
   sale: 'Sale',
   rental: 'Rental',
+  deposit: 'Deposit',
   seller: 'Seller',
   size: 'Size',
   addToCart: 'Add to Cart',

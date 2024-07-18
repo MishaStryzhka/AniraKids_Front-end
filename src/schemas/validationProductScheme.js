@@ -26,16 +26,16 @@ export const validationProductSchema = Yup.object().shape({
   photoUrls: Yup.array()
     .of(
       Yup.mixed()
-        .test(
-          'fileSize',
-          'fileSize',
-          value => !value || (value && value.size <= FILE_SIZE_LIMIT)
-        )
-        .test(
-          'fileFormat',
-          'fileFormat',
-          value => !value || (value && SUPPORTED_FORMATS.includes(value.type))
-        )
+        .test('fileSize', 'fileSize', value => {
+          if (value?.path) return true;
+          return !value || (value && value.file.size <= FILE_SIZE_LIMIT);
+        })
+        .test('fileFormat', 'fileFormat', value => {
+          if (value?.path) return true;
+          return (
+            !value || (value && SUPPORTED_FORMATS.includes(value.file.type))
+          );
+        })
     )
     .required('requiredFileSelection')
     .min(1, 'minimumFileSelection')
@@ -113,6 +113,9 @@ export const validationProductSchema = Yup.object().shape({
       return this.parent.rental ? !!value : true;
     }
   ),
+  deposit: Yup.number().test('required', 'Required field', function (value) {
+    return this.parent.rental ? !!value : true;
+  }),
 
   salePrice: Yup.number().test('required', 'Required field', function (value) {
     return this.parent.sale ? !!value : true;

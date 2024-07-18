@@ -250,7 +250,7 @@ const ProductPage = () => {
                   {product?.size || product?.childSize}
                 </TextValueSize>
               </TextSize>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                 {product?.rental && (
                   <SecondWrap>
                     <Price style={{ width: 'max-content' }}>
@@ -284,6 +284,20 @@ const ProductPage = () => {
                   </SecondWrap>
                 )}
               </div>
+              {product.deposit && (
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-around' }}
+                >
+                  <SecondWrap>
+                    <Price style={{ width: 'max-content' }}>
+                      {t('deposit')}
+                    </Price>
+                    <div>
+                      <TextPrice>{product.deposit} kč</TextPrice>
+                    </div>
+                  </SecondWrap>
+                </div>
+              )}
               {pathname !== `/my-account/rent-out/${product?._id}` &&
                 product?.rental && (
                   <WrapCalendar>
