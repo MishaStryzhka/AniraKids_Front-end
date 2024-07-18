@@ -2,7 +2,15 @@ import { NavLink } from 'react-router-dom';
 
 const { StyledButtonRent } = require('./ButtonRent.styled');
 
-const ButtonRent = ({ type, to, className, onClick, disabled, children }) => {
+const ButtonRent = ({
+  type,
+  to,
+  className,
+  onClick,
+  disabled,
+  children,
+  form,
+}) => {
   return (
     <StyledButtonRent
       as={to && NavLink}
@@ -11,6 +19,7 @@ const ButtonRent = ({ type, to, className, onClick, disabled, children }) => {
       className={className}
       onClick={() => (onClick ? onClick() : null)}
       disabled={disabled}
+      form={form}
     >
       {children}
     </StyledButtonRent>
