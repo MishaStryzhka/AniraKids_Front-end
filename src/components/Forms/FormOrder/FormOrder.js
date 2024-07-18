@@ -15,7 +15,7 @@ import Modal from 'components/Modals/Modal';
 import { useEffect, useState } from 'react';
 import GoogleMap from 'components/GoogleMap/GoogleMap';
 
-const FormOrder = ({ order }) => {
+const FormOrder = ({ order, handleOrderConfirmationByTheUser }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.formOrder',
   });
@@ -44,25 +44,21 @@ const FormOrder = ({ order }) => {
     };
   }, [isOpenModalDeliveryService]);
 
-  const handleFormOrderSubmit = (values, { resetForm }) => {
-    resetForm();
-  };
   return (
     <>
       <Formik
         initialValues={{
-          fullName: `${user.firstName} ${user.lastName}`,
+          firstName: user.firstName,
+          lastName: user.lastName,
           phoneNumber: user.primaryPhoneNumber,
           email: user.email,
           deliveryService:
             order.typeRent === 'photosession' ? 'selfPickup' : '',
           deliveryType: '',
-          city: '',
           address: '',
-          typePay: '',
         }}
         validationSchema={validationFormOrderScheme}
-        onSubmit={handleFormOrderSubmit}
+        onSubmit={handleOrderConfirmationByTheUser}
       >
         {({
           values,
@@ -76,9 +72,23 @@ const FormOrder = ({ order }) => {
           return (
             <StyledForm id="orderForm" onSubmit={handleSubmit}>
               <LabelOrder>
-                {t('urerFullName')}*
+                {t('firstName')}*
                 <FieldOrder
-                  name="fullName"
+                  name="firstName"
+                  value={values.fullName}
+                  type="text"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Бондаренко А.А."
+                />
+                {errors.fullName && touched.fullName && (
+                  <ErrorMessage>{t(errors.fullName)}</ErrorMessage>
+                )}
+              </LabelOrder>
+              <LabelOrder>
+                {t('lastName')}*
+                <FieldOrder
+                  name="lastName"
                   value={values.fullName}
                   type="text"
                   onChange={handleChange}
@@ -184,21 +194,6 @@ const FormOrder = ({ order }) => {
               </LabelOrder>
             )} */}
 
-              {/* <LabelOrder>
-              {t('city')}*
-              <FieldOrder
-                name="city"
-                value={values.city}
-                type="text"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder=""
-              />
-              {errors.city && touched.city && (
-                <ErrorMessage>{t(errors.city)}</ErrorMessage>
-              )}
-            </LabelOrder> */}
-
               {(values.deliveryService === 'Balikovna' ||
                 values.deliveryService === 'POST_OFFICE') && (
                 <LabelOrder>
@@ -218,7 +213,7 @@ const FormOrder = ({ order }) => {
                 </LabelOrder>
               )}
 
-              <LabelOrder>
+              {/* <LabelOrder>
                 {t('typePay')}*
                 <FieldSelect
                   as="select"
@@ -240,7 +235,7 @@ const FormOrder = ({ order }) => {
                 {errors.deliveryService && touched.deliveryService && (
                   <ErrorMessage>{t(errors.deliveryService)}</ErrorMessage>
                 )}
-              </LabelOrder>
+              </LabelOrder> */}
 
               <TextDescription>*{t('Text required')}</TextDescription>
 
