@@ -1,5 +1,6 @@
 export const FormOrderTranslationsCs = {
-  urerFullName: 'Celé jméno příjemce',
+  lastName: 'Příjmení',
+  firstName: 'Jméno',
   userPhoneNumber: 'Telefonní číslo příjemce',
   email: 'Email',
 

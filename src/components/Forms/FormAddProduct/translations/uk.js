@@ -126,6 +126,7 @@ export const FormAddProductTranslationsUk = {
   Sale: 'Продаж',
   Price: 'Ціна',
   pricePlaceholder: '1500 CZK',
+  deposit: 'Завдаток',
 
   // part - keywords of product
   keywords: 'Ключові слова',
@@ -145,7 +146,8 @@ export const FormAddProductTranslationsUk = {
   address: 'Адрес',
 
   // buttonAdd in form
-  addItem: 'Додати товар',
+  addProduct: 'Додати товар',
+  save: 'Зберегти',
   btnNext: 'Далі',
 
   // error File

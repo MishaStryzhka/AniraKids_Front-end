@@ -1,5 +1,6 @@
 export const FormOrderTranslationsEn = {
-  urerFullName: 'Recipient`s full name',
+  lastName: 'Last Name',
+  firstName: 'First Name',
   userPhoneNumber: 'Recipient`s phone number',
   email: 'Email',
   'Delivery service': 'Delivery service',
