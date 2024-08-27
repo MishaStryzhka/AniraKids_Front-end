@@ -23,8 +23,7 @@ const PrivacyPolicyPage = () => {
       </Text>
       <Text>
         Pro jakékoliv otázky ohledně ochrany osobních údajů můžete kontaktovat
-        našeho zástupce pro ochranu osobních údajů:
-        mykhailo.stryzhka@anirakids.cz
+        našeho zástupce pro ochranu osobních údajů: mykhailo.stryzhka@seznam.cz
       </Text>
 
       <Title>2. Jaké osobní údaje shromažďujeme</Title>
