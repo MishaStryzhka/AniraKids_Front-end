@@ -10,10 +10,12 @@ export const OrderTranslationsEn = {
   quantity_of_days: 'quantity of days',
   amount: 'Amount',
   seller: 'Seller',
+  deposit: 'Deposit',
 
   orderTotal: 'Order total',
   totalPrice: 'Total amount products',
   Continue: 'Continue',
+  amount_due: 'Amount Due',
 
   celebration: 'celebration',
   photosession: 'photosession',

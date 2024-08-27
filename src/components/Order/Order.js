@@ -37,7 +37,7 @@ const api = require('../../api');
 
 const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   const [order, setOrder] = useState(dataOrder);
-  console.log('order', order);
+  // console.log('order', order);
 
   const {
     _id: orderId,
@@ -47,6 +47,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     typeRent,
     totalPrice,
     totalOrderPrice,
+    totalOrderDeposit,
     quantityDays,
     rentalPeriods,
   } = order;
@@ -89,9 +90,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   const handleIncrementQuantityHours = ({ _id: orderId, quantityHours }) => {
     api
       .setQuantityHours({ orderId, quantityHours: quantityHours + 1 })
-      .then(({ order }) => {
-        setOrder(order);
-      });
+      .then(({ order }) => setOrder(order));
   };
 
   const handleDecrementQuantityHours = ({ _id: orderId, quantityHours }) => {
@@ -117,7 +116,10 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   };
 
   const handleOrderConfirmationByTheUser = e => {
-    api.orderConfirmationByTheUser({ orderId, ...e });
+    api
+      .orderConfirmationByTheUser({ orderId, ...e })
+      .then(data => console.log('data', data))
+      .catch(error => console.log('error', error));
   };
 
   return (
@@ -311,18 +313,33 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
                 Počet dni <span>{quantityDays}</span>
               </TextAmount>
             )}
+            {serviceType === 'rent' && (
+              <TextAmount>
+                {t('deposit')} <span>{totalOrderDeposit}</span>
+              </TextAmount>
+            )}
 
             <BorderAmount />
-            <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
-              {t('orderTotal')}
-              <span>{totalOrderPrice} kč</span>
-            </TextAmount>
+
+            {serviceType === 'rent' && (
+              <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
+                {t('amount_due')}
+                <span>{totalOrderDeposit} kč</span>
+              </TextAmount>
+            )}
+            {serviceType === 'buy' && (
+              <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
+                {t('amount_due')}
+                <span>{totalOrderPrice} kč</span>
+              </TextAmount>
+            )}
+
             <ButtonRent
               form="orderForm"
               type="submit"
-              // disabled={items.some(
-              //   item => item?.product?.status === 'inactive'
-              // )}
+              disabled={items.some(
+                item => item?.product?.status === 'inactive'
+              )}
             >
               {items.some(item => item?.product?.status === 'inactive')
                 ? 'Замовлення містить недоступні продукти!'
