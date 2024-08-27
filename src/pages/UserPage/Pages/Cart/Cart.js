@@ -1,14 +1,19 @@
 import EmptyCart from 'components/EmptyCart/EmptyCart';
 import Order from 'components/Order/Order';
 import { useEffect, useRef, useState } from 'react';
-import { ListOrders } from './Cart.styled';
+import { CartTitle, ListOrders } from './Cart.styled';
 import { useLocation } from 'react-router-dom';
 import { removeOrderIdFromUserCart } from '../../../../redux/auth/slice';
 import { useDispatch } from 'react-redux';
+import CartDescription from 'components/CartDescription/CartDescription';
+import { useTranslation } from 'react-i18next';
 
 const api = require('../../../../api');
 
 const Cart = () => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'pages.userPage.cart',
+  });
   const [orders, setOrders] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [totalOrders, setTotalOrders] = useState([]);
@@ -36,7 +41,7 @@ const Cart = () => {
 
   useEffect(() => {
     api
-      .getOrders()
+      .getOrders({ status: 'create' })
       .then(data => {
         setOrders(data.orders);
         setTotalOrders(data.totalOrders);
@@ -62,19 +67,27 @@ const Cart = () => {
   return !orders.length ? (
     <EmptyCart />
   ) : (
-    <ListOrders>
-      {orders.map(order => (
-        <li
-          key={order._id}
-          ref={order._id === location.hash.slice(1) ? scrollOrderRef : null}
-        >
-          <Order
-            handleRemoveOrder={() => handleRemoveOrder(order._id)}
-            order={order}
-          />
-        </li>
-      ))}
-    </ListOrders>
+    <>
+      <CartTitle>{t('Order Processing')}</CartTitle>
+      {orders.length && (
+        <>
+          <CartDescription />
+        </>
+      )}
+      <ListOrders>
+        {orders.map(order => (
+          <li
+            key={order._id}
+            ref={order._id === location.hash.slice(1) ? scrollOrderRef : null}
+          >
+            <Order
+              handleRemoveOrder={() => handleRemoveOrder(order._id)}
+              order={order}
+            />
+          </li>
+        ))}
+      </ListOrders>
+    </>
   );
 };
 
