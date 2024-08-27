@@ -1,5 +1,6 @@
 const { addToOrder } = require('./order/addToOrder');
 const { getOrders } = require('./order/getOrders');
+const { getOrdersRent } = require('./order/getOrdersRent');
 const {
   orderConfirmationByTheUser,
 } = require('./order/orderConfirmationByTheUser');
@@ -30,6 +31,7 @@ module.exports = {
   // Order
   addToOrder,
   getOrders,
+  getOrdersRent,
   setQuantity,
   setQuantityHours,
   removeOrder,

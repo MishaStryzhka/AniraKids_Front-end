@@ -11,9 +11,11 @@ export const OrderTranslationsUk = {
   quantity_of_days: 'Кількість днів',
   amount: 'Сума',
   seller: 'Продавець',
+  deposit: 'Завдаток',
 
   orderTotal: 'Сума замовлення',
   totalPrice: 'Загальна сума товарів',
+  amount_due: 'Сума до оплати',
   Continue: 'Продовжити',
 
   celebration: 'святкування',

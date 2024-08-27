@@ -25,19 +25,25 @@ import {
 import ButtonBack from 'components/Buttons/ButtonBack/ButtonBack';
 import IconChats from 'images/icons/IconChats';
 
-const RentalCard = ({ product }) => {
+const RentalCard = ({ order }) => {
+  console.log('order', order);
+  console.log('first', order?.items[0].product.photos[0].path);
+
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.rentalCard',
   });
   return (
     <WrapCard>
       <PictureTablet>
-        <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
+        <Image
+          src={order?.items[0]?.product?.photos[0]?.path}
+          alt="Фотографія продукту"
+        />
       </PictureTablet>
       <AddWrap>
         <Wrap>
           <Picture>
-            <Image src={product?.photos[0]?.path} alt="Фотографія продукту" />
+            {/* <Image src={order?.photos[0]?.path} alt="Фотографія продукту" /> */}
           </Picture>
 
           <WrapTimeRent>
@@ -52,24 +58,22 @@ const RentalCard = ({ product }) => {
                 {window.innerWidth > 768 && (
                   <TextRental>{t('rent')}:</TextRental>
                 )}
-                <TextRentalTime>01.03.2024 - 12.03.2024</TextRentalTime>
+                <TextRentalTime>{order.rentalPeriods}</TextRentalTime>
               </SecondWrap>
             </WrapTime>
             <TextOrder>
               {t('order')}
-              <span style={{ marginLeft: '6px' }}>N123456789</span>
+              <span style={{ marginLeft: '6px' }}>ID:{order._id}</span>
             </TextOrder>
           </WrapTimeRent>
         </Wrap>
 
         <WrapText>
           <div>
-            <TextName>{product.name}</TextName>
+            <TextName>{order.name}</TextName>
             <TextSeller>
               {t('Seller')}:
-              <span style={{ marginLeft: '8px' }}>
-                {product.owner.nickname}
-              </span>
+              <span style={{ marginLeft: '8px' }}>{order.owner.nickname}</span>
             </TextSeller>
             <NavLinkMessage to="../chat">
               <IconChats />

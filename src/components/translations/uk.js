@@ -54,6 +54,7 @@ import { RentalCardTranslationsUk } from 'components/RentalCard/translations/uk'
 import { OrderCardTranslationsUk } from 'components/OrderCard/translations/uk';
 import { ViewOrderProductTranslationsUk } from 'components/ViewOrderProduct/translations/uk';
 import { SelectTypeRentTranslationsUk } from 'components/SelectTypeRent/translations/uk';
+import { CartDescriptionTranslationsUk } from 'components/CartDescription/translations/uk';
 
 export const ComponentTranslationsUk = {
   // forms
@@ -122,4 +123,5 @@ export const ComponentTranslationsUk = {
   emptyCart: EmptyCartTranslationsUk,
   order: OrderTranslationsUk,
   viewOrderProduct: ViewOrderProductTranslationsUk,
+  cartDescription: CartDescriptionTranslationsUk,
 };

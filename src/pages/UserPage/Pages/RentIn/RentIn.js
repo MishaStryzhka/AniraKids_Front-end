@@ -8,23 +8,22 @@ const RentIn = () => {
   const [isLoading, setIsLoading] = useState(true);
   // const [page, setPage] = useState(1);
   // const [pageSize, setPageSize] = useState(9);
-  // const [error, setError] = useState(null);
-  const [products, setProducts] = useState([]);
+
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState(null);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     setIsLoading(true);
 
     api
-      .getProducts({
-        // page,
-        // pageSize,
-      })
-      .then(data => {
-        setProducts(data.products);
+      .getOrdersRent()
+      .then(({ totalOrders, orders }) => {
+        setOrders(orders);
         setIsLoading(false);
       })
       .catch(error => {
-        // setError(error);
+        setError(error);
         setIsLoading(false);
       });
   }, []);
@@ -35,9 +34,9 @@ const RentIn = () => {
         <p>Loading</p>
       ) : (
         <List>
-          {products?.map(product => (
-            <li key={product?._id}>
-              <RentalCard product={product} />
+          {orders?.map(order => (
+            <li key={order?._id}>
+              <RentalCard order={order} />
             </li>
           ))}
         </List>

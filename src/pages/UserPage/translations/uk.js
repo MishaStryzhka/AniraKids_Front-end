@@ -1,3 +1,4 @@
+import { CartTranslationsUk } from '../Pages/Cart/translations/uk';
 import { ProfileTranslationsUk } from '../Pages/Profile/translations/uk';
 
 export const UserPageTranslationsUk = {
@@ -11,6 +12,8 @@ export const UserPageTranslationsUk = {
   wallet: 'Мій гаманець',
   basket: 'Кошик',
   logOut: 'Вийти',
-  profilePage: ProfileTranslationsUk,
   addProduct: 'Додати товар',
+
+  profilePage: ProfileTranslationsUk,
+  cart: CartTranslationsUk,
 };

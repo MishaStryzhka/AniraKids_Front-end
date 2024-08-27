@@ -53,6 +53,7 @@ import { RentalCardTranslationsCs } from 'components/RentalCard/translations/cs'
 import { OrderCardTranslationsCs } from 'components/OrderCard/translations/cs';
 import { ViewOrderProductTranslationsCs } from 'components/ViewOrderProduct/translations/cs';
 import { SelectTypeRentTranslationsCs } from 'components/SelectTypeRent/translations/cs';
+import { CartDescriptionTranslationsCs } from 'components/CartDescription/translations/cs';
 
 export const ComponentTranslationsCs = {
   // forms
@@ -120,4 +121,5 @@ export const ComponentTranslationsCs = {
   emptyCart: EmptyCartTranslationsCs,
   order: OrderTranslationsCs,
   viewOrderProduct: ViewOrderProductTranslationsCs,
+  cartDescription: CartDescriptionTranslationsCs,
 };
