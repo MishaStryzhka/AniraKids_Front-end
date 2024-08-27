@@ -19,4 +19,8 @@ export const OrderTranslationsEn = {
 
   celebration: 'celebration',
   photosession: 'photosession',
+
+  deleteOrder: 'Delete order',
+  forPeriod: 'for {{period}}',
+  deleteProduct: "Delete product: '{{productName}}'",
 };

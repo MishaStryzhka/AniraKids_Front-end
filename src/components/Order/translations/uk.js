@@ -20,4 +20,8 @@ export const OrderTranslationsUk = {
 
   celebration: 'святкування',
   photosession: 'фотосесію',
+
+  deleteOrder: 'Видалити замовлення',
+  forPeriod: 'на {{period}}',
+  deleteProduct: "Видалити товар: '{{productName}}'",
 };

@@ -19,4 +19,8 @@ export const OrderTranslationsCs = {
 
   celebration: 'oslava',
   photosession: 'focení',
+
+  deleteOrder: 'Smazat objednávku',
+  forPeriod: 'pro {{period}}',
+  deleteProduct: "Smazat produkt: '{{productName}}'",
 };

@@ -351,16 +351,18 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
       {isOpenModalRemoveOrder && (
         <ModalConfirm
           onCloseModal={() => setIsOpenModalRemoveOrder(false)}
-          title={`Видалити замовлення${
-            rentalPeriods ? ` на ${rentalPeriods}` : ''
-          }?`}
+          title={`${t('deleteOrder')}${
+            rentalPeriods ? ` ${t('forPeriod', { period: rentalPeriods })}` : ''
+          }`}
           confirm={() => handleRemoveOrder()}
         />
       )}
       {isOpenModalRemoveProduct && (
         <ModalConfirm
           onCloseModal={() => setIsOpenModalRemoveProduct(false)}
-          title={`Видалити товар: '${isOpenModalRemoveProduct.product.name}'`}
+          title={t('deleteProduct', {
+            productName: isOpenModalRemoveProduct.product.name,
+          })}
           confirm={() => handleRemove(isOpenModalRemoveProduct._id)}
         />
       )}
