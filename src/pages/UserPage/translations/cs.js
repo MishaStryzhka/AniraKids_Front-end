@@ -1,3 +1,4 @@
+import { CartTranslationsCs } from '../Pages/Cart/translations/cs';
 import { ProfileTranslationsCs } from '../Pages/Profile/translations/cs';
 
 export const UserPageTranslationsCs = {
@@ -11,6 +12,8 @@ export const UserPageTranslationsCs = {
   wallet: 'Peněženka',
   basket: 'Košík',
   logOut: 'Odhlásit se',
-  profilePage: ProfileTranslationsCs,
   addProduct: 'Přidat produkt',
+
+  profilePage: ProfileTranslationsCs,
+  cart: CartTranslationsCs,
 };
