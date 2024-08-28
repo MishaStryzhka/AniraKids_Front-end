@@ -35,7 +35,7 @@ const MainPage = () => {
     }
 
     code && user && navigate('/my-account/profile', { replace: true });
-  }, [dispatch, isLoggedIn, navigate, searchParams, storage, user]);
+  }, [dispatch, navigate, searchParams, storage, user, isLoading, isLoggedIn]);
 
   return isLoading ? (
     <p>loading</p>
