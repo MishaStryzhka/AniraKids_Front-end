@@ -14,7 +14,7 @@ const MainPage = () => {
   useTitle('AniraK');
   // eslint-disable-next-line no-unused-vars
   let [searchParams, setSearchParams] = useSearchParams();
-  const { isLoading, user } = useAuth();
+  const { isLoggedIn, isLoading, user } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const storage = useStorage();
@@ -24,7 +24,7 @@ const MainPage = () => {
     const { origin } = new URL(window.location.href);
     const state = searchParams.get('state');
 
-    if (code && !isLoading) {
+    if (code && !isLoggedIn && !isLoading) {
       state === storage.get('requestSecretSeznam') &&
         dispatch(
           authBySeznam({
@@ -35,7 +35,7 @@ const MainPage = () => {
     }
 
     code && user && navigate('/my-account/profile', { replace: true });
-  }, [dispatch, isLoading, navigate, searchParams, storage, user]);
+  }, [dispatch, isLoggedIn, navigate, searchParams, storage, user]);
 
   return isLoading ? (
     <p>loading</p>
