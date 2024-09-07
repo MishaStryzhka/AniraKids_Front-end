@@ -33,7 +33,7 @@ export const addProduct = async credentials => {
 
   const formData = new FormData();
 
-  photoUrls.forEach(file => file && formData.append(`photos`, file));
+  photoUrls.forEach(({ file }) => file && formData.append(`photos`, file));
   age && formData.append(`age`, JSON.stringify(age));
   brand && formData.append(`brand`, brand);
   category && formData.append(`category`, category);
