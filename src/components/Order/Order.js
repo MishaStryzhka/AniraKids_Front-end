@@ -37,7 +37,7 @@ const api = require('../../api');
 
 const Order = ({ order: dataOrder, handleRemoveOrder }) => {
   const [order, setOrder] = useState(dataOrder);
-  // console.log('order', order);
+  console.log('order', order);
 
   const {
     _id: orderId,
@@ -47,7 +47,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
     typeRent,
     totalPrice,
     totalOrderPrice,
-    totalOrderDeposit,
+    totalDeposit,
     quantityDays,
     rentalPeriods,
   } = order;
@@ -315,7 +315,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
             )}
             {serviceType === 'rent' && (
               <TextAmount>
-                {t('deposit')} <span>{totalOrderDeposit}</span>
+                {t('deposit')} <span>{totalDeposit}</span>
               </TextAmount>
             )}
 
@@ -324,7 +324,7 @@ const Order = ({ order: dataOrder, handleRemoveOrder }) => {
             {serviceType === 'rent' && (
               <TextAmount style={{ fontWeight: 700, marginBottom: '40px' }}>
                 {t('amount_due')}
-                <span>{totalOrderDeposit} kč</span>
+                <span>{totalDeposit} kč</span>
               </TextAmount>
             )}
             {serviceType === 'buy' && (

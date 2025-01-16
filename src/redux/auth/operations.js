@@ -36,6 +36,7 @@ export const register = createAsyncThunk(
 );
 
 /*
+	Google Cloud Console mykhailo.stryzhka@anirakids.com
  * POST @ /users/authByGoogle
  * body: { credential }
  */
