@@ -420,6 +420,7 @@ const ProductPage = () => {
                 price: {
                   dailyRentalPrice: product?.dailyRentalPrice,
                   hourlyRentalPrice: product?.hourlyRentalPrice,
+                  deposit: product?.deposit,
                 },
                 owner: product?.owner?._id,
                 rentalPeriods,
@@ -474,6 +475,7 @@ const ProductPage = () => {
                     price: {
                       dailyRentalPrice: product?.dailyRentalPrice,
                       hourlyRentalPrice: product?.hourlyRentalPrice,
+                      deposit: product?.deposit,
                     },
                     owner: product?.owner?._id,
                     rentalPeriods,
