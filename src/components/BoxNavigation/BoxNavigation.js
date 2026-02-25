@@ -1,6 +1,6 @@
 import IconHeart from 'images/icons/IconHeart';
 import IconBag from '../../images/icons/IconBag';
-import IconPerson from '../../images/icons/IconPerson';
+// import IconPerson from '../../images/icons/IconPerson';
 import { Box, Button, Caunt } from './BoxNavigation.styled';
 import theme from 'components/theme';
 import { useAuth } from 'hooks';
@@ -22,15 +22,15 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
     isOpenModalAuth && user && setIsOpenModalAuth(false);
   }, [isOpenModalAuth, user, navigate, setIsOpenModalAuth]);
 
-  const onClickAuth = () => {
-    if (user) {
-      document.body.style.overflowY = 'auto';
-      navigate('/my-account/profile', { replace: true });
-    } else {
-      setIsOpenModalAuth(true);
-    }
-    user && onClick && onClick();
-  };
+  // const onClickAuth = () => {
+  //   if (user) {
+  //     document.body.style.overflowY = 'auto';
+  //     navigate('/my-account/profile', { replace: true });
+  //   } else {
+  //     setIsOpenModalAuth(true);
+  //   }
+  //   user && onClick && onClick();
+  // };
   return (
     <Box>
       <Button
