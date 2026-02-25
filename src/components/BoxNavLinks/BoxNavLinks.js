@@ -10,9 +10,9 @@ const BoxNavLinks = ({ $mainPage, onClick }) => {
       <StyledNavLink $mainPage={$mainPage} to="./forWomen" onClick={onClick}>
         {t("Women's Clothing")}
       </StyledNavLink>
-      <StyledNavLink $mainPage={$mainPage} to="./forMen" onClick={onClick}>
+      {/* <StyledNavLink $mainPage={$mainPage} to="./forMen" onClick={onClick}>
         {t("Men's Suits")}
-      </StyledNavLink>
+      </StyledNavLink> */}
       <StyledNavLink $mainPage={$mainPage} to="./forChildren" onClick={onClick}>
         {t("Children's Clothing")}
       </StyledNavLink>
