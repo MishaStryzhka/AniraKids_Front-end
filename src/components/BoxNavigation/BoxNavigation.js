@@ -54,7 +54,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
           <Caunt>{user?.favorites?.length}</Caunt>
         ) : null}
       </Button>
-      <Button type="button" onClick={onClickAuth}>
+      {/* <Button type="button" onClick={onClickAuth}>
         <IconPerson
           stroke={
             $mainPage
@@ -62,7 +62,7 @@ const BoxNavigation = ({ onClick, $mainPage }) => {
               : theme[currentTheme].color.mainColor5
           }
         />
-      </Button>
+      </Button> */}
 
       <Button
         type="button"
