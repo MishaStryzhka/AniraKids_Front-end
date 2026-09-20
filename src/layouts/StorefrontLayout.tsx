@@ -44,6 +44,10 @@ function firstVisible(selector: string) {
   return Array.from(document.querySelectorAll<HTMLElement>(selector)).find(isVisible) ?? null;
 }
 
+function canReceiveFocus(element: HTMLElement | null) {
+  return Boolean(element && isVisible(element) && !element.closest('[inert]'));
+}
+
 export function StorefrontLayout() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,6 +68,7 @@ export function StorefrontLayout() {
   const mainRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const previousDesktopRef = useRef(isDesktop);
+  const pendingResponsiveFocusRef = useRef(false);
 
   const authState: AuthNavigationState = isLoggedIn
     ? 'authenticated'
@@ -134,16 +139,20 @@ export function StorefrontLayout() {
     previousDesktopRef.current = isDesktop;
 
     if (!wasDesktop && isDesktop && activeOverlay === 'menu') {
+      pendingResponsiveFocusRef.current = true;
       closeOverlay({ restoreFocus: false });
-
-      // Wait until the close render removes inert from the desktop header.
-      // The target is resolved after the responsive composition is visible,
-      // so focus is never restored to the now-hidden mobile Menu trigger.
-      window.setTimeout(() => {
-        firstVisible('[data-brand-logo]')?.focus({ preventScroll: true });
-      }, 0);
     }
   }, [activeOverlay, closeOverlay, isDesktop]);
+
+  useEffect(() => {
+    if (!isDesktop || activeOverlay !== 'none' || !pendingResponsiveFocusRef.current) return;
+
+    const target = firstVisible('[data-brand-logo]');
+    if (!canReceiveFocus(target)) return;
+
+    pendingResponsiveFocusRef.current = false;
+    target?.focus({ preventScroll: true });
+  }, [activeOverlay, isDesktop]);
 
   useLayoutEffect(() => {
     setProductPrimaryCategory(null);
