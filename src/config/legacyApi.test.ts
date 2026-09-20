@@ -34,7 +34,8 @@ beforeEach(() => {
   delete process.env.REACT_APP_LEGACY_API_BASE_URL;
   axios.defaults.baseURL = undefined;
   adminApiClient.defaults.baseURL = undefined;
-  jest.mocked(axios.get).mockClear();
+  jest.mocked(axios.get).mockReset();
+  jest.mocked(axios.get).mockResolvedValue({ data: { ok: true } });
 });
 
 afterAll(() => {
