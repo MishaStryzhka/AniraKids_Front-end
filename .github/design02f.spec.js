@@ -24,7 +24,7 @@ for (const width of widths) {
     if (width < 1024) {
       await expect(page.locator('[data-menu-trigger]')).toBeVisible();
       await expect(page.locator('[data-search-trigger]:visible')).toBeVisible();
-      await expect(page.locator('a[aria-label^="Rezervace"]')).toBeVisible();
+      await expect(page.locator('a[aria-label^="Rezervace"]:visible')).toBeVisible();
       await expect(page.locator('[data-desktop-utilities]')).toBeHidden();
       const logoBox = await page.locator('[data-brand-logo]:visible').boundingBox();
       expect(logoBox).not.toBeNull();
@@ -143,7 +143,7 @@ test('desktop search and canonical route current state', async ({ page }) => {
   expect(await page.locator('[data-desktop-utilities]').getByRole('link', { name: 'Oblíbené' }).evaluate(el => el.tagName)).toBe('A');
   expect(await page.locator('[data-desktop-utilities]').getByRole('link', { name: 'Rezervace' }).evaluate(el => el.tagName)).toBe('A');
 
-  const searchTrigger = page.locator('[data-search-trigger]').first();
+  const searchTrigger = page.locator('[data-search-trigger]:visible');
   await searchTrigger.focus();
   await searchTrigger.click();
 

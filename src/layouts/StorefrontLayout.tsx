@@ -135,10 +135,21 @@ export function StorefrontLayout() {
 
     if (!wasDesktop && isDesktop && activeOverlay === 'menu') {
       closeOverlay({ restoreFocus: false });
-      window.requestAnimationFrame(() => {
-        firstVisible('[data-brand-logo]')?.focus({ preventScroll: true });
+
+      let secondFrame = 0;
+      const firstFrame = window.requestAnimationFrame(() => {
+        secondFrame = window.requestAnimationFrame(() => {
+          firstVisible('[data-brand-logo]')?.focus({ preventScroll: true });
+        });
       });
+
+      return () => {
+        window.cancelAnimationFrame(firstFrame);
+        if (secondFrame) window.cancelAnimationFrame(secondFrame);
+      };
     }
+
+    return undefined;
   }, [activeOverlay, closeOverlay, isDesktop]);
 
   useLayoutEffect(() => {
