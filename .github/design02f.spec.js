@@ -199,3 +199,21 @@ test('reduced motion collapses navigation transitions', async ({ browser }) => {
   expect(values.every(value => value <= 0.001)).toBe(true);
   await context.close();
 });
+
+
+test('reservation route owns focused layout and not storefront layout', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('http://127.0.0.1:4173/rezervace');
+
+  await expect(page.locator('[data-focused-reservation-header]')).toBeVisible();
+  await expect(page.locator('[data-storefront-header]')).toHaveCount(0);
+
+  await expect(page.getByRole('button', { name: 'Zpět' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Ukončit rezervaci' })).toBeDisabled();
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect(page.locator('[data-focused-reservation-header]')).toBeVisible();
+  await expect(page.locator('[data-storefront-header]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Zpět', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Ukončit', exact: true })).toBeDisabled();
+});

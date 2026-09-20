@@ -12,6 +12,7 @@ import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { GlobalStyles } from '../design-system/styles/GlobalStyles';
 import { StorefrontLayout } from '../layouts/StorefrontLayout';
+import { ReservationFlowLayout } from '../layouts/ReservationFlowLayout';
 import { CanonicalRoutePlaceholder, ProductRoutePlaceholder } from '../pages/CanonicalRoutePlaceholder/CanonicalRoutePlaceholder';
 import { routes } from '../navigation/routes';
 import { ModalAuthContext } from '../context/ModalAuthContext';
@@ -133,8 +134,10 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
 
-          {/* /rezervace is reserved for ReservationFlowLayout. Its Back/Exit/Help actions are not wired until Reservation UX/domain provides the approved actions. */}
-          <Route path={routes.reservation} element={<CanonicalRoutePlaceholder />} />
+          {/* Reservation action behavior remains a Reservation UX/domain dependency. The focused layout boundary is canonical now. */}
+          <Route path={routes.reservation} element={<ReservationFlowLayout />}>
+            <Route index element={<CanonicalRoutePlaceholder />} />
+          </Route>
         </Routes>
 
         {isOpenModalAuth && !isLoggedIn ? (

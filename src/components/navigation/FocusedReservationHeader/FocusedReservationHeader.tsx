@@ -13,8 +13,8 @@ export type ReservationHelpAction =
   | { kind: 'button'; onActivate(): void };
 
 export interface FocusedReservationHeaderProps {
-  onBack(): void;
-  onExit(): void;
+  onBack?(): void;
+  onExit?(): void;
   helpAction?: ReservationHelpAction;
 }
 
@@ -139,12 +139,12 @@ function HelpControl({ action, compact = false }: { action: ReservationHelpActio
 
 export function FocusedReservationHeader({ onBack, onExit, helpAction }: FocusedReservationHeaderProps) {
   return (
-    <Shell>
+    <Shell data-focused-reservation-header>
       <Row>
         <Left>
-          <PhoneOnly><IconButton aria-label="Zpět" icon={<ArrowLeft aria-hidden="true" />} variant="ghost" onClick={onBack} /></PhoneOnly>
-          <TabletOnly><IconButton aria-label="Zpět" icon={<ArrowLeft aria-hidden="true" />} variant="ghost" onClick={onBack} /></TabletOnly>
-          <DesktopOnly><Button size="compact" variant="ghost" startIcon={<ArrowLeft aria-hidden="true" />} onClick={onBack}>Zpět</Button></DesktopOnly>
+          <PhoneOnly><IconButton aria-label="Zpět" icon={<ArrowLeft aria-hidden="true" />} variant="ghost" onClick={onBack} disabled={!onBack} /></PhoneOnly>
+          <TabletOnly><IconButton aria-label="Zpět" icon={<ArrowLeft aria-hidden="true" />} variant="ghost" onClick={onBack} disabled={!onBack} /></TabletOnly>
+          <DesktopOnly><Button size="compact" variant="ghost" startIcon={<ArrowLeft aria-hidden="true" />} onClick={onBack} disabled={!onBack}>Zpět</Button></DesktopOnly>
         </Left>
 
         <Centre><BrandMark /></Centre>
@@ -152,9 +152,9 @@ export function FocusedReservationHeader({ onBack, onExit, helpAction }: Focused
         <Right>
           <TabletOnly>{helpAction ? <HelpControl action={helpAction} compact /> : null}</TabletOnly>
           <DesktopOnly>{helpAction ? <HelpControl action={helpAction} /> : null}</DesktopOnly>
-          <PhoneOnly><IconButton aria-label="Ukončit rezervaci" icon={<X aria-hidden="true" />} variant="ghost" onClick={onExit} /></PhoneOnly>
-          <TabletOnly><IconButton aria-label="Ukončit rezervaci" icon={<X aria-hidden="true" />} variant="ghost" onClick={onExit} /></TabletOnly>
-          <DesktopOnly><Button size="compact" variant="ghost" startIcon={<X aria-hidden="true" />} onClick={onExit}>Ukončit</Button></DesktopOnly>
+          <PhoneOnly><IconButton aria-label="Ukončit rezervaci" icon={<X aria-hidden="true" />} variant="ghost" onClick={onExit} disabled={!onExit} /></PhoneOnly>
+          <TabletOnly><IconButton aria-label="Ukončit rezervaci" icon={<X aria-hidden="true" />} variant="ghost" onClick={onExit} disabled={!onExit} /></TabletOnly>
+          <DesktopOnly><Button size="compact" variant="ghost" startIcon={<X aria-hidden="true" />} onClick={onExit} disabled={!onExit}>Ukončit</Button></DesktopOnly>
         </Right>
       </Row>
     </Shell>

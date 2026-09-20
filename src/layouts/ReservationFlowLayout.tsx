@@ -4,8 +4,8 @@ import type { ReservationHelpAction } from '../components/navigation/FocusedRese
 import { FocusedReservationHeader } from '../components/navigation/FocusedReservationHeader/FocusedReservationHeader';
 
 export interface ReservationFlowLayoutProps {
-  onBack(): void;
-  onExit(): void;
+  onBack?(): void;
+  onExit?(): void;
   helpAction?: ReservationHelpAction;
 }
 
