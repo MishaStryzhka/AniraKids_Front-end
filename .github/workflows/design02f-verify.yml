@@ -36,7 +36,8 @@ jobs:
 
       - name: Install browser test runner
         run: |
-          npx --yes playwright@1.55.0 install --with-deps chromium
+          npm install --no-save --no-package-lock @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
 
       - name: Start production SPA server
         run: |
@@ -50,4 +51,4 @@ jobs:
           exit 1
 
       - name: Responsive and accessibility verification
-        run: npx --yes @playwright/test@1.55.0 test .github/design02f.spec.js --reporter=line
+        run: npx playwright test .github/design02f.spec.js --reporter=line
