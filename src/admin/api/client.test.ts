@@ -1,3 +1,18 @@
+jest.mock('axios', () => {
+  class MockAxiosError extends Error {
+    code?: string;
+    response?: unknown;
+  }
+  const defaults = { baseURL: undefined, headers: { common: { Authorization: undefined } } };
+  const instance = { get: jest.fn() };
+  const mockAxios = {
+    create: jest.fn(() => instance),
+    defaults,
+    isCancel: jest.fn(() => false),
+  };
+  return { __esModule: true, default: mockAxios, AxiosError: MockAxiosError };
+});
+
 import axios from 'axios';
 import { adminApiClient, buildAdminRequestConfig, getAdminApiBaseUrl } from './client';
 import { AdminApiError } from './errors';
