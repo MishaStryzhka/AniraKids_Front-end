@@ -18,6 +18,18 @@ import { routes } from '../navigation/routes';
 import { ModalAuthContext } from '../context/ModalAuthContext';
 import Modal from './Modals/Modal';
 import ModalRegister from './Modals/ModalRegister/ModalRegister';
+import { AdminAccessBoundary } from '../admin/auth/AdminAccessBoundary';
+import { AdminLayout } from '../admin/layout/AdminLayout';
+import { adminRoutes } from '../admin/navigation/adminRoutes';
+import {
+  AdminHomePage,
+  AdminProductsPlaceholder,
+  AdminProductCreatePlaceholder,
+  AdminProductDetailPlaceholder,
+  AdminReservationsPlaceholder,
+  AdminReservationDetailPlaceholder,
+  AdminCalendarPlaceholder,
+} from '../admin/pages/AdminPlaceholders';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() => import('../pages/DecorAndToysPage/DecorAndToysPage'));
@@ -132,6 +144,18 @@ function App() {
             <Route path="favorite/" element={<Favorite />} />
             <Route path="cart/" element={<Cart />} />
             <Route path="*" element={<NotFoundPage />} />
+          </Route>
+
+          <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminHomePage />} />
+              <Route path={adminRoutes.products} element={<AdminProductsPlaceholder />} />
+              <Route path={adminRoutes.productNew} element={<AdminProductCreatePlaceholder />} />
+              <Route path={adminRoutes.productDetail} element={<AdminProductDetailPlaceholder />} />
+              <Route path={adminRoutes.reservations} element={<AdminReservationsPlaceholder />} />
+              <Route path={adminRoutes.reservationDetail} element={<AdminReservationDetailPlaceholder />} />
+              <Route path={adminRoutes.calendar} element={<AdminCalendarPlaceholder />} />
+            </Route>
           </Route>
 
           {/* Reservation action behavior remains a Reservation UX/domain dependency. The focused layout boundary is canonical now. */}
