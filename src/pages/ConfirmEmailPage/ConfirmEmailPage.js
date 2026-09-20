@@ -14,7 +14,6 @@ const ConfirmEmailPage = () => {
     dispatch(confirmUserEmail({ token: token }));
   }, [dispatch, token]);
 
-  console.log('token', token);
 
   return <p>ConfirmEmailPage</p>;
 };

@@ -151,11 +151,7 @@ const ModalRegister = ({ handleCloseModal }) => {
             type="icon"
             theme="outline"
             onSuccess={credentialResponse => {
-              console.log(credentialResponse);
               dispatch(authByGoogle(credentialResponse));
-            }}
-            onError={() => {
-              console.log('Login Failed');
             }}
           />
           {/* <StyledNavLink>
