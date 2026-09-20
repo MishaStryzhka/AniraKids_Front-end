@@ -65,7 +65,7 @@ import Modal from 'components/Modals/Modal';
 import { GeneralModalWindow } from 'components/Modals/Modal.styled';
 import ModalConfirm from 'components/Modals/ModalConfirm/ModalConfirm';
 import CalendarSelectDate from 'components/Calendar/CalendarSelectDate';
-import { ModalAuthContext } from 'components/App';
+import { ModalAuthContext } from 'context/ModalAuthContext';
 import SceletonProductPage from './SceletonProductPage';
 import { addOrderIdToUserCart } from '../../redux/auth/slice';
 
