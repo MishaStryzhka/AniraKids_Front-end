@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkanira_kids=self.webpackChunkanira_kids||[]).push([[463],{87463:(e,n,s)=>{s.r(n),s.d(n,{default:()=>c});var r=s(72791),a=s(94420),t=s(11087),i=s(82565),o=s(80184);const c=()=>{const[e,n]=(0,t.lr)(),s=e.get("token"),c=(0,a.I0)();return(0,r.useEffect)((()=>{c((0,i.confirmUserEmail)({token:s}))}),[c,s]),console.log("token",s),(0,o.jsx)("p",{children:"ConfirmEmailPage"})}}}]);
+//# sourceMappingURL=463.7b570ebc.chunk.js.map
