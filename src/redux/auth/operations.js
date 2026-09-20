@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { configureLegacyApiBaseUrl } from '../../config/legacyApi';
 
-axios.defaults.baseURL = 'https://anira-kids-back-end.onrender.com';
-// axios.defaults.baseURL = 'http://Localhost:4000';
+configureLegacyApiBaseUrl();
 
 // Utility to add JWT
 const setAuthHeader = token => {
