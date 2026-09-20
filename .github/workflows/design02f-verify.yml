@@ -33,3 +33,21 @@ jobs:
           name: design02f-build
           path: build
           if-no-files-found: error
+
+      - name: Install browser test runner
+        run: |
+          npx --yes playwright@1.55.0 install --with-deps chromium
+
+      - name: Start production SPA server
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 > /tmp/design02f-serve.log 2>&1 &
+          echo $! > /tmp/design02f-serve.pid
+          for i in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/design02f-serve.log
+          exit 1
+
+      - name: Responsive and accessibility verification
+        run: npx --yes @playwright/test@1.55.0 test .github/design02f.spec.js --reporter=line
