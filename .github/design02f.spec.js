@@ -23,14 +23,17 @@ for (const width of widths) {
 
     if (width < 1024) {
       await expect(page.locator('[data-menu-trigger]')).toBeVisible();
-      await expect(page.locator('[data-search-trigger]')).toBeVisible();
+      await expect(page.locator('[data-search-trigger]:visible')).toBeVisible();
       await expect(page.locator('a[aria-label^="Rezervace"]')).toBeVisible();
       await expect(page.locator('[data-desktop-utilities]')).toBeHidden();
+      const logoBox = await page.locator('[data-brand-logo]:visible').boundingBox();
+      expect(logoBox).not.toBeNull();
+      expect(Math.abs((logoBox.x + logoBox.width / 2) - width / 2)).toBeLessThan(2);
     } else {
       await expect(page.locator('[data-menu-trigger]')).toBeHidden();
       await expect(page.locator('[data-desktop-utilities]')).toBeVisible();
       for (const label of ['Dívčí šaty', 'Chlapecké obleky', 'Novinky', 'Pronájem']) {
-        await expect(page.getByRole('link', { name: label, exact: true })).toBeVisible();
+        await expect(page.locator('nav[aria-label="Hlavní navigace"]').getByRole('link', { name: label, exact: true })).toBeVisible();
       }
     }
   });
@@ -125,19 +128,20 @@ test('open mobile menu closes cleanly when crossing to desktop', async ({ page }
   await expect(page.locator('#mobile-menu')).toHaveCount(0);
   expect(await page.evaluate(() => document.querySelector('main').hasAttribute('inert'))).toBe(false);
   expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed');
-  await expect(page.locator('[data-brand-logo]')).toBeFocused();
+  await expect(page.locator('[data-brand-logo]:visible')).toBeFocused();
 });
 
 test('desktop search and canonical route current state', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.goto('http://127.0.0.1:4173/saty');
 
-  const dresses = page.getByRole('link', { name: 'Dívčí šaty', exact: true });
+  const primaryNav = page.locator('nav[aria-label="Hlavní navigace"]');
+  const dresses = primaryNav.getByRole('link', { name: 'Dívčí šaty', exact: true });
   await expect(dresses).toHaveAttribute('aria-current', 'page');
 
   expect(await page.locator('[data-search-trigger]').first().evaluate(el => el.tagName)).toBe('BUTTON');
-  expect(await page.getByRole('link', { name: 'Oblíbené' }).evaluate(el => el.tagName)).toBe('A');
-  expect(await page.getByRole('link', { name: 'Rezervace' }).evaluate(el => el.tagName)).toBe('A');
+  expect(await page.locator('[data-desktop-utilities]').getByRole('link', { name: 'Oblíbené' }).evaluate(el => el.tagName)).toBe('A');
+  expect(await page.locator('[data-desktop-utilities]').getByRole('link', { name: 'Rezervace' }).evaluate(el => el.tagName)).toBe('A');
 
   const searchTrigger = page.locator('[data-search-trigger]').first();
   await searchTrigger.focus();
@@ -155,8 +159,8 @@ test('desktop search and canonical route current state', async ({ page }) => {
   await expect(layer).toHaveCount(0);
   await expect(searchTrigger).toBeFocused();
 
-  await page.getByRole('link', { name: 'Pronájem', exact: true }).click();
-  await expect(page.getByRole('link', { name: 'Pronájem', exact: true })).toHaveAttribute('aria-current', 'page');
+  await primaryNav.getByRole('link', { name: 'Pronájem', exact: true }).click();
+  await expect(primaryNav.getByRole('link', { name: 'Pronájem', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.goBack();
   await expect(dresses).toHaveAttribute('aria-current', 'page');
 
@@ -165,7 +169,20 @@ test('desktop search and canonical route current state', async ({ page }) => {
   await expect(page.locator('nav[aria-label="Hlavní navigace"] [aria-current="page"]')).toHaveCount(0);
 
   await page.goto('http://127.0.0.1:4173/pronajem#jak-funguje-pronajem');
-  await expect(page.getByRole('link', { name: 'Pronájem', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(primaryNav.getByRole('link', { name: 'Pronájem', exact: true })).toHaveAttribute('aria-current', 'page');
+});
+
+test('route change while mobile menu is open releases inert and scroll lock', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('http://127.0.0.1:4173/');
+  await page.locator('[data-menu-trigger]').click();
+  await expect(page.locator('#mobile-menu')).toBeVisible();
+
+  await page.locator('#mobile-menu').getByRole('link', { name: 'Dívčí šaty', exact: true }).click();
+  await expect(page).toHaveURL(/\/saty$/);
+  await expect(page.locator('#mobile-menu')).toHaveCount(0);
+  expect(await page.evaluate(() => document.querySelector('main').hasAttribute('inert'))).toBe(false);
+  expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed');
 });
 
 test('reduced motion collapses navigation transitions', async ({ browser }) => {
