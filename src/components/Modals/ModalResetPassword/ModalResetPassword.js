@@ -18,9 +18,7 @@ const ModalResetPassword = ({ onClick }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalResetPassword',
   });
-  const handleSubmitEmail = values => {
-
-  };
+  const handleSubmitEmail = () => {};
   return (
     <GeneralModalWindow>
       <Formik
