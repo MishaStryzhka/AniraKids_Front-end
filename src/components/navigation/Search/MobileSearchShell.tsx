@@ -60,7 +60,6 @@ export function MobileSearchShell({
   return (
     <Shell ref={rootRef} aria-label="Vyhledávání">
       <SearchContent
-        presentation="mobile"
         query={query}
         status={status}
         suggestions={suggestions}

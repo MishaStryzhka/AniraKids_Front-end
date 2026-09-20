@@ -54,7 +54,6 @@ export function DesktopSearchLayer({
     <Layer ref={rootRef} aria-label="Vyhledávání">
       <Inner>
         <SearchContent
-          presentation="desktop"
           query={query}
           status={status}
           suggestions={suggestions}
