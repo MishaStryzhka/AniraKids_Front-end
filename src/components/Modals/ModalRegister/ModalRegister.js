@@ -153,7 +153,6 @@ const ModalRegister = ({ handleCloseModal }) => {
             onSuccess={credentialResponse => {
               dispatch(authByGoogle(credentialResponse));
             }}
-            onError={() => {}}
           />
           {/* <StyledNavLink>
             <IconEmail />
