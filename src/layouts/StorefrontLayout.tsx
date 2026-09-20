@@ -111,12 +111,15 @@ export function StorefrontLayout() {
 
   useEffect(() => {
     const inert = activeOverlay !== 'none';
-    setInert(mainRef.current, inert);
-    setInert(footerRef.current, inert);
+    const main = mainRef.current;
+    const footer = footerRef.current;
+
+    setInert(main, inert);
+    setInert(footer, inert);
 
     return () => {
-      setInert(mainRef.current, false);
-      setInert(footerRef.current, false);
+      setInert(main, false);
+      setInert(footer, false);
     };
   }, [activeOverlay]);
 

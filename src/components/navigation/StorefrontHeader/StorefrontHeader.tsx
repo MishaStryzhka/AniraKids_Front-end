@@ -103,25 +103,25 @@ export function StorefrontHeader({
   useEffect(() => {
     const menuOpen = activeOverlay === 'menu';
     const searchOpen = activeOverlay === 'search';
+    const mobileLeft = mobileLeftRef.current;
+    const mobileLogo = mobileLogoRef.current;
+    const mobileRight = mobileRightRef.current;
+    const desktopLogo = desktopLogoRef.current;
+    const desktopPrimary = desktopPrimaryRef.current;
+    const desktopUtilities = desktopUtilitiesRef.current;
 
-    setInert(mobileLeftRef.current, searchOpen);
-    setInert(mobileLogoRef.current, menuOpen || searchOpen);
-    setInert(mobileRightRef.current, menuOpen || searchOpen);
+    setInert(mobileLeft, searchOpen);
+    setInert(mobileLogo, menuOpen || searchOpen);
+    setInert(mobileRight, menuOpen || searchOpen);
 
     const desktopHeaderInert = isDesktop && (searchOpen || menuOpen);
-    setInert(desktopLogoRef.current, desktopHeaderInert);
-    setInert(desktopPrimaryRef.current, desktopHeaderInert);
-    setInert(desktopUtilitiesRef.current, desktopHeaderInert);
+    setInert(desktopLogo, desktopHeaderInert);
+    setInert(desktopPrimary, desktopHeaderInert);
+    setInert(desktopUtilities, desktopHeaderInert);
 
     return () => {
-      [
-        mobileLeftRef.current,
-        mobileLogoRef.current,
-        mobileRightRef.current,
-        desktopLogoRef.current,
-        desktopPrimaryRef.current,
-        desktopUtilitiesRef.current,
-      ].forEach(element => setInert(element, false));
+      [mobileLeft, mobileLogo, mobileRight, desktopLogo, desktopPrimary, desktopUtilities]
+        .forEach(element => setInert(element, false));
     };
   }, [activeOverlay, isDesktop]);
 
