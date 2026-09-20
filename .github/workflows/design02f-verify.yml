@@ -26,3 +26,10 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: design02f-build
+          path: build
+          if-no-files-found: error
