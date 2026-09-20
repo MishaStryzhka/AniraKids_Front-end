@@ -26,7 +26,7 @@ const ModalChangePassword = ({ onClick }) => {
   };
 
   const handlePasswordSubmit = values => {
-    const { password, newPassword, confirmNewPassword } = values;
+    const { newPassword, confirmNewPassword } = values;
 
     dispatch(updateUserInfo({ newPassword, confirmNewPassword }));
   };
