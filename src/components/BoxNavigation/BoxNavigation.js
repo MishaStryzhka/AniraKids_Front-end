@@ -8,7 +8,7 @@ import { useContext, useEffect } from 'react';
 import Modal from 'components/Modals/Modal';
 import { useNavigate } from 'react-router-dom';
 import ModalRegister from 'components/Modals/ModalRegister/ModalRegister';
-import { ModalAuthContext } from 'components/App';
+import { ModalAuthContext } from 'context/ModalAuthContext';
 
 const BoxNavigation = ({ onClick, $mainPage }) => {
   const { isOpenModalAuth, setIsOpenModalAuth } = useContext(ModalAuthContext);

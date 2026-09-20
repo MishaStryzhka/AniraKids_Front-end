@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import {
   selectError,
+  selectToken,
   selectIsFirstLogin,
   selectIsLoggedIn,
   selectIsRefreshing,
@@ -11,6 +12,7 @@ import {
 import { selectCurrentTheme } from '../redux/settings/selectors';
 
 export const useAuth = () => {
+  const token = useSelector(selectToken);
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const isLoading = useSelector(selectIsLoading);
   const isRefreshing = useSelector(selectIsRefreshing);
@@ -21,6 +23,7 @@ export const useAuth = () => {
   const isDone = useSelector(selectIsDone);
 
   return {
+    token,
     isLoading,
     isLoggedIn,
     isRefreshing,
