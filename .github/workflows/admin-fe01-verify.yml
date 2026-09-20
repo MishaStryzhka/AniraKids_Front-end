@@ -1,0 +1,66 @@
+name: ADMIN-FE-01 Verify
+
+on:
+  push:
+    branches:
+      - admin-fe-01-foundation
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Admin client unit tests
+        run: npm test -- --watchAll=false --runInBand src/admin/api/client.test.ts
+
+      - name: Production build without Admin API environment
+        run: npm run build
+
+      - name: Preserve no-env build
+        run: mv build build-no-env
+
+      - name: Production build with mocked Admin API base
+        env:
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: npm run build
+
+      - name: Install browser test runner
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start configured and no-env SPA servers
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 > /tmp/admin-fe01-configured.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 > /tmp/admin-fe01-no-env.log 2>&1 &
+          for port in 4173 4174; do
+            for i in {1..30}; do
+              if curl --silent --fail http://127.0.0.1:$port/ > /dev/null; then break; fi
+              if [ $i -eq 30 ]; then
+                cat /tmp/admin-fe01-configured.log
+                cat /tmp/admin-fe01-no-env.log
+                exit 1
+              fi
+              sleep 1
+            done
+          done
+
+      - name: Existing DESIGN-02 regression
+        run: npx playwright test .github/design02f.spec.js --reporter=line
+
+      - name: ADMIN-FE-01 foundation browser verification
+        run: npx playwright test .github/admin-fe01.spec.js --reporter=line
