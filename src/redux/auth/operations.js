@@ -93,11 +93,9 @@ export const logIn = createAsyncThunk(
       const res = await axios.post('/api/users/login', credentials);
       // After successful login, add the token to the HTTP header
       setAuthHeader(res.data.token);
-      console.log('res.data', res.data);
 
       return res.data;
     } catch (error) {
-      console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,
@@ -201,11 +199,9 @@ export const updateUserInfo = createAsyncThunk(
         formData,
         { headers: { 'content-type': 'multipart/form-data' } }
       );
-      // console.log('response.data', response.data);
 
       return response.data;
     } catch (error) {
-      // console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,
@@ -228,11 +224,9 @@ export const updateUserBillingDetails = createAsyncThunk(
         `/api/users/current/update-billing-details`,
         credentials
       );
-      console.log('response.data', response.data);
 
       return response.data;
     } catch (error) {
-      console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,
@@ -250,11 +244,9 @@ export const updateUserBankAccount = createAsyncThunk(
         `/api/users/current/update-bank-account`,
         credentials
       );
-      console.log('response.data', response.data);
 
       return response.data;
     } catch (error) {
-      console.log('error', error);
 
       return thunkAPI.rejectWithValue({
         status: error.response.status,
@@ -272,7 +264,6 @@ export const updateUserEmail = createAsyncThunk(
         `/api/users/current/refreshEmail?email=${email}`
       );
 
-      console.log('response.data', response.data);
 
       return response.data;
     } catch (error) {
@@ -290,7 +281,6 @@ export const verifiedEmail = createAsyncThunk(
     try {
       const response = await axios.patch(`/api/users/current/verifiedEmail`);
 
-      console.log('response.data', response.data);
 
       return response.data;
     } catch (error) {
