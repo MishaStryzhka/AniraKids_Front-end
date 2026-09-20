@@ -145,7 +145,7 @@ export function stateFromAdminError(error: AdminApiError): AdminAccessState {
 }
 
 export function AdminAccessBoundary() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const authModal = useContext(ModalAuthContext);
   const [state, setState] = useState<AdminAccessState>('auth_refreshing');
