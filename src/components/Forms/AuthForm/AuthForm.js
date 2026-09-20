@@ -31,7 +31,6 @@ const AuthForm = ({ handleCloseModal }) => {
   const { currentTheme, isLoading } = useAuth();
   let { error } = useAuth();
 
-  console.log('error', error);
 
   const handleOpenPassword = () => {
     setOpenPassword(openPassword => !openPassword);
@@ -40,7 +39,7 @@ const AuthForm = ({ handleCloseModal }) => {
   const handleAuthSubmit = values => {
     const { login, password } = values;
 
-    console.log(values);
+
     dispatch(logIn({ login, password }));
   };
   return (
