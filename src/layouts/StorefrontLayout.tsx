@@ -136,20 +136,13 @@ export function StorefrontLayout() {
     if (!wasDesktop && isDesktop && activeOverlay === 'menu') {
       closeOverlay({ restoreFocus: false });
 
-      let secondFrame = 0;
-      const firstFrame = window.requestAnimationFrame(() => {
-        secondFrame = window.requestAnimationFrame(() => {
-          firstVisible('[data-brand-logo]')?.focus({ preventScroll: true });
-        });
-      });
-
-      return () => {
-        window.cancelAnimationFrame(firstFrame);
-        if (secondFrame) window.cancelAnimationFrame(secondFrame);
-      };
+      // Wait until the close render removes inert from the desktop header.
+      // The target is resolved after the responsive composition is visible,
+      // so focus is never restored to the now-hidden mobile Menu trigger.
+      window.setTimeout(() => {
+        firstVisible('[data-brand-logo]')?.focus({ preventScroll: true });
+      }, 0);
     }
-
-    return undefined;
   }, [activeOverlay, closeOverlay, isDesktop]);
 
   useLayoutEffect(() => {
