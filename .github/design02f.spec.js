@@ -111,20 +111,31 @@ test('search survives tablet to desktop transition', async ({ page }) => {
   await input.fill('Amelia');
 
   await page.setViewportSize({ width: 1024, height: 900 });
-  await page.waitForTimeout(200);
   const moved = page.getByRole('searchbox', { name: 'Hledat' });
   await expect(moved).toHaveValue('Amelia');
   await expect(moved).toBeFocused();
 });
 
-test('open mobile menu closes cleanly when crossing to desktop', async ({ page }) => {
+test('open mobile menu closes cleanly when crossing 768 to desktop', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto('http://127.0.0.1:4173/');
   await page.locator('[data-menu-trigger]').click();
   await expect(page.locator('#mobile-menu')).toBeVisible();
 
   await page.setViewportSize({ width: 1024, height: 900 });
-  await page.waitForTimeout(200);
+  await expect(page.locator('#mobile-menu')).toHaveCount(0);
+  expect(await page.evaluate(() => document.querySelector('main').hasAttribute('inert'))).toBe(false);
+  expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed');
+  await expect(page.locator('[data-brand-logo]:visible')).toBeFocused();
+});
+
+test('open mobile menu closes cleanly when crossing 390 to desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('http://127.0.0.1:4173/');
+  await page.locator('[data-menu-trigger]').click();
+  await expect(page.locator('#mobile-menu')).toBeVisible();
+
+  await page.setViewportSize({ width: 1024, height: 900 });
   await expect(page.locator('#mobile-menu')).toHaveCount(0);
   expect(await page.evaluate(() => document.querySelector('main').hasAttribute('inert'))).toBe(false);
   expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed');

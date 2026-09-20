@@ -114,7 +114,10 @@ export function StorefrontHeader({
     setInert(mobileLogo, menuOpen || searchOpen);
     setInert(mobileRight, menuOpen || searchOpen);
 
-    const desktopHeaderInert = isDesktop && (searchOpen || menuOpen);
+    // Mobile Menu cannot exist in the desktop composition. A stale menu state
+    // during a breakpoint handoff must not make the newly visible desktop
+    // header inert; desktop Search remains the only desktop header overlay.
+    const desktopHeaderInert = isDesktop && searchOpen;
     setInert(desktopLogo, desktopHeaderInert);
     setInert(desktopPrimary, desktopHeaderInert);
     setInert(desktopUtilities, desktopHeaderInert);
