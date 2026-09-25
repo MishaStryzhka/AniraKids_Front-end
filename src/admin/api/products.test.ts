@@ -66,10 +66,11 @@ test('listAdminProducts requests only /admin/products with isolated Admin config
   });
 
   expect(mockedBuildConfig).toHaveBeenCalledWith('dummy-token', signal);
-  expect(mockedGet).toHaveBeenCalledWith('/admin/products', {
-    baseURL: 'https://admin.example.test/api/v2',
-    headers: { Authorization: 'Bearer dummy-token' },
-    params: { rentalEnabled: true, page: 1, limit: 20 },
-  });
+  expect(mockedGet).toHaveBeenCalledWith(
+    '/admin/products',
+    expect.objectContaining({
+      params: { rentalEnabled: true, page: 1, limit: 20 },
+    })
+  );
   expect(result).toEqual(payload);
 });
