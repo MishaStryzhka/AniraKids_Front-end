@@ -13,7 +13,6 @@ const Copy = styled.p`
 function Placeholder({ children }: { children: string }) { return <Copy>{children}</Copy>; }
 
 export function AdminHomePage() { return <Placeholder>Základ administrace je připraven. Obsah přehledu bude doplněn v další fázi.</Placeholder>; }
-export function AdminProductsPlaceholder() { return <Placeholder>Správa produktů bude implementována v ADMIN-FE-02.</Placeholder>; }
 export function AdminProductCreatePlaceholder() { return <Placeholder>Vytvoření produktu bude implementováno v další fázi.</Placeholder>; }
 export function AdminProductDetailPlaceholder() { return <Placeholder>Detail produktu bude implementován v další fázi.</Placeholder>; }
 export function AdminReservationsPlaceholder() { return <Placeholder>Správa rezervací bude implementována v další fázi.</Placeholder>; }
