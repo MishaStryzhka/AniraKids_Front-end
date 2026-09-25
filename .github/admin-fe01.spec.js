@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 const APP = 'http://127.0.0.1:4173';
 const APP_NO_ENV = 'http://127.0.0.1:4174';
-const ADMIN_PROBE = '**/admin/products**';
+const ADMIN_PRODUCTS = '**/admin/products**';
 
 async function seedToken(page, token = 'admin-test-token') {
   await page.addInitScript(value => {
@@ -30,7 +30,22 @@ async function mockProbe(page, input = {}) {
   const { status = 200, code, abort = false } = input;
   let authorization = null;
   let attempts = 0;
-  await page.route(ADMIN_PROBE, async route => {
+  await page.route(ADMIN_PRODUCTS, async route => {
+    const url = new URL(route.request().url());
+
+    if (url.pathname.endsWith('/admin/products') && url.searchParams.get('limit') !== '1') {
+      const pageNumber = Number(url.searchParams.get('page') || '1');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [],
+          pagination: { page: pageNumber, limit: 20, total: 0, pages: 0 },
+        }),
+      });
+      return;
+    }
+
     attempts += 1;
     authorization = route.request().headers().authorization || null;
     if (abort) {
@@ -38,7 +53,14 @@ async function mockProbe(page, input = {}) {
       return;
     }
     if (status === 200) {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [], pagination: { page: 1, limit: 1 } }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [],
+          pagination: { page: 1, limit: 1, total: 0, pages: 0 },
+        }),
+      });
       return;
     }
     await route.fulfill({
@@ -117,7 +139,7 @@ test('network failure renders retry state and retry can recover', async ({ page 
   await seedToken(page);
   await mockCurrentUser(page);
   let attempts = 0;
-  await page.route(ADMIN_PROBE, async route => {
+  await page.route(ADMIN_PRODUCTS, async route => {
     attempts += 1;
     if (attempts === 1) {
       await route.abort('failed');
@@ -136,7 +158,7 @@ test('missing REACT_APP_V2_API_BASE_URL renders configuration state without Admi
   await seedToken(page);
   await mockCurrentUser(page);
   let adminRequestSeen = false;
-  await page.route(ADMIN_PROBE, async route => {
+  await page.route(ADMIN_PRODUCTS, async route => {
     adminRequestSeen = true;
     await route.abort();
   });
