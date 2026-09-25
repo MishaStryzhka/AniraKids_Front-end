@@ -227,6 +227,12 @@ test('filter changes reset page to 1 and browser Back reconstructs state', async
   await expect(page.getByLabel('Status')).toHaveValue('');
   await expect(page.getByLabel('Kategorie')).toHaveValue('dress');
   await expect.poll(() => state.listRequests.at(-1)?.searchParams.get('page')).toBe('2');
+
+  await page.goForward();
+  await expect(page).toHaveURL(/\/admin\/produkty\?status=active&category=dress$/);
+  await expect(page.getByLabel('Status')).toHaveValue('active');
+  await expect(page.getByLabel('Kategorie')).toHaveValue('dress');
+  await expect.poll(() => state.listRequests.at(-1)?.searchParams.get('page')).toBe('1');
 });
 
 test('stale positive page is replaced with final valid page and refetched once', async ({ page }) => {
