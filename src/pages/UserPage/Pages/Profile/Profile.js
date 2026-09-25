@@ -92,6 +92,10 @@ const Profile = () => {
       }, 5000);
   }, [dispatch, isDone]);
 
+  if (!user) {
+    return null;
+  }
+
   const isChangeAvatarUrl = e => {
     const { files } = e.currentTarget;
     setAvatar(files[0]);
