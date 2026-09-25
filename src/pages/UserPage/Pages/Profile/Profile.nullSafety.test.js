@@ -1,3 +1,17 @@
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: {
+    defaults: {
+      baseURL: undefined,
+      headers: { common: { Authorization: undefined } },
+    },
+    post: jest.fn(),
+    get: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
+
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Profile from './Profile';
