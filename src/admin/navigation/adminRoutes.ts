@@ -10,6 +10,10 @@ export const adminRoutes = {
   calendar: '/admin/kalendar',
 } as const;
 
+export function buildAdminProductDetailPath(productId: string) {
+  return `/admin/produkty/${encodeURIComponent(productId)}`;
+}
+
 export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar';
 
 export const adminNavigationItems: ReadonlyArray<{ key: AdminNavigationKey; label: string; to: string }> = [
