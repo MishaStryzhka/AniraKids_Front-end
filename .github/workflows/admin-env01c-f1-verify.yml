@@ -1,0 +1,67 @@
+name: ADMIN-ENV-01C-F1 Verify
+
+on:
+  push:
+    branches:
+      - admin-env-01c-profile-null-safety
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Profile null-safety and auth/security regressions
+        run: npm test -- --watchAll=false --runInBand src/pages/UserPage/Pages/Profile/Profile.nullSafety.test.js src/security/authSensitiveLogging.test.js src/redux/auth/operations.security.test.js src/config/legacyApi.test.ts src/admin/api/client.test.ts
+
+      - name: No-env build
+        run: npm run build
+
+      - name: Preserve no-env build
+        run: mv build build-no-env
+
+      - name: Configured browser-regression build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: npm run build
+
+      - name: Install browser test runner
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start configured and no-env SPA servers
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 > /tmp/profile-null-configured.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 > /tmp/profile-null-no-env.log 2>&1 &
+          for port in 4173 4174; do
+            for i in {1..30}; do
+              if curl --silent --fail http://127.0.0.1:$port/ > /dev/null; then break; fi
+              if [ $i -eq 30 ]; then
+                cat /tmp/profile-null-configured.log
+                cat /tmp/profile-null-no-env.log
+                exit 1
+              fi
+              sleep 1
+            done
+          done
+
+      - name: Existing DESIGN-02 regression
+        run: npx playwright test .github/design02f.spec.js --reporter=line
+
+      - name: Existing ADMIN-FE-01 regression
+        run: npx playwright test .github/admin-fe01.spec.js --reporter=line
