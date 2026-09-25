@@ -241,7 +241,7 @@ test('stale positive page is replaced with final valid page and refetched once',
   await openProducts(page, '/admin/produkty?page=99');
 
   await expect(page).toHaveURL(/\/admin\/produkty\?page=2$/);
-  await expect(page.getByText('Šaty Sofia').first()).toBeVisible();
+  await expect(page.locator('[data-admin-products-table]:visible').getByText('Šaty Sofia')).toBeVisible();
   expect(state.listRequests.map(url => url.searchParams.get('page'))).toEqual(['99', '2']);
   await expect(page.getByText('Zatím tu nejsou žádné produkty')).toHaveCount(0);
   await expect(page.getByText('Žádné produkty neodpovídají vybraným filtrům')).toHaveCount(0);
@@ -294,7 +294,7 @@ test('loading shell remains visible and populated rows expose frozen status/comm
   await expect(neitherRow.getByText('Pronájem: Ne')).toBeVisible();
   await expect(neitherRow.getByText('Prodej: Ne')).toBeVisible();
 
-  await expect(archivedRow.getByText('Neuvedeno').first()).toBeVisible();
+  await expect(archivedRow.locator('td:visible').getByText('Neuvedeno', { exact: true }).first()).toBeVisible();
 });
 
 test('initial empty and filtered empty are distinct states', async ({ page }) => {
@@ -326,7 +326,7 @@ test('error retry repeats the exact canonical query', async ({ page }) => {
 
   await expect(page.getByText('Produkty se nepodařilo načíst')).toBeVisible();
   await page.getByRole('button', { name: 'Zkusit znovu' }).click();
-  await expect(page.getByText('Šaty Sofia').first()).toBeVisible();
+  await expect(page.locator('[data-admin-products-table]:visible').getByText('Šaty Sofia')).toBeVisible();
 
   expect(state.listRequests).toHaveLength(2);
   expect(state.listRequests[0].search).toBe(state.listRequests[1].search);
