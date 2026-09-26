@@ -29,7 +29,7 @@ test('serializes only the supported product-list API query keys and fixes limit 
     status: 'active',
     category: 'dress',
     gender: 'girls',
-    rentalEnabled: 'false',
+    rentalEnabled: false,
     page: 3,
     limit: 50,
     saleEnabled: true,
@@ -41,7 +41,7 @@ test('serializes only the supported product-list API query keys and fixes limit 
     status: 'active',
     category: 'dress',
     gender: 'girls',
-    rentalEnabled: false,
+    rentalEnabled: 'false',
     page: 3,
     limit: 20,
   });
