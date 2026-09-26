@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconButton } from '../../design-system/components/IconButton';
@@ -71,9 +71,29 @@ const Content = styled.div`min-inline-size: 0;`;
 
 const PageHeader = styled.div`
   padding: ${t.space[6]} ${t.container.padding.mobile} ${t.space[4]};
-  @media (min-width: ${t.breakpoint.md}) { padding-inline: ${t.container.padding.md}; }
-  @media (min-width: ${t.breakpoint.lg}) { padding: ${t.space[8]} ${t.container.padding.lg} ${t.space[6]}; }
+  display: grid;
+  gap: ${t.space[4]};
+  align-items: center;
+
+  @media (min-width: ${t.breakpoint.md}) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: ${t.container.padding.md};
+  }
+
+  @media (min-width: ${t.breakpoint.lg}) {
+    padding: ${t.space[8]} ${t.container.padding.lg} ${t.space[6]};
+  }
+
   @media (min-width: ${t.breakpoint.xl}) { padding-inline: ${t.container.padding.xl}; }
+`;
+
+const PageAction = styled.div`
+  min-inline-size: 0;
+  justify-self: start;
+
+  @media (min-width: ${t.breakpoint.md}) {
+    justify-self: end;
+  }
 `;
 
 const Heading = styled.h1`
@@ -92,9 +112,23 @@ const Main = styled.main`
   @media (min-width: ${t.breakpoint.xl}) { padding-inline: ${t.container.padding.xl}; }
 `;
 
+type AdminPageActionSetter = Dispatch<SetStateAction<ReactNode>>;
+const AdminPageActionContext = createContext<AdminPageActionSetter | null>(null);
+
+export function useAdminPageAction(action: ReactNode) {
+  const setPageAction = useContext(AdminPageActionContext);
+
+  useLayoutEffect(() => {
+    if (!setPageAction) return;
+    setPageAction(action);
+    return () => setPageAction(null);
+  }, [action, setPageAction]);
+}
+
 export function AdminLayout() {
   const location = useLocation();
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const [pageAction, setPageAction] = useState<ReactNode>(null);
   const pageTitle = resolveAdminPageTitle(location.pathname);
 
   useEffect(() => { setMobileNavigationOpen(false); }, [location.pathname]);
@@ -119,6 +153,7 @@ export function AdminLayout() {
         <AdminNavigation />
       </Sidebar>
 
+      <AdminPageActionContext.Provider value={setPageAction}>
       <Content>
         <MobileHeader data-admin-mobile-header>
           <IconButton
@@ -140,10 +175,12 @@ export function AdminLayout() {
 
         <PageHeader>
           <Heading data-admin-page-title>{pageTitle}</Heading>
+          {pageAction ? <PageAction data-admin-page-action>{pageAction}</PageAction> : null}
         </PageHeader>
 
         <Main><Outlet /></Main>
       </Content>
+      </AdminPageActionContext.Provider>
     </Shell>
   );
 }

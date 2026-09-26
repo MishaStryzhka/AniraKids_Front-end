@@ -21,9 +21,9 @@ import ModalRegister from './Modals/ModalRegister/ModalRegister';
 import { AdminAccessBoundary } from '../admin/auth/AdminAccessBoundary';
 import { AdminLayout } from '../admin/layout/AdminLayout';
 import { adminRoutes } from '../admin/navigation/adminRoutes';
+import { AdminProductsPage } from '../admin/products/AdminProductsPage';
 import {
   AdminHomePage,
-  AdminProductsPlaceholder,
   AdminProductCreatePlaceholder,
   AdminProductDetailPlaceholder,
   AdminReservationsPlaceholder,
@@ -149,7 +149,7 @@ function App() {
           <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
             <Route element={<AdminLayout />}>
               <Route index element={<AdminHomePage />} />
-              <Route path={adminRoutes.products} element={<AdminProductsPlaceholder />} />
+              <Route path={adminRoutes.products} element={<AdminProductsPage />} />
               <Route path={adminRoutes.productNew} element={<AdminProductCreatePlaceholder />} />
               <Route path={adminRoutes.productDetail} element={<AdminProductDetailPlaceholder />} />
               <Route path={adminRoutes.reservations} element={<AdminReservationsPlaceholder />} />
