@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react';
-import { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconButton } from '../../design-system/components/IconButton';
@@ -118,7 +118,7 @@ const AdminPageActionContext = createContext<AdminPageActionSetter | null>(null)
 export function useAdminPageAction(action: ReactNode) {
   const setPageAction = useContext(AdminPageActionContext);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!setPageAction) return;
     setPageAction(action);
     return () => setPageAction(null);

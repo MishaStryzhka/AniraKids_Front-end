@@ -1,4 +1,3 @@
-import { Archive, CheckCircle2, FileText } from 'lucide-react';
 import styled from 'styled-components';
 import { NavigationLink } from '../../design-system/components/NavigationLink';
 import { StatusBadge } from '../../design-system/components/StatusBadge';
@@ -22,12 +21,21 @@ const Surface = styled.div`
   background: ${t.color.bg.surface};
 `;
 
-const StackedList = styled.div`
+const StackedList = styled.ul`
   display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 
   @media (min-width: ${t.breakpoint.lg}) {
     display: none;
   }
+`;
+
+const StackedItem = styled.li`
+  border-block-end: 1px solid ${t.color.border.subtle};
+
+  &:last-child { border-block-end: 0; }
 `;
 
 const RowLink = styled(NavigationLink)`
@@ -39,9 +47,7 @@ const RowLink = styled(NavigationLink)`
   gap: ${t.space[4]};
   align-items: start;
   color: ${t.color.text.primary};
-  border-block-end: 1px solid ${t.color.border.subtle};
 
-  &:last-child { border-block-end: 0; }
   &:hover { color: ${t.color.text.primary}; background: ${t.color.bg.subtle}; }
 
   @media (min-width: ${t.breakpoint.md}) {
@@ -126,6 +132,18 @@ const Table = styled.table`
   table-layout: fixed;
   border-collapse: collapse;
   font-family: ${t.font.family.ui};
+`;
+
+const TableCaption = styled.caption`
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `;
 
 const HeaderCell = styled.th`
@@ -233,20 +251,8 @@ const Updated = styled.time`
 
 function Status({ status }: { status: AdminProductStatus }) {
   const presentation = statusPresentation[status];
-  const icon =
-    status === 'active' ? (
-      <CheckCircle2 aria-hidden="true" />
-    ) : status === 'archived' ? (
-      <Archive aria-hidden="true" />
-    ) : (
-      <FileText aria-hidden="true" />
-    );
 
-  return (
-    <StatusBadge tone={presentation.tone} icon={icon}>
-      {presentation.label}
-    </StatusBadge>
-  );
+  return <StatusBadge tone={presentation.tone}>{presentation.label}</StatusBadge>;
 }
 
 function OfferState({ product }: { product: AdminProductListItem }) {
@@ -267,14 +273,14 @@ export function AdminProductsList({ products }: { products: AdminProductListItem
     <Surface data-admin-products-list>
       <StackedList data-admin-products-stacked>
         {products.map(product => (
-          <RowLink
-            key={product.id}
-            variant="plain"
-            to={buildAdminProductDetailPath(product.id)}
-            data-product-row
-          >
-            <ProductThumbnail photo={product.photos?.[0]} />
-            <RowContent>
+          <StackedItem key={product.id}>
+            <RowLink
+              variant="plain"
+              to={buildAdminProductDetailPath(product.id)}
+              data-product-row
+            >
+              <ProductThumbnail photo={product.photos?.[0]} />
+              <RowContent>
               <ProductName>{product.name}</ProductName>
               {product.slug ? <Slug>{product.slug}</Slug> : null}
               <Status status={product.status} />
@@ -296,13 +302,15 @@ export function AdminProductsList({ products }: { products: AdminProductListItem
                   <MetaValue as="div"><ProductUpdatedAt product={product} /></MetaValue>
                 </Meta>
               </StackedMeta>
-            </RowContent>
-          </RowLink>
+              </RowContent>
+            </RowLink>
+          </StackedItem>
         ))}
       </StackedList>
 
       <TableWrap data-admin-products-table>
         <Table>
+          <TableCaption>Seznam produktů</TableCaption>
           <thead>
             <tr>
               <ProductHeader scope="col">Produkt</ProductHeader>

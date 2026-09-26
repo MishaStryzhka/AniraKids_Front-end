@@ -50,6 +50,13 @@ const CreateLink = styled(NavigationLink)`
   }
 `;
 
+const ProductCount = styled.p`
+  margin: 0;
+  color: ${t.color.text.secondary};
+  font-size: ${t.type.bodySm.size};
+  line-height: ${t.type.bodySm.lineHeight};
+`;
+
 const Results = styled.section`
   min-inline-size: 0;
   min-block-size: 240px;
@@ -102,7 +109,7 @@ const PaginationWrap = styled.div`
 
 type RequestState =
   | { status: 'loading' }
-  | { status: 'success'; data: AdminProductListResponse }
+  | { status: 'success'; data: AdminProductListResponse; queryKey: string }
   | { status: 'error' };
 
 const paginationLabels = {
@@ -178,12 +185,12 @@ export function AdminProductsPage() {
         if (total === 0 && pages === 0 && requestedPage !== 1) {
           const normalized = buildProductListSearchParams({ ...canonical.state, page: 1 });
           skipFetchForCanonicalKeyRef.current = normalized.toString();
-          setRequestState({ status: 'success', data });
+          setRequestState({ status: 'success', data, queryKey: normalized.toString() });
           setSearchParams(normalized, { replace: true });
           return;
         }
 
-        setRequestState({ status: 'success', data });
+        setRequestState({ status: 'success', data, queryKey: canonicalKey });
       })
       .catch(error => {
         if (controller.signal.aborted || requestSequence !== requestSequenceRef.current) return;
@@ -224,6 +231,13 @@ export function AdminProductsPage() {
   };
 
   const activeFilterCount = countActiveProductFilters(canonical.state);
+  const currentData =
+    requestState.status === 'success' && requestState.queryKey === canonicalKey
+      ? requestState.data
+      : null;
+  const pendingQuery =
+    requestState.status === 'loading' ||
+    (requestState.status === 'success' && requestState.queryKey !== canonicalKey);
 
   return (
     <Page data-admin-products-page>
@@ -235,13 +249,17 @@ export function AdminProductsPage() {
         onClear={clearFilters}
       />
 
+      <ProductCount data-admin-products-count>
+        Počet produktů: {currentData ? currentData.pagination.total : '…'}
+      </ProductCount>
+
       <Results
-        aria-busy={requestState.status === 'loading' || undefined}
+        aria-busy={pendingQuery || undefined}
         aria-live="polite"
         data-admin-products-results
       >
-        {requestState.status === 'loading' ? (
-          <StatePanel>
+        {pendingQuery ? (
+          <StatePanel role="status">
             <LoadingLine>
               <Spinner size="md" />
               <span>Načítání produktů…</span>
@@ -250,7 +268,7 @@ export function AdminProductsPage() {
         ) : null}
 
         {requestState.status === 'error' ? (
-          <StatePanel>
+          <StatePanel role="alert">
             <StateContent>
               <StateTitle>Produkty se nepodařilo načíst</StateTitle>
               <StateText>Zkuste to prosím znovu.</StateText>
@@ -261,7 +279,7 @@ export function AdminProductsPage() {
           </StatePanel>
         ) : null}
 
-        {requestState.status === 'success' && requestState.data.pagination.total === 0 ? (
+        {currentData && currentData.pagination.total === 0 ? (
           <StatePanel>
             <StateContent>
               {activeFilterCount === 0 ? (
@@ -285,13 +303,13 @@ export function AdminProductsPage() {
           </StatePanel>
         ) : null}
 
-        {requestState.status === 'success' && requestState.data.pagination.total > 0 ? (
+        {currentData && currentData.pagination.total > 0 ? (
           <>
-            <AdminProductsList products={requestState.data.items} />
+            <AdminProductsList products={currentData.items} />
             <PaginationWrap>
               <Pagination
-                page={requestState.data.pagination.page}
-                pages={requestState.data.pagination.pages}
+                page={currentData.pagination.page}
+                pages={currentData.pagination.pages}
                 onPageChange={changePage}
                 labels={paginationLabels}
               />

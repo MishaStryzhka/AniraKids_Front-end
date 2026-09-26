@@ -61,6 +61,7 @@ export function ProductThumbnail({ photo }: { photo?: AdminProductPhoto }) {
         src={photo.url}
         alt=""
         loading="lazy"
+        decoding="async"
         onError={() => setFailed(true)}
       />
     </Frame>

@@ -235,6 +235,32 @@ test('filter changes reset page to 1 and browser Back reconstructs state', async
   await expect.poll(() => state.listRequests.at(-1)?.searchParams.get('page')).toBe('1');
 });
 
+
+test('product count uses pagination.total and hides the previous total while a new query is pending', async ({ page }) => {
+  const state = await installAdminMocks(page, (url, requestNumber) => {
+    if (requestNumber === 1) {
+      return responseFor(url, products, { total: 40, pages: 2 });
+    }
+
+    return {
+      __delay: 300,
+      body: responseFor(url, [products[0]], { total: 7, pages: 1 }),
+    };
+  });
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await openProducts(page);
+  await expect(page.locator('[data-admin-products-count]')).toHaveText('Počet produktů: 40');
+
+  await page.getByLabel('Status').selectOption('active');
+  await expect(page).toHaveURL(/status=active/);
+  await expect(page.locator('[data-admin-products-count]')).toHaveText('Počet produktů: …');
+  await expect(page.getByRole('status')).toContainText('Načítání produktů…');
+
+  await expect(page.locator('[data-admin-products-count]')).toHaveText('Počet produktů: 7');
+  expect(state.listRequests).toHaveLength(2);
+});
+
 test('stale positive page is replaced with final valid page and refetched once', async ({ page }) => {
   const state = await installAdminMocks(page, url => {
     const requested = Number(url.searchParams.get('page') || '1');
@@ -268,7 +294,7 @@ test('zero-result stale page canonicalizes to page 1 without a redundant refetch
 test('loading shell remains visible and populated rows expose frozen status/commercial data', async ({ page }) => {
   await installAdminMocks(page, url => ({
     __delay: 250,
-    body: responseFor(url, products),
+    body: responseFor(url, products, { total: 37, pages: 2 }),
   }));
 
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -277,9 +303,12 @@ test('loading shell remains visible and populated rows expose frozen status/comm
   await expect(page.getByRole('heading', { name: 'Produkty' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Přidat produkt' })).toBeVisible();
   await expect(page.getByLabel('Status')).toBeVisible();
-  await expect(page.getByText('Načítání produktů…')).toBeVisible();
+  await expect(page.locator('[data-admin-products-count]')).toHaveText('Počet produktů: …');
+  await expect(page.getByRole('status')).toContainText('Načítání produktů…');
 
   await expect(page.locator('[data-admin-products-table]')).toBeVisible();
+  await expect(page.locator('[data-admin-products-count]')).toHaveText('Počet produktů: 37');
+  await expect(page.getByRole('table', { name: 'Seznam produktů' })).toBeVisible();
 
   const activeRow = page.locator('tbody tr').filter({ hasText: 'Šaty Sofia' });
   await expect(activeRow.getByText('Aktivní')).toBeVisible();
@@ -301,6 +330,10 @@ test('loading shell remains visible and populated rows expose frozen status/comm
   await expect(neitherRow.getByText('Prodej: Ne')).toBeVisible();
 
   await expect(archivedRow.locator('td:visible').getByText('Neuvedeno', { exact: true }).first()).toBeVisible();
+
+  for (const label of ['Aktivní', 'Koncept', 'Archivovaný']) {
+    await expect(page.getByText(label, { exact: true }).first().locator('..').locator('svg')).toHaveCount(0);
+  }
 });
 
 test('initial empty and filtered empty are distinct states', async ({ page }) => {
@@ -330,8 +363,9 @@ test('error retry repeats the exact canonical query', async ({ page }) => {
 
   await openProducts(page, '/admin/produkty?status=active&category=dress');
 
-  await expect(page.getByText('Produkty se nepodařilo načíst')).toBeVisible();
-  await page.getByRole('button', { name: 'Zkusit znovu' }).click();
+  const alert = page.getByRole('alert');
+  await expect(alert).toContainText('Produkty se nepodařilo načíst');
+  await alert.getByRole('button', { name: 'Zkusit znovu' }).click();
   await expect(page.locator('[data-admin-products-table]:visible').getByText('Šaty Sofia')).toBeVisible();
 
   expect(state.listRequests).toHaveLength(2);
@@ -346,7 +380,11 @@ test('thumbnail uses photos[0], missing/failed image shares the quiet fallback, 
   await expect(page.locator('[data-admin-products-table]')).toBeVisible();
 
   const firstRow = page.locator('tbody tr').filter({ hasText: 'Šaty Sofia' });
-  await expect(firstRow.locator('[data-product-thumbnail] img')).toHaveAttribute('src', 'https://images.example.test/first.jpg');
+  const firstImage = firstRow.locator('[data-product-thumbnail] img');
+  await expect(firstImage).toHaveAttribute('src', 'https://images.example.test/first.jpg');
+  await expect(firstImage).toHaveAttribute('alt', '');
+  await expect(firstImage).toHaveAttribute('loading', 'lazy');
+  await expect(firstImage).toHaveAttribute('decoding', 'async');
 
   const missingRow = page.locator('tbody tr').filter({ hasText: 'Oblek Oliver' });
   await expect(missingRow.locator('[data-thumbnail-fallback]')).toBeVisible();
@@ -445,9 +483,13 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
     const thumbnailBox = await thumbnail.boundingBox();
 
     if (width < 1024) {
-      await expect(page.locator('[data-admin-products-stacked]')).toBeVisible();
+      const stacked = page.locator('[data-admin-products-stacked]');
+      await expect(stacked).toBeVisible();
       await expect(page.locator('[data-admin-products-table]')).toBeHidden();
-      expect(await page.locator('[data-admin-products-stacked] [data-product-row]').first().evaluate(el => el.tagName)).toBe('A');
+      expect(await stacked.evaluate(el => el.tagName)).toBe('UL');
+      const firstItem = stacked.locator(':scope > li').first();
+      expect(await firstItem.evaluate(el => el.tagName)).toBe('LI');
+      expect(await firstItem.locator(':scope > [data-product-row]').evaluate(el => el.tagName)).toBe('A');
 
       if (width < 768) {
         expect(Math.abs(thumbnailBox.width - 64)).toBeLessThan(2);

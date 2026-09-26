@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import { designTokens as t } from '../../tokens/designTokens';
 
-export type StatusBadgeTone = 'info' | 'success' | 'neutral';
+export type StatusBadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 
 export interface StatusBadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone: StatusBadgeTone;
@@ -21,6 +21,14 @@ const toneStyles = {
   neutral: css`
     color: ${t.color.text.secondary};
     background: ${t.color.bg.subtle};
+  `,
+  warning: css`
+    color: ${t.color.status.warning.strong};
+    background: ${t.color.status.warning.bg};
+  `,
+  danger: css`
+    color: ${t.color.status.danger.strong};
+    background: ${t.color.status.danger.bg};
   `,
 };
 

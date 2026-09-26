@@ -52,7 +52,7 @@ export function serializeAdminProductListParams(query: AdminProductListQuery) {
     status?: AdminProductStatus;
     category?: AdminProductCategory;
     gender?: AdminProductGender;
-    rentalEnabled?: boolean;
+    rentalEnabled?: 'true' | 'false';
     page: number;
     limit: number;
   } = {
@@ -63,7 +63,7 @@ export function serializeAdminProductListParams(query: AdminProductListQuery) {
   if (query.status !== undefined) params.status = query.status;
   if (query.category !== undefined) params.category = query.category;
   if (query.gender !== undefined) params.gender = query.gender;
-  if (query.rentalEnabled !== undefined) params.rentalEnabled = query.rentalEnabled;
+  if (query.rentalEnabled !== undefined) params.rentalEnabled = query.rentalEnabled ? 'true' : 'false';
 
   return params;
 }

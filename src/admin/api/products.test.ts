@@ -29,7 +29,7 @@ test('serializes only the supported product-list API query keys and fixes limit 
     status: 'active',
     category: 'dress',
     gender: 'girls',
-    rentalEnabled: false,
+    rentalEnabled: 'false',
     page: 3,
     limit: 50,
     saleEnabled: true,
@@ -69,7 +69,7 @@ test('listAdminProducts requests only /admin/products with isolated Admin config
   expect(mockedGet).toHaveBeenCalledWith(
     '/admin/products',
     expect.objectContaining({
-      params: { rentalEnabled: true, page: 1, limit: 20 },
+      params: { rentalEnabled: 'true', page: 1, limit: 20 },
     })
   );
   expect(result).toEqual(payload);
