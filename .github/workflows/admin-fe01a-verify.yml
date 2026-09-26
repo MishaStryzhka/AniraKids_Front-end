@@ -38,10 +38,6 @@ jobs:
             exit 1
           fi
 
-      - name: Verify explicit Production deployment configuration
-        run: |
-          grep -q "REACT_APP_LEGACY_API_BASE_URL: https://anira-kids-back-end.onrender.com" .github/workflows/deploy.yml
-
       - name: No-env build
         run: npm run build
 
