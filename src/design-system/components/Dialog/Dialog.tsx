@@ -14,7 +14,7 @@ export function Dialog({open,title,description,onEscape,initialFocusRef,resolveR
  useEffect(()=>{if(!open)return;const identity=++openId.current,previous=document.activeElement as HTMLElement|null,root=document.getElementById('root'),html=document.documentElement,body=document.body;
  const rootInert=root?.hasAttribute('inert')??false,rootAria=root?.getAttribute('aria-hidden'),bodyOverflow=body.style.overflow,bodyPadding=body.style.paddingRight,htmlOverflow=html.style.overflow,scrollX=window.scrollX,scrollY=window.scrollY;
  root?.setAttribute('inert','');root?.setAttribute('aria-hidden','true');body.style.overflow='hidden';html.style.overflow='hidden';
- const panel=panelRef.current,focusables=()=>Array.from(panel?.querySelectorAll<HTMLElement>('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')??[]).filter(eligible);
+ const panel=panelRef.current,focusables=()=>Array.from(panel?.querySelectorAll<HTMLElement>('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')??[]).filter(el=>eligible(el));
  const initial=initialFocusRef?.current;if(identity===openId.current)(eligible(initial)?initial:focusables()[0])?.focus();
  const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();escapeRef.current();return}if(e.key!=='Tab')return;const list=focusables();if(!list.length)return;const first=list[0],last=list[list.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}};
  document.addEventListener('keydown',key);
