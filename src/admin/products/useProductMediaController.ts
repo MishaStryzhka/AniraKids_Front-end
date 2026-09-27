@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {getAdminProductDetail,type AdminProduct,type AdminProductPhoto,type AdminProductStatus} from '../api/products';
 import {completeProductPhoto,deleteProductPhoto,productMediaCandidate,reorderProductPhotos,signProductPhoto,updateProductPhotoAlt,type ProductMediaUploadDescriptor} from '../api/productMedia';
 import {AdminApiError} from '../api/errors';
@@ -11,11 +11,12 @@ export function useProductMediaController(input:{productId:string;productName:st
  const [photos,setPhotos]=useState(input.initialPhotos),[guard,setGuard]=useState<MediaGuardStatus>('available'),[drafts,setDrafts]=useState<ProductMediaDrafts>({altById:{},orderIds:photoIds(input.initialPhotos)});
  const [operation,setOperation]=useState<string|null>(null),[feedback,setFeedback]=useState<string|null>(null),[uploadPhase,setUploadPhase]=useState<UploadPhase>('idle'),[progress,setProgress]=useState<number|null>(null),[attempt,setAttempt]=useState<Attempt|null>(null),[editingAlt,setEditingAlt]=useState<string|null>(null);
  const writeGen=useRef(0),refreshGen=useRef(0),attemptSeq=useRef(0),mounted=useRef(true),controller=useRef<AbortController|null>(null),refreshController=useRef<AbortController|null>(null),productRef=useRef(input.productId);
- useEffect(()=>{mounted.current=true;productRef.current=input.productId;return()=>{mounted.current=false;writeGen.current++;refreshGen.current++;controller.current?.abort();refreshController.current?.abort()}},[input.productId]);
+ const invalidateAll=useCallback(()=>{mounted.current=false;writeGen.current++;refreshGen.current++;controller.current?.abort();refreshController.current?.abort()},[]);
+ useEffect(()=>{mounted.current=true;productRef.current=input.productId;return invalidateAll},[input.productId,invalidateAll]);
  useEffect(()=>()=>{if(attempt?.previewUrl)URL.revokeObjectURL(attempt.previewUrl)},[attempt?.previewUrl]);
  useEffect(()=>{setPhotos(input.initialPhotos);setDrafts(d=>reconcileMediaDrafts({previousPhotos:photos,previousDrafts:d,nextPhotos:input.initialPhotos}).drafts)},[input.initialPhotos]);
  const orderDirty=isOrderDirty(photos,drafts.orderIds),altDirty=editingAlt?((drafts.altById[editingAlt]??photos.find(p=>p.publicId===editingAlt)?.alt??'')!==(photos.find(p=>p.publicId===editingAlt)?.alt??'')):false;
- const risk=Boolean(operation||uploadPhase!=='idle'||orderDirty||altDirty);useEffect(()=>input.onRiskChange?.(risk),[risk,input.onRiskChange]);
+ const risk=Boolean(operation||uploadPhase!=='idle'||orderDirty||altDirty);const onRiskChange=input.onRiskChange;useEffect(()=>onRiskChange?.(risk),[risk,onRiskChange]);
  const safe=(g:number)=>mounted.current&&productRef.current===input.productId&&g===writeGen.current;
  const apply=(product:AdminProduct)=>{setPhotos(product.photos);setDrafts(d=>reconcileMediaDrafts({previousPhotos:photos,previousDrafts:d,nextPhotos:product.photos}).drafts);setGuard('available')};
  const fail=(e:unknown,g:number,defaultCopy:string)=>{if(!safe(g))return;if(input.onAccessError?.(e))return;if(e instanceof AdminApiError&&e.code==='PHOTO_NOT_FOUND'){setFeedback('Fotografie už u produktu není. Načtěte aktuální fotografie.');return}if(e instanceof AdminApiError&&(e.code==='PRODUCT_NOT_FOUND')){setGuard('product-missing');input.onProductMissing?.();setFeedback('Produkt už nebyl nalezen. Další změny fotografií nelze uložit.');return}if(e instanceof AdminApiError&&e.code==='MEDIA_CONFIGURATION_ERROR'){setGuard('configuration-error');setFeedback('Služba fotografií není správně nakonfigurovaná.');return}setFeedback(defaultCopy)};
