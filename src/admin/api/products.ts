@@ -15,26 +15,26 @@ export interface AdminProductPhoto {
 
 export type AdminProductOccasion = 'wedding' | 'birthday' | 'christening' | 'photoshoot' | 'celebration' | 'other';
 export interface AdminProductRentalPrices { studio?: number; external?: number; }
-export interface AdminProductSeo { title?: string; description?: string; }
+export interface AdminProductSeo { title?: string; description?: string; noIndex: boolean; }
 export interface AdminProduct {
   id: string; name: string; slug: string; description?: string;
   category?: AdminProductCategory; gender?: AdminProductGender; color?: string;
-  occasion?: AdminProductOccasion[]; ageTags?: string[]; brand?: string; familyLookGroup?: string;
+  occasion: AdminProductOccasion[]; ageTags: string[]; brand?: string; familyLookGroup?: string;
   rentalEnabled: boolean; saleEnabled: boolean; rentalPrices?: AdminProductRentalPrices;
-  defaultSalePrice?: number; defaultDeposit?: number; seo?: AdminProductSeo;
-  status: AdminProductStatus; photos: AdminProductPhoto[]; variants: unknown[];
+  defaultSalePrice?: number; defaultDeposit: number; seo: AdminProductSeo;
+  status: AdminProductStatus; photos: AdminProductPhoto[];
   createdAt: string; updatedAt: string;
 }
-export interface AdminProductDetailResponse { product: AdminProduct; }
+export interface AdminProductDetailResponse { product: AdminProduct; variants: unknown[]; }
 export interface CreateAdminProductRequest {
  name:string;slug?:string;description?:string;category?:AdminProductCategory;gender?:AdminProductGender;color?:string;
  occasion?:AdminProductOccasion[];ageTags?:string[];brand?:string;familyLookGroup?:string;rentalEnabled?:boolean;saleEnabled?:boolean;
- rentalPrices?:AdminProductRentalPrices;defaultSalePrice?:number;defaultDeposit?:number;seo?:AdminProductSeo;
+ rentalPrices?:AdminProductRentalPrices;defaultSalePrice?:number;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
 }
 export interface UpdateAdminProductRequest {
  name?:string;slug?:string;description?:string;category?:AdminProductCategory|null;gender?:AdminProductGender|null;color?:string;
  occasion?:AdminProductOccasion[];ageTags?:string[];brand?:string;familyLookGroup?:string;rentalEnabled?:boolean;saleEnabled?:boolean;
- rentalPrices?:{studio?:number|null;external?:number|null};defaultSalePrice?:number|null;defaultDeposit?:number;seo?:AdminProductSeo;
+ rentalPrices?:{studio?:number|null;external?:number|null};defaultSalePrice?:number|null;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
 }
 
 export interface AdminProductListItem {
@@ -117,8 +117,8 @@ export async function createAdminProduct(input:{token:string;body:CreateAdminPro
  try { const response=await adminApiClient.post<AdminProduct|AdminProductDetailResponse>('/admin/products',input.body,buildAdminRequestConfig(input.token,input.signal)); return extractAdminProduct(response.data); }
  catch(error){throw normalizeAdminApiError(error)}
 }
-export async function getAdminProductDetail(input:{token:string;productId:string;signal?:AbortSignal}) {
- try { const response=await adminApiClient.get<AdminProduct|AdminProductDetailResponse>(`/admin/products/${encodeURIComponent(input.productId)}`,buildAdminRequestConfig(input.token,input.signal)); return extractAdminProduct(response.data); }
+export async function getAdminProductDetail(input:{token:string;productId:string;signal?:AbortSignal}):Promise<AdminProductDetailResponse> {
+ try { const response=await adminApiClient.get<AdminProductDetailResponse>(`/admin/products/${encodeURIComponent(input.productId)}`,buildAdminRequestConfig(input.token,input.signal)); return response.data; }
  catch(error){throw normalizeAdminApiError(error)}
 }
 export async function updateAdminProduct(input:{token:string;productId:string;body:UpdateAdminProductRequest;signal?:AbortSignal}) {
