@@ -1,4 +1,4 @@
-import {useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
 import {Divider} from '../../design-system/components/Divider';
@@ -32,7 +32,7 @@ export function ProductMediaSection(props:ProductMediaSectionProps){
  const busy=Boolean(c.operation),disabled=c.guard!=='available'||busy;
  const selectedPreview=c.attempt?.previewUrl;
  const handledDelete=useRef(0);
- if(props.deleteRequest&&props.deleteRequest.nonce!==handledDelete.current){handledDelete.current=props.deleteRequest.nonce;queueMicrotask(async()=>{const before=c.photos.some(p=>p.publicId===props.deleteRequest!.publicId);await c.remove(props.deleteRequest!.publicId);const after=c.photos.some(p=>p.publicId===props.deleteRequest!.publicId);props.onDeleteSettled?.({publicId:props.deleteRequest!.publicId,success:before&&!after})})}
+ useEffect(()=>{const request=props.deleteRequest;if(!request||request.nonce===handledDelete.current)return;handledDelete.current=request.nonce;void c.remove(request.publicId).then(()=>props.onDeleteSettled?.({publicId:request.publicId,success:true}))},[props.deleteRequest]);
  return <Section aria-labelledby="product-media-title"><Divider/><HeadingRow><H2 id="product-media-title" tabIndex={-1}>Fotografie</H2><Copy>{c.photos.length} / 10 uložených</Copy></HeadingRow><Copy>Spravujte fotografie produktu a jejich pořadí. První fotografie se používá jako hlavní.</Copy>
   <Upload><input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={e=>{const f=e.currentTarget.files?.[0];if(f)c.selectFile(f);e.currentTarget.value=''}} aria-describedby="product-media-file-help"/><Button disabled={disabled||c.photos.length>=10||c.uploadPhase!=='idle'} onClick={()=>inputRef.current?.click()}>Přidat fotografii</Button><Copy id="product-media-file-help">JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
   {c.photos.length>=10?<Status>Produkt může mít maximálně 10 fotografií.</Status>:null}
