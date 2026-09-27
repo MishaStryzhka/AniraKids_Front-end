@@ -1,0 +1,19 @@
+import {createRef,useState} from 'react';
+import {MemoryRouter} from 'react-router-dom';
+import {fireEvent,render,screen} from '@testing-library/react';
+import {ProductCoreForm,type ProductCoreFormHandle} from './ProductCoreForm';
+import {initialProductCoreFormState,type ProductCoreFormState} from './productCoreFormModel';
+
+const renderForm=(props:Partial<React.ComponentProps<typeof ProductCoreForm>>={})=>render(<MemoryRouter><ProductCoreForm mode="create" value={initialProductCoreFormState} errors={{}} ageTagErrors={{}} submitting={false} saveDisabled={false} onChange={()=>{}} onSubmit={()=>{}} {...props}/></MemoryRouter>);
+
+test('renders frozen sections, native commercial controls, SEO textarea and stable footer DOM order',()=>{renderForm();expect(screen.getAllByRole('heading',{level:2}).map(x=>x.textContent)).toEqual(['Základní informace','Zařazení','Nabídka a ceny','SEO']);expect(screen.getByLabelText('Nabízet produkt k pronájmu')).toHaveAttribute('type','checkbox');expect(screen.queryByLabelText('Cena ve studiu')).not.toBeInTheDocument();expect(screen.getByLabelText('SEO popis').tagName).toBe('TEXTAREA');const footer=screen.getByText('Uložit').closest('[data-product-core-footer]')!;expect(Array.from(footer.children).map(x=>x.textContent)).toEqual(['Uložit','Zpět'])});
+
+test('imperative focus targets native name field',()=>{const ref=createRef<ProductCoreFormHandle>();renderForm({ref});ref.current?.focus('name');expect(screen.getByLabelText('Název')).toHaveFocus()});
+
+test('age tag row exposes deterministic error semantics and imperative row focus',()=>{const ref=createRef<ProductCoreFormHandle>();renderForm({ref,value:{...initialProductCoreFormState,ageTags:['x'.repeat(41)]},errors:{ageTags:'Opravte věková označení.'},ageTagErrors:{0:'Označení může mít nejvýše 40 znaků.'}});const input=screen.getByLabelText('Věkové označení 1');expect(input).toHaveAttribute('aria-invalid','true');expect(input).toHaveAttribute('aria-describedby','core-ageTag-0-error');expect(document.getElementById('core-ageTag-0-error')).toHaveTextContent('Označení může mít nejvýše 40 znaků.');ref.current?.focus({field:'ageTag',index:0});expect(input).toHaveFocus();expect(screen.getByRole('button',{name:'Odebrat věkové označení 1'})).toBeInTheDocument()});
+
+function ControlledTags(){const [value,setValue]=useState<ProductCoreFormState>({...initialProductCoreFormState,ageTags:['3 roky']});return <ProductCoreForm mode="create" value={value} errors={{}} ageTagErrors={{}} submitting={false} saveDisabled={false} onChange={setValue} onSubmit={()=>{}}/>}
+test('new age tag row focuses immediately',()=>{render(<MemoryRouter><ControlledTags/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'Přidat označení'}));expect(screen.getByLabelText('Věkové označení 2')).toHaveFocus()});
+test('age tag add stays visible and disabled at 20 rows',()=>{renderForm({value:{...initialProductCoreFormState,ageTags:Array.from({length:20},(_,i)=>String(i))}});expect(screen.getByRole('button',{name:'Přidat označení'})).toBeDisabled()});
+
+test('commercial pricing remains hidden while disabled and money exposes Kč description when enabled',()=>{const {rerender}=render(<MemoryRouter><ProductCoreForm mode="create" value={initialProductCoreFormState} errors={{}} ageTagErrors={{}} submitting={false} saveDisabled={false} onChange={()=>{}} onSubmit={()=>{}}/></MemoryRouter>);expect(screen.queryByLabelText('Cena ve studiu')).not.toBeInTheDocument();rerender(<MemoryRouter><ProductCoreForm mode="create" value={{...initialProductCoreFormState,rentalEnabled:true}} errors={{}} ageTagErrors={{}} submitting={false} saveDisabled={false} onChange={()=>{}} onSubmit={()=>{}}/></MemoryRouter>);expect(screen.getByLabelText('Cena ve studiu')).toHaveAttribute('aria-describedby',expect.stringContaining('core-rentalStudioPrice-currency'));expect(document.getElementById('core-rentalStudioPrice-currency')).toHaveTextContent('Částka v Kč.')});

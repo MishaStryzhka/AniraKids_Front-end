@@ -22,10 +22,9 @@ import { AdminAccessBoundary } from '../admin/auth/AdminAccessBoundary';
 import { AdminLayout } from '../admin/layout/AdminLayout';
 import { adminRoutes } from '../admin/navigation/adminRoutes';
 import { AdminProductsPage } from '../admin/products/AdminProductsPage';
+import { AdminProductCorePage } from '../admin/products/AdminProductCorePage';
 import {
   AdminHomePage,
-  AdminProductCreatePlaceholder,
-  AdminProductDetailPlaceholder,
   AdminReservationsPlaceholder,
   AdminReservationDetailPlaceholder,
   AdminCalendarPlaceholder,
@@ -150,8 +149,8 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route index element={<AdminHomePage />} />
               <Route path={adminRoutes.products} element={<AdminProductsPage />} />
-              <Route path={adminRoutes.productNew} element={<AdminProductCreatePlaceholder />} />
-              <Route path={adminRoutes.productDetail} element={<AdminProductDetailPlaceholder />} />
+              <Route path={adminRoutes.productNew} element={<AdminProductCorePage mode="create" />} />
+              <Route path={adminRoutes.productDetail} element={<AdminProductCorePage mode="edit" />} />
               <Route path={adminRoutes.reservations} element={<AdminReservationsPlaceholder />} />
               <Route path={adminRoutes.reservationDetail} element={<AdminReservationDetailPlaceholder />} />
               <Route path={adminRoutes.calendar} element={<AdminCalendarPlaceholder />} />

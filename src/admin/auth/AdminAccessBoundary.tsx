@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
@@ -144,6 +144,10 @@ export function stateFromAdminError(error: AdminApiError): AdminAccessState {
   return 'network_error';
 }
 
+interface AdminAccessContextValue { handleRequestError(error: unknown): boolean }
+const AdminAccessContext=createContext<AdminAccessContextValue|null>(null);
+export function useAdminAccess(){const value=useContext(AdminAccessContext);if(!value)throw new Error('useAdminAccess must be used inside AdminAccessBoundary');return value;}
+
 export function AdminAccessBoundary() {
   const dispatch = useDispatch<any>();
   const { token, isLoggedIn, isRefreshing } = useAuth();
@@ -180,11 +184,13 @@ export function AdminAccessBoundary() {
   }, [isLoggedIn, isRefreshing, retryRevision, token]);
 
   const retry = useCallback(() => setRetryRevision(value => value + 1), []);
+  const handleRequestError=useCallback((error:unknown)=>{const normalized=normalizeAdminApiError(error);if(!['unauthorized','forbidden','admin_disabled','configuration_error'].includes(normalized.kind))return false;setState(stateFromAdminError(normalized));return true;},[]);
+  const accessContext=useMemo(()=>({handleRequestError}),[handleRequestError]);
   const recoverSession = useCallback(() => { dispatch(refreshUser()); }, [dispatch]);
 
   if (state === 'auth_refreshing') return <LoadingState label="Ověřujeme přihlášení…" />;
   if (state === 'probing') return <LoadingState label="Ověřujeme přístup do administrace…" />;
-  if (state === 'authorized') return <Outlet />;
+  if (state === 'authorized') return <AdminAccessContext.Provider value={accessContext}><Outlet /></AdminAccessContext.Provider>;
 
   return (
     <AccessStateView

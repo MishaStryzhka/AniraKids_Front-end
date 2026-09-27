@@ -1,5 +1,5 @@
 jest.mock('./client', () => ({
-  adminApiClient: { get: jest.fn() },
+  adminApiClient: { get: jest.fn(), post: jest.fn(), patch: jest.fn() },
   buildAdminRequestConfig: jest.fn(() => ({
     baseURL: 'https://admin.example.test/api/v2',
     headers: { Authorization: 'Bearer dummy-token' },
@@ -15,13 +15,19 @@ import {
   ADMIN_PRODUCTS_PAGE_SIZE,
   listAdminProducts,
   serializeAdminProductListParams,
+  createAdminProduct,
+  getAdminProductDetail,
+  updateAdminProduct,
 } from './products';
 
 const mockedGet = adminApiClient.get as jest.Mock;
+const mockedPost = adminApiClient.post as jest.Mock;
+const mockedPatch = adminApiClient.patch as jest.Mock;
 const mockedBuildConfig = buildAdminRequestConfig as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockedBuildConfig.mockReturnValue({ baseURL: 'https://admin.example.test/api/v2', headers: { Authorization: 'Bearer dummy-token' } });
 });
 
 test('serializes only the supported product-list API query keys and fixes limit to 20', () => {
@@ -74,3 +80,8 @@ test('listAdminProducts requests only /admin/products with isolated Admin config
   );
   expect(result).toEqual(payload);
 });
+
+const product={id:'p1',name:'Sofia',slug:'sofia',occasion:[],ageTags:[],rentalEnabled:false,saleEnabled:false,defaultDeposit:0,photos:[],status:'draft' as const,seo:{noIndex:false},createdAt:'2026-01-01T00:00:00Z',updatedAt:'2026-01-01T00:00:00Z'};
+test('createAdminProduct POSTs body with auth/signal and extracts product',async()=>{mockedPost.mockResolvedValue({data:{product}});const signal=new AbortController().signal;await expect(createAdminProduct({token:'dummy-token',body:{name:'Sofia'},signal})).resolves.toEqual(product);expect(mockedBuildConfig).toHaveBeenCalledWith('dummy-token',signal);expect(mockedPost).toHaveBeenCalledWith('/admin/products',{name:'Sofia'},expect.any(Object))});
+test('getAdminProductDetail preserves product and variants transport contract',async()=>{const variants=[{id:'v1',size:'98'}];mockedGet.mockResolvedValue({data:{product,variants}});await expect(getAdminProductDetail({token:'dummy-token',productId:'p1'})).resolves.toEqual({product,variants});expect(mockedGet).toHaveBeenCalledWith('/admin/products/p1',expect.any(Object))});
+test('updateAdminProduct PATCHes changed body and rejects empty PATCH',async()=>{mockedPatch.mockResolvedValue({data:{product}});await expect(updateAdminProduct({token:'dummy-token',productId:'p1',body:{name:'Sofia'}})).resolves.toEqual(product);expect(mockedPatch).toHaveBeenCalledWith('/admin/products/p1',{name:'Sofia'},expect.any(Object));await expect(updateAdminProduct({token:'dummy-token',productId:'p1',body:{}})).rejects.toThrow('empty product PATCH')});
