@@ -13,11 +13,11 @@ export function useProductMediaController(input:{productId:string;productName:st
  const writeGen=useRef(0),refreshGen=useRef(0),attemptSeq=useRef(0),mounted=useRef(true),controller=useRef<AbortController|null>(null),refreshController=useRef<AbortController|null>(null),productRef=useRef(input.productId);
  useEffect(()=>{mounted.current=true;productRef.current=input.productId;return()=>{mounted.current=false;writeGen.current++;refreshGen.current++;controller.current?.abort();refreshController.current?.abort()}},[input.productId]);
  useEffect(()=>()=>{if(attempt?.previewUrl)URL.revokeObjectURL(attempt.previewUrl)},[attempt?.previewUrl]);
- useEffect(()=>{setPhotos(input.initialPhotos);setDrafts(d=>reconcileMediaDrafts(d,input.initialPhotos))},[input.initialPhotos]);
+ useEffect(()=>{setPhotos(input.initialPhotos);setDrafts(d=>reconcileMediaDrafts({previousPhotos:photos,previousDrafts:d,nextPhotos:input.initialPhotos}).drafts)},[input.initialPhotos]);
  const orderDirty=isOrderDirty(photos,drafts.orderIds),altDirty=editingAlt?((drafts.altById[editingAlt]??photos.find(p=>p.publicId===editingAlt)?.alt??'')!==(photos.find(p=>p.publicId===editingAlt)?.alt??'')):false;
  const risk=Boolean(operation||uploadPhase!=='idle'||orderDirty||altDirty);useEffect(()=>input.onRiskChange?.(risk),[risk,input.onRiskChange]);
  const safe=(g:number)=>mounted.current&&productRef.current===input.productId&&g===writeGen.current;
- const apply=(product:AdminProduct)=>{setPhotos(product.photos);setDrafts(d=>reconcileMediaDrafts(d,product.photos));setGuard('available')};
+ const apply=(product:AdminProduct)=>{setPhotos(product.photos);setDrafts(d=>reconcileMediaDrafts({previousPhotos:photos,previousDrafts:d,nextPhotos:product.photos}).drafts);setGuard('available')};
  const fail=(e:unknown,g:number,defaultCopy:string)=>{if(!safe(g))return;if(e instanceof AdminApiError&&e.code==='PHOTO_NOT_FOUND'){setFeedback('Fotografie už u produktu není. Načtěte aktuální fotografie.');return}if(e instanceof AdminApiError&&(e.code==='PRODUCT_NOT_FOUND'||(e.status===404&&e.code!=='PHOTO_NOT_FOUND'))){setGuard('product-missing');input.onProductMissing?.();setFeedback('Produkt už nebyl nalezen. Další změny fotografií nelze uložit.');return}if(e instanceof AdminApiError&&e.code==='MEDIA_CONFIGURATION_ERROR'){setGuard('configuration-error');setFeedback('Služba fotografií není správně nakonfigurovaná.');return}setFeedback(defaultCopy)};
  const begin=(name:string)=>{const g=++writeGen.current;refreshGen.current++;controller.current?.abort();controller.current=new AbortController();setOperation(name);setFeedback(null);return {g,signal:controller.current.signal}};
  const finish=(g:number)=>{if(safe(g)){setOperation(null);setProgress(null)}};
