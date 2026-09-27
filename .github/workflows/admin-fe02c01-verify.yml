@@ -2,6 +2,9 @@ name: ADMIN-FE-02C-01 Verify
 on:
   push:
     branches: [admin-fe-02c-01-product-photos]
+concurrency:
+  group: admin-fe02c01-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -29,7 +32,10 @@ jobs:
           src/redux/auth/operations.security.test.js
           src/config/legacyApi.test.ts
           src/admin/api/client.test.ts
-      - name: Build
+      - name: No-env build
+        run: npm run build
+      - run: mv build build-no-env
+      - name: Configured Admin build
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
           REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
@@ -41,7 +47,9 @@ jobs:
       - name: Start SPA
         run: |
           npx --yes serve@14.2.4 -s build -l 4173 >/tmp/admin-fe02c01.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02c01-no-env.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
       - name: ADMIN-FE-02C-01 Playwright
         run: npx playwright test .github/admin-fe02c01.spec.js --reporter=line
       - name: ADMIN-FE-02B regression
@@ -52,3 +60,15 @@ jobs:
         run: npx playwright test .github/admin-fe01.spec.js --reporter=line
       - name: DESIGN-02 regression
         run: npx playwright test .github/design02f.spec.js --reporter=line
+
+      - name: Upload verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-fe02c01-${{ github.sha }}
+          if-no-files-found: ignore
+          path: |
+            test-results/
+            playwright-report/
+            /tmp/admin-fe02c01.log
+            /tmp/admin-fe02c01-no-env.log
