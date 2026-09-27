@@ -1,0 +1,1 @@
+import {render,screen} from '@testing-library/react';import {CheckboxField} from './CheckboxField';test('uses native labelled checkbox',()=>{render(<CheckboxField label="Pronájem" checked readOnly/>);const el=screen.getByLabelText('Pronájem');expect(el).toHaveAttribute('type','checkbox');expect(el).toBeChecked()});
