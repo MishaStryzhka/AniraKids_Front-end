@@ -5,8 +5,8 @@ import {createAdminProduct,getAdminProductDetail,updateAdminProduct} from '../ap
 import {AdminProductCorePage} from './AdminProductCorePage';
 
 jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
-const handleRequestError=jest.fn();
-jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError})}));
+const mockHandleRequestError=jest.fn();
+jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({mockHandleRequestError})}));
 jest.mock('../api/products',()=>{const actual=jest.requireActual('../api/products');return {...actual,createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}});
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
@@ -25,7 +25,7 @@ function renderRouter(initial='/admin/produkty/novy'){
  render(<RouterProvider router={router}/>);
  return router;
 }
-beforeEach(()=>{jest.clearAllMocks();handleRequestError.mockReturnValue(false)});
+beforeEach(()=>{jest.clearAllMocks();mockHandleRequestError.mockReturnValue(false)});
 
 test('CREATE starts clean, posts only name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback',async()=>{
  createMock.mockResolvedValue(product);const router=renderRouter();
@@ -68,5 +68,5 @@ test('PATCH 404 preserves edits and shows product-not-found save copy without re
 
 test.each([
  [401,'ADMIN_UNAUTHORIZED','unauthorized'],[403,'ADMIN_FORBIDDEN','forbidden'],[503,'ADMIN_API_DISABLED','admin_disabled'],[503,'ADMIN_API_CONFIGURATION_ERROR','configuration_error']
-] as const)('access error %s %s is delegated to boundary context',async(status,code,kind)=>{const error=apiError(status,code,kind);handleRequestError.mockImplementation(e=>e===error);createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));await waitFor(()=>expect(handleRequestError).toHaveBeenCalledWith(error));expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument()});
-test('network is not consumed by access context and uses save copy',async()=>{const error=apiError(null,'ADMIN_NETWORK_ERROR','network');createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')).toBeInTheDocument();expect(handleRequestError).toHaveBeenCalledWith(error)});
+] as const)('access error %s %s is delegated to boundary context',async(status,code,kind)=>{const error=apiError(status,code,kind);mockHandleRequestError.mockImplementation(e=>e===error);createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalledWith(error));expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument()});
+test('network is not consumed by access context and uses save copy',async()=>{const error=apiError(null,'ADMIN_NETWORK_ERROR','network');createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')).toBeInTheDocument();expect(mockHandleRequestError).toHaveBeenCalledWith(error)});
