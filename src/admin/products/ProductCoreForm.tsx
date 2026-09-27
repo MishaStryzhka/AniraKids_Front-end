@@ -35,7 +35,7 @@ interface Props{mode:'create'|'edit';status?:AdminProductStatus;value:ProductCor
 export const ProductCoreForm=forwardRef<ProductCoreFormHandle,Props>(function ProductCoreForm({mode,status,value,errors,ageTagErrors,submitting,saveDisabled,submitError,onChange,onSubmit},ref){
  const refs=useRef<Partial<Record<ProductCoreField,HTMLElement>>>({});const newTagRef=useRef<HTMLInputElement|null>(null);const previousTagCount=useRef(value.ageTags.length);
  useEffect(()=>{if(value.ageTags.length>previousTagCount.current)newTagRef.current?.focus();previousTagCount.current=value.ageTags.length},[value.ageTags.length]);
- useImperativeHandle(ref,()=>({focus(target){const node=refs.current[target];node?.scrollIntoView({block:'center'});node?.focus({preventScroll:true})}}),[]);
+ useImperativeHandle(ref,()=>({focus(target){const node=refs.current[target];if(node&&typeof node.scrollIntoView==='function')node.scrollIntoView({block:'center'});node?.focus({preventScroll:true})}}),[]);
  const set=<K extends keyof ProductCoreFormState>(key:K,next:ProductCoreFormState[K])=>onChange({...value,[key]:next});
  const err=(key:ProductCoreField)=>errors[key]?<ErrorText id={`core-${key}-error`} role="alert">{errors[key]}</ErrorText>:null;
  const input=(key:keyof Pick<ProductCoreFormState,'name'|'slug'|'color'|'brand'|'familyLookGroup'|'seoTitle'|'seoDescription'>,label:string,extra:Record<string,unknown>={})=><div><Input label={label} value={value[key]} onChange={e=>set(key,e.target.value)} error={Boolean(errors[key])} aria-describedby={errors[key]?`core-${key}-error`:undefined} ref={el=>{refs.current[key]=el??undefined}} {...extra}/>{err(key)}</div>;
