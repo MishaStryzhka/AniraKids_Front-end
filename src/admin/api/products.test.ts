@@ -27,6 +27,7 @@ const mockedBuildConfig = buildAdminRequestConfig as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockedBuildConfig.mockReturnValue({ baseURL: 'https://admin.example.test/api/v2', headers: { Authorization: 'Bearer dummy-token' } });
 });
 
 test('serializes only the supported product-list API query keys and fixes limit to 20', () => {
