@@ -25,7 +25,7 @@ const Progress=styled.progress`inline-size:100%;block-size:8px;accent-color:${t.
 const Status=styled.div`min-block-size:20px;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};overflow-wrap:anywhere;`;
 const Empty=styled.div`display:grid;gap:${t.space[2]};padding:${t.space[6]};border:1px solid ${t.color.border.subtle};border-radius:${t.radius[2]};`;
 const OrderActions=styled(Actions)`@media(max-width:767px){display:grid;grid-template-columns:1fr;}`;
-export interface ProductMediaSectionProps{productId:string;productName:string;status?:AdminProductStatus;token:string;initialPhotos:AdminProductPhoto[];onRiskChange?(risk:boolean):void;onProductMissing?():void}
+export interface ProductMediaSectionProps{productId:string;productName:string;status?:AdminProductStatus;token:string;initialPhotos:AdminProductPhoto[];onRiskChange?(risk:boolean):void;onProductMissing?():void;onAccessError?(error:unknown):boolean}
 export function ProductMediaSection(props:ProductMediaSectionProps){
  const c=useProductMediaController(props),inputRef=useRef<HTMLInputElement>(null),[broken,setBroken]=useState<Record<string,boolean>>({}),[deleteId,setDeleteId]=useState<string|null>(null);
  const ordered=c.drafts.orderIds.map(id=>c.photos.find(p=>p.publicId===id)).filter(Boolean) as AdminProductPhoto[];
