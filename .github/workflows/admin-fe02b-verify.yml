@@ -45,7 +45,9 @@ jobs:
       - name: Start SPA
         run: |
           npx --yes serve@14.2.4 -s build -l 4173 >/tmp/admin-fe02b.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02b-no-env.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
       - name: ADMIN-FE-02B Playwright
         run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
       - name: ADMIN-FE-02A regression
