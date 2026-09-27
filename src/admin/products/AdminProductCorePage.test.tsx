@@ -6,7 +6,7 @@ import {AdminProductCorePage} from './AdminProductCorePage';
 
 jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
 const mockHandleRequestError=jest.fn();
-jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({mockHandleRequestError})}));
+jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockHandleRequestError})}));
 jest.mock('../api/products',()=>{const actual=jest.requireActual('../api/products');return {...actual,createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}});
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
