@@ -31,8 +31,8 @@ export function ProductMediaSection(props:ProductMediaSectionProps){
  const ordered=c.drafts.orderIds.map(id=>c.photos.find(p=>p.publicId===id)).filter(Boolean) as AdminProductPhoto[];
  const busy=Boolean(c.operation),disabled=c.guard!=='available'||busy;
  const selectedPreview=c.attempt?.previewUrl;
- const handledDelete=useRef(0);
- useEffect(()=>{const request=props.deleteRequest;if(!request||request.nonce===handledDelete.current)return;handledDelete.current=request.nonce;void c.remove(request.publicId).then(()=>props.onDeleteSettled?.({publicId:request.publicId,success:true}))},[props.deleteRequest]);
+ const handledDelete=useRef(0),deleteRequest=props.deleteRequest,onDeleteSettled=props.onDeleteSettled,removePhoto=c.remove;
+ useEffect(()=>{const request=deleteRequest;if(!request||request.nonce===handledDelete.current)return;handledDelete.current=request.nonce;void removePhoto(request.publicId).then(()=>onDeleteSettled?.({publicId:request.publicId,success:true}))},[deleteRequest,onDeleteSettled,removePhoto]);
  return <Section aria-labelledby="product-media-title"><Divider/><HeadingRow><H2 id="product-media-title" tabIndex={-1}>Fotografie</H2><Copy>{c.photos.length} / 10 uložených</Copy></HeadingRow><Copy>Spravujte fotografie produktu a jejich pořadí. První fotografie se používá jako hlavní.</Copy>
   <Upload><input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={e=>{const f=e.currentTarget.files?.[0];if(f)c.selectFile(f);e.currentTarget.value=''}} aria-describedby="product-media-file-help"/><Button disabled={disabled||c.photos.length>=10||c.uploadPhase!=='idle'} onClick={()=>inputRef.current?.click()}>Přidat fotografii</Button><Copy id="product-media-file-help">JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
   {c.photos.length>=10?<Status>Produkt může mít maximálně 10 fotografií.</Status>:null}
