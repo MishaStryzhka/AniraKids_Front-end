@@ -4,10 +4,11 @@ import {AdminApiError} from '../api/errors';
 import {createAdminProduct,getAdminProductDetail,updateAdminProduct} from '../api/products';
 import {AdminProductCorePage} from './AdminProductCorePage';
 
+jest.mock('../api/errors',()=>{class AdminApiError extends Error{status;code;details;kind;constructor(input:any){super(input.message);this.status=input.status??null;this.code=input.code;this.details=input.details;this.kind=input.kind}}return {AdminApiError}});
 jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
 const mockHandleRequestError=jest.fn();
 jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockHandleRequestError})}));
-jest.mock('../api/products',()=>{const actual=jest.requireActual('../api/products');return {...actual,createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}});
+jest.mock('../api/products',()=>({createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}));
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const getMock=getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
