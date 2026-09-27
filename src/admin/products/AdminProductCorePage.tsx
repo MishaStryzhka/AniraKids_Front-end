@@ -1,0 +1,54 @@
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useBeforeUnload,useBlocker,useLocation,useNavigate,useNavigationType,useParams} from 'react-router-dom';
+import styled from 'styled-components';
+import {X} from 'lucide-react';
+import {Button} from '../../design-system/components/Button';
+import {IconButton} from '../../design-system/components/IconButton';
+import {NavigationLink} from '../../design-system/components/NavigationLink';
+import {Dialog} from '../../design-system/components/Dialog';
+import {designTokens as t} from '../../design-system/tokens/designTokens';
+import {useAuth} from '../../hooks/useAuth';
+import {AdminApiError} from '../api/errors';
+import {createAdminProduct,getAdminProductDetail,updateAdminProduct,type AdminProduct,type AdminProductStatus} from '../api/products';
+import {useAdminAccess} from '../auth/AdminAccessBoundary';
+import {adminRoutes,buildAdminProductDetailPath} from '../navigation/adminRoutes';
+import {ProductCoreForm,type ProductCoreFormHandle} from './ProductCoreForm';
+import {coreFormStatesEquivalent,initialProductCoreFormState,productToCoreFormState,serializeAdminProductPatch,serializeCreateAdminProduct,type ProductCoreFormState} from './productCoreFormModel';
+import {validateProductCoreForm,type ProductCoreErrors} from './productCoreValidation';
+const Page=styled.div`inline-size:100%;max-inline-size:840px;display:grid;gap:${t.space[5]??t.space[4]};`;
+const Guidance=styled.p`margin:0;color:${t.color.text.secondary};`;
+const State=styled.section`max-inline-size:640px;display:grid;gap:${t.space[3]};`;
+const Actions=styled.div`display:flex;flex-wrap:wrap;gap:${t.space[3]};`;
+const Feedback=styled.div`display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};padding:${t.space[3]};border:1px solid ${t.color.status.success.fg};border-radius:${t.radius[2]};background:${t.color.status.success.bg};`;
+type FeedbackKind='created'|'updated';
+function ProductSuccessFeedback({kind,onDismiss}:{kind:FeedbackKind;onDismiss():void}){return <Feedback aria-live="polite"><span>{kind==='created'?'Produkt byl vytvořen.':'Změny byly uloženy.'}</span><IconButton aria-label="Zavřít potvrzení" icon={<X aria-hidden="true"/>} onClick={onDismiss}/></Feedback>}
+function isProduct(value:unknown):value is AdminProduct{return Boolean(value&&typeof value==='object'&&typeof (value as any).id==='string'&&typeof (value as any).name==='string')}
+export function AdminProductCorePage({mode}:{mode:'create'|'edit'}){
+ const {productId}=useParams();const {token}=useAuth();const navigate=useNavigate();const location=useLocation();const navigationType=useNavigationType();const {handleRequestError}=useAdminAccess();
+ const hydrationState=location.state as {adminProductCoreHydration?:unknown;adminProductCoreFeedback?:unknown}|null;
+ const validHydration=mode==='edit'&&navigationType==='REPLACE'&&hydrationState?.adminProductCoreFeedback==='created'&&isProduct(hydrationState.adminProductCoreHydration)&&hydrationState.adminProductCoreHydration.id===productId?hydrationState.adminProductCoreHydration:null;
+ const hydrated=validHydration?productToCoreFormState(validHydration):null;
+ const [current,setCurrent]=useState<ProductCoreFormState>(()=>hydrated??initialProductCoreFormState);const [baseline,setBaseline]=useState<ProductCoreFormState>(()=>hydrated??initialProductCoreFormState);
+ const [status,setStatus]=useState<AdminProductStatus|undefined>(()=>validHydration?.status);const [loading,setLoading]=useState(mode==='edit'&&!validHydration);const [loadError,setLoadError]=useState<'not-found'|'network'|null>(null);const [retryRevision,setRetryRevision]=useState(0);
+ const [errors,setErrors]=useState<ProductCoreErrors>({});const [ageTagErrors,setAgeTagErrors]=useState<Record<number,string>>({});const [submitError,setSubmitError]=useState<string|null>(null);const [submitting,setSubmitting]=useState(false);const [feedback,setFeedback]=useState<FeedbackKind|null>(validHydration?'created':null);
+ const formRef=useRef<ProductCoreFormHandle>(null),saveInFlightRef=useRef(false),saveControllerRef=useRef<AbortController|null>(null),requestSequence=useRef(0),bypassRef=useRef(false);
+ const dirty=useMemo(()=>!coreFormStatesEquivalent(current,baseline),[current,baseline]);
+ const blocker=useBlocker(()=>dirty&&!bypassRef.current);
+ useBeforeUnload(useCallback((event)=>{if(!dirty)return;event.preventDefault();event.returnValue='';},[dirty]));
+ useEffect(()=>{if(!feedback)return;const id=window.setTimeout(()=>setFeedback(null),4000);return()=>window.clearTimeout(id)},[feedback]);
+ useEffect(()=>()=>saveControllerRef.current?.abort(),[]);
+ useEffect(()=>{if(mode!=='edit'||validHydration)return;if(!productId){setLoading(false);setLoadError('not-found');return}const controller=new AbortController();const sequence=++requestSequence.current;setLoading(true);setLoadError(null);getAdminProductDetail({token:token??'',productId,signal:controller.signal}).then(product=>{if(controller.signal.aborted||sequence!==requestSequence.current||product.id!==productId)return;const next=productToCoreFormState(product);setCurrent(next);setBaseline(next);setStatus(product.status);setLoading(false)}).catch(error=>{if(controller.signal.aborted||(error instanceof AdminApiError&&error.kind==='cancelled'))return;if(sequence!==requestSequence.current)return;if(handleRequestError(error))return;setLoading(false);setLoadError(error instanceof AdminApiError&&error.status===404?'not-found':'network')});return()=>controller.abort()},[mode,productId,retryRevision,token,handleRequestError,validHydration]);
+ const submit=async()=>{if(saveInFlightRef.current)return;const validation=validateProductCoreForm({mode,status,value:current});setErrors(validation.errors);setAgeTagErrors(validation.ageTagErrors);setSubmitError(null);if(!validation.valid){if(validation.firstInvalid)requestAnimationFrame(()=>formRef.current?.focus(validation.firstInvalid!));return}
+  const body=mode==='create'?serializeCreateAdminProduct(current):serializeAdminProductPatch(current,baseline);if(mode==='edit'&&!Object.keys(body).length){setSubmitError('Změny se nepodařilo připravit k uložení.');return}
+  saveInFlightRef.current=true;setSubmitting(true);const controller=new AbortController();saveControllerRef.current=controller;const scrollY=window.scrollY;
+  try{const product=mode==='create'?await createAdminProduct({token:token??'',body:body as any,signal:controller.signal}):await updateAdminProduct({token:token??'',productId:productId!,body:body as any,signal:controller.signal});const next=productToCoreFormState(product);setCurrent(next);setBaseline(next);setStatus(product.status);setErrors({});setAgeTagErrors({});
+   if(mode==='create'){bypassRef.current=true;navigate(buildAdminProductDetailPath(product.id),{replace:true,state:{adminProductCoreHydration:product,adminProductCoreFeedback:'created'}})}else{setFeedback('updated');requestAnimationFrame(()=>window.scrollTo({top:scrollY}))}
+  }catch(error){if(controller.signal.aborted||(error instanceof AdminApiError&&error.kind==='cancelled'))return;if(handleRequestError(error))return;const e=error as AdminApiError;if(e.status===409&&e.code==='SLUG_ALREADY_EXISTS'){setErrors(prev=>({...prev,slug:'Tuto URL / slug už používá jiný produkt. Zvolte jiný.'}));requestAnimationFrame(()=>formRef.current?.focus('slug'))}else if(e.status===400&&e.code==='VALIDATION_ERROR'){setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.')}else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')}
+  finally{saveInFlightRef.current=false;setSubmitting(false);saveControllerRef.current=null}
+ };
+ const stay=useCallback(()=>blocker.state==='blocked'&&blocker.reset(),[blocker]);const leave=()=>blocker.state==='blocked'&&blocker.proceed();const stayRef=useRef<HTMLButtonElement>(null);
+ if(mode==='edit'&&loading)return <State role="status" aria-live="polite">Načítání produktu…</State>;
+ if(mode==='edit'&&loadError==='not-found')return <State><h2>Produkt nebyl nalezen</h2><p>Produkt už nemusí existovat nebo odkaz není platný.</p><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></State>;
+ if(mode==='edit'&&loadError==='network')return <State><h2>Produkt se nepodařilo načíst</h2><p>Zkuste to prosím znovu.</p><Actions><Button onClick={()=>setRetryRevision(x=>x+1)}>Zkusit znovu</Button><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></Actions></State>;
+ return <Page>{mode==='create'?<Guidance>Produkt se uloží jako koncept. Pro vytvoření je povinný pouze název; ostatní údaje můžete doplnit později.</Guidance>:null}{feedback?<ProductSuccessFeedback kind={feedback} onDismiss={()=>setFeedback(null)}/>:null}<ProductCoreForm ref={formRef} mode={mode} status={status} value={current} errors={errors} ageTagErrors={ageTagErrors} submitting={submitting} saveDisabled={submitting||(!dirty&&mode==='edit')} submitError={submitError} onChange={setCurrent} onSubmit={submit}/><Dialog open={blocker.state==='blocked'} title="Neuložené změny" description="Máte neuložené změny. Opravdu chcete odejít?" onEscape={stay} initialFocusRef={stayRef}><Actions><Button ref={stayRef as any} onClick={stay}>Zůstat</Button><Button variant="destructive" onClick={leave}>Odejít bez uložení</Button></Actions></Dialog></Page>
+}

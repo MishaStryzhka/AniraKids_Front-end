@@ -33,7 +33,7 @@ export function resolveAdminNavigation(pathname: string): AdminNavigationKey | n
 
 export function resolveAdminPageTitle(pathname: string) {
   if (matchPath({ path: adminRoutes.productNew, end: true }, pathname)) return 'Nový produkt';
-  if (matchPath({ path: adminRoutes.productDetail, end: true }, pathname)) return 'Detail produktu';
+  if (matchPath({ path: adminRoutes.productDetail, end: true }, pathname)) return 'Upravit produkt';
   if (matchPath({ path: adminRoutes.products, end: true }, pathname)) return 'Produkty';
   if (matchPath({ path: adminRoutes.reservationDetail, end: true }, pathname)) return 'Detail rezervace';
   if (matchPath({ path: adminRoutes.reservations, end: true }, pathname)) return 'Rezervace';
