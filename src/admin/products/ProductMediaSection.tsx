@@ -25,12 +25,14 @@ const Progress=styled.progress`inline-size:100%;block-size:8px;accent-color:${t.
 const Status=styled.div`min-block-size:20px;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};overflow-wrap:anywhere;`;
 const Empty=styled.div`display:grid;gap:${t.space[2]};padding:${t.space[6]};border:1px solid ${t.color.border.subtle};border-radius:${t.radius[2]};`;
 const OrderActions=styled(Actions)`@media(max-width:767px){display:grid;grid-template-columns:1fr;}`;
-export interface ProductMediaSectionProps{productId:string;productName:string;status?:AdminProductStatus;token:string;initialPhotos:AdminProductPhoto[];onRiskChange?(risk:boolean):void;onProductMissing?():void;onAccessError?(error:unknown):boolean;onRequestDelete?(input:{publicId:string;trigger:HTMLElement;distinctCount:number;isMain:boolean}):void}
+export interface ProductMediaSectionProps{productId:string;productName:string;status?:AdminProductStatus;token:string;initialPhotos:AdminProductPhoto[];onRiskChange?(risk:boolean):void;onProductMissing?():void;onAccessError?(error:unknown):boolean;onRequestDelete?(input:{publicId:string;trigger:HTMLElement;distinctCount:number;isMain:boolean}):void;deleteRequest?:{publicId:string;nonce:number}|null;onDeleteSettled?(input:{publicId:string;success:boolean}):void}
 export function ProductMediaSection(props:ProductMediaSectionProps){
  const c=useProductMediaController(props),inputRef=useRef<HTMLInputElement>(null),[broken,setBroken]=useState<Record<string,boolean>>({});
  const ordered=c.drafts.orderIds.map(id=>c.photos.find(p=>p.publicId===id)).filter(Boolean) as AdminProductPhoto[];
  const busy=Boolean(c.operation),disabled=c.guard!=='available'||busy;
  const selectedPreview=c.attempt?.previewUrl;
+ const handledDelete=useRef(0);
+ if(props.deleteRequest&&props.deleteRequest.nonce!==handledDelete.current){handledDelete.current=props.deleteRequest.nonce;queueMicrotask(async()=>{const before=c.photos.some(p=>p.publicId===props.deleteRequest!.publicId);await c.remove(props.deleteRequest!.publicId);const after=c.photos.some(p=>p.publicId===props.deleteRequest!.publicId);props.onDeleteSettled?.({publicId:props.deleteRequest!.publicId,success:before&&!after})})}
  return <Section aria-labelledby="product-media-title"><Divider/><HeadingRow><H2 id="product-media-title" tabIndex={-1}>Fotografie</H2><Copy>{c.photos.length} / 10 uložených</Copy></HeadingRow><Copy>Spravujte fotografie produktu a jejich pořadí. První fotografie se používá jako hlavní.</Copy>
   <Upload><input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={e=>{const f=e.currentTarget.files?.[0];if(f)c.selectFile(f);e.currentTarget.value=''}} aria-describedby="product-media-file-help"/><Button disabled={disabled||c.photos.length>=10||c.uploadPhase!=='idle'} onClick={()=>inputRef.current?.click()}>Přidat fotografii</Button><Copy id="product-media-file-help">JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
   {c.photos.length>=10?<Status>Produkt může mít maximálně 10 fotografií.</Status>:null}
