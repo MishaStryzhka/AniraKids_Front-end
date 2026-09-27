@@ -50,8 +50,21 @@ jobs:
           npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02c01-no-env.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+      - name: Prepare evidence directory
+        run: mkdir -p test-evidence/admin-fe02c01
       - name: ADMIN-FE-02C-01 Playwright
+        env:
+          ADMIN_FE02C01_EVIDENCE_DIR: test-evidence/admin-fe02c01
         run: npx playwright test .github/admin-fe02c01.spec.js --reporter=line
+      - name: Evidence manifest
+        if: always()
+        run: |
+          mkdir -p test-evidence/admin-fe02c01
+          cp /tmp/admin-fe02c01.log test-evidence/admin-fe02c01/configured-server.log || true
+          cp /tmp/admin-fe02c01-no-env.log test-evidence/admin-fe02c01/no-env-server.log || true
+          find test-results -type f -maxdepth 5 -print -exec cp --parents {} test-evidence/admin-fe02c01/ \; 2>/dev/null || true
+          find test-evidence/admin-fe02c01 -type f -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
+          cat test-evidence/admin-fe02c01/MANIFEST.txt
       - name: ADMIN-FE-02B regression
         run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
       - name: ADMIN-FE-02A regression
@@ -67,8 +80,4 @@ jobs:
         with:
           name: admin-fe02c01-${{ github.sha }}
           if-no-files-found: ignore
-          path: |
-            test-results/
-            playwright-report/
-            /tmp/admin-fe02c01.log
-            /tmp/admin-fe02c01-no-env.log
+          path: test-evidence/admin-fe02c01/
