@@ -62,17 +62,28 @@ jobs:
           mkdir -p test-evidence/admin-fe02c01
           cp /tmp/admin-fe02c01.log test-evidence/admin-fe02c01/configured-server.log || true
           cp /tmp/admin-fe02c01-no-env.log test-evidence/admin-fe02c01/no-env-server.log || true
-          find test-results -type f -maxdepth 5 -print -exec cp --parents {} test-evidence/admin-fe02c01/ \; 2>/dev/null || true
+          find test-results -type f -maxdepth 5 -print | while read -r file; do base=$(basename "$file"); cp "$file" "test-evidence/admin-fe02c01/diagnostic-$base"; done 2>/dev/null || true
           find test-evidence/admin-fe02c01 -type f -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
           cat test-evidence/admin-fe02c01/MANIFEST.txt
       - name: ADMIN-FE-02B regression
         run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
+      - name: Capture 02B failure evidence
+        if: failure()
+        run: find test-results -type f -maxdepth 5 | while read -r file; do cp "$file" "test-evidence/admin-fe02c01/02b-$(basename "$file")"; done 2>/dev/null || true
       - name: ADMIN-FE-02A regression
         run: npx playwright test .github/admin-fe02a.spec.js --reporter=line
+      - name: Capture 02A failure evidence
+        if: failure()
+        run: find test-results -type f -maxdepth 5 | while read -r file; do cp "$file" "test-evidence/admin-fe02c01/02a-$(basename "$file")"; done 2>/dev/null || true
       - name: ADMIN-FE-01 regression
         run: npx playwright test .github/admin-fe01.spec.js --reporter=line
       - name: DESIGN-02 regression
         run: npx playwright test .github/design02f.spec.js --reporter=line
+      - name: Final evidence manifest
+        if: always()
+        run: |
+          find test-evidence/admin-fe02c01 -type f -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
+          cat test-evidence/admin-fe02c01/MANIFEST.txt
 
       - name: Upload verification artifacts
         if: always()
