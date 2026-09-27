@@ -1,3 +1,4 @@
+jest.mock('./errors',()=>({normalizeAdminApiError:(e:unknown)=>e}));
 jest.mock('./client',()=>({adminApiClient:{post:jest.fn(),patch:jest.fn(),delete:jest.fn()},buildAdminRequestConfig:jest.fn(()=>({baseURL:'https://admin.test/api/v2',headers:{Authorization:'Bearer test'}}))}));
 import {adminApiClient} from './client';import {completeProductPhoto,deleteProductPhoto,productMediaCandidate,reorderProductPhotos,signProductPhoto,updateProductPhotoAlt} from './productMedia';
 const product={id:'p',name:'N',slug:'n',occasion:[],ageTags:[],rentalEnabled:false,saleEnabled:false,defaultDeposit:0,seo:{noIndex:false},photos:[],status:'draft',createdAt:'',updatedAt:''};
