@@ -46,7 +46,7 @@ export function AdminProductCorePage({mode}:{mode:'create'|'edit'}){
   }catch(error){if(controller.signal.aborted||(error instanceof AdminApiError&&error.kind==='cancelled'))return;if(handleRequestError(error))return;const e=error as AdminApiError;if(e.status===409&&e.code==='SLUG_ALREADY_EXISTS'){setErrors(prev=>({...prev,slug:'Tuto URL / slug už používá jiný produkt. Zvolte jiný.'}));requestAnimationFrame(()=>formRef.current?.focus('slug'))}else if(e.status===400&&e.code==='VALIDATION_ERROR'){setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.')}else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')}
   finally{saveInFlightRef.current=false;setSubmitting(false);saveControllerRef.current=null}
  };
- const stay=useCallback(()=>blocker.state==='blocked'&&blocker.reset(),[blocker]);const leave=()=>blocker.state==='blocked'&&blocker.proceed();const stayRef=useRef<HTMLButtonElement>(null);
+ const stay=useCallback(()=>blocker.state==='blocked'&&blocker.reset(),[blocker]);const leave=()=>blocker.state==='blocked'&&blocker.proceed();
  if(mode==='edit'&&loading)return <State role="status" aria-live="polite">Načítání produktu…</State>;
  if(mode==='edit'&&loadError==='not-found')return <State><h2>Produkt nebyl nalezen</h2><p>Produkt už nemusí existovat nebo odkaz není platný.</p><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></State>;
  if(mode==='edit'&&loadError==='network')return <State><h2>Produkt se nepodařilo načíst</h2><p>Zkuste to prosím znovu.</p><Actions><Button onClick={()=>setRetryRevision(x=>x+1)}>Zkusit znovu</Button><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></Actions></State>;
