@@ -9,6 +9,7 @@ jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
 const mockHandleRequestError=jest.fn();
 jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockHandleRequestError})}));
 jest.mock('../api/products',()=>({createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}));
+jest.mock('../api/productMedia',()=>({completeProductPhoto:jest.fn(),deleteProductPhoto:jest.fn(),productMediaCandidate:jest.fn(),reorderProductPhotos:jest.fn(),signProductPhoto:jest.fn(),updateProductPhotoAlt:jest.fn()}));
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const getMock=getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
