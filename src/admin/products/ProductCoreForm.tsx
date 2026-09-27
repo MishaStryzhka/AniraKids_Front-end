@@ -1,4 +1,4 @@
-import { forwardRef,useEffect,useImperativeHandle,useRef,type FormEvent,type ReactNode } from 'react';
+import { forwardRef,useEffect,useImperativeHandle,useRef,type FormEvent } from 'react';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
 import { Input } from '../../design-system/components/Input';
