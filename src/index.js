@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import App from './components/App';
-import { BrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './redux/store';
@@ -66,6 +66,13 @@ i18n.use(LanguageDetector).init({
   },
 });
 
+const router = createBrowserRouter([
+  {
+    path: '*',
+    element: <App />,
+  },
+]);
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_DI}>
@@ -73,11 +80,9 @@ root.render(
       <I18nextProvider i18n={i18n}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <BrowserRouter>
-              <React.Suspense fallback="loading...">
-                <App />
-              </React.Suspense>
-            </BrowserRouter>
+            <React.Suspense fallback="loading...">
+              <RouterProvider router={router} />
+            </React.Suspense>
           </PersistGate>
         </Provider>
       </I18nextProvider>
