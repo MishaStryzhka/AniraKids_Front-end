@@ -75,8 +75,7 @@ async function startConfirmedFailure() {
 test('same-ID COMPLETE retry never signs or uploads twice and applies saved photo once', async () => {
   const hook = await startConfirmedFailure();
   expect(hook.result.current.uploadPhase).toBe('provider-confirmed-unattached');
-  const attempt = hook.result.current.attempt;
-  expect(attempt).toMatchObject({candidate: 'products/p1/x', providerPublicId: 'products/p1/x', filename: 'x.jpg'});
+  expect(hook.result.current.attempt).toMatchObject({candidate: 'products/p1/x', providerPublicId: 'products/p1/x', filename: 'x.jpg'});
   complete.mockResolvedValueOnce({product: product('p1', [photo('products/p1/x')])});
   await act(async () => {await hook.result.current.recover();});
   expect(sign).toHaveBeenCalledTimes(1);
@@ -145,16 +144,12 @@ test.each(['success', 'failure'] as const)('delayed A refresh %s cannot replace 
   act(() => {request = hook.result.current.refresh();});
   const signal = detail.mock.calls[0][0].signal!;
   hook.rerender(props('B', [photo('b'), photo('c')]));
-  act(() => {
-    hook.result.current.startAlt('b');
-    hook.result.current.setDrafts(d => ({...d, altById: {...d.altById, b: 'B draft'}}));
-    hook.result.current.selectFile(new File(['bad'], 'bad.txt', {type: 'text/plain'}));
-  });
-  const before = {
-    photos: hook.result.current.photos, drafts: hook.result.current.drafts,
+  act(() => hook.result.current.startAlt('b'));
+  act(() => hook.result.current.setDrafts(d => ({...d, altById: {...d.altById, b: 'B draft'}})));
+  act(() => hook.result.current.selectFile(new File(['bad'], 'bad.txt', {type: 'text/plain'})));
+  const before = {photos: hook.result.current.photos, drafts: hook.result.current.drafts,
     feedback: hook.result.current.feedback, guard: hook.result.current.guard,
-    operation: hook.result.current.operation, editor: hook.result.current.editingAlt,
-  };
+    operation: hook.result.current.operation, editor: hook.result.current.editingAlt};
   expect(before.photos.map(p => p.publicId)).toEqual(['b', 'c']);
   expect(before.drafts.altById.b).toBe('B draft');
   expect(signal.aborted).toBe(true);
@@ -200,11 +195,12 @@ test.each(['success', 'failure'] as const)('delayed A mutation %s cannot overwri
   expect(hook.result.current.operation).toBeNull();
 });
 
-test('unmount aborts write and refresh signals and suppresses late access callbacks', async () => {
+test('unmount aborts the operation signal and suppresses late access callbacks', async () => {
   const pending = deferred<Awaited<ReturnType<typeof deleteProductPhoto>>>();
   const access = jest.fn(() => false);
+  const input = {...props('A', [photo('a')]), onAccessError: access};
   remove.mockReturnValueOnce(pending.promise);
-  const hook = renderHook(() => useProductMediaController({...props('A', [photo('a')]), onAccessError: access}));
+  const hook = renderHook(() => useProductMediaController(input));
   let request!: ReturnType<typeof hook.result.current.remove>;
   act(() => {request = hook.result.current.remove('a');});
   const signal = remove.mock.calls[0][0].signal!;
