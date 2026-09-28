@@ -103,6 +103,6 @@ test('dirty Core survives upload ALT and delete media mutations without Core PAT
 });
 test('dirty Core survives successful upload and upload uses media pipeline only',async()=>{
  const withPhotos={...product,photos:[]};getMock.mockResolvedValue({product:withPhotos,variants:[]});signMock.mockResolvedValue({upload:{cloudName:'c',apiKey:'k',signature:'s',resourceType:'image',params:{timestamp:1,folder:'products/p1',public_id:'x',overwrite:false,allowed_formats:'jpg'}}} as any);providerMock.mockResolvedValue({publicId:'products/p1/x'});completeMock.mockResolvedValue({product:{...withPhotos,photos:[{publicId:'products/p1/x',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'X'}]}} as any);
- const {container}=render(<></>);renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+ renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
  const input=document.querySelector('input[type="file"]') as HTMLInputElement;fireEvent.change(input,{target:{files:[new File(['x'],'x.jpg',{type:'image/jpeg'})]}});fireEvent.click(screen.getByRole('button',{name:'Nahrát fotografii'}));await waitFor(()=>expect(completeMock).toHaveBeenCalled());expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
 });
