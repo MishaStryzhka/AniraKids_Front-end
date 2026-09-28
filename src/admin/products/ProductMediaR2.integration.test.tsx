@@ -7,7 +7,7 @@ import {uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
 import {ProductMediaSection} from './ProductMediaSection';
 
-// Real page, controller, candidate helper and error classes. No real network operation is allowed.
+// Real page, controller, candidate helper and errors; all I/O is mocked.
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}
   return {__esModule: true, default: {isCancel: () => false}, AxiosError: MockAxiosError};
@@ -57,7 +57,7 @@ async function open(p = product) {
   const router = createMemoryRouter([
     {path: '/admin/produkty/:productId', element: <AdminProductCorePage mode="edit"/>},
     {path: '/admin/produkty', element: <div>List</div>},
-  ], {initialEntries: ['/admin/produkty/p1']});
+  ], {initialEntries: ['/admin/produkty', '/admin/produkty/p1'], initialIndex: 1});
   const view = render(<RouterProvider router={router}/>);
   await screen.findByDisplayValue('Sofia');
   return {...view, router};
@@ -141,21 +141,21 @@ test('confirmed provider identity and category survive a failed 502 COMPLETE ret
   expect(provider).toHaveBeenCalledTimes(1);
 });
 
-test.each([
-  ['PRODUCT_NOT_FOUND', 404], ['MEDIA_CONFIGURATION_ERROR', 503],
-] as const)('initial COMPLETE %s retains attempt but disables guarded recovery actions', async (code, status) => {
-  await open({...product, photos: []});
-  sign.mockResolvedValueOnce({upload: descriptor});
-  provider.mockResolvedValueOnce({publicId: 'products/p1/x'});
-  complete.mockRejectedValueOnce(error(code, status));
-  startUpload();
-  const retry = await screen.findByRole('button', {name: 'Zkusit připojit znovu'});
-  await waitFor(() => expect(retry).toBeDisabled());
-  expect(screen.getByText('x.jpg')).toBeInTheDocument();
-  expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toBeDisabled();
-  fireEvent.click(retry);
-  expect(complete).toHaveBeenCalledTimes(1);
-});
+test.each([['PRODUCT_NOT_FOUND', 404], ['MEDIA_CONFIGURATION_ERROR', 503]] as const)(
+  'initial COMPLETE %s retains attempt but disables guarded recovery actions', async (code, status) => {
+    await open({...product, photos: []});
+    sign.mockResolvedValueOnce({upload: descriptor});
+    provider.mockResolvedValueOnce({publicId: 'products/p1/x'});
+    complete.mockRejectedValueOnce(error(code, status));
+    startUpload();
+    const retry = await screen.findByRole('button', {name: 'Zkusit připojit znovu'});
+    await waitFor(() => expect(retry).toBeDisabled());
+    expect(screen.getByText('x.jpg')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toBeDisabled();
+    fireEvent.click(retry);
+    expect(complete).toHaveBeenCalledTimes(1);
+  },
+);
 
 test.each([
   [401, 'ADMIN_UNAUTHORIZED', 'unauthorized'], [403, 'ADMIN_FORBIDDEN', 'forbidden'],
@@ -232,9 +232,36 @@ test('unmounted real media section never calls a stale delete-settlement or sche
   const signal = remove.mock.calls[0][0].signal!;
   view.unmount();
   expect(signal.aborted).toBe(true);
-  await act(async () => {
-    pending.resolve({product: {...product, id: 'A', photos: []}});
-  });
-  act(() => {for (const callback of frames.values()) callback(0); frames.clear();});
+  await act(async () => {pending.resolve({product: {...product, id: 'A', photos: []}});});
+  act(() => {Array.from(frames.values()).forEach(callback => callback(0)); frames.clear();});
   expect(settled).not.toHaveBeenCalled();
+});
+
+test('delete plus browser Back keeps one dialog and safely hands pending navigation to Leave', async () => {
+  const {router} = await open();
+  fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
+  fireEvent.click(screen.getAllByRole('button', {name: 'Odebrat fotografii'})[0]);
+  await act(async () => {await router.navigate(-1);});
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.getByRole('dialog')).toHaveTextContent('Odebrat fotografii?');
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Zrušit'}));
+  await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent('Neuložené nebo nedokončené změny'));
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.getByRole('button', {name: 'Zůstat'})).toHaveFocus();
+  fireEvent.click(screen.getByRole('button', {name: 'Zůstat'}));
+  expect(router.state.location.pathname).toBe('/admin/produkty/p1');
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(remove).not.toHaveBeenCalled();
+});
+
+test('pending Back proceeds once when committed deletion resolves the last dirty media order', async () => {
+  const {router} = await open();
+  fireEvent.click(screen.getAllByRole('button', {name: 'Posunout později'})[0]);
+  remove.mockResolvedValueOnce({product: {...product, photos: [photo('b')]}});
+  fireEvent.click(within(media()).getAllByRole('button', {name: 'Odebrat fotografii'})[1]);
+  await act(async () => {await router.navigate(-1);});
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Odebrat fotografii'}));
+  await waitFor(() => expect(router.state.location.pathname).toBe('/admin/produkty'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(remove).toHaveBeenCalledTimes(1);
 });

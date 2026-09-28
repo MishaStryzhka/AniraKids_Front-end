@@ -1,5 +1,5 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {useBeforeUnload,useBlocker,useLocation,useNavigate,useNavigationType,useParams} from 'react-router-dom';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useBeforeUnload, useBlocker, useLocation, useNavigate, useNavigationType, useParams} from 'react-router-dom';
 import styled from 'styled-components';
 import {X} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
@@ -9,52 +9,280 @@ import {Dialog} from '../../design-system/components/Dialog';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import {useAuth} from '../../hooks/useAuth';
 import {AdminApiError} from '../api/errors';
-import {createAdminProduct,getAdminProductDetail,updateAdminProduct,type AdminProduct,type AdminProductStatus} from '../api/products';
+import {createAdminProduct, getAdminProductDetail, updateAdminProduct, type AdminProduct, type AdminProductStatus} from '../api/products';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
-import {adminRoutes,buildAdminProductDetailPath} from '../navigation/adminRoutes';
-import {ProductCoreForm,type ProductCoreFormHandle} from './ProductCoreForm';
-import {ProductMediaSection} from './ProductMediaSection';
-import {coreFormStatesEquivalent,initialProductCoreFormState,productToCoreFormState,serializeAdminProductPatch,serializeCreateAdminProduct,type ProductCoreFormState} from './productCoreFormModel';
-import {validateProductCoreForm,type ProductCoreErrors,type ProductCoreField,type ProductCoreFocusTarget} from './productCoreValidation';
-const Page=styled.div`inline-size:100%;max-inline-size:840px;display:grid;gap:${t.space[4]};`;
-const Guidance=styled.p`margin:0;color:${t.color.text.secondary};`;
-const State=styled.section`max-inline-size:640px;display:grid;gap:${t.space[3]};`;
-const Actions=styled.div`display:flex;flex-wrap:wrap;gap:${t.space[3]};`;
-const Feedback=styled.div`display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};padding:${t.space[3]};border:1px solid ${t.color.status.success.fg};border-radius:${t.radius[2]};background:${t.color.status.success.bg};`;
-const backendFieldMap:Record<string,ProductCoreField>={name:'name',slug:'slug',description:'description',category:'category',gender:'gender',color:'color',ageTags:'ageTags',brand:'brand',familyLookGroup:'familyLookGroup','rentalPrices.studio':'rentalStudioPrice','rentalPrices.external':'rentalExternalPrice',defaultSalePrice:'defaultSalePrice',defaultDeposit:'defaultDeposit','seo.title':'seoTitle','seo.description':'seoDescription'};
-const backendFieldFallback:Partial<Record<ProductCoreField,string>>={name:'Zkontrolujte název.',slug:'Zkontrolujte URL / slug.',description:'Zkontrolujte popis.',category:'Zkontrolujte kategorii.',gender:'Zkontrolujte určení.',color:'Zkontrolujte barvu.',ageTags:'Zkontrolujte věková označení.',brand:'Zkontrolujte značku.',familyLookGroup:'Zkontrolujte rodinný look.',rentalStudioPrice:'Zkontrolujte cenu ve studiu.',rentalExternalPrice:'Zkontrolujte cenu mimo studio.',defaultSalePrice:'Zkontrolujte prodejní cenu.',defaultDeposit:'Zkontrolujte zálohu.',seoTitle:'Zkontrolujte SEO titulek.',seoDescription:'Zkontrolujte SEO popis.'};
-type FeedbackKind='created'|'updated';
-function ProductSuccessFeedback({kind,onDismiss}:{kind:FeedbackKind;onDismiss():void}){return <Feedback aria-live="polite"><span>{kind==='created'?'Produkt byl vytvořen.':'Změny byly uloženy.'}</span><IconButton aria-label="Zavřít potvrzení" icon={<X aria-hidden="true"/>} onClick={onDismiss}/></Feedback>}
-function isProduct(value:unknown):value is AdminProduct{return Boolean(value&&typeof value==='object'&&typeof (value as any).id==='string'&&typeof (value as any).name==='string')}
-export function AdminProductCorePage({mode}:{mode:'create'|'edit'}){
- const {productId}=useParams();const {token}=useAuth();const navigate=useNavigate();const location=useLocation();const navigationType=useNavigationType();const {handleRequestError}=useAdminAccess();
- const hydrationState=location.state as {adminProductCoreHydration?:unknown;adminProductCoreFeedback?:unknown}|null;
- const validHydration=mode==='edit'&&navigationType==='REPLACE'&&hydrationState?.adminProductCoreFeedback==='created'&&isProduct(hydrationState.adminProductCoreHydration)&&hydrationState.adminProductCoreHydration.id===productId?hydrationState.adminProductCoreHydration:null;
- const hydrated=validHydration?productToCoreFormState(validHydration):null;
- const [current,setCurrent]=useState<ProductCoreFormState>(()=>hydrated??initialProductCoreFormState);const [baseline,setBaseline]=useState<ProductCoreFormState>(()=>hydrated??initialProductCoreFormState);
- const [status,setStatus]=useState<AdminProductStatus|undefined>(()=>validHydration?.status);const [mediaPhotos,setMediaPhotos]=useState(()=>validHydration?.photos??[]);const [mediaProductName,setMediaProductName]=useState(()=>validHydration?.name??'');const [mediaRisk,setMediaRisk]=useState(false);const [loading,setLoading]=useState(mode==='edit'&&!validHydration);const [loadError,setLoadError]=useState<'not-found'|'network'|null>(null);const [retryRevision,setRetryRevision]=useState(0);
- const [dialogState,setDialogState]=useState<{kind:'none'}|{kind:'delete';publicId:string;trigger:HTMLElement;distinctCount:number;isMain:boolean}>({kind:'none'});const [deleteRequest,setDeleteRequest]=useState<{publicId:string;nonce:number}|null>(null);const deleteNonce=useRef(0),deleteSuccessFocusRef=useRef<HTMLElement|null>(null);
- const [errors,setErrors]=useState<ProductCoreErrors>({});const [ageTagErrors,setAgeTagErrors]=useState<Record<number,string>>({});const [submitError,setSubmitError]=useState<string|null>(null);const [submitting,setSubmitting]=useState(false);const [feedback,setFeedback]=useState<FeedbackKind|null>(validHydration?'created':null);
- const formRef=useRef<ProductCoreFormHandle>(null),saveInFlightRef=useRef(false),saveControllerRef=useRef<AbortController|null>(null),requestSequence=useRef(0),bypassRef=useRef(false);
- const dirty=useMemo(()=>!coreFormStatesEquivalent(current,baseline),[current,baseline]);
- const blocker=useBlocker(()=>((dirty||mediaRisk)&&!bypassRef.current));
- useEffect(()=>{if(blocker.state==='blocked'&&dialogState.kind==='none')setDialogState({kind:'none'})},[blocker.state,dialogState.kind]);
- useBeforeUnload(useCallback((event)=>{if(!dirty&&!mediaRisk)return;event.preventDefault();event.returnValue='';},[dirty,mediaRisk]));
- useEffect(()=>{if(!feedback)return;const id=window.setTimeout(()=>setFeedback(null),4000);return()=>window.clearTimeout(id)},[feedback]);
- useEffect(()=>()=>saveControllerRef.current?.abort(),[]);
- useEffect(()=>{if(mode==='edit'&&validHydration)bypassRef.current=false},[mode,validHydration]);
- useEffect(()=>{if(mode!=='edit'||validHydration)return;if(!productId){setLoading(false);setLoadError('not-found');return}const controller=new AbortController();const sequence=++requestSequence.current;setLoading(true);setLoadError(null);getAdminProductDetail({token:token??'',productId,signal:controller.signal}).then(response=>{const product=response.product;if(controller.signal.aborted||sequence!==requestSequence.current||product.id!==productId)return;const next=productToCoreFormState(product);setCurrent(next);setBaseline(next);setStatus(product.status);setMediaPhotos(product.photos);setMediaProductName(product.name);setLoading(false)}).catch(error=>{if(controller.signal.aborted||(error instanceof AdminApiError&&error.kind==='cancelled'))return;if(sequence!==requestSequence.current)return;if(handleRequestError(error))return;setLoading(false);setLoadError(error instanceof AdminApiError&&(error.status===404||(error.status===400&&error.code==='INVALID_ID'))?'not-found':'network')});return()=>controller.abort()},[mode,productId,retryRevision,token,handleRequestError,validHydration]);
- const submit=async()=>{if(saveInFlightRef.current)return;const validation=validateProductCoreForm({mode,status,value:current});setErrors(validation.errors);setAgeTagErrors(validation.ageTagErrors);setSubmitError(null);if(!validation.valid){if(validation.firstInvalid)requestAnimationFrame(()=>formRef.current?.focus(validation.firstInvalid!));return}
-  const body=mode==='create'?serializeCreateAdminProduct(current):serializeAdminProductPatch(current,baseline);if(mode==='edit'&&!Object.keys(body).length){setSubmitError('Změny se nepodařilo připravit k uložení.');return}
-  saveInFlightRef.current=true;setSubmitting(true);const controller=new AbortController();saveControllerRef.current=controller;const scrollY=window.scrollY;
-  try{const product=mode==='create'?await createAdminProduct({token:token??'',body:body as any,signal:controller.signal}):await updateAdminProduct({token:token??'',productId:productId!,body:body as any,signal:controller.signal});const next=productToCoreFormState(product);setCurrent(next);setBaseline(next);setStatus(product.status);setMediaProductName(product.name);setErrors({});setAgeTagErrors({});
-   if(mode==='create'){setFeedback('created');bypassRef.current=true;navigate(buildAdminProductDetailPath(product.id),{replace:true,state:{adminProductCoreHydration:product,adminProductCoreFeedback:'created'}})}else{setFeedback('updated');requestAnimationFrame(()=>window.scrollTo({top:scrollY}))}
-  }catch(error){if(controller.signal.aborted||(error instanceof AdminApiError&&error.kind==='cancelled'))return;if(handleRequestError(error))return;const e=error as AdminApiError;if(e.status===409&&e.code==='SLUG_ALREADY_EXISTS'){setErrors(prev=>({...prev,slug:'Tuto URL / slug už používá jiný produkt. Zvolte jiný.'}));requestAnimationFrame(()=>formRef.current?.focus('slug'))}else if(e.status===400&&e.code==='VALIDATION_ERROR'){const path=e.details?.find(detail=>backendFieldMap[detail]);if(path){const field=backendFieldMap[path];const local=validateProductCoreForm({mode,status,value:current});const message=local.errors[field]??backendFieldFallback[field]??'Zkontrolujte tuto hodnotu.';setErrors(prev=>({...prev,[field]:message}));const target:ProductCoreFocusTarget=field==='ageTags'&&current.ageTags.length?{field:'ageTag',index:0}:field;requestAnimationFrame(()=>formRef.current?.focus(target))}else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.')}else if(mode==='edit'&&e.status===404){setSubmitError('Produkt už nebyl nalezen. Vaše změny zůstaly zachované.')}else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')}
-  finally{saveInFlightRef.current=false;setSubmitting(false);saveControllerRef.current=null}
- };
- const stay=useCallback(()=>{setDialogState({kind:'none'});if(blocker.state==='blocked')blocker.reset()},[blocker]);const leave=()=>{setDialogState({kind:'none'});if(blocker.state==='blocked')blocker.proceed()};
- if(mode==='edit'&&loading)return <State role="status" aria-live="polite">Načítání produktu…</State>;
- if(mode==='edit'&&loadError==='not-found')return <State><h2>Produkt nebyl nalezen</h2><p>Produkt už nemusí existovat nebo odkaz není platný.</p><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></State>;
- if(mode==='edit'&&loadError==='network')return <State><h2>Produkt se nepodařilo načíst</h2><p>Zkuste to prosím znovu.</p><Actions><Button onClick={()=>setRetryRevision(x=>x+1)}>Zkusit znovu</Button><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></Actions></State>;
- return <Page>{mode==='create'?<Guidance>Produkt se uloží jako koncept. Pro vytvoření je povinný pouze název; ostatní údaje můžete doplnit později.</Guidance>:null}{feedback?<ProductSuccessFeedback kind={feedback} onDismiss={()=>setFeedback(null)}/>:null}<ProductCoreForm ref={formRef} mode={mode} status={status} value={current} errors={errors} ageTagErrors={ageTagErrors} submitting={submitting} saveDisabled={submitting||(!dirty&&mode==='edit')} submitError={submitError} onChange={setCurrent} onSubmit={submit}/>{mode==='edit'&&productId?<ProductMediaSection productId={productId} productName={mediaProductName||current.name} status={status} token={token??''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onAccessError={handleRequestError} onRequestDelete={request=>{deleteSuccessFocusRef.current=null;setDialogState({kind:'delete',...request})}} deleteRequest={deleteRequest} onDeleteSettled={({success,focusTarget})=>{if(success)deleteSuccessFocusRef.current=focusTarget??null;setDeleteRequest(null);setDialogState({kind:'none'})}}/>:null}<Dialog open={dialogState.kind==='delete'||blocker.state==='blocked'} title={dialogState.kind==='delete'?'Odebrat fotografii?':mode==='create'?'Neuložené změny':'Neuložené nebo nedokončené změny'} description={dialogState.kind==='delete'?(dialogState.distinctCount===1&&status==='active'?'Aktivní produkt musí mít alespoň jednu fotografii.':dialogState.isMain&&dialogState.distinctCount>1?'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět. Tato fotografie je nyní hlavní. Po odebrání se hlavní fotografií stane první zbývající fotografie.':dialogState.distinctCount===1?'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět. Je to jediná fotografie produktu. Po odebrání nebude mít produkt žádné fotografie.':'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět.'):(mode==='create'?'Máte neuložené změny. Opravdu chcete odejít?':'Máte neuložené změny nebo nedokončenou práci s fotografiemi. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.')} onEscape={()=>dialogState.kind==='delete'?setDialogState({kind:'none'}):stay()} resolveRestoreFocus={previous=>{if(dialogState.kind==='delete'){const successTarget=deleteSuccessFocusRef.current;deleteSuccessFocusRef.current=null;return successTarget??dialogState.trigger}return previous}}><Actions><Button onClick={()=>dialogState.kind==='delete'?setDialogState({kind:'none'}):stay()}>{dialogState.kind==='delete'?'Zrušit':'Zůstat'}</Button>{dialogState.kind==='delete'?(dialogState.distinctCount===1&&status==='active'?null:<Button variant="destructive" onClick={()=>{const request=dialogState;setDeleteRequest({publicId:request.publicId,nonce:++deleteNonce.current})}}>Odebrat fotografii</Button>):<Button variant="destructive" onClick={leave}>{mode==='create'?'Odejít bez uložení':'Odejít'}</Button>}</Actions></Dialog></Page>
+import {adminRoutes, buildAdminProductDetailPath} from '../navigation/adminRoutes';
+import {ProductCoreForm, type ProductCoreFormHandle} from './ProductCoreForm';
+import {ProductMediaSection, type MediaDeleteIntent, type MediaDeleteSettlement} from './ProductMediaSection';
+import {coreFormStatesEquivalent, initialProductCoreFormState, productToCoreFormState, serializeAdminProductPatch, serializeCreateAdminProduct, type ProductCoreFormState} from './productCoreFormModel';
+import {validateProductCoreForm, type ProductCoreErrors, type ProductCoreField, type ProductCoreFocusTarget} from './productCoreValidation';
+
+const Page = styled.div`inline-size:100%;max-inline-size:840px;display:grid;gap:${t.space[4]};`;
+const Guidance = styled.p`margin:0;color:${t.color.text.secondary};`;
+const State = styled.section`max-inline-size:640px;display:grid;gap:${t.space[3]};`;
+const Actions = styled.div`display:flex;flex-wrap:wrap;gap:${t.space[3]};`;
+const Feedback = styled.div`
+  display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};padding:${t.space[3]};
+  border:1px solid ${t.color.status.success.fg};border-radius:${t.radius[2]};background:${t.color.status.success.bg};
+`;
+const backendFieldMap: Record<string, ProductCoreField> = {
+  name:'name',slug:'slug',description:'description',category:'category',gender:'gender',color:'color',ageTags:'ageTags',
+  brand:'brand',familyLookGroup:'familyLookGroup','rentalPrices.studio':'rentalStudioPrice','rentalPrices.external':'rentalExternalPrice',
+  defaultSalePrice:'defaultSalePrice',defaultDeposit:'defaultDeposit','seo.title':'seoTitle','seo.description':'seoDescription',
+};
+const backendFieldFallback: Partial<Record<ProductCoreField, string>> = {
+  name:'Zkontrolujte název.',slug:'Zkontrolujte URL / slug.',description:'Zkontrolujte popis.',category:'Zkontrolujte kategorii.',
+  gender:'Zkontrolujte určení.',color:'Zkontrolujte barvu.',ageTags:'Zkontrolujte věková označení.',brand:'Zkontrolujte značku.',
+  familyLookGroup:'Zkontrolujte rodinný look.',rentalStudioPrice:'Zkontrolujte cenu ve studiu.',rentalExternalPrice:'Zkontrolujte cenu mimo studio.',
+  defaultSalePrice:'Zkontrolujte prodejní cenu.',defaultDeposit:'Zkontrolujte zálohu.',seoTitle:'Zkontrolujte SEO titulek.',seoDescription:'Zkontrolujte SEO popis.',
+};
+type FeedbackKind = 'created' | 'updated';
+type ActiveDialog = {kind: 'none'} | {kind: 'leave'} | ({kind: 'delete'} & MediaDeleteIntent);
+function ProductSuccessFeedback({kind, onDismiss}: {kind: FeedbackKind; onDismiss(): void}) {
+  return <Feedback aria-live="polite"><span>{kind === 'created' ? 'Produkt byl vytvořen.' : 'Změny byly uloženy.'}</span>
+    <IconButton aria-label="Zavřít potvrzení" icon={<X aria-hidden="true"/>} onClick={onDismiss}/></Feedback>;
+}
+function isProduct(value: unknown): value is AdminProduct {
+  return Boolean(value && typeof value === 'object' && typeof (value as AdminProduct).id === 'string' && typeof (value as AdminProduct).name === 'string');
+}
+
+export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
+  const {productId} = useParams();
+  const {token} = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const {handleRequestError} = useAdminAccess();
+  const hydrationState = location.state as {adminProductCoreHydration?: unknown; adminProductCoreFeedback?: unknown} | null;
+  const validHydration = mode === 'edit' && navigationType === 'REPLACE' && hydrationState?.adminProductCoreFeedback === 'created'
+    && isProduct(hydrationState.adminProductCoreHydration) && hydrationState.adminProductCoreHydration.id === productId
+    ? hydrationState.adminProductCoreHydration : null;
+  const hydrated = validHydration ? productToCoreFormState(validHydration) : null;
+  const [current, setCurrent] = useState<ProductCoreFormState>(() => hydrated ?? initialProductCoreFormState);
+  const [baseline, setBaseline] = useState<ProductCoreFormState>(() => hydrated ?? initialProductCoreFormState);
+  const [status, setStatus] = useState<AdminProductStatus | undefined>(() => validHydration?.status);
+  const [mediaPhotos, setMediaPhotos] = useState(() => validHydration?.photos ?? []);
+  const [mediaProductName, setMediaProductName] = useState(() => validHydration?.name ?? '');
+  const [mediaRisk, setMediaRisk] = useState(false);
+  const [loading, setLoading] = useState(mode === 'edit' && !validHydration);
+  const [loadError, setLoadError] = useState<'not-found' | 'network' | null>(null);
+  const [retryRevision, setRetryRevision] = useState(0);
+  const [errors, setErrors] = useState<ProductCoreErrors>({});
+  const [ageTagErrors, setAgeTagErrors] = useState<Record<number, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackKind | null>(validHydration ? 'created' : null);
+  const formRef = useRef<ProductCoreFormHandle>(null);
+  const saveInFlightRef = useRef(false);
+  const saveControllerRef = useRef<AbortController | null>(null);
+  const requestSequence = useRef(0);
+  const bypassRef = useRef(false);
+  const dirty = useMemo(() => !coreFormStatesEquivalent(current, baseline), [current, baseline]);
+  const hasRisk = dirty || mediaRisk;
+  const blocker = useBlocker(() => hasRisk && !bypassRef.current);
+
+  // One page-owned dialog. A pending browser navigation waits until deletion is resolved.
+  const [dialogState, setDialogState] = useState<ActiveDialog>({kind: 'none'});
+  const [deleteRequest, setDeleteRequest] = useState<{publicId: string; nonce: number} | null>(null);
+  const deleteNonce = useRef(0);
+  const pendingDelete = useRef<number | null>(null);
+  const restoreTarget = useRef<(() => HTMLElement | null) | null>(null);
+  const safeDialogButton = useRef<HTMLButtonElement>(null);
+  const previousDialogKind = useRef<ActiveDialog['kind']>('none');
+  const proceededLocation = useRef<string | null>(null);
+  const scopeKey = `${mode}:${productId ?? ''}:${location.key}`;
+  const scope = useRef({key: scopeKey, alive: true});
+  scope.current.key = scopeKey;
+  useEffect(() => {
+    const lifecycle = scope.current;
+    lifecycle.alive = true;
+    return () => {lifecycle.alive = false; pendingDelete.current = null; restoreTarget.current = null;};
+  }, [scopeKey]);
+  useEffect(() => {
+    if (blocker.state !== 'blocked') {proceededLocation.current = null; return;}
+    if (dialogState.kind === 'delete') return;
+    if (!hasRisk) {
+      if (proceededLocation.current !== blocker.location.key) {
+        proceededLocation.current = blocker.location.key;
+        restoreTarget.current = null;
+        setDialogState({kind: 'none'});
+        blocker.proceed();
+      }
+    } else if (dialogState.kind !== 'leave') setDialogState({kind: 'leave'});
+  }, [blocker, dialogState.kind, hasRisk]);
+  useEffect(() => {
+    if (previousDialogKind.current === 'delete' && dialogState.kind === 'leave') {
+      // The same modal remains open; the newly safe action, not the replaced destructive action, owns focus.
+      safeDialogButton.current?.focus();
+    }
+    previousDialogKind.current = dialogState.kind;
+  }, [dialogState.kind]);
+
+  useBeforeUnload(useCallback(event => {
+    if (!dirty && !mediaRisk) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }, [dirty, mediaRisk]));
+  useEffect(() => {
+    if (!feedback) return;
+    const id = window.setTimeout(() => setFeedback(null), 4000);
+    return () => window.clearTimeout(id);
+  }, [feedback]);
+  useEffect(() => () => saveControllerRef.current?.abort(), []);
+  useEffect(() => {if (mode === 'edit' && validHydration) bypassRef.current = false;}, [mode, validHydration]);
+  useEffect(() => {
+    if (mode !== 'edit' || validHydration) return;
+    if (!productId) {setLoading(false); setLoadError('not-found'); return;}
+    const controller = new AbortController();
+    const sequence = ++requestSequence.current;
+    setLoading(true);
+    setLoadError(null);
+    getAdminProductDetail({token: token ?? '', productId, signal: controller.signal}).then(response => {
+      const product = response.product;
+      if (controller.signal.aborted || sequence !== requestSequence.current || product.id !== productId) return;
+      const next = productToCoreFormState(product);
+      setCurrent(next);
+      setBaseline(next);
+      setStatus(product.status);
+      setMediaPhotos(product.photos);
+      setMediaProductName(product.name);
+      setLoading(false);
+    }).catch(error => {
+      if (controller.signal.aborted || (error instanceof AdminApiError && error.kind === 'cancelled')) return;
+      if (sequence !== requestSequence.current || handleRequestError(error)) return;
+      setLoading(false);
+      setLoadError(error instanceof AdminApiError && (error.status === 404 || (error.status === 400 && error.code === 'INVALID_ID')) ? 'not-found' : 'network');
+    });
+    return () => controller.abort();
+  }, [mode, productId, retryRevision, token, handleRequestError, validHydration]);
+
+  const submit = async () => {
+    if (saveInFlightRef.current) return;
+    const validation = validateProductCoreForm({mode, status, value: current});
+    setErrors(validation.errors);
+    setAgeTagErrors(validation.ageTagErrors);
+    setSubmitError(null);
+    if (!validation.valid) {
+      if (validation.firstInvalid) requestAnimationFrame(() => formRef.current?.focus(validation.firstInvalid!));
+      return;
+    }
+    const body = mode === 'create' ? serializeCreateAdminProduct(current) : serializeAdminProductPatch(current, baseline);
+    if (mode === 'edit' && !Object.keys(body).length) {setSubmitError('Změny se nepodařilo připravit k uložení.'); return;}
+    saveInFlightRef.current = true;
+    setSubmitting(true);
+    const controller = new AbortController();
+    saveControllerRef.current = controller;
+    const scrollY = window.scrollY;
+    try {
+      const product = mode === 'create'
+        ? await createAdminProduct({token: token ?? '', body: body as Parameters<typeof createAdminProduct>[0]['body'], signal: controller.signal})
+        : await updateAdminProduct({token: token ?? '', productId: productId!, body, signal: controller.signal});
+      const next = productToCoreFormState(product);
+      setCurrent(next);
+      setBaseline(next);
+      setStatus(product.status);
+      setMediaProductName(product.name);
+      setErrors({});
+      setAgeTagErrors({});
+      if (mode === 'create') {
+        setFeedback('created');
+        bypassRef.current = true;
+        navigate(buildAdminProductDetailPath(product.id), {replace: true, state: {adminProductCoreHydration: product, adminProductCoreFeedback: 'created'}});
+      } else {
+        setFeedback('updated');
+        requestAnimationFrame(() => window.scrollTo({top: scrollY}));
+      }
+    } catch (error) {
+      if (controller.signal.aborted || (error instanceof AdminApiError && error.kind === 'cancelled')) return;
+      if (handleRequestError(error)) return;
+      const e = error as AdminApiError;
+      if (e.status === 409 && e.code === 'SLUG_ALREADY_EXISTS') {
+        setErrors(prev => ({...prev, slug: 'Tuto URL / slug už používá jiný produkt. Zvolte jiný.'}));
+        requestAnimationFrame(() => formRef.current?.focus('slug'));
+      } else if (e.status === 400 && e.code === 'VALIDATION_ERROR') {
+        const path = e.details?.find(detail => backendFieldMap[detail]);
+        if (path) {
+          const field = backendFieldMap[path];
+          const local = validateProductCoreForm({mode, status, value: current});
+          const message = local.errors[field] ?? backendFieldFallback[field] ?? 'Zkontrolujte tuto hodnotu.';
+          setErrors(prev => ({...prev, [field]: message}));
+          const target: ProductCoreFocusTarget = field === 'ageTags' && current.ageTags.length ? {field: 'ageTag', index: 0} : field;
+          requestAnimationFrame(() => formRef.current?.focus(target));
+        } else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.');
+      } else if (mode === 'edit' && e.status === 404) setSubmitError('Produkt už nebyl nalezen. Vaše změny zůstaly zachované.');
+      else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');
+    } finally {
+      saveInFlightRef.current = false;
+      setSubmitting(false);
+      saveControllerRef.current = null;
+    }
+  };
+
+  const requestDelete = (intent: MediaDeleteIntent) => {
+    if (pendingDelete.current !== null || dialogState.kind !== 'none') return;
+    restoreTarget.current = () => intent.trigger;
+    setDialogState({kind: 'delete', ...intent});
+  };
+  const confirmDelete = () => {
+    if (dialogState.kind !== 'delete' || pendingDelete.current !== null) return;
+    const nonce = ++deleteNonce.current;
+    pendingDelete.current = nonce;
+    setDeleteRequest({publicId: dialogState.publicId, nonce});
+  };
+  const settleDelete = ({nonce, success, resolveFocus}: MediaDeleteSettlement) => {
+    if (!scope.current.alive || scope.current.key !== scopeKey || pendingDelete.current !== nonce) return;
+    if (success) restoreTarget.current = resolveFocus;
+    pendingDelete.current = null;
+    setDeleteRequest(null);
+    setDialogState({kind: 'none'});
+  };
+  const cancelDelete = () => {if (pendingDelete.current === null) setDialogState({kind: 'none'});};
+  const stay = () => {
+    setDialogState({kind: 'none'});
+    if (blocker.state === 'blocked') blocker.reset();
+  };
+  const leave = () => {
+    restoreTarget.current = null;
+    setDialogState({kind: 'none'});
+    if (blocker.state === 'blocked') blocker.proceed();
+  };
+  const resolveRestoreFocus = (previous: HTMLElement | null) => {
+    if (!scope.current.alive || scope.current.key !== scopeKey || blocker.state === 'proceeding') return null;
+    // The target outlives the delete state. Closing sets kind=none before Dialog invokes this resolver.
+    const resolve = restoreTarget.current;
+    restoreTarget.current = null;
+    return resolve ? resolve() : previous;
+  };
+  const deleting = dialogState.kind === 'delete' ? dialogState : null;
+  const protectedLastPhoto = Boolean(deleting && deleting.distinctCount === 1 && status === 'active');
+  const deleteDescription = protectedLastPhoto ? 'Aktivní produkt musí mít alespoň jednu fotografii.'
+    : deleting?.isMain && deleting.distinctCount > 1
+      ? 'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět. Tato fotografie je nyní hlavní. Po odebrání se hlavní fotografií stane první zbývající fotografie.'
+      : deleting?.distinctCount === 1
+        ? 'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět. Je to jediná fotografie produktu. Po odebrání nebude mít produkt žádné fotografie.'
+        : 'Fotografie bude odebrána z produktu. Tuto akci nelze v administraci vrátit zpět.';
+
+  if (mode === 'edit' && loading) return <State role="status" aria-live="polite">Načítání produktu…</State>;
+  if (mode === 'edit' && loadError === 'not-found') return <State><h2>Produkt nebyl nalezen</h2><p>Produkt už nemusí existovat nebo odkaz není platný.</p><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></State>;
+  if (mode === 'edit' && loadError === 'network') return <State><h2>Produkt se nepodařilo načíst</h2><p>Zkuste to prosím znovu.</p><Actions><Button onClick={() => setRetryRevision(x => x + 1)}>Zkusit znovu</Button><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></Actions></State>;
+  return <Page>
+    {mode === 'create' ? <Guidance>Produkt se uloží jako koncept. Pro vytvoření je povinný pouze název; ostatní údaje můžete doplnit později.</Guidance> : null}
+    {feedback ? <ProductSuccessFeedback kind={feedback} onDismiss={() => setFeedback(null)}/> : null}
+    <ProductCoreForm ref={formRef} mode={mode} status={status} value={current} errors={errors} ageTagErrors={ageTagErrors}
+      submitting={submitting} saveDisabled={submitting || (!dirty && mode === 'edit')} submitError={submitError}
+      onChange={setCurrent} onSubmit={submit}/>
+    {mode === 'edit' && productId ? <ProductMediaSection key={productId} productId={productId} productName={mediaProductName || current.name}
+      status={status} token={token ?? ''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onAccessError={handleRequestError}
+      onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete}/> : null}
+    <Dialog open={dialogState.kind !== 'none'}
+      title={deleting ? 'Odebrat fotografii?' : mode === 'create' ? 'Neuložené změny' : 'Neuložené nebo nedokončené změny'}
+      description={deleting ? deleteDescription : mode === 'create' ? 'Máte neuložené změny. Opravdu chcete odejít?' : 'Máte neuložené změny nebo nedokončenou práci s fotografiemi. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.'}
+      onEscape={deleting ? cancelDelete : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
+      <Actions>
+        <Button ref={safeDialogButton} disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
+        {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
+          : <Button variant="destructive" onClick={leave}>{mode === 'create' ? 'Odejít bez uložení' : 'Odejít'}</Button>}
+      </Actions>
+    </Dialog>
+  </Page>;
 }

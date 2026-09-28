@@ -44,11 +44,11 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const [refreshReason, setRefreshReason] = useState<'photo-missing' | 'conflict' | 'reconciled' | 'refresh-failed' | null>(null);
   const [lostAltNotice, setLostAltNotice] = useState<string | null>(null);
   const [reconciliationNotice, setReconciliationNotice] = useState<string | null>(null);
+  const [recoveryFailed, setRecoveryFailed] = useState(false);
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle');
   const [progress, setProgress] = useState<number | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [editingAlt, setEditingAlt] = useState<string | null>(null);
-
   const photosRef = useRef(photos);
   const draftsRef = useRef(drafts);
   const editingAltRef = useRef(editingAlt);
@@ -79,10 +79,9 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   useEffect(() => () => {
     if (attempt?.previewUrl) URL.revokeObjectURL(attempt.previewUrl);
   }, [attempt?.previewUrl]);
-
   useEffect(() => {
     if (snapshotProductRef.current !== productId) {
-      // A cancelled A operation is not B's operation. Never carry its busy/editor/attempt state into B.
+      // A cancelled A operation is not B's operation or draft.
       snapshotProductRef.current = productId;
       setPhotos(initialPhotos);
       setDrafts({altById: {}, orderIds: photoIds(initialPhotos)});
@@ -96,11 +95,10 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
       setRefreshReason(null);
       setLostAltNotice(null);
       setReconciliationNotice(null);
+      setRecoveryFailed(false);
       return;
     }
-    const result = reconcileMediaDrafts({
-      previousPhotos: photosRef.current, previousDrafts: draftsRef.current, nextPhotos: initialPhotos,
-    });
+    const result = reconcileMediaDrafts({previousPhotos: photosRef.current, previousDrafts: draftsRef.current, nextPhotos: initialPhotos});
     const activeEditor = editingAltRef.current;
     if (activeEditor && result.missingAltTargetIds.includes(activeEditor)) {
       setLostAltNotice(draftsRef.current.altById[activeEditor] ?? '');
@@ -116,13 +114,12 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const altDirty = editingAlt ? (drafts.altById[editingAlt] ?? savedAlt) !== savedAlt : false;
   const risk = Boolean(operation || uploadPhase !== 'idle' || orderDirty || altDirty);
   useEffect(() => onRiskChange?.(risk), [risk, onRiskChange]);
-
   const safe = (generation: number) => mounted.current && productRef.current === productId && generation === writeGen.current;
   const apply = (product: AdminProduct) => {
     const previousPhotos = photosRef.current;
     const previousDrafts = draftsRef.current;
     const result = reconcileMediaDrafts({previousPhotos, previousDrafts, nextPhotos: product.photos});
-    // Reconcile once, outside state updaters. Their replay must not overwrite later success feedback.
+    // No side effects inside state updaters: replay must not overwrite success feedback.
     setPhotos(product.photos);
     setDrafts(result.drafts);
     if (result.membershipChanged) {
@@ -139,8 +136,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setGuard('available');
   };
   const fail = (error: unknown, generation: number, defaultCopy: string) => {
-    if (!safe(generation)) return;
-    if (input.onAccessError?.(error)) return;
+    if (!safe(generation) || input.onAccessError?.(error)) return;
     if (error instanceof AdminApiError) {
       if (error.code === 'PHOTO_NOT_FOUND') {
         setRefreshReason('photo-missing');
@@ -169,6 +165,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const begin = (name: string) => {
     const generation = ++writeGen.current;
     refreshGen.current++;
+    refreshController.current?.abort();
     controller.current?.abort();
     controller.current = new AbortController();
     setOperation(name);
@@ -176,10 +173,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     return {generation, signal: controller.current.signal};
   };
   const finish = (generation: number) => {
-    if (safe(generation)) {
-      setOperation(null);
-      setProgress(null);
-    }
+    if (safe(generation)) {setOperation(null); setProgress(null);}
   };
 
   const selectFile = useCallback((file: File) => {
@@ -189,6 +183,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     if (attempt?.previewUrl) URL.revokeObjectURL(attempt.previewUrl);
     setAttempt({attemptId: ++attemptSeq.current, productId, file, filename: file.name, previewUrl: URL.createObjectURL(file)});
     setUploadPhase('selected');
+    setRecoveryFailed(false);
     setFeedback(null);
   }, [photos.length, attempt, productId]);
   const discardUpload = () => {
@@ -196,9 +191,10 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setAttempt(null);
     setUploadPhase('idle');
     setProgress(null);
+    setRecoveryFailed(false);
   };
   const upload = async () => {
-    if (!attempt || guard !== 'available' || operation) return;
+    if (!attempt || guard !== 'available' || operation || uploadPhase !== 'selected') return;
     const {generation, signal} = begin('upload');
     let providerSucceeded = false;
     try {
@@ -209,10 +205,8 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
       const candidate = productMediaCandidate(descriptor);
       setAttempt(a => a ? {...a, descriptor, candidate} : a);
       setUploadPhase('uploading');
-      const provider = await uploadProductMedia({
-        upload: descriptor, file: attempt.file, signal,
-        onProgress: value => {if (safe(generation)) setProgress(value);},
-      });
+      const provider = await uploadProductMedia({upload: descriptor, file: attempt.file, signal,
+        onProgress: value => {if (safe(generation)) setProgress(value);}});
       providerSucceeded = true;
       if (!safe(generation)) return;
       setAttempt(a => a ? {...a, providerPublicId: provider.publicId} : a);
@@ -243,7 +237,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     } finally {finish(generation);}
   };
   const recover = async () => {
-    if (!attempt || operation || guard !== 'available' || uploadPhase === 'identity-mismatch') return;
+    if (!attempt || operation || guard !== 'available' || !['unknown', 'provider-confirmed-unattached'].includes(uploadPhase)) return;
     const previousPhase = uploadPhase;
     const publicId = previousPhase === 'provider-confirmed-unattached' ? attempt.providerPublicId : attempt.candidate;
     if (!publicId) {setFeedback('Výsledek nahrání se nepodařilo potvrdit.'); return;}
@@ -258,30 +252,34 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
         setFeedback('Fotografie byla připojena k produktu.');
         discardUpload();
       } else {
-        setUploadPhase('unknown');
+        setUploadPhase(previousPhase);
+        setRecoveryFailed(true);
         setFeedback('Výsledek se stále nepodařilo ověřit');
       }
     } catch (error) {
       if (!safe(generation)) return;
+      // A failed lookup cannot undo the already confirmed provider identity/category.
       setUploadPhase(previousPhase);
+      setRecoveryFailed(true);
       if (error instanceof AdminApiError && error.status === 502 && error.code === 'CLOUDINARY_OPERATION_FAILED') {
-        setUploadPhase('unknown');
         setFeedback('Služba fotografie nepotvrdila, zda soubor existuje. Fotografie zatím není potvrzeně připojena k produktu.');
       } else fail(error, generation, 'Výsledek se stále nepodařilo ověřit');
     } finally {finish(generation);}
   };
   const refresh = async () => {
-    if (operation) return;
+    if (operation || guard !== 'available' || !input.token) return;
     const generation = ++refreshGen.current;
     const observedWrite = writeGen.current;
     refreshController.current?.abort();
     const ac = new AbortController();
     refreshController.current = ac;
+    const current = () => mounted.current && productRef.current === productId && generation === refreshGen.current
+      && observedWrite === writeGen.current && !ac.signal.aborted;
     setFeedback(null);
     try {
       const result = await getAdminProductDetail({token: input.token, productId, signal: ac.signal});
-      if (!mounted.current || productRef.current !== productId || generation !== refreshGen.current || observedWrite !== writeGen.current) return;
-      const reconciliation = reconcileMediaDrafts({previousPhotos: photosRef.current, previousDrafts: drafts, nextPhotos: result.product.photos});
+      if (!current()) return;
+      const reconciliation = reconcileMediaDrafts({previousPhotos: photosRef.current, previousDrafts: draftsRef.current, nextPhotos: result.product.photos});
       apply(result.product);
       if (reconciliation.membershipChanged) {
         setRefreshReason('reconciled');
@@ -291,15 +289,14 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
         setFeedback('Aktuální fotografie byly načteny.');
       }
     } catch (error) {
-      if (!mounted.current || generation !== refreshGen.current) return;
+      if (!current()) return;
       setRefreshReason('refresh-failed');
-      fail(error, writeGen.current, 'Fotografie se nepodařilo znovu načíst. Zkuste načíst aktuální fotografie znovu.');
-    } finally {
-      if (generation === refreshGen.current) refreshController.current = null;
-    }
+      fail(error, observedWrite, 'Fotografie se nepodařilo znovu načíst. Zkuste načíst aktuální fotografie znovu.');
+    } finally {if (current()) refreshController.current = null;}
   };
 
   const startAlt = (id: string) => {
+    if (operation || guard !== 'available') return;
     setEditingAlt(id);
     setDrafts(d => ({...d, altById: {...d.altById, [id]: photos.find(p => p.publicId === id)?.alt ?? ''}}));
   };
@@ -366,7 +363,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     } finally {finish(generation);}
   };
   return {
-    photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, uploadPhase,
+    photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, recoveryFailed, uploadPhase,
     progress, attempt, editingAlt, orderDirty, risk, selectFile, discardUpload, upload, recover,
     startAlt, cancelAlt, saveAlt, move, cancelOrder, saveOrder, remove, refresh,
   };
