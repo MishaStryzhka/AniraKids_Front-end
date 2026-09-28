@@ -45,7 +45,8 @@ const AltEditor = styled.div`
 const Upload = styled.div`display:grid;gap:${t.space[3]};min-inline-size:0;`;
 const Selected = styled.div`
   display:grid;grid-template-columns:96px minmax(0,1fr);gap:${t.space[4]};align-items:start;overflow-wrap:anywhere;
-  @media(max-width:767px){.selected-actions{grid-column:1/-1;display:grid;gap:${t.space[2]};}}
+  .selected-actions{grid-column:1/-1;min-inline-size:0;display:flex;flex-wrap:wrap;gap:${t.space[2]};}
+  @media(max-width:767px){.selected-actions{display:grid;grid-template-columns:minmax(0,1fr);}}
 `;
 const Progress = styled.progress`inline-size:100%;block-size:8px;accent-color:${t.color.action.primary.bg};`;
 const Status = styled.div`min-block-size:20px;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};overflow-wrap:anywhere;`;

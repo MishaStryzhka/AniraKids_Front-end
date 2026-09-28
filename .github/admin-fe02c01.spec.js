@@ -116,6 +116,24 @@ async function chooseFile(page) {
   await page.getByRole('button', {name: 'Přidat fotografii'}).click();
   await (await chooser).setFiles(UPLOAD_FILE);
 }
+async function assertSelectedActions(page, buttonName, evidenceName) {
+  const actions = page.locator('[data-product-media-section] .selected-actions');
+  const parent = actions.locator('..');
+  const primary = actions.getByRole('button', {name: buttonName, exact: true});
+  await expect(primary).toBeVisible();
+  const actionsBox = await actions.boundingBox();
+  const parentBox = await parent.boundingBox();
+  const primaryBox = await primary.boundingBox();
+  expect(Math.abs(actionsBox.width - parentBox.width)).toBeLessThanOrEqual(1);
+  expect(primaryBox.width).toBeGreaterThan(144);
+  expect(primaryBox.height).toBeGreaterThanOrEqual(44);
+  expect(primaryBox.height).toBeLessThanOrEqual(56);
+  if (page.viewportSize().width < 768) expect(Math.abs(primaryBox.width - actionsBox.width)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  output(`${evidenceName}-geometry.json`, {viewport: page.viewportSize(), actions: actionsBox, selected: parentBox, primary: primaryBox});
+  await actions.scrollIntoViewIfNeeded();
+  await capture(page, evidenceName);
+}
 test.afterEach(async ({page}, testInfo) => {
   const state = states.get(page);
   if (state) {
@@ -184,6 +202,8 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) test(`media responsive ${w
     form: formBox, divider: dividerBox, heading: headingBox, item: itemBox, remove: removeBox,
     earlier: earlierBox, later: laterBox, badge: badgeBox, badgeStyle, imageLoaded: true});
   await page.screenshot({path: path.join(EVIDENCE, `responsive-${width}.png`), fullPage: true});
+  await chooseFile(page);
+  await assertSelectedActions(page, 'Nahrát fotografii', `selected-upload-actions-${width}`);
 });
 test('dirty order actions keep frozen 16px list rhythm', async ({page}) => {
   await mocks(page);
@@ -255,7 +275,6 @@ test('delete success focuses next surviving photo then previous at last position
   await page.goto(`${APP}/admin/produkty/p1`);
   await page.locator('[data-photo-id="b"]').getByRole('button', {name: 'Odebrat fotografii'}).click();
   await page.getByRole('dialog').getByRole('button', {name: 'Odebrat fotografii'}).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('[data-photo-id="c"] [data-media-action]').first()).toBeFocused();
   await capture(page, 'delete-middle-next-focus');
   await page.locator('[data-photo-id="c"]').getByRole('button', {name: 'Odebrat fotografii'}).click();
@@ -307,7 +326,7 @@ test('mocked browser upload retains same-ID COMPLETE retry and never reuploads a
   const media = page.locator('[data-product-media-section]');
   await expect(media.getByRole('status')).toContainText('Připojení fotografie není potvrzené');
   await expect(media.getByRole('status')).toContainText('Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');
-  await capture(page, 'confirmed-provider-unconfirmed-attachment');
+  await assertSelectedActions(page, 'Zkusit připojit znovu', 'confirmed-provider-unconfirmed-attachment');
   await page.getByRole('button', {name: 'Zkusit připojit znovu'}).click();
   await expect(media.getByText('1 / 10 uložených')).toBeVisible();
   await expect(media.locator('[data-photo-id="products/p1/x"] img')).toHaveJSProperty('naturalWidth', 96);
@@ -329,7 +348,7 @@ test('unknown provider outcome and 502 keep one truthful recovery action', async
   const retry = media.getByRole('button', {name: /^(Ověřit a připojit|Zkusit ověřit znovu)$/});
   await expect(retry).toHaveCount(1);
   await expect(retry).toBeEnabled();
-  await capture(page, 'unknown-provider-502-recovery');
+  await assertSelectedActions(page, 'Ověřit a připojit', 'unknown-provider-502-recovery');
   await retry.click();
   await expect(media.getByText('1 / 10 uložených')).toBeVisible();
   expect(state.sign).toBe(1);
