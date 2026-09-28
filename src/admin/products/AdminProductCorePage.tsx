@@ -87,7 +87,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const deleteNonce = useRef(0);
   const pendingDelete = useRef<number | null>(null);
   const restoreTarget = useRef<(() => HTMLElement | null) | null>(null);
-  const safeDialogButton = useRef<HTMLButtonElement>(null);
+  const safeDialogButton = useRef<HTMLButtonElement | null>(null);
   const previousDialogKind = useRef<ActiveDialog['kind']>('none');
   const proceededLocation = useRef<string | null>(null);
   const scopeKey = `${mode}:${productId ?? ''}:${location.key}`;
@@ -112,7 +112,6 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   }, [blocker, dialogState.kind, hasRisk]);
   useEffect(() => {
     if (previousDialogKind.current === 'delete' && dialogState.kind === 'leave') {
-      // The same modal remains open; the newly safe action, not the replaced destructive action, owns focus.
       safeDialogButton.current?.focus();
     }
     previousDialogKind.current = dialogState.kind;
@@ -248,7 +247,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   };
   const resolveRestoreFocus = (previous: HTMLElement | null) => {
     if (!scope.current.alive || scope.current.key !== scopeKey || blocker.state === 'proceeding') return null;
-    // The target outlives the delete state. Closing sets kind=none before Dialog invokes this resolver.
+    // This ref outlives kind=delete; the close render must not discard the successful focus destination.
     const resolve = restoreTarget.current;
     restoreTarget.current = null;
     return resolve ? resolve() : previous;
@@ -278,8 +277,8 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       title={deleting ? 'Odebrat fotografii?' : mode === 'create' ? 'Neuložené změny' : 'Neuložené nebo nedokončené změny'}
       description={deleting ? deleteDescription : mode === 'create' ? 'Máte neuložené změny. Opravdu chcete odejít?' : 'Máte neuložené změny nebo nedokončenou práci s fotografiemi. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.'}
       onEscape={deleting ? cancelDelete : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
-      <Actions>
-        <Button ref={safeDialogButton} disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
+      <Actions ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
+        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
         {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
           : <Button variant="destructive" onClick={leave}>{mode === 'create' ? 'Odejít bez uložení' : 'Odejít'}</Button>}
       </Actions>
