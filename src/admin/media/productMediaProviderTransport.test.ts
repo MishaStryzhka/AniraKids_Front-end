@@ -25,3 +25,8 @@ test('4xx is known failure while 5xx is unknown',async()=>{
  let promise=uploadProductMedia({upload,file});let xhr=FakeXHR.last;xhr.status=400;xhr.responseText='{}';xhr.onload();await expect(promise).rejects.toMatchObject({outcome:'known-failure'});
  promise=uploadProductMedia({upload,file});xhr=FakeXHR.last;xhr.status=502;xhr.responseText='{}';xhr.onload();await expect(promise).rejects.toMatchObject({outcome:'unknown'});
 });
+
+test('network error is unknown and abort is AbortError',async()=>{
+ let promise=uploadProductMedia({upload,file});let xhr=FakeXHR.last;xhr.onerror();await expect(promise).rejects.toMatchObject({outcome:'unknown'});
+ const controller=new AbortController();promise=uploadProductMedia({upload,file,signal:controller.signal});controller.abort();await expect(promise).rejects.toMatchObject({name:'AbortError'});
+});
