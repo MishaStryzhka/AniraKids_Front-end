@@ -79,10 +79,12 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const bypassRef = useRef(false);
   const dirty = useMemo(() => !coreFormStatesEquivalent(current, baseline), [current, baseline]);
   const hasRisk = dirty || mediaRisk;
-  const blocker = useBlocker(() => hasRisk && !bypassRef.current);
+  const deleteDialogOpen = useRef(false);
+  const blocker = useBlocker(() => (hasRisk || deleteDialogOpen.current) && !bypassRef.current);
 
-  // One page-owned dialog. A pending browser navigation waits until deletion is resolved.
+  // One page-owned dialog. Navigation cannot replace an unresolved deletion confirmation.
   const [dialogState, setDialogState] = useState<ActiveDialog>({kind: 'none'});
+  deleteDialogOpen.current = dialogState.kind === 'delete';
   const [deleteRequest, setDeleteRequest] = useState<{publicId: string; nonce: number} | null>(null);
   const deleteNonce = useRef(0);
   const pendingDelete = useRef<number | null>(null);
@@ -111,9 +113,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     } else if (dialogState.kind !== 'leave') setDialogState({kind: 'leave'});
   }, [blocker, dialogState.kind, hasRisk]);
   useEffect(() => {
-    if (previousDialogKind.current === 'delete' && dialogState.kind === 'leave') {
-      safeDialogButton.current?.focus();
-    }
+    if (previousDialogKind.current === 'delete' && dialogState.kind === 'leave') safeDialogButton.current?.focus();
     previousDialogKind.current = dialogState.kind;
   }, [dialogState.kind]);
 
@@ -247,7 +247,6 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   };
   const resolveRestoreFocus = (previous: HTMLElement | null) => {
     if (!scope.current.alive || scope.current.key !== scopeKey || blocker.state === 'proceeding') return null;
-    // This ref outlives kind=delete; the close render must not discard the successful focus destination.
     const resolve = restoreTarget.current;
     restoreTarget.current = null;
     return resolve ? resolve() : previous;
