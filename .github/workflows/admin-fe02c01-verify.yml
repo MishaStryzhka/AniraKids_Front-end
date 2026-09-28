@@ -19,6 +19,12 @@ jobs:
           node -e "require('fs').writeFileSync('test-evidence/admin-fe02c01/BUILD-METADATA.json', JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
       - name: TypeScript
         run: npm run typecheck
+      - name: Delete focus lifecycle regression first
+        run: >
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c01/delete-lifecycle-results.json
+          src/admin/products/AdminProductDeleteFocus.test.tsx
+          src/design-system/components/Dialog/Dialog.test.tsx
       - name: R2 focused integration first
         run: >
           npm test -- --watchAll=false --runInBand --json
@@ -38,6 +44,7 @@ jobs:
           src/admin/products/ProductMediaSection.test.tsx
           src/admin/products/ProductMediaR2.integration.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
+          src/admin/products/AdminProductDeleteFocus.test.tsx
           src/design-system/components/Dialog/Dialog.test.tsx
           src/admin/api/products.test.ts
           src/admin/products/ProductCoreForm.test.tsx
@@ -68,6 +75,14 @@ jobs:
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
           curl --silent --fail http://127.0.0.1:4173/ >/dev/null
           curl --silent --fail http://127.0.0.1:4174/ >/dev/null
+      - name: Delete browser scenarios first
+        env:
+          ADMIN_FE02C01_EVIDENCE_DIR: test-evidence/admin-fe02c01/delete-first-evidence
+          PLAYWRIGHT_JSON_OUTPUT_NAME: test-evidence/admin-fe02c01/delete-first-results.json
+        run: >
+          npx playwright test --config=.github/admin-fe02c01.playwright.config.js
+          --grep 'delete success focuses|allowed final-photo deletion|final-photo deletion uses heading fallback'
+          --reporter=line,json --output=test-evidence/admin-fe02c01/delete-first-test-results
       - name: ADMIN-FE-02C-01 Playwright
         env:
           ADMIN_FE02C01_EVIDENCE_DIR: test-evidence/admin-fe02c01
