@@ -15,7 +15,7 @@ test.each([
  ['completing','Ověřujeme připojení fotografie k produktu…'],
  ['provider-confirmed-unattached','Připojení fotografie není potvrzené'],
  ['identity-mismatch','Nahraná fotografie neodpovídá podepsanému identifikátoru. Připojení je zablokované.'],
-])('phase %s renders truthful copy',phase=>{renderPhase(phase);expect(screen.getAllByText(arguments[1] as any).length).toBeGreaterThan(0)});
+])('phase %s renders truthful copy',(phase,copy)=>{renderPhase(phase);expect(screen.getAllByText(copy).length).toBeGreaterThan(0)});
 
 test('confirmed attachment uncertainty exposes only same-ID retry',()=>{renderPhase('provider-confirmed-unattached','Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');expect(screen.getByRole('button',{name:'Zkusit připojit znovu'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Ověřit a připojit'})).not.toBeInTheDocument()});
 test('unknown state exposes one recovery action',()=>{renderPhase('unknown');expect(screen.getByRole('button',{name:'Ověřit a připojit'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Zkusit ověřit znovu'})).not.toBeInTheDocument()});
