@@ -13,22 +13,30 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 20, cache: npm}
       - run: npm ci --no-audit --no-fund
+      - name: Prepare allowlisted evidence
+        run: |
+          mkdir -p test-evidence/admin-fe02c01
+          node -e "require('fs').writeFileSync('test-evidence/admin-fe02c01/BUILD-METADATA.json', JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
       - name: TypeScript
         run: npm run typecheck
       - name: R2 focused integration first
         run: >
-          npm test -- --watchAll=false --runInBand
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c01/r2-focused-results.json
           src/admin/products/useProductMediaController.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
           src/admin/products/ProductMediaSection.test.tsx
+          src/admin/products/ProductMediaR2.integration.test.tsx
       - name: Focused unit and integration
         run: >
-          npm test -- --watchAll=false --runInBand
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c01/unit-results.json
           src/admin/api/productMedia.test.ts
           src/admin/media/productMediaProviderTransport.test.ts
           src/admin/products/productMediaModel.test.ts
           src/admin/products/useProductMediaController.test.tsx
           src/admin/products/ProductMediaSection.test.tsx
+          src/admin/products/ProductMediaR2.integration.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
           src/design-system/components/Dialog/Dialog.test.tsx
           src/admin/api/products.test.ts
@@ -54,22 +62,16 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start SPA
         run: |
-          npx --yes serve@14.2.4 -s build -l 4173 >/tmp/admin-fe02c01.log 2>&1 &
-          npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02c01-no-env.log 2>&1 &
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/admin-fe02c01/configured-server.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/admin-fe02c01/no-env-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
-      - name: Prepare evidence directory
-        run: mkdir -p test-evidence/admin-fe02c01
+          curl --silent --fail http://127.0.0.1:4173/ >/dev/null
+          curl --silent --fail http://127.0.0.1:4174/ >/dev/null
       - name: ADMIN-FE-02C-01 Playwright
         env:
           ADMIN_FE02C01_EVIDENCE_DIR: test-evidence/admin-fe02c01
-        run: npx playwright test .github/admin-fe02c01.spec.js --reporter=line
-      - name: Evidence manifest
-        if: always()
-        run: |
-          mkdir -p test-evidence/admin-fe02c01
-          for f in /tmp/admin-fe02c01.log /tmp/admin-fe02c01-no-env.log; do if test -f "$f"; then cp "$f" test-evidence/admin-fe02c01/; fi; done
-          if test -d test-results; then cp -R test-results test-evidence/admin-fe02c01/02c-results; fi
+        run: npx playwright test --config=.github/admin-fe02c01.playwright.config.js
       - name: ADMIN-FE-02B regression
         id: browser02b
         run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
@@ -97,6 +99,7 @@ jobs:
       - name: Final evidence manifest
         if: always()
         run: |
+          mkdir -p test-evidence/admin-fe02c01
           find test-evidence/admin-fe02c01 -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
           cat test-evidence/admin-fe02c01/MANIFEST.txt
       - name: Upload verification artifacts
