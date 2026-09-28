@@ -21,6 +21,8 @@ jobs:
           src/admin/api/productMedia.test.ts
           src/admin/media/productMediaProviderTransport.test.ts
           src/admin/products/productMediaModel.test.ts
+          src/admin/products/useProductMediaController.test.tsx
+          src/admin/products/ProductMediaSection.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
           src/design-system/components/Dialog/Dialog.test.tsx
           src/admin/api/products.test.ts
