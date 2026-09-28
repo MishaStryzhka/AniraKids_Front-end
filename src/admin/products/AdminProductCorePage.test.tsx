@@ -1,108 +1,334 @@
-import {act,fireEvent,render,screen,waitFor} from '@testing-library/react';
-import {createMemoryRouter,RouterProvider} from 'react-router-dom';
-import {AdminApiError} from '../api/errors';
-import {createAdminProduct,getAdminProductDetail,updateAdminProduct} from '../api/products';
-import {completeProductPhoto,deleteProductPhoto,reorderProductPhotos,signProductPhoto,updateProductPhotoAlt} from '../api/productMedia';
-import {uploadProductMedia} from '../media/productMediaProviderTransport';
+import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
+import {createMemoryRouter, RouterProvider} from 'react-router-dom';
+import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
+import {createAdminProduct, getAdminProductDetail, updateAdminProduct, type AdminProduct} from '../api/products';
+import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
+import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
 
-jest.mock('../api/errors',()=>{class AdminApiError extends Error{status;code;details;kind;constructor(input:any){super(input.message);this.status=input.status??null;this.code=input.code;this.details=input.details;this.kind=input.kind}}return {AdminApiError}});
-jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
-const mockHandleRequestError=jest.fn();
-jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockHandleRequestError})}));
-jest.mock('../api/products',()=>({createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}));
-jest.mock('../media/productMediaProviderTransport',()=>({uploadProductMedia:jest.fn(),ProviderUploadError:class ProviderUploadError extends Error{constructor(public outcome:string,message:string){super(message)}}}));
-jest.mock('../api/productMedia',()=>({completeProductPhoto:jest.fn(),deleteProductPhoto:jest.fn(),productMediaCandidate:jest.fn(),reorderProductPhotos:jest.fn(),signProductPhoto:jest.fn(),updateProductPhotoAlt:jest.fn()}));
+jest.mock('axios', () => {
+  class MockAxiosError extends Error {}
+  return {__esModule: true, default: {isCancel: () => false}, AxiosError: MockAxiosError};
+});
+jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: jest.fn()}));
+jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'})}));
+const mockHandleRequestError = jest.fn();
+jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
+jest.mock('../api/products', () => ({createAdminProduct: jest.fn(), getAdminProductDetail: jest.fn(), updateAdminProduct: jest.fn()}));
+jest.mock('../media/productMediaProviderTransport', () => {
+  const actual = jest.requireActual('../media/productMediaProviderTransport');
+  return {...actual, uploadProductMedia: jest.fn()};
+});
+jest.mock('../api/productMedia', () => {
+  const actual = jest.requireActual('../api/productMedia');
+  return {...actual, completeProductPhoto: jest.fn(), deleteProductPhoto: jest.fn(),
+    reorderProductPhotos: jest.fn(), signProductPhoto: jest.fn(), updateProductPhotoAlt: jest.fn()};
+});
 
-const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
-const getMock=getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
-const signMock=signProductPhoto as jest.MockedFunction<typeof signProductPhoto>;
-const completeMock=completeProductPhoto as jest.MockedFunction<typeof completeProductPhoto>;
-const altMock=updateProductPhotoAlt as jest.MockedFunction<typeof updateProductPhotoAlt>;
-const deleteMock=deleteProductPhoto as jest.MockedFunction<typeof deleteProductPhoto>;
-const providerMock=uploadProductMedia as jest.MockedFunction<typeof uploadProductMedia>;
-const reorderMock=reorderProductPhotos as jest.MockedFunction<typeof reorderProductPhotos>;
-const patchMock=updateAdminProduct as jest.MockedFunction<typeof updateAdminProduct>;
-const product={id:'p1',name:'Sofia',slug:'sofia',description:'Jemné šaty',category:'dress' as const,gender:'girls' as const,color:'Bílá',occasion:['wedding' as const],ageTags:['3–4 roky'],brand:'',familyLookGroup:'',rentalEnabled:false,saleEnabled:false,defaultDeposit:0,photos:[],status:'draft' as const,seo:{noIndex:false},createdAt:'2026-09-01T00:00:00Z',updatedAt:'2026-09-01T00:00:00Z'};
-const detail={product,variants:[{id:'ignored-variant'}]};
-const apiError=(status:number|null,code:string,kind:'unauthorized'|'forbidden'|'admin_disabled'|'configuration_error'|'network'|'unexpected'|'cancelled'='unexpected',details?:string[])=>new AdminApiError({status,code,message:'raw backend english',kind,details});
-
-function renderRouter(initial='/admin/produkty/novy'){
- const router=createMemoryRouter([
-  {path:'/admin/produkty',element:<div>Products list</div>},
-  {path:'/admin/produkty/novy',element:<><h1>Nový produkt</h1><AdminProductCorePage mode="create"/></>},
-  {path:'/admin/produkty/:productId',element:<><h1>Upravit produkt</h1><AdminProductCorePage mode="edit"/></>},
- ],{initialEntries:[initial]});
- render(<RouterProvider router={router}/>);
- return router;
+const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
+const getMock = getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
+const patchMock = updateAdminProduct as jest.MockedFunction<typeof updateAdminProduct>;
+const signMock = signProductPhoto as jest.MockedFunction<typeof signProductPhoto>;
+const completeMock = completeProductPhoto as jest.MockedFunction<typeof completeProductPhoto>;
+const altMock = updateProductPhotoAlt as jest.MockedFunction<typeof updateProductPhotoAlt>;
+const deleteMock = deleteProductPhoto as jest.MockedFunction<typeof deleteProductPhoto>;
+const providerMock = uploadProductMedia as jest.MockedFunction<typeof uploadProductMedia>;
+const reorderMock = reorderProductPhotos as jest.MockedFunction<typeof reorderProductPhotos>;
+const product: AdminProduct = {id: 'p1', name: 'Sofia', slug: 'sofia', description: 'Jemné šaty', category: 'dress',
+  gender: 'girls', color: 'Bílá', occasion: ['wedding'], ageTags: ['3–4 roky'], brand: '', familyLookGroup: '',
+  rentalEnabled: false, saleEnabled: false, defaultDeposit: 0, photos: [], status: 'draft', seo: {noIndex: false},
+  createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-01T00:00:00Z'};
+const detail = {product, variants: [{id: 'ignored-variant'}]};
+const apiError = (status: number | null, code: string, kind: AdminApiErrorKind = 'unexpected', details?: string[]) =>
+  new AdminApiError({status, code, message: 'raw backend english', kind, details});
+const photo = (publicId: string) => ({publicId, url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', alt: publicId});
+const media = () => screen.getByRole('region', {name: 'Fotografie'});
+const status = () => within(media()).getByRole('status');
+const save = () => screen.getByRole('button', {name: 'Uložit', exact: true});
+function renderRouter(initial = '/admin/produkty/novy') {
+  const router = createMemoryRouter([
+    {path: '/admin/produkty', element: <div>Products list</div>},
+    {path: '/admin/produkty/novy', element: <><h1>Nový produkt</h1><AdminProductCorePage mode="create"/></>},
+    {path: '/admin/produkty/:productId', element: <><h1>Upravit produkt</h1><AdminProductCorePage mode="edit"/></>},
+  ], {initialEntries: [initial]});
+  render(<RouterProvider router={router}/>);
+  return router;
 }
-beforeEach(()=>{jest.clearAllMocks();mockHandleRequestError.mockReturnValue(false);(URL as any).createObjectURL=jest.fn(()=> 'blob:test');(URL as any).revokeObjectURL=jest.fn()});
-
-test('CREATE starts clean, posts only name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback',async()=>{
- createMock.mockResolvedValue(product);const router=renderRouter();
- expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
- fireEvent.change(screen.getByLabelText('Název'),{target:{value:' Sofia '}});
- fireEvent.click(screen.getByRole('button',{name:'Uložit'}));
- await waitFor(()=>expect(createMock).toHaveBeenCalledWith(expect.objectContaining({body:{name:'Sofia'}})));
- await waitFor(()=>expect(router.state.location.pathname).toBe('/admin/produkty/p1'));
- expect(router.state.historyAction).toBe('REPLACE');
- expect(getMock).not.toHaveBeenCalled();
- expect(screen.getByLabelText('URL / slug')).toHaveValue('sofia');
- expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
- expect(screen.getByText('Produkt byl vytvořen.')).toBeInTheDocument();
- expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((yes, no) => {resolve = yes; reject = no;});
+  return {promise, resolve, reject};
+}
+function checkCoreUntouched() {
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(patchMock).not.toHaveBeenCalled();
+  expect(save()).toBeEnabled();
+  fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Bílá'}});
+  expect(save()).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
+}
+async function openDirty(p: AdminProduct) {
+  getMock.mockResolvedValueOnce({product: p, variants: []});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
+}
+function selectAndUpload() {
+  const input = within(media()).getByLabelText('Soubor fotografie') as HTMLInputElement;
+  fireEvent.change(input, {target: {files: [new File(['fixture'], 'x.jpg', {type: 'image/jpeg'})]}});
+  fireEvent.click(screen.getByRole('button', {name: 'Nahrát fotografii'}));
+}
+function configureUpload() {
+  signMock.mockResolvedValue({upload: {cloudName: 'fixture', apiKey: 'key', signature: 'sig', resourceType: 'image',
+    params: {timestamp: 1, folder: 'products/p1', public_id: 'x', overwrite: false, allowed_formats: 'jpg'}}});
+  providerMock.mockResolvedValue({publicId: 'products/p1/x'});
+}
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockHandleRequestError.mockReturnValue(false);
+  URL.createObjectURL = jest.fn(() => 'blob:fixture');
+  URL.revokeObjectURL = jest.fn();
+  jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
 });
+afterEach(() => jest.restoreAllMocks());
 
-test('EDIT renders loading before GET, ignores variants, hydrates clean baseline and PATCHes only changed field',async()=>{
- let resolve!:(value:typeof detail)=>void;getMock.mockReturnValue(new Promise(r=>{resolve=r}));const router=renderRouter('/admin/produkty/p1');
- expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');expect(screen.queryByLabelText('Název')).not.toBeInTheDocument();
- await act(async()=>resolve(detail));
- await screen.findByDisplayValue('Sofia');expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
- fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
- patchMock.mockResolvedValue({...product,color:'Růžová'});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));
- await waitFor(()=>expect(patchMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{color:'Růžová'}})));
- expect(router.state.location.pathname).toBe('/admin/produkty/p1');await screen.findByText('Změny byly uloženy.');expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
+test('CREATE starts clean, posts only name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback', async () => {
+  createMock.mockResolvedValue(product);
+  const router = renderRouter();
+  expect(save()).toBeEnabled();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: ' Sofia '}});
+  fireEvent.click(save());
+  await waitFor(() => expect(createMock).toHaveBeenCalledWith(expect.objectContaining({body: {name: 'Sofia'}})));
+  await waitFor(() => expect(router.state.location.pathname).toBe('/admin/produkty/p1'));
+  expect(router.state.historyAction).toBe('REPLACE');
+  expect(getMock).not.toHaveBeenCalled();
+  expect(screen.getByLabelText('URL / slug')).toHaveValue('sofia');
+  expect(save()).toBeDisabled();
+  expect(screen.getByText('Produkt byl vytvořen.')).toBeInTheDocument();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
-
-test('failed PATCH preserves current values and dirty state',async()=>{getMock.mockResolvedValue(detail);patchMock.mockRejectedValue(apiError(null,'ADMIN_NETWORK_ERROR','network'));renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled()});
-
-test('GET retry reloads after network error',async()=>{getMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network')).mockResolvedValueOnce(detail);renderRouter('/admin/produkty/p1');await screen.findByText('Produkt se nepodařilo načíst');fireEvent.click(screen.getByRole('button',{name:'Zkusit znovu'}));expect(await screen.findByDisplayValue('Sofia')).toBeInTheDocument();expect(getMock).toHaveBeenCalledTimes(2)});
-test.each([[404,'PRODUCT_NOT_FOUND'],[400,'INVALID_ID']])('GET %s %s renders frozen not-found state',async(status,code)=>{getMock.mockRejectedValue(apiError(status,code));renderRouter('/admin/produkty/bad');expect(await screen.findByText('Produkt nebyl nalezen')).toBeInTheDocument();expect(screen.getByText('Produkt už nemusí existovat nebo odkaz není platný.')).toBeInTheDocument();expect(screen.getByRole('link',{name:'Zpět na produkty'})).toBeInTheDocument()});
-test('cancelled GET is silent',async()=>{getMock.mockRejectedValue(apiError(null,'ADMIN_REQUEST_CANCELLED','cancelled'));renderRouter('/admin/produkty/p1');await waitFor(()=>expect(getMock).toHaveBeenCalled());expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');expect(screen.queryByText('Produkt se nepodařilo načíst')).not.toBeInTheDocument()});
-
-test('slug conflict maps inline and focuses slug without raw backend copy',async()=>{createMock.mockRejectedValue(apiError(409,'SLUG_ALREADY_EXISTS'));renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.change(screen.getByLabelText('URL / slug'),{target:{value:'sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Tuto URL / slug už používá jiný produkt. Zvolte jiný.')).toBeInTheDocument();await waitFor(()=>expect(screen.getByLabelText('URL / slug')).toHaveFocus());expect(screen.queryByText('raw backend english')).not.toBeInTheDocument()});
-
-test('recognized VALIDATION_ERROR detail maps inline and focuses field',async()=>{createMock.mockRejectedValue(apiError(400,'VALIDATION_ERROR','unexpected',['seo.description']));renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Zkontrolujte SEO popis.')).toBeInTheDocument();await waitFor(()=>expect(screen.getByLabelText('SEO popis')).toHaveFocus())});
-test('unsupported VALIDATION_ERROR uses safe form fallback',async()=>{createMock.mockRejectedValue(apiError(400,'VALIDATION_ERROR','unexpected',['variants.0.size']));renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.')).toBeInTheDocument();expect(screen.queryByText('raw backend english')).not.toBeInTheDocument()});
-
-test('PATCH 404 preserves edits and shows product-not-found save copy without replacing page',async()=>{getMock.mockResolvedValue(detail);patchMock.mockRejectedValue(apiError(404,'PRODUCT_NOT_FOUND'));const router=renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt už nebyl nalezen. Vaše změny zůstaly zachované.')).toBeInTheDocument();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();expect(router.state.location.pathname).toBe('/admin/produkty/p1')});
-
+test('EDIT renders loading before GET, ignores variants, hydrates clean baseline and PATCHes only changed field', async () => {
+  const pending = deferred<typeof detail>();
+  getMock.mockReturnValueOnce(pending.promise);
+  const router = renderRouter('/admin/produkty/p1');
+  expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');
+  expect(screen.queryByLabelText('Název')).not.toBeInTheDocument();
+  await act(async () => pending.resolve(detail));
+  await screen.findByDisplayValue('Sofia');
+  expect(save()).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
+  patchMock.mockResolvedValue({...product, color: 'Růžová'});
+  fireEvent.click(save());
+  await screen.findByText('Změny byly uloženy.');
+  expect(patchMock).toHaveBeenCalledWith(expect.objectContaining({productId: 'p1', body: {color: 'Růžová'}}));
+  expect(router.state.location.pathname).toBe('/admin/produkty/p1');
+  expect(save()).toBeDisabled();
+});
+test('failed PATCH preserves current values and dirty state', async () => {
+  await openDirty(product);
+  patchMock.mockRejectedValue(apiError(null, 'ADMIN_NETWORK_ERROR', 'network'));
+  fireEvent.click(save());
+  await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+});
+test('GET retry reloads after network error', async () => {
+  getMock.mockRejectedValueOnce(apiError(null, 'ADMIN_NETWORK_ERROR', 'network')).mockResolvedValueOnce(detail);
+  renderRouter('/admin/produkty/p1');
+  await screen.findByText('Produkt se nepodařilo načíst');
+  fireEvent.click(screen.getByRole('button', {name: 'Zkusit znovu'}));
+  expect(await screen.findByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(getMock).toHaveBeenCalledTimes(2);
+});
+test.each([[404, 'PRODUCT_NOT_FOUND'], [400, 'INVALID_ID']] as const)('GET %s %s renders frozen not-found state', async (httpStatus, code) => {
+  getMock.mockRejectedValue(apiError(httpStatus, code));
+  renderRouter('/admin/produkty/bad');
+  expect(await screen.findByText('Produkt nebyl nalezen')).toBeInTheDocument();
+  expect(screen.getByText('Produkt už nemusí existovat nebo odkaz není platný.')).toBeInTheDocument();
+  expect(screen.getByRole('link', {name: 'Zpět na produkty'})).toBeInTheDocument();
+});
+test('cancelled GET is silent', async () => {
+  getMock.mockRejectedValue(apiError(null, 'ADMIN_REQUEST_CANCELLED', 'cancelled'));
+  renderRouter('/admin/produkty/p1');
+  await waitFor(() => expect(getMock).toHaveBeenCalled());
+  expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');
+  expect(screen.queryByText('Produkt se nepodařilo načíst')).not.toBeInTheDocument();
+});
+test('slug conflict maps inline and focuses slug without raw backend copy', async () => {
+  createMock.mockRejectedValue(apiError(409, 'SLUG_ALREADY_EXISTS'));
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.change(screen.getByLabelText('URL / slug'), {target: {value: 'sofia'}});
+  fireEvent.click(save());
+  await screen.findByText('Tuto URL / slug už používá jiný produkt. Zvolte jiný.');
+  await waitFor(() => expect(screen.getByLabelText('URL / slug')).toHaveFocus());
+  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+});
+test('recognized VALIDATION_ERROR detail maps inline and focuses field', async () => {
+  createMock.mockRejectedValue(apiError(400, 'VALIDATION_ERROR', 'unexpected', ['seo.description']));
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.click(save());
+  await screen.findByText('Zkontrolujte SEO popis.');
+  await waitFor(() => expect(screen.getByLabelText('SEO popis')).toHaveFocus());
+});
+test('unsupported VALIDATION_ERROR uses safe form fallback', async () => {
+  createMock.mockRejectedValue(apiError(400, 'VALIDATION_ERROR', 'unexpected', ['variants.0.size']));
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.click(save());
+  await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.');
+  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+});
+test('PATCH 404 preserves edits and shows product-not-found save copy without replacing page', async () => {
+  await openDirty(product);
+  patchMock.mockRejectedValue(apiError(404, 'PRODUCT_NOT_FOUND'));
+  fireEvent.click(save());
+  await screen.findByText('Produkt už nebyl nalezen. Vaše změny zůstaly zachované.');
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+});
 test.each([
- [401,'ADMIN_UNAUTHORIZED','unauthorized'],[403,'ADMIN_FORBIDDEN','forbidden'],[503,'ADMIN_API_DISABLED','admin_disabled'],[503,'ADMIN_API_CONFIGURATION_ERROR','configuration_error']
-] as const)('access error %s %s is delegated to boundary context',async(status,code,kind)=>{const error=apiError(status,code,kind);mockHandleRequestError.mockImplementation(e=>e===error);createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalledWith(error));expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument()});
-test('network is not consumed by access context and uses save copy',async()=>{const error=apiError(null,'ADMIN_NETWORK_ERROR','network');createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')).toBeInTheDocument();expect(mockHandleRequestError).toHaveBeenCalledWith(error)});
-
-test('dirty Core values and baseline survive media conflict plus media-only refresh',async()=>{
- const a={publicId:'a',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'A'},b={...a,publicId:'b',alt:'B'};
- const withPhotos={...product,photos:[a,b]};getMock.mockResolvedValueOnce({product:withPhotos,variants:[]}).mockResolvedValueOnce({product:{...withPhotos,photos:[b,a]},variants:[]});
- reorderMock.mockRejectedValue(apiError(409,'PHOTO_STATE_CONFLICT'));
- renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');
- fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
- fireEvent.click(screen.getAllByRole('button',{name:'Posunout později'})[0]);fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
- expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fotografie'}));
- await waitFor(()=>expect(getMock).toHaveBeenCalledTimes(2));expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
- fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
+  [401, 'ADMIN_UNAUTHORIZED', 'unauthorized'], [403, 'ADMIN_FORBIDDEN', 'forbidden'],
+  [503, 'ADMIN_API_DISABLED', 'admin_disabled'], [503, 'ADMIN_API_CONFIGURATION_ERROR', 'configuration_error'],
+] as const)('access error %s %s is delegated to boundary context', async (httpStatus, code, kind) => {
+  const failure = apiError(httpStatus, code, kind);
+  mockHandleRequestError.mockImplementation(e => e === failure);
+  createMock.mockRejectedValue(failure);
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.click(save());
+  await waitFor(() => expect(mockHandleRequestError).toHaveBeenCalledWith(failure));
+  expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument();
+});
+test('network is not consumed by access context and uses save copy', async () => {
+  const failure = apiError(null, 'ADMIN_NETWORK_ERROR', 'network');
+  createMock.mockRejectedValue(failure);
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.click(save());
+  await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');
+  expect(mockHandleRequestError).toHaveBeenCalledWith(failure);
 });
 
-test('dirty Core survives upload ALT and delete media mutations without Core PATCH',async()=>{
- const img={publicId:'a',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'A'};const withPhoto={...product,photos:[img]};
- getMock.mockResolvedValue({product:withPhoto,variants:[]});renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
- altMock.mockResolvedValue({product:{...withPhoto,photos:[{...img,alt:'Nový ALT'}]}} as any);fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Nový ALT'}});fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));await waitFor(()=>expect(altMock).toHaveBeenCalled());
- expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();
- deleteMock.mockRejectedValue(apiError(404,'PHOTO_NOT_FOUND'));fireEvent.click(screen.getByRole('button',{name:'Odebrat fotografii'}));fireEvent.click(screen.getByRole('dialog').querySelector('button:last-child')!);await waitFor(()=>expect(deleteMock).toHaveBeenCalled());expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();
+test('dirty Core baseline survives applied order success conflict and media refresh with foreign Core values', async () => {
+  const a = photo('a'), b = photo('b');
+  await openDirty({...product, photos: [a, b]});
+  reorderMock.mockResolvedValueOnce({product: {...product, color: 'Server-only', photos: [b, a]}});
+  fireEvent.click(screen.getAllByRole('button', {name: 'Posunout později'})[0]);
+  fireEvent.click(screen.getByRole('button', {name: 'Uložit pořadí'}));
+  await waitFor(() => expect(status()).toHaveTextContent('Pořadí fotografií bylo uloženo.'));
+  await waitFor(() => expect(screen.queryByRole('button', {name: 'Uložit pořadí'})).not.toBeInTheDocument());
+  checkCoreUntouched();
+  reorderMock.mockRejectedValueOnce(apiError(409, 'PHOTO_STATE_CONFLICT'));
+  fireEvent.click(screen.getAllByRole('button', {name: 'Posunout později'})[0]);
+  fireEvent.click(screen.getByRole('button', {name: 'Uložit pořadí'}));
+  await waitFor(() => expect(status()).toHaveTextContent('Fotografie se mezitím změnily jinde.'));
+  checkCoreUntouched();
+  const fresh = deferred<Awaited<ReturnType<typeof getAdminProductDetail>>>();
+  getMock.mockReturnValueOnce(fresh.promise);
+  fireEvent.click(screen.getByRole('button', {name: 'Načíst aktuální fotografie'}));
+  await act(async () => fresh.resolve({product: {...product, color: 'Do not hydrate', photos: [b, photo('c')]}, variants: []}));
+  await waitFor(() => expect(media().querySelector('[data-photo-id="c"]')).toBeInTheDocument());
+  expect(media().querySelector('[data-photo-id="a"]')).not.toBeInTheDocument();
+  checkCoreUntouched();
 });
-test('dirty Core survives successful upload and upload uses media pipeline only',async()=>{
- const withPhotos={...product,photos:[]};getMock.mockResolvedValue({product:withPhotos,variants:[]});signMock.mockResolvedValue({upload:{cloudName:'c',apiKey:'k',signature:'s',resourceType:'image',params:{timestamp:1,folder:'products/p1',public_id:'x',overwrite:false,allowed_formats:'jpg'}}} as any);providerMock.mockResolvedValue({publicId:'products/p1/x'});completeMock.mockResolvedValue({product:{...withPhotos,photos:[{publicId:'products/p1/x',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'X'}]}} as any);
- renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
- const input=document.querySelector('input[type="file"]') as HTMLInputElement;fireEvent.change(input,{target:{files:[new File(['x'],'x.jpg',{type:'image/jpeg'})]}});fireEvent.click(screen.getByRole('button',{name:'Nahrát fotografii'}));await waitFor(()=>expect(completeMock).toHaveBeenCalled());expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+
+test('dirty Core survives applied ALT success and failed delete then refresh without losing baseline or validation', async () => {
+  const a = photo('a');
+  await openDirty({...product, photos: [a]});
+  altMock.mockResolvedValueOnce({product: {...product, color: 'Do not hydrate', photos: [{...a, alt: 'Nový ALT'}]}});
+  fireEvent.click(screen.getByRole('button', {name: 'Upravit ALT'}));
+  fireEvent.change(screen.getByLabelText('Alternativní text'), {target: {value: 'Nový ALT'}});
+  fireEvent.click(screen.getByRole('button', {name: 'Uložit ALT'}));
+  await waitFor(() => expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
+  expect(screen.queryByRole('button', {name: 'Uložit ALT'})).not.toBeInTheDocument();
+  expect(within(media()).getByText('Nový ALT')).toBeInTheDocument();
+  checkCoreUntouched();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: ''}});
+  fireEvent.click(save());
+  expect(screen.getByText('Název je povinný.')).toBeInTheDocument();
+  deleteMock.mockRejectedValueOnce(apiError(404, 'PHOTO_NOT_FOUND'));
+  fireEvent.click(screen.getByRole('button', {name: 'Odebrat fotografii'}));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Odebrat fotografii'}));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(() => expect(status()).toHaveTextContent('Fotografie už u produktu není.'));
+  expect(media().querySelector('[data-photo-id="a"]')).toBeInTheDocument();
+  getMock.mockResolvedValueOnce({product: {...product, color: 'Server-only', photos: []}, variants: []});
+  fireEvent.click(screen.getByRole('button', {name: 'Načíst aktuální fotografie'}));
+  await within(media()).findByText('Produkt zatím nemá žádné fotografie.');
+  expect(screen.getByText('Název je povinný.')).toBeInTheDocument();
+  expect(screen.getByLabelText('Název')).toHaveValue('');
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(patchMock).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  checkCoreUntouched();
+});
+
+test('successful delete reconciles photos while independent Core Save only PATCHes changed Core field', async () => {
+  const a = photo('a'), b = photo('b');
+  await openDirty({...product, photos: [a, b]});
+  deleteMock.mockResolvedValueOnce({product: {...product, color: 'Foreign', photos: [b]}});
+  fireEvent.click(screen.getAllByRole('button', {name: 'Odebrat fotografii'})[0]);
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Odebrat fotografii'}));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(() => expect(media().querySelector('[data-photo-id="a"]')).not.toBeInTheDocument());
+  expect(media().querySelector('[data-photo-id="b"]')).toBeInTheDocument();
+  checkCoreUntouched();
+  patchMock.mockResolvedValueOnce({...product, color: 'Růžová', photos: [a, b]});
+  fireEvent.click(save());
+  await screen.findByText('Změny byly uloženy.');
+  expect(patchMock).toHaveBeenCalledWith(expect.objectContaining({body: {color: 'Růžová'}}));
+  expect(save()).toBeDisabled();
+  expect(media().querySelector('[data-photo-id="a"]')).not.toBeInTheDocument();
+});
+
+test('real candidate helper allows upload COMPLETE; retained same-ID retry applies once and preserves dirty Core', async () => {
+  await openDirty(product);
+  configureUpload();
+  completeMock.mockRejectedValueOnce(apiError(null, 'ADMIN_NETWORK_ERROR', 'network'));
+  selectAndUpload();
+  await screen.findByRole('button', {name: 'Zkusit připojit znovu'});
+  await waitFor(() => expect(status()).toHaveTextContent('Připojení fotografie není potvrzené'));
+  checkCoreUntouched();
+  completeMock.mockResolvedValueOnce({product: {...product, color: 'Foreign', photos: [photo('products/p1/x')]}});
+  fireEvent.click(screen.getByRole('button', {name: 'Zkusit připojit znovu'}));
+  await within(media()).findByText('1 / 10 uložených');
+  await waitFor(() => expect(status()).toHaveTextContent('Fotografie byla připojena k produktu.'));
+  expect(media().querySelectorAll('[data-photo-id="products/p1/x"]')).toHaveLength(1);
+  expect(completeMock.mock.calls.map(([input]) => input.publicId)).toEqual(['products/p1/x', 'products/p1/x']);
+  expect(signMock).toHaveBeenCalledTimes(1);
+  expect(providerMock).toHaveBeenCalledTimes(1);
+  checkCoreUntouched();
+});
+
+test('mismatching provider ID blocks attachment while preserving candidate guard and dirty Core', async () => {
+  await openDirty(product);
+  configureUpload();
+  providerMock.mockResolvedValueOnce({publicId: 'products/other/unexpected'});
+  selectAndUpload();
+  await waitFor(() => expect(status()).toHaveTextContent('Připojení je zablokované.'));
+  expect(completeMock).not.toHaveBeenCalled();
+  expect(screen.queryByRole('button', {name: 'Nahrát fotografii'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', {name: 'Zkusit připojit znovu'})).not.toBeInTheDocument();
+  checkCoreUntouched();
+});
+
+test('unknown provider and 502 recovery keep one actionable retry using the real error class', async () => {
+  await openDirty(product);
+  configureUpload();
+  providerMock.mockRejectedValueOnce(new ProviderUploadError('unknown', 'lost response'));
+  completeMock.mockRejectedValueOnce(apiError(502, 'CLOUDINARY_OPERATION_FAILED'));
+  selectAndUpload();
+  const firstRetry = await screen.findByRole('button', {name: 'Ověřit a připojit'});
+  fireEvent.click(firstRetry);
+  await waitFor(() => expect(status()).toHaveTextContent('Služba fotografie nepotvrdila'));
+  const retries = within(media()).getAllByRole('button').filter(button => /Ověřit a připojit|Zkusit ověřit znovu/.test(button.textContent ?? ''));
+  expect(retries).toHaveLength(1);
+  expect(retries[0]).toBeEnabled();
+  expect(completeMock.mock.calls[0][0].publicId).toBe('products/p1/x');
+  expect(signMock).toHaveBeenCalledTimes(1);
+  expect(providerMock).toHaveBeenCalledTimes(1);
+  checkCoreUntouched();
 });

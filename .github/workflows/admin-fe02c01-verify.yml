@@ -15,6 +15,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: TypeScript
         run: npm run typecheck
+      - name: R2 focused integration first
+        run: >
+          npm test -- --watchAll=false --runInBand
+          src/admin/products/useProductMediaController.test.tsx
+          src/admin/products/AdminProductCorePage.test.tsx
+          src/admin/products/ProductMediaSection.test.tsx
       - name: Focused unit and integration
         run: >
           npm test -- --watchAll=false --runInBand
@@ -62,35 +68,42 @@ jobs:
         if: always()
         run: |
           mkdir -p test-evidence/admin-fe02c01
-          cp /tmp/admin-fe02c01.log test-evidence/admin-fe02c01/configured-server.log || true
-          cp /tmp/admin-fe02c01-no-env.log test-evidence/admin-fe02c01/no-env-server.log || true
-          find test-results -type f -maxdepth 5 -print | while read -r file; do base=$(basename "$file"); cp "$file" "test-evidence/admin-fe02c01/diagnostic-$base"; done 2>/dev/null || true
-          find test-evidence/admin-fe02c01 -type f -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
-          cat test-evidence/admin-fe02c01/MANIFEST.txt
+          for f in /tmp/admin-fe02c01.log /tmp/admin-fe02c01-no-env.log; do if test -f "$f"; then cp "$f" test-evidence/admin-fe02c01/; fi; done
+          if test -d test-results; then cp -R test-results test-evidence/admin-fe02c01/02c-results; fi
       - name: ADMIN-FE-02B regression
+        id: browser02b
         run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
       - name: Capture 02B failure evidence
-        if: failure()
-        run: find test-results -type f -maxdepth 5 | while read -r file; do cp "$file" "test-evidence/admin-fe02c01/02b-$(basename "$file")"; done 2>/dev/null || true
+        if: failure() && steps.browser02b.outcome == 'failure'
+        run: cp -R test-results test-evidence/admin-fe02c01/02b-results
       - name: ADMIN-FE-02A regression
+        id: browser02a
         run: npx playwright test .github/admin-fe02a.spec.js --reporter=line
       - name: Capture 02A failure evidence
-        if: failure()
-        run: find test-results -type f -maxdepth 5 | while read -r file; do cp "$file" "test-evidence/admin-fe02c01/02a-$(basename "$file")"; done 2>/dev/null || true
+        if: failure() && steps.browser02a.outcome == 'failure'
+        run: cp -R test-results test-evidence/admin-fe02c01/02a-results
       - name: ADMIN-FE-01 regression
+        id: browser01
         run: npx playwright test .github/admin-fe01.spec.js --reporter=line
+      - name: Capture 01 failure evidence
+        if: failure() && steps.browser01.outcome == 'failure'
+        run: cp -R test-results test-evidence/admin-fe02c01/01-results
       - name: DESIGN-02 regression
+        id: browserDesign
         run: npx playwright test .github/design02f.spec.js --reporter=line
+      - name: Capture DESIGN-02 failure evidence
+        if: failure() && steps.browserDesign.outcome == 'failure'
+        run: cp -R test-results test-evidence/admin-fe02c01/design02-results
       - name: Final evidence manifest
         if: always()
         run: |
-          find test-evidence/admin-fe02c01 -type f -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
+          find test-evidence/admin-fe02c01 -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-fe02c01/MANIFEST.txt
           cat test-evidence/admin-fe02c01/MANIFEST.txt
-
       - name: Upload verification artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: admin-fe02c01-${{ github.sha }}
-          if-no-files-found: ignore
+          if-no-files-found: error
           path: test-evidence/admin-fe02c01/
+          include-hidden-files: true
