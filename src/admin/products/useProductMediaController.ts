@@ -43,6 +43,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [refreshReason, setRefreshReason] = useState<'photo-missing' | 'conflict' | 'reconciled' | 'refresh-failed' | null>(null);
   const [lostAltNotice, setLostAltNotice] = useState<string | null>(null);
+  const [reconciliationNotice, setReconciliationNotice] = useState<string | null>(null);
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle');
   const [progress, setProgress] = useState<number | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
@@ -94,6 +95,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
       setFeedback(null);
       setRefreshReason(null);
       setLostAltNotice(null);
+      setReconciliationNotice(null);
       return;
     }
     const result = reconcileMediaDrafts({
@@ -118,20 +120,22 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const safe = (generation: number) => mounted.current && productRef.current === productId && generation === writeGen.current;
   const apply = (product: AdminProduct) => {
     const previousPhotos = photosRef.current;
+    const previousDrafts = draftsRef.current;
+    const result = reconcileMediaDrafts({previousPhotos, previousDrafts, nextPhotos: product.photos});
+    // Reconcile once, outside state updaters. Their replay must not overwrite later success feedback.
     setPhotos(product.photos);
-    setDrafts(d => {
-      const result = reconcileMediaDrafts({previousPhotos, previousDrafts: d, nextPhotos: product.photos});
-      if (result.membershipChanged) {
-        setRefreshReason('reconciled');
-        setFeedback('Seznam fotografií se změnil. Pořadí bylo sjednoceno s aktuálním stavem.');
+    setDrafts(result.drafts);
+    if (result.membershipChanged) {
+      setRefreshReason('reconciled');
+      if (isOrderDirty(previousPhotos, previousDrafts.orderIds)) {
+        setReconciliationNotice('Seznam fotografií se změnil. Pořadí bylo sjednoceno s aktuálním stavem.');
       }
-      if (editingAlt && result.missingAltTargetIds.includes(editingAlt)) {
-        setLostAltNotice(d.altById[editingAlt] ?? '');
-        setEditingAlt(null);
-        setFeedback('Upravovaná fotografie už u produktu není. Rozpracovaný ALT text nebyl znovu připojen.');
-      }
-      return result.drafts;
-    });
+    }
+    if (editingAlt && result.missingAltTargetIds.includes(editingAlt)) {
+      setLostAltNotice(previousDrafts.altById[editingAlt] ?? '');
+      setEditingAlt(null);
+      setReconciliationNotice('Upravovaná fotografie už u produktu není. Rozpracovaný ALT text nebyl znovu připojen.');
+    }
     setGuard('available');
   };
   const fail = (error: unknown, generation: number, defaultCopy: string) => {
@@ -362,7 +366,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     } finally {finish(generation);}
   };
   return {
-    photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, uploadPhase,
+    photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, uploadPhase,
     progress, attempt, editingAlt, orderDirty, risk, selectFile, discardUpload, upload, recover,
     startAlt, cancelAlt, saveAlt, move, cancelOrder, saveOrder, remove, refresh,
   };
