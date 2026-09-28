@@ -2,6 +2,7 @@ import {act,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {createMemoryRouter,RouterProvider} from 'react-router-dom';
 import {AdminApiError} from '../api/errors';
 import {createAdminProduct,getAdminProductDetail,updateAdminProduct} from '../api/products';
+import {reorderProductPhotos} from '../api/productMedia';
 import {AdminProductCorePage} from './AdminProductCorePage';
 
 jest.mock('../api/errors',()=>{class AdminApiError extends Error{status;code;details;kind;constructor(input:any){super(input.message);this.status=input.status??null;this.code=input.code;this.details=input.details;this.kind=input.kind}}return {AdminApiError}});
@@ -13,6 +14,7 @@ jest.mock('../api/productMedia',()=>({completeProductPhoto:jest.fn(),deleteProdu
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const getMock=getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
+const reorderMock=reorderProductPhotos as jest.MockedFunction<typeof reorderProductPhotos>;
 const patchMock=updateAdminProduct as jest.MockedFunction<typeof updateAdminProduct>;
 const product={id:'p1',name:'Sofia',slug:'sofia',description:'Jemné šaty',category:'dress' as const,gender:'girls' as const,color:'Bílá',occasion:['wedding' as const],ageTags:['3–4 roky'],brand:'',familyLookGroup:'',rentalEnabled:false,saleEnabled:false,defaultDeposit:0,photos:[],status:'draft' as const,seo:{noIndex:false},createdAt:'2026-09-01T00:00:00Z',updatedAt:'2026-09-01T00:00:00Z'};
 const detail={product,variants:[{id:'ignored-variant'}]};
@@ -72,3 +74,15 @@ test.each([
  [401,'ADMIN_UNAUTHORIZED','unauthorized'],[403,'ADMIN_FORBIDDEN','forbidden'],[503,'ADMIN_API_DISABLED','admin_disabled'],[503,'ADMIN_API_CONFIGURATION_ERROR','configuration_error']
 ] as const)('access error %s %s is delegated to boundary context',async(status,code,kind)=>{const error=apiError(status,code,kind);mockHandleRequestError.mockImplementation(e=>e===error);createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalledWith(error));expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument()});
 test('network is not consumed by access context and uses save copy',async()=>{const error=apiError(null,'ADMIN_NETWORK_ERROR','network');createMock.mockRejectedValue(error);renderRouter();fireEvent.change(screen.getByLabelText('Název'),{target:{value:'Sofia'}});fireEvent.click(screen.getByRole('button',{name:'Uložit'}));expect(await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.')).toBeInTheDocument();expect(mockHandleRequestError).toHaveBeenCalledWith(error)});
+
+test('dirty Core values and baseline survive media conflict plus media-only refresh',async()=>{
+ const a={publicId:'a',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'A'},b={...a,publicId:'b',alt:'B'};
+ const withPhotos={...product,photos:[a,b]};getMock.mockResolvedValueOnce({product:withPhotos,variants:[]}).mockResolvedValueOnce({product:{...withPhotos,photos:[b,a]},variants:[]});
+ reorderMock.mockRejectedValue(apiError(409,'PHOTO_STATE_CONFLICT'));
+ renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');
+ fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+ fireEvent.click(screen.getByRole('button',{name:'Posunout později'}).first());fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
+ expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fotografie'}));
+ await waitFor(()=>expect(getMock).toHaveBeenCalledTimes(2));expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
+ fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
+});
