@@ -1,5 +1,4 @@
 import {act, fireEvent, render, screen} from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import {Dialog} from './Dialog';
 
 function frames() {
@@ -40,6 +39,7 @@ test('deferred close restores global state before resolving a programmatic headi
   });
   const view = render(<Dialog open title="Delete" onEscape={() => undefined} resolveRestoreFocus={resolve}><button>Zrušit</button></Dialog>);
   view.rerender(<Dialog open={false} title="Delete" onEscape={() => undefined} resolveRestoreFocus={resolve}><button>Zrušit</button></Dialog>);
+  expect(resolve).not.toHaveBeenCalled();
   flush();
   expect(heading).toHaveFocus();
   expect(resolve).toHaveBeenCalledTimes(1);
@@ -54,7 +54,7 @@ test('old deferred cleanup never steals focus behind a replacement modal', () =>
   const trigger = document.createElement('button');
   trigger.textContent = 'Trigger';
   document.body.appendChild(trigger);
-  userEvent.click(trigger);
+  trigger.focus();
   const view = render(<Dialog open title="Delete" onEscape={() => undefined}><button>Zrušit</button></Dialog>);
   view.rerender(<Dialog open={false} title="Delete" onEscape={() => undefined}><button>Zrušit</button></Dialog>);
   view.rerender(<Dialog open title="Leave" onEscape={() => undefined}><button>Zůstat</button></Dialog>);
@@ -69,12 +69,11 @@ test('unmount cancels deferred restoration even if the old external trigger rema
   const flush = frames();
   const trigger = document.createElement('button');
   document.body.appendChild(trigger);
-  userEvent.click(trigger);
+  trigger.focus();
   const resolve = jest.fn(() => trigger);
   const view = render(<Dialog open title="Delete" onEscape={() => undefined} resolveRestoreFocus={resolve}><button>Zrušit</button></Dialog>);
   view.rerender(<Dialog open={false} title="Delete" onEscape={() => undefined} resolveRestoreFocus={resolve}><button>Zrušit</button></Dialog>);
   view.unmount();
-  resolve.mockClear();
   flush();
   expect(trigger).not.toHaveFocus();
   expect(resolve).not.toHaveBeenCalled();
