@@ -17,18 +17,31 @@ const adminOrigin = 'http://admin-api.test';
 const productsPath = '/api/v2/admin/products';
 const matchesAdminProducts = url => url.origin === adminOrigin &&
   (url.pathname === productsPath || url.pathname.startsWith(`${productsPath}/`));
-const row = (page, id) => page.locator('[data-photo-id]').filter({has: page.locator(`[data-photo-identity="${id}"]`)});
 const states = new WeakMap();
 const output = (name, value) => fs.writeFileSync(path.join(EVIDENCE, name), JSON.stringify(value, null, 2));
 const json = (route, body, status = 200) => route.fulfill({status, contentType: 'application/json', body: JSON.stringify(body)});
+const requestIdentity = request => {
+  const url = new URL(request.url());
+  // Diagnostics record routes, never query values, credentials or headers.
+  return {method: request.method(), origin: url.origin, path: url.pathname};
+};
 async function mocks(page, seed = product, options = {}) {
-  const state = {detailHits: 0, currentProduct: structuredClone(seed), requests: [], unexpected: [], sign: 0, provider: 0, complete: []};
+  const state = {detailHits: 0, currentProduct: structuredClone(seed), requests: [], unexpected: [], sdkStubs: [], sign: 0, provider: 0, complete: []};
   const failures = [...(options.completeFailures || [])];
   states.set(page, state);
   // The isolated suite never falls through to external .test/provider/production networking.
   await page.route(url => /^https?:$/.test(url.protocol) && url.origin !== APP, async route => {
-    state.unexpected.push({method: route.request().method(), url: route.request().url()});
+    state.unexpected.push(requestIdentity(route.request()));
     await route.abort('failed');
+  });
+  // These two globally mounted scripts are unrelated to the authenticated Product editor.
+  // Stub their exact script paths; do not allow a broader Google origin or any API request.
+  await page.route(url => (url.origin === 'https://maps.googleapis.com' && url.pathname === '/maps/api/js') ||
+    (url.origin === 'https://accounts.google.com' && url.pathname === '/gsi/client'), async route => {
+    expect(route.request().method()).toBe('GET');
+    expect(route.request().resourceType()).toBe('script');
+    state.sdkStubs.push(requestIdentity(route.request()));
+    await route.fulfill({status: 200, contentType: 'application/javascript', body: '/* isolated SDK fixture: unused on Product editor */'});
   });
   await page.addInitScript(() => localStorage.setItem('persist:auth', JSON.stringify({token: JSON.stringify('admin-test-token')})));
   await page.route('https://example.test/api/users/current', route => json(route, {user: {_id: 'admin-user'}}));
@@ -77,7 +90,7 @@ async function mocks(page, seed = product, options = {}) {
       if (!state.currentProduct.photos.some(p => p.publicId === body.publicId)) state.currentProduct.photos.push(photo(body.publicId));
       return json(route, {product: state.currentProduct});
     }
-    state.unexpected.push({method, url: request.url()});
+    state.unexpected.push(requestIdentity(request));
     return route.abort('failed');
   });
   if (options.upload) await page.route('https://api.cloudinary.com/v1_1/fixture/image/upload', route => {
@@ -106,7 +119,7 @@ async function chooseFile(page) {
 test.afterEach(async ({page}, testInfo) => {
   const state = states.get(page);
   if (state) {
-    await testInfo.attach('mock-network-summary', {body: JSON.stringify({requests: state.requests, unexpected: state.unexpected}), contentType: 'application/json'});
+    await testInfo.attach('mock-network-summary', {body: JSON.stringify({requests: state.requests, unexpected: state.unexpected, sdkStubs: state.sdkStubs}), contentType: 'application/json'});
     expect(state.unexpected).toEqual([]);
   }
 });
