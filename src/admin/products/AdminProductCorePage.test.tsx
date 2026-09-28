@@ -88,7 +88,7 @@ test('dirty Core values and baseline survive media conflict plus media-only refr
  reorderMock.mockRejectedValue(apiError(409,'PHOTO_STATE_CONFLICT'));
  renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');
  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
- fireEvent.click(screen.getByRole('button',{name:'Posunout později'}).first());fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
+ fireEvent.click(screen.getAllByRole('button',{name:'Posunout později'})[0]);fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
  expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fotografie'}));
  await waitFor(()=>expect(getMock).toHaveBeenCalledTimes(2));expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
