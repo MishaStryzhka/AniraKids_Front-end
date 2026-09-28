@@ -2,7 +2,8 @@ import {act,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {createMemoryRouter,RouterProvider} from 'react-router-dom';
 import {AdminApiError} from '../api/errors';
 import {createAdminProduct,getAdminProductDetail,updateAdminProduct} from '../api/products';
-import {reorderProductPhotos} from '../api/productMedia';
+import {completeProductPhoto,deleteProductPhoto,reorderProductPhotos,signProductPhoto,updateProductPhotoAlt} from '../api/productMedia';
+import {uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
 
 jest.mock('../api/errors',()=>{class AdminApiError extends Error{status;code;details;kind;constructor(input:any){super(input.message);this.status=input.status??null;this.code=input.code;this.details=input.details;this.kind=input.kind}}return {AdminApiError}});
@@ -10,10 +11,16 @@ jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'admin-token'})}));
 const mockHandleRequestError=jest.fn();
 jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockHandleRequestError})}));
 jest.mock('../api/products',()=>({createAdminProduct:jest.fn(),getAdminProductDetail:jest.fn(),updateAdminProduct:jest.fn()}));
+jest.mock('../media/productMediaProviderTransport',()=>({uploadProductMedia:jest.fn(),ProviderUploadError:class ProviderUploadError extends Error{constructor(public outcome:string,message:string){super(message)}}}));
 jest.mock('../api/productMedia',()=>({completeProductPhoto:jest.fn(),deleteProductPhoto:jest.fn(),productMediaCandidate:jest.fn(),reorderProductPhotos:jest.fn(),signProductPhoto:jest.fn(),updateProductPhotoAlt:jest.fn()}));
 
 const createMock=createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const getMock=getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
+const signMock=signProductPhoto as jest.MockedFunction<typeof signProductPhoto>;
+const completeMock=completeProductPhoto as jest.MockedFunction<typeof completeProductPhoto>;
+const altMock=updateProductPhotoAlt as jest.MockedFunction<typeof updateProductPhotoAlt>;
+const deleteMock=deleteProductPhoto as jest.MockedFunction<typeof deleteProductPhoto>;
+const providerMock=uploadProductMedia as jest.MockedFunction<typeof uploadProductMedia>;
 const reorderMock=reorderProductPhotos as jest.MockedFunction<typeof reorderProductPhotos>;
 const patchMock=updateAdminProduct as jest.MockedFunction<typeof updateAdminProduct>;
 const product={id:'p1',name:'Sofia',slug:'sofia',description:'Jemné šaty',category:'dress' as const,gender:'girls' as const,color:'Bílá',occasion:['wedding' as const],ageTags:['3–4 roky'],brand:'',familyLookGroup:'',rentalEnabled:false,saleEnabled:false,defaultDeposit:0,photos:[],status:'draft' as const,seo:{noIndex:false},createdAt:'2026-09-01T00:00:00Z',updatedAt:'2026-09-01T00:00:00Z'};
@@ -29,7 +36,7 @@ function renderRouter(initial='/admin/produkty/novy'){
  render(<RouterProvider router={router}/>);
  return router;
 }
-beforeEach(()=>{jest.clearAllMocks();mockHandleRequestError.mockReturnValue(false)});
+beforeEach(()=>{jest.clearAllMocks();mockHandleRequestError.mockReturnValue(false);(URL as any).createObjectURL=jest.fn(()=> 'blob:test');(URL as any).revokeObjectURL=jest.fn()});
 
 test('CREATE starts clean, posts only name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback',async()=>{
  createMock.mockResolvedValue(product);const router=renderRouter();
@@ -85,4 +92,17 @@ test('dirty Core values and baseline survive media conflict plus media-only refr
  expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fotografie'}));
  await waitFor(()=>expect(getMock).toHaveBeenCalledTimes(2));expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Uložit'})).toBeEnabled();
  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(screen.getByRole('button',{name:'Uložit'})).toBeDisabled();
+});
+
+test('dirty Core survives upload ALT and delete media mutations without Core PATCH',async()=>{
+ const img={publicId:'a',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'A'};const withPhoto={...product,photos:[img]};
+ getMock.mockResolvedValue({product:withPhoto,variants:[]});renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+ altMock.mockResolvedValue({product:{...withPhoto,photos:[{...img,alt:'Nový ALT'}]}} as any);fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Nový ALT'}});fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));await waitFor(()=>expect(altMock).toHaveBeenCalled());
+ expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();
+ deleteMock.mockRejectedValue(apiError(404,'PHOTO_NOT_FOUND'));fireEvent.click(screen.getByRole('button',{name:'Odebrat fotografii'}));fireEvent.click(screen.getByRole('dialog').querySelector('button:last-child')!);await waitFor(()=>expect(deleteMock).toHaveBeenCalled());expect(await screen.findByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();
+});
+test('dirty Core survives successful upload and upload uses media pipeline only',async()=>{
+ const withPhotos={...product,photos:[]};getMock.mockResolvedValue({product:withPhotos,variants:[]});signMock.mockResolvedValue({upload:{cloudName:'c',apiKey:'k',signature:'s',resourceType:'image',params:{timestamp:1,folder:'products/p1',public_id:'x',overwrite:false,allowed_formats:'jpg'}}} as any);providerMock.mockResolvedValue({publicId:'products/p1/x'});completeMock.mockResolvedValue({product:{...withPhotos,photos:[{publicId:'products/p1/x',url:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',alt:'X'}]}} as any);
+ const {container}=render(<></>);renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+ const input=document.querySelector('input[type="file"]') as HTMLInputElement;fireEvent.change(input,{target:{files:[new File(['x'],'x.jpg',{type:'image/jpeg'})]}});fireEvent.click(screen.getByRole('button',{name:'Nahrát fotografii'}));await waitFor(()=>expect(completeMock).toHaveBeenCalled());expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).not.toHaveBeenCalled();expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
 });
