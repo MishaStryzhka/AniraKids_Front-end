@@ -75,8 +75,10 @@ async function openDirty(p: AdminProduct) {
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
 }
 function selectAndUpload() {
-  const input = within(media()).getByLabelText('Soubor fotografie') as HTMLInputElement;
-  fireEvent.change(input, {target: {files: [new File(['fixture'], 'x.jpg', {type: 'image/jpeg'})]}});
+  // Native file chooser is hidden behind the visible selection button.
+  const input = media().querySelector<HTMLInputElement>('input[type="file"]');
+  expect(input).not.toBeNull();
+  fireEvent.change(input!, {target: {files: [new File(['fixture'], 'x.jpg', {type: 'image/jpeg'})]}});
   fireEvent.click(screen.getByRole('button', {name: 'Nahrát fotografii'}));
 }
 function configureUpload() {
