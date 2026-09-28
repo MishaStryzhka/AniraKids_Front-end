@@ -54,7 +54,8 @@ const variantStyles = {
 const StyledButton = styled.button<{ $variant: ButtonVariant; $size: ButtonSize; $loading: boolean }>`
   position: relative;
   min-inline-size: 0;
-  block-size: ${({ $size }) => ($size === 'compact' ? t.control.height.compact : t.control.height.default)};
+  min-block-size: ${({ $size }) => ($size === 'compact' ? t.control.height.compact : t.control.height.default)};
+  block-size: auto;
   padding-inline: ${({ $size }) => ($size === 'compact' ? t.component.button.paddingInline.compact : t.component.button.paddingInline.default)};
   border: 1px solid transparent;
   border-radius: ${t.component.button.radius};
@@ -95,10 +96,14 @@ const StyledButton = styled.button<{ $variant: ButtonVariant; $size: ButtonSize;
 `;
 
 const Label = styled.span<{ $hidden: boolean }>`
+  min-inline-size: 0;
   display: inline-flex;
   align-items: center;
   gap: ${t.component.button.iconGap};
   color: ${({ $hidden }) => ($hidden ? 'transparent' : 'inherit')};
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
 `;
 
 const LoadingSpinner = styled.span`

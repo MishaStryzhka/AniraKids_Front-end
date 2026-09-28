@@ -33,7 +33,9 @@ const toneStyles = {
 };
 
 const Root = styled.span<{ $tone: StatusBadgeTone }>`
-  block-size: 28px;
+  min-block-size: 28px;
+  block-size: auto;
+  min-inline-size: 0;
   max-inline-size: 100%;
   padding-inline: ${t.space[2]};
   border-radius: ${t.radius.full};
@@ -45,7 +47,8 @@ const Root = styled.span<{ $tone: StatusBadgeTone }>`
   line-height: ${t.type.caption.lineHeight};
   font-weight: ${t.font.weight.semibold};
   letter-spacing: ${t.type.caption.letterSpacing};
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   ${({ $tone }) => toneStyles[$tone]}
 
   & > svg {
