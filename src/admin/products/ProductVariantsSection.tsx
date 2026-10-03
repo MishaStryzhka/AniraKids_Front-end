@@ -282,9 +282,12 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       return control ?? root.querySelector<HTMLElement>('#product-variants-title');
     };
 
-    const focusEditButton = (variantId: string) => scheduleFocus(() =>
-      sectionRef.current?.querySelector<HTMLElement>(`[data-variant-id="${CSS.escape(variantId)}"] [data-variant-edit]`) ?? fallbackFocus(),
-    );
+    const focusEditButton = (variantId: string) => scheduleFocus(() => {
+      const root = sectionRef.current;
+      const row = Array.from(root?.querySelectorAll<HTMLElement>('[data-variant-id]') ?? [])
+        .find(item => item.dataset.variantId === variantId);
+      return row?.querySelector<HTMLElement>('[data-variant-edit]') ?? fallbackFocus();
+    });
 
     const openEditor = (target: VariantEditorTarget, trigger?: HTMLElement | null) => {
       if (operation || productMissing) return;
