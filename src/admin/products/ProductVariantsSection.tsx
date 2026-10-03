@@ -348,7 +348,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           openEditor(target, pendingSwitchTriggerRef.current);
         });
       },
-    }), [openEditor, props.productId, scheduleFocus]);
+    }), [fallbackFocus, openEditor, props.productId, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !productMissing && Boolean(props.token);
 
