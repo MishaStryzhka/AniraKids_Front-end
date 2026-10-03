@@ -54,8 +54,8 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  expect(vb.width).toBeLessThanOrEqual(841);expect(Math.abs(vb.x-pb.x)).toBeLessThanOrEqual(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await expect(variants.getByText('98-104-110-116')).toBeVisible();
- await expect(variants.getByText('Aktivní')).toBeVisible();await expect(variants.getByText('Neaktivní')).toBeVisible();
- const first=variants.locator('[data-variant-id="v1"]'),size=first.getByText('98-104-110-116'),status=first.getByText('Aktivní'),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
+ await expect(variants.getByText('Aktivní',{exact:true})).toBeVisible();await expect(variants.getByText('Neaktivní',{exact:true})).toBeVisible();
+ const first=variants.locator('[data-variant-id="v1"]'),size=first.getByText('98-104-110-116'),status=first.getByText('Aktivní',{exact:true}),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
  const [sb,stb,skub,eb]=await Promise.all([size.boundingBox(),status.boundingBox(),sku.boundingBox(),edit.boundingBox()]);
  if(width<768){expect(eb.width).toBeGreaterThan(vb.width*0.8);expect(stb.y).toBeGreaterThan(sb.y);expect(skub.y).toBeGreaterThan(stb.y)}
  else if(width<1024){expect(Math.abs(sb.y-stb.y)).toBeLessThan(8);expect(Math.abs(skub.y-eb.y)).toBeLessThan(8);expect(skub.y).toBeGreaterThan(sb.y)}
