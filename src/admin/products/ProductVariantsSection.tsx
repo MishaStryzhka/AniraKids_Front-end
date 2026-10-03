@@ -179,6 +179,7 @@ export interface VariantSwitchIntent {
 }
 
 export interface ProductVariantsSectionHandle {
+  resolveCurrentEditorFocus(): HTMLElement | null;
   focusCurrentEditor(): void;
   discardAndOpen(target: VariantEditorTarget): void;
 }
@@ -327,6 +328,9 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     useImperativeHandle(ref, () => ({
+      resolveCurrentEditorFocus() {
+        return available(inputRef.current) ? inputRef.current : fallbackFocus();
+      },
       focusCurrentEditor() {
         scheduleFocus(() => inputRef.current ?? fallbackFocus());
       },
