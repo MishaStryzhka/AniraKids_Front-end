@@ -617,7 +617,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         <strong>Produkt zatím nemá žádné varianty</strong>
         <span>Přidejte první velikost produktu.</span>
         <Button
-          disabled={Boolean(operation) || productMissing}
+          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
