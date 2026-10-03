@@ -107,8 +107,17 @@ const Row = styled.div`
 const Size = styled.div`
   grid-area: size;
   min-inline-size: 0;
+  display: grid;
+  gap: ${t.space[1]};
   overflow-wrap: anywhere;
-  font-weight: ${t.font.weight.semibold};
+
+  > span:first-child {
+    color: ${t.color.text.secondary};
+    font-size: ${t.type.caption.size};
+    line-height: ${t.type.caption.lineHeight};
+  }
+
+  > span:last-child { font-weight: ${t.font.weight.semibold}; }
 `;
 const VariantStatus = styled.div`grid-area: status; justify-self: start;`;
 const Sku = styled.div`
@@ -612,7 +621,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Empty> : <List data-variant-list>
         {canonicalVariants.map(variant => <Item key={variant.id} data-variant-id={variant.id}>
           <Row>
-            <Size><span className="sr-only">Velikost: </span>{variant.size}</Size>
+            <Size><span>Velikost</span><span data-variant-size>{variant.size}</span></Size>
             <VariantStatus>
               <StatusBadge tone={variant.status === 'active' ? 'success' : 'neutral'}>
                 {variant.status === 'active' ? 'Aktivní' : 'Neaktivní'}
