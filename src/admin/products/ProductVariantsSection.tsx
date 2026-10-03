@@ -265,12 +265,12 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const scheduleFocus = (resolve: () => HTMLElement | null | undefined) => {
       const generation = ++focusGeneration.current;
       const productId = props.productId;
-      requestAnimationFrame(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         if (!mounted.current || productRef.current !== productId || focusGeneration.current !== generation) return;
         if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
         const target = resolve();
         if (available(target)) target.focus();
-      });
+      }));
     };
 
     const fallbackFocus = () => {
