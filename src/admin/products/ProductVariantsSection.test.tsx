@@ -54,8 +54,8 @@ test('Add trims, submits only size, shows loading/success and focuses created ed
   render(<ProductVariantsSection {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98-104 '}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
-  expect(screen.getByRole('button',{name:'Přidávání…'})).toBeDisabled();
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
+  await waitFor(()=>expect(document.querySelector('[data-variant-submit]')).toHaveAttribute('aria-busy','true'));
   expect(createMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'98-104'}}));
   resolve({...v('a','98-104'),inventory:undefined});
   await waitFor(()=>expect(screen.getByText('Varianta byla přidána.')).toBeInTheDocument());
@@ -79,9 +79,9 @@ test('Edit cancel restores trigger; save PATCHes size and focuses same variant a
 
 test('duplicate and max validation keep editor and focus Input',async()=>{
   render(<ProductVariantsSection {...props([v('a','98')])}/>);
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98 '}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   expect(await screen.findByText('Tato velikost už u produktu existuje.')).toBeInTheDocument();
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
   expect(createMock).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ test('ambiguous create never auto-replays POST and refresh reconciles found size
   render(<ProductVariantsSection {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   expect(await screen.findByText('Výsledek vytvoření varianty není potvrzený')).toBeInTheDocument();
   expect(createMock).toHaveBeenCalledTimes(1);
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
@@ -158,14 +158,14 @@ test('unknown create refresh absent clears uncertainty and allows explicit retry
   render(<ProductVariantsSection {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await screen.findByText('Výsledek vytvoření varianty není potvrzený');
   expect(createMock).toHaveBeenCalledTimes(1);
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
   await screen.findByText('Aktuální varianty byly načteny. Vytvoření můžete zkusit znovu.');
   expect(createMock).toHaveBeenCalledTimes(1);
   createMock.mockResolvedValue({...v('a','98'),inventory:undefined} as any);
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await waitFor(()=>expect(createMock).toHaveBeenCalledTimes(2));
 });
 
@@ -187,7 +187,7 @@ test('stale create completion after keyed Product switch cannot mutate the new s
   const view=render(<ProductVariantsSection key="p1" {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   const p2Variant={...v('p2v','200'),productId:'p2',inventory:[]} as AdminProductDetailVariant;
   view.rerender(<ProductVariantsSection key="p2" {...props([p2Variant])} productId="p2"/>);
   expect(screen.getByText('200')).toBeInTheDocument();
