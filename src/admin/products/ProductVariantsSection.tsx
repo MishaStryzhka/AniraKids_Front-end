@@ -243,17 +243,6 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     useEffect(() => {
       mounted.current = true;
       productRef.current = props.productId;
-      setCanonicalVariants(sortAdminVariants(projectDetailVariants(props.initialVariants)));
-      setActiveEditor(null);
-      setSizeDraft('');
-      setFieldError(null);
-      setSubmitError(null);
-      setFeedback(null);
-      setOperation(null);
-      setRefreshReason(null);
-      setUnknownCreate(null);
-      setMissingVariantId(null);
-      setProductMissing(false);
       return () => {
         mounted.current = false;
         mutationGeneration.current += 1;
@@ -262,7 +251,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         mutationController.current?.abort();
         refreshController.current?.abort();
       };
-    }, [props.productId, props.initialVariants]);
+    }, [props.productId]);
 
     const scheduleFocus = (resolve: () => HTMLElement | null | undefined) => {
       const generation = ++focusGeneration.current;
