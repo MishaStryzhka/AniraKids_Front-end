@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
-import {createAdminProduct, getAdminProductDetail, updateAdminProduct, type AdminProduct} from '../api/products';
+import {createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductVariants, updateAdminProduct, updateAdminVariantSize, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
@@ -14,7 +14,14 @@ jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: 
 jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'})}));
 const mockHandleRequestError = jest.fn();
 jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
-jest.mock('../api/products', () => ({createAdminProduct: jest.fn(), getAdminProductDetail: jest.fn(), updateAdminProduct: jest.fn()}));
+jest.mock('../api/products', () => ({
+  createAdminProduct: jest.fn(),
+  createAdminVariant: jest.fn(),
+  getAdminProductDetail: jest.fn(),
+  getAdminProductVariants: jest.fn(),
+  updateAdminProduct: jest.fn(),
+  updateAdminVariantSize: jest.fn(),
+}));
 jest.mock('../media/productMediaProviderTransport', () => {
   const actual = jest.requireActual('../media/productMediaProviderTransport');
   return {...actual, uploadProductMedia: jest.fn()};
@@ -26,6 +33,9 @@ jest.mock('../api/productMedia', () => {
 });
 
 const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
+const createVariantMock = createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
+const refreshVariantsMock = getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
+const updateVariantMock = updateAdminVariantSize as jest.MockedFunction<typeof updateAdminVariantSize>;
 const getMock = getAdminProductDetail as jest.MockedFunction<typeof getAdminProductDetail>;
 const patchMock = updateAdminProduct as jest.MockedFunction<typeof updateAdminProduct>;
 const signMock = signProductPhoto as jest.MockedFunction<typeof signProductPhoto>;
@@ -38,7 +48,11 @@ const product: AdminProduct = {id: 'p1', name: 'Sofia', slug: 'sofia', descripti
   gender: 'girls', color: 'Bílá', occasion: ['wedding'], ageTags: ['3–4 roky'], brand: '', familyLookGroup: '',
   rentalEnabled: false, saleEnabled: false, defaultDeposit: 0, photos: [], status: 'draft', seo: {noIndex: false},
   createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-01T00:00:00Z'};
-const detail = {product, variants: [{id: 'ignored-variant'}]};
+const variant = (id='v1', size='98', status:'active'|'inactive'='active'): AdminProductDetailVariant => ({
+  id, productId:'p1', size, sku:id==='v1'?'SKU-1':undefined, status, sortOrder:id==='v1'?0:1,
+  createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z', inventory:[{ignored:true}],
+});
+const detail = {product, variants: [variant()]};
 const apiError = (status: number | null, code: string, kind: AdminApiErrorKind = 'unexpected', details?: string[]) =>
   new AdminApiError({status, code, message: 'raw backend english', kind, details});
 const photo = (publicId: string) => ({publicId, url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', alt: publicId});
@@ -66,6 +80,9 @@ function checkCoreUntouched() {
   expect(save()).toBeEnabled();
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Bílá'}});
   expect(save()).toBeDisabled();
+  expect(screen.getByRole('heading', {name: 'Varianty'})).toBeInTheDocument();
+  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
+  expect(getMock).toHaveBeenCalledTimes(1);
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
 }
 async function openDirty(p: AdminProduct) {
@@ -110,7 +127,7 @@ test('CREATE starts clean, posts only name, rebases from response, replaces into
   expect(screen.getByText('Produkt byl vytvořen.')).toBeInTheDocument();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
-test('EDIT renders loading before GET, ignores variants, hydrates clean baseline and PATCHes only changed field', async () => {
+test('EDIT seeds Varianty from the same detail GET, hydrates clean baseline and PATCHes only changed Core field', async () => {
   const pending = deferred<typeof detail>();
   getMock.mockReturnValueOnce(pending.promise);
   const router = renderRouter('/admin/produkty/p1');
