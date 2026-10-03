@@ -1,5 +1,9 @@
 const {test,expect}=require('@playwright/test');
+const fs=require('fs'),path=require('path');
 const APP='http://127.0.0.1:4173';
+const EVIDENCE=process.env.ADMIN_FE02C02_EVIDENCE_DIR||'test-evidence/admin-fe02c02';
+fs.mkdirSync(EVIDENCE,{recursive:true});
+const output=(name,value)=>fs.writeFileSync(path.join(EVIDENCE,name),JSON.stringify(value,null,2));
 const adminOrigin='http://admin-api.test';
 const productsPath='/api/v2/admin/products';
 const variantsPath='/api/v2/admin/variants';
@@ -56,6 +60,8 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  if(width<768){expect(eb.width).toBeGreaterThan(vb.width*0.8);expect(stb.y).toBeGreaterThan(sb.y);expect(skub.y).toBeGreaterThan(stb.y)}
  else if(width<1024){expect(Math.abs(sb.y-stb.y)).toBeLessThan(8);expect(Math.abs(skub.y-eb.y)).toBeLessThan(8);expect(skub.y).toBeGreaterThan(sb.y)}
  else {expect(Math.max(sb.y,stb.y,skub.y,eb.y)-Math.min(sb.y,stb.y,skub.y,eb.y)).toBeLessThan(12)}
+ output('geometry-'+width+'.json',{width,variantSection:vb,photoSection:pb,divider,first:{size:sb,status:stb,sku:skub,edit:eb},scrollWidth:await page.evaluate(()=>document.documentElement.scrollWidth)});
+ await page.screenshot({path:path.join(EVIDENCE,'responsive-'+width+'.png'),fullPage:true});
 });
 test('Add/Edit stay inline, only one editor exists, cancel and success focus correctly',async({page})=>{
  const state=await mocks(page);await page.goto(APP+'/admin/produkty/p1');const variants=section(page);
@@ -78,6 +84,9 @@ test('combined Core plus Variant dirty state uses generic EDIT leave copy and St
 });
 test('dirty Core survives variant success and variant failure without Core PATCH',async({page})=>{
  const success=await mocks(page);await page.goto(APP+'/admin/produkty/p1');await page.getByLabel('Barva').fill('Růžová');let variants=section(page);await variants.getByRole('button',{name:'Přidat variantu'}).first().click();await variants.getByLabel('Velikost').fill('122');await variants.getByRole('button',{name:'Přidat variantu'}).last().click();await expect(variants.getByText('Varianta byla přidána.')).toBeVisible();await expect(page.getByLabel('Barva')).toHaveValue('Růžová');expect(success.product.color).toBe('Bílá');
+});
+test('dirty Core survives explicit variant update network failure and draft remains retryable',async({page})=>{
+ const state=await mocks(page,{updateNetwork:true});await page.goto(APP+'/admin/produkty/p1');await page.getByLabel('Barva').fill('Růžová');const variants=section(page);await variants.getByRole('button',{name:'Upravit velikost'}).first().click();await variants.getByLabel('Velikost').fill('101');await variants.getByRole('button',{name:'Uložit velikost'}).click();await expect(variants.getByRole('alert')).toContainText('Zkontrolujte připojení');await expect(variants.getByLabel('Velikost')).toHaveValue('101');await expect(variants.getByRole('button',{name:'Uložit velikost'})).toBeEnabled();await expect(page.getByLabel('Barva')).toHaveValue('Růžová');expect(state.update).toBe(1);
 });
 test('unknown create never auto-replays POST and authoritative refresh is explicit',async({page})=>{
  const state=await mocks(page,{createNetwork:true});await page.goto(APP+'/admin/produkty/p1');const variants=section(page);await variants.getByRole('button',{name:'Přidat variantu'}).first().click();await variants.getByLabel('Velikost').fill('122');await variants.getByRole('button',{name:'Přidat variantu'}).last().click();await expect(variants.getByText('Výsledek vytvoření varianty není potvrzený')).toBeVisible();expect(state.create).toBe(1);await expect(variants.getByRole('button',{name:'Načíst aktuální varianty'})).toBeVisible();expect(state.create).toBe(1);
