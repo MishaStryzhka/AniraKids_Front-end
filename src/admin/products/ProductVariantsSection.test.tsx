@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}
@@ -149,4 +149,67 @@ test('access errors delegate unchanged to boundary',async()=>{
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
   await waitFor(()=>expect(onAccessError).toHaveBeenCalled());
   expect(screen.queryByText('forbidden')).not.toBeInTheDocument();
+});
+
+
+test('unknown create refresh absent clears uncertainty and allows explicit retry only',async()=>{
+  createMock.mockRejectedValueOnce(new AdminApiError({code:'ADMIN_NETWORK_ERROR',message:'network',kind:'network'}));
+  refreshMock.mockResolvedValueOnce([]);
+  render(<ProductVariantsSection {...props()}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  await screen.findByText('Výsledek vytvoření varianty není potvrzený');
+  expect(createMock).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
+  await screen.findByText('Aktuální varianty byly načteny. Vytvoření můžete zkusit znovu.');
+  expect(createMock).toHaveBeenCalledTimes(1);
+  createMock.mockResolvedValue({...v('a','98'),inventory:undefined} as any);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  await waitFor(()=>expect(createMock).toHaveBeenCalledTimes(2));
+});
+
+test('SKU conflict is defensive local copy with refresh action and no raw backend English',async()=>{
+  updateMock.mockRejectedValue(new AdminApiError({status:409,code:'SKU_ALREADY_EXISTS',message:'raw backend english',kind:'unexpected'}));
+  render(<ProductVariantsSection {...props([v('a','98')])}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  expect(await screen.findByText(/Variantu se nepodařilo uložit kvůli konfliktu SKU/)).toBeInTheDocument();
+  expect(screen.getByText(/SKU se v tomto kroku neupravuje/)).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Načíst aktuální varianty'})).toBeEnabled();
+  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+});
+
+test('stale create completion after keyed Product switch cannot mutate the new section',async()=>{
+  let resolve!:(value:any)=>void;
+  createMock.mockReturnValue(new Promise(r=>{resolve=r}) as any);
+  const view=render(<ProductVariantsSection key="p1" {...props()}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
+  const p2Variant={...v('p2v','200'),productId:'p2',inventory:[]} as AdminProductDetailVariant;
+  view.rerender(<ProductVariantsSection key="p2" {...props([p2Variant])} productId="p2"/>);
+  expect(screen.getByText('200')).toBeInTheDocument();
+  await act(async()=>resolve({...v('a','98'),inventory:undefined}));
+  expect(screen.getByText('200')).toBeInTheDocument();
+  expect(screen.queryByText('Varianta byla přidána.')).not.toBeInTheDocument();
+  expect(screen.queryByText('98')).not.toBeInTheDocument();
+});
+
+test('stale refresh completion after keyed Product switch cannot mutate new canonical variants',async()=>{
+  let resolve!:(value:any)=>void;
+  refreshMock.mockReturnValue(new Promise(r=>{resolve=r}) as any);
+  updateMock.mockRejectedValue(new AdminApiError({status:404,code:'VARIANT_NOT_FOUND',message:'missing',kind:'unexpected'}));
+  const view=render(<ProductVariantsSection key="p1" {...props([v('a','98')])}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  await screen.findByRole('button',{name:'Načíst aktuální varianty'});
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
+  const p2Variant={...v('p2v','200'),productId:'p2',inventory:[]} as AdminProductDetailVariant;
+  view.rerender(<ProductVariantsSection key="p2" {...props([p2Variant])} productId="p2"/>);
+  await act(async()=>resolve([v('old','999')]));
+  expect(screen.getByText('200')).toBeInTheDocument();
+  expect(screen.queryByText('999')).not.toBeInTheDocument();
 });
