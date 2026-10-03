@@ -80,9 +80,6 @@ function checkCoreUntouched() {
   expect(save()).toBeEnabled();
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Bílá'}});
   expect(save()).toBeDisabled();
-  expect(screen.getByRole('heading', {name: 'Varianty'})).toBeInTheDocument();
-  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
-  expect(getMock).toHaveBeenCalledTimes(1);
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
 }
 async function openDirty(p: AdminProduct) {
@@ -136,6 +133,9 @@ test('EDIT seeds Varianty from the same detail GET, hydrates clean baseline and 
   await act(async () => pending.resolve(detail));
   await screen.findByDisplayValue('Sofia');
   expect(save()).toBeDisabled();
+  expect(screen.getByRole('heading', {name: 'Varianty'})).toBeInTheDocument();
+  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
+  expect(getMock).toHaveBeenCalledTimes(1);
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
   patchMock.mockResolvedValue({...product, color: 'Růžová'});
   fireEvent.click(save());
