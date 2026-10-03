@@ -96,7 +96,9 @@ test('dirty editor switch delegates to page and imperative discard opens request
   fireEvent.click(edits[1]);
   expect(requestSwitch).toHaveBeenCalledWith({target:{kind:'edit',variantId:'b'}});
   expect(screen.getByLabelText('Velikost')).toHaveValue('99');
-  ref.current?.discardAndOpen({kind:'edit',variantId:'b'});
+  act(() => {
+    ref.current?.discardAndOpen({kind:'edit',variantId:'b'});
+  });
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveValue('110'));
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
 });
@@ -166,7 +168,11 @@ test('unknown create refresh absent clears uncertainty and allows explicit retry
   expect(createMock).toHaveBeenCalledTimes(1);
   createMock.mockResolvedValue({...v('a','98'),inventory:undefined} as any);
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
-  await waitFor(()=>expect(createMock).toHaveBeenCalledTimes(2));
+  await screen.findByText('Varianta byla přidána.');
+  await waitFor(()=>expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument());
+  expect(screen.getByText('98')).toBeInTheDocument();
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit velikost'})).toHaveFocus());
+  expect(createMock).toHaveBeenCalledTimes(2);
 });
 
 test('SKU conflict is defensive local copy with refresh action and no raw backend English',async()=>{
