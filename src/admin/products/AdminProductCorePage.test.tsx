@@ -374,7 +374,7 @@ test('dirty Core and existing Photos survive successful variant create; Core bas
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Růžová'}});
-  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 110 '}});
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await screen.findByText('Varianta byla přidána.');
@@ -404,8 +404,8 @@ test('dirty Core and Photos survive variant update and variant refresh ignores P
   await waitFor(()=>expect(refreshVariantsMock).toHaveBeenCalledTimes(1));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
-  expect(screen.getByText('110')).toBeInTheDocument();
-  expect(screen.getByText('Neaktivní')).toBeInTheDocument();
+  expect(await screen.findByText('110')).toBeInTheDocument();
+  expect(await screen.findByText('Neaktivní')).toBeInTheDocument();
   expect(patchMock).not.toHaveBeenCalled();
 });
 
