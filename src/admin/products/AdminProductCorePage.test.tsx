@@ -478,3 +478,87 @@ test('post-load variant PRODUCT_NOT_FOUND keeps Core Photos and draft mounted an
   expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
 });
+
+
+test('dirty Core survives successful variant update and Core Save preserves active variant draft and risk', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98')]});
+  updateVariantMock.mockResolvedValueOnce({...variant('v1','104'),inventory:undefined} as any);
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+
+  await screen.findByText('Velikost byla uložena.');
+  await waitFor(()=>expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument());
+  expect(screen.getByText('104')).toBeInTheDocument();
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
+  expect(save()).toBeDisabled();
+
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'105'}});
+  expect(screen.getByLabelText('Velikost')).toHaveValue('105');
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  patchMock.mockResolvedValueOnce({...p,color:'Růžová'});
+  fireEvent.click(save());
+  await screen.findByText('Změny byly uloženy.');
+
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeDisabled();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('105');
+  expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
+  expect(screen.getByText('104')).toBeInTheDocument();
+  expect(updateVariantMock).toHaveBeenCalledTimes(1);
+  expect(createVariantMock).not.toHaveBeenCalled();
+
+  await act(async()=>router.navigate('/admin/produkty'));
+  const dialog=screen.getByRole('dialog');
+  expect(dialog).toHaveTextContent('Neuložené nebo nedokončené změny');
+  expect(dialog).toHaveTextContent('Máte neuložené změny nebo nedokončenou práci na této stránce.');
+  expect(within(dialog).getByRole('button',{name:'Zůstat'})).toHaveFocus();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+  expect(router.state.location.pathname).toBe('/admin/produkty/p1');
+  expect(screen.getByLabelText('Velikost')).toHaveValue('105');
+});
+
+test('photo ALT mutation preserves active variant editor draft canonical variants and page risk', async () => {
+  const a=photo('a');
+  const p={...product,photos:[a]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98')]});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+  expect(screen.getByText('98')).toBeInTheDocument();
+
+  altMock.mockResolvedValueOnce({product:{...p,color:'Server-only',photos:[{...a,alt:'Nový ALT'}]}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
+  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Nový ALT'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
+  await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
+  expect(within(media()).getByText('Nový ALT')).toBeInTheDocument();
+
+  expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(updateVariantMock).not.toHaveBeenCalled();
+  expect(createVariantMock).not.toHaveBeenCalled();
+
+  await act(async()=>router.navigate('/admin/produkty'));
+  const dialog=screen.getByRole('dialog');
+  expect(dialog).toHaveTextContent('Neuložené nebo nedokončené změny');
+  expect(within(dialog).getByRole('button',{name:'Zůstat'})).toHaveFocus();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+  expect(router.state.location.pathname).toBe('/admin/produkty/p1');
+  expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+});
