@@ -247,7 +247,8 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     }), [activeEditor, canonicalVariants, sizeDraft]);
     const risk = editorDirty || operation !== null || unknownCreate !== null;
 
-    useEffect(() => props.onRiskChange?.(risk), [props.onRiskChange, risk]);
+    const onRiskChange = props.onRiskChange;
+    useEffect(() => onRiskChange?.(risk), [onRiskChange, risk]);
 
     useEffect(() => {
       mounted.current = true;
@@ -346,7 +347,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           openEditor(target, pendingSwitchTriggerRef.current);
         });
       },
-    }), [canonicalVariants, operation, productMissing, props.productId]);
+    }), [canonicalVariants, openEditor, operation, productMissing, props.productId, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !productMissing && Boolean(props.token);
 
