@@ -35,7 +35,8 @@ export function isVariantEditorDirty(input: {
   if (!input.target) return false;
   const normalized = normalizeVariantSize(input.sizeDraft);
   if (input.target.kind === 'add') return normalized !== '';
-  const canonical = input.variants.find(variant => variant.id === input.target!.variantId);
+  const editingVariantId = input.target.variantId;
+  const canonical = input.variants.find(variant => variant.id === editingVariantId);
   return canonical ? normalized !== canonical.size : normalized !== '';
 }
 
