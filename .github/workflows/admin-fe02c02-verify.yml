@@ -13,15 +13,36 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 20, cache: npm}
       - run: npm ci --no-audit --no-fund
+      - name: Prepare evidence
+        run: |
+          mkdir -p test-evidence/admin-fe02c02
+          node -e "require('fs').writeFileSync('test-evidence/admin-fe02c02/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
       - name: TypeScript
         run: npm run typecheck
       - name: ADMIN-FE-02C-02 focused
         run: >
-          npm test -- --watchAll=false --runInBand
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c02/focused-results.json
           src/admin/api/products.test.ts
           src/admin/products/productVariantsModel.test.ts
           src/admin/products/ProductVariantsSection.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
+      - name: Expanded focused unit and integration
+        run: >
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c02/expanded-results.json
+          src/admin/api/products.test.ts
+          src/admin/api/productMedia.test.ts
+          src/admin/media/productMediaProviderTransport.test.ts
+          src/admin/products/productVariantsModel.test.ts
+          src/admin/products/ProductVariantsSection.test.tsx
+          src/admin/products/AdminProductCorePage.test.tsx
+          src/admin/products/AdminProductDeleteFocus.test.tsx
+          src/admin/products/ProductMediaSection.test.tsx
+          src/admin/products/ProductMediaR2.integration.test.tsx
+          src/admin/products/useProductMediaController.test.tsx
+          src/admin/products/productMediaModel.test.ts
+          src/design-system/components/Dialog/Dialog.test.tsx
       - name: No-env build
         run: npm run build
       - run: mv build build-no-env
@@ -36,11 +57,13 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start SPA
         run: |
-          npx --yes serve@14.2.4 -s build -l 4173 >/tmp/admin-fe02c02.log 2>&1 &
-          npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02c02-no-env.log 2>&1 &
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/admin-fe02c02/configured-server.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/admin-fe02c02/no-env-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
       - name: ADMIN-FE-02C-02 Playwright
+        env:
+          ADMIN_FE02C02_EVIDENCE_DIR: test-evidence/admin-fe02c02
         run: npx playwright test .github/admin-fe02c02.spec.js --reporter=line
       - name: ADMIN-FE-02C-01 regression
         run: npx playwright test --config=.github/admin-fe02c01.playwright.config.js
@@ -52,3 +75,17 @@ jobs:
         run: npx playwright test .github/admin-fe01.spec.js --reporter=line
       - name: DESIGN-02 regression
         run: npx playwright test .github/design02f.spec.js --reporter=line
+
+      - name: Evidence manifest
+        if: always()
+        run: |
+          find test-evidence/admin-fe02c02 -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-fe02c02/MANIFEST.txt
+          cat test-evidence/admin-fe02c02/MANIFEST.txt
+      - name: Upload verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-fe02c02-${{ github.sha }}
+          if-no-files-found: error
+          path: test-evidence/admin-fe02c02/
+          include-hidden-files: true
