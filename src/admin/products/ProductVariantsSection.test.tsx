@@ -79,7 +79,7 @@ test('Edit cancel restores trigger; save PATCHes size and focuses same variant a
 
 test('duplicate and max validation keep editor and focus Input',async()=>{
   render(<ProductVariantsSection {...props([v('a','98')])}/>);
-  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98 '}});
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   expect(await screen.findByText('Tato velikost už u produktu existuje.')).toBeInTheDocument();
