@@ -6,6 +6,33 @@ export const ADMIN_PRODUCTS_PAGE_SIZE = 20;
 export type AdminProductStatus = 'draft' | 'active' | 'archived';
 export type AdminProductCategory = 'dress' | 'suit' | 'set' | 'accessory' | 'other';
 export type AdminProductGender = 'girls' | 'boys' | 'women' | 'men' | 'unisex';
+export type AdminVariantStatus = 'active' | 'inactive';
+
+export interface AdminVariant {
+  id: string;
+  productId: string;
+  size: string;
+  sku?: string;
+  rentalPriceOverrides?: {studio?: number; external?: number};
+  salePriceOverride?: number;
+  depositOverride?: number;
+  status: AdminVariantStatus;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductDetailVariant extends AdminVariant {
+  inventory: unknown[];
+}
+
+export interface CreateAdminVariantRequest {
+  size: string;
+}
+
+export interface UpdateAdminVariantSizeRequest {
+  size: string;
+}
 
 export interface AdminProductPhoto {
   url: string;
@@ -25,7 +52,7 @@ export interface AdminProduct {
   status: AdminProductStatus; photos: AdminProductPhoto[];
   createdAt: string; updatedAt: string;
 }
-export interface AdminProductDetailResponse { product: AdminProduct; variants: unknown[]; }
+export interface AdminProductDetailResponse { product: AdminProduct; variants: AdminProductDetailVariant[]; }
 export interface CreateAdminProductRequest {
  name:string;slug?:string;description?:string;category?:AdminProductCategory;gender?:AdminProductGender;color?:string;
  occasion?:AdminProductOccasion[];ageTags?:string[];brand?:string;familyLookGroup?:string;rentalEnabled?:boolean;saleEnabled?:boolean;
@@ -125,4 +152,50 @@ export async function updateAdminProduct(input:{token:string;productId:string;bo
  if(!Object.keys(input.body).length) throw new Error('Invariant: empty product PATCH');
  try { const response=await adminApiClient.patch<AdminProduct|AdminProductDetailResponse>(`/admin/products/${encodeURIComponent(input.productId)}`,input.body,buildAdminRequestConfig(input.token,input.signal)); return extractAdminProduct(response.data); }
  catch(error){throw normalizeAdminApiError(error)}
+}
+
+
+export async function createAdminVariant(input: {
+  token: string;
+  productId: string;
+  body: CreateAdminVariantRequest;
+  signal?: AbortSignal;
+}): Promise<AdminVariant> {
+  try {
+    const response = await adminApiClient.post<{variant: AdminVariant}>(
+      `/admin/products/${encodeURIComponent(input.productId)}/variants`,
+      input.body,
+      buildAdminRequestConfig(input.token, input.signal),
+    );
+    return response.data.variant;
+  } catch (error) {
+    throw normalizeAdminApiError(error);
+  }
+}
+
+export async function updateAdminVariantSize(input: {
+  token: string;
+  variantId: string;
+  body: UpdateAdminVariantSizeRequest;
+  signal?: AbortSignal;
+}): Promise<AdminVariant> {
+  try {
+    const response = await adminApiClient.patch<{variant: AdminVariant}>(
+      `/admin/variants/${encodeURIComponent(input.variantId)}`,
+      input.body,
+      buildAdminRequestConfig(input.token, input.signal),
+    );
+    return response.data.variant;
+  } catch (error) {
+    throw normalizeAdminApiError(error);
+  }
+}
+
+export async function getAdminProductVariants(input: {
+  token: string;
+  productId: string;
+  signal?: AbortSignal;
+}): Promise<AdminProductDetailVariant[]> {
+  const detail = await getAdminProductDetail(input);
+  return detail.variants;
 }
