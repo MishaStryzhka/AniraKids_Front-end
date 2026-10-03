@@ -1,4 +1,10 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+
+jest.mock('axios', () => {
+  class MockAxiosError extends Error {}
+  return {__esModule: true, default: {isCancel: () => false}, AxiosError: MockAxiosError};
+});
+jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: jest.fn()}));
 import {AdminApiError} from '../api/errors';
 import {createAdminVariant, getAdminProductVariants, updateAdminVariantSize, type AdminProductDetailVariant} from '../api/products';
 import {ProductVariantsSection, type ProductVariantsSectionHandle} from './ProductVariantsSection';
