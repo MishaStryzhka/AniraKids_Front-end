@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -263,7 +264,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       };
     }, [props.productId]);
 
-    const scheduleFocus = (resolve: () => HTMLElement | null | undefined) => {
+    const scheduleFocus = useCallback((resolve: () => HTMLElement | null | undefined) => {
       const generation = ++focusGeneration.current;
       const productId = props.productId;
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -272,14 +273,14 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         const target = resolve();
         if (available(target)) target.focus();
       }));
-    };
+    }, [props.productId]);
 
-    const fallbackFocus = () => {
+    const fallbackFocus = useCallback(() => {
       const root = sectionRef.current;
       if (!root) return null;
       const control = Array.from(root.querySelectorAll<HTMLElement>('button,input')).find(available);
       return control ?? root.querySelector<HTMLElement>('#product-variants-title');
-    };
+    }, []);
 
     const focusEditButton = (variantId: string) => scheduleFocus(() => {
       const root = sectionRef.current;
@@ -288,7 +289,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       return row?.querySelector<HTMLElement>('[data-variant-edit]') ?? fallbackFocus();
     });
 
-    const openEditor = (target: VariantEditorTarget, trigger?: HTMLElement | null) => {
+    const openEditor = useCallback((target: VariantEditorTarget, trigger?: HTMLElement | null) => {
       if (operation || productMissing) return;
       editorTriggerRef.current = trigger ?? pendingSwitchTriggerRef.current;
       pendingSwitchTriggerRef.current = null;
@@ -301,7 +302,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       setMissingVariantId(null);
       setFeedback(null);
       scheduleFocus(() => inputRef.current ?? fallbackFocus());
-    };
+    }, [canonicalVariants, fallbackFocus, operation, productMissing, scheduleFocus]);
 
     const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
       if (operation || productMissing) return;
