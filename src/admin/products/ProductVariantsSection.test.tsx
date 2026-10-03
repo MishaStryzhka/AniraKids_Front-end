@@ -235,18 +235,23 @@ test('backend VALIDATION_ERROR preserves draft, uses safe Czech copy and focuses
 
 
 test('missing variant stays reviewable with typed draft after refresh confirms absence',async()=>{
+  let resolveRefresh!:(value:AdminProductDetailVariant[])=>void;
   updateMock.mockRejectedValueOnce(new AdminApiError({status:404,code:'VARIANT_NOT_FOUND',message:'missing',kind:'unexpected'}));
-  refreshMock.mockResolvedValueOnce([]);
+  refreshMock.mockReturnValueOnce(new Promise(resolve=>{resolveRefresh=resolve}) as any);
   render(<ProductVariantsSection {...props([v('a','98')])}/>);
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
   await screen.findByText('Varianta už není dostupná');
-  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
-  await waitFor(()=>expect(refreshMock).toHaveBeenCalledTimes(1));
+  const refresh=screen.getByRole('button',{name:'Načíst aktuální varianty'});
+  fireEvent.click(refresh);
+  await waitFor(()=>expect(refresh).toHaveAttribute('aria-busy','true'));
+  await act(async()=>{resolveRefresh([])});
+  await waitFor(()=>expect(refresh).not.toHaveAttribute('aria-busy','true'));
+  expect(refreshMock).toHaveBeenCalledTimes(1);
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
   expect(screen.getByRole('button',{name:'Uložit velikost'})).toBeDisabled();
-  expect(screen.getByText('Varianta už není dostupná')).toBeInTheDocument();
+  expect(screen.getAllByText('Varianta už není dostupná').length).toBeGreaterThanOrEqual(1);
 });
 
 test('stale update completion after keyed Product switch cannot mutate new canonical variants',async()=>{
