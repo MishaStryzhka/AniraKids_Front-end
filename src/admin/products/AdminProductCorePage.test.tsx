@@ -351,3 +351,130 @@ test('unknown provider and 502 recovery keep one actionable retry using the real
   expect(providerMock).toHaveBeenCalledTimes(1);
   checkCoreUntouched();
 });
+
+
+test('CREATE to EDIT seeds empty Varianty without redundant detail GET', async () => {
+  createMock.mockResolvedValue(product);
+  renderRouter();
+  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.click(save());
+  await screen.findByText('Produkt byl vytvořen.');
+  expect(getMock).not.toHaveBeenCalled();
+  expect(screen.getByRole('heading', {name: 'Varianty'})).toBeInTheDocument();
+  expect(screen.getByText('Produkt zatím nemá žádné varianty')).toBeInTheDocument();
+});
+
+test('dirty Core and existing Photos survive successful variant create; Core baseline remains independently dirty', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant()]});
+  createVariantMock.mockResolvedValue({
+    id:'v2',productId:'p1',size:'110',status:'active',sortOrder:1,
+    createdAt:'2026-09-02T00:00:00Z',updatedAt:'2026-09-02T00:00:00Z',
+  });
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Růžová'}});
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 110 '}});
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
+  await screen.findByText('Varianta byla přidána.');
+  expect(createVariantMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'110'}}));
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('110')).toBeInTheDocument();
+  expect(patchMock).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Bílá'}});
+  expect(save()).toBeDisabled();
+});
+
+test('dirty Core and Photos survive variant update and variant refresh ignores Product/photo payloads', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant()]});
+  updateVariantMock.mockRejectedValueOnce(apiError(404,'VARIANT_NOT_FOUND'));
+  refreshVariantsMock.mockResolvedValueOnce([variant('v2','110','inactive')]);
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  await screen.findByText('Varianta už není dostupná');
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
+  await waitFor(()=>expect(refreshVariantsMock).toHaveBeenCalledTimes(1));
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('110')).toBeInTheDocument();
+  expect(screen.getByText('Neaktivní')).toBeInTheDocument();
+  expect(patchMock).not.toHaveBeenCalled();
+});
+
+test('dirty variant editor uses the single page-owned switch Dialog with exact copy and Stay preserves draft/focus', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98'),variant('v2','110')]});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  const edits=screen.getAllByRole('button',{name:'Upravit velikost'});
+  fireEvent.click(edits[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
+  fireEvent.click(edits[1]);
+  const dialog=screen.getByRole('dialog');
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(within(dialog).getByRole('heading',{name:'Neuložená změna varianty'})).toBeInTheDocument();
+  expect(dialog).toHaveTextContent('Velikost má neuložené změny. Chcete je zahodit a pokračovat?');
+  expect(within(dialog).getByRole('button',{name:'Zůstat'})).toHaveFocus();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(screen.getByLabelText('Velikost')).toHaveValue('99');
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+});
+
+test('dirty variant switch discard opens requested editor and combined navigation uses page-wide EDIT leave copy', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98'),variant('v2','110')]});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  const edits=screen.getAllByRole('button',{name:'Upravit velikost'});
+  fireEvent.click(edits[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
+  fireEvent.click(edits[1]);
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Zahodit změny a pokračovat'}));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveValue('110'));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'111'}});
+  await act(async()=>router.navigate('/admin/produkty'));
+  const leaveDialog=screen.getByRole('dialog');
+  expect(leaveDialog).toHaveTextContent('Máte neuložené změny nebo nedokončenou práci na této stránce.');
+  expect(within(leaveDialog).getByRole('button',{name:'Zůstat'})).toHaveFocus();
+  fireEvent.click(within(leaveDialog).getByRole('button',{name:'Zůstat'}));
+  expect(router.state.location.pathname).toBe('/admin/produkty/p1');
+  expect(screen.getByLabelText('Velikost')).toHaveValue('111');
+});
+
+test('ambiguous variant create is page risk and never auto-replays POST', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[]});
+  createVariantMock.mockRejectedValue(apiError(null,'ADMIN_NETWORK_ERROR','network'));
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
+  await screen.findByText('Výsledek vytvoření varianty není potvrzený');
+  expect(createVariantMock).toHaveBeenCalledTimes(1);
+  await act(async()=>router.navigate('/admin/produkty'));
+  expect(screen.getByRole('dialog')).toHaveTextContent('Neuložené nebo nedokončené změny');
+  expect(createVariantMock).toHaveBeenCalledTimes(1);
+});
+
+test('post-load variant PRODUCT_NOT_FOUND keeps Core Photos and draft mounted and delegates access errors', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant()]});
+  updateVariantMock.mockRejectedValueOnce(apiError(404,'PRODUCT_NOT_FOUND'));
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  await screen.findByText('Produkt už není dostupný');
+  expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+});
