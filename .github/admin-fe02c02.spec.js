@@ -55,7 +55,7 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await expect(variants.getByText('98-104-110-116')).toBeVisible();
  await expect(variants.getByText('Aktivní',{exact:true})).toBeVisible();await expect(variants.getByText('Neaktivní',{exact:true})).toBeVisible();
- const first=variants.locator('[data-variant-id="v1"]'),size=first.getByText('98-104-110-116'),status=first.getByText('Aktivní',{exact:true}),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
+ const first=variants.locator('[data-variant-id="v1"]'),size=first.locator('[data-variant-size-cell]'),status=first.getByText('Aktivní',{exact:true}),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
  const [sb,stb,skub,eb]=await Promise.all([size.boundingBox(),status.boundingBox(),sku.boundingBox(),edit.boundingBox()]);
  const centerY=box=>box.y+box.height/2;
  if(width<768){expect(eb.width).toBeGreaterThan(vb.width*0.8);expect(stb.y).toBeGreaterThan(sb.y);expect(skub.y).toBeGreaterThan(stb.y)}
