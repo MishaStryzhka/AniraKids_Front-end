@@ -404,6 +404,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       }
       if (error.code === 'VALIDATION_ERROR') {
         setSubmitError('Variantu se nepodařilo uložit. Zkontrolujte zadané údaje.');
+        scheduleFocus(() => inputRef.current);
         return;
       }
       if (context === 'create' && error.kind === 'network') {
@@ -569,7 +570,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           ref={inputRef}
           label="Velikost"
           value={sizeDraft}
-          maxLength={80}
+          maxLength={40}
           disabled={Boolean(operation) || productMissing}
           error={Boolean(fieldError)}
           aria-describedby={fieldError ? 'variant-size-error' : undefined}
