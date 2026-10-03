@@ -624,7 +624,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Empty> : <List data-variant-list>
         {canonicalVariants.map(variant => <Item key={variant.id} data-variant-id={variant.id}>
           <Row>
-            <Size><span>Velikost</span><span data-variant-size>{variant.size}</span></Size>
+            <Size data-variant-size-cell><span>Velikost</span><span data-variant-size>{variant.size}</span></Size>
             <VariantStatus>
               <StatusBadge tone={variant.status === 'active' ? 'success' : 'neutral'}>
                 {variant.status === 'active' ? 'Aktivní' : 'Neaktivní'}
