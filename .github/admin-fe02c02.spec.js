@@ -2,6 +2,7 @@ const {test,expect}=require('@playwright/test');
 const APP='http://127.0.0.1:4173';
 const adminOrigin='http://admin-api.test';
 const productsPath='/api/v2/admin/products';
+const variantsPath='/api/v2/admin/variants';
 const LOCAL_IMAGE='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%22128%22%3E%3Crect width=%2296%22 height=%22128%22 fill=%22%23ddd%22/%3E%3C/svg%3E';
 const photo={publicId:'photo-a',url:LOCAL_IMAGE,alt:'Sofia'};
 const baseProduct={id:'p1',name:'Sofia',slug:'sofia',description:'',category:'dress',gender:'girls',color:'Bílá',occasion:[],ageTags:[],brand:'',familyLookGroup:'',rentalEnabled:false,saleEnabled:false,defaultDeposit:0,seo:{noIndex:false},photos:[photo],status:'draft',createdAt:'2026-01-01T00:00:00Z',updatedAt:'2026-01-01T00:00:00Z',rentalPrices:{}};
@@ -10,12 +11,12 @@ const seedVariants=[
  variant('v1','98-104-110-116','active','SKU-VERY-LONG-WRAPPING-VALUE-1234567890'),
  variant('v2','XS','inactive'),
 ];
-const matchesProducts=url=>url.origin===adminOrigin&&(url.pathname===productsPath||url.pathname.startsWith(productsPath+'/'));
+const matchesAdminVariantFeature=url=>url.origin===adminOrigin&&(url.pathname===productsPath||url.pathname.startsWith(productsPath+'/')||url.pathname.startsWith(variantsPath+'/'));
 async function mocks(page,options={}){
  const state={product:structuredClone(baseProduct),variants:structuredClone(seedVariants),detail:0,create:0,update:0,unexpected:[]};
  await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('admin-test-token')})));
  await page.route('**/api/users/current',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({user:{_id:'admin-user'}})}));
- await page.route(matchesProducts,async r=>{
+ await page.route(matchesAdminVariantFeature,async r=>{
   const req=r.request(),u=new URL(req.url()),method=req.method(),detailPath=productsPath+'/p1';
   const json=(status,body)=>r.fulfill({status,contentType:'application/json',body:JSON.stringify(body)});
   if(method==='GET'&&u.pathname===productsPath&&u.searchParams.get('limit')==='1')return json(200,{items:[],pagination:{page:1,limit:1,total:0,pages:0}});
