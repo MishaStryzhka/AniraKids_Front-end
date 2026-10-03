@@ -54,7 +54,7 @@ test('Add trims, submits only size, shows loading/success and focuses created ed
   render(<ProductVariantsSection {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98-104 '}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   expect(screen.getByRole('button',{name:'Přidávání…'})).toBeDisabled();
   expect(createMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'98-104'}}));
   resolve({...v('a','98-104'),inventory:undefined});
@@ -79,9 +79,9 @@ test('Edit cancel restores trigger; save PATCHes size and focuses same variant a
 
 test('duplicate and max validation keep editor and focus Input',async()=>{
   render(<ProductVariantsSection {...props([v('a','98')])}/>);
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98 '}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   expect(await screen.findByText('Tato velikost už u produktu existuje.')).toBeInTheDocument();
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
   expect(createMock).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ test('ambiguous create never auto-replays POST and refresh reconciles found size
   render(<ProductVariantsSection {...props()}/>);
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   expect(await screen.findByText('Výsledek vytvoření varianty není potvrzený')).toBeInTheDocument();
   expect(createMock).toHaveBeenCalledTimes(1);
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
