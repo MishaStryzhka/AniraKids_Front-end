@@ -584,6 +584,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         <EditorActions>
           <Button variant="secondary" disabled={Boolean(operation)} onClick={cancelEditor}>Zrušit</Button>
           <Button
+            data-variant-submit
             loading={loading}
             disabled={Boolean(operation) || productMissing || Boolean(targetMissing)}
             onClick={save}
