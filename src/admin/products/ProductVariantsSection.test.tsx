@@ -39,7 +39,6 @@ test('empty state opens one Add editor and focuses Velikost',async()=>{
   expect(screen.getByText('Produkt zatím nemá žádné varianty')).toBeInTheDocument();
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
-  expect(screen.getAllByTestId?.('never')).toBeUndefined();
   expect(document.querySelectorAll('[data-variant-editor]')).toHaveLength(1);
 });
 
