@@ -1,0 +1,54 @@
+name: ADMIN-FE-02C-02 Verify
+on:
+  push:
+    branches: [admin-fe-02c-02-basic-variants]
+concurrency:
+  group: admin-fe02c02-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - name: TypeScript
+        run: npm run typecheck
+      - name: ADMIN-FE-02C-02 focused
+        run: >
+          npm test -- --watchAll=false --runInBand
+          src/admin/api/products.test.ts
+          src/admin/products/productVariantsModel.test.ts
+          src/admin/products/ProductVariantsSection.test.tsx
+          src/admin/products/AdminProductCorePage.test.tsx
+      - name: No-env build
+        run: npm run build
+      - run: mv build build-no-env
+      - name: Configured Admin build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: npm run build
+      - name: Browser install
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start SPA
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 >/tmp/admin-fe02c02.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >/tmp/admin-fe02c02-no-env.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+      - name: ADMIN-FE-02C-02 Playwright
+        run: npx playwright test .github/admin-fe02c02.spec.js --reporter=line
+      - name: ADMIN-FE-02C-01 regression
+        run: npx playwright test --config=.github/admin-fe02c01.playwright.config.js
+      - name: ADMIN-FE-02B regression
+        run: npx playwright test .github/admin-fe02b.spec.js --reporter=line
+      - name: ADMIN-FE-02A regression
+        run: npx playwright test .github/admin-fe02a.spec.js --reporter=line
+      - name: ADMIN-FE-01 regression
+        run: npx playwright test .github/admin-fe01.spec.js --reporter=line
+      - name: DESIGN-02 regression
+        run: npx playwright test .github/design02f.spec.js --reporter=line
