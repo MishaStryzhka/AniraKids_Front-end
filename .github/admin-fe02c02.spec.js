@@ -57,9 +57,10 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  await expect(variants.getByText('Aktivní',{exact:true})).toBeVisible();await expect(variants.getByText('Neaktivní',{exact:true})).toBeVisible();
  const first=variants.locator('[data-variant-id="v1"]'),size=first.getByText('98-104-110-116'),status=first.getByText('Aktivní',{exact:true}),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
  const [sb,stb,skub,eb]=await Promise.all([size.boundingBox(),status.boundingBox(),sku.boundingBox(),edit.boundingBox()]);
+ const centerY=box=>box.y+box.height/2;
  if(width<768){expect(eb.width).toBeGreaterThan(vb.width*0.8);expect(stb.y).toBeGreaterThan(sb.y);expect(skub.y).toBeGreaterThan(stb.y)}
- else if(width<1024){expect(Math.abs(sb.y-stb.y)).toBeLessThan(8);expect(Math.abs(skub.y-eb.y)).toBeLessThan(8);expect(skub.y).toBeGreaterThan(sb.y)}
- else {expect(Math.max(sb.y,stb.y,skub.y,eb.y)-Math.min(sb.y,stb.y,skub.y,eb.y)).toBeLessThan(12)}
+ else if(width<1024){expect(Math.abs(centerY(sb)-centerY(stb))).toBeLessThan(2);expect(Math.abs(centerY(skub)-centerY(eb))).toBeLessThan(2);expect(centerY(skub)).toBeGreaterThan(centerY(sb))}
+ else {const c1=centerY(sb),c2=centerY(stb),c3=centerY(skub),c4=centerY(eb);expect(Math.max(c1,c2,c3,c4)-Math.min(c1,c2,c3,c4)).toBeLessThan(2)}
  output('geometry-'+width+'.json',{width,variantSection:vb,photoSection:pb,divider,first:{size:sb,status:stb,sku:skub,edit:eb},scrollWidth:await page.evaluate(()=>document.documentElement.scrollWidth)});
  await page.screenshot({path:path.join(EVIDENCE,'responsive-'+width+'.png'),fullPage:true});
 });
