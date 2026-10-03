@@ -305,7 +305,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     }, [canonicalVariants, fallbackFocus, operation, productMissing, scheduleFocus]);
 
     const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
-      if (operation || productMissing) return;
+      if (operation || productMissing || unknownCreate) return;
       const same = activeEditor?.kind === target.kind &&
         (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
       if (same) return;
@@ -318,7 +318,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     const cancelEditor = () => {
-      if (operation) return;
+      if (operation || unknownCreate) return;
       const trigger = editorTriggerRef.current;
       setActiveEditor(null);
       setSizeDraft('');
@@ -350,7 +350,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       },
     }), [fallbackFocus, openEditor, props.productId, scheduleFocus]);
 
-    const mutationAllowed = () => !operation && !productMissing && Boolean(props.token);
+    const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
     const beginMutation = (next: Exclude<Operation, null>) => {
       if (!mutationAllowed()) return null;
@@ -503,7 +503,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     const refresh = async () => {
-      if (operation || refreshing || !props.token) return;
+      if (operation || refreshing || refreshController.current || productMissing || !props.token) return;
       const generation = ++refreshGeneration.current;
       const observedMutation = mutationGeneration.current;
       refreshController.current?.abort();
@@ -573,7 +573,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           label="Velikost"
           value={sizeDraft}
           maxLength={40}
-          disabled={Boolean(operation) || productMissing}
+          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
           error={Boolean(fieldError)}
           aria-describedby={fieldError ? 'variant-size-error' : undefined}
           onChange={event => {
@@ -585,11 +585,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         {fieldError ? <ErrorText id="variant-size-error">{fieldError}</ErrorText> : null}
         {targetMissing ? <Message><strong>Varianta už není dostupná</strong><br/>Velikost nelze uložit, protože varianta už nebyla nalezena.</Message> : null}
         <EditorActions>
-          <Button variant="secondary" disabled={Boolean(operation)} onClick={cancelEditor}>Zrušit</Button>
+          <Button variant="secondary" disabled={Boolean(operation) || Boolean(unknownCreate)} onClick={cancelEditor}>Zrušit</Button>
           <Button
             data-variant-submit
             loading={loading}
-            disabled={Boolean(operation) || productMissing || Boolean(targetMissing)}
+            disabled={Boolean(operation) || productMissing || Boolean(targetMissing) || Boolean(unknownCreate)}
             onClick={save}
           >
             {loading ? (isUpdate ? 'Ukládání…' : 'Přidávání…') : (isUpdate ? 'Uložit velikost' : 'Přidat variantu')}
@@ -604,7 +604,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         <Heading id="product-variants-title" tabIndex={-1}>Varianty</Heading>
         <Button
           data-variant-add
-          disabled={Boolean(operation) || productMissing}
+          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
@@ -637,7 +637,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
                 data-variant-edit
                 size="compact"
                 variant="secondary"
-                disabled={Boolean(operation) || productMissing}
+                disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
                 onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
                   requestEditor({kind: 'edit', variantId: variant.id}, event.currentTarget)}
               >
@@ -648,6 +648,9 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           {activeEditor?.kind === 'edit' && activeEditor.variantId === variant.id ? renderEditor(activeEditor) : null}
         </Item>)}
       </List>}
+      {activeEditor?.kind === 'edit' && !canonicalVariants.some(variant => variant.id === activeEditor.variantId)
+        ? renderEditor(activeEditor)
+        : null}
 
       {unknownCreate ? <Message data-variant-unknown>
         <strong>Výsledek vytvoření varianty není potvrzený</strong><br/>
@@ -662,7 +665,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       {submitError ? <ErrorText role="alert">{submitError}</ErrorText> : null}
       {feedback ? <Message role="status" aria-live="polite">{feedback}</Message> : null}
 
-      {refreshReason ? <Button variant="secondary" loading={refreshing} disabled={Boolean(operation)} onClick={refresh}>
+      {refreshReason ? <Button variant="secondary" loading={refreshing} disabled={Boolean(operation) || productMissing} onClick={refresh}>
         Načíst aktuální varianty
       </Button> : null}
     </Section>;
