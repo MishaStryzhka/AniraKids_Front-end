@@ -374,9 +374,9 @@ test('dirty Core and existing Photos survive successful variant create; Core bas
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Růžová'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 110 '}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   await screen.findByText('Varianta byla přidána.');
   expect(createVariantMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'110'}}));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
@@ -456,7 +456,7 @@ test('ambiguous variant create is page risk and never auto-replays POST', async 
   await screen.findByDisplayValue('Sofia');
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
-  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).at(-1)!);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'}).slice(-1)[0]);
   await screen.findByText('Výsledek vytvoření varianty není potvrzený');
   expect(createVariantMock).toHaveBeenCalledTimes(1);
   await act(async()=>router.navigate('/admin/produkty'));
