@@ -213,3 +213,16 @@ test('stale refresh completion after keyed Product switch cannot mutate new cano
   expect(screen.getByText('200')).toBeInTheDocument();
   expect(screen.queryByText('999')).not.toBeInTheDocument();
 });
+
+
+test('backend VALIDATION_ERROR preserves draft, uses safe Czech copy and focuses size Input',async()=>{
+  updateMock.mockRejectedValue(new AdminApiError({status:400,code:'VALIDATION_ERROR',message:'raw backend english',kind:'unexpected'}));
+  render(<ProductVariantsSection {...props([v('a','98')])}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  expect(await screen.findByText('Variantu se nepodařilo uložit. Zkontrolujte zadané údaje.')).toBeInTheDocument();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+});
