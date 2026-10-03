@@ -7,10 +7,11 @@ jest.mock('./client', () => ({
 }));
 
 jest.mock('./errors', () => ({
-  normalizeAdminApiError: (error: unknown) => error,
+  normalizeAdminApiError: jest.fn((error: unknown) => error),
 }));
 
 import { adminApiClient, buildAdminRequestConfig } from './client';
+import { normalizeAdminApiError } from './errors';
 import {
   ADMIN_PRODUCTS_PAGE_SIZE,
   listAdminProducts,
@@ -27,10 +28,12 @@ const mockedGet = adminApiClient.get as jest.Mock;
 const mockedPost = adminApiClient.post as jest.Mock;
 const mockedPatch = adminApiClient.patch as jest.Mock;
 const mockedBuildConfig = buildAdminRequestConfig as jest.Mock;
+const mockedNormalizeError = normalizeAdminApiError as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockedBuildConfig.mockReturnValue({ baseURL: 'https://admin.example.test/api/v2', headers: { Authorization: 'Bearer dummy-token' } });
+  mockedNormalizeError.mockImplementation((error: unknown) => error);
 });
 
 test('serializes only the supported product-list API query keys and fixes limit to 20', () => {
@@ -136,4 +139,5 @@ test('variant API helpers normalize transport errors',async()=>{
   await expect(createAdminVariant({token:'dummy-token',productId:'p1',body:{size:'98'}})).rejects.toBe(failure);
   await expect(updateAdminVariantSize({token:'dummy-token',variantId:'v1',body:{size:'98'}})).rejects.toBe(failure);
   await expect(getAdminProductVariants({token:'dummy-token',productId:'p1'})).rejects.toBe(failure);
+  expect(mockedNormalizeError).toHaveBeenCalledTimes(3);
 });
