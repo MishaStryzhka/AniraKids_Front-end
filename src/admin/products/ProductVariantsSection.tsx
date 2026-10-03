@@ -506,7 +506,6 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       if (operation || refreshing || refreshController.current || productMissing || !props.token) return;
       const generation = ++refreshGeneration.current;
       const observedMutation = mutationGeneration.current;
-      refreshController.current?.abort();
       const controller = new AbortController();
       refreshController.current = controller;
       const productId = props.productId;
