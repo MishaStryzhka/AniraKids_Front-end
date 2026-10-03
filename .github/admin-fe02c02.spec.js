@@ -51,7 +51,7 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  await expect(variants.getByRole('heading',{name:'Varianty'})).toBeVisible();
  const vb=await variants.boundingBox(),pb=await photos.boundingBox(),divider=await variants.locator('hr').first().boundingBox();
  expect(Math.round(divider.y-(pb.y+pb.height))).toBe(32);
- expect(vb.width).toBeLessThanOrEqual(841);
+ expect(vb.width).toBeLessThanOrEqual(841);expect(Math.abs(vb.x-pb.x)).toBeLessThanOrEqual(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await expect(variants.getByText('98-104-110-116')).toBeVisible();
  await expect(variants.getByText('Aktivní')).toBeVisible();await expect(variants.getByText('Neaktivní')).toBeVisible();
