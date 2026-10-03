@@ -219,7 +219,6 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const [productMissing, setProductMissing] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const addTriggerRef = useRef<HTMLButtonElement>(null);
     const editorTriggerRef = useRef<HTMLElement | null>(null);
     const pendingSwitchTriggerRef = useRef<HTMLElement | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
@@ -595,7 +594,6 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       <Header>
         <Heading id="product-variants-title" tabIndex={-1}>Varianty</Heading>
         <Button
-          ref={addTriggerRef as any}
           data-variant-add
           disabled={Boolean(operation) || productMissing}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
