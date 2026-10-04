@@ -53,10 +53,12 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const [createDraft,setCreateDraft]=useState<InventoryCreateDraft>({...EMPTY_INVENTORY_CREATE_DRAFT});
   const [editDraft,setEditDraft]=useState<InventoryEditDraft|null>(null);
   const [editBaseline,setEditBaseline]=useState<InventoryEditDraft|null>(null);
+  const [editIdentity,setEditIdentity]=useState<AdminInventoryItem|null>(null);
   const [fieldErrors,setFieldErrors]=useState<Partial<Record<InventoryField,string>>>({});
   const [submitError,setSubmitError]=useState<string|null>(null);
   const [damagedError,setDamagedError]=useState(false);
   const [feedback,setFeedback]=useState<string|null>(null);
+  const [feedbackVariantId,setFeedbackVariantId]=useState<string|null>(null);
   const [operation,setOperation]=useState<InventoryOperation>(null);
   const [refreshing,setRefreshing]=useState(false);
   const [refreshReason,setRefreshReason]=useState<RefreshReason>(null);
@@ -75,8 +77,8 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     mounted.current=true;
     productRef.current=input.productId;
     setSnapshot(buildInventorySnapshot(input.initialVariants));
-    setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);
-    setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setOperation(null);setRefreshing(false);
+    setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);
+    setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
     setRefreshReason(null);setUnknownCreate(null);setMissingItemId(null);setMissingVariantId(null);setProductMissing(false);
     mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
     mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;
@@ -108,19 +110,19 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     hasRisk:editorDirty||missingTargetDraft||Boolean(operation||unknownCreate),
   }),[editorDirty,missingTargetDraft,operation,unknownCreate]);
 
-  const clearMessages=()=>{setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);};
+  const clearMessages=()=>{setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);};
   const open=(target:InventoryEditorTarget,trigger?:HTMLElement|null)=>{
     if(operation||unknownCreate||productMissing)return false;
     triggerRef.current=trigger??null;clearMessages();setMissingItemId(null);setMissingVariantId(null);
     if(target.kind==='add'){
-      setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setActiveEditor(target);return true;
+      setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setActiveEditor(target);return true;
     }
     const item=findInventoryItem(snapshot,target.variantId,target.inventoryItemId);
     if(!item)return false;
     const baseline=inventoryEditBaseline(item);
-    setEditDraft({...baseline});setEditBaseline(baseline);setActiveEditor(target);return true;
+    setEditDraft({...baseline});setEditBaseline(baseline);setEditIdentity(item);setActiveEditor(target);return true;
   };
-  const discardCurrent=()=>{setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setFieldErrors({});setSubmitError(null);setDamagedError(false);setMissingItemId(null);setMissingVariantId(null);triggerRef.current=null;};
+  const discardCurrent=()=>{setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setFieldErrors({});setSubmitError(null);setDamagedError(false);setMissingItemId(null);setMissingVariantId(null);triggerRef.current=null;};
   const cancel=(fallback:()=>HTMLElement|null|undefined)=>{
     if(operation||unknownCreate)return;
     const trigger=triggerRef.current;discardCurrent();scheduleFocus(()=>trigger?.isConnected?trigger:fallback());
@@ -193,7 +195,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       const item=await createAdminInventoryItem({token:input.token,variantId:target.variantId,body:serializeInventoryCreate(createDraftRef.current),signal:started.signal});
       if(!safeMutation(started.generation,started.productId,target.variantId))return;
       if(item.variantId!==target.variantId){setSubmitError('Fyzický kus se nepodařilo uložit. Zkontrolujte zadané údaje.');return;}
-      setSnapshot(prev=>reconcileCreatedInventoryItem(prev,item));setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setUnknownCreate(null);setRefreshReason(null);setFeedback('Fyzický kus byl přidán.');triggerRef.current=null;
+      setSnapshot(prev=>reconcileCreatedInventoryItem(prev,item));setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setUnknownCreate(null);setRefreshReason(null);setFeedback('Fyzický kus byl přidán.');setFeedbackVariantId(item.variantId);triggerRef.current=null;
       scheduleFocus(()=>resolveSuccess(item));
     }catch(error){
       if(!safeMutation(started.generation,started.productId,target.variantId))return;
@@ -215,7 +217,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       const returned=await updateAdminInventoryItem({token:input.token,inventoryItemId:target.inventoryItemId,body,signal:started.signal});
       if(!safeMutation(started.generation,started.productId,target.variantId,target.inventoryItemId))return;
       if(returned.id!==target.inventoryItemId||returned.variantId!==target.variantId){setSubmitError('Fyzický kus se nepodařilo uložit. Zkontrolujte zadané údaje.');return;}
-      setSnapshot(prev=>reconcileUpdatedInventoryItem(prev,returned));setActiveEditor(null);setEditDraft(null);setEditBaseline(null);setMissingItemId(null);setRefreshReason(null);setFeedback('Změny fyzického kusu byly uloženy.');triggerRef.current=null;
+      setSnapshot(prev=>reconcileUpdatedInventoryItem(prev,returned));setActiveEditor(null);setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setMissingItemId(null);setRefreshReason(null);setFeedback('Změny fyzického kusu byly uloženy.');setFeedbackVariantId(returned.variantId);triggerRef.current=null;
       scheduleFocus(()=>resolveSuccess(returned));
     }catch(error){
       if(!safeMutation(started.generation,started.productId,target.variantId,target.inventoryItemId))return;
@@ -237,7 +239,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
         const item=findInventoryItem(next,target.variantId,target.inventoryItemId);
         if(item){
           const baseline=inventoryEditBaseline(item),dirty=Boolean(editDraftRef.current&&editBaselineRef.current&&isInventoryEditDirty(editDraftRef.current,editBaselineRef.current));
-          setEditBaseline(baseline);if(!dirty)setEditDraft({...baseline});setMissingItemId(null);
+          setEditBaseline(baseline);setEditIdentity(item);if(!dirty)setEditDraft({...baseline});setMissingItemId(null);
         }else{setMissingItemId(target.inventoryItemId);setRefreshReason('missing-item');}
       }else if(target?.kind==='add'){
         if(!projected.variantIds.includes(target.variantId)){setMissingVariantId(target.variantId);setRefreshReason('missing-variant');}
@@ -246,15 +248,15 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       if(unknownCreate){
         const result=reconcileUnknownInventoryCreate({snapshot:next,attempt:unknownCreate});
         if(result.kind==='found-target'){
-          setUnknownCreate(null);setRefreshReason(null);setFeedback('Fyzický kus s tímto interním kódem je nyní v seznamu. Zkontrolujte jeho stav před další akcí.');
+          setUnknownCreate(null);setRefreshReason(null);setFeedback('Fyzický kus s tímto interním kódem je nyní v seznamu. Zkontrolujte jeho stav před další akcí.');setFeedbackVariantId(unknownCreate.variantId);
           setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setFieldErrors({});
         }else if(result.kind==='found-other-variant'){
           setUnknownCreate(null);setRefreshReason(null);setFieldErrors({internalCode:'Tento interní kód už používá jiný fyzický kus.'});
         }else if(projected.variantIds.includes(unknownCreate.variantId)){
-          setUnknownCreate(null);setRefreshReason(null);setFeedback('Aktuální fyzické kusy byly načteny. Přidání můžete zkusit znovu.');
+          setUnknownCreate(null);setRefreshReason(null);setFeedback('Aktuální fyzické kusy byly načteny. Přidání můžete zkusit znovu.');setFeedbackVariantId(unknownCreate.variantId);
         }else{setMissingVariantId(unknownCreate.variantId);setRefreshReason('missing-variant');}
       }else if(!refreshReason||refreshReason==='refresh-failed'){
-        setRefreshReason(null);setFeedback('Aktuální fyzické kusy byly načteny.');
+        setRefreshReason(null);setFeedback('Aktuální fyzické kusy byly načteny.');setFeedbackVariantId(target?.variantId??null);
       }
     }catch(error){
       if(!mounted.current||productRef.current!==productId||refreshGeneration.current!==generation||mutationGeneration.current!==observedMutation)return;
@@ -268,8 +270,10 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   };
 
   return{
-    snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,fieldErrors,submitError,damagedError,feedback,
+    snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,editIdentity,fieldErrors,submitError,damagedError,feedback,feedbackVariantId,
     operation,refreshing,refreshReason,unknownCreate,missingItemId,missingVariantId,productMissing,editorDirty,riskMeta,
     open,discardCurrent,cancel,saveCreate,saveEdit,refresh,scheduleFocus,
   };
 }
+
+export type ProductInventoryController = ReturnType<typeof useProductInventoryController>;
