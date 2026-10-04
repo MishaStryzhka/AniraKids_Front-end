@@ -20,6 +20,7 @@ import {
   findInventoryItem,
   inventoryCodeErrorCopy,
   inventoryEditBaseline,
+  inventoryLifecycleTarget,
   isInventoryCreateDirty,
   isInventoryEditDirty,
   sameItemDirtyCondition,
@@ -303,6 +304,125 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       handleMutationError(error,'update',target.variantId,target.inventoryItemId);
       if(error instanceof AdminApiError&&error.code==='DAMAGED_ITEM_REQUIRES_MAINTENANCE')scheduleFocus(()=>resolveField('condition'));
     }finally{finishMutation(started.generation,started.productId,target.variantId,target.inventoryItemId);}
+  };
+
+  const lifecycleSuccessMessage=(action:InventoryLifecycleAction)=>{
+    if(action==='maintenance')return 'Fyzický kus byl přesunut do údržby.';
+    if(action==='activate')return 'Fyzický kus byl aktivován.';
+    return 'Fyzický kus byl vyřazen.';
+  };
+
+  const lifecycleSafe=(itemId:string,generation:number,productId:string,variantId:string)=>{
+    return mounted.current
+      && productRef.current===productId
+      && lifecycleGenerationByItemRef.current[itemId]===generation
+      && findInventoryItem(snapshot,variantId,itemId)!==null;
+  };
+
+  const clearLifecycleNotice=(itemId:string)=>setLifecycleNoticeByItem(previous=>{
+    if(!previous[itemId])return previous;
+    const next={...previous};delete next[itemId];return next;
+  });
+
+  const transitionLifecycle=async(inputLifecycle:{
+    variantId:string;
+    inventoryItemId:string;
+    action:InventoryLifecycleAction;
+    focus:InventoryLifecycleFocus;
+  })=>{
+    const item=findInventoryItem(snapshot,inputLifecycle.variantId,inputLifecycle.inventoryItemId);
+    if(!item||productMissing||!input.token)return false;
+    const targetStatus=inventoryLifecycleTarget(inputLifecycle.action);
+    if(item.status===targetStatus||item.status==='retired')return false;
+    const basic=mutationOperationRef.current;
+    if(basic?.kind==='update'&&basic.inventoryItemId===item.id)return false;
+    if(lifecycleControllerByItemRef.current[item.id]||unknownLifecycleByItem[item.id])return false;
+    if(inputLifecycle.action==='activate'&&sameItemDirtyCondition({
+      editor:activeEditorRef.current,
+      editDraft:editDraftRef.current,
+      editBaseline:editBaselineRef.current,
+      variantId:inputLifecycle.variantId,
+      inventoryItemId:item.id,
+    }))return false;
+
+    const generation=++lifecycleSequenceRef.current;
+    lifecycleGenerationByItemRef.current[item.id]=generation;
+    lifecycleRevisionRef.current++;
+    refreshGeneration.current++;
+    refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
+    const controller=new AbortController();
+    lifecycleControllerByItemRef.current[item.id]=controller;
+    const operationState:InventoryLifecycleOperation={
+      generation,
+      productId:input.productId,
+      variantId:inputLifecycle.variantId,
+      inventoryItemId:item.id,
+      sourceStatus:item.status,
+      targetStatus,
+      action:inputLifecycle.action,
+    };
+    setLifecycleOperationsByItem(previous=>({...previous,[item.id]:operationState}));
+    clearLifecycleNotice(item.id);
+
+    try{
+      const request={token:input.token,inventoryItemId:item.id,signal:controller.signal};
+      const returned=inputLifecycle.action==='maintenance'
+        ? await moveAdminInventoryItemToMaintenance(request)
+        : inputLifecycle.action==='activate'
+          ? await activateAdminInventoryItem(request)
+          : await retireAdminInventoryItem(request);
+      if(!mounted.current||productRef.current!==operationState.productId||lifecycleGenerationByItemRef.current[item.id]!==generation)return false;
+      if(returned.id!==item.id||returned.variantId!==inputLifecycle.variantId){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'invalid-id',recoverable:true}}));
+        return false;
+      }
+      setSnapshot(previous=>reconcileLifecycleInventoryItem(previous,returned));
+      setUnknownLifecycleByItem(previous=>{if(!previous[item.id])return previous;const next={...previous};delete next[item.id];return next;});
+      setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'success',message:lifecycleSuccessMessage(inputLifecycle.action)}}));
+      scheduleFocus(()=>inputLifecycle.focus.edit());
+      return true;
+    }catch(error){
+      if(!mounted.current||productRef.current!==operationState.productId||lifecycleGenerationByItemRef.current[item.id]!==generation)return false;
+      if(input.onAccessError?.(error))return false;
+      if(error instanceof AdminApiError&&error.kind==='cancelled')return false;
+      if(error instanceof AdminApiError&&error.code==='INVENTORY_HAS_CURRENT_OR_FUTURE_RESERVATION'){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'reservation-conflict'}}));
+        scheduleFocus(()=>inputLifecycle.focus.action(inputLifecycle.action));return false;
+      }
+      if(error instanceof AdminApiError&&error.code==='DAMAGED_ITEM_CANNOT_BE_ACTIVATED'){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'damaged-activation'}}));
+        const editor=activeEditorRef.current;
+        const sameEditor=editor?.kind==='edit'&&editor.variantId===inputLifecycle.variantId&&editor.inventoryItemId===item.id;
+        scheduleFocus(()=>sameEditor?inputLifecycle.focus.condition():inputLifecycle.focus.edit());return false;
+      }
+      if(error instanceof AdminApiError&&error.code==='INVALID_INVENTORY_TRANSITION'){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'invalid-transition',recoverable:true}}));return false;
+      }
+      if(error instanceof AdminApiError&&error.code==='INVALID_ID'){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'invalid-id',recoverable:true}}));return false;
+      }
+      if(error instanceof AdminApiError&&error.code==='INVENTORY_ITEM_NOT_FOUND'){
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'missing-item',recoverable:true}}));return false;
+      }
+      if(error instanceof AdminApiError&&error.kind==='network'){
+        setUnknownLifecycleByItem(previous=>({...previous,[item.id]:{
+          productId:operationState.productId,
+          variantId:operationState.variantId,
+          inventoryItemId:item.id,
+          sourceStatus:operationState.sourceStatus,
+          requestedTargetStatus:operationState.targetStatus,
+        }}));
+        setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'unknown',recoverable:true}}));
+        return false;
+      }
+      setLifecycleNoticeByItem(previous=>({...previous,[item.id]:{kind:'invalid-transition',recoverable:true}}));
+      return false;
+    }finally{
+      if(lifecycleGenerationByItemRef.current[item.id]===generation){
+        delete lifecycleControllerByItemRef.current[item.id];
+        setLifecycleOperationsByItem(previous=>{if(!previous[item.id]||previous[item.id].generation!==generation)return previous;const next={...previous};delete next[item.id];return next;});
+      }
+    }
   };
 
   const refresh=async()=>{
