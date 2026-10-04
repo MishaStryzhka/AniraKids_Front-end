@@ -374,11 +374,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     const requestInventoryEditor = (target: InventoryEditorTarget, trigger: HTMLElement) => {
-      sectionRef.current?.setAttribute('data-inventory-request', target.kind);
-      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) {
-        sectionRef.current?.setAttribute('data-inventory-request-result', `blocked:operation=${Boolean(operation)};productMissing=${productMissing};unknown=${Boolean(unknownCreate)};inventoryPending=${inventory.riskMeta.pendingOrUnresolved}`);
-        return;
-      }
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
       if (inventory.activeEditor) {
         const same = inventory.activeEditor.kind === target.kind &&
           inventory.activeEditor.variantId === target.variantId &&
@@ -399,9 +395,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         }
         clearVariantEditor();
       }
-      const opened = inventory.open(target, trigger);
-      sectionRef.current?.setAttribute('data-inventory-request-result', opened ? 'opened' : 'open-false');
-      if (opened) focusInventoryEditor(target);
+      if (inventory.open(target, trigger)) focusInventoryEditor(target);
     };
 
     const cancelEditor = () => {
