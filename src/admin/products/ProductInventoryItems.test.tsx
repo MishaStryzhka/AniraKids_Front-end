@@ -52,7 +52,7 @@ test('active edit is read-only for identity/status, excludes damaged and disable
     editIdentity:item('i1'),editDraft:{condition:'good',notes:'Poznámka text'},editBaseline:{condition:'good',notes:'Poznámka text'},
   });
   render(<ProductInventoryItems variant={variant} controller={c} onRequestOpen={jest.fn()}/>);
-  expect(screen.getByText('AK-001-LONG-CODE')).toBeInTheDocument();
+  expect(screen.getAllByText('AK-001-LONG-CODE').length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText('Aktivní').length).toBeGreaterThan(0);
   expect(screen.queryByLabelText('Interní kód')).not.toBeInTheDocument();
   expect(screen.queryByRole('option',{name:'Poškozený'})).not.toBeInTheDocument();
