@@ -910,7 +910,7 @@ test('02D dirty same-item Inventory editor survives maintenance; only canonical 
   await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit',exact:true})).toHaveFocus());
 });
 
-test('02D notes-only dirty maintenance item can activate and draft survives; dirty condition blocks activation without POST',async()=>{
+test('02D notes-only dirty maintenance item can activate and draft survives',async()=>{
   const maintenance=inventoryItem('i1','v1','AK-001','good','maintenance');
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
   activateInventoryMock.mockResolvedValueOnce({...maintenance,status:'active'});
@@ -921,20 +921,21 @@ test('02D notes-only dirty maintenance item can activate and draft survives; dir
   fireEvent.click(screen.getByRole('button',{name:'Aktivovat'}));
   await screen.findByText('Fyzický kus byl aktivován.');
   expect(screen.getByLabelText('Poznámka')).toHaveValue('notes-only');
-  expect(screen.getByText('Aktivní')).toBeInTheDocument();
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-status-cell]')!).getByText('Aktivní')).toBeInTheDocument();
+});
 
+test('02D dirty same-item condition disables activation and issues no lifecycle POST',async()=>{
+  const maintenance=inventoryItem('i1','v1','AK-001','good','maintenance');
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
-  const second=renderRouter('/admin/produkty/p1');
-  await screen.findAllByDisplayValue('Sofia');
-  const condition=screen.getAllByLabelText('Stav kusu').slice(-1)[0];
-  fireEvent.click(screen.getAllByRole('button',{name:'Upravit',exact:true}).slice(-1)[0]);
-  await waitFor(()=>expect(screen.getAllByLabelText('Stav kusu').slice(-1)[0]).toBeInTheDocument());
-  fireEvent.change(screen.getAllByLabelText('Stav kusu').slice(-1)[0],{target:{value:'fair'}});
-  const activate=screen.getAllByRole('button',{name:'Aktivovat'}).slice(-1)[0];
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getByRole('button',{name:'Upravit',exact:true}));
+  await waitFor(()=>expect(screen.getByLabelText('Stav kusu')).toHaveFocus());
+  fireEvent.change(screen.getByLabelText('Stav kusu'),{target:{value:'fair'}});
+  const activate=screen.getByRole('button',{name:'Aktivovat'});
   expect(activate).toBeDisabled();
   expect(screen.getByText('Nejprve uložte nebo zrušte rozpracovanou změnu Stavu kusu.')).toBeInTheDocument();
-  expect(activateInventoryMock).toHaveBeenCalledTimes(1);
-  second.dispose?.();
+  expect(activateInventoryMock).not.toHaveBeenCalled();
 });
 
 test('02D lifecycle preserves dirty Variant, dirty Core and Photo drafts across successful maintenance',async()=>{
