@@ -469,17 +469,18 @@ export function useProductInventoryController(input:UseProductInventoryControlle
         .filter(([,notice])=>'recoverable' in notice&&notice.recoverable)
         .map(([id])=>id);
       if(recoverableLifecycleIds.length){
-        const missingVariants:string[]=[];
+        const missingVariants=recoverableLifecycleIds.flatMap(id=>{
+          const observedVariant=Object.entries(next).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
+          if(observedVariant)return [];
+          const priorVariant=Object.entries(snapshot).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
+          return priorVariant?[priorVariant]:[];
+        });
         setLifecycleNoticeByItem(previous=>{
           const copy={...previous};
           recoverableLifecycleIds.forEach(id=>{
             const owning=Object.entries(next).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
             if(owning)copy[id]={kind:'success',message:'Aktuální fyzické kusy byly načteny.'};
-            else{
-              const priorVariant=Object.entries(snapshot).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
-              if(priorVariant)missingVariants.push(priorVariant);
-              delete copy[id];
-            }
+            else delete copy[id];
           });
           return copy;
         });
