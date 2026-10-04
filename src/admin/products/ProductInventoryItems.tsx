@@ -79,7 +79,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen}:Produ
   </Body>;
  };
 
- return <Section ref={root} aria-labelledby={headingId} data-inventory-variant={variant.id}>
+ return <Section ref={root} aria-labelledby={headingId} data-inventory-variant={variant.id} data-inventory-active-editor={target?.kind??'none'}>
   <Divider/><Header><Heading id={headingId} tabIndex={-1}>Fyzické kusy</Heading><Button data-inventory-add size="compact" variant="secondary" disabled={blocked} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'add',variantId:variant.id},e.currentTarget)}>Přidat fyzický kus</Button></Header>
   {target?.kind==='add'?editor():null}
   {c.feedback&&c.feedbackVariantId===variant.id?<Notice $tone={c.feedback.startsWith('Fyzický kus s tímto interním kódem')?'info':'success'} role="status">{c.feedback.startsWith('Fyzický kus s tímto interním kódem')?<Info/>:<CircleCheck/>}<div>{c.feedback}</div></Notice>:null}
