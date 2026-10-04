@@ -751,7 +751,7 @@ test('R1 A: dirty Core survives successful Inventory update and Core Save preser
   await screen.findByText('Změny fyzického kusu byly uloženy.');
   await waitFor(()=>expect(document.querySelector('[data-inventory-editor]')).not.toBeInTheDocument());
   const savedRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
-  expect(within(savedRow).getByText('Uspokojivý')).toBeInTheDocument();
+  expect(within(savedRow.querySelector<HTMLElement>('[data-inventory-condition-cell]')!).getByText('Uspokojivý')).toBeInTheDocument();
   expect(within(savedRow).getByText(/saved/)).toBeInTheDocument();
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(save()).toBeEnabled();
@@ -769,7 +769,7 @@ test('R1 A: dirty Core survives successful Inventory update and Core Save preser
 
   expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
   expect(screen.getByLabelText('Poznámka')).toHaveValue('draft-after-core-save');
-  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!).getByText('Uspokojivý')).toBeInTheDocument();
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-condition-cell]')!).getByText('Uspokojivý')).toBeInTheDocument();
   expect(updateInventoryMock).toHaveBeenCalledTimes(1);
   expect(createInventoryMock).not.toHaveBeenCalled();
   expect(save()).toBeDisabled();
@@ -791,7 +791,7 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   await openInventoryEdit();
   fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'inventory-draft'}});
   expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
-  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!).getByText('Dobrý')).toBeInTheDocument();
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
   fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Photo saved'}});
@@ -803,7 +803,7 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
   expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
   expect(within(inventoryRow).getByText('AK-001')).toBeInTheDocument();
-  expect(within(inventoryRow).getByText('Dobrý')).toBeInTheDocument();
+  expect(within(inventoryRow.querySelector<HTMLElement>('[data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
   expect(updateInventoryMock).not.toHaveBeenCalled();
   expect(createInventoryMock).not.toHaveBeenCalled();
 
