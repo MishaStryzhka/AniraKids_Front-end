@@ -15,6 +15,7 @@ import {adminRoutes, buildAdminProductDetailPath} from '../navigation/adminRoute
 import {ProductCoreForm, type ProductCoreFormHandle} from './ProductCoreForm';
 import {ProductMediaSection, type MediaDeleteIntent, type MediaDeleteSettlement} from './ProductMediaSection';
 import {ProductVariantsSection, type EditorSwitchIntent, type ProductVariantsSectionHandle, type VariantyEditorTarget} from './ProductVariantsSection';
+import type {InventoryRetireIntent} from './ProductInventoryItems';
 import type {InventoryRiskMeta} from './productInventoryModel';
 import {coreFormStatesEquivalent, initialProductCoreFormState, productToCoreFormState, serializeAdminProductPatch, serializeCreateAdminProduct, type ProductCoreFormState} from './productCoreFormModel';
 import {validateProductCoreForm, type ProductCoreErrors, type ProductCoreField, type ProductCoreFocusTarget} from './productCoreValidation';
@@ -40,8 +41,16 @@ const backendFieldFallback: Partial<Record<ProductCoreField, string>> = {
 };
 type FeedbackKind = 'created' | 'updated';
 type ActiveDialog = {kind:'none'} | {kind:'leave'} | ({kind:'delete'} & MediaDeleteIntent)
-  | {kind:'editor-switch';dirtyDomain:'variant'|'inventory';target:VariantyEditorTarget};
-const EMPTY_INVENTORY_RISK: InventoryRiskMeta = {hasRisk:false,hasDraft:false,pendingOrUnresolved:false,missingTargetDraft:false};
+  | {kind:'editor-switch';dirtyDomain:'variant'|'inventory';target:VariantyEditorTarget}
+  | {kind:'inventory-retire';intent:InventoryRetireIntent};
+const EMPTY_INVENTORY_RISK: InventoryRiskMeta = {
+  hasRisk:false,
+  hasDraft:false,
+  missingTargetDraft:false,
+  editorPendingOrUnresolved:false,
+  lifecyclePendingOrUnresolved:false,
+  pendingOrUnresolved:false,
+};
 function ProductSuccessFeedback({kind, onDismiss}: {kind: FeedbackKind; onDismiss(): void}) {
   return <Feedback aria-live="polite"><span>{kind === 'created' ? 'Produkt byl vytvořen.' : 'Změny byly uloženy.'}</span>
     <IconButton aria-label="Zavřít potvrzení" icon={<X aria-hidden="true"/>} onClick={onDismiss}/></Feedback>;
@@ -73,6 +82,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const [variantRisk, setVariantRisk] = useState(false);
   const [variantPending, setVariantPending] = useState(false);
   const [inventoryRisk, setInventoryRisk] = useState<InventoryRiskMeta>(EMPTY_INVENTORY_RISK);
+  const [retireStartPending,setRetireStartPending]=useState<InventoryRetireIntent|null>(null);
   const [loading, setLoading] = useState(mode === 'edit' && !validHydration);
   const [loadError, setLoadError] = useState<'not-found' | 'network' | null>(null);
   const [retryRevision, setRetryRevision] = useState(0);
@@ -88,15 +98,19 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const requestSequence = useRef(0);
   const bypassRef = useRef(false);
   const dirty = useMemo(() => !coreFormStatesEquivalent(current, baseline), [current, baseline]);
-  const hasRisk = dirty || mediaRisk || variantRisk || inventoryRisk.hasRisk;
-  const hasPendingOrUnresolved = submitting || mediaPending || variantPending || inventoryRisk.pendingOrUnresolved;
-  const inventoryOnlyRisk = inventoryRisk.hasRisk && !dirty && !mediaRisk && !variantRisk;
+  const hasRisk = dirty || mediaRisk || variantRisk || inventoryRisk.hasRisk || Boolean(retireStartPending);
+  const hasPendingOrUnresolved = submitting || mediaPending || variantPending || inventoryRisk.pendingOrUnresolved || Boolean(retireStartPending);
+  const inventoryNonLifecycleRisk = inventoryRisk.hasDraft || inventoryRisk.missingTargetDraft || inventoryRisk.editorPendingOrUnresolved;
+  const lifecycleOnlyRisk = (inventoryRisk.lifecyclePendingOrUnresolved || Boolean(retireStartPending))
+    && !dirty && !mediaRisk && !variantRisk && !inventoryNonLifecycleRisk;
+  const inventoryOnlyRisk = inventoryNonLifecycleRisk && !dirty && !mediaRisk && !variantRisk
+    && !inventoryRisk.lifecyclePendingOrUnresolved && !retireStartPending;
   const localDialogOpen = useRef(false);
   const blocker = useBlocker(() => (hasRisk || localDialogOpen.current) && !bypassRef.current);
 
   // One page-owned dialog. Navigation cannot replace an unresolved deletion confirmation.
   const [dialogState, setDialogState] = useState<ActiveDialog>({kind: 'none'});
-  localDialogOpen.current = dialogState.kind === 'delete' || dialogState.kind === 'editor-switch';
+  localDialogOpen.current = dialogState.kind === 'delete' || dialogState.kind === 'editor-switch' || dialogState.kind === 'inventory-retire';
   const [deleteRequest, setDeleteRequest] = useState<{publicId: string; nonce: number} | null>(null);
   const deleteNonce = useRef(0);
   const pendingDelete = useRef<number | null>(null);
@@ -114,7 +128,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   }, [scopeKey]);
   useEffect(() => {
     if (blocker.state !== 'blocked') {proceededLocation.current = null; return;}
-    if (dialogState.kind === 'delete' || dialogState.kind === 'editor-switch') return;
+    if (dialogState.kind === 'delete' || dialogState.kind === 'editor-switch' || dialogState.kind === 'inventory-retire') return;
     if (!hasRisk) {
       if (proceededLocation.current !== blocker.location.key) {
         proceededLocation.current = blocker.location.key;
@@ -125,9 +139,25 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     } else if (dialogState.kind !== 'leave') setDialogState({kind: 'leave'});
   }, [blocker, dialogState.kind, hasRisk]);
   useEffect(() => {
-    if ((previousDialogKind.current === 'delete' || previousDialogKind.current === 'editor-switch') && dialogState.kind === 'leave') safeDialogButton.current?.focus();
+    if ((previousDialogKind.current === 'delete' || previousDialogKind.current === 'editor-switch' || previousDialogKind.current === 'inventory-retire') && dialogState.kind === 'leave') safeDialogButton.current?.focus();
     previousDialogKind.current = dialogState.kind;
   }, [dialogState.kind]);
+
+  useEffect(()=>{
+    if(!retireStartPending||dialogState.kind!=='none')return;
+    const intent=retireStartPending;
+    const expectedScope=scopeKey;
+    const first=window.requestAnimationFrame(()=>{
+      if(!scope.current.alive||scope.current.key!==expectedScope)return;
+      variantsRef.current?.retireInventoryItem({variantId:intent.variantId,inventoryItemId:intent.inventoryItemId});
+      window.requestAnimationFrame(()=>{
+        if(scope.current.alive&&scope.current.key===expectedScope){
+          setRetireStartPending(current=>current===intent?null:current);
+        }
+      });
+    });
+    return()=>window.cancelAnimationFrame(first);
+  },[retireStartPending,dialogState.kind,scopeKey]);
 
   useBeforeUnload(useCallback(event => {
     if (!hasRisk) return;
@@ -247,6 +277,20 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     setDialogState({kind:'none'});
   };
 
+  const requestInventoryRetire=(intent:InventoryRetireIntent)=>{
+    if(dialogState.kind!=='none')return;
+    restoreTarget.current=()=>intent.trigger;
+    setDialogState({kind:'inventory-retire',intent});
+  };
+  const cancelInventoryRetire=()=>setDialogState({kind:'none'});
+  const confirmInventoryRetire=()=>{
+    if(dialogState.kind!=='inventory-retire')return;
+    const intent=dialogState.intent;
+    restoreTarget.current=()=>null;
+    setRetireStartPending(intent);
+    setDialogState({kind:'none'});
+  };
+
   const requestDelete = (intent: MediaDeleteIntent) => {
     if (pendingDelete.current !== null || dialogState.kind !== 'none') return;
     restoreTarget.current = () => intent.trigger;
@@ -283,19 +327,24 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   };
   const deleting = dialogState.kind === 'delete' ? dialogState : null;
   const switchingEditor = dialogState.kind === 'editor-switch' ? dialogState : null;
+  const retiringInventory = dialogState.kind === 'inventory-retire' ? dialogState.intent : null;
   const switchingInventory = switchingEditor?.dirtyDomain === 'inventory';
   const leaveTitle = mode === 'create'
     ? 'Neuložené změny'
-    : inventoryOnlyRisk
-      ? hasPendingOrUnresolved ? 'Nedokončená práce s fyzickým kusem' : 'Neuložené změny fyzického kusu'
-      : 'Neuložené nebo nedokončené změny';
+    : lifecycleOnlyRisk
+      ? 'Nedokončená změna provozního stavu'
+      : inventoryOnlyRisk
+        ? hasPendingOrUnresolved ? 'Nedokončená práce s fyzickým kusem' : 'Neuložené změny fyzického kusu'
+        : 'Neuložené nebo nedokončené změny';
   const leaveDescription = mode === 'create'
     ? 'Máte neuložené změny. Opravdu chcete odejít?'
-    : inventoryOnlyRisk
-      ? hasPendingOrUnresolved
-        ? 'Výsledek operace s fyzickým kusem nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
-        : 'Máte neuložené změny fyzického kusu. Opravdu chcete odejít?'
-      : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.';
+    : lifecycleOnlyRisk
+      ? 'Změna provozního stavu probíhá nebo její výsledek není potvrzený. Pokud odejdete, požadavek už mohl být zpracován a opuštění stránky jej nevrátí zpět.'
+      : inventoryOnlyRisk
+        ? hasPendingOrUnresolved
+          ? 'Výsledek operace s fyzickým kusem nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
+          : 'Máte neuložené změny fyzického kusu. Opravdu chcete odejít?'
+        : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.';
   const mixedWithInventory = inventoryRisk.hasRisk && (dirty || mediaRisk || variantRisk);
   const leaveAction = mode === 'create'
     ? 'Odejít bez uložení'
@@ -327,14 +376,16 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete}/> : null}
     {mode === 'edit' && productId ? <ProductVariantsSection key={`variants:${productId}`} ref={variantsRef} productId={productId}
       token={token ?? ''} initialVariants={variantSeed} onRiskChange={setVariantRisk} onPendingRiskChange={setVariantPending}
-      onInventoryRiskChange={setInventoryRisk} onRequestEditorSwitch={requestEditorSwitch} onAccessError={handleRequestError}/> : null}
+      onInventoryRiskChange={setInventoryRisk} onRequestEditorSwitch={requestEditorSwitch}
+      onRequestInventoryRetire={requestInventoryRetire} onAccessError={handleRequestError}/> : null}
     <Dialog open={dialogState.kind !== 'none'}
-      title={deleting ? 'Odebrat fotografii?' : switchingEditor ? switchingInventory ? 'Neuložené změny fyzického kusu' : 'Neuložená změna varianty' : leaveTitle}
-      description={deleting ? deleteDescription : switchingEditor ? switchingInventory ? 'Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?' : 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : leaveDescription}
-      onEscape={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
+      title={deleting ? 'Odebrat fotografii?' : retiringInventory ? 'Vyřadit fyzický kus?' : switchingEditor ? switchingInventory ? 'Neuložené změny fyzického kusu' : 'Neuložená změna varianty' : leaveTitle}
+      description={deleting ? deleteDescription : retiringInventory ? `Fyzický kus ${retiringInventory.internalCode} bude trvale převeden do stavu Vyřazený. Po vyřazení jej nelze znovu aktivovat.` : switchingEditor ? switchingInventory ? 'Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?' : 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : leaveDescription}
+      onEscape={deleting ? cancelDelete : retiringInventory ? cancelInventoryRetire : switchingEditor ? stayEditorSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
       <Actions ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
-        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
+        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : retiringInventory ? cancelInventoryRetire : switchingEditor ? stayEditorSwitch : stay}>{deleting || retiringInventory ? 'Zrušit' : 'Zůstat'}</Button>
         {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
+          : retiringInventory ? <Button variant="destructive" onClick={confirmInventoryRetire}>Vyřadit</Button>
           : switchingEditor ? <Button variant={switchingInventory ? 'secondary' : 'destructive'} onClick={discardEditorSwitch}>Zahodit změny a pokračovat</Button>
           : <Button variant="destructive" onClick={leave}>{leaveAction}</Button>}
       </Actions>
