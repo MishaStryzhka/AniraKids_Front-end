@@ -1,10 +1,14 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {AdminApiError} from '../api/errors';
 import {
+  activateAdminInventoryItem,
   createAdminInventoryItem,
   getAdminProductInventorySnapshot,
+  moveAdminInventoryItemToMaintenance,
+  retireAdminInventoryItem,
   updateAdminInventoryItem,
   type AdminInventoryItem,
+  type AdminInventoryItemStatus,
   type AdminProductDetailVariant,
 } from '../api/products';
 import {
@@ -12,12 +16,15 @@ import {
   buildInventorySnapshot,
   buildInventorySnapshotFromProjection,
   canonicalInventoryCode,
+  deriveInventoryRiskMeta,
   findInventoryItem,
   inventoryCodeErrorCopy,
   inventoryEditBaseline,
   isInventoryCreateDirty,
   isInventoryEditDirty,
+  sameItemDirtyCondition,
   reconcileCreatedInventoryItem,
+  reconcileLifecycleInventoryItem,
   reconcileUnknownInventoryCreate,
   reconcileUpdatedInventoryItem,
   serializeInventoryCreate,
@@ -26,6 +33,7 @@ import {
   validateInventoryNotes,
   type InventoryCreateDraft,
   type InventoryEditDraft,
+  type InventoryLifecycleAction,
   type InventoryEditorTarget,
   type InventoryRiskMeta,
   type InventoryUnknownCreateAttempt,
@@ -39,6 +47,40 @@ type InventoryOperation =
 
 type RefreshReason='unknown-create'|'missing-item'|'missing-variant'|'refresh-failed'|null;
 type InventoryField='internalCode'|'condition'|'notes';
+
+export interface InventoryLifecycleOperation {
+  generation:number;
+  productId:string;
+  variantId:string;
+  inventoryItemId:string;
+  sourceStatus:AdminInventoryItemStatus;
+  targetStatus:AdminInventoryItemStatus;
+  action:InventoryLifecycleAction;
+}
+
+export interface InventoryLifecycleUnknownOutcome {
+  productId:string;
+  variantId:string;
+  inventoryItemId:string;
+  sourceStatus:AdminInventoryItemStatus;
+  requestedTargetStatus:AdminInventoryItemStatus;
+}
+
+export type InventoryLifecycleNotice =
+  | {kind:'success';message:string}
+  | {kind:'reservation-conflict'}
+  | {kind:'damaged-activation'}
+  | {kind:'invalid-transition';recoverable:true}
+  | {kind:'invalid-id';recoverable:true}
+  | {kind:'missing-item';recoverable:true}
+  | {kind:'unknown';recoverable:true};
+
+export interface InventoryLifecycleFocus {
+  edit():HTMLElement|null|undefined;
+  action(action:InventoryLifecycleAction):HTMLElement|null|undefined;
+  condition():HTMLElement|null|undefined;
+  heading():HTMLElement|null|undefined;
+}
 
 export interface UseProductInventoryControllerInput{
   productId:string;
