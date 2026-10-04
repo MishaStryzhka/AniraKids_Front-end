@@ -446,7 +446,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           },
         });
       },
-    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
+    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, inventorySection, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
