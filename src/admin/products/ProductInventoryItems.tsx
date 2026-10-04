@@ -69,7 +69,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
  const items=inventoryItemsForVariant(c.snapshot,variant.id);
  const target=c.activeEditor?.variantId===variant.id?c.activeEditor:null;
  const identity=target?.kind==='edit'?(findInventoryItem(c.snapshot,variant.id,target.inventoryItemId)??c.editIdentity):null;
- const pending=Boolean(c.operation),basicBlocked=pending||c.productMissing||Boolean(c.unknownCreate);
+ const pending=Boolean(c.operation),lifecycleAnyPending=Object.keys(c.lifecycleOperationsByItem).length>0,basicBlocked=pending||c.productMissing||Boolean(c.unknownCreate);
  const resolveField=(field:'internalCode'|'condition'|'notes')=>field==='internalCode'?codeRef.current:field==='condition'?conditionRef.current:notesRef.current;
  const fallback=()=>root.current?.querySelector<HTMLElement>(`#${headingId}`)??null;
  const itemRow=(id:string)=>row(root.current,id);
@@ -84,9 +84,9 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
 
  const basicNotice=()=>{
   if(c.productMissing)return <Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Produkt už není dostupný</strong>Další změny fyzických kusů nelze uložit.</div></Notice>;
-  if(target?.kind==='add'&&c.missingVariantId===variant.id)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Varianta už není dostupná</strong>Fyzický kus nelze přidat, protože tato varianta už nebyla nalezena.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
-  if(target?.kind==='edit'&&c.missingItemId===target.inventoryItemId)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Fyzický kus už není dostupný</strong>Změny nelze uložit, protože tento fyzický kus už nebyl nalezen.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
-  if(c.unknownCreate?.variantId===variant.id)return <><Notice $tone="warning" data-inventory-unknown><TriangleAlert aria-hidden="true"/><div><strong>Výsledek přidání fyzického kusu není potvrzený</strong>Požadavek mohl být zpracován. Než kus přidáte znovu, načtěte aktuální fyzické kusy.</div></Notice><Recovery size="compact" loading={c.refreshing} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(target?.kind==='add'&&c.missingVariantId===variant.id)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Varianta už není dostupná</strong>Fyzický kus nelze přidat, protože tato varianta už nebyla nalezena.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(target?.kind==='edit'&&c.missingItemId===target.inventoryItemId)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Fyzický kus už není dostupný</strong>Změny nelze uložit, protože tento fyzický kus už nebyl nalezen.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(c.unknownCreate?.variantId===variant.id)return <><Notice $tone="warning" data-inventory-unknown><TriangleAlert aria-hidden="true"/><div><strong>Výsledek přidání fyzického kusu není potvrzený</strong>Požadavek mohl být zpracován. Než kus přidáte znovu, načtěte aktuální fyzické kusy.</div></Notice><Recovery size="compact" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
   if(c.damagedError)return <Notice $tone="danger"><CircleAlert aria-hidden="true"/><div><strong>Poškozený stav nelze uložit</strong>Aktivní fyzický kus nelze v tomto základním editoru označit jako poškozený. Změna provozního stavu do údržby není součástí této fáze.</div></Notice>;
   return null;
  };
@@ -94,8 +94,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
  const lifecycleNotice=(item:AdminInventoryItem,notice:InventoryLifecycleNotice|null)=>{
   if(!notice)return null;
   const recover=()=>{
-    const lifecyclePending=Object.keys(c.lifecycleOperationsByItem).length>0;
-    return <Recovery size="compact" variant="secondary" disabled={c.refreshing||lifecyclePending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery>;
+    return <Recovery size="compact" variant="secondary" disabled={c.refreshing||lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery>;
   };
   if(notice.kind==='success')return <Notice $tone="success" role="status" aria-live="polite"><CircleCheck aria-hidden="true"/><div>{notice.message}</div></Notice>;
   if(notice.kind==='reservation-conflict')return <Notice $tone="warning" role="status" aria-live="polite"><TriangleAlert aria-hidden="true"/><div><strong>Provozní stav nelze změnit</strong>Fyzický kus má aktuální nebo budoucí rezervaci, která této změně brání.</div></Notice>;
