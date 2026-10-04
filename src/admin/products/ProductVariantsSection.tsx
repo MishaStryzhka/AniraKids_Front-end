@@ -334,11 +334,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       editorTriggerRef.current = null;
     };
 
-    const inventorySection = (variantId: string) =>
+    const inventorySection = useCallback((variantId: string) =>
       Array.from(sectionRef.current?.querySelectorAll<HTMLElement>('[data-inventory-variant]') ?? [])
-        .find(section => section.dataset.inventoryVariant === variantId) ?? null;
+        .find(section => section.dataset.inventoryVariant === variantId) ?? null, []);
 
-    const resolveInventoryEditorFocus = (target?: InventoryEditorTarget | null) => {
+    const resolveInventoryEditorFocus = useCallback((target?: InventoryEditorTarget | null) => {
       const active = target ?? inventory.activeEditor;
       if (!active) return null;
       const section = inventorySection(active.variantId);
@@ -347,10 +347,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         ? section.querySelector<HTMLElement>('[data-inventory-code]')
         : section.querySelector<HTMLElement>('[data-inventory-condition]');
       return available(field) ? field : section.querySelector<HTMLElement>('h3') ?? null;
-    };
+    }, [inventory.activeEditor, inventorySection]);
 
-    const focusInventoryEditor = (target: InventoryEditorTarget) =>
-      inventory.scheduleFocus(() => resolveInventoryEditorFocus(target));
+    const focusInventoryEditor = useCallback((target: InventoryEditorTarget) =>
+      inventory.scheduleFocus(() => resolveInventoryEditorFocus(target)),
+    [inventory.scheduleFocus, resolveInventoryEditorFocus]);
 
     const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
       if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
@@ -425,7 +426,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           else if (inventory.open(next.target, trigger)) focusInventoryEditor(next.target);
         });
       },
-    }), [activeEditor, fallbackFocus, inventory, openEditor, props.productId, scheduleFocus]);
+    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
