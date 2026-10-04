@@ -19,6 +19,13 @@ jobs:
           node -e "require('fs').writeFileSync('test-evidence/admin-fe02c03/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
       - name: TypeScript
         run: npm run typecheck
+      - name: DQA R1 corrected suites
+        run: >
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-fe02c03/dqa-r1-results.json
+          src/admin/products/AdminProductCorePage.test.tsx
+          src/admin/products/ProductInventoryItems.test.tsx
+          src/admin/products/useProductInventoryController.test.tsx
       - name: ADMIN-FE-02C-03 focused
         run: >
           npm test -- --watchAll=false --runInBand --json
