@@ -109,7 +109,7 @@ test('typed detail keeps active/inactive variants and inventory transport',async
   mockedGet.mockResolvedValue({data:{product,variants}});
   const result=await getAdminProductDetail({token:'dummy-token',productId:'p1'});
   expect(result.variants.map(v=>v.status)).toEqual(['active','inactive']);
-  expect(result.variants[0].inventory).toEqual([{id:'i1'}]);
+  expect(result.variants[0].inventory).toEqual([inventoryItem]);
 });
 test('createAdminVariant POSTs exact size-only body and preserves signal',async()=>{
   mockedPost.mockResolvedValue({data:{variant}});
