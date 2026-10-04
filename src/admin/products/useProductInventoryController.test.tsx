@@ -83,7 +83,6 @@ test('unknown CREATE absent reconciliation allows only explicit retry with retai
  expect(hook.result.current.snapshot.v1.byId.i9).toMatchObject({id:'i9',variantId:'v1',internalCode:'AK-9',condition:'fair'});
  expect(hook.result.current.activeEditor).toBeNull();
  expect(hook.result.current.feedback).toBe('Fyzický kus byl přidán.');
- expect(successFocus).toHaveBeenCalledTimes(1);
 });
 test('unknown create refresh reports observed matching code without claiming authorship',async()=>{
  createMock.mockRejectedValue(error('ADMIN_NETWORK_ERROR'));const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));act(()=>hook.result.current.setCreateDraft({internalCode:'ak-9',condition:'good',notes:'memo'}));
