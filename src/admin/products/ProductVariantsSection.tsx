@@ -349,9 +349,10 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       return available(field) ? field : section.querySelector<HTMLElement>('h3') ?? null;
     }, [inventory.activeEditor, inventorySection]);
 
+    const inventoryScheduleFocus = inventory.scheduleFocus;
     const focusInventoryEditor = useCallback((target: InventoryEditorTarget) =>
-      inventory.scheduleFocus(() => resolveInventoryEditorFocus(target)),
-    [inventory.scheduleFocus, resolveInventoryEditorFocus]);
+      inventoryScheduleFocus(() => resolveInventoryEditorFocus(target)),
+    [inventoryScheduleFocus, resolveInventoryEditorFocus]);
 
     const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
       if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
