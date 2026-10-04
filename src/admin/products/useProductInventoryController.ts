@@ -170,12 +170,15 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     return Boolean(editDraft&&editBaseline&&isInventoryEditDirty(editDraft,editBaseline));
   },[activeEditor,createDraft,editDraft,editBaseline]);
   const missingTargetDraft=Boolean(activeEditor&&(missingItemId||missingVariantId));
-  const riskMeta:InventoryRiskMeta=useMemo(()=>({
-    hasDraft:editorDirty||missingTargetDraft,
-    pendingOrUnresolved:Boolean(operation||unknownCreate),
+  const editorPendingOrUnresolved=Boolean(operation||unknownCreate);
+  const lifecyclePendingOrUnresolved=
+    Object.keys(lifecycleOperationsByItem).length>0 || Object.keys(unknownLifecycleByItem).length>0;
+  const riskMeta:InventoryRiskMeta=useMemo(()=>deriveInventoryRiskMeta({
+    editorDirty,
     missingTargetDraft,
-    hasRisk:editorDirty||missingTargetDraft||Boolean(operation||unknownCreate),
-  }),[editorDirty,missingTargetDraft,operation,unknownCreate]);
+    editorPendingOrUnresolved,
+    lifecyclePendingOrUnresolved,
+  }),[editorDirty,missingTargetDraft,editorPendingOrUnresolved,lifecyclePendingOrUnresolved]);
 
   const clearMessages=()=>{setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);};
   const open=(target:InventoryEditorTarget,trigger?:HTMLElement|null)=>{
