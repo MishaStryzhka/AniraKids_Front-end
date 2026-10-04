@@ -8,7 +8,7 @@ jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: 
 import {AdminApiError} from '../api/errors';
 import {createAdminInventoryItem, createAdminVariant, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminVariantSize, type AdminProductDetailVariant} from '../api/products';
 import {ProductVariantsSection, type ProductVariantsSectionHandle} from './ProductVariantsSection';
-import {createRef} from 'react';
+import {createRef,useState} from 'react';
 
 jest.mock('../api/products',()=>({
   ...jest.requireActual('../api/products'),
@@ -378,4 +378,19 @@ test('Inventory mutation risk metadata is reported independently from Variant ri
   await waitFor(()=>expect(inventoryRisk).toHaveBeenLastCalledWith(expect.objectContaining({pendingOrUnresolved:true})));
   expect(variantRisk).toHaveBeenLastCalledWith(false);
   await act(async()=>resolve(inv('i9','a','AK-9')));
+});
+
+
+test('parent risk-state rerender does not reset a newly opened Inventory editor',async()=>{
+  function Host(){
+    const [,setInventoryRisk]=useState<any>(null);
+    const [,setVariantRisk]=useState(false);
+    return <ProductVariantsSection {...props([withInventory(v('a','98'),[])])} onRiskChange={setVariantRisk} onInventoryRiskChange={setInventoryRisk}/>;
+  }
+  render(<Host/>);
+  const add=screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0];
+  expect(add).toBeEnabled();
+  fireEvent.click(add);
+  await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="add"]')).toBeInTheDocument());
+  expect(screen.getByLabelText('Interní kód')).toBeInTheDocument();
 });
