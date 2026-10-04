@@ -73,6 +73,15 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const activeEditorRef=useRef(activeEditor),createDraftRef=useRef(createDraft),editDraftRef=useRef(editDraft),editBaselineRef=useRef(editBaseline);
   activeEditorRef.current=activeEditor;createDraftRef.current=createDraft;editDraftRef.current=editDraft;editBaselineRef.current=editBaseline;
 
+  const invalidateLifetime=useCallback(()=>{
+    mounted.current=false;
+    mutationGeneration.current++;
+    refreshGeneration.current++;
+    focusGeneration.current++;
+    mutationController.current?.abort();
+    refreshController.current?.abort();
+  }, []);
+
   useEffect(()=>{
     const productChanged=productRef.current!==input.productId;
     mounted.current=true;
@@ -85,10 +94,10 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
       mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;
     }
-    return()=>{mounted.current=false;mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;mutationController.current?.abort();refreshController.current?.abort();};
+    return invalidateLifetime;
   // initial state is already seeded synchronously; only a real Product identity change resets this domain.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[input.productId]);
+  },[input.productId,invalidateLifetime]);
 
   const scheduleFocus=useCallback((resolve:()=>HTMLElement|null|undefined)=>{
     const generation=++focusGeneration.current,productId=input.productId;
