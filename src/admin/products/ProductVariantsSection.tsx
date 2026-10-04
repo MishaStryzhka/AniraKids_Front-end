@@ -649,7 +649,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           label="Velikost"
           value={sizeDraft}
           maxLength={40}
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           error={Boolean(fieldError)}
           aria-describedby={fieldError ? 'variant-size-error' : undefined}
           onChange={event => {
@@ -674,13 +674,15 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Editor>;
     };
 
+    const variantActionsDisabled = Boolean(operation) || productMissing || Boolean(unknownCreate) || inventory.riskMeta.pendingOrUnresolved;
+
     return <Section ref={sectionRef} data-product-variants-section aria-labelledby="product-variants-title">
       <Divider/>
       <Header>
         <Heading id="product-variants-title" tabIndex={-1}>Varianty</Heading>
         <Button
           data-variant-add
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
@@ -693,7 +695,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         <strong>Produkt zatím nemá žádné varianty</strong>
         <span>Přidejte první velikost produktu.</span>
         <Button
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
@@ -713,7 +715,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
                 data-variant-edit
                 size="compact"
                 variant="secondary"
-                disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+                disabled={variantActionsDisabled}
                 onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
                   requestEditor({kind: 'edit', variantId: variant.id}, event.currentTarget)}
               >
@@ -722,6 +724,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
             </EditAction>
           </Row>
           {activeEditor?.kind === 'edit' && activeEditor.variantId === variant.id ? renderEditor(activeEditor) : null}
+          <ProductInventoryItems variant={variant} controller={inventory} onRequestOpen={requestInventoryEditor}/>
         </Item>)}
       </List>}
       {activeEditor?.kind === 'edit' && !canonicalVariants.some(variant => variant.id === activeEditor.variantId)
