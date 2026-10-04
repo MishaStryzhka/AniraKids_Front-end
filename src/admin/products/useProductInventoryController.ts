@@ -312,13 +312,6 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     return 'Fyzický kus byl vyřazen.';
   };
 
-  const lifecycleSafe=(itemId:string,generation:number,productId:string,variantId:string)=>{
-    return mounted.current
-      && productRef.current===productId
-      && lifecycleGenerationByItemRef.current[itemId]===generation
-      && findInventoryItem(snapshot,variantId,itemId)!==null;
-  };
-
   const clearLifecycleNotice=(itemId:string)=>setLifecycleNoticeByItem(previous=>{
     if(!previous[itemId])return previous;
     const next={...previous};delete next[itemId];return next;
@@ -425,13 +418,13 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     }
   };
 
-  const refresh=async()=>{
-    if(operation||refreshing||refreshController.current||!input.token)return;
-    const generation=++refreshGeneration.current,observedMutation=mutationGeneration.current,controller=new AbortController(),productId=input.productId;
+  const refresh=async(resolveMissingFocus?:(variantId:string)=>HTMLElement|null|undefined)=>{
+    if(operation||refreshing||refreshController.current||Object.keys(lifecycleOperationsByItem).length>0||!input.token)return;
+    const generation=++refreshGeneration.current,observedMutation=mutationGeneration.current,observedLifecycleRevision=lifecycleRevisionRef.current,controller=new AbortController(),productId=input.productId;
     refreshController.current=controller;setRefreshing(true);setSubmitError(null);
     try{
       const projected=await getAdminProductInventorySnapshot({token:input.token,productId,signal:controller.signal});
-      if(!mounted.current||productRef.current!==productId||refreshGeneration.current!==generation||mutationGeneration.current!==observedMutation)return;
+      if(!mounted.current||productRef.current!==productId||refreshGeneration.current!==generation||mutationGeneration.current!==observedMutation||lifecycleRevisionRef.current!==observedLifecycleRevision)return;
       const next=buildInventorySnapshotFromProjection(projected);setSnapshot(next);
       const target=activeEditorRef.current;
       if(target?.kind==='edit'){
@@ -444,6 +437,54 @@ export function useProductInventoryController(input:UseProductInventoryControlle
         if(!projected.variantIds.includes(target.variantId)){setMissingVariantId(target.variantId);setRefreshReason('missing-variant');}
         else setMissingVariantId(null);
       }
+      const unknownLifecycleEntries=Object.entries(unknownLifecycleByItem);
+      if(unknownLifecycleEntries.length){
+        const resolvedIds:string[]=[];
+        const missingVariants:string[]=[];
+        unknownLifecycleEntries.forEach(([itemId,outcome])=>{
+          const observed=findInventoryItem(next,outcome.variantId,itemId);
+          resolvedIds.push(itemId);
+          if(!observed)missingVariants.push(outcome.variantId);
+        });
+        if(resolvedIds.length){
+          setUnknownLifecycleByItem(previous=>{
+            const copy={...previous};resolvedIds.forEach(id=>delete copy[id]);return copy;
+          });
+          setLifecycleNoticeByItem(previous=>{
+            const copy={...previous};
+            resolvedIds.forEach(id=>{
+              const outcome=unknownLifecycleByItem[id];
+              const observed=outcome?findInventoryItem(next,outcome.variantId,id):null;
+              if(observed)copy[id]={kind:'success',message:'Aktuální fyzické kusy byly načteny.'};
+              else delete copy[id];
+            });
+            return copy;
+          });
+        }
+        if(missingVariants.length&&resolveMissingFocus)scheduleFocus(()=>resolveMissingFocus(missingVariants[0]));
+      }
+
+      const recoverableLifecycleIds=Object.entries(lifecycleNoticeByItem)
+        .filter(([,notice])=>'recoverable' in notice&&notice.recoverable)
+        .map(([id])=>id);
+      if(recoverableLifecycleIds.length){
+        const missingVariants:string[]=[];
+        setLifecycleNoticeByItem(previous=>{
+          const copy={...previous};
+          recoverableLifecycleIds.forEach(id=>{
+            const owning=Object.entries(next).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
+            if(owning)copy[id]={kind:'success',message:'Aktuální fyzické kusy byly načteny.'};
+            else{
+              const priorVariant=Object.entries(snapshot).find(([,bucket])=>Boolean(bucket.byId[id]))?.[0];
+              if(priorVariant)missingVariants.push(priorVariant);
+              delete copy[id];
+            }
+          });
+          return copy;
+        });
+        if(missingVariants.length&&resolveMissingFocus)scheduleFocus(()=>resolveMissingFocus(missingVariants[0]));
+      }
+
       if(unknownCreate){
         const result=reconcileUnknownInventoryCreate({snapshot:next,attempt:unknownCreate});
         if(result.kind==='found-target'){
@@ -458,13 +499,13 @@ export function useProductInventoryController(input:UseProductInventoryControlle
         setRefreshReason(null);setFeedback('Aktuální fyzické kusy byly načteny.');setFeedbackVariantId(target?.variantId??null);
       }
     }catch(error){
-      if(!mounted.current||productRef.current!==productId||refreshGeneration.current!==generation||mutationGeneration.current!==observedMutation)return;
+      if(!mounted.current||productRef.current!==productId||refreshGeneration.current!==generation||mutationGeneration.current!==observedMutation||lifecycleRevisionRef.current!==observedLifecycleRevision)return;
       if(input.onAccessError?.(error))return;
       if(error instanceof AdminApiError&&error.kind==='cancelled')return;
       if(error instanceof AdminApiError&&error.code==='PRODUCT_NOT_FOUND'){setProductMissing(true);return;}
       setRefreshReason('refresh-failed');setSubmitError('Fyzické kusy se nepodařilo načíst. Zkuste to znovu.');
     }finally{
-      if(mounted.current&&productRef.current===productId&&refreshGeneration.current===generation&&mutationGeneration.current===observedMutation){setRefreshing(false);refreshController.current=null;}
+      if(mounted.current&&productRef.current===productId&&refreshGeneration.current===generation&&mutationGeneration.current===observedMutation&&lifecycleRevisionRef.current===observedLifecycleRevision){setRefreshing(false);refreshController.current=null;}
     }
   };
 
