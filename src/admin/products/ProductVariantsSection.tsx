@@ -33,6 +33,9 @@ import {
   variantSizeErrorCopy,
   type VariantEditorTarget,
 } from './productVariantsModel';
+import {ProductInventoryItems} from './ProductInventoryItems';
+import {useProductInventoryController} from './useProductInventoryController';
+import type {InventoryEditorTarget,InventoryRiskMeta} from './productInventoryModel';
 
 const Section = styled.section`
   inline-size: 100%;
@@ -184,14 +187,19 @@ const ErrorText = styled.p`
   line-height: ${t.type.bodySm.lineHeight};
 `;
 
-export interface VariantSwitchIntent {
-  target: VariantEditorTarget;
+export type VariantyEditorTarget =
+  | {domain:'variant';target:VariantEditorTarget}
+  | {domain:'inventory';target:InventoryEditorTarget};
+
+export interface EditorSwitchIntent {
+  dirtyDomain:'variant'|'inventory';
+  target:VariantyEditorTarget;
 }
 
 export interface ProductVariantsSectionHandle {
   resolveCurrentEditorFocus(): HTMLElement | null;
   focusCurrentEditor(): void;
-  discardAndOpen(target: VariantEditorTarget): void;
+  discardAndOpen(target: VariantyEditorTarget): void;
 }
 
 export interface ProductVariantsSectionProps {
@@ -199,7 +207,9 @@ export interface ProductVariantsSectionProps {
   token: string;
   initialVariants: AdminProductDetailVariant[];
   onRiskChange?(risk: boolean): void;
-  onRequestEditorSwitch?(intent: VariantSwitchIntent): void;
+  onPendingRiskChange?(pending: boolean): void;
+  onInventoryRiskChange?(risk: InventoryRiskMeta): void;
+  onRequestEditorSwitch?(intent: EditorSwitchIntent): void;
   onAccessError?(error: unknown): boolean;
 }
 
@@ -228,6 +238,12 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const [unknownCreate, setUnknownCreate] = useState<string | null>(null);
     const [missingVariantId, setMissingVariantId] = useState<string | null>(null);
     const [productMissing, setProductMissing] = useState(false);
+    const inventory = useProductInventoryController({
+      productId: props.productId,
+      token: props.token,
+      initialVariants: props.initialVariants,
+      onAccessError: props.onAccessError,
+    });
 
     const inputRef = useRef<HTMLInputElement>(null);
     const editorTriggerRef = useRef<HTMLElement | null>(null);
@@ -249,7 +265,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const risk = editorDirty || operation !== null || unknownCreate !== null;
 
     const onRiskChange = props.onRiskChange;
+    const onPendingRiskChange = props.onPendingRiskChange;
+    const onInventoryRiskChange = props.onInventoryRiskChange;
     useEffect(() => onRiskChange?.(risk), [onRiskChange, risk]);
+    useEffect(() => onPendingRiskChange?.(Boolean(operation || unknownCreate)), [onPendingRiskChange, operation, unknownCreate]);
+    useEffect(() => onInventoryRiskChange?.(inventory.riskMeta), [onInventoryRiskChange, inventory.riskMeta]);
 
     useEffect(() => {
       mounted.current = true;
