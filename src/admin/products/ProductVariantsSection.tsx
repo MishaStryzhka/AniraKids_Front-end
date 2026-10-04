@@ -324,22 +324,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       scheduleFocus(() => inputRef.current ?? fallbackFocus());
     }, [canonicalVariants, fallbackFocus, operation, productMissing, scheduleFocus]);
 
-    const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
-      if (operation || productMissing || unknownCreate) return;
-      const same = activeEditor?.kind === target.kind &&
-        (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
-      if (same) return;
-      if (editorDirty) {
-        pendingSwitchTriggerRef.current = trigger;
-        props.onRequestEditorSwitch?.({target});
-        return;
-      }
-      openEditor(target, trigger);
-    };
-
-    const cancelEditor = () => {
-      if (operation || unknownCreate) return;
-      const trigger = editorTriggerRef.current;
+    const clearVariantEditor = () => {
       setActiveEditor(null);
       setSizeDraft('');
       setFieldError(null);
@@ -347,28 +332,100 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       setMissingVariantId(null);
       setFeedback(null);
       editorTriggerRef.current = null;
+    };
+
+    const inventorySection = (variantId: string) =>
+      Array.from(sectionRef.current?.querySelectorAll<HTMLElement>('[data-inventory-variant]') ?? [])
+        .find(section => section.dataset.inventoryVariant === variantId) ?? null;
+
+    const resolveInventoryEditorFocus = (target?: InventoryEditorTarget | null) => {
+      const active = target ?? inventory.activeEditor;
+      if (!active) return null;
+      const section = inventorySection(active.variantId);
+      if (!section) return sectionRef.current?.querySelector<HTMLElement>('#product-variants-title') ?? null;
+      const field = active.kind === 'add'
+        ? section.querySelector<HTMLElement>('[data-inventory-code]')
+        : section.querySelector<HTMLElement>('[data-inventory-condition]');
+      return available(field) ? field : section.querySelector<HTMLElement>('h3') ?? null;
+    };
+
+    const focusInventoryEditor = (target: InventoryEditorTarget) =>
+      inventory.scheduleFocus(() => resolveInventoryEditorFocus(target));
+
+    const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      const same = activeEditor?.kind === target.kind &&
+        (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
+      if (same) return;
+      if (inventory.activeEditor) {
+        if (inventory.riskMeta.hasDraft) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'inventory',target:{domain:'variant',target}});
+          return;
+        }
+        inventory.discardCurrent();
+      }
+      if (editorDirty) {
+        pendingSwitchTriggerRef.current = trigger;
+        props.onRequestEditorSwitch?.({dirtyDomain:'variant',target:{domain:'variant',target}});
+        return;
+      }
+      openEditor(target, trigger);
+    };
+
+    const requestInventoryEditor = (target: InventoryEditorTarget, trigger: HTMLElement) => {
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      if (inventory.activeEditor) {
+        const same = inventory.activeEditor.kind === target.kind &&
+          inventory.activeEditor.variantId === target.variantId &&
+          (target.kind === 'add' || (inventory.activeEditor.kind === 'edit' && inventory.activeEditor.inventoryItemId === target.inventoryItemId));
+        if (same) return;
+        if (inventory.riskMeta.hasDraft) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'inventory',target:{domain:'inventory',target}});
+          return;
+        }
+        inventory.discardCurrent();
+      }
+      if (activeEditor) {
+        if (editorDirty) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'variant',target:{domain:'inventory',target}});
+          return;
+        }
+        clearVariantEditor();
+      }
+      if (inventory.open(target, trigger)) focusInventoryEditor(target);
+    };
+
+    const cancelEditor = () => {
+      if (operation || unknownCreate) return;
+      const trigger = editorTriggerRef.current;
+      clearVariantEditor();
       scheduleFocus(() => available(trigger) ? trigger : fallbackFocus());
     };
 
     useImperativeHandle(ref, () => ({
       resolveCurrentEditorFocus() {
-        return available(inputRef.current) ? inputRef.current : fallbackFocus();
+        if (activeEditor) return available(inputRef.current) ? inputRef.current : fallbackFocus();
+        return resolveInventoryEditorFocus() ?? fallbackFocus();
       },
       focusCurrentEditor() {
-        scheduleFocus(() => inputRef.current ?? fallbackFocus());
+        if (activeEditor) scheduleFocus(() => inputRef.current ?? fallbackFocus());
+        else inventory.scheduleFocus(() => resolveInventoryEditorFocus() ?? fallbackFocus());
       },
-      discardAndOpen(target) {
-        setActiveEditor(null);
-        setSizeDraft('');
-        setFieldError(null);
-        setSubmitError(null);
-        setMissingVariantId(null);
+      discardAndOpen(next) {
+        const trigger = pendingSwitchTriggerRef.current;
+        pendingSwitchTriggerRef.current = null;
+        clearVariantEditor();
+        inventory.discardCurrent();
         requestAnimationFrame(() => {
           if (!mounted.current || productRef.current !== props.productId) return;
-          openEditor(target, pendingSwitchTriggerRef.current);
+          if (next.domain === 'variant') openEditor(next.target, trigger);
+          else if (inventory.open(next.target, trigger)) focusInventoryEditor(next.target);
         });
       },
-    }), [fallbackFocus, openEditor, props.productId, scheduleFocus]);
+    }), [activeEditor, fallbackFocus, inventory, openEditor, props.productId, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
