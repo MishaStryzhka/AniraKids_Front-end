@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
-import {createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductVariants, updateAdminProduct, updateAdminVariantSize, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
+import {createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
@@ -15,10 +15,13 @@ jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'
 const mockHandleRequestError = jest.fn();
 jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
 jest.mock('../api/products', () => ({
+  createAdminInventoryItem: jest.fn(),
   createAdminProduct: jest.fn(),
   createAdminVariant: jest.fn(),
   getAdminProductDetail: jest.fn(),
+  getAdminProductInventorySnapshot: jest.fn(),
   getAdminProductVariants: jest.fn(),
+  updateAdminInventoryItem: jest.fn(),
   updateAdminProduct: jest.fn(),
   updateAdminVariantSize: jest.fn(),
 }));
@@ -32,6 +35,9 @@ jest.mock('../api/productMedia', () => {
     reorderProductPhotos: jest.fn(), signProductPhoto: jest.fn(), updateProductPhotoAlt: jest.fn()};
 });
 
+const createInventoryMock = createAdminInventoryItem as jest.MockedFunction<typeof createAdminInventoryItem>;
+const updateInventoryMock = updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
+const refreshInventoryMock = getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
 const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const createVariantMock = createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
 const refreshVariantsMock = getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
@@ -48,9 +54,12 @@ const product: AdminProduct = {id: 'p1', name: 'Sofia', slug: 'sofia', descripti
   gender: 'girls', color: 'Bílá', occasion: ['wedding'], ageTags: ['3–4 roky'], brand: '', familyLookGroup: '',
   rentalEnabled: false, saleEnabled: false, defaultDeposit: 0, photos: [], status: 'draft', seo: {noIndex: false},
   createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-01T00:00:00Z'};
-const variant = (id='v1', size='98', status:'active'|'inactive'='active'): AdminProductDetailVariant => ({
+const inventoryItem = (id='i1', variantId='v1', internalCode='AK-001', condition:'excellent'|'good'|'fair'|'damaged'='good', status:'active'|'maintenance'|'retired'='active'): AdminInventoryItem => ({
+  id, variantId, internalCode, status, condition, notes:'', createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z',
+});
+const variant = (id='v1', size='98', status:'active'|'inactive'='active', inventory:AdminInventoryItem[]=[inventoryItem('i1',id)]): AdminProductDetailVariant => ({
   id, productId:'p1', size, sku:id==='v1'?'SKU-1':undefined, status, sortOrder:id==='v1'?0:1,
-  createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z', inventory:[{ignored:true}],
+  createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z', inventory,
 });
 const detail = {product, variants: [variant()]};
 const apiError = (status: number | null, code: string, kind: AdminApiErrorKind = 'unexpected', details?: string[]) =>
