@@ -163,6 +163,14 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     if(input.onAccessError?.(error))return;
     if(!(error instanceof AdminApiError)){setSubmitError('Fyzický kus se nepodařilo uložit. Zkontrolujte zadané údaje.');return;}
     if(error.kind==='cancelled')return;
+    if(error.code==='INVALID_ID'){
+      if(kind==='create'){
+        setMissingVariantId(variantId);setRefreshReason('missing-variant');return;
+      }
+      if(kind==='update'&&itemId){
+        setMissingItemId(itemId);setRefreshReason('missing-item');return;
+      }
+    }
     if(error.code==='INVENTORY_CODE_ALREADY_EXISTS'){
       setFieldErrors({internalCode:'Tento interní kód už používá jiný fyzický kus.'});return;
     }
