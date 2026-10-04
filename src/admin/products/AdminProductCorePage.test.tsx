@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
-import {createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductVariants, updateAdminProduct, updateAdminVariantSize, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
+import {createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
@@ -15,10 +15,13 @@ jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'
 const mockHandleRequestError = jest.fn();
 jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
 jest.mock('../api/products', () => ({
+  createAdminInventoryItem: jest.fn(),
   createAdminProduct: jest.fn(),
   createAdminVariant: jest.fn(),
   getAdminProductDetail: jest.fn(),
+  getAdminProductInventorySnapshot: jest.fn(),
   getAdminProductVariants: jest.fn(),
+  updateAdminInventoryItem: jest.fn(),
   updateAdminProduct: jest.fn(),
   updateAdminVariantSize: jest.fn(),
 }));
@@ -32,6 +35,9 @@ jest.mock('../api/productMedia', () => {
     reorderProductPhotos: jest.fn(), signProductPhoto: jest.fn(), updateProductPhotoAlt: jest.fn()};
 });
 
+const createInventoryMock = createAdminInventoryItem as jest.MockedFunction<typeof createAdminInventoryItem>;
+const updateInventoryMock = updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
+const refreshInventoryMock = getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
 const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
 const createVariantMock = createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
 const refreshVariantsMock = getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
@@ -48,9 +54,12 @@ const product: AdminProduct = {id: 'p1', name: 'Sofia', slug: 'sofia', descripti
   gender: 'girls', color: 'Bílá', occasion: ['wedding'], ageTags: ['3–4 roky'], brand: '', familyLookGroup: '',
   rentalEnabled: false, saleEnabled: false, defaultDeposit: 0, photos: [], status: 'draft', seo: {noIndex: false},
   createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-01T00:00:00Z'};
-const variant = (id='v1', size='98', status:'active'|'inactive'='active'): AdminProductDetailVariant => ({
+const inventoryItem = (id='i1', variantId='v1', internalCode='AK-001', condition:'excellent'|'good'|'fair'|'damaged'='good', status:'active'|'maintenance'|'retired'='active'): AdminInventoryItem => ({
+  id, variantId, internalCode, status, condition, notes:'', createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z',
+});
+const variant = (id='v1', size='98', status:'active'|'inactive'='active', inventory:AdminInventoryItem[]=[inventoryItem('i1',id)]): AdminProductDetailVariant => ({
   id, productId:'p1', size, sku:id==='v1'?'SKU-1':undefined, status, sortOrder:id==='v1'?0:1,
-  createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z', inventory:[{ignored:true}],
+  createdAt:'2026-09-01T00:00:00Z', updatedAt:'2026-09-01T00:00:00Z', inventory,
 });
 const detail = {product, variants: [variant()]};
 const apiError = (status: number | null, code: string, kind: AdminApiErrorKind = 'unexpected', details?: string[]) =>
@@ -87,6 +96,20 @@ async function openDirty(p: AdminProduct) {
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
+}
+async function openInventoryAdd() {
+  const add = screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0];
+  expect(add).toBeEnabled();
+  fireEvent.click(add);
+  await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="add"]')).toBeInTheDocument());
+  return screen.getByLabelText('Interní kód');
+}
+async function openInventoryEdit() {
+  const edit = screen.getAllByRole('button',{name:'Upravit',exact:true})[0];
+  expect(edit).toBeEnabled();
+  fireEvent.click(edit);
+  await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument());
+  return screen.getByLabelText('Poznámka');
 }
 function selectAndUpload() {
   // Native file chooser is hidden behind the visible selection button.
@@ -561,4 +584,305 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
   expect(router.state.location.pathname).toBe('/admin/produkty/p1');
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
+});
+
+
+test('initial Product detail seeds Inventory once before Variant projection', async () => {
+  getMock.mockResolvedValueOnce({product:{...product,photos:[photo('a')]},variants:[variant('v1','98','active',[inventoryItem()])]});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  expect(getMock).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('AK-001')).toBeInTheDocument();
+  expect(screen.getByRole('heading',{name:'Fyzické kusy',level:3})).toBeInTheDocument();
+  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+});
+
+test('dirty Core survives Inventory create success and failure without Core rebase', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
+  createInventoryMock
+    .mockResolvedValueOnce(inventoryItem('i2','v1','AK-002'))
+    .mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+
+  fireEvent.change(await openInventoryAdd(),{target:{value:'ak-002'}});
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Fyzický kus byl přidán.');
+  expect(screen.getByText('AK-002')).toBeInTheDocument();
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
+  expect(save()).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+
+  fireEvent.change(await openInventoryAdd(),{target:{value:'AK-003'}});
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Výsledek přidání fyzického kusu není potvrzený');
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+  expect(createInventoryMock).toHaveBeenCalledTimes(2);
+  expect(patchMock).not.toHaveBeenCalled();
+});
+
+test('Photo ALT draft survives Inventory success and keeps combined page risk', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[])]});
+  createInventoryMock.mockResolvedValueOnce(inventoryItem('i2','v1','AK-002'));
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
+  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Rozpracovaný ALT'}});
+  fireEvent.change(await openInventoryAdd(),{target:{value:'AK-002'}});
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Fyzický kus byl přidán.');
+  expect(screen.getByLabelText('Alternativní text')).toHaveValue('Rozpracovaný ALT');
+  expect(screen.getByText('AK-002')).toBeInTheDocument();
+  await act(async()=>router.navigate('/admin/produkty'));
+  expect(screen.getByRole('dialog')).toHaveTextContent('Neuložené nebo nedokončené změny');
+});
+
+test('Inventory refresh applies only Inventory and preserves Core Photos and Variant canonical state', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[inventoryItem()])]});
+  updateInventoryMock.mockRejectedValueOnce(apiError(404,'INVENTORY_ITEM_NOT_FOUND'));
+  refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[inventoryItem('i2','v1','AK-777','fair')]}});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
+  await screen.findByText('Fyzický kus už není dostupný');
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
+  await waitFor(()=>expect(refreshInventoryMock).toHaveBeenCalledTimes(1));
+  expect(await screen.findByText('AK-777')).toBeInTheDocument();
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(patchMock).not.toHaveBeenCalled();
+});
+
+test('dirty Inventory uses one page Dialog with approved switch copy and Stay restores Inventory focus', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(await openInventoryAdd(),{target:{value:'AK-9'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  const dialog=screen.getByRole('dialog');
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(within(dialog).getByRole('heading',{name:'Neuložené změny fyzického kusu'})).toBeInTheDocument();
+  expect(dialog).toHaveTextContent('Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?');
+  expect(within(dialog).getByRole('button',{name:'Zůstat'})).toHaveFocus();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(screen.getByLabelText('Interní kód')).toHaveValue('AK-9');
+  await waitFor(()=>expect(screen.getByLabelText('Interní kód')).toHaveFocus());
+});
+
+test('Inventory-only draft and unresolved create select exact leave copy/actions', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
+  createInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.change(await openInventoryAdd(),{target:{value:'AK-9'}});
+  await act(async()=>router.navigate('/admin/produkty'));
+  let dialog=screen.getByRole('dialog');
+  expect(dialog).toHaveTextContent('Neuložené změny fyzického kusu');
+  expect(within(dialog).getByRole('button',{name:'Odejít bez uložení'})).toBeInTheDocument();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Výsledek přidání fyzického kusu není potvrzený');
+  await act(async()=>router.navigate('/admin/produkty'));
+  dialog=screen.getByRole('dialog');
+  expect(dialog).toHaveTextContent('Nedokončená práce s fyzickým kusem');
+  expect(dialog).toHaveTextContent('Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.');
+  expect(within(dialog).getByRole('button',{name:'Odejít',exact:true})).toBeInTheDocument();
+});
+
+test('post-load Inventory PRODUCT_NOT_FOUND preserves mounted domains and disables Inventory writes', async () => {
+  const p={...product,photos:[photo('a')]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant()]});
+  updateInventoryMock.mockRejectedValueOnce(apiError(404,'INVENTORY_ITEM_NOT_FOUND'));
+  refreshInventoryMock.mockRejectedValueOnce(apiError(404,'PRODUCT_NOT_FOUND'));
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
+  await screen.findByText('Fyzický kus už není dostupný');
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
+  await screen.findByText('Produkt už není dostupný');
+  expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('typed');
+  expect(screen.getByRole('button',{name:'Uložit změny'})).toBeDisabled();
+});
+
+test('Inventory access errors delegate to existing Admin boundary without raw backend copy', async () => {
+  mockHandleRequestError.mockReturnValue(true);
+  getMock.mockResolvedValueOnce({product,variants:[variant()]});
+  updateInventoryMock.mockRejectedValueOnce(apiError(403,'ADMIN_FORBIDDEN','forbidden'));
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
+  await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalled());
+  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+});
+
+
+test('R1 A: dirty Core survives successful Inventory update and Core Save preserves a new dirty Inventory editor', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[inventoryItem()])]});
+  updateInventoryMock.mockResolvedValueOnce({...inventoryItem(),condition:'fair',notes:'saved'});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  await openInventoryEdit();
+  fireEvent.change(screen.getByLabelText('Stav kusu'),{target:{value:'fair'}});
+  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'saved'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
+
+  await screen.findByText('Změny fyzického kusu byly uloženy.');
+  await waitFor(()=>expect(document.querySelector('[data-inventory-editor]')).not.toBeInTheDocument());
+  const savedRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
+  expect(within(savedRow.querySelector<HTMLElement>('[data-inventory-condition-cell]')!).getByText('Uspokojivý')).toBeInTheDocument();
+  expect(within(savedRow).getByText(/saved/)).toBeInTheDocument();
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(save()).toBeEnabled();
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
+  expect(save()).toBeDisabled();
+
+  await openInventoryEdit();
+  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'draft-after-core-save'}});
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('draft-after-core-save');
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  patchMock.mockResolvedValueOnce({...product,color:'Růžová'});
+  fireEvent.click(save());
+  await screen.findByText('Změny byly uloženy.');
+
+  expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('draft-after-core-save');
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-condition-cell]')!).getByText('Uspokojivý')).toBeInTheDocument();
+  expect(updateInventoryMock).toHaveBeenCalledTimes(1);
+  expect(createInventoryMock).not.toHaveBeenCalled();
+  expect(save()).toBeDisabled();
+
+  await act(async()=>router.navigate('/admin/produkty'));
+  const dialog=screen.getByRole('dialog');
+  expect(within(dialog).getByRole('heading',{name:'Neuložené změny fyzického kusu'})).toBeInTheDocument();
+  expect(dialog).toHaveTextContent('Máte neuložené změny fyzického kusu. Opravdu chcete odejít?');
+});
+
+test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft canonical item and leave risk', async () => {
+  const a=photo('a');
+  const p={...product,photos:[a]};
+  getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[inventoryItem()])]});
+  altMock.mockResolvedValueOnce({product:{...p,photos:[{...a,alt:'Photo saved'}]}});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  await openInventoryEdit();
+  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'inventory-draft'}});
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
+  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Photo saved'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
+  await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
+  expect(within(media()).getByText('Photo saved')).toBeInTheDocument();
+
+  const inventoryRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
+  expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
+  expect(inventoryRow.dataset.inventoryId).toBe('i1');
+  expect(within(inventoryRow.querySelector<HTMLElement>('[data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
+  expect(updateInventoryMock).not.toHaveBeenCalled();
+  expect(createInventoryMock).not.toHaveBeenCalled();
+
+  await act(async()=>router.navigate('/admin/produkty'));
+  expect(within(screen.getByRole('dialog')).getByRole('heading',{name:'Neuložené změny fyzického kusu'})).toBeInTheDocument();
+});
+
+test('R1 C: deferred Inventory refresh commits while active dirty Variant editor and draft remain untouched', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[inventoryItem()])]});
+  updateInventoryMock.mockRejectedValueOnce(apiError(404,'INVENTORY_ITEM_NOT_FOUND'));
+  const pendingRefresh=deferred<Awaited<ReturnType<typeof getAdminProductInventorySnapshot>>>();
+  refreshInventoryMock.mockReturnValueOnce(pendingRefresh.promise);
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.change(await openInventoryEdit(),{target:{value:'inventory-draft-before-refresh'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
+  await screen.findByText('Fyzický kus už není dostupný');
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
+  await waitFor(()=>expect(refreshInventoryMock).toHaveBeenCalledTimes(1));
+
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  const switchDialog=screen.getByRole('dialog');
+  fireEvent.click(within(switchDialog).getByRole('button',{name:'Zahodit změny a pokračovat'}));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
+  expect(screen.getByLabelText('Velikost')).toHaveValue('99');
+
+  await act(async()=>pendingRefresh.resolve({
+    variantIds:['v1'],
+    inventoryByVariant:{v1:[inventoryItem('i2','v1','AK-777','fair')]},
+  }));
+  expect(await screen.findByText('AK-777')).toBeInTheDocument();
+  expect(screen.getByLabelText('Velikost')).toHaveValue('99');
+  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
+  expect(updateVariantMock).not.toHaveBeenCalled();
+  expect(createVariantMock).not.toHaveBeenCalled();
+
+  await act(async()=>router.navigate('/admin/produkty'));
+  const leave=screen.getByRole('dialog');
+  expect(within(leave).getByRole('heading',{name:'Neuložené nebo nedokončené změny'})).toBeInTheDocument();
+});
+
+test('R1 unknown Inventory create requires explicit retry after authoritative absence and commits success focus', async () => {
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
+  createInventoryMock
+    .mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'))
+    .mockResolvedValueOnce(inventoryItem('i9','v1','AK-009','fair'));
+  refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[]}});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  const code=await openInventoryAdd();
+  fireEvent.change(code,{target:{value:' ak-009 '}});
+  fireEvent.change(screen.getByLabelText('Stav kusu'),{target:{value:'fair'}});
+  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'memo'}});
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Výsledek přidání fyzického kusu není potvrzený');
+  expect(createInventoryMock).toHaveBeenCalledTimes(1);
+  expect(createInventoryMock.mock.calls[0][0].body).toEqual({internalCode:'ak-009',condition:'fair',notes:'memo'});
+  expect(screen.getByLabelText('Interní kód')).toHaveValue(' ak-009 ');
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('memo');
+
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
+  await screen.findByText('Aktuální fyzické kusy byly načteny. Přidání můžete zkusit znovu.');
+  expect(createInventoryMock).toHaveBeenCalledTimes(1);
+  expect(screen.getByLabelText('Interní kód')).toHaveValue(' ak-009 ');
+  expect(screen.getByLabelText('Stav kusu')).toHaveValue('fair');
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('memo');
+
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Fyzický kus byl přidán.');
+  const row=document.querySelector<HTMLElement>('[data-inventory-id="i9"]')!;
+  expect(row).not.toBeNull();
+  expect(within(row).getByText('AK-009')).toBeInTheDocument();
+  expect(within(row).getByText('Uspokojivý')).toBeInTheDocument();
+  await waitFor(()=>expect(within(row).getByRole('button',{name:'Upravit'})).toHaveFocus());
+  expect(document.querySelector('[data-inventory-editor]')).not.toBeInTheDocument();
+  expect(createInventoryMock).toHaveBeenCalledTimes(2);
+  expect(createInventoryMock.mock.calls[1][0].body).toEqual({internalCode:'ak-009',condition:'fair',notes:'memo'});
 });

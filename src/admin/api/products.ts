@@ -7,6 +7,22 @@ export type AdminProductStatus = 'draft' | 'active' | 'archived';
 export type AdminProductCategory = 'dress' | 'suit' | 'set' | 'accessory' | 'other';
 export type AdminProductGender = 'girls' | 'boys' | 'women' | 'men' | 'unisex';
 export type AdminVariantStatus = 'active' | 'inactive';
+export type AdminInventoryItemStatus = 'active' | 'maintenance' | 'retired';
+export type AdminInventoryCondition = 'excellent' | 'good' | 'fair' | 'damaged';
+export type CreateAdminInventoryCondition = Exclude<AdminInventoryCondition, 'damaged'>;
+
+export interface AdminInventoryItem {
+  id: string;
+  variantId: string;
+  internalCode: string;
+  status: AdminInventoryItemStatus;
+  condition: AdminInventoryCondition;
+  notes?: string;
+  acquiredAt?: string;
+  retiredAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface AdminVariant {
   id: string;
@@ -23,7 +39,7 @@ export interface AdminVariant {
 }
 
 export interface AdminProductDetailVariant extends AdminVariant {
-  inventory: unknown[];
+  inventory: AdminInventoryItem[];
 }
 
 export interface CreateAdminVariantRequest {
@@ -32,6 +48,22 @@ export interface CreateAdminVariantRequest {
 
 export interface UpdateAdminVariantSizeRequest {
   size: string;
+}
+
+export interface CreateAdminInventoryItemRequest {
+  internalCode: string;
+  condition?: CreateAdminInventoryCondition;
+  notes?: string;
+}
+
+export interface UpdateAdminInventoryItemRequest {
+  condition?: AdminInventoryCondition;
+  notes?: string;
+}
+
+export interface AdminProductInventorySnapshot {
+  variantIds: string[];
+  inventoryByVariant: Record<string, AdminInventoryItem[]>;
 }
 
 export interface AdminProductPhoto {
@@ -198,4 +230,56 @@ export async function getAdminProductVariants(input: {
 }): Promise<AdminProductDetailVariant[]> {
   const detail = await getAdminProductDetail(input);
   return detail.variants;
+}
+
+
+export async function createAdminInventoryItem(input: {
+  token: string;
+  variantId: string;
+  body: CreateAdminInventoryItemRequest;
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  try {
+    const response = await adminApiClient.post<{inventoryItem: AdminInventoryItem}>(
+      `/admin/variants/${encodeURIComponent(input.variantId)}/inventory-items`,
+      input.body,
+      buildAdminRequestConfig(input.token, input.signal),
+    );
+    return response.data.inventoryItem;
+  } catch (error) {
+    throw normalizeAdminApiError(error);
+  }
+}
+
+export async function updateAdminInventoryItem(input: {
+  token: string;
+  inventoryItemId: string;
+  body: UpdateAdminInventoryItemRequest;
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  if (!Object.keys(input.body).length) throw new Error('Invariant: empty inventory PATCH');
+  try {
+    const response = await adminApiClient.patch<{inventoryItem: AdminInventoryItem}>(
+      `/admin/inventory-items/${encodeURIComponent(input.inventoryItemId)}`,
+      input.body,
+      buildAdminRequestConfig(input.token, input.signal),
+    );
+    return response.data.inventoryItem;
+  } catch (error) {
+    throw normalizeAdminApiError(error);
+  }
+}
+
+export async function getAdminProductInventorySnapshot(input: {
+  token: string;
+  productId: string;
+  signal?: AbortSignal;
+}): Promise<AdminProductInventorySnapshot> {
+  const detail = await getAdminProductDetail(input);
+  return {
+    variantIds: detail.variants.map(variant => variant.id),
+    inventoryByVariant: Object.fromEntries(
+      detail.variants.map(variant => [variant.id, variant.inventory]),
+    ),
+  };
 }

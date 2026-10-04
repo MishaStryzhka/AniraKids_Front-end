@@ -14,8 +14,8 @@ import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {adminRoutes, buildAdminProductDetailPath} from '../navigation/adminRoutes';
 import {ProductCoreForm, type ProductCoreFormHandle} from './ProductCoreForm';
 import {ProductMediaSection, type MediaDeleteIntent, type MediaDeleteSettlement} from './ProductMediaSection';
-import {ProductVariantsSection, type ProductVariantsSectionHandle, type VariantSwitchIntent} from './ProductVariantsSection';
-import type {VariantEditorTarget} from './productVariantsModel';
+import {ProductVariantsSection, type EditorSwitchIntent, type ProductVariantsSectionHandle, type VariantyEditorTarget} from './ProductVariantsSection';
+import type {InventoryRiskMeta} from './productInventoryModel';
 import {coreFormStatesEquivalent, initialProductCoreFormState, productToCoreFormState, serializeAdminProductPatch, serializeCreateAdminProduct, type ProductCoreFormState} from './productCoreFormModel';
 import {validateProductCoreForm, type ProductCoreErrors, type ProductCoreField, type ProductCoreFocusTarget} from './productCoreValidation';
 
@@ -39,7 +39,9 @@ const backendFieldFallback: Partial<Record<ProductCoreField, string>> = {
   defaultSalePrice:'Zkontrolujte prodejní cenu.',defaultDeposit:'Zkontrolujte zálohu.',seoTitle:'Zkontrolujte SEO titulek.',seoDescription:'Zkontrolujte SEO popis.',
 };
 type FeedbackKind = 'created' | 'updated';
-type ActiveDialog = {kind: 'none'} | {kind: 'leave'} | ({kind: 'delete'} & MediaDeleteIntent) | {kind: 'variant-switch'; target: VariantEditorTarget};
+type ActiveDialog = {kind:'none'} | {kind:'leave'} | ({kind:'delete'} & MediaDeleteIntent)
+  | {kind:'editor-switch';dirtyDomain:'variant'|'inventory';target:VariantyEditorTarget};
+const EMPTY_INVENTORY_RISK: InventoryRiskMeta = {hasRisk:false,hasDraft:false,pendingOrUnresolved:false,missingTargetDraft:false};
 function ProductSuccessFeedback({kind, onDismiss}: {kind: FeedbackKind; onDismiss(): void}) {
   return <Feedback aria-live="polite"><span>{kind === 'created' ? 'Produkt byl vytvořen.' : 'Změny byly uloženy.'}</span>
     <IconButton aria-label="Zavřít potvrzení" icon={<X aria-hidden="true"/>} onClick={onDismiss}/></Feedback>;
@@ -66,8 +68,11 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const [mediaPhotos, setMediaPhotos] = useState(() => validHydration?.photos ?? []);
   const [mediaProductName, setMediaProductName] = useState(() => validHydration?.name ?? '');
   const [mediaRisk, setMediaRisk] = useState(false);
+  const [mediaPending, setMediaPending] = useState(false);
   const [variantSeed, setVariantSeed] = useState<AdminProductDetailVariant[]>([]);
   const [variantRisk, setVariantRisk] = useState(false);
+  const [variantPending, setVariantPending] = useState(false);
+  const [inventoryRisk, setInventoryRisk] = useState<InventoryRiskMeta>(EMPTY_INVENTORY_RISK);
   const [loading, setLoading] = useState(mode === 'edit' && !validHydration);
   const [loadError, setLoadError] = useState<'not-found' | 'network' | null>(null);
   const [retryRevision, setRetryRevision] = useState(0);
@@ -83,13 +88,15 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const requestSequence = useRef(0);
   const bypassRef = useRef(false);
   const dirty = useMemo(() => !coreFormStatesEquivalent(current, baseline), [current, baseline]);
-  const hasRisk = dirty || mediaRisk || variantRisk;
+  const hasRisk = dirty || mediaRisk || variantRisk || inventoryRisk.hasRisk;
+  const hasPendingOrUnresolved = submitting || mediaPending || variantPending || inventoryRisk.pendingOrUnresolved;
+  const inventoryOnlyRisk = inventoryRisk.hasRisk && !dirty && !mediaRisk && !variantRisk;
   const localDialogOpen = useRef(false);
   const blocker = useBlocker(() => (hasRisk || localDialogOpen.current) && !bypassRef.current);
 
   // One page-owned dialog. Navigation cannot replace an unresolved deletion confirmation.
   const [dialogState, setDialogState] = useState<ActiveDialog>({kind: 'none'});
-  localDialogOpen.current = dialogState.kind === 'delete' || dialogState.kind === 'variant-switch';
+  localDialogOpen.current = dialogState.kind === 'delete' || dialogState.kind === 'editor-switch';
   const [deleteRequest, setDeleteRequest] = useState<{publicId: string; nonce: number} | null>(null);
   const deleteNonce = useRef(0);
   const pendingDelete = useRef<number | null>(null);
@@ -107,7 +114,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   }, [scopeKey]);
   useEffect(() => {
     if (blocker.state !== 'blocked') {proceededLocation.current = null; return;}
-    if (dialogState.kind === 'delete' || dialogState.kind === 'variant-switch') return;
+    if (dialogState.kind === 'delete' || dialogState.kind === 'editor-switch') return;
     if (!hasRisk) {
       if (proceededLocation.current !== blocker.location.key) {
         proceededLocation.current = blocker.location.key;
@@ -118,7 +125,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     } else if (dialogState.kind !== 'leave') setDialogState({kind: 'leave'});
   }, [blocker, dialogState.kind, hasRisk]);
   useEffect(() => {
-    if ((previousDialogKind.current === 'delete' || previousDialogKind.current === 'variant-switch') && dialogState.kind === 'leave') safeDialogButton.current?.focus();
+    if ((previousDialogKind.current === 'delete' || previousDialogKind.current === 'editor-switch') && dialogState.kind === 'leave') safeDialogButton.current?.focus();
     previousDialogKind.current = dialogState.kind;
   }, [dialogState.kind]);
 
@@ -223,21 +230,21 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     }
   };
 
-  const requestVariantSwitch = (intent: VariantSwitchIntent) => {
+  const requestEditorSwitch = (intent: EditorSwitchIntent) => {
     if (dialogState.kind !== 'none') return;
     restoreTarget.current = () => variantsRef.current?.resolveCurrentEditorFocus() ?? null;
-    setDialogState({kind: 'variant-switch', target: intent.target});
+    setDialogState({kind:'editor-switch',dirtyDomain:intent.dirtyDomain,target:intent.target});
   };
-  const stayVariantSwitch = () => {
+  const stayEditorSwitch = () => {
     restoreTarget.current = () => variantsRef.current?.resolveCurrentEditorFocus() ?? null;
-    setDialogState({kind: 'none'});
+    setDialogState({kind:'none'});
   };
-  const discardVariantSwitch = () => {
-    if (dialogState.kind !== 'variant-switch') return;
+  const discardEditorSwitch = () => {
+    if (dialogState.kind !== 'editor-switch') return;
     const target = dialogState.target;
     restoreTarget.current = null;
     variantsRef.current?.discardAndOpen(target);
-    setDialogState({kind: 'none'});
+    setDialogState({kind:'none'});
   };
 
   const requestDelete = (intent: MediaDeleteIntent) => {
@@ -275,7 +282,29 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     return resolve ? resolve() : previous;
   };
   const deleting = dialogState.kind === 'delete' ? dialogState : null;
-  const switchingVariant = dialogState.kind === 'variant-switch' ? dialogState : null;
+  const switchingEditor = dialogState.kind === 'editor-switch' ? dialogState : null;
+  const switchingInventory = switchingEditor?.dirtyDomain === 'inventory';
+  const leaveTitle = mode === 'create'
+    ? 'Neuložené změny'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved ? 'Nedokončená práce s fyzickým kusem' : 'Neuložené změny fyzického kusu'
+      : 'Neuložené nebo nedokončené změny';
+  const leaveDescription = mode === 'create'
+    ? 'Máte neuložené změny. Opravdu chcete odejít?'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved
+        ? 'Výsledek operace s fyzickým kusem nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
+        : 'Máte neuložené změny fyzického kusu. Opravdu chcete odejít?'
+      : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.';
+  const mixedWithInventory = inventoryRisk.hasRisk && (dirty || mediaRisk || variantRisk);
+  const leaveAction = mode === 'create'
+    ? 'Odejít bez uložení'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved ? 'Odejít' : 'Odejít bez uložení'
+      : mixedWithInventory
+        ? hasPendingOrUnresolved ? 'Odejít' : 'Odejít bez uložení'
+        : 'Odejít';
+
   const protectedLastPhoto = Boolean(deleting && deleting.distinctCount === 1 && status === 'active');
   const deleteDescription = protectedLastPhoto ? 'Aktivní produkt musí mít alespoň jednu fotografii.'
     : deleting?.isMain && deleting.distinctCount > 1
@@ -294,20 +323,20 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       submitting={submitting} saveDisabled={submitting || (!dirty && mode === 'edit')} submitError={submitError}
       onChange={setCurrent} onSubmit={submit}/>
     {mode === 'edit' && productId ? <ProductMediaSection key={productId} productId={productId} productName={mediaProductName || current.name}
-      status={status} token={token ?? ''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onAccessError={handleRequestError}
+      status={status} token={token ?? ''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onPendingRiskChange={setMediaPending} onAccessError={handleRequestError}
       onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete}/> : null}
     {mode === 'edit' && productId ? <ProductVariantsSection key={`variants:${productId}`} ref={variantsRef} productId={productId}
-      token={token ?? ''} initialVariants={variantSeed} onRiskChange={setVariantRisk} onRequestEditorSwitch={requestVariantSwitch}
-      onAccessError={handleRequestError}/> : null}
+      token={token ?? ''} initialVariants={variantSeed} onRiskChange={setVariantRisk} onPendingRiskChange={setVariantPending}
+      onInventoryRiskChange={setInventoryRisk} onRequestEditorSwitch={requestEditorSwitch} onAccessError={handleRequestError}/> : null}
     <Dialog open={dialogState.kind !== 'none'}
-      title={deleting ? 'Odebrat fotografii?' : switchingVariant ? 'Neuložená změna varianty' : mode === 'create' ? 'Neuložené změny' : 'Neuložené nebo nedokončené změny'}
-      description={deleting ? deleteDescription : switchingVariant ? 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : mode === 'create' ? 'Máte neuložené změny. Opravdu chcete odejít?' : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.'}
-      onEscape={deleting ? cancelDelete : switchingVariant ? stayVariantSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
+      title={deleting ? 'Odebrat fotografii?' : switchingEditor ? switchingInventory ? 'Neuložené změny fyzického kusu' : 'Neuložená změna varianty' : leaveTitle}
+      description={deleting ? deleteDescription : switchingEditor ? switchingInventory ? 'Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?' : 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : leaveDescription}
+      onEscape={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
       <Actions ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
-        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : switchingVariant ? stayVariantSwitch : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
+        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
         {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
-          : switchingVariant ? <Button variant="destructive" onClick={discardVariantSwitch}>Zahodit změny a pokračovat</Button>
-          : <Button variant="destructive" onClick={leave}>{mode === 'create' ? 'Odejít bez uložení' : 'Odejít'}</Button>}
+          : switchingEditor ? <Button variant={switchingInventory ? 'secondary' : 'destructive'} onClick={discardEditorSwitch}>Zahodit změny a pokračovat</Button>
+          : <Button variant="destructive" onClick={leave}>{leaveAction}</Button>}
       </Actions>
     </Dialog>
   </Page>;

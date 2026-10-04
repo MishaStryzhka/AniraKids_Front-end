@@ -33,6 +33,9 @@ import {
   variantSizeErrorCopy,
   type VariantEditorTarget,
 } from './productVariantsModel';
+import {ProductInventoryItems} from './ProductInventoryItems';
+import {useProductInventoryController} from './useProductInventoryController';
+import type {InventoryEditorTarget,InventoryRiskMeta} from './productInventoryModel';
 
 const Section = styled.section`
   inline-size: 100%;
@@ -184,14 +187,19 @@ const ErrorText = styled.p`
   line-height: ${t.type.bodySm.lineHeight};
 `;
 
-export interface VariantSwitchIntent {
-  target: VariantEditorTarget;
+export type VariantyEditorTarget =
+  | {domain:'variant';target:VariantEditorTarget}
+  | {domain:'inventory';target:InventoryEditorTarget};
+
+export interface EditorSwitchIntent {
+  dirtyDomain:'variant'|'inventory';
+  target:VariantyEditorTarget;
 }
 
 export interface ProductVariantsSectionHandle {
   resolveCurrentEditorFocus(): HTMLElement | null;
   focusCurrentEditor(): void;
-  discardAndOpen(target: VariantEditorTarget): void;
+  discardAndOpen(target: VariantyEditorTarget): void;
 }
 
 export interface ProductVariantsSectionProps {
@@ -199,7 +207,9 @@ export interface ProductVariantsSectionProps {
   token: string;
   initialVariants: AdminProductDetailVariant[];
   onRiskChange?(risk: boolean): void;
-  onRequestEditorSwitch?(intent: VariantSwitchIntent): void;
+  onPendingRiskChange?(pending: boolean): void;
+  onInventoryRiskChange?(risk: InventoryRiskMeta): void;
+  onRequestEditorSwitch?(intent: EditorSwitchIntent): void;
   onAccessError?(error: unknown): boolean;
 }
 
@@ -228,6 +238,12 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const [unknownCreate, setUnknownCreate] = useState<string | null>(null);
     const [missingVariantId, setMissingVariantId] = useState<string | null>(null);
     const [productMissing, setProductMissing] = useState(false);
+    const inventory = useProductInventoryController({
+      productId: props.productId,
+      token: props.token,
+      initialVariants: props.initialVariants,
+      onAccessError: props.onAccessError,
+    });
 
     const inputRef = useRef<HTMLInputElement>(null);
     const editorTriggerRef = useRef<HTMLElement | null>(null);
@@ -249,7 +265,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const risk = editorDirty || operation !== null || unknownCreate !== null;
 
     const onRiskChange = props.onRiskChange;
+    const onPendingRiskChange = props.onPendingRiskChange;
+    const onInventoryRiskChange = props.onInventoryRiskChange;
     useEffect(() => onRiskChange?.(risk), [onRiskChange, risk]);
+    useEffect(() => onPendingRiskChange?.(Boolean(operation || unknownCreate)), [onPendingRiskChange, operation, unknownCreate]);
+    useEffect(() => onInventoryRiskChange?.(inventory.riskMeta), [onInventoryRiskChange, inventory.riskMeta]);
 
     useEffect(() => {
       mounted.current = true;
@@ -304,22 +324,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       scheduleFocus(() => inputRef.current ?? fallbackFocus());
     }, [canonicalVariants, fallbackFocus, operation, productMissing, scheduleFocus]);
 
-    const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
-      if (operation || productMissing || unknownCreate) return;
-      const same = activeEditor?.kind === target.kind &&
-        (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
-      if (same) return;
-      if (editorDirty) {
-        pendingSwitchTriggerRef.current = trigger;
-        props.onRequestEditorSwitch?.({target});
-        return;
-      }
-      openEditor(target, trigger);
-    };
-
-    const cancelEditor = () => {
-      if (operation || unknownCreate) return;
-      const trigger = editorTriggerRef.current;
+    const clearVariantEditor = () => {
       setActiveEditor(null);
       setSizeDraft('');
       setFieldError(null);
@@ -327,28 +332,102 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       setMissingVariantId(null);
       setFeedback(null);
       editorTriggerRef.current = null;
+    };
+
+    const inventorySection = useCallback((variantId: string) =>
+      Array.from(sectionRef.current?.querySelectorAll<HTMLElement>('[data-inventory-variant]') ?? [])
+        .find(section => section.dataset.inventoryVariant === variantId) ?? null, []);
+
+    const resolveInventoryEditorFocus = useCallback((target?: InventoryEditorTarget | null) => {
+      const active = target ?? inventory.activeEditor;
+      if (!active) return null;
+      const section = inventorySection(active.variantId);
+      if (!section) return sectionRef.current?.querySelector<HTMLElement>('#product-variants-title') ?? null;
+      const field = active.kind === 'add'
+        ? section.querySelector<HTMLElement>('[data-inventory-code]')
+        : section.querySelector<HTMLElement>('[data-inventory-condition]');
+      return available(field) ? field : section.querySelector<HTMLElement>('h3') ?? null;
+    }, [inventory.activeEditor, inventorySection]);
+
+    const inventoryScheduleFocus = inventory.scheduleFocus;
+    const focusInventoryEditor = useCallback((target: InventoryEditorTarget) =>
+      inventoryScheduleFocus(() => resolveInventoryEditorFocus(target)),
+    [inventoryScheduleFocus, resolveInventoryEditorFocus]);
+
+    const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      const same = activeEditor?.kind === target.kind &&
+        (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
+      if (same) return;
+      if (inventory.activeEditor) {
+        if (inventory.riskMeta.hasDraft) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'inventory',target:{domain:'variant',target}});
+          return;
+        }
+        inventory.discardCurrent();
+      }
+      if (editorDirty) {
+        pendingSwitchTriggerRef.current = trigger;
+        props.onRequestEditorSwitch?.({dirtyDomain:'variant',target:{domain:'variant',target}});
+        return;
+      }
+      openEditor(target, trigger);
+    };
+
+    const requestInventoryEditor = (target: InventoryEditorTarget, trigger: HTMLElement) => {
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      if (inventory.activeEditor) {
+        const same = inventory.activeEditor.kind === target.kind &&
+          inventory.activeEditor.variantId === target.variantId &&
+          (target.kind === 'add' || (inventory.activeEditor.kind === 'edit' && inventory.activeEditor.inventoryItemId === target.inventoryItemId));
+        if (same) return;
+        if (inventory.riskMeta.hasDraft) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'inventory',target:{domain:'inventory',target}});
+          return;
+        }
+        inventory.discardCurrent();
+      }
+      if (activeEditor) {
+        if (editorDirty) {
+          pendingSwitchTriggerRef.current = trigger;
+          props.onRequestEditorSwitch?.({dirtyDomain:'variant',target:{domain:'inventory',target}});
+          return;
+        }
+        clearVariantEditor();
+      }
+      if (inventory.open(target, trigger)) focusInventoryEditor(target);
+    };
+
+    const cancelEditor = () => {
+      if (operation || unknownCreate) return;
+      const trigger = editorTriggerRef.current;
+      clearVariantEditor();
       scheduleFocus(() => available(trigger) ? trigger : fallbackFocus());
     };
 
     useImperativeHandle(ref, () => ({
       resolveCurrentEditorFocus() {
-        return available(inputRef.current) ? inputRef.current : fallbackFocus();
+        if (activeEditor) return available(inputRef.current) ? inputRef.current : fallbackFocus();
+        return resolveInventoryEditorFocus() ?? fallbackFocus();
       },
       focusCurrentEditor() {
-        scheduleFocus(() => inputRef.current ?? fallbackFocus());
+        if (activeEditor) scheduleFocus(() => inputRef.current ?? fallbackFocus());
+        else inventory.scheduleFocus(() => resolveInventoryEditorFocus() ?? fallbackFocus());
       },
-      discardAndOpen(target) {
-        setActiveEditor(null);
-        setSizeDraft('');
-        setFieldError(null);
-        setSubmitError(null);
-        setMissingVariantId(null);
+      discardAndOpen(next) {
+        const trigger = pendingSwitchTriggerRef.current;
+        pendingSwitchTriggerRef.current = null;
+        clearVariantEditor();
+        inventory.discardCurrent();
         requestAnimationFrame(() => {
           if (!mounted.current || productRef.current !== props.productId) return;
-          openEditor(target, pendingSwitchTriggerRef.current);
+          if (next.domain === 'variant') openEditor(next.target, trigger);
+          else if (inventory.open(next.target, trigger)) focusInventoryEditor(next.target);
         });
       },
-    }), [fallbackFocus, openEditor, props.productId, scheduleFocus]);
+    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
@@ -572,7 +651,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           label="Velikost"
           value={sizeDraft}
           maxLength={40}
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           error={Boolean(fieldError)}
           aria-describedby={fieldError ? 'variant-size-error' : undefined}
           onChange={event => {
@@ -597,13 +676,15 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Editor>;
     };
 
+    const variantActionsDisabled = Boolean(operation) || productMissing || Boolean(unknownCreate) || inventory.riskMeta.pendingOrUnresolved;
+
     return <Section ref={sectionRef} data-product-variants-section aria-labelledby="product-variants-title">
       <Divider/>
       <Header>
         <Heading id="product-variants-title" tabIndex={-1}>Varianty</Heading>
         <Button
           data-variant-add
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
@@ -616,7 +697,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         <strong>Produkt zatím nemá žádné varianty</strong>
         <span>Přidejte první velikost produktu.</span>
         <Button
-          disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+          disabled={variantActionsDisabled}
           onClick={(event: ReactMouseEvent<HTMLButtonElement>) => requestEditor({kind: 'add'}, event.currentTarget)}
         >
           Přidat variantu
@@ -636,7 +717,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
                 data-variant-edit
                 size="compact"
                 variant="secondary"
-                disabled={Boolean(operation) || productMissing || Boolean(unknownCreate)}
+                disabled={variantActionsDisabled}
                 onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
                   requestEditor({kind: 'edit', variantId: variant.id}, event.currentTarget)}
               >
@@ -645,6 +726,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
             </EditAction>
           </Row>
           {activeEditor?.kind === 'edit' && activeEditor.variantId === variant.id ? renderEditor(activeEditor) : null}
+          <ProductInventoryItems variant={variant} controller={inventory} onRequestOpen={requestInventoryEditor}/>
         </Item>)}
       </List>}
       {activeEditor?.kind === 'edit' && !canonicalVariants.some(variant => variant.id === activeEditor.variantId)

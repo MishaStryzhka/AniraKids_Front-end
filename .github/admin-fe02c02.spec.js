@@ -10,7 +10,7 @@ const variantsPath='/api/v2/admin/variants';
 const LOCAL_IMAGE='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%22128%22%3E%3Crect width=%2296%22 height=%22128%22 fill=%22%23ddd%22/%3E%3C/svg%3E';
 const photo={publicId:'photo-a',url:LOCAL_IMAGE,alt:'Sofia'};
 const baseProduct={id:'p1',name:'Sofia',slug:'sofia',description:'',category:'dress',gender:'girls',color:'Bílá',occasion:[],ageTags:[],brand:'',familyLookGroup:'',rentalEnabled:false,saleEnabled:false,defaultDeposit:0,seo:{noIndex:false},photos:[photo],status:'draft',createdAt:'2026-01-01T00:00:00Z',updatedAt:'2026-01-01T00:00:00Z',rentalPrices:{}};
-const variant=(id,size,status='active',sku)=>({id,productId:'p1',size,sku,status,sortOrder:id==='v1'?0:1,createdAt:id==='v1'?'2026-01-01T00:00:00Z':'2026-01-02T00:00:00Z',updatedAt:'2026-01-02T00:00:00Z',inventory:[{ignored:true}]});
+const variant=(id,size,status='active',sku)=>({id,productId:'p1',size,sku,status,sortOrder:id==='v1'?0:1,createdAt:id==='v1'?'2026-01-01T00:00:00Z':'2026-01-02T00:00:00Z',updatedAt:'2026-01-02T00:00:00Z',inventory:[]});
 const seedVariants=[
  variant('v1','98-104-110-116','active','SKU-VERY-LONG-WRAPPING-VALUE-1234567890'),
  variant('v2','XS','inactive'),
@@ -53,7 +53,7 @@ for(const width of [375,390,430,768,1024,1440])test('Varianty responsive '+width
  expect(Math.round(divider.y-(pb.y+pb.height))).toBe(32);
  expect(vb.width).toBeLessThanOrEqual(841);expect(Math.abs(vb.x-pb.x)).toBeLessThanOrEqual(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
- await expect(variants.getByText('98-104-110-116')).toBeVisible();
+ await expect(variants.locator('[data-variant-id="v1"] [data-variant-size]')).toHaveText('98-104-110-116');
  await expect(variants.getByText('Aktivní',{exact:true})).toBeVisible();await expect(variants.getByText('Neaktivní',{exact:true})).toBeVisible();
  const first=variants.locator('[data-variant-id="v1"]'),size=first.locator('[data-variant-size-cell]'),status=first.getByText('Aktivní',{exact:true}),sku=first.getByText(/SKU: SKU-VERY/),edit=first.getByRole('button',{name:'Upravit velikost'});
  const [sb,stb,skub,eb]=await Promise.all([size.boundingBox(),status.boundingBox(),sku.boundingBox(),edit.boundingBox()]);
