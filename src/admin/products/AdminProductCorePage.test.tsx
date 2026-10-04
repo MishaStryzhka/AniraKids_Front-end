@@ -892,3 +892,156 @@ test('R1 unknown Inventory create requires explicit retry after authoritative ab
   expect(createInventoryMock).toHaveBeenCalledTimes(2);
   expect(createInventoryMock.mock.calls[1][0].body).toEqual({internalCode:'ak-009',condition:'fair',notes:'memo'});
 });
+
+
+test('02D dirty same-item Inventory editor survives maintenance; only canonical status changes and focus returns to Upravit',async()=>{
+  const active=inventoryItem('i1','v1','AK-001','good','active');
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
+  maintenanceInventoryMock.mockResolvedValueOnce({...active,status:'maintenance'});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(await openInventoryEdit(),{target:{value:'typed-note'}});
+  fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
+  await screen.findByText('Fyzický kus byl přesunut do údržby.');
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('typed-note');
+  expect(screen.getByLabelText('Stav kusu')).toHaveValue('good');
+  expect(screen.getByText('V údržbě')).toBeInTheDocument();
+  expect(updateInventoryMock).not.toHaveBeenCalled();
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit',exact:true})).toHaveFocus());
+});
+
+test('02D notes-only dirty maintenance item can activate and draft survives; dirty condition blocks activation without POST',async()=>{
+  const maintenance=inventoryItem('i1','v1','AK-001','good','maintenance');
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
+  activateInventoryMock.mockResolvedValueOnce({...maintenance,status:'active'});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(await openInventoryEdit(),{target:{value:'notes-only'}});
+  expect(screen.getByRole('button',{name:'Aktivovat'})).toBeEnabled();
+  fireEvent.click(screen.getByRole('button',{name:'Aktivovat'}));
+  await screen.findByText('Fyzický kus byl aktivován.');
+  expect(screen.getByLabelText('Poznámka')).toHaveValue('notes-only');
+  expect(screen.getByText('Aktivní')).toBeInTheDocument();
+
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
+  const second=renderRouter('/admin/produkty/p1');
+  await screen.findAllByDisplayValue('Sofia');
+  const condition=screen.getAllByLabelText('Stav kusu').slice(-1)[0];
+  fireEvent.click(screen.getAllByRole('button',{name:'Upravit',exact:true}).slice(-1)[0]);
+  await waitFor(()=>expect(screen.getAllByLabelText('Stav kusu').slice(-1)[0]).toBeInTheDocument());
+  fireEvent.change(screen.getAllByLabelText('Stav kusu').slice(-1)[0],{target:{value:'fair'}});
+  const activate=screen.getAllByRole('button',{name:'Aktivovat'}).slice(-1)[0];
+  expect(activate).toBeDisabled();
+  expect(screen.getByText('Nejprve uložte nebo zrušte rozpracovanou změnu Stavu kusu.')).toBeInTheDocument();
+  expect(activateInventoryMock).toHaveBeenCalledTimes(1);
+  second.dispose?.();
+});
+
+test('02D lifecycle preserves dirty Variant, dirty Core and Photo drafts across successful maintenance',async()=>{
+  const a=photo('a'),active=inventoryItem();
+  getMock.mockResolvedValueOnce({product:{...product,photos:[a]},variants:[variant('v1','98','active',[active])]});
+  maintenanceInventoryMock.mockResolvedValue({...active,status:'maintenance'});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
+  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'draft-alt'}});
+
+  fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
+  await screen.findByText('Fyzický kus byl přesunut do údržby.');
+  expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+  expect(screen.getByLabelText('Velikost')).toHaveValue('99');
+  expect(screen.getByLabelText('Alternativní text')).toHaveValue('draft-alt');
+  expect(screen.getByText('V údržbě')).toBeInTheDocument();
+  expect(updateVariantMock).not.toHaveBeenCalled();expect(altMock).not.toHaveBeenCalled();expect(patchMock).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
+  expect(save()).toBeDisabled();
+});
+
+test('02D retire uses exactly one page Dialog, cancel restores trigger, confirm suppresses stale trigger and success focuses Upravit',async()=>{
+  const active=inventoryItem();
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
+  retireInventoryMock.mockResolvedValueOnce({...active,status:'retired',retiredAt:'2026-10-04T00:00:00Z'});
+  renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  const retire=screen.getByRole('button',{name:'Vyřadit'});
+  fireEvent.click(retire);
+  let dialog=screen.getByRole('dialog');
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(within(dialog).getByRole('heading',{name:'Vyřadit fyzický kus?'})).toBeInTheDocument();
+  expect(dialog).toHaveTextContent('Fyzický kus AK-001 bude trvale převeden do stavu Vyřazený. Po vyřazení jej nelze znovu aktivovat.');
+  expect(within(dialog).getByRole('button',{name:'Zrušit'})).toHaveFocus();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zrušit'}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(()=>expect(retire).toHaveFocus());
+
+  fireEvent.click(retire);
+  dialog=screen.getByRole('dialog');
+  fireEvent.click(within(dialog).getByRole('button',{name:'Vyřadit'}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(()=>expect(retireInventoryMock).toHaveBeenCalledTimes(1));
+  await screen.findByText('Fyzický kus byl vyřazen.');
+  expect(screen.getByText('Vyřazený')).toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:'Vyřadit'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:'Aktivovat'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:'Přesunout do údržby'})).not.toBeInTheDocument();
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit',exact:true})).toHaveFocus());
+});
+
+test('02D blocked navigation never replaces retire Dialog; cancel resolves local Dialog then proceeds once when no risk remains',async()=>{
+  getMock.mockResolvedValueOnce({product,variants:[variant()]});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getByRole('button',{name:'Vyřadit'}));
+  await act(async()=>router.navigate('/admin/produkty'));
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.getByRole('dialog')).toHaveTextContent('Vyřadit fyzický kus?');
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Zrušit'}));
+  await waitFor(()=>expect(router.state.location.pathname).toBe('/admin/produkty'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(retireInventoryMock).not.toHaveBeenCalled();
+});
+
+test('02D lifecycle-only unknown risk uses exact leave copy; explicit Inventory refresh resolves observed status without replay',async()=>{
+  const active=inventoryItem();
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
+  maintenanceInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
+  refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[{...active,status:'maintenance'}]}});
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
+  await screen.findByText('Výsledek změny provozního stavu není potvrzený');
+  expect(maintenanceInventoryMock).toHaveBeenCalledTimes(1);
+  await act(async()=>router.navigate('/admin/produkty'));
+  let dialog=screen.getByRole('dialog');
+  expect(within(dialog).getByRole('heading',{name:'Nedokončená změna provozního stavu'})).toBeInTheDocument();
+  expect(dialog).toHaveTextContent('Změna provozního stavu probíhá nebo její výsledek není potvrzený.');
+  expect(within(dialog).getByRole('button',{name:'Odejít',exact:true})).toBeInTheDocument();
+  fireEvent.click(within(dialog).getByRole('button',{name:'Zůstat'}));
+
+  fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
+  await screen.findByText('Aktuální fyzické kusy byly načteny.');
+  expect(maintenanceInventoryMock).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('V údržbě')).toBeInTheDocument();
+  await act(async()=>router.navigate('/admin/produkty'));
+  await waitFor(()=>expect(router.state.location.pathname).toBe('/admin/produkty'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
+test('02D mixed lifecycle unknown plus Core draft uses page-wide leave copy',async()=>{
+  const active=inventoryItem();
+  getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
+  maintenanceInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
+  const router=renderRouter('/admin/produkty/p1');
+  await screen.findByDisplayValue('Sofia');
+  fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+  fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
+  await screen.findByText('Výsledek změny provozního stavu není potvrzený');
+  await act(async()=>router.navigate('/admin/produkty'));
+  const dialog=screen.getByRole('dialog');
+  expect(within(dialog).getByRole('heading',{name:'Neuložené nebo nedokončené změny'})).toBeInTheDocument();
+  expect(within(dialog).getByRole('button',{name:'Odejít',exact:true})).toBeInTheDocument();
+});
