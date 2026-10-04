@@ -6,22 +6,28 @@ jest.mock('axios', () => {
 });
 jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: jest.fn()}));
 import {AdminApiError} from '../api/errors';
-import {createAdminVariant, getAdminProductVariants, updateAdminVariantSize, type AdminProductDetailVariant} from '../api/products';
+import {createAdminInventoryItem, createAdminVariant, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminVariantSize, type AdminProductDetailVariant} from '../api/products';
 import {ProductVariantsSection, type ProductVariantsSectionHandle} from './ProductVariantsSection';
 import {createRef} from 'react';
 
 jest.mock('../api/products',()=>({
   ...jest.requireActual('../api/products'),
+  createAdminInventoryItem:jest.fn(),
   createAdminVariant:jest.fn(),
+  getAdminProductInventorySnapshot:jest.fn(),
   getAdminProductVariants:jest.fn(),
+  updateAdminInventoryItem:jest.fn(),
   updateAdminVariantSize:jest.fn(),
 }));
+const createInventoryMock=createAdminInventoryItem as jest.MockedFunction<typeof createAdminInventoryItem>;
+const updateInventoryMock=updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
+const refreshInventoryMock=getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
 const createMock=createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
 const refreshMock=getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
 const updateMock=updateAdminVariantSize as jest.MockedFunction<typeof updateAdminVariantSize>;
 const v=(id:string,size:string,status:'active'|'inactive'='active',sku?:string):AdminProductDetailVariant=>({
   id,productId:'p1',size,sku,status,sortOrder:id==='a'?0:1,
-  createdAt:`2026-01-0${id==='a'?1:2}T00:00:00Z`,updatedAt:'2026-01-01T00:00:00Z',inventory:[{ignored:true}],
+  createdAt:`2026-01-0${id==='a'?1:2}T00:00:00Z`,updatedAt:'2026-01-01T00:00:00Z',inventory:[],
 });
 const props=(variants:AdminProductDetailVariant[]=[])=>({
   productId:'p1',token:'token',initialVariants:variants,onAccessError:jest.fn(()=>false),
@@ -94,10 +100,10 @@ test('dirty editor switch delegates to page and imperative discard opens request
   const edits=screen.getAllByRole('button',{name:'Upravit velikost'});
   fireEvent.click(edits[0]);fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
   fireEvent.click(edits[1]);
-  expect(requestSwitch).toHaveBeenCalledWith({target:{kind:'edit',variantId:'b'}});
+  expect(requestSwitch).toHaveBeenCalledWith({dirtyDomain:'variant',target:{domain:'variant',target:{kind:'edit',variantId:'b'}}});
   expect(screen.getByLabelText('Velikost')).toHaveValue('99');
   act(() => {
-    ref.current?.discardAndOpen({kind:'edit',variantId:'b'});
+    ref.current?.discardAndOpen({domain:'variant',target:{kind:'edit',variantId:'b'}});
   });
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveValue('110'));
   await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
