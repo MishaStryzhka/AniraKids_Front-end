@@ -25,6 +25,9 @@ import {
   createAdminInventoryItem,
   updateAdminInventoryItem,
   getAdminProductInventorySnapshot,
+  moveAdminInventoryItemToMaintenance,
+  activateAdminInventoryItem,
+  retireAdminInventoryItem,
 } from './products';
 
 const mockedGet = adminApiClient.get as jest.Mock;
@@ -182,4 +185,28 @@ test('inventory API helpers normalize transport errors',async()=>{
   await expect(updateAdminInventoryItem({token:'dummy-token',inventoryItemId:'i1',body:{notes:'x'}})).rejects.toBe(failure);
   await expect(getAdminProductInventorySnapshot({token:'dummy-token',productId:'p1'})).rejects.toBe(failure);
   expect(mockedNormalizeError).toHaveBeenCalledTimes(3);
+});
+
+
+describe('inventory lifecycle API bindings',()=>{
+  const cases=[
+    ['maintenance',moveAdminInventoryItemToMaintenance],
+    ['activate',activateAdminInventoryItem],
+    ['retire',retireAdminInventoryItem],
+  ] as const;
+  test.each(cases)('%s POST uses exact URL, no body, shared config, signal and extracts inventoryItem',async(action,fn)=>{
+    mockedPost.mockResolvedValueOnce({data:{inventoryItem}});
+    const signal=new AbortController().signal;
+    await expect(fn({token:'dummy-token',inventoryItemId:'i1',signal})).resolves.toEqual(inventoryItem);
+    expect(mockedBuildConfig).toHaveBeenCalledWith('dummy-token',signal);
+    expect(mockedPost).toHaveBeenCalledWith(`/admin/inventory-items/i1/${action}`,undefined,expect.any(Object));
+  });
+  test.each(cases)('%s normalizes errors without global client mutation',async(_action,fn)=>{
+    const failure=new Error('lifecycle failure');
+    mockedPost.mockRejectedValueOnce(failure);
+    await expect(fn({token:'dummy-token',inventoryItemId:'i1'})).rejects.toBe(failure);
+    expect(mockedNormalizeError).toHaveBeenCalledWith(failure);
+    expect(mockedGet).not.toHaveBeenCalled();
+    expect(mockedPatch).not.toHaveBeenCalled();
+  });
 });
