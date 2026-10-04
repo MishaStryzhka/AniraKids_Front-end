@@ -283,6 +283,21 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   };
   const deleting = dialogState.kind === 'delete' ? dialogState : null;
   const switchingEditor = dialogState.kind === 'editor-switch' ? dialogState : null;
+  const switchingInventory = switchingEditor?.dirtyDomain === 'inventory';
+  const leaveTitle = mode === 'create'
+    ? 'Neuložené změny'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved ? 'Nedokončená práce s fyzickým kusem' : 'Neuložené změny fyzického kusu'
+      : 'Neuložené nebo nedokončené změny';
+  const leaveDescription = mode === 'create'
+    ? 'Máte neuložené změny. Opravdu chcete odejít?'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved
+        ? 'Výsledek operace s fyzickým kusem nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
+        : 'Máte neuložené změny fyzického kusu. Opravdu chcete odejít?'
+      : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.';
+  const leaveAction = mode === 'create' || !hasPendingOrUnresolved ? 'Odejít bez uložení' : 'Odejít';
+
   const protectedLastPhoto = Boolean(deleting && deleting.distinctCount === 1 && status === 'active');
   const deleteDescription = protectedLastPhoto ? 'Aktivní produkt musí mít alespoň jednu fotografii.'
     : deleting?.isMain && deleting.distinctCount > 1
@@ -307,14 +322,14 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       token={token ?? ''} initialVariants={variantSeed} onRiskChange={setVariantRisk} onPendingRiskChange={setVariantPending}
       onInventoryRiskChange={setInventoryRisk} onRequestEditorSwitch={requestEditorSwitch} onAccessError={handleRequestError}/> : null}
     <Dialog open={dialogState.kind !== 'none'}
-      title={deleting ? 'Odebrat fotografii?' : switchingVariant ? 'Neuložená změna varianty' : mode === 'create' ? 'Neuložené změny' : 'Neuložené nebo nedokončené změny'}
-      description={deleting ? deleteDescription : switchingVariant ? 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : mode === 'create' ? 'Máte neuložené změny. Opravdu chcete odejít?' : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.'}
-      onEscape={deleting ? cancelDelete : switchingVariant ? stayVariantSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
+      title={deleting ? 'Odebrat fotografii?' : switchingEditor ? switchingInventory ? 'Neuložené změny fyzického kusu' : 'Neuložená změna varianty' : leaveTitle}
+      description={deleting ? deleteDescription : switchingEditor ? switchingInventory ? 'Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?' : 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : leaveDescription}
+      onEscape={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
       <Actions ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
-        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : switchingVariant ? stayVariantSwitch : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
+        <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : switchingEditor ? stayEditorSwitch : stay}>{deleting ? 'Zrušit' : 'Zůstat'}</Button>
         {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
-          : switchingVariant ? <Button variant="destructive" onClick={discardVariantSwitch}>Zahodit změny a pokračovat</Button>
-          : <Button variant="destructive" onClick={leave}>{mode === 'create' ? 'Odejít bez uložení' : 'Odejít'}</Button>}
+          : switchingEditor ? <Button variant={switchingInventory ? 'secondary' : 'destructive'} onClick={discardEditorSwitch}>Zahodit změny a pokračovat</Button>
+          : <Button variant="destructive" onClick={leave}>{leaveAction}</Button>}
       </Actions>
     </Dialog>
   </Page>;
