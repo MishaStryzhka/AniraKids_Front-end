@@ -296,7 +296,14 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
         ? 'Výsledek operace s fyzickým kusem nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
         : 'Máte neuložené změny fyzického kusu. Opravdu chcete odejít?'
       : 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.';
-  const leaveAction = mode === 'create' || !hasPendingOrUnresolved ? 'Odejít bez uložení' : 'Odejít';
+  const mixedWithInventory = inventoryRisk.hasRisk && (dirty || mediaRisk || variantRisk);
+  const leaveAction = mode === 'create'
+    ? 'Odejít bez uložení'
+    : inventoryOnlyRisk
+      ? hasPendingOrUnresolved ? 'Odejít' : 'Odejít bez uložení'
+      : mixedWithInventory
+        ? hasPendingOrUnresolved ? 'Odejít' : 'Odejít bez uložení'
+        : 'Odejít';
 
   const protectedLastPhoto = Boolean(deleting && deleting.distinctCount === 1 && status === 'active');
   const deleteDescription = protectedLastPhoto ? 'Aktivní produkt musí mít alespoň jednu fotografii.'
