@@ -101,14 +101,30 @@ async function openInventoryAdd() {
   const add = screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0];
   expect(add).toBeEnabled();
   fireEvent.click(add);
-  await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="add"]')).toBeInTheDocument());
+  await waitFor(()=>{
+    const editor=document.querySelector('[data-inventory-editor-kind="add"]');
+    if(!editor){
+      const dialog=screen.queryByRole('dialog');
+      const variantEditor=document.querySelector('[data-variant-editor]');
+      throw new Error(`Inventory add editor missing; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; addDisabled=${add.hasAttribute('disabled')}`);
+    }
+    expect(editor).toBeInTheDocument();
+  });
   return screen.getByLabelText('Interní kód');
 }
 async function openInventoryEdit() {
   const edit = screen.getAllByRole('button',{name:'Upravit',exact:true})[0];
   expect(edit).toBeEnabled();
   fireEvent.click(edit);
-  await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument());
+  await waitFor(()=>{
+    const editor=document.querySelector('[data-inventory-editor-kind="edit"]');
+    if(!editor){
+      const dialog=screen.queryByRole('dialog');
+      const variantEditor=document.querySelector('[data-variant-editor]');
+      throw new Error(`Inventory edit editor missing; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; editDisabled=${edit.hasAttribute('disabled')}`);
+    }
+    expect(editor).toBeInTheDocument();
+  });
   return screen.getByLabelText('Poznámka');
 }
 function selectAndUpload() {
