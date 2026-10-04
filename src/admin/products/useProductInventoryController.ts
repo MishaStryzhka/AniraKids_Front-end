@@ -128,6 +128,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     refreshGeneration.current++;
     focusGeneration.current++;
     mutationController.current?.abort();
+    mutationOperationRef.current=null;
     refreshController.current?.abort();
     Object.values(lifecycleControllerByItemRef.current).forEach(controller=>controller.abort());
     lifecycleControllerByItemRef.current={};
@@ -509,10 +510,30 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     }
   };
 
+  const lifecycleNoticeRecoverable=(itemId:string)=>{
+    const notice=lifecycleNoticeByItem[itemId];
+    return Boolean(notice&&'recoverable' in notice&&notice.recoverable);
+  };
+  const isLifecycleActionBlocked=(itemId:string)=>Boolean(
+    lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]||lifecycleNoticeRecoverable(itemId)
+  );
+  const isBasicWriteBlocked=(itemId:string)=>Boolean(
+    lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]
+  );
+  const isActivationBlocked=(variantId:string,itemId:string)=>sameItemDirtyCondition({
+    editor:activeEditor,
+    editDraft,
+    editBaseline,
+    variantId,
+    inventoryItemId:itemId,
+  });
+
   return{
     snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,editIdentity,fieldErrors,submitError,damagedError,feedback,feedbackVariantId,
     operation,refreshing,refreshReason,unknownCreate,missingItemId,missingVariantId,productMissing,editorDirty,riskMeta,
-    open,discardCurrent,cancel,saveCreate,saveEdit,refresh,scheduleFocus,
+    lifecycleOperationsByItem,unknownLifecycleByItem,lifecycleNoticeByItem,
+    isLifecycleActionBlocked,isBasicWriteBlocked,isActivationBlocked,
+    open,discardCurrent,cancel,saveCreate,saveEdit,refresh,transitionLifecycle,scheduleFocus,
   };
 }
 
