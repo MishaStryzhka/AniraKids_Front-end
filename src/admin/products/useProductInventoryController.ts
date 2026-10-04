@@ -211,6 +211,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   };
   const beginMutation=(next:Exclude<InventoryOperation,null>)=>{
     if(operation||mutationController.current||refreshing||productMissing||unknownCreate||!input.token)return null;
+    if(next.kind==='update'&&(lifecycleControllerByItemRef.current[next.inventoryItemId]||unknownLifecycleByItem[next.inventoryItemId]))return null;
     refreshGeneration.current++;refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
     const generation=++mutationGeneration.current,controller=new AbortController();
     mutationController.current=controller;setOperation(next);setSubmitError(null);setFieldErrors({});setDamagedError(false);setFeedback(null);
