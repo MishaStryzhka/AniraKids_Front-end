@@ -274,3 +274,108 @@ test('stale update completion after keyed Product switch cannot mutate new canon
   expect(screen.queryByText('104')).not.toBeInTheDocument();
   expect(screen.queryByText('Velikost byla uložena.')).not.toBeInTheDocument();
 });
+
+
+const inv=(id='i1',variantId='a',code='AK-001')=>({
+  id,variantId,internalCode:code,status:'active' as const,condition:'good' as const,notes:'',createdAt:'2026-01-01T00:00:00Z',
+});
+const withInventory=(base:AdminProductDetailVariant,items:any[])=>({...base,inventory:items});
+
+test('clean Variant editor switches directly to Inventory Add and keeps exactly one editor',async()=>{
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[])])}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  await waitFor(()=>expect(screen.getByLabelText('Interní kód')).toHaveFocus());
+  expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument();
+  expect(document.querySelectorAll('[data-variant-editor],[data-inventory-editor]')).toHaveLength(1);
+});
+
+test('clean Inventory editor switches directly to Variant edit and focuses size',async()=>{
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[])])}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  await waitFor(()=>expect(screen.getByLabelText('Interní kód')).toHaveFocus());
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  expect(screen.queryByLabelText('Interní kód')).not.toBeInTheDocument();
+  expect(document.querySelectorAll('[data-variant-editor],[data-inventory-editor]')).toHaveLength(1);
+});
+
+test('dirty Variant switching to Inventory delegates one page-owned intent without discarding draft',async()=>{
+  const requestSwitch=jest.fn();
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[])])} onRequestEditorSwitch={requestSwitch}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  expect(requestSwitch).toHaveBeenCalledWith({dirtyDomain:'variant',target:{domain:'inventory',target:{kind:'add',variantId:'a'}}});
+  expect(screen.getByLabelText('Velikost')).toHaveValue('99');
+  expect(screen.queryByLabelText('Interní kód')).not.toBeInTheDocument();
+});
+
+test('dirty Inventory switching to Variant delegates Inventory dialog intent and preserves draft',async()=>{
+  const requestSwitch=jest.fn();
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[])])} onRequestEditorSwitch={requestSwitch}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-9'}});
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  expect(requestSwitch).toHaveBeenCalledWith({dirtyDomain:'inventory',target:{domain:'variant',target:{kind:'edit',variantId:'a'}}});
+  expect(screen.getByLabelText('Interní kód')).toHaveValue('AK-9');
+  expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument();
+});
+
+test('imperative discard of dirty Inventory opens requested Variant editor after commit',async()=>{
+  const ref=createRef<ProductVariantsSectionHandle>();
+  render(<ProductVariantsSection ref={ref} {...props([withInventory(v('a','98'),[])])}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-9'}});
+  act(()=>ref.current?.discardAndOpen({domain:'variant',target:{kind:'edit',variantId:'a'}}));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveValue('98'));
+  await waitFor(()=>expect(screen.getByLabelText('Velikost')).toHaveFocus());
+  expect(screen.queryByLabelText('Interní kód')).not.toBeInTheDocument();
+});
+
+test('Variant size success preserves Inventory canonical items for stable Variant ID',async()=>{
+  updateMock.mockResolvedValue({...v('a','104'),inventory:undefined} as any);
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[inv()])])}/>);
+  expect(screen.getByText('AK-001')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  await screen.findByText('Velikost byla uložena.');
+  expect(screen.getByText('104')).toBeInTheDocument();
+  expect(screen.getByText('AK-001')).toBeInTheDocument();
+});
+
+test('Inventory create success preserves Variant canonical size/status and new Variant gets empty bucket',async()=>{
+  createInventoryMock.mockResolvedValue(inv('i2','a','AK-002') as any);
+  render(<ProductVariantsSection {...props([withInventory(v('a','98','inactive'),[])])}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'ak-002'}});
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await screen.findByText('Fyzický kus byl přidán.');
+  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(screen.getByText('Neaktivní')).toBeInTheDocument();
+  expect(screen.getByText('AK-002')).toBeInTheDocument();
+
+  createMock.mockResolvedValue({...v('b','110'),inventory:undefined} as any);
+  fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'110'}});
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
+  await screen.findByText('Varianta byla přidána.');
+  expect(screen.getByText('Pro velikost 110 zatím nejsou žádné fyzické kusy')).toBeInTheDocument();
+  expect(screen.getByText('AK-002')).toBeInTheDocument();
+});
+
+test('Inventory mutation risk metadata is reported independently from Variant risk',async()=>{
+  const inventoryRisk=jest.fn(),variantRisk=jest.fn(),pending=jest.fn();
+  let resolve!:(value:any)=>void;
+  createInventoryMock.mockReturnValue(new Promise(r=>{resolve=r}) as any);
+  render(<ProductVariantsSection {...props([withInventory(v('a','98'),[])])} onRiskChange={variantRisk} onInventoryRiskChange={inventoryRisk} onPendingRiskChange={pending}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
+  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-9'}});
+  await waitFor(()=>expect(inventoryRisk).toHaveBeenLastCalledWith(expect.objectContaining({hasRisk:true,hasDraft:true})));
+  fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
+  await waitFor(()=>expect(inventoryRisk).toHaveBeenLastCalledWith(expect.objectContaining({pendingOrUnresolved:true})));
+  expect(variantRisk).toHaveBeenLastCalledWith(false);
+  await act(async()=>resolve(inv('i9','a','AK-9')));
+});
