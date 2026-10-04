@@ -86,3 +86,43 @@ test('unknown create, missing target and damaged error use approved local recove
   rerender(<ProductInventoryItems variant={variant} controller={controller({activeEditor:{kind:'edit',variantId:'v1',inventoryItemId:'i1'},editIdentity:item('i1'),editDraft:{condition:'fair',notes:'x'},editBaseline:{condition:'good',notes:''},damagedError:true})} onRequestOpen={jest.fn()}/>);
   expect(screen.getByText('Poškozený stav nelze uložit')).toBeInTheDocument();
 });
+
+
+test('condition and notes errors are programmatically associated with stable helper/error IDs',()=>{
+  const c=controller({
+    activeEditor:{kind:'add',variantId:'v1'},
+    snapshot:{v1:{order:[],byId:{}}},
+    fieldErrors:{condition:'Chyba stavu kusu',notes:'Chyba poznámky'},
+  });
+  render(<ProductInventoryItems variant={variant} controller={c} onRequestOpen={jest.fn()}/>);
+  const condition=screen.getByLabelText('Stav kusu');
+  const notes=screen.getByLabelText('Poznámka');
+  expect(condition).toHaveAttribute('aria-invalid','true');
+  expect(condition).toHaveAttribute('aria-describedby','inventory-v1-title-condition-help inventory-v1-title-condition-error');
+  expect(document.getElementById('inventory-v1-title-condition-help')).toHaveTextContent(/Nový fyzický kus/);
+  expect(document.getElementById('inventory-v1-title-condition-error')).toHaveTextContent('Chyba stavu kusu');
+  expect(notes).toHaveAttribute('aria-invalid','true');
+  expect(notes).toHaveAttribute('aria-describedby','inventory-v1-title-notes-help inventory-v1-title-notes-error');
+  expect(document.getElementById('inventory-v1-title-notes-help')).toHaveTextContent('Volitelné. Maximálně 1000 znaků.');
+  expect(document.getElementById('inventory-v1-title-notes-error')).toHaveTextContent('Chyba poznámky');
+});
+
+test('multiple Variant Inventory editors have no duplicate helper or error IDs',()=>{
+  const variant2:AdminVariant={...variant,id:'v2',size:'110'};
+  const c1=controller({
+    activeEditor:{kind:'add',variantId:'v1'},snapshot:{v1:{order:[],byId:{}}},
+    fieldErrors:{condition:'C1',notes:'N1'},
+  });
+  const c2=controller({
+    activeEditor:{kind:'add',variantId:'v2'},snapshot:{v2:{order:[],byId:{}}},
+    fieldErrors:{condition:'C2',notes:'N2'},
+  });
+  render(<><ProductInventoryItems variant={variant} controller={c1} onRequestOpen={jest.fn()}/>
+    <ProductInventoryItems variant={variant2} controller={c2} onRequestOpen={jest.fn()}/></>);
+  const ids=Array.from(document.querySelectorAll<HTMLElement>('[id^="inventory-v"]')).map(node=>node.id);
+  expect(new Set(ids).size).toBe(ids.length);
+  expect(document.getElementById('inventory-v1-title-condition-error')).toBeInTheDocument();
+  expect(document.getElementById('inventory-v2-title-condition-error')).toBeInTheDocument();
+  expect(document.getElementById('inventory-v1-title-notes-error')).toBeInTheDocument();
+  expect(document.getElementById('inventory-v2-title-notes-error')).toBeInTheDocument();
+});
