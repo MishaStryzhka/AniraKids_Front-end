@@ -74,16 +74,19 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   activeEditorRef.current=activeEditor;createDraftRef.current=createDraft;editDraftRef.current=editDraft;editBaselineRef.current=editBaseline;
 
   useEffect(()=>{
+    const productChanged=productRef.current!==input.productId;
     mounted.current=true;
     productRef.current=input.productId;
-    setSnapshot(buildInventorySnapshot(input.initialVariants));
-    setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);
-    setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
-    setRefreshReason(null);setUnknownCreate(null);setMissingItemId(null);setMissingVariantId(null);setProductMissing(false);
-    mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
-    mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;
+    if(productChanged){
+      setSnapshot(buildInventorySnapshot(input.initialVariants));
+      setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);
+      setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
+      setRefreshReason(null);setUnknownCreate(null);setMissingItemId(null);setMissingVariantId(null);setProductMissing(false);
+      mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
+      mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;
+    }
     return()=>{mounted.current=false;mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;mutationController.current?.abort();refreshController.current?.abort();};
-  // initialVariants intentionally seeds only a new product lifetime.
+  // initial state is already seeded synchronously; only a real Product identity change resets this domain.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[input.productId]);
 
