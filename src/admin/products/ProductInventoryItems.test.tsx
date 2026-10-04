@@ -186,7 +186,7 @@ test.each([
   ['retire','Vyřazování…','destructive'],
 ] as const)('pending %s keeps exact visible label, aria-busy and disabled state',(action,label,_variant)=>{
   const status=action==='activate'?'maintenance':'active';
-  const lifecycleOperationsByItem={i1:{generation:1,productId:'p1',variantId:'v1',inventoryItemId:'i1',sourceStatus:status,targetStatus:action==='activate'?'active':action==='maintenance'?'maintenance':'retired',action}};
+  const lifecycleOperationsByItem:any={i1:{generation:1,productId:'p1',variantId:'v1',inventoryItemId:'i1',sourceStatus:status,targetStatus:action==='activate'?'active':action==='maintenance'?'maintenance':'retired',action}};
   const c=controller({
     snapshot:buildInventorySnapshot([{...variant,inventory:[item('i1',status as any,'good')]}] as any),
     lifecycleOperationsByItem,
