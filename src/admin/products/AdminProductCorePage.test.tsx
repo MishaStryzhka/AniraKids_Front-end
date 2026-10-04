@@ -905,7 +905,7 @@ test('02D dirty same-item Inventory editor survives maintenance; only canonical 
   await screen.findByText('Fyzický kus byl přesunut do údržby.');
   expect(screen.getByLabelText('Poznámka')).toHaveValue('typed-note');
   expect(screen.getByLabelText('Stav kusu')).toHaveValue('good');
-  expect(screen.getByText('V údržbě')).toBeInTheDocument();
+  expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-status-cell]')!).getByText('V údržbě')).toBeInTheDocument();
   expect(updateInventoryMock).not.toHaveBeenCalled();
   await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit',exact:true})).toHaveFocus());
 });
