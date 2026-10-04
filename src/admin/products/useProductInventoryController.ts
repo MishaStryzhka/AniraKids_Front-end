@@ -108,10 +108,16 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const [missingItemId,setMissingItemId]=useState<string|null>(null);
   const [missingVariantId,setMissingVariantId]=useState<string|null>(null);
   const [productMissing,setProductMissing]=useState(false);
+  const [lifecycleOperationsByItem,setLifecycleOperationsByItem]=useState<Record<string,InventoryLifecycleOperation>>({});
+  const [unknownLifecycleByItem,setUnknownLifecycleByItem]=useState<Record<string,InventoryLifecycleUnknownOutcome>>({});
+  const [lifecycleNoticeByItem,setLifecycleNoticeByItem]=useState<Record<string,InventoryLifecycleNotice>>({});
 
   const mounted=useRef(true),productRef=useRef(input.productId),triggerRef=useRef<HTMLElement|null>(null);
   const mutationGeneration=useRef(0),refreshGeneration=useRef(0),focusGeneration=useRef(0);
   const mutationController=useRef<AbortController|null>(null),refreshController=useRef<AbortController|null>(null);
+  const lifecycleSequenceRef=useRef(0),lifecycleRevisionRef=useRef(0);
+  const lifecycleGenerationByItemRef=useRef<Record<string,number>>({});
+  const lifecycleControllerByItemRef=useRef<Record<string,AbortController>>({});
   const activeEditorRef=useRef(activeEditor),createDraftRef=useRef(createDraft),editDraftRef=useRef(editDraft),editBaselineRef=useRef(editBaseline);
   activeEditorRef.current=activeEditor;createDraftRef.current=createDraft;editDraftRef.current=editDraft;editBaselineRef.current=editBaseline;
 
@@ -122,6 +128,10 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     focusGeneration.current++;
     mutationController.current?.abort();
     refreshController.current?.abort();
+    Object.values(lifecycleControllerByItemRef.current).forEach(controller=>controller.abort());
+    lifecycleControllerByItemRef.current={};
+    lifecycleGenerationByItemRef.current={};
+    lifecycleRevisionRef.current++;
   }, []);
 
   useEffect(()=>{
@@ -133,8 +143,11 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);
       setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
       setRefreshReason(null);setUnknownCreate(null);setMissingItemId(null);setMissingVariantId(null);setProductMissing(false);
+      setLifecycleOperationsByItem({});setUnknownLifecycleByItem({});setLifecycleNoticeByItem({});
       mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
-      mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;
+      Object.values(lifecycleControllerByItemRef.current).forEach(controller=>controller.abort());
+      lifecycleControllerByItemRef.current={};lifecycleGenerationByItemRef.current={};
+      mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;lifecycleRevisionRef.current++;
     }
     return invalidateLifetime;
   // initial state is already seeded synchronously; only a real Product identity change resets this domain.
