@@ -64,16 +64,26 @@ test('missing Variant and missing item preserve draft and expose Inventory refre
  await act(async()=>editHook.result.current.saveEdit(()=>null,()=>null));
  expect(editHook.result.current.missingItemId).toBe('i1');expect(editHook.result.current.editDraft?.notes).toBe('typed');
 });
-test('unknown CREATE retains full attempt and never auto-replays POST',async()=>{
- createMock.mockRejectedValue(error('ADMIN_NETWORK_ERROR'));
+test('unknown CREATE absent reconciliation allows only explicit retry with retained full attempt context',async()=>{
+ createMock.mockRejectedValueOnce(error('ADMIN_NETWORK_ERROR')).mockResolvedValueOnce(item('i9','v1','AK-9','fair'));
+ const successFocus=jest.fn(()=>null);
  const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));act(()=>hook.result.current.setCreateDraft({internalCode:' ak-9 ',condition:'fair',notes:'memo'}));
- await act(async()=>hook.result.current.saveCreate(()=>null,()=>null));
+ await act(async()=>hook.result.current.saveCreate(()=>null,successFocus));
  expect(hook.result.current.unknownCreate).toEqual({productId:'p1',variantId:'v1',internalCode:'ak-9',canonicalInternalCode:'AK-9',condition:'fair',notes:'memo'});
  expect(createMock).toHaveBeenCalledTimes(1);
  refreshMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[]}});
  await act(async()=>hook.result.current.refresh());
+ expect(hook.result.current.feedback).toBe('Aktuální fyzické kusy byly načteny. Přidání můžete zkusit znovu.');
  expect(createMock).toHaveBeenCalledTimes(1);
- expect(hook.result.current.unknownCreate).toBeNull();expect(hook.result.current.createDraft.notes).toBe('memo');
+ expect(hook.result.current.unknownCreate).toBeNull();
+ expect(hook.result.current.createDraft).toEqual({internalCode:' ak-9 ',condition:'fair',notes:'memo'});
+ await act(async()=>hook.result.current.saveCreate(()=>null,successFocus));
+ expect(createMock).toHaveBeenCalledTimes(2);
+ expect(createMock.mock.calls[1][0].body).toEqual({internalCode:'ak-9',condition:'fair',notes:'memo'});
+ expect(hook.result.current.snapshot.v1.byId.i9).toMatchObject({id:'i9',variantId:'v1',internalCode:'AK-9',condition:'fair'});
+ expect(hook.result.current.activeEditor).toBeNull();
+ expect(hook.result.current.feedback).toBe('Fyzický kus byl přidán.');
+ expect(successFocus).toHaveBeenCalledTimes(1);
 });
 test('unknown create refresh reports observed matching code without claiming authorship',async()=>{
  createMock.mockRejectedValue(error('ADMIN_NETWORK_ERROR'));const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));act(()=>hook.result.current.setCreateDraft({internalCode:'ak-9',condition:'good',notes:'memo'}));
@@ -110,4 +120,29 @@ test('unmount aborts request and stale finally cannot apply access/error state',
  act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));act(()=>hook.result.current.setCreateDraft({internalCode:'AK-9',condition:'good',notes:''}));
  let request!:Promise<void>;act(()=>{request=hook.result.current.saveCreate(()=>null,()=>null)});const signal=createMock.mock.calls[0][0].signal!;hook.unmount();expect(signal.aborted).toBe(true);
  await act(async()=>{pending.reject(error('PRODUCT_NOT_FOUND',404));await request});expect(access).not.toHaveBeenCalled();
+});
+
+
+test('CREATE INVALID_ID becomes missing Variant recovery, preserves draft and never auto-replays POST',async()=>{
+ createMock.mockRejectedValueOnce(error('INVALID_ID',400));
+ const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'bad-variant'}));act(()=>hook.result.current.setCreateDraft({internalCode:'AK-9',condition:'fair',notes:'memo'}));
+ await act(async()=>hook.result.current.saveCreate(()=>null,()=>null));
+ expect(hook.result.current.missingVariantId).toBe('bad-variant');
+ expect(hook.result.current.refreshReason).toBe('missing-variant');
+ expect(hook.result.current.createDraft).toEqual({internalCode:'AK-9',condition:'fair',notes:'memo'});
+ expect(hook.result.current.submitError).toBeNull();
+ expect(hook.result.current.fieldErrors).toEqual({});
+ expect(createMock).toHaveBeenCalledTimes(1);
+});
+
+test('UPDATE INVALID_ID becomes missing InventoryItem recovery, preserves draft and never auto-replays PATCH',async()=>{
+ updateMock.mockRejectedValueOnce(error('INVALID_ID',400));
+ const hook=setup();act(()=>hook.result.current.open({kind:'edit',variantId:'v1',inventoryItemId:'i1'}));act(()=>hook.result.current.setEditDraft({condition:'fair',notes:'typed'}));
+ await act(async()=>hook.result.current.saveEdit(()=>null,()=>null));
+ expect(hook.result.current.missingItemId).toBe('i1');
+ expect(hook.result.current.refreshReason).toBe('missing-item');
+ expect(hook.result.current.editDraft).toEqual({condition:'fair',notes:'typed'});
+ expect(hook.result.current.submitError).toBeNull();
+ expect(hook.result.current.fieldErrors).toEqual({});
+ expect(updateMock).toHaveBeenCalledTimes(1);
 });
