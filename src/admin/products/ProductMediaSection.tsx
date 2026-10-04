@@ -78,6 +78,7 @@ export interface ProductMediaSectionProps {
   token: string;
   initialPhotos: AdminProductPhoto[];
   onRiskChange?(risk: boolean): void;
+  onPendingRiskChange?(pending: boolean): void;
   onProductMissing?(): void;
   onAccessError?(error: unknown): boolean;
   onRequestDelete?(intent: MediaDeleteIntent): void;
@@ -169,6 +170,9 @@ export function ProductMediaSection(props: ProductMediaSectionProps) {
 
   const ordered = c.drafts.orderIds.map(id => c.photos.find(photo => photo.publicId === id)).filter(Boolean) as AdminProductPhoto[];
   const busy = Boolean(c.operation);
+  const pendingRisk = busy || !['idle','selected'].includes(c.uploadPhase);
+  const onPendingRiskChange = props.onPendingRiskChange;
+  useEffect(() => onPendingRiskChange?.(pendingRisk), [onPendingRiskChange, pendingRisk]);
   const disabled = c.guard !== 'available' || busy || !props.token;
   const statusText = [phaseCopy[c.uploadPhase], c.feedback].filter(Boolean).filter((value, i, values) => values.indexOf(value) === i).join(' ');
   const move = (publicId: string, delta: -1 | 1) => {
