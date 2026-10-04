@@ -1,0 +1,27 @@
+name: ADMIN-FE-02C-03 Verify
+on:
+  push:
+    branches: [admin-fe-02c-03-basic-inventory-items]
+concurrency:
+  group: admin-fe02c03-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - name: TypeScript
+        run: npm run typecheck
+      - name: ADMIN-FE-02C-03 focused
+        run: >
+          npm test -- --watchAll=false --runInBand
+          src/admin/api/products.test.ts
+          src/admin/products/productInventoryModel.test.ts
+          src/admin/products/useProductInventoryController.test.tsx
+          src/admin/products/ProductInventoryItems.test.tsx
+          src/admin/products/ProductVariantsSection.test.tsx
+          src/admin/products/ProductMediaSection.test.tsx
+          src/admin/products/AdminProductCorePage.test.tsx
