@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
-import {createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
+import {activateAdminInventoryItem, createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, moveAdminInventoryItemToMaintenance, retireAdminInventoryItem, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
@@ -15,12 +15,15 @@ jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'
 const mockHandleRequestError = jest.fn();
 jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
 jest.mock('../api/products', () => ({
+  activateAdminInventoryItem: jest.fn(),
   createAdminInventoryItem: jest.fn(),
   createAdminProduct: jest.fn(),
   createAdminVariant: jest.fn(),
   getAdminProductDetail: jest.fn(),
   getAdminProductInventorySnapshot: jest.fn(),
   getAdminProductVariants: jest.fn(),
+  moveAdminInventoryItemToMaintenance: jest.fn(),
+  retireAdminInventoryItem: jest.fn(),
   updateAdminInventoryItem: jest.fn(),
   updateAdminProduct: jest.fn(),
   updateAdminVariantSize: jest.fn(),
@@ -35,7 +38,10 @@ jest.mock('../api/productMedia', () => {
     reorderProductPhotos: jest.fn(), signProductPhoto: jest.fn(), updateProductPhotoAlt: jest.fn()};
 });
 
+const activateInventoryMock = activateAdminInventoryItem as jest.MockedFunction<typeof activateAdminInventoryItem>;
 const createInventoryMock = createAdminInventoryItem as jest.MockedFunction<typeof createAdminInventoryItem>;
+const maintenanceInventoryMock = moveAdminInventoryItemToMaintenance as jest.MockedFunction<typeof moveAdminInventoryItemToMaintenance>;
+const retireInventoryMock = retireAdminInventoryItem as jest.MockedFunction<typeof retireAdminInventoryItem>;
 const updateInventoryMock = updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
 const refreshInventoryMock = getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
 const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
