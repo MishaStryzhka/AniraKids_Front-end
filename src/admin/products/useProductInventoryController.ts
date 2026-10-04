@@ -114,7 +114,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
 
   const mounted=useRef(true),productRef=useRef(input.productId),triggerRef=useRef<HTMLElement|null>(null);
   const mutationGeneration=useRef(0),refreshGeneration=useRef(0),focusGeneration=useRef(0);
-  const mutationController=useRef<AbortController|null>(null),refreshController=useRef<AbortController|null>(null);
+  const mutationController=useRef<AbortController|null>(null),mutationOperationRef=useRef<InventoryOperation>(null),refreshController=useRef<AbortController|null>(null);
   const lifecycleSequenceRef=useRef(0),lifecycleRevisionRef=useRef(0);
   const lifecycleGenerationByItemRef=useRef<Record<string,number>>({});
   const lifecycleControllerByItemRef=useRef<Record<string,AbortController>>({});
@@ -144,7 +144,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
       setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
       setRefreshReason(null);setUnknownCreate(null);setMissingItemId(null);setMissingVariantId(null);setProductMissing(false);
       setLifecycleOperationsByItem({});setUnknownLifecycleByItem({});setLifecycleNoticeByItem({});
-      mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;refreshController.current=null;
+      mutationController.current?.abort();refreshController.current?.abort();mutationController.current=null;mutationOperationRef.current=null;refreshController.current=null;
       Object.values(lifecycleControllerByItemRef.current).forEach(controller=>controller.abort());
       lifecycleControllerByItemRef.current={};lifecycleGenerationByItemRef.current={};
       mutationGeneration.current++;refreshGeneration.current++;focusGeneration.current++;lifecycleRevisionRef.current++;
@@ -207,14 +207,14 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   };
   const finishMutation=(generation:number,productId:string,variantId:string,itemId?:string)=>{
     if(!safeMutation(generation,productId,variantId,itemId))return;
-    setOperation(null);mutationController.current=null;
+    setOperation(null);mutationController.current=null;mutationOperationRef.current=null;
   };
   const beginMutation=(next:Exclude<InventoryOperation,null>)=>{
     if(operation||mutationController.current||refreshing||productMissing||unknownCreate||!input.token)return null;
     if(next.kind==='update'&&(lifecycleControllerByItemRef.current[next.inventoryItemId]||unknownLifecycleByItem[next.inventoryItemId]))return null;
     refreshGeneration.current++;refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
     const generation=++mutationGeneration.current,controller=new AbortController();
-    mutationController.current=controller;setOperation(next);setSubmitError(null);setFieldErrors({});setDamagedError(false);setFeedback(null);
+    mutationController.current=controller;mutationOperationRef.current=next;setOperation(next);setSubmitError(null);setFieldErrors({});setDamagedError(false);setFeedback(null);
     return{generation,signal:controller.signal,productId:input.productId};
   };
 
