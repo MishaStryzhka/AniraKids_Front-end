@@ -594,7 +594,7 @@ test('dirty Core survives Inventory create success and failure without Core reba
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
 
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
-  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'ak-002'}});
+  fireEvent.change(await screen.findByLabelText('Interní kód'),{target:{value:'ak-002'}});
   fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
   await screen.findByText('Fyzický kus byl přidán.');
   expect(screen.getByText('AK-002')).toBeInTheDocument();
@@ -606,7 +606,7 @@ test('dirty Core survives Inventory create success and failure without Core reba
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
 
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
-  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-003'}});
+  fireEvent.change(await screen.findByLabelText('Interní kód'),{target:{value:'AK-003'}});
   fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
   await screen.findByText('Výsledek přidání fyzického kusu není potvrzený');
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
@@ -624,7 +624,7 @@ test('Photo ALT draft survives Inventory success and keeps combined page risk', 
   fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
   fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Rozpracovaný ALT'}});
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
-  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-002'}});
+  fireEvent.change(await screen.findByLabelText('Interní kód'),{target:{value:'AK-002'}});
   fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
   await screen.findByText('Fyzický kus byl přidán.');
   expect(screen.getByLabelText('Alternativní text')).toHaveValue('Rozpracovaný ALT');
@@ -642,7 +642,7 @@ test('Inventory refresh applies only Inventory and preserves Core Photos and Var
   await screen.findByDisplayValue('Sofia');
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit'}));
-  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'typed'}});
+  fireEvent.change(await screen.findByLabelText('Poznámka'),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
   await screen.findByText('Fyzický kus už není dostupný');
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
@@ -660,7 +660,7 @@ test('dirty Inventory uses one page Dialog with approved switch copy and Stay re
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
-  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-9'}});
+  fireEvent.change(await screen.findByLabelText('Interní kód'),{target:{value:'AK-9'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   const dialog=screen.getByRole('dialog');
   expect(screen.getAllByRole('dialog')).toHaveLength(1);
@@ -680,7 +680,7 @@ test('Inventory-only draft and unresolved create select exact leave copy/actions
   await screen.findByDisplayValue('Sofia');
 
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat fyzický kus'})[0]);
-  fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'AK-9'}});
+  fireEvent.change(await screen.findByLabelText('Interní kód'),{target:{value:'AK-9'}});
   await act(async()=>router.navigate('/admin/produkty'));
   let dialog=screen.getByRole('dialog');
   expect(dialog).toHaveTextContent('Neuložené změny fyzického kusu');
@@ -704,7 +704,7 @@ test('post-load Inventory PRODUCT_NOT_FOUND preserves mounted domains and disabl
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.click(screen.getByRole('button',{name:'Upravit'}));
-  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'typed'}});
+  fireEvent.change(await screen.findByLabelText('Poznámka'),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
   await screen.findByText('Fyzický kus už není dostupný');
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
@@ -723,7 +723,7 @@ test('Inventory access errors delegate to existing Admin boundary without raw ba
   renderRouter('/admin/produkty/p1');
   await screen.findByDisplayValue('Sofia');
   fireEvent.click(screen.getByRole('button',{name:'Upravit'}));
-  fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'typed'}});
+  fireEvent.change(await screen.findByLabelText('Poznámka'),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
   await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalled());
   expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
