@@ -106,7 +106,7 @@ async function openInventoryAdd() {
     if(!editor){
       const dialog=screen.queryByRole('dialog');
       const variantEditor=document.querySelector('[data-variant-editor]');
-      throw new Error(`Inventory add editor missing; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; addDisabled=${add.hasAttribute('disabled')}`);
+      const zone=add.closest('[data-inventory-variant]'); throw new Error(`Inventory add editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; addDisabled=${add.hasAttribute('disabled')}`);
     }
     expect(editor).toBeInTheDocument();
   });
@@ -121,7 +121,7 @@ async function openInventoryEdit() {
     if(!editor){
       const dialog=screen.queryByRole('dialog');
       const variantEditor=document.querySelector('[data-variant-editor]');
-      throw new Error(`Inventory edit editor missing; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; editDisabled=${edit.hasAttribute('disabled')}`);
+      const zone=edit.closest('[data-inventory-variant]'); throw new Error(`Inventory edit editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; editDisabled=${edit.hasAttribute('disabled')}`);
     }
     expect(editor).toBeInTheDocument();
   });
