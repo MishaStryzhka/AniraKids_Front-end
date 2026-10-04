@@ -106,7 +106,7 @@ async function openInventoryAdd() {
     if(!editor){
       const dialog=screen.queryByRole('dialog');
       const variantEditor=document.querySelector('[data-variant-editor]');
-      const zone=add.closest('[data-inventory-variant]'); const variants=add.closest('[data-product-variants-section]'); throw new Error(`Inventory add editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; request=${variants?.getAttribute('data-inventory-request')??'none'}; result=${variants?.getAttribute('data-inventory-request-result')??'none'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; addDisabled=${add.hasAttribute('disabled')}`);
+      const zone=add.closest('[data-inventory-variant]'); const variants=add.closest('[data-product-variants-section]'); throw new Error(`Inventory add editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; request=${variants?.getAttribute('data-inventory-request')??'none'}; result=${variants?.getAttribute('data-inventory-request-result')??'none'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; addDisabled=${add.hasAttribute('disabled')};addConnected=${add.isConnected};sameVariantsNode=${variants===document.querySelector('[data-product-variants-section]')}`);
     }
     expect(editor).toBeInTheDocument();
   });
@@ -121,7 +121,7 @@ async function openInventoryEdit() {
     if(!editor){
       const dialog=screen.queryByRole('dialog');
       const variantEditor=document.querySelector('[data-variant-editor]');
-      const zone=edit.closest('[data-inventory-variant]'); const variants=edit.closest('[data-product-variants-section]'); throw new Error(`Inventory edit editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; request=${variants?.getAttribute('data-inventory-request')??'none'}; result=${variants?.getAttribute('data-inventory-request-result')??'none'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; editDisabled=${edit.hasAttribute('disabled')}`);
+      const zone=edit.closest('[data-inventory-variant]'); const variants=edit.closest('[data-product-variants-section]'); throw new Error(`Inventory edit editor missing; active=${zone?.getAttribute('data-inventory-active-editor')??'missing-zone'}; request=${variants?.getAttribute('data-inventory-request')??'none'}; result=${variants?.getAttribute('data-inventory-request-result')??'none'}; dialog=${dialog?.textContent??'none'}; variantEditor=${Boolean(variantEditor)}; editDisabled=${edit.hasAttribute('disabled')};editConnected=${edit.isConnected};sameVariantsNode=${variants===document.querySelector('[data-product-variants-section]')}`);
     }
     expect(editor).toBeInTheDocument();
   });
