@@ -126,3 +126,30 @@ test('multiple Variant Inventory editors have no duplicate helper or error IDs',
   expect(document.getElementById('inventory-v1-title-notes-error')).toBeInTheDocument();
   expect(document.getElementById('inventory-v2-title-notes-error')).toBeInTheDocument();
 });
+
+
+test('missing Variant and InventoryItem recovery surfaces use approved Czech copy and never field-validation guidance',()=>{
+  const add=controller({
+    activeEditor:{kind:'add',variantId:'v1'},snapshot:{v1:{order:[],byId:{}}},
+    createDraft:{internalCode:'AK-9',condition:'fair',notes:'memo'},
+    missingVariantId:'v1',refreshReason:'missing-variant',
+    riskMeta:{hasRisk:true,hasDraft:true,pendingOrUnresolved:false,missingTargetDraft:true},
+  });
+  const view=render(<ProductInventoryItems variant={variant} controller={add} onRequestOpen={jest.fn()}/>);
+  expect(screen.getByText('Varianta už není dostupná')).toBeInTheDocument();
+  expect(screen.getByText('Fyzický kus nelze přidat, protože tato varianta už nebyla nalezena.')).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'})).toBeEnabled();
+  expect(screen.queryByText('Fyzický kus se nepodařilo uložit. Zkontrolujte zadané údaje.')).not.toBeInTheDocument();
+
+  const edit=controller({
+    activeEditor:{kind:'edit',variantId:'v1',inventoryItemId:'i1'},editIdentity:item('i1'),
+    editDraft:{condition:'fair',notes:'typed'},editBaseline:{condition:'good',notes:'Poznámka text'},
+    missingItemId:'i1',refreshReason:'missing-item',
+    riskMeta:{hasRisk:true,hasDraft:true,pendingOrUnresolved:false,missingTargetDraft:true},
+  });
+  view.rerender(<ProductInventoryItems variant={variant} controller={edit} onRequestOpen={jest.fn()}/>);
+  expect(screen.getByText('Fyzický kus už není dostupný')).toBeInTheDocument();
+  expect(screen.getByText('Změny nelze uložit, protože tento fyzický kus už nebyl nalezen.')).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'})).toBeEnabled();
+  expect(screen.queryByText('Fyzický kus se nepodařilo uložit. Zkontrolujte zadané údaje.')).not.toBeInTheDocument();
+});
