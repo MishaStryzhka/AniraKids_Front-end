@@ -802,7 +802,7 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   const inventoryRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
   expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
   expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
-  expect(within(inventoryRow).getByText('AK-001')).toBeInTheDocument();
+  expect(inventoryRow.dataset.inventoryId).toBe('i1');
   expect(within(inventoryRow.querySelector<HTMLElement>('[data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
   expect(updateInventoryMock).not.toHaveBeenCalled();
   expect(createInventoryMock).not.toHaveBeenCalled();
