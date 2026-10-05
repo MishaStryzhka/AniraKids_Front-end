@@ -24,6 +24,7 @@ const Page = styled.div`inline-size:100%;max-inline-size:840px;display:grid;gap:
 const Guidance = styled.p`margin:0;color:${t.color.text.secondary};`;
 const State = styled.section`max-inline-size:640px;display:grid;gap:${t.space[3]};`;
 const Actions = styled.div`display:flex;flex-wrap:wrap;gap:${t.space[3]};`;
+const RetireDialogActions = styled(Actions)`@media(max-width:767px){display:grid;grid-template-columns:minmax(0,1fr);inline-size:100%;>button{min-inline-size:0;inline-size:100%;}}`;
 const Feedback = styled.div`
   display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};padding:${t.space[3]};
   border:1px solid ${t.color.status.success.fg};border-radius:${t.radius[2]};background:${t.color.status.success.bg};
@@ -328,6 +329,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const deleting = dialogState.kind === 'delete' ? dialogState : null;
   const switchingEditor = dialogState.kind === 'editor-switch' ? dialogState : null;
   const retiringInventory = dialogState.kind === 'inventory-retire' ? dialogState.intent : null;
+  const DialogActionContainer = retiringInventory ? RetireDialogActions : Actions;
   const switchingInventory = switchingEditor?.dirtyDomain === 'inventory';
   const leaveTitle = mode === 'create'
     ? 'Neuložené změny'
@@ -382,13 +384,13 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       title={deleting ? 'Odebrat fotografii?' : retiringInventory ? 'Vyřadit fyzický kus?' : switchingEditor ? switchingInventory ? 'Neuložené změny fyzického kusu' : 'Neuložená změna varianty' : leaveTitle}
       description={deleting ? deleteDescription : retiringInventory ? `Fyzický kus ${retiringInventory.internalCode} bude trvale převeden do stavu Vyřazený. Po vyřazení jej nelze znovu aktivovat.` : switchingEditor ? switchingInventory ? 'Máte neuložené změny fyzického kusu. Chcete je zahodit a pokračovat?' : 'Velikost má neuložené změny. Chcete je zahodit a pokračovat?' : leaveDescription}
       onEscape={deleting ? cancelDelete : retiringInventory ? cancelInventoryRetire : switchingEditor ? stayEditorSwitch : stay} resolveRestoreFocus={resolveRestoreFocus} initialFocusRef={safeDialogButton}>
-      <Actions ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
+      <DialogActionContainer ref={node => {safeDialogButton.current = node?.querySelector<HTMLButtonElement>('button') ?? null;}}>
         <Button disabled={Boolean(deleteRequest)} onClick={deleting ? cancelDelete : retiringInventory ? cancelInventoryRetire : switchingEditor ? stayEditorSwitch : stay}>{deleting || retiringInventory ? 'Zrušit' : 'Zůstat'}</Button>
         {deleting ? protectedLastPhoto ? null : <Button variant="destructive" disabled={Boolean(deleteRequest)} onClick={confirmDelete}>Odebrat fotografii</Button>
           : retiringInventory ? <Button variant="destructive" onClick={confirmInventoryRetire}>Vyřadit</Button>
           : switchingEditor ? <Button variant={switchingInventory ? 'secondary' : 'destructive'} onClick={discardEditorSwitch}>Zahodit změny a pokračovat</Button>
           : <Button variant="destructive" onClick={leave}>{leaveAction}</Button>}
-      </Actions>
+      </DialogActionContainer>
     </Dialog>
   </Page>;
 }
