@@ -62,8 +62,8 @@ for(const width of [375,390,430,768,1024,1440])test('Inventory responsive '+widt
  const code=await row.locator('strong').first().boundingBox(),status=await row.getByText('Aktivní',{exact:true}).boundingBox(),condition=await row.locator('[data-inventory-condition-cell]').boundingBox(),edit=await row.getByRole('button',{name:'Upravit'}).boundingBox();
  expect(vb.width).toBeLessThanOrEqual(841);expect(zb.width).toBeLessThanOrEqual(vb.width);expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  if(width<768){expect(edit.width).toBeGreaterThan(zb.width*.75);expect(status.y).toBeGreaterThan(code.y);expect(condition.y).toBeGreaterThan(status.y)}
- else if(width<1024){const cy=b=>b.y+b.height/2;expect(condition.y).toBeGreaterThan(code.y);expect(Math.abs(cy(edit)-cy(condition))).toBeLessThan(2)}
- else {const centers=[code,status,condition,edit].map(b=>b.y+b.height/2);expect(Math.max(...centers)-Math.min(...centers)).toBeLessThan(20)}
+ else if(width<1024){const cy=b=>b.y+b.height/2;expect(Math.abs(cy(code)-cy(status))).toBeLessThan(2);expect(condition.y).toBeGreaterThan(code.y);expect(edit.y).toBeGreaterThan(condition.y+condition.height-1)}
+ else {const centers=[code,status,condition].map(b=>b.y+b.height/2);expect(Math.max(...centers)-Math.min(...centers)).toBeLessThan(20);expect(edit.y).toBeGreaterThan(Math.max(code.y+code.height,status.y+status.height,condition.y+condition.height)-1)}
  output('geometry-'+width+'.json',{width,variant:vb,inventory:zb,row:{code,status,condition,edit},scrollWidth:await page.evaluate(()=>document.documentElement.scrollWidth)});
  await page.screenshot({path:path.join(EVIDENCE,'responsive-'+width+'.png'),fullPage:true});
 });

@@ -8,6 +8,7 @@ export type AdminProductCategory = 'dress' | 'suit' | 'set' | 'accessory' | 'oth
 export type AdminProductGender = 'girls' | 'boys' | 'women' | 'men' | 'unisex';
 export type AdminVariantStatus = 'active' | 'inactive';
 export type AdminInventoryItemStatus = 'active' | 'maintenance' | 'retired';
+export type AdminInventoryLifecycleTarget = AdminInventoryItemStatus;
 export type AdminInventoryCondition = 'excellent' | 'good' | 'fair' | 'damaged';
 export type CreateAdminInventoryCondition = Exclude<AdminInventoryCondition, 'damaged'>;
 
@@ -282,4 +283,47 @@ export async function getAdminProductInventorySnapshot(input: {
       detail.variants.map(variant => [variant.id, variant.inventory]),
     ),
   };
+}
+
+
+async function postAdminInventoryLifecycle(input: {
+  token: string;
+  inventoryItemId: string;
+  action: 'maintenance' | 'activate' | 'retire';
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  try {
+    const response = await adminApiClient.post<{inventoryItem: AdminInventoryItem}>(
+      `/admin/inventory-items/${encodeURIComponent(input.inventoryItemId)}/${input.action}`,
+      undefined,
+      buildAdminRequestConfig(input.token, input.signal),
+    );
+    return response.data.inventoryItem;
+  } catch (error) {
+    throw normalizeAdminApiError(error);
+  }
+}
+
+export function moveAdminInventoryItemToMaintenance(input: {
+  token: string;
+  inventoryItemId: string;
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  return postAdminInventoryLifecycle({...input, action: 'maintenance'});
+}
+
+export function activateAdminInventoryItem(input: {
+  token: string;
+  inventoryItemId: string;
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  return postAdminInventoryLifecycle({...input, action: 'activate'});
+}
+
+export function retireAdminInventoryItem(input: {
+  token: string;
+  inventoryItemId: string;
+  signal?: AbortSignal;
+}): Promise<AdminInventoryItem> {
+  return postAdminInventoryLifecycle({...input, action: 'retire'});
 }

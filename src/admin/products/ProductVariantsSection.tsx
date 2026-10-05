@@ -33,7 +33,7 @@ import {
   variantSizeErrorCopy,
   type VariantEditorTarget,
 } from './productVariantsModel';
-import {ProductInventoryItems} from './ProductInventoryItems';
+import {ProductInventoryItems, type InventoryRetireIntent} from './ProductInventoryItems';
 import {useProductInventoryController} from './useProductInventoryController';
 import type {InventoryEditorTarget,InventoryRiskMeta} from './productInventoryModel';
 
@@ -200,6 +200,7 @@ export interface ProductVariantsSectionHandle {
   resolveCurrentEditorFocus(): HTMLElement | null;
   focusCurrentEditor(): void;
   discardAndOpen(target: VariantyEditorTarget): void;
+  retireInventoryItem(input:{variantId:string;inventoryItemId:string}): void;
 }
 
 export interface ProductVariantsSectionProps {
@@ -210,6 +211,7 @@ export interface ProductVariantsSectionProps {
   onPendingRiskChange?(pending: boolean): void;
   onInventoryRiskChange?(risk: InventoryRiskMeta): void;
   onRequestEditorSwitch?(intent: EditorSwitchIntent): void;
+  onRequestInventoryRetire?(intent: InventoryRetireIntent): void;
   onAccessError?(error: unknown): boolean;
 }
 
@@ -355,7 +357,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     [inventoryScheduleFocus, resolveInventoryEditorFocus]);
 
     const requestEditor = (target: VariantEditorTarget, trigger: HTMLElement) => {
-      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.editorPendingOrUnresolved) return;
       const same = activeEditor?.kind === target.kind &&
         (target.kind === 'add' || (activeEditor?.kind === 'edit' && activeEditor.variantId === target.variantId));
       if (same) return;
@@ -376,7 +378,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     const requestInventoryEditor = (target: InventoryEditorTarget, trigger: HTMLElement) => {
-      if (operation || productMissing || unknownCreate || inventory.riskMeta.pendingOrUnresolved) return;
+      if (operation || productMissing || unknownCreate || inventory.riskMeta.editorPendingOrUnresolved) return;
       if (inventory.activeEditor) {
         const same = inventory.activeEditor.kind === target.kind &&
           inventory.activeEditor.variantId === target.variantId &&
@@ -427,7 +429,24 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           else if (inventory.open(next.target, trigger)) focusInventoryEditor(next.target);
         });
       },
-    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
+      retireInventoryItem(input) {
+        const section=inventorySection(input.variantId);
+        const row=Array.from(section?.querySelectorAll<HTMLElement>('[data-inventory-id]')??[])
+          .find(node=>node.dataset.inventoryId===input.inventoryItemId)??null;
+        const edit=()=>row?.querySelector<HTMLElement>('[data-inventory-edit]')??section?.querySelector<HTMLElement>('h3')??fallbackFocus();
+        inventory.transitionLifecycle({
+          variantId:input.variantId,
+          inventoryItemId:input.inventoryItemId,
+          action:'retire',
+          focus:{
+            edit,
+            action:(action)=>row?.querySelector<HTMLElement>(`[data-inventory-lifecycle="${action}"]`)??edit(),
+            condition:()=>row?.querySelector<HTMLElement>('[data-inventory-condition]')??edit(),
+            heading:()=>section?.querySelector<HTMLElement>('h3')??fallbackFocus(),
+          },
+        });
+      },
+    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, inventorySection, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
@@ -676,7 +695,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Editor>;
     };
 
-    const variantActionsDisabled = Boolean(operation) || productMissing || Boolean(unknownCreate) || inventory.riskMeta.pendingOrUnresolved;
+    const variantActionsDisabled = Boolean(operation) || productMissing || Boolean(unknownCreate) || inventory.riskMeta.editorPendingOrUnresolved;
 
     return <Section ref={sectionRef} data-product-variants-section aria-labelledby="product-variants-title">
       <Divider/>
@@ -726,7 +745,8 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
             </EditAction>
           </Row>
           {activeEditor?.kind === 'edit' && activeEditor.variantId === variant.id ? renderEditor(activeEditor) : null}
-          <ProductInventoryItems variant={variant} controller={inventory} onRequestOpen={requestInventoryEditor}/>
+          <ProductInventoryItems variant={variant} controller={inventory} onRequestOpen={requestInventoryEditor}
+            onRequestRetire={intent=>props.onRequestInventoryRetire?.(intent)}/>
         </Item>)}
       </List>}
       {activeEditor?.kind === 'edit' && !canonicalVariants.some(variant => variant.id === activeEditor.variantId)

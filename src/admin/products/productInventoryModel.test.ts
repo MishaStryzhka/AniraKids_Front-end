@@ -8,8 +8,13 @@ import {
   editInventoryConditions,
   inventoryEditBaseline,
   inventoryItemsForVariant,
+  inventoryLifecycleActionsForStatus,
+  inventoryLifecycleTarget,
   isInventoryCreateDirty,
   isInventoryEditDirty,
+  sameItemDirtyCondition,
+  deriveInventoryRiskMeta,
+  reconcileLifecycleInventoryItem,
   normalizeInventoryCode,
   reconcileCreatedInventoryItem,
   reconcileUnknownInventoryCreate,
@@ -90,4 +95,34 @@ test('unknown create reconciliation distinguishes target match, global-code conf
 });
 test('edit baseline does not expose immutable internal code',()=>{
   expect(inventoryEditBaseline({...item('i1'),notes:undefined} as any)).toEqual({condition:'good',notes:''});
+});
+
+
+test('lifecycle action matrix is exact and retired is terminal',()=>{
+  expect(inventoryLifecycleActionsForStatus('active').map(x=>x.action)).toEqual(['maintenance','retire']);
+  expect(inventoryLifecycleActionsForStatus('maintenance').map(x=>x.action)).toEqual(['activate','retire']);
+  expect(inventoryLifecycleActionsForStatus('retired')).toEqual([]);
+  expect(inventoryLifecycleTarget('maintenance')).toBe('maintenance');
+  expect(inventoryLifecycleTarget('activate')).toBe('active');
+  expect(inventoryLifecycleTarget('retire')).toBe('retired');
+});
+test('same-item dirty condition blocks activation but notes-only/other-item do not',()=>{
+  const editor={kind:'edit' as const,variantId:'v1',inventoryItemId:'i1'};
+  expect(sameItemDirtyCondition({editor,editDraft:{condition:'fair',notes:''},editBaseline:{condition:'good',notes:''},variantId:'v1',inventoryItemId:'i1'})).toBe(true);
+  expect(sameItemDirtyCondition({editor,editDraft:{condition:'good',notes:'typed'},editBaseline:{condition:'good',notes:''},variantId:'v1',inventoryItemId:'i1'})).toBe(false);
+  expect(sameItemDirtyCondition({editor,editDraft:{condition:'fair',notes:''},editBaseline:{condition:'good',notes:''},variantId:'v1',inventoryItemId:'i2'})).toBe(false);
+});
+test('lifecycle reconciliation updates exact item only',()=>{
+  const snapshot=buildInventorySnapshot([variant('v1',[item('i1'),item('i2','v1','AK-2')]) as any]);
+  const next=reconcileLifecycleInventoryItem(snapshot,{...item('i1'),status:'maintenance'} as any);
+  expect(next.v1.byId.i1.status).toBe('maintenance');
+  expect(next.v1.byId.i2).toEqual(snapshot.v1.byId.i2);
+});
+test('lifecycle risk metadata separates editor and lifecycle pending/unresolved',()=>{
+  expect(deriveInventoryRiskMeta({editorDirty:false,missingTargetDraft:false,editorPendingOrUnresolved:false,lifecyclePendingOrUnresolved:true})).toEqual({
+    hasRisk:true,hasDraft:false,missingTargetDraft:false,editorPendingOrUnresolved:false,lifecyclePendingOrUnresolved:true,pendingOrUnresolved:true,
+  });
+  expect(deriveInventoryRiskMeta({editorDirty:true,missingTargetDraft:false,editorPendingOrUnresolved:false,lifecyclePendingOrUnresolved:false})).toEqual({
+    hasRisk:true,hasDraft:true,missingTargetDraft:false,editorPendingOrUnresolved:false,lifecyclePendingOrUnresolved:false,pendingOrUnresolved:false,
+  });
 });

@@ -44,8 +44,10 @@ export interface InventoryUnknownCreateAttempt {
 export interface InventoryRiskMeta {
   hasRisk: boolean;
   hasDraft: boolean;
-  pendingOrUnresolved: boolean;
   missingTargetDraft: boolean;
+  editorPendingOrUnresolved: boolean;
+  lifecyclePendingOrUnresolved: boolean;
+  pendingOrUnresolved: boolean;
 }
 
 export type InventoryCodeError = 'empty' | 'too-short' | 'too-long' | 'invalid-pattern' | null;
@@ -229,4 +231,91 @@ export function reconcileUnknownInventoryCreate(input: {
     if (item) return {kind: 'found-other-variant' as const, item};
   }
   return {kind: 'absent' as const, item: null};
+}
+
+
+export type InventoryLifecycleAction = 'maintenance' | 'activate' | 'retire';
+
+export interface InventoryLifecycleActionSpec {
+  action: InventoryLifecycleAction;
+  targetStatus: AdminInventoryItemStatus;
+  label: string;
+  pendingLabel: string;
+  destructive: boolean;
+}
+
+export const INVENTORY_LIFECYCLE_ACTIONS: Record<InventoryLifecycleAction, InventoryLifecycleActionSpec> = {
+  maintenance: {
+    action: 'maintenance',
+    targetStatus: 'maintenance',
+    label: 'Přesunout do údržby',
+    pendingLabel: 'Přesouvání…',
+    destructive: false,
+  },
+  activate: {
+    action: 'activate',
+    targetStatus: 'active',
+    label: 'Aktivovat',
+    pendingLabel: 'Aktivování…',
+    destructive: false,
+  },
+  retire: {
+    action: 'retire',
+    targetStatus: 'retired',
+    label: 'Vyřadit',
+    pendingLabel: 'Vyřazování…',
+    destructive: true,
+  },
+};
+
+export function inventoryLifecycleActionsForStatus(status: AdminInventoryItemStatus): InventoryLifecycleActionSpec[] {
+  if (status === 'active') return [INVENTORY_LIFECYCLE_ACTIONS.maintenance, INVENTORY_LIFECYCLE_ACTIONS.retire];
+  if (status === 'maintenance') return [INVENTORY_LIFECYCLE_ACTIONS.activate, INVENTORY_LIFECYCLE_ACTIONS.retire];
+  return [];
+}
+
+export function inventoryLifecycleTarget(action: InventoryLifecycleAction): AdminInventoryItemStatus {
+  return INVENTORY_LIFECYCLE_ACTIONS[action].targetStatus;
+}
+
+export function sameItemDirtyCondition(input: {
+  editor: InventoryEditorTarget | null;
+  editDraft: InventoryEditDraft | null;
+  editBaseline: InventoryEditDraft | null;
+  variantId: string;
+  inventoryItemId: string;
+}) {
+  return Boolean(
+    input.editor?.kind === 'edit'
+    && input.editor.variantId === input.variantId
+    && input.editor.inventoryItemId === input.inventoryItemId
+    && input.editDraft
+    && input.editBaseline
+    && input.editDraft.condition !== input.editBaseline.condition
+  );
+}
+
+export function reconcileLifecycleInventoryItem(
+  snapshot: ProductInventorySnapshot,
+  item: AdminInventoryItem,
+): ProductInventorySnapshot {
+  return reconcileUpdatedInventoryItem(snapshot, item);
+}
+
+export function deriveInventoryRiskMeta(input: {
+  editorDirty: boolean;
+  missingTargetDraft: boolean;
+  editorPendingOrUnresolved: boolean;
+  lifecyclePendingOrUnresolved: boolean;
+}): InventoryRiskMeta {
+  const hasDraft = input.editorDirty || input.missingTargetDraft;
+  const pendingOrUnresolved = input.editorPendingOrUnresolved || input.lifecyclePendingOrUnresolved;
+  return {
+    hasRisk: hasDraft || pendingOrUnresolved,
+    hasDraft,
+    missingTargetDraft: input.missingTargetDraft,
+    editorPendingOrUnresolved: input.editorPendingOrUnresolved,
+    lifecyclePendingOrUnresolved: input.lifecyclePendingOrUnresolved,
+    pendingOrUnresolved,
+  };
 }

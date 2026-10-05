@@ -6,7 +6,7 @@ jest.mock('axios', () => {
 });
 jest.mock('../api/client', () => ({adminApiClient: {}, buildAdminRequestConfig: jest.fn()}));
 import {AdminApiError} from '../api/errors';
-import {createAdminInventoryItem, createAdminVariant, getAdminProductInventorySnapshot, getAdminProductVariants, updateAdminInventoryItem, updateAdminVariantSize, type AdminProductDetailVariant} from '../api/products';
+import {createAdminInventoryItem, createAdminVariant, getAdminProductInventorySnapshot, getAdminProductVariants, retireAdminInventoryItem, updateAdminInventoryItem, updateAdminVariantSize, type AdminInventoryItem, type AdminProductDetailVariant} from '../api/products';
 import {ProductVariantsSection, type ProductVariantsSectionHandle} from './ProductVariantsSection';
 import {createRef,useState} from 'react';
 
@@ -16,12 +16,14 @@ jest.mock('../api/products',()=>({
   createAdminVariant:jest.fn(),
   getAdminProductInventorySnapshot:jest.fn(),
   getAdminProductVariants:jest.fn(),
+  retireAdminInventoryItem:jest.fn(),
   updateAdminInventoryItem:jest.fn(),
   updateAdminVariantSize:jest.fn(),
 }));
 const createInventoryMock=createAdminInventoryItem as jest.MockedFunction<typeof createAdminInventoryItem>;
 const updateInventoryMock=updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
 const refreshInventoryMock=getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
+const retireInventoryMock=retireAdminInventoryItem as jest.MockedFunction<typeof retireAdminInventoryItem>;
 const createMock=createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
 const refreshMock=getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
 const updateMock=updateAdminVariantSize as jest.MockedFunction<typeof updateAdminVariantSize>;
@@ -393,4 +395,21 @@ test('parent risk-state rerender does not reset a newly opened Inventory editor'
   fireEvent.click(add);
   await waitFor(()=>expect(document.querySelector('[data-inventory-editor-kind="add"]')).toBeInTheDocument());
   expect(screen.getByLabelText('Interní kód')).toBeInTheDocument();
+});
+
+
+test('retire intent is delegated upward and imperative retire seam reconciles exact Inventory item',async()=>{
+  const inventory:AdminInventoryItem={id:'i1',variantId:'a',internalCode:'AK-1',status:'active',condition:'good',notes:''};
+  const seeded={...v('a','98'),inventory:[inventory]};
+  const requestRetire=jest.fn();
+  const ref=createRef<ProductVariantsSectionHandle>();
+  retireInventoryMock.mockResolvedValueOnce({...inventory,status:'retired'});
+  render(<ProductVariantsSection ref={ref} {...props([seeded])} onRequestInventoryRetire={requestRetire}/>);
+  const retire=screen.getByRole('button',{name:'Vyřadit'});
+  fireEvent.click(retire);
+  expect(requestRetire).toHaveBeenCalledWith(expect.objectContaining({variantId:'a',inventoryItemId:'i1',internalCode:'AK-1',trigger:retire}));
+  act(()=>ref.current?.retireInventoryItem({variantId:'a',inventoryItemId:'i1'}));
+  await waitFor(()=>expect(retireInventoryMock).toHaveBeenCalledWith(expect.objectContaining({inventoryItemId:'i1'})));
+  await waitFor(()=>expect(screen.getByText('Vyřazený')).toBeInTheDocument());
+  expect(screen.queryByRole('button',{name:'Vyřadit'})).not.toBeInTheDocument();
 });
