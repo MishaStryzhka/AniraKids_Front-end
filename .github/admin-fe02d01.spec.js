@@ -117,7 +117,17 @@ test('unknown lifecycle disables replay until explicit refresh observes server s
 
 test('retire Dialog exact copy, initial focus, Escape restoration and successful retire focus',async({page})=>{
  const state=await mocks(page);await page.setViewportSize({width:390,height:360});await page.goto(APP+'/admin/produkty/p1');const active=row(page,'i1'),retire=active.getByRole('button',{name:'Vyřadit'});
- await retire.click();let d=page.getByRole('dialog');await expect(d.getByRole('heading',{name:'Vyřadit fyzický kus?'})).toBeVisible();await expect(d).toContainText('bude trvale převeden do stavu Vyřazený. Po vyřazení jej nelze znovu aktivovat.');await expect(d.getByRole('button',{name:'Zrušit'})).toBeFocused();await expect(d.getByRole('button',{name:'Vyřadit'})).toBeVisible();
+ await retire.click();let d=page.getByRole('dialog');await expect(d.getByRole('heading',{name:'Vyřadit fyzický kus?'})).toBeVisible();await expect(d).toContainText('bude trvale převeden do stavu Vyřazený. Po vyřazení jej nelze znovu aktivovat.');
+ const cancel=d.getByRole('button',{name:'Zrušit'}),confirm=d.getByRole('button',{name:'Vyřadit'});await expect(cancel).toBeVisible();await expect(confirm).toBeVisible();await expect(cancel).toBeFocused();
+ const actions=cancel.locator('xpath=..'),cancelBox=await cancel.boundingBox(),confirmBox=await confirm.boundingBox(),actionsBox=await actions.boundingBox();
+ expect(cancelBox).not.toBeNull();expect(confirmBox).not.toBeNull();expect(actionsBox).not.toBeNull();
+ if(!cancelBox||!confirmBox||!actionsBox)throw new Error('Retire Dialog action geometry unavailable');
+ expect(confirmBox.y-(cancelBox.y+cancelBox.height)).toBeGreaterThan(0);
+ expect(cancelBox.width/actionsBox.width).toBeGreaterThanOrEqual(.95);expect(confirmBox.width/actionsBox.width).toBeGreaterThanOrEqual(.95);
+ const overflow=await page.evaluate(()=>{const dialog=document.querySelector('[role="dialog"]');return{document:document.documentElement.scrollWidth-innerWidth,dialog:dialog?dialog.scrollWidth-dialog.clientWidth:0}});
+ expect(overflow.document).toBeLessThanOrEqual(1);expect(overflow.dialog).toBeLessThanOrEqual(1);
+ output('retire-dialog-390x360.json',{actions:actionsBox,cancel:cancelBox,retire:confirmBox,overflow});
+ await d.screenshot({path:path.join(EVIDENCE,'retire-dialog-390x360.png')});
  await page.keyboard.press('Escape');await expect(d).toHaveCount(0);await expect(retire).toBeFocused();
  await retire.click();d=page.getByRole('dialog');await d.getByRole('button',{name:'Vyřadit'}).click();await expect(d).toHaveCount(0);await expect(active.getByText('Vyřazený')).toBeVisible();await expect(active.getByRole('button',{name:'Upravit'})).toBeFocused();await expect(active.getByRole('button',{name:'Vyřadit'})).toHaveCount(0);expect(state.lifecycle.filter(x=>x.action==='retire')).toHaveLength(1);
 });
