@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '../../design-system/components/Button';
@@ -8,7 +8,6 @@ import { StatusBadge } from '../../design-system/components/StatusBadge';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { useAuth } from '../../hooks/useAuth';
 import { useAdminAccess } from '../auth/AdminAccessBoundary';
-import { getAdminReservationDetail } from '../api/reservations';
 import { adminRoutes } from '../navigation/adminRoutes';
 import { formatCalendarDay } from '../calendar/calendarDates';
 import { formatPragueLoadedAt } from '../calendar/reservationCalendarModel';
@@ -25,7 +24,11 @@ import {
   reservationBackContext,
   reservationListBackLink,
 } from './reservationNavigation';
-import { useReservationRead } from './useReservationRead';
+import { useReservationDetail } from './useReservationDetail';
+import {
+  ReservationLifecycleControls,
+  ReservationNotesEditor,
+} from './ReservationLifecycleControls';
 import {
   ReservationPage,
   ReservationCopy,
@@ -61,37 +64,59 @@ const DetailFacts = styled(ReservationFacts)`
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
+const StatusGroup = styled(ReservationBadges)`
+  &:focus {
+    outline: ${t.focus.ring.width} solid ${t.color.focus.ring};
+    outline-offset: ${t.focus.ring.offset};
+  }
+`;
 const Notes = styled.p`
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 `;
 export function AdminReservationDetailPage() {
-  const { reservationId } = useParams(),
-    { token } = useAuth(),
-    { handleRequestError } = useAdminAccess(),
-    location = useLocation();
-  const [revision, setRevision] = useState(0);
+  const { reservationId } = useParams();
+  const { token } = useAuth();
+  return (
+    <ReservationDetailView
+      key={`${reservationId}:${token}`}
+      reservationId={reservationId ?? ''}
+      token={token ?? ''}
+    />
+  );
+}
+function ReservationDetailView({
+  reservationId,
+  token,
+}: {
+  reservationId: string;
+  token: string;
+}) {
+  const { handleRequestError } = useAdminAccess();
+  const location = useLocation();
   const context = reservationBackContext(location.state),
     back = reservationListBackLink(context);
-  const state = useReservationRead({
-    token: token ?? '',
-    requestKey: `detail:${reservationId ?? ''}`,
-    revision,
+  const state = useReservationDetail({
+    reservationId,
+    token,
     onAccessError: handleRequestError,
-    allowNotFound: true,
-    read: signal =>
-      getAdminReservationDetail({
-        token: token ?? '',
-        reservationId: reservationId ?? '',
-        signal,
-      }),
   });
-  const reservation = state.kind === 'success' ? state.data : null,
-    status = reservation ? reservationStatus(reservation.status) : null,
-    payment = reservation
-      ? reservationPayment(reservation.paymentStatus)
-      : null;
+  const statusRef = useRef<HTMLDivElement>(null);
+  const terminalRef = useRef<HTMLElement>(null);
+  const { kind, ownsView } = state;
+  useEffect(() => {
+    if (kind !== 'not-found' && kind !== 'error') return;
+    const frame = requestAnimationFrame(() => {
+      if (ownsView()) terminalRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [kind, ownsView]);
+  const reservation = state.reservation;
+  const status = reservation ? reservationStatus(reservation.status) : null;
+  const payment = reservation
+    ? reservationPayment(reservation.paymentStatus)
+    : null;
   return (
     <ReservationPage data-admin-reservation-detail>
       <ReservationActions>
@@ -113,7 +138,7 @@ export function AdminReservationDetailPage() {
         </ReservationPanel>
       ) : null}
       {state.kind === 'not-found' ? (
-        <ReservationPanel>
+        <ReservationPanel ref={terminalRef} tabIndex={-1}>
           <ReservationHeading>Rezervace nebyla nalezena</ReservationHeading>
           <ReservationCopy>
             Rezervace už nemusí existovat nebo odkaz není platný.
@@ -121,14 +146,12 @@ export function AdminReservationDetailPage() {
         </ReservationPanel>
       ) : null}
       {state.kind === 'error' ? (
-        <ReservationPanel role="alert">
+        <ReservationPanel role="alert" ref={terminalRef} tabIndex={-1}>
           <ReservationHeading>
             Rezervaci se nepodařilo načíst
           </ReservationHeading>
           <ReservationCopy>Zkuste to prosím znovu.</ReservationCopy>
-          <Button onClick={() => setRevision(value => value + 1)}>
-            Zkusit znovu
-          </Button>
+          <Button onClick={() => void state.read()}>Zkusit znovu</Button>
         </ReservationPanel>
       ) : null}
       {reservation && status && payment ? (
@@ -136,12 +159,23 @@ export function AdminReservationDetailPage() {
           <ReservationHeading>
             {reservation.reservationNumber}
           </ReservationHeading>
-          <ReservationBadges>
+          <StatusGroup
+            ref={statusRef}
+            tabIndex={-1}
+            aria-label="Aktuální stav rezervace"
+          >
             <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
             {reservation.pendingExpired ? (
               <StatusBadge tone="warning">Čekání vypršelo</StatusBadge>
             ) : null}
-          </ReservationBadges>
+          </StatusGroup>
+          <ReservationLifecycleControls
+            controller={state}
+            statusRef={statusRef}
+          />
+          <ReservationCopy role="status" aria-live="polite">
+            {state.announcement}
+          </ReservationCopy>
           <ReservationPanel>
             <ReservationHeading>Zákazník</ReservationHeading>
             <DetailFacts>
@@ -266,12 +300,7 @@ export function AdminReservationDetailPage() {
               </div>
             </DetailFacts>
           </ReservationPanel>
-          {reservation.notes ? (
-            <ReservationPanel>
-              <ReservationHeading>Poznámky</ReservationHeading>
-              <Notes>{reservation.notes}</Notes>
-            </ReservationPanel>
-          ) : null}
+          <ReservationNotesEditor controller={state} />
           {reservation.cancelledAt || reservation.cancellationReason ? (
             <ReservationPanel>
               <ReservationHeading>Zrušení rezervace</ReservationHeading>
