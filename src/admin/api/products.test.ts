@@ -13,7 +13,7 @@ jest.mock('./errors', () => ({
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import { normalizeAdminApiError } from './errors';
 import {
-  ADMIN_PRODUCTS_PAGE_SIZE,
+  activateAdminProduct, getAdminProductActivationState, ADMIN_PRODUCTS_PAGE_SIZE,
   listAdminProducts,
   serializeAdminProductListParams,
   createAdminProduct,
@@ -209,4 +209,20 @@ describe('inventory lifecycle API bindings',()=>{
     expect(mockedGet).not.toHaveBeenCalled();
     expect(mockedPatch).not.toHaveBeenCalled();
   });
+});
+
+
+test('activation is bodyless, authenticated, cancellable, and exposes metadata only',async()=>{
+ const signal=new AbortController().signal;
+ mockedPost.mockResolvedValue({data:{product:{id:'p/1',status:'active',seo:{noIndex:false,title:'retained'},name:'discard',photos:['discard']},variants:['discard']}});
+ expect(await activateAdminProduct({token:'token',productId:'p/1',signal})).toEqual({id:'p/1',status:'active',seoNoIndex:false});
+ expect(mockedPost).toHaveBeenCalledWith('/admin/products/p%2F1/activate',undefined,expect.objectContaining({headers:{Authorization:'Bearer dummy-token'}}));
+ expect(mockedBuildConfig).toHaveBeenCalledWith('token',signal);
+});
+test('metadata GET discards all other domains, and conflict passthrough preserves absent details',async()=>{
+ mockedGet.mockResolvedValue({data:{product:{id:'p1',status:'draft',seo:{noIndex:true},name:'discard'},variants:['discard']}});
+ expect(await getAdminProductActivationState({token:'token',productId:'p1'})).toEqual({id:'p1',status:'draft',seoNoIndex:true});
+ const failure={status:409,code:'PRODUCT_STATE_CONFLICT'};mockedPost.mockRejectedValue(failure);
+ await expect(activateAdminProduct({token:'token',productId:'p1'})).rejects.toBe(failure);
+ expect(mockedNormalizeError).toHaveBeenCalledWith(failure);
 });

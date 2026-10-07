@@ -1,4 +1,5 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState, type SetStateAction} from 'react';
+import type {ActivationDomainGuardSnapshot} from './productActivationModel';
 import {getAdminProductDetail, type AdminProduct, type AdminProductPhoto, type AdminProductStatus} from '../api/products';
 import {
   completeProductPhoto, deleteProductPhoto, productMediaCandidate, reorderProductPhotos,
@@ -38,14 +39,16 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const {productId, initialPhotos, onRiskChange} = input;
   const [photos, setPhotos] = useState(initialPhotos);
   const [guard, setGuard] = useState<MediaGuardStatus>('available');
-  const [drafts, setDrafts] = useState<ProductMediaDrafts>({altById: {}, orderIds: photoIds(initialPhotos)});
+  const [drafts, commitDrafts] = useState<ProductMediaDrafts>({altById: {}, orderIds: photoIds(initialPhotos)});
   const [operation, setOperation] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [refreshReason, setRefreshReason] = useState<'photo-missing' | 'conflict' | 'reconciled' | 'refresh-failed' | null>(null);
   const [lostAltNotice, setLostAltNotice] = useState<string | null>(null);
   const [reconciliationNotice, setReconciliationNotice] = useState<string | null>(null);
   const [recoveryFailed, setRecoveryFailed] = useState(false);
-  const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle');
+  const [uploadPhase, commitUploadPhase] = useState<UploadPhase>('idle');
+  const uploadPhaseRef=useRef(uploadPhase);uploadPhaseRef.current=uploadPhase;
+  const setUploadPhase=useCallback((next:UploadPhase)=>{uploadPhaseRef.current=next;commitUploadPhase(next);},[]);
   const [progress, setProgress] = useState<number | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [editingAlt, setEditingAlt] = useState<string | null>(null);
@@ -54,6 +57,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   const editingAltRef = useRef(editingAlt);
   photosRef.current = photos;
   draftsRef.current = drafts;
+  const setDrafts=(next:SetStateAction<ProductMediaDrafts>)=>{const value=typeof next==='function'?next(draftsRef.current):next;draftsRef.current=value;commitDrafts(value);};
   editingAltRef.current = editingAlt;
   const writeGen = useRef(0);
   const refreshGen = useRef(0);
@@ -107,12 +111,15 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setPhotos(initialPhotos);
     setDrafts(result.drafts);
     if (result.membershipChanged) setRefreshReason('reconciled');
-  }, [productId, initialPhotos]);
+  }, [productId, initialPhotos, setUploadPhase]);
 
   const orderDirty = isOrderDirty(photos, drafts.orderIds);
   const savedAlt = photos.find(p => p.publicId === editingAlt)?.alt ?? '';
   const altDirty = editingAlt ? (drafts.altById[editingAlt] ?? savedAlt) !== savedAlt : false;
+  const immediatePending = useRef(false);
   const risk = Boolean(operation || uploadPhase !== 'idle' || orderDirty || altDirty);
+  immediatePending.current = Boolean(operation);
+  const getActivationGuardSnapshot = ():ActivationDomainGuardSnapshot => ({hasUnsavedWork:isOrderDirty(photosRef.current,draftsRef.current.orderIds)||Boolean(editingAltRef.current&&(draftsRef.current.altById[editingAltRef.current]??savedAlt)!==savedAlt)||uploadPhaseRef.current==='selected',pendingMutation:immediatePending.current,unresolvedOutcome:!['idle','selected','signing','uploading','completing'].includes(uploadPhaseRef.current)});
   useEffect(() => onRiskChange?.(risk), [risk, onRiskChange]);
   const safe = (generation: number) => mounted.current && productRef.current === productId && generation === writeGen.current;
   const apply = (product: AdminProduct) => {
@@ -163,6 +170,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setFeedback(defaultCopy);
   };
   const begin = (name: string) => {
+    immediatePending.current = true;
     const generation = ++writeGen.current;
     refreshGen.current++;
     refreshController.current?.abort();
@@ -185,7 +193,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setUploadPhase('selected');
     setRecoveryFailed(false);
     setFeedback(null);
-  }, [photos.length, attempt, productId]);
+  }, [photos.length, attempt, productId, setUploadPhase]);
   const discardUpload = () => {
     if (attempt?.previewUrl) URL.revokeObjectURL(attempt.previewUrl);
     setAttempt(null);
@@ -363,7 +371,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     } finally {finish(generation);}
   };
   return {
-    photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, recoveryFailed, uploadPhase,
+    getActivationGuardSnapshot, photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, recoveryFailed, uploadPhase,
     progress, attempt, editingAlt, orderDirty, risk, selectFile, discardUpload, upload, recover,
     startAlt, cancelAlt, saveAlt, move, cancelOrder, saveOrder, remove, refresh,
   };

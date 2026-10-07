@@ -408,7 +408,7 @@ test('retire intent is delegated upward and imperative retire seam reconciles ex
   const retire=screen.getByRole('button',{name:'Vyřadit'});
   fireEvent.click(retire);
   expect(requestRetire).toHaveBeenCalledWith(expect.objectContaining({variantId:'a',inventoryItemId:'i1',internalCode:'AK-1',trigger:retire}));
-  act(()=>ref.current?.retireInventoryItem({variantId:'a',inventoryItemId:'i1'}));
+  await act(async()=>{await ref.current?.retireInventoryItem({variantId:'a',inventoryItemId:'i1'});});
   await waitFor(()=>expect(retireInventoryMock).toHaveBeenCalledWith(expect.objectContaining({inventoryItemId:'i1'})));
   await waitFor(()=>expect(screen.getByText('Vyřazený')).toBeInTheDocument());
   expect(screen.queryByRole('button',{name:'Vyřadit'})).not.toBeInTheDocument();

@@ -35,6 +35,7 @@ import {
 } from './productVariantsModel';
 import {ProductInventoryItems, type InventoryRetireIntent} from './ProductInventoryItems';
 import {useProductInventoryController} from './useProductInventoryController';
+import type {ActivationDomainGuardSnapshot} from './productActivationModel';
 import type {InventoryEditorTarget,InventoryRiskMeta} from './productInventoryModel';
 
 const Section = styled.section`
@@ -61,6 +62,7 @@ const Header = styled.div`
 `;
 
 const Heading = styled.h2`
+  &:focus{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}
   margin: 0;
   font: 600 22px/30px ${t.font.family.ui};
 `;
@@ -200,7 +202,8 @@ export interface ProductVariantsSectionHandle {
   resolveCurrentEditorFocus(): HTMLElement | null;
   focusCurrentEditor(): void;
   discardAndOpen(target: VariantyEditorTarget): void;
-  retireInventoryItem(input:{variantId:string;inventoryItemId:string}): void;
+  retireInventoryItem(input:{variantId:string;inventoryItemId:string}): Promise<boolean>;
+  getActivationGuardSnapshot():ActivationDomainGuardSnapshot;
 }
 
 export interface ProductVariantsSectionProps {
@@ -231,6 +234,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     );
     const [activeEditor, setActiveEditor] = useState<VariantEditorTarget | null>(null);
     const [sizeDraft, setSizeDraft] = useState('');
+    const sizeDraftRef=useRef(sizeDraft);sizeDraftRef.current=sizeDraft;
     const [fieldError, setFieldError] = useState<string | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -264,6 +268,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       sizeDraft,
       variants: canonicalVariants,
     }), [activeEditor, canonicalVariants, sizeDraft]);
+    const activationPendingRef=useRef(false);activationPendingRef.current=Boolean(operation);
     const risk = editorDirty || operation !== null || unknownCreate !== null;
 
     const onRiskChange = props.onRiskChange;
@@ -410,6 +415,12 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     useImperativeHandle(ref, () => ({
+      getActivationGuardSnapshot(){
+        const child=inventory.getActivationGuardSnapshot();
+        return {hasUnsavedWork:isVariantEditorDirty({target:activeEditor,sizeDraft:sizeDraftRef.current,variants:canonicalVariants})||child.hasUnsavedWork,
+          pendingMutation:Boolean(activationPendingRef.current||mutationController.current)||child.pendingMutation,
+          unresolvedOutcome:Boolean(unknownCreate)||child.unresolvedOutcome};
+      },
       resolveCurrentEditorFocus() {
         if (activeEditor) return available(inputRef.current) ? inputRef.current : fallbackFocus();
         return resolveInventoryEditorFocus() ?? fallbackFocus();
@@ -434,7 +445,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         const row=Array.from(section?.querySelectorAll<HTMLElement>('[data-inventory-id]')??[])
           .find(node=>node.dataset.inventoryId===input.inventoryItemId)??null;
         const edit=()=>row?.querySelector<HTMLElement>('[data-inventory-edit]')??section?.querySelector<HTMLElement>('h3')??fallbackFocus();
-        inventory.transitionLifecycle({
+        return inventory.transitionLifecycle({
           variantId:input.variantId,
           inventoryItemId:input.inventoryItemId,
           action:'retire',
@@ -446,12 +457,13 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           },
         });
       },
-    }), [activeEditor, fallbackFocus, focusInventoryEditor, inventory, inventorySection, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
+    }), [activeEditor, canonicalVariants, unknownCreate, fallbackFocus, focusInventoryEditor, inventory, inventorySection, openEditor, props.productId, resolveInventoryEditorFocus, scheduleFocus]);
 
     const mutationAllowed = () => !operation && !mutationController.current && !productMissing && !unknownCreate && Boolean(props.token);
 
     const beginMutation = (next: Exclude<Operation, null>) => {
       if (!mutationAllowed()) return null;
+      activationPendingRef.current=true;
       const generation = ++mutationGeneration.current;
       refreshGeneration.current += 1;
       refreshController.current?.abort();
@@ -674,6 +686,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           error={Boolean(fieldError)}
           aria-describedby={fieldError ? 'variant-size-error' : undefined}
           onChange={event => {
+            sizeDraftRef.current=event.currentTarget.value;
             setSizeDraft(event.currentTarget.value);
             setFieldError(null);
             setSubmitError(null);

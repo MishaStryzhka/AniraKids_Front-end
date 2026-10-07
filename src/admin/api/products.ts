@@ -327,3 +327,25 @@ export function retireAdminInventoryItem(input: {
 }): Promise<AdminInventoryItem> {
   return postAdminInventoryLifecycle({...input, action: 'retire'});
 }
+
+/** Lifecycle consumers never receive another domain's mutable Product data. */
+export interface AdminProductActivationState {
+  id: string;
+  status: AdminProductStatus;
+  seoNoIndex: boolean;
+}
+function projectActivationState(data: unknown): AdminProductActivationState {
+  const product = (data as {product?: Partial<AdminProduct>} | null)?.product;
+  // Runtime validation is deliberately at the operation consumer: unusable POST data
+  // is an unknown outcome, whereas unusable GET data retains its recovery record.
+  return {id: product?.id!, status: product?.status!, seoNoIndex: product?.seo?.noIndex!};
+}
+export async function activateAdminProduct(input: {token: string; productId: string; signal?: AbortSignal}): Promise<AdminProductActivationState> {
+  try {
+    const response = await adminApiClient.post(`/admin/products/${encodeURIComponent(input.productId)}/activate`, undefined, buildAdminRequestConfig(input.token, input.signal));
+    return projectActivationState(response.data);
+  } catch (error) {throw normalizeAdminApiError(error);}
+}
+export async function getAdminProductActivationState(input: {token: string; productId: string; signal?: AbortSignal}): Promise<AdminProductActivationState> {
+  return projectActivationState(await getAdminProductDetail(input));
+}

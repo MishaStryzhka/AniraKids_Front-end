@@ -324,3 +324,9 @@ test('stale lifecycle response after Product switch and unmount cannot apply',as
   const signal=maintenanceMock.mock.calls.slice(-1)[0][0].signal!;unmounted.unmount();expect(signal.aborted).toBe(true);
   await act(async()=>{pending2.resolve(lifeItem('maintenance'));await request2});
 });
+test('activation snapshot sees same-tick draft and lifecycle request without parent mirrors',async()=>{
+ const pending=deferred<AdminInventoryItem>();maintenanceMock.mockReturnValue(pending.promise);const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));
+ act(()=>{hook.result.current.setCreateDraft({internalCode:'AK-NEW',condition:'good',notes:''});expect(hook.result.current.getActivationGuardSnapshot().hasUnsavedWork).toBe(true);});
+ act(()=>{void hook.result.current.transitionLifecycle({variantId:'v1',inventoryItemId:'i1',action:'maintenance',focus:{edit:()=>null,action:()=>null,condition:()=>null,heading:()=>null}});expect(hook.result.current.getActivationGuardSnapshot().pendingMutation).toBe(true);});
+ await act(async()=>pending.resolve(lifeItem('maintenance')));
+});
