@@ -60,6 +60,18 @@ export function monthCalendarDays(month: CalendarMonth): DateOnly[] {
   return result;
 }
 export function mondayWeekday(value: DateOnly): number {return (toUtcDate(value).getUTCDay() + 6) % 7;}
+/** Complete Monday–Sunday rows; adjacent-month dates are presentation only. */
+export function monthCalendarGridDays(month: CalendarMonth): Array<DateOnly | null> {
+  const days = monthCalendarDays(month);
+  const leading = mondayWeekday(days[0]);
+  const length = Math.ceil((leading + days.length) / 7) * 7;
+  return Array.from({length}, (_, index) => {
+    const offset = index - leading;
+    // The date picker intentionally stops at years 0001 and 9999.
+    if ((month === '0001-01' && offset < 0) || (month === '9999-12' && offset >= days.length)) return null;
+    return addCalendarDays(days[0], offset);
+  });
+}
 export function formatCalendarDay(value: DateOnly, weekday = false): string {
   return new Intl.DateTimeFormat('cs-CZ', {timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric', ...(weekday ? {weekday: 'long' as const} : {})}).format(toUtcDate(value));
 }
