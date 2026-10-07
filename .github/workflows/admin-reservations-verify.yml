@@ -1,0 +1,66 @@
+name: Admin Reservations List and Detail Verify
+on:
+  push:
+    branches: [admin-reservations-list-detail]
+concurrency:
+  group: admin-reservations-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - name: Prepare evidence
+        run: |
+          mkdir -p test-evidence/admin-reservations
+          node -e "require('fs').writeFileSync('test-evidence/admin-reservations/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Reservation focused tests and Admin regressions
+        run: >
+          npm test -- --watchAll=false --runInBand --json
+          --outputFile=test-evidence/admin-reservations/admin-results.json
+          src/admin
+      - name: No-env build
+        run: npm run build
+      - run: mv build build-no-env
+      - name: Configured Admin build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: npm run build
+      - name: Browser install
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start SPA
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/admin-reservations/configured-server.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/admin-reservations/no-env-server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+      - name: Reservation list and detail browser verification
+        env:
+          ADMIN_RESERVATIONS_EVIDENCE_DIR: test-evidence/admin-reservations
+        run:
+          npx playwright test .github/admin-reservations.spec.js --reporter=line
+      - name: Reservation calendar regression
+        run: npx playwright test .github/admin-fe03a01.spec.js --reporter=line
+      - name: Admin shell navigation regression
+        run: npx playwright test .github/admin-fe01.spec.js --reporter=line
+      - name: Product activation regression
+        run: npx playwright test .github/admin-fe02d02.spec.js --reporter=line
+      - name: Evidence manifest
+        if: always()
+        run: |
+          find test-evidence/admin-reservations -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-reservations/MANIFEST.txt
+      - name: Upload verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-reservations-${{ github.sha }}
+          if-no-files-found: error
+          path: test-evidence/

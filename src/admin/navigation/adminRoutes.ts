@@ -14,6 +14,10 @@ export function buildAdminProductDetailPath(productId: string) {
   return `/admin/produkty/${encodeURIComponent(productId)}`;
 }
 
+export function buildAdminReservationDetailPath(reservationId: string) {
+  return `/admin/rezervace/${encodeURIComponent(reservationId)}`;
+}
+
 export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar';
 
 export const adminNavigationItems: ReadonlyArray<{ key: AdminNavigationKey; label: string; to: string }> = [

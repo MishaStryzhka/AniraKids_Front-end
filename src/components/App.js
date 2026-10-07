@@ -21,14 +21,12 @@ import ModalRegister from './Modals/ModalRegister/ModalRegister';
 import { AdminAccessBoundary } from '../admin/auth/AdminAccessBoundary';
 import { AdminLayout } from '../admin/layout/AdminLayout';
 import { adminRoutes } from '../admin/navigation/adminRoutes';
+import { AdminReservationsPage } from '../admin/reservations/AdminReservationsPage';
+import { AdminReservationDetailPage } from '../admin/reservations/AdminReservationDetailPage';
 import {AdminReservationCalendarPage} from '../admin/calendar/AdminReservationCalendarPage';
 import { AdminProductsPage } from '../admin/products/AdminProductsPage';
 import { AdminProductCorePage } from '../admin/products/AdminProductCorePage';
-import {
-  AdminHomePage,
-  AdminReservationsPlaceholder,
-  AdminReservationDetailPlaceholder,
-} from '../admin/pages/AdminPlaceholders';
+import { AdminHomePage } from '../admin/pages/AdminPlaceholders';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() => import('../pages/DecorAndToysPage/DecorAndToysPage'));
@@ -151,8 +149,8 @@ function App() {
               <Route path={adminRoutes.products} element={<AdminProductsPage />} />
               <Route path={adminRoutes.productNew} element={<AdminProductCorePage mode="create" />} />
               <Route path={adminRoutes.productDetail} element={<AdminProductCorePage mode="edit" />} />
-              <Route path={adminRoutes.reservations} element={<AdminReservationsPlaceholder />} />
-              <Route path={adminRoutes.reservationDetail} element={<AdminReservationDetailPlaceholder />} />
+              <Route path={adminRoutes.reservations} element={<AdminReservationsPage />} />
+              <Route path={adminRoutes.reservationDetail} element={<AdminReservationDetailPage />} />
               <Route path={adminRoutes.calendar} element={<AdminReservationCalendarPage />} />
             </Route>
           </Route>

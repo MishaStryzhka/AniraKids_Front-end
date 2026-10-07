@@ -1,6 +1,8 @@
 import {useMemo, useState} from 'react';
 import styled from 'styled-components';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
+import {NavigationLink} from '../../design-system/components/NavigationLink';
+import {buildAdminReservationDetailPath} from '../navigation/adminRoutes';
 import {Button} from '../../design-system/components/Button';
 import {SelectField} from '../../design-system/components/SelectField';
 import {Spinner} from '../../design-system/components/Spinner';
@@ -98,7 +100,7 @@ export function AdminReservationCalendarPage() {
           <Agenda aria-labelledby="calendar-agenda-title">
             <AgendaTitle id="calendar-agenda-title">{formatCalendarDay(selectedDay,true)}</AgendaTitle>
             {agenda.length===0?<Copy>Žádné rezervace pro vybraný den</Copy>:<Cards>{agenda.map(reservation=>{const status=reservationStatusPresentation(reservation.status);return <Card key={reservation.id} data-calendar-reservation={reservation.id}>
-              <CardHeading>{reservation.reservationNumber}</CardHeading>
+              <CardHeading><NavigationLink variant="plain" to={buildAdminReservationDetailPath(reservation.id)} state={{reservationBack:{kind:'calendar'}}}>{reservation.reservationNumber}</NavigationLink></CardHeading>
               <div>{reservation.customerName.trim()||'Jméno neuvedeno'}</div>
               <CardMeta><StatusBadge tone={status.tone}>{status.label}</StatusBadge><span>{rentalModeLabels[reservation.rentalMode]}</span>{selectedDay>reservation.endDate?<StatusBadge tone="neutral">Navazující obsazení / čištění</StatusBadge>:null}</CardMeta>
               <Details><div><dt>Termín</dt><dd>{formatCalendarDay(reservation.startDate)} – {formatCalendarDay(reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
