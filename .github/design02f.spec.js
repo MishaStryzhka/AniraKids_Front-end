@@ -212,19 +212,36 @@ test('reduced motion collapses navigation transitions', async ({ browser }) => {
 });
 
 
-test('reservation route owns focused layout and not storefront layout', async ({ page }) => {
+test('reservation layout Back and Exit navigate while preserving the customer draft', async ({ page }) => {
+  await page.route('**/api/v2/catalogue/products/sofia', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ product: {
+      id: '111111111111111111111111', slug: 'sofia', name: 'Sofia', category: 'dress', photos: [],
+      variants: [{ id: '222222222222222222222222', size: '98', pricing: {
+        studio: { rentalPrice: 500, deposit: 1000, totalDue: 1500 }, external: null,
+      } }],
+    } }),
+  }));
   await page.setViewportSize({ width: 390, height: 900 });
-  await page.goto('http://127.0.0.1:4173/rezervace');
-
+  await page.goto('http://127.0.0.1:4173/produkt/sofia');
+  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
   await expect(page.locator('[data-focused-reservation-header]')).toBeVisible();
   await expect(page.locator('[data-storefront-header]')).toHaveCount(0);
-
-  await expect(page.getByRole('button', { name: 'Zpět' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Ukončit rezervaci' })).toBeDisabled();
-
+  await page.getByLabel('Jméno', { exact: true }).fill('Jana');
+  await page.getByRole('button', { name: 'Zpět', exact: true }).click();
+  await expect(page).toHaveURL(/\/produkt\/sofia$/);
+  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');
+  await page.getByRole('button', { name: 'Ukončit rezervaci' }).click();
+  await expect(page).toHaveURL(/\/pronajem$/);
+  await page.locator('a[aria-label^="Rezervace"]:visible').click();
   await page.setViewportSize({ width: 1024, height: 900 });
   await expect(page.locator('[data-focused-reservation-header]')).toBeVisible();
   await expect(page.locator('[data-storefront-header]')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Zpět', exact: true })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Ukončit', exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');
+  await page.getByRole('button', { name: 'Zpět', exact: true }).click();
+  await expect(page).toHaveURL(/\/produkt\/sofia$/);
+  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Ukončit', exact: true }).click();
+  await expect(page).toHaveURL(/\/pronajem$/);
+  await expect(page.locator('a[aria-label^="Rezervace — máte"]:visible')).toBeVisible();
 });

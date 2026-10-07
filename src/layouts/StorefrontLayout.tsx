@@ -21,6 +21,7 @@ import {
   type ProductPrimaryCategory,
 } from '../navigation/routes';
 import { useContext } from 'react';
+import { useBookingOptional } from '../storefront/booking/BookingProvider';
 
 const Main = styled.main`
   min-inline-size: 0;
@@ -61,7 +62,7 @@ export function StorefrontLayout() {
 
   const searchStatus: SearchStatus = 'idle';
   const suggestions: readonly SearchProductSuggestion[] = [];
-  const hasActiveReservationDraft = false;
+  const hasActiveReservationDraft = useBookingOptional()?.hasActiveDraft ?? false;
 
   const focusOriginRef = useRef<HTMLElement | null>(null);
   const focusOriginOverlayRef = useRef<Exclude<ActiveOverlay, 'none'> | null>(null);
