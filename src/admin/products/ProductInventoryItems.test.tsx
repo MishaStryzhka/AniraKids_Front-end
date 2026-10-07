@@ -4,6 +4,7 @@ import type {ProductInventoryController} from './useProductInventoryController';
 import type {AdminInventoryItem,AdminVariant} from '../api/products';
 import {buildInventorySnapshot} from './productInventoryModel';
 
+jest.mock('../availability/InventoryAvailabilityBlocks',()=>({InventoryAvailabilityBlocks:()=>null}));
 const item=(id:string,status:'active'|'maintenance'|'retired'='active',condition:'excellent'|'good'|'fair'|'damaged'='good'):AdminInventoryItem=>({
   id,variantId:'v1',internalCode:id==='i1'?'AK-001-LONG-CODE':'AK-002',status,condition,notes:id==='i1'?'Poznámka text':'',
 });

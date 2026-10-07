@@ -22,6 +22,7 @@ import {
   type InventoryEditorTarget,
   type InventoryLifecycleAction,
 } from './productInventoryModel';
+import {InventoryAvailabilityBlocks} from '../availability/InventoryAvailabilityBlocks';
 import type {InventoryLifecycleNotice,ProductInventoryController} from './useProductInventoryController';
 
 const Section=styled.section`margin-block-start:${t.space[6]};min-inline-size:0;display:grid;gap:${t.space[4]};overflow:visible;`;
@@ -57,6 +58,7 @@ export interface InventoryRetireIntent{
 }
 export interface ProductInventoryItemsProps{
   variant:AdminVariant;
+  blocks?:{token:string;onAccessError(error:unknown):boolean};
   controller:ProductInventoryController;
   onRequestOpen(target:InventoryEditorTarget,trigger:HTMLElement):void;
   onRequestRetire(intent:InventoryRetireIntent):void;
@@ -64,7 +66,7 @@ export interface ProductInventoryItemsProps{
 
 function row(root:HTMLElement|null,id:string){return Array.from(root?.querySelectorAll<HTMLElement>('[data-inventory-id]')??[]).find(node=>node.dataset.inventoryId===id)??null;}
 
-export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequestRetire}:ProductInventoryItemsProps){
+export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequestRetire,blocks}:ProductInventoryItemsProps){
  const root=useRef<HTMLElement>(null),codeRef=useRef<HTMLInputElement>(null),conditionRef=useRef<HTMLSelectElement>(null),notesRef=useRef<HTMLTextAreaElement>(null);
  const key=variant.id.replace(/[^A-Za-z0-9_-]/g,'-'),headingId=`inventory-${key}-title`;
  const items=inventoryItemsForVariant(c.snapshot,variant.id);
@@ -85,9 +87,9 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
 
  const basicNotice=()=>{
   if(c.productMissing)return <Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Produkt už není dostupný</strong>Další změny fyzických kusů nelze uložit.</div></Notice>;
-  if(target?.kind==='add'&&c.missingVariantId===variant.id)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Varianta už není dostupná</strong>Fyzický kus nelze přidat, protože tato varianta už nebyla nalezena.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
-  if(target?.kind==='edit'&&c.missingItemId===target.inventoryItemId)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Fyzický kus už není dostupný</strong>Změny nelze uložit, protože tento fyzický kus už nebyl nalezen.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
-  if(c.unknownCreate?.variantId===variant.id)return <><Notice $tone="warning" data-inventory-unknown><TriangleAlert aria-hidden="true"/><div><strong>Výsledek přidání fyzického kusu není potvrzený</strong>Požadavek mohl být zpracován. Než kus přidáte znovu, načtěte aktuální fyzické kusy.</div></Notice><Recovery size="compact" loading={c.refreshing} disabled={lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(target?.kind==='add'&&c.missingVariantId===variant.id)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Varianta už není dostupná</strong>Fyzický kus nelze přidat, protože tato varianta už nebyla nalezena.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending||c.manualRefreshBlocked} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(target?.kind==='edit'&&c.missingItemId===target.inventoryItemId)return <><Notice $tone="warning"><TriangleAlert aria-hidden="true"/><div><strong>Fyzický kus už není dostupný</strong>Změny nelze uložit, protože tento fyzický kus už nebyl nalezen.</div></Notice><Recovery size="compact" variant="secondary" loading={c.refreshing} disabled={lifecycleAnyPending||c.manualRefreshBlocked} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
+  if(c.unknownCreate?.variantId===variant.id)return <><Notice $tone="warning" data-inventory-unknown><TriangleAlert aria-hidden="true"/><div><strong>Výsledek přidání fyzického kusu není potvrzený</strong>Požadavek mohl být zpracován. Než kus přidáte znovu, načtěte aktuální fyzické kusy.</div></Notice><Recovery size="compact" loading={c.refreshing} disabled={lifecycleAnyPending||c.manualRefreshBlocked} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery></>;
   if(c.damagedError)return <Notice $tone="danger"><CircleAlert aria-hidden="true"/><div><strong>Poškozený stav nelze uložit</strong>Aktivní fyzický kus nelze v tomto základním editoru označit jako poškozený. Změna provozního stavu do údržby není součástí této fáze.</div></Notice>;
   return null;
  };
@@ -95,7 +97,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
  const lifecycleNotice=(item:AdminInventoryItem,notice:InventoryLifecycleNotice|null)=>{
   if(!notice)return null;
   const recover=()=>{
-    return <Recovery size="compact" variant="secondary" disabled={c.refreshing||lifecycleAnyPending} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery>;
+    return <Recovery size="compact" variant="secondary" disabled={c.refreshing||lifecycleAnyPending||c.manualRefreshBlocked} onClick={()=>c.refresh(()=>fallback())}>Načíst aktuální fyzické kusy</Recovery>;
   };
   if(notice.kind==='success')return <Notice $tone="success" role="status" aria-live="polite"><CircleCheck aria-hidden="true"/><div>{notice.message}</div></Notice>;
   if(notice.kind==='reservation-conflict')return <Notice $tone="warning" role="status" aria-live="polite"><TriangleAlert aria-hidden="true"/><div><strong>Provozní stav nelze změnit</strong>Fyzický kus má aktuální nebo budoucí rezervaci, která této změně brání.</div></Notice>;
@@ -135,7 +137,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
   const activationHelpId=`${headingId}-${item.id.replace(/[^A-Za-z0-9_-]/g,'-')}-activation-help`;
   const perform=(action:InventoryLifecycleAction)=>c.transitionLifecycle({variantId:variant.id,inventoryItemId:item.id,action,focus:lifecycleFocus(item)});
   return <Operations data-inventory-actions>
-    <Button data-inventory-edit size="compact" variant="secondary" disabled={basicBlocked} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'edit',variantId:variant.id,inventoryItemId:item.id},e.currentTarget)}>Upravit</Button>
+    <Button data-inventory-edit size="compact" variant="secondary" disabled={basicBlocked||c.isBasicWriteBlocked(item.id)} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'edit',variantId:variant.id,inventoryItemId:item.id},e.currentTarget)}>Upravit</Button>
     {inventoryLifecycleActionsForStatus(item.status).map(spec=>{
       const isPending=lifecycleOp?.action===spec.action;
       const disabled=lifecycleBlocked||basicSameItemPending||(spec.action==='activate'&&activationBlocked);
@@ -154,7 +156,7 @@ export function ProductInventoryItems({variant,controller:c,onRequestOpen,onRequ
   <Divider/><Header><Heading id={headingId} tabIndex={-1}>Fyzické kusy</Heading><Button data-inventory-add size="compact" variant="secondary" disabled={basicBlocked} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'add',variantId:variant.id},e.currentTarget)}>Přidat fyzický kus</Button></Header>
   {target?.kind==='add'?editor():null}
   {c.feedback&&c.feedbackVariantId===variant.id?<Notice $tone={c.feedback.startsWith('Fyzický kus s tímto interním kódem')?'info':'success'} role="status">{c.feedback.startsWith('Fyzický kus s tímto interním kódem')?<Info aria-hidden="true"/>:<CircleCheck aria-hidden="true"/>}<div>{c.feedback}</div></Notice>:null}
-  {items.length===0?<Empty data-inventory-empty><strong>Pro velikost {variant.size} zatím nejsou žádné fyzické kusy</strong><span>Přidejte první fyzický kus této velikosti.</span><Button size="compact" variant="secondary" disabled={basicBlocked} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'add',variantId:variant.id},e.currentTarget)}>Přidat fyzický kus</Button></Empty>:<List>{items.map(item=>{const p=INVENTORY_STATUS_PRESENTATION[item.status];return <Item key={item.id} data-inventory-id={item.id}><Row><Code><Label>Interní kód</Label><strong>{item.internalCode}</strong></Code><Status data-inventory-status-cell><Label>Provozní stav</Label><StatusBadge tone={p.tone}>{p.label}</StatusBadge></Status><Condition data-inventory-condition-cell $damaged={item.condition==='damaged'}><Label>Stav kusu</Label><strong>{INVENTORY_CONDITION_LABEL[item.condition]}</strong></Condition></Row>{item.notes?<Helper data-inventory-notes-display><strong>Poznámka:</strong> {item.notes}</Helper>:null}{operations(item)}{lifecycleNotice(item,c.lifecycleNoticeByItem[item.id]??null)}{target?.kind==='edit'&&target.inventoryItemId===item.id?editor():null}</Item>})}</List>}
+  {items.length===0?<Empty data-inventory-empty><strong>Pro velikost {variant.size} zatím nejsou žádné fyzické kusy</strong><span>Přidejte první fyzický kus této velikosti.</span><Button size="compact" variant="secondary" disabled={basicBlocked} onClick={(e:ReactMouseEvent<HTMLButtonElement>)=>onRequestOpen({kind:'add',variantId:variant.id},e.currentTarget)}>Přidat fyzický kus</Button></Empty>:<List>{items.map(item=>{const p=INVENTORY_STATUS_PRESENTATION[item.status];return <Item key={item.id} data-inventory-id={item.id}><Row><Code><Label>Interní kód</Label><strong>{item.internalCode}</strong></Code><Status data-inventory-status-cell><Label>Provozní stav</Label><StatusBadge tone={p.tone}>{p.label}</StatusBadge></Status><Condition data-inventory-condition-cell $damaged={item.condition==='damaged'}><Label>Stav kusu</Label><strong>{INVENTORY_CONDITION_LABEL[item.condition]}</strong></Condition></Row>{item.notes?<Helper data-inventory-notes-display><strong>Poznámka:</strong> {item.notes}</Helper>:null}{operations(item)}{blocks?<InventoryAvailabilityBlocks key={`${item.id}:${blocks.token}`} item={item} token={blocks.token} controller={c} onAccessError={blocks.onAccessError}/>:null}{lifecycleNotice(item,c.lifecycleNoticeByItem[item.id]??null)}{target?.kind==='edit'&&target.inventoryItemId===item.id?editor():null}</Item>})}</List>}
   {target?.kind==='edit'&&!items.some(item=>item.id===target.inventoryItemId)?editor():null}
  </Section>;
 }
