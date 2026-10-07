@@ -8,7 +8,7 @@ import {StatusBadge} from '../../design-system/components/StatusBadge';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import {useAuth} from '../../hooks/useAuth';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
-import {calendarMonthRange, formatCalendarDay, formatCalendarMonth, mondayWeekday, monthCalendarDays, pragueToday, shiftCalendarMonth} from './calendarDates';
+import {formatCalendarDay, formatCalendarMonth, mondayWeekday, monthCalendarDays, monthCalendarGridDays, pragueToday, shiftCalendarMonth} from './calendarDates';
 import {formatPragueLoadedAt, rentalModeLabels, reservationDayCounts, reservationsForDay, reservationStatusPresentation} from './reservationCalendarModel';
 import {useReservationCalendar} from './useReservationCalendar';
 
@@ -25,10 +25,13 @@ const Loading = styled.div`display:flex;gap:${t.space[3]};align-items:center;`;
 const Content = styled.div`display:grid;gap:${t.space[6]};min-inline-size:0;margin-block-start:${t.space[4]};`;
 const Calendar = styled.section`min-inline-size:0;@media(max-width:767px){display:none;}`;
 const Weekdays = styled.div`display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:${t.space[2]};margin-block-end:${t.space[2]};text-align:center;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};`;
+const Weekday = styled.span<{$weekend:boolean}>`padding-block:${t.space[1]};border-radius:${t.radius[2]};background:${p=>p.$weekend?t.color.bg.subtle:'transparent'};`;
 const Days = styled.div`display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:${t.space[2]};`;
 const DayButton = styled(Button)`display:grid;justify-items:start;align-content:start;gap:${t.space[1]};padding:${t.space[2]};min-block-size:104px;text-align:start;white-space:normal;
   >span{display:grid;justify-items:start;text-align:start;font-size:${t.type.bodySm.size};line-height:${t.type.bodySm.lineHeight};}
   &[aria-current="date"]{box-shadow:inset 0 0 0 1px ${t.color.focus.ring};}
+  &[data-weekend="true"]:not([aria-pressed="true"]):not(:disabled){background:${t.color.bg.subtle};}
+  &&:disabled{background:${t.color.bg.canvas};color:${t.color.text.muted};border-color:${t.color.border.subtle};cursor:default;}
 `;
 const DayNumber = styled.strong`font-size:${t.type.bodyMd.size};`;
 const DayCount = styled.span`font-size:${t.type.caption.size};line-height:${t.type.caption.lineHeight};overflow-wrap:anywhere;`;
@@ -52,6 +55,7 @@ export function AdminReservationCalendarPage() {
   const [revision, setRevision] = useState(0);
   const state = useReservationCalendar({month,token:token??'',revision,onAccessError:handleRequestError});
   const days = useMemo(() => monthCalendarDays(month),[month]);
+  const gridDays = useMemo(() => monthCalendarGridDays(month),[month]);
   const items = state.kind === 'success' ? state.items : null;
   const agenda = useMemo(() => items ? reservationsForDay(items,selectedDay) : [],[items,selectedDay]);
   const navigateMonth = (offset:number) => {
@@ -79,9 +83,12 @@ export function AdminReservationCalendarPage() {
         {state.items.length===0?<State><StateTitle>Žádné rezervace v tomto období</StateTitle></State>:null}
         <Content>
           <Calendar aria-labelledby="calendar-month-title">
-            <Weekdays aria-hidden="true">{weekdays.map(day=><span key={day}>{day}</span>)}</Weekdays>
-            <Days>{Array.from({length:mondayWeekday(calendarMonthRange(month).from)},(_,index)=><div aria-hidden="true" key={`blank-${index}`}/>)}
-              {days.map(day=>{const counts=reservationDayCounts(state.items,day);return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
+            <Weekdays aria-hidden="true">{weekdays.map((day,index)=><Weekday key={day} $weekend={index>=5}>{day}</Weekday>)}</Weekdays>
+            <Days>
+              {gridDays.map((day,index)=>{
+                if (!day) return <div aria-hidden="true" key={`boundary-${index}`}/>;
+                if (!day.startsWith(month+'-')) return <DayButton key={day} size="compact" variant="secondary" disabled data-calendar-adjacent={day} aria-label={`${formatCalendarDay(day,true)}. Mimo zobrazený měsíc.`}><DayNumber>{Number(day.slice(-2))}</DayNumber></DayButton>;
+                const counts=reservationDayCounts(state.items,day);return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} data-weekend={mondayWeekday(day)>=5?'true':undefined} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
                 aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}.`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
                 <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount><DayCount>Čištění: {counts.cleaning}</DayCount>
               </DayButton>;})}
