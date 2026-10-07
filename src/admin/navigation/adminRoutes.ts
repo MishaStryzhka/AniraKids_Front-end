@@ -37,6 +37,6 @@ export function resolveAdminPageTitle(pathname: string) {
   if (matchPath({ path: adminRoutes.products, end: true }, pathname)) return 'Produkty';
   if (matchPath({ path: adminRoutes.reservationDetail, end: true }, pathname)) return 'Detail rezervace';
   if (matchPath({ path: adminRoutes.reservations, end: true }, pathname)) return 'Rezervace';
-  if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'Kalendář';
+  if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'Kalendář pronájmů';
   return 'Přehled administrace';
 }

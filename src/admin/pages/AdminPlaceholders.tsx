@@ -15,4 +15,3 @@ function Placeholder({ children }: { children: string }) { return <Copy>{childre
 export function AdminHomePage() { return <Placeholder>Základ administrace je připraven. Obsah přehledu bude doplněn v další fázi.</Placeholder>; }
 export function AdminReservationsPlaceholder() { return <Placeholder>Správa rezervací bude implementována v další fázi.</Placeholder>; }
 export function AdminReservationDetailPlaceholder() { return <Placeholder>Detail rezervace bude implementován v další fázi.</Placeholder>; }
-export function AdminCalendarPlaceholder() { return <Placeholder>Kalendář rezervací bude implementován v další fázi.</Placeholder>; }
