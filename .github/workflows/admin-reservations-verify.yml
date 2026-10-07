@@ -1,7 +1,7 @@
-name: Admin Reservations List and Detail Verify
+name: Admin Reservation Lifecycle Verify
 on:
   push:
-    branches: [admin-reservations-list-detail]
+    branches: [admin-reservation-lifecycle]
 concurrency:
   group: admin-reservations-${{ github.ref }}
   cancel-in-progress: true
@@ -15,14 +15,14 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Prepare evidence
         run: |
-          mkdir -p test-evidence/admin-reservations
-          node -e "require('fs').writeFileSync('test-evidence/admin-reservations/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
+          mkdir -p test-evidence/admin-reservation-lifecycle
+          node -e "require('fs').writeFileSync('test-evidence/admin-reservation-lifecycle/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
       - name: TypeScript
         run: npm run typecheck
       - name: Reservation focused tests and Admin regressions
         run: >
           npm test -- --watchAll=false --runInBand --json
-          --outputFile=test-evidence/admin-reservations/admin-results.json
+          --outputFile=test-evidence/admin-reservation-lifecycle/admin-results.json
           src/admin
       - name: No-env build
         run: npm run build
@@ -38,15 +38,19 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start SPA
         run: |
-          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/admin-reservations/configured-server.log 2>&1 &
-          npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/admin-reservations/no-env-server.log 2>&1 &
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/admin-reservation-lifecycle/configured-server.log 2>&1 &
+          npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/admin-reservation-lifecycle/no-env-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
       - name: Reservation list and detail browser verification
         env:
-          ADMIN_RESERVATIONS_EVIDENCE_DIR: test-evidence/admin-reservations
+          ADMIN_RESERVATIONS_EVIDENCE_DIR: test-evidence/admin-reservation-lifecycle
         run:
           npx playwright test .github/admin-reservations.spec.js --reporter=line
+      - name: Reservation lifecycle browser verification
+        run:
+          npx playwright test .github/admin-reservation-lifecycle.spec.js
+          --reporter=line
       - name: Reservation calendar regression
         run: npx playwright test .github/admin-fe03a01.spec.js --reporter=line
       - name: Admin shell navigation regression
@@ -56,7 +60,7 @@ jobs:
       - name: Evidence manifest
         if: always()
         run: |
-          find test-evidence/admin-reservations -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-reservations/MANIFEST.txt
+          find test-evidence/admin-reservation-lifecycle -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/admin-reservation-lifecycle/MANIFEST.txt
       - name: Upload verification artifacts
         if: always()
         uses: actions/upload-artifact@v4

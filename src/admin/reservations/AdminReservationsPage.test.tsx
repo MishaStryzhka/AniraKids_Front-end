@@ -189,7 +189,12 @@ test('detail renders authoritative Kč, snapshots, expiration and missing curren
   expect(
     screen.getByRole('link', { name: 'Zpět na kalendář' })
   ).toHaveAttribute('href', '/admin/kalendar');
-  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: 'Potvrdit rezervaci' })
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole('button', { name: /platbu/i })
+  ).not.toBeInTheDocument();
 });
 test('cancelled/refunded detail preserves safe text and current inventory facts', async () => {
   getDetail.mockResolvedValueOnce({
