@@ -613,7 +613,8 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     };
 
     const refresh = async () => {
-      if (operation || refreshing || refreshController.current || productMissing || !props.token) return;
+      if (inventory.getManualBlockGuard().hasRisk || operation || refreshing || refreshController.current || productMissing || !props.token) return;
+      const observedManual=inventory.getManualBlockGuard().revision;
       const generation = ++refreshGeneration.current;
       const observedMutation = mutationGeneration.current;
       const controller = new AbortController();
@@ -624,7 +625,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       try {
         const detailVariants = await getAdminProductVariants({token: props.token, productId, signal: controller.signal});
         if (!mounted.current || productRef.current !== productId || refreshGeneration.current !== generation ||
-          mutationGeneration.current !== observedMutation) return;
+          mutationGeneration.current !== observedMutation || inventory.getManualBlockGuard().revision!==observedManual) return;
         const variants = sortAdminVariants(projectDetailVariants(detailVariants));
         setCanonicalVariants(variants);
         if (unknownCreate) {
@@ -654,7 +655,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         }
       } catch (error) {
         if (!mounted.current || productRef.current !== productId || refreshGeneration.current !== generation ||
-          mutationGeneration.current !== observedMutation) return;
+          mutationGeneration.current !== observedMutation || inventory.getManualBlockGuard().revision!==observedManual) return;
         if (props.onAccessError?.(error)) return;
         if (error instanceof AdminApiError && error.kind === 'cancelled') return;
         if (error instanceof AdminApiError && error.code === 'PRODUCT_NOT_FOUND') {
@@ -758,7 +759,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
             </EditAction>
           </Row>
           {activeEditor?.kind === 'edit' && activeEditor.variantId === variant.id ? renderEditor(activeEditor) : null}
-          <ProductInventoryItems variant={variant} controller={inventory} onRequestOpen={requestInventoryEditor}
+          <ProductInventoryItems variant={variant} blocks={{token:props.token,onAccessError:error=>props.onAccessError?.(error)??false}} controller={inventory} onRequestOpen={requestInventoryEditor}
             onRequestRetire={intent=>props.onRequestInventoryRetire?.(intent)}/>
         </Item>)}
       </List>}
@@ -779,7 +780,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       {submitError ? <ErrorText role="alert">{submitError}</ErrorText> : null}
       {feedback ? <Message role="status" aria-live="polite">{feedback}</Message> : null}
 
-      {refreshReason ? <Button variant="secondary" loading={refreshing} disabled={Boolean(operation) || productMissing} onClick={refresh}>
+      {refreshReason ? <Button variant="secondary" loading={refreshing} disabled={Boolean(operation) || productMissing || inventory.manualRefreshBlocked} onClick={refresh}>
         Načíst aktuální varianty
       </Button> : null}
     </Section>;

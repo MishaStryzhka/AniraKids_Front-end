@@ -330,3 +330,16 @@ test('activation snapshot sees same-tick draft and lifecycle request without par
  act(()=>{void hook.result.current.transitionLifecycle({variantId:'v1',inventoryItemId:'i1',action:'maintenance',focus:{edit:()=>null,action:()=>null,condition:()=>null,heading:()=>null}});expect(hook.result.current.getActivationGuardSnapshot().pendingMutation).toBe(true);});
  await act(async()=>pending.resolve(lifeItem('maintenance')));
 });
+
+test('manual block risk synchronously interlocks only its item, feeds activation/leave and blocks removing inventory refresh',async()=>{
+ const hook=setup(props('p1',[variant('v1',[item('i1'),item('i2')])]));
+ act(()=>hook.result.current.reportManualBlockRisk('i1',{dirty:true,pending:false,unresolved:false}));
+ expect(hook.result.current.getActivationGuardSnapshot().hasUnsavedWork).toBe(true);expect(hook.result.current.riskMeta.hasRisk).toBe(true);
+ const pending=deferred<any>();refreshMock.mockReturnValue(pending.promise);await act(async()=>hook.result.current.refresh());expect(refreshMock).not.toHaveBeenCalled();
+ act(()=>hook.result.current.reportManualBlockRisk('i1',{dirty:true,pending:true,unresolved:false}));expect(hook.result.current.isBasicWriteBlocked('i1')).toBe(true);expect(hook.result.current.isLifecycleActionBlocked('i1')).toBe(true);expect(hook.result.current.isBasicWriteBlocked('i2')).toBe(false);
+ const focus={edit:()=>null,action:()=>null,condition:()=>null,heading:()=>null};await act(async()=>hook.result.current.transitionLifecycle({variantId:'v1',inventoryItemId:'i1',action:'maintenance',focus}));expect(maintenanceMock).not.toHaveBeenCalled();
+ act(()=>hook.result.current.reportManualBlockRisk('i1',{dirty:true,pending:false,unresolved:true}));expect(hook.result.current.getActivationGuardSnapshot().unresolvedOutcome).toBe(true);expect(hook.result.current.riskMeta.pendingOrUnresolved).toBe(true);
+});
+test('an inventory GET started before block draft cannot remove the item or clear its risk',async()=>{
+ const hook=setup();const pending=deferred<any>();refreshMock.mockReturnValueOnce(pending.promise);let promise!:Promise<void>;act(()=>{promise=hook.result.current.refresh();});act(()=>hook.result.current.reportManualBlockRisk('i1',{dirty:false,pending:true,unresolved:false}));await act(async()=>{pending.resolve({variantIds:[],items:[]});await promise;});expect(hook.result.current.snapshot.v1.order).toEqual(['i1']);expect(hook.result.current.getActivationGuardSnapshot().pendingMutation).toBe(true);expect(hook.result.current.refreshing).toBe(false);
+});

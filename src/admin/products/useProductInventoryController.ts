@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useMemo,useRef,useState,type SetStateAction} from 'react';
 import {AdminApiError} from '../api/errors';
+import type {BlockRisk} from '../availability/availabilityBlockModel';
 import {
   activateAdminInventoryItem,
   createAdminInventoryItem,
@@ -114,6 +115,22 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const [lifecycleNoticeByItem,setLifecycleNoticeByItem]=useState<Record<string,InventoryLifecycleNotice>>({});
 
   const mounted=useRef(true),productRef=useRef(input.productId),triggerRef=useRef<HTMLElement|null>(null);
+  const manualRiskRef=useRef<Record<string,BlockRisk>>({});
+  const manualRevisionRef=useRef(0);
+  const [manualRisks,setManualRisks]=useState<Record<string,BlockRisk>>({});
+  const reportManualBlockRisk=useCallback((itemId:string,value:BlockRisk|null)=>{
+    if(!mounted.current||productRef.current!==input.productId)return;
+    if(value&&!value.dirty&&!value.pending&&!value.unresolved)value=null;
+    const old=manualRiskRef.current[itemId];
+    if((!old&&!value)||(old&&value&&old.dirty===value.dirty&&old.pending===value.pending&&old.unresolved===value.unresolved))return;
+    const next={...manualRiskRef.current};if(value&&(value.dirty||value.pending||value.unresolved))next[itemId]=value;else delete next[itemId];
+    manualRevisionRef.current++;
+    manualRiskRef.current=next;setManualRisks(next);
+    if(Object.keys(next).length&&refreshController.current){refreshGeneration.current++;refreshController.current.abort();refreshController.current=null;setRefreshing(false);}
+  },[input.productId]);
+  const getManualBlockGuard=()=>({hasRisk:Object.keys(manualRiskRef.current).length>0,revision:manualRevisionRef.current});
+  const manualWriteBlocked=(itemId:string)=>Boolean(manualRiskRef.current[itemId]?.pending||manualRiskRef.current[itemId]?.unresolved);
+
   const mutationGeneration=useRef(0),refreshGeneration=useRef(0),focusGeneration=useRef(0);
   const mutationController=useRef<AbortController|null>(null),mutationOperationRef=useRef<InventoryOperation>(null),refreshController=useRef<AbortController|null>(null);
   const lifecycleSequenceRef=useRef(0),lifecycleRevisionRef=useRef(0);
@@ -143,6 +160,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     mounted.current=true;
     productRef.current=input.productId;
     if(productChanged){
+      manualRiskRef.current={};setManualRisks({});
       setSnapshot(buildInventorySnapshot(input.initialVariants));
       setActiveEditor(null);setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);
       setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);setOperation(null);setRefreshing(false);
@@ -178,16 +196,15 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const editorPendingOrUnresolved=Boolean(operation||unknownCreate);
   const lifecyclePendingOrUnresolved=
     Object.keys(lifecycleOperationsByItem).length>0 || Object.keys(unknownLifecycleByItem).length>0;
-  const riskMeta:InventoryRiskMeta=useMemo(()=>deriveInventoryRiskMeta({
-    editorDirty,
-    missingTargetDraft,
-    editorPendingOrUnresolved,
-    lifecyclePendingOrUnresolved,
-  }),[editorDirty,missingTargetDraft,editorPendingOrUnresolved,lifecyclePendingOrUnresolved]);
+  const riskMeta:InventoryRiskMeta=useMemo(()=>{
+    const base=deriveInventoryRiskMeta({editorDirty,missingTargetDraft,editorPendingOrUnresolved,lifecyclePendingOrUnresolved});
+    const manual=Object.values(manualRisks);
+    return {...base,hasRisk:base.hasRisk||manual.some(value=>value.dirty||value.pending||value.unresolved),pendingOrUnresolved:base.pendingOrUnresolved||manual.some(value=>value.pending||value.unresolved)};
+  },[editorDirty,missingTargetDraft,editorPendingOrUnresolved,lifecyclePendingOrUnresolved,manualRisks]);
 
   const clearMessages=()=>{setFieldErrors({});setSubmitError(null);setDamagedError(false);setFeedback(null);setFeedbackVariantId(null);};
   const open=(target:InventoryEditorTarget,trigger?:HTMLElement|null)=>{
-    if(operation||unknownCreate||productMissing)return false;
+    if(operation||unknownCreate||productMissing||(target.kind==='edit'&&manualWriteBlocked(target.inventoryItemId)))return false;
     triggerRef.current=trigger??null;clearMessages();setMissingItemId(null);setMissingVariantId(null);
     if(target.kind==='add'){
       setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setActiveEditor(target);return true;
@@ -216,7 +233,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   };
   const beginMutation=(next:Exclude<InventoryOperation,null>)=>{
     if(operation||mutationController.current||refreshing||productMissing||unknownCreate||!input.token)return null;
-    if(next.kind==='update'&&(lifecycleControllerByItemRef.current[next.inventoryItemId]||unknownLifecycleByItem[next.inventoryItemId]))return null;
+    if(next.kind==='update'&&(manualWriteBlocked(next.inventoryItemId)||lifecycleControllerByItemRef.current[next.inventoryItemId]||unknownLifecycleByItem[next.inventoryItemId]))return null;
     refreshGeneration.current++;refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
     const generation=++mutationGeneration.current,controller=new AbortController();
     activationPendingRef.current=true;
@@ -334,7 +351,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     if(item.status===targetStatus||item.status==='retired')return false;
     const basic=mutationOperationRef.current;
     if(basic?.kind==='update'&&basic.inventoryItemId===item.id)return false;
-    if(lifecycleControllerByItemRef.current[item.id]||unknownLifecycleByItem[item.id])return false;
+    if(manualWriteBlocked(item.id)||lifecycleControllerByItemRef.current[item.id]||unknownLifecycleByItem[item.id])return false;
     if(inputLifecycle.action==='activate'&&sameItemDirtyCondition({
       editor:activeEditorRef.current,
       editDraft:editDraftRef.current,
@@ -425,7 +442,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   };
 
   const refresh=async(resolveMissingFocus?:(variantId:string)=>HTMLElement|null|undefined)=>{
-    if(operation||refreshing||refreshController.current||Object.keys(lifecycleOperationsByItem).length>0||!input.token)return;
+    if(getManualBlockGuard().hasRisk||operation||refreshing||refreshController.current||Object.keys(lifecycleOperationsByItem).length>0||!input.token)return;
     const generation=++refreshGeneration.current,observedMutation=mutationGeneration.current,observedLifecycleRevision=lifecycleRevisionRef.current,controller=new AbortController(),productId=input.productId;
     refreshController.current=controller;setRefreshing(true);setSubmitError(null);
     try{
@@ -521,10 +538,10 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     return Boolean(notice&&'recoverable' in notice&&notice.recoverable);
   };
   const isLifecycleActionBlocked=(itemId:string)=>Boolean(
-    lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]||lifecycleNoticeRecoverable(itemId)
+    manualWriteBlocked(itemId)||lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]||lifecycleNoticeRecoverable(itemId)
   );
   const isBasicWriteBlocked=(itemId:string)=>Boolean(
-    lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]
+    manualWriteBlocked(itemId)||lifecycleOperationsByItem[itemId]||unknownLifecycleByItem[itemId]
   );
   const isActivationBlocked=(variantId:string,itemId:string)=>sameItemDirtyCondition({
     editor:activeEditor,
@@ -535,11 +552,16 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   });
 
   const getActivationGuardSnapshot=()=>({
-    hasUnsavedWork:riskMeta.missingTargetDraft||Boolean(activeEditorRef.current&&(activeEditorRef.current.kind==='add'?isInventoryCreateDirty(createDraftRef.current):editDraftRef.current&&editBaselineRef.current&&isInventoryEditDirty(editDraftRef.current,editBaselineRef.current))),
-    pendingMutation:Boolean(activationPendingRef.current||mutationController.current||Object.keys(lifecycleControllerByItemRef.current).length),
-    unresolvedOutcome:Boolean(unknownCreate||Object.keys(unknownLifecycleByItem).length),
+    hasUnsavedWork:Object.values(manualRiskRef.current).some(value=>value.dirty)||riskMeta.missingTargetDraft||Boolean(activeEditorRef.current&&(activeEditorRef.current.kind==='add'?isInventoryCreateDirty(createDraftRef.current):editDraftRef.current&&editBaselineRef.current&&isInventoryEditDirty(editDraftRef.current,editBaselineRef.current))),
+    pendingMutation:Boolean(Object.values(manualRiskRef.current).some(value=>value.pending)||activationPendingRef.current||mutationController.current||Object.keys(lifecycleControllerByItemRef.current).length),
+    unresolvedOutcome:Boolean(Object.values(manualRiskRef.current).some(value=>value.unresolved)||unknownCreate||Object.keys(unknownLifecycleByItem).length),
   });
+  const canWriteManualBlocks=(itemId:string)=>!productMissing&&!unknownCreate&&!refreshing
+    &&!(mutationOperationRef.current?.kind==='update'&&mutationOperationRef.current.inventoryItemId===itemId)
+    &&!lifecycleControllerByItemRef.current[itemId]&&!unknownLifecycleByItem[itemId]&&!lifecycleNoticeRecoverable(itemId)
+    &&!(activeEditorRef.current?.kind==='edit'&&activeEditorRef.current.inventoryItemId===itemId&&editDraftRef.current&&editBaselineRef.current&&isInventoryEditDirty(editDraftRef.current,editBaselineRef.current));
   return{
+    reportManualBlockRisk,canWriteManualBlocks,getManualBlockGuard,manualRefreshBlocked:Object.keys(manualRisks).length>0,
     getActivationGuardSnapshot,snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,editIdentity,fieldErrors,submitError,damagedError,feedback,feedbackVariantId,
     operation,refreshing,refreshReason,unknownCreate,missingItemId,missingVariantId,productMissing,editorDirty,riskMeta,
     lifecycleOperationsByItem,unknownLifecycleByItem,lifecycleNoticeByItem,
