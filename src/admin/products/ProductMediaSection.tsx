@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {forwardRef, useImperativeHandle, useCallback, useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
 import {Divider} from '../../design-system/components/Divider';
@@ -6,6 +6,7 @@ import {Spinner} from '../../design-system/components/Spinner';
 import {StatusBadge} from '../../design-system/components/StatusBadge';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import type {AdminProductPhoto, AdminProductStatus} from '../api/products';
+import type {ActivationDomainGuardSnapshot} from './productActivationModel';
 import {useProductMediaController, type UploadPhase} from './useProductMediaController';
 
 const Section = styled.section`
@@ -15,7 +16,7 @@ const HeadingRow = styled.div`
   margin-block-start:${t.space[2]};display:flex;align-items:baseline;justify-content:space-between;gap:${t.space[3]};
   @media(max-width:767px){align-items:flex-start;flex-direction:column;}
 `;
-const H2 = styled.h2`margin:0;font:600 22px/30px ${t.font.family.ui};`;
+const H2 = styled.h2`&:focus{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}margin:0;font:600 22px/30px ${t.font.family.ui};`;
 const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};line-height:${t.type.bodySm.lineHeight};`;
 const List = styled.ol`list-style:none;margin:0;padding:0;border:1px solid ${t.color.border.subtle};border-radius:${t.radius[2]};overflow:visible;`;
 const Item = styled.li`
@@ -103,8 +104,10 @@ function enabledAction(row: HTMLElement | undefined, preferred?: string) {
   return actions.find(action => action.dataset.mediaAction === preferred) ?? actions[0] ?? null;
 }
 
-export function ProductMediaSection(props: ProductMediaSectionProps) {
+export interface ProductMediaSectionHandle {getActivationGuardSnapshot():ActivationDomainGuardSnapshot;}
+export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductMediaSectionProps>(function ProductMediaSection(props,ref) {
   const c = useProductMediaController(props);
+  useImperativeHandle(ref,()=>({getActivationGuardSnapshot:c.getActivationGuardSnapshot}),[c.getActivationGuardSnapshot]);
   const inputRef = useRef<HTMLInputElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const [broken, setBroken] = useState<Record<string, boolean>>({});
@@ -249,4 +252,4 @@ export function ProductMediaSection(props: ProductMediaSectionProps) {
     {c.refreshReason ? <Button variant="secondary" disabled={disabled} onClick={c.refresh}>Načíst aktuální fotografie</Button> : null}
     <Status role="status" aria-live="polite" aria-atomic="true">{statusText}</Status>
   </Section>;
-}
+});

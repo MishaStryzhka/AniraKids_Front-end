@@ -209,3 +209,9 @@ test('unmount aborts the operation signal and suppresses late access callbacks',
   await act(async () => {pending.reject(error('PRODUCT_NOT_FOUND', 404)); await request;});
   expect(access).not.toHaveBeenCalled();
 });
+test('activation snapshot sees local file selection and mutation before parent risk effects run',async()=>{
+ const pending=deferred<{upload:ProductMediaUploadDescriptor}>();sign.mockReturnValue(pending.promise);const hook=setup();
+ act(()=>{hook.result.current.selectFile(file());expect(hook.result.current.getActivationGuardSnapshot().hasUnsavedWork).toBe(true);});
+ act(()=>{void hook.result.current.upload();expect(hook.result.current.getActivationGuardSnapshot().pendingMutation).toBe(true);});
+ await act(async()=>pending.reject(error('SIGN_FAILED',400)));
+});

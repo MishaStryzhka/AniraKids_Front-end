@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState,type SetStateAction} from 'react';
 import {AdminApiError} from '../api/errors';
 import {
   activateAdminInventoryItem,
@@ -93,8 +93,8 @@ export interface UseProductInventoryControllerInput{
 export function useProductInventoryController(input:UseProductInventoryControllerInput){
   const [snapshot,setSnapshot]=useState<ProductInventorySnapshot>(()=>buildInventorySnapshot(input.initialVariants));
   const [activeEditor,setActiveEditor]=useState<InventoryEditorTarget|null>(null);
-  const [createDraft,setCreateDraft]=useState<InventoryCreateDraft>({...EMPTY_INVENTORY_CREATE_DRAFT});
-  const [editDraft,setEditDraft]=useState<InventoryEditDraft|null>(null);
+  const [createDraft,commitCreateDraft]=useState<InventoryCreateDraft>({...EMPTY_INVENTORY_CREATE_DRAFT});
+  const [editDraft,commitEditDraft]=useState<InventoryEditDraft|null>(null);
   const [editBaseline,setEditBaseline]=useState<InventoryEditDraft|null>(null);
   const [editIdentity,setEditIdentity]=useState<AdminInventoryItem|null>(null);
   const [fieldErrors,setFieldErrors]=useState<Partial<Record<InventoryField,string>>>({});
@@ -121,6 +121,8 @@ export function useProductInventoryController(input:UseProductInventoryControlle
   const lifecycleControllerByItemRef=useRef<Record<string,AbortController>>({});
   const activeEditorRef=useRef(activeEditor),createDraftRef=useRef(createDraft),editDraftRef=useRef(editDraft),editBaselineRef=useRef(editBaseline);
   activeEditorRef.current=activeEditor;createDraftRef.current=createDraft;editDraftRef.current=editDraft;editBaselineRef.current=editBaseline;
+  const setCreateDraft=(next:SetStateAction<InventoryCreateDraft>)=>{const value=typeof next==='function'?next(createDraftRef.current):next;createDraftRef.current=value;commitCreateDraft(value);};
+  const setEditDraft=(next:SetStateAction<InventoryEditDraft|null>)=>{const value=typeof next==='function'?next(editDraftRef.current):next;editDraftRef.current=value;commitEditDraft(value);};
 
   const invalidateLifetime=useCallback(()=>{
     mounted.current=false;
@@ -172,6 +174,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     return Boolean(editDraft&&editBaseline&&isInventoryEditDirty(editDraft,editBaseline));
   },[activeEditor,createDraft,editDraft,editBaseline]);
   const missingTargetDraft=Boolean(activeEditor&&(missingItemId||missingVariantId));
+  const activationPendingRef=useRef(false);activationPendingRef.current=Boolean(operation||Object.keys(lifecycleOperationsByItem).length);
   const editorPendingOrUnresolved=Boolean(operation||unknownCreate);
   const lifecyclePendingOrUnresolved=
     Object.keys(lifecycleOperationsByItem).length>0 || Object.keys(unknownLifecycleByItem).length>0;
@@ -216,6 +219,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     if(next.kind==='update'&&(lifecycleControllerByItemRef.current[next.inventoryItemId]||unknownLifecycleByItem[next.inventoryItemId]))return null;
     refreshGeneration.current++;refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
     const generation=++mutationGeneration.current,controller=new AbortController();
+    activationPendingRef.current=true;
     mutationController.current=controller;mutationOperationRef.current=next;setOperation(next);setSubmitError(null);setFieldErrors({});setDamagedError(false);setFeedback(null);
     return{generation,signal:controller.signal,productId:input.productId};
   };
@@ -345,6 +349,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     refreshGeneration.current++;
     refreshController.current?.abort();refreshController.current=null;setRefreshing(false);
     const controller=new AbortController();
+    activationPendingRef.current=true;
     lifecycleControllerByItemRef.current[item.id]=controller;
     const operationState:InventoryLifecycleOperation={
       generation,
@@ -529,8 +534,13 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     inventoryItemId:itemId,
   });
 
+  const getActivationGuardSnapshot=()=>({
+    hasUnsavedWork:riskMeta.missingTargetDraft||Boolean(activeEditorRef.current&&(activeEditorRef.current.kind==='add'?isInventoryCreateDirty(createDraftRef.current):editDraftRef.current&&editBaselineRef.current&&isInventoryEditDirty(editDraftRef.current,editBaselineRef.current))),
+    pendingMutation:Boolean(activationPendingRef.current||mutationController.current||Object.keys(lifecycleControllerByItemRef.current).length),
+    unresolvedOutcome:Boolean(unknownCreate||Object.keys(unknownLifecycleByItem).length),
+  });
   return{
-    snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,editIdentity,fieldErrors,submitError,damagedError,feedback,feedbackVariantId,
+    getActivationGuardSnapshot,snapshot,activeEditor,createDraft,setCreateDraft,editDraft,setEditDraft,editBaseline,editIdentity,fieldErrors,submitError,damagedError,feedback,feedbackVariantId,
     operation,refreshing,refreshReason,unknownCreate,missingItemId,missingVariantId,productMissing,editorDirty,riskMeta,
     lifecycleOperationsByItem,unknownLifecycleByItem,lifecycleNoticeByItem,
     isLifecycleActionBlocked,isBasicWriteBlocked,isActivationBlocked,

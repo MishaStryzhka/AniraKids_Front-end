@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
-import {activateAdminInventoryItem, createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, moveAdminInventoryItemToMaintenance, retireAdminInventoryItem, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
+import {activateAdminProduct, getAdminProductActivationState, activateAdminInventoryItem, createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, moveAdminInventoryItemToMaintenance, retireAdminInventoryItem, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
@@ -15,6 +15,8 @@ jest.mock('../../hooks/useAuth', () => ({useAuth: () => ({token: 'fixture-token'
 const mockHandleRequestError = jest.fn();
 jest.mock('../auth/AdminAccessBoundary', () => ({useAdminAccess: () => ({handleRequestError: mockHandleRequestError})}));
 jest.mock('../api/products', () => ({
+  activateAdminProduct: jest.fn(),
+  getAdminProductActivationState: jest.fn(),
   activateAdminInventoryItem: jest.fn(),
   createAdminInventoryItem: jest.fn(),
   createAdminProduct: jest.fn(),
@@ -1045,4 +1047,81 @@ test('02D mixed lifecycle unknown plus Core draft uses page-wide leave copy',asy
   const dialog=screen.getByRole('dialog');
   expect(within(dialog).getByRole('heading',{name:'Neuložené nebo nedokončené změny'})).toBeInTheDocument();
   expect(within(dialog).getByRole('button',{name:'Odejít',exact:true})).toBeInTheDocument();
+});
+
+const activationPostMock=activateAdminProduct as jest.MockedFunction<typeof activateAdminProduct>;
+const activationGetMock=getAdminProductActivationState as jest.MockedFunction<typeof getAdminProductActivationState>;
+const activationButton=()=>screen.getByRole('button',{name:'Aktivovat produkt',exact:true});
+const activationRegion=()=>screen.getByRole('region',{name:'Aktivace produktu'});
+const coreForm=()=>document.querySelector('[data-product-core-form]') as HTMLElement;
+const coreRecovery=()=>within(coreForm()).getByRole('button',{name:'Načíst aktuální stav produktu'});
+const activationRecovery=()=>within(activationRegion()).getByRole('button',{name:'Načíst aktuální stav produktu'});
+const activationMetadata=(status:'draft'|'active'|'archived'='active')=>({id:'p1',status,seoNoIndex:status!=='active'});
+async function openActivationPage(){getMock.mockResolvedValue(detail);renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');}
+
+test('activation starts clean; new Core and Variant drafts survive its success, existing status receives focus',async()=>{
+ const pending=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(pending.promise);await openActivationPage();
+ fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
+ fireEvent.click(screen.getByRole('button',{name:'Přidat variantu',exact:true}));fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
+ await act(async()=>pending.resolve(activationMetadata()));expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(screen.getByLabelText('Velikost')).toHaveValue('104');expect(save()).toBeEnabled();
+ expect(document.querySelector('[data-product-status]')).toHaveTextContent('Aktivní');expect(screen.queryByRole('button',{name:'Aktivovat produkt'})).not.toBeInTheDocument();
+ await waitFor(()=>expect(document.querySelector('[data-product-status]')).toHaveFocus());
+});
+test('Core Save remains allowed after activation begins; its stale status cannot revert active',async()=>{
+ const activation=deferred<ReturnType<typeof activationMetadata>>(),patch=deferred<AdminProduct>();activationPostMock.mockReturnValue(activation.promise);patchMock.mockReturnValue(patch.promise);await openActivationPage();
+ fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});expect(save()).toBeEnabled();fireEvent.click(save());
+ await act(async()=>activation.resolve(activationMetadata()));await act(async()=>patch.resolve({...product,color:'Růžová',status:'draft',seo:{noIndex:true}}));
+ expect(document.querySelector('[data-product-status]')).toHaveTextContent('Aktivní');expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(save()).toBeDisabled();
+});
+test('Core Save in flight blocks activation even when user restores the clean baseline',async()=>{
+ const pending=deferred<AdminProduct>();patchMock.mockReturnValue(pending.promise);await openActivationPage();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
+ expect(activationButton()).toBeDisabled();fireEvent.click(activationButton());expect(activationPostMock).not.toHaveBeenCalled();await act(async()=>pending.resolve(product));
+});
+test('both writer conflicts coexist; recovering only Core preserves activation conflict and the dirty draft',async()=>{
+ const activation=deferred<ReturnType<typeof activationMetadata>>(),patch=deferred<AdminProduct>();activationPostMock.mockReturnValue(activation.promise);patchMock.mockReturnValue(patch.promise);await openActivationPage();
+ fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());
+ await act(async()=>{activation.reject(apiError(409,'PRODUCT_STATE_CONFLICT'));patch.reject(apiError(409,'PRODUCT_STATE_CONFLICT'));});
+ expect(screen.getAllByText('Produkt se mezitím změnil')).toHaveLength(2);expect(save()).toBeDisabled();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+ activationGetMock.mockResolvedValue(activationMetadata('draft'));fireEvent.click(coreRecovery());await waitFor(()=>expect(save()).toBeEnabled());expect(activationRecovery()).toBeInTheDocument();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');expect(patchMock).toHaveBeenCalledTimes(1);expect(activationPostMock).toHaveBeenCalledTimes(1);
+ fireEvent.click(activationRecovery());await waitFor(()=>expect(screen.queryByText('Produkt se mezitím změnil')).not.toBeInTheDocument());expect(activationButton()).toBeDisabled();
+ fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(save()).toBeDisabled();expect(activationButton()).toBeEnabled();
+});
+test('malformed Core conflict recovery preserves input/baseline and Save refresh block',async()=>{
+ patchMock.mockRejectedValue(apiError(409,'PRODUCT_STATE_CONFLICT'));await openActivationPage();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());await screen.findByText('Produkt se mezitím změnil');
+ activationGetMock.mockResolvedValue({...activationMetadata('draft'),id:'other'});fireEvent.click(coreRecovery());await screen.findByText('Aktuální stav produktu se nepodařilo načíst. Zkuste to znovu.');expect(save()).toBeDisabled();expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
+ fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(save()).toBeDisabled();fireEvent.click(screen.getByRole('link',{name:'Zpět',exact:true}));await screen.findByText('Products list');expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+test('delayed Core recovery draft cannot downgrade a later confirmed activation or clear its conflict',async()=>{
+ const activation=deferred<ReturnType<typeof activationMetadata>>(),recovery=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(activation.promise);patchMock.mockRejectedValue(apiError(409,'PRODUCT_STATE_CONFLICT'));activationGetMock.mockReturnValue(recovery.promise);await openActivationPage();
+ fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());await screen.findByText('Produkt se mezitím změnil');fireEvent.click(coreRecovery());
+ await act(async()=>activation.resolve(activationMetadata()));await act(async()=>recovery.resolve(activationMetadata('draft')));
+ expect(document.querySelector('[data-product-status]')).toHaveTextContent('Aktivní');expect(coreRecovery()).toBeEnabled();expect(save()).toBeDisabled();
+});
+test('activation unknown recovery remains visible when independent Core recovery observes active',async()=>{
+ const activation=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(activation.promise);patchMock.mockRejectedValue(apiError(409,'PRODUCT_STATE_CONFLICT'));await openActivationPage();fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());
+ await screen.findByText('Produkt se mezitím změnil');await act(async()=>activation.reject(apiError(null,'ADMIN_NETWORK_ERROR','network')));activationGetMock.mockResolvedValue(activationMetadata());fireEvent.click(coreRecovery());await waitFor(()=>expect(document.querySelector('[data-product-status]')).toHaveTextContent('Aktivní'));
+ expect(screen.getByText('Výsledek aktivace není potvrzený')).toBeInTheDocument();expect(activationRecovery()).toBeEnabled();expect(screen.queryByRole('button',{name:'Aktivovat produkt'})).not.toBeInTheDocument();expect(save()).toBeEnabled();
+});
+test('new Core unknown invalidates older activation-conflict GET; independent uncertainty keeps leave protection',async()=>{
+ const activation=deferred<ReturnType<typeof activationMetadata>>(),patch=deferred<AdminProduct>(),recovery=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(activation.promise);patchMock.mockReturnValue(patch.promise);activationGetMock.mockReturnValue(recovery.promise);await openActivationPage();fireEvent.click(activationButton());fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());
+ await act(async()=>activation.reject(apiError(409,'PRODUCT_STATE_CONFLICT')));fireEvent.click(activationRecovery());await act(async()=>patch.reject(apiError(null,'ADMIN_NETWORK_ERROR','network')));await act(async()=>recovery.resolve(activationMetadata('draft')));
+ expect(activationRecovery()).toBeEnabled();expect(screen.getByText('Produkt se mezitím změnil')).toBeInTheDocument();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});fireEvent.click(screen.getByRole('link',{name:'Zpět',exact:true}));await screen.findByRole('dialog');
+});
+test('readiness is authoritative, focusable and stays stale after a dirty-to-clean episode',async()=>{
+ activationPostMock.mockRejectedValue(apiError(409,'PRODUCT_NOT_READY','unexpected',['inventory','rentalPrices.external','name','photos','future-key']));await openActivationPage();fireEvent.click(activationButton());await screen.findByText('Produkt zatím nelze aktivovat');await waitFor(()=>expect(screen.getByRole('heading',{name:'Produkt zatím nelze aktivovat'})).toHaveFocus());
+ fireEvent.click(screen.getByRole('button',{name:'Přejít na Název'}));expect(screen.getByLabelText('Název')).toHaveFocus();
+ fireEvent.click(screen.getByRole('button',{name:'Přejít k cenám'}));expect(screen.getByLabelText('Nabízet produkt k pronájmu')).toHaveFocus();
+ fireEvent.click(screen.getByRole('button',{name:'Přejít k fotografiím'}));expect(screen.getByRole('heading',{name:'Fotografie'})).toHaveFocus();
+ fireEvent.click(screen.getByRole('button',{name:'Přejít k variantám'}));expect(screen.getByRole('heading',{name:'Varianty'})).toHaveFocus();
+ fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(screen.getByText('Výsledek posledního pokusu už nemusí odpovídat aktuálním údajům.')).toBeInTheDocument();expect(activationButton()).toBeEnabled();
+});
+test('activation-only pending uses one blocker; resolution proceeds requested navigation exactly once',async()=>{
+ const pending=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(pending.promise);await openActivationPage();fireEvent.click(activationButton());fireEvent.click(screen.getByRole('link',{name:'Zpět',exact:true}));
+ expect(await screen.findByRole('dialog')).toHaveTextContent('Aktivace produktu není potvrzená');expect(screen.getAllByRole('dialog')).toHaveLength(1);await act(async()=>pending.resolve(activationMetadata()));await screen.findByText('Products list');
+});
+test('reconciliation does not steal focus after newer editing interaction',async()=>{
+ activationPostMock.mockRejectedValue(new Error('network'));const pending=deferred<ReturnType<typeof activationMetadata>>();activationGetMock.mockReturnValue(pending.promise);await openActivationPage();fireEvent.click(activationButton());await screen.findByText('Výsledek aktivace není potvrzený');activationRecovery().focus();fireEvent.click(activationRecovery());screen.getByLabelText('Barva').focus();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});await act(async()=>pending.resolve(activationMetadata()));await waitFor(()=>expect(document.querySelector('[data-product-status]')).toHaveTextContent('Aktivní'));expect(screen.getByLabelText('Barva')).toHaveFocus();
+});
+test('ambiguous Core save blocks activation after current draft is restored to baseline',async()=>{
+ patchMock.mockRejectedValue(apiError(null,'ADMIN_NETWORK_ERROR','network'));await openActivationPage();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});fireEvent.click(save());await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});expect(save()).toBeDisabled();expect(activationButton()).toBeDisabled();fireEvent.click(activationButton());expect(activationPostMock).not.toHaveBeenCalled();
 });
