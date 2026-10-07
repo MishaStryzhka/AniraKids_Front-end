@@ -13,7 +13,7 @@ import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { GlobalStyles } from '../design-system/styles/GlobalStyles';
 import { StorefrontLayout } from '../layouts/StorefrontLayout';
 import { ReservationFlowLayout } from '../layouts/ReservationFlowLayout';
-import { CanonicalRoutePlaceholder, ProductRoutePlaceholder } from '../pages/CanonicalRoutePlaceholder/CanonicalRoutePlaceholder';
+import { CanonicalRoutePlaceholder } from '../pages/CanonicalRoutePlaceholder/CanonicalRoutePlaceholder';
 import { routes } from '../navigation/routes';
 import { ModalAuthContext } from '../context/ModalAuthContext';
 import Modal from './Modals/Modal';
@@ -27,6 +27,11 @@ import {AdminReservationCalendarPage} from '../admin/calendar/AdminReservationCa
 import { AdminProductsPage } from '../admin/products/AdminProductsPage';
 import { AdminProductCorePage } from '../admin/products/AdminProductCorePage';
 import { AdminHomePage } from '../admin/pages/AdminPlaceholders';
+
+import { BookingProvider } from '../storefront/booking/BookingProvider';
+import { CataloguePage } from '../storefront/CataloguePage';
+import { ProductDetailPage } from '../storefront/ProductDetailPage';
+import { BookingPage } from '../storefront/booking/BookingPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(() => import('../pages/DecorAndToysPage/DecorAndToysPage'));
@@ -72,6 +77,7 @@ function App() {
     <ThemeProvider theme={theme[currentTheme]}>
       <GlobalStyles />
       <ModalAuthContext.Provider value={{ isOpenModalAuth, setIsOpenModalAuth }}>
+        <BookingProvider>
         <Routes>
           <Route
             element={
@@ -84,12 +90,12 @@ function App() {
           >
             <Route path={routes.home} element={<MainPage />} />
 
-            {/* DESIGN-02 canonical storefront routes. Page UI is intentionally not invented here. */}
-            <Route path={routes.dresses} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.suits} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.newArrivals} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.rental} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.search} element={<CanonicalRoutePlaceholder />} />
+            {/* Canonical storefront routes. */}
+            <Route path={routes.dresses} element={<CataloguePage />} />
+            <Route path={routes.suits} element={<CataloguePage />} />
+            <Route path={routes.newArrivals} element={<CataloguePage />} />
+            <Route path={routes.rental} element={<CataloguePage />} />
+            <Route path={routes.search} element={<CataloguePage />} />
             <Route path={routes.favourites} element={<CanonicalRoutePlaceholder />} />
             <Route path={routes.account} element={<CanonicalRoutePlaceholder />} />
             <Route path={routes.accountReservations} element={<CanonicalRoutePlaceholder />} />
@@ -99,7 +105,7 @@ function App() {
             <Route path={routes.terms} element={<CanonicalRoutePlaceholder />} />
             <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
             <Route path={routes.cookies} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.productPattern} element={<ProductRoutePlaceholder />} />
+            <Route path={routes.productPattern} element={<ProductDetailPage />} />
 
             {/* Legacy pages remain reachable during the controlled migration. */}
             <Route path="/popular" element={<PopularPage />} />
@@ -155,11 +161,12 @@ function App() {
             </Route>
           </Route>
 
-          {/* Reservation action behavior remains a Reservation UX/domain dependency. The focused layout boundary is canonical now. */}
+          {/* Focused customer reservation flow. */}
           <Route path={routes.reservation} element={<ReservationFlowLayout />}>
-            <Route index element={<CanonicalRoutePlaceholder />} />
+            <Route index element={<BookingPage />} />
           </Route>
         </Routes>
+        </BookingProvider>
 
         {isOpenModalAuth && !isLoggedIn ? (
           <Modal closeModal={() => setIsOpenModalAuth(false)}>
