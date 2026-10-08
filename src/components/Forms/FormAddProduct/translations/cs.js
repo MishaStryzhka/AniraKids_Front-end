@@ -125,7 +125,7 @@ export const FormAddProductTranslationsCs = {
   Sale: 'Prodej',
   Price: 'Cena',
   pricePlaceholder: '1500',
-  deposit: 'Záloha',
+  deposit: 'Vratná kauce',
 
   // part - keywords of product
   keywords: 'klíčová slova',

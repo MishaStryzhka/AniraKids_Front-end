@@ -83,3 +83,38 @@ export function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
+export const bookingPolicyFixture = {
+  policyVersion: 1 as const,
+  advanceAmount: 200,
+  currency: 'CZK' as const,
+  confirmation: 'manual_after_payment' as const,
+  paymentMethod: 'bank_transfer' as const,
+  company: {
+    name: 'GlamGarb Rentals s.r.o.',
+    ico: '19970561',
+    address: 'Bílkova 855/19, Staré Město, 110 00 Praha 1',
+    register: 'Městský soud v Praze, oddíl C, vložka 394851',
+    vatPayer: false as const,
+  },
+  bank: {
+    iban: 'CZ0708000000006644781399',
+    accountNumber: '6644781399/0800',
+    bic: 'GIBACZPX',
+    beneficiary: 'GlamGarb Rentals s.r.o.',
+  },
+  cancellation: { feeAmount: 200, automatic: false as const },
+};
+export const receiptPaymentFixture = {
+  advanceRequired: 200,
+  advanceBalance: 200,
+  rentalBalance: 500,
+  depositRequired: 1000,
+  depositHeld: 0,
+  paymentInstructions: {
+    ...bookingPolicyFixture.bank,
+    amount: 200,
+    currency: 'CZK' as const,
+    message: receipt.reservationNumber,
+    qrPayload: `SPD*1.0*ACC:${bookingPolicyFixture.bank.iban}*AM:200.00*CC:CZK*MSG:${receipt.reservationNumber}*PT:IP`,
+  },
+};

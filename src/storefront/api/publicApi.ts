@@ -1,4 +1,11 @@
+import { PublicApiError, object, string, money } from './publicValidation';
+import {
+  parseBookingPolicy,
+  parseReceiptPayment,
+  type ReceiptPayment,
+} from './bookingPolicy';
 import { isDateOnly } from '../../admin/calendar/calendarDates';
+export { PublicApiError, object, string, money } from './publicValidation';
 export type RentalMode = 'studio' | 'external';
 export type Pricing = {
   rentalPrice: number;
@@ -45,6 +52,7 @@ export type ReservationBody = Selection & {
   notes?: string;
 };
 export type Receipt = {
+  payment?: ReceiptPayment | null;
   reservationNumber: string;
   status: string;
   rentalMode: RentalMode;
@@ -64,23 +72,8 @@ export type Receipt = {
   totalDue: number;
   paymentStatus: string;
 };
-export class PublicApiError extends Error {
-  constructor(
-    readonly code: string,
-    readonly status: number | null = null
-  ) {
-    super(code);
-    this.name = 'PublicApiError';
-  }
-}
-export const object = (v: unknown): v is Record<string, unknown> =>
-  Boolean(v && typeof v === 'object' && !Array.isArray(v));
-export const string = (v: unknown, max = 10000): v is string =>
-  typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 export const objectId = (v: unknown): v is string =>
   typeof v === 'string' && /^[a-f\d]{24}$/.test(v);
-export const money = (v: unknown): v is number =>
-  typeof v === 'number' && Number.isSafeInteger(v) && v >= 0;
 const instant = (v: unknown): v is string =>
   typeof v === 'string' &&
   /^\d{4}-\d{2}-\d{2}T/.test(v) &&
@@ -304,6 +297,20 @@ export function parseReceipt(v: unknown, expected?: Selection): Receipt {
     deposit: r.deposit,
     totalDue: r.totalDue,
     paymentStatus: r.paymentStatus,
+    ...(r.payment === undefined
+      ? {}
+      : {
+          payment:
+            r.payment === null
+              ? null
+              : parseReceiptPayment(r.payment, {
+                  reservationNumber: r.reservationNumber,
+                  subtotal: r.subtotal,
+                  deposit: r.deposit,
+                  status: r.status,
+                  expiresAt: r.expiresAt as string | null,
+                }),
+        }),
   };
 }
 export function publicApiBase() {
@@ -400,4 +407,10 @@ export async function postReservation(
   });
   if (result.status !== 200 && result.status !== 201) return invalid();
   return parseReceipt(result.body, body);
+}
+
+export async function getBookingPolicy(signal?: AbortSignal) {
+  return parseBookingPolicy(
+    (await request('/booking-policy', { signal })).body
+  );
 }

@@ -1,3 +1,4 @@
+import { BookingInformationPage } from '../storefront/payments/BookingInformationPage';
 import { lazy, useEffect, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Route, Routes } from 'react-router-dom';
@@ -138,16 +139,13 @@ function App() {
               />
               <Route
                 path={routes.rentalTerms}
-                element={<CanonicalRoutePlaceholder />}
+                element={<BookingInformationPage />}
               />
               <Route
                 path={routes.contact}
                 element={<CanonicalRoutePlaceholder />}
               />
-              <Route
-                path={routes.terms}
-                element={<CanonicalRoutePlaceholder />}
-              />
+              <Route path={routes.terms} element={<BookingInformationPage />} />
               <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
               <Route
                 path={routes.cookies}

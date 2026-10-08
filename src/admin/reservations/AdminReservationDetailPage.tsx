@@ -1,3 +1,6 @@
+import { useReservationPayments } from '../payments/useReservationPayments';
+import { ReservationPaymentLedger } from '../payments/ReservationPaymentLedger';
+import type { ReservationMutationLock } from '../payments/paymentModel';
 import { useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,7 +20,6 @@ import {
   inventoryStatus,
   money,
   reservationMode,
-  reservationPayment,
   reservationStatus,
 } from './reservationPresentation';
 import {
@@ -77,31 +79,56 @@ const Notes = styled.p`
 `;
 export function AdminReservationDetailPage() {
   const { reservationId } = useParams();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   return (
     <ReservationDetailView
       key={`${reservationId}:${token}`}
       reservationId={reservationId ?? ''}
       token={token ?? ''}
+      adminId={user?._id ?? ''}
     />
   );
 }
 function ReservationDetailView({
   reservationId,
   token,
+  adminId,
 }: {
   reservationId: string;
   token: string;
+  adminId: string;
 }) {
   const { handleRequestError } = useAdminAccess();
   const location = useLocation();
   const context = reservationBackContext(location.state),
     back = reservationListBackLink(context);
+  const mutationLock = useRef<ReservationMutationLock['current']>(null);
+  const paymentsRef = useRef<ReturnType<typeof useReservationPayments> | null>(
+    null
+  );
   const state = useReservationDetail({
     reservationId,
     token,
     onAccessError: handleRequestError,
+    mutationLock,
+    canMutate: change =>
+      Boolean(paymentsRef.current?.canWriteNow()) &&
+      (change.action !== 'confirm' ||
+        !paymentsRef.current?.payments?.advanceBalance),
   });
+  const payments = useReservationPayments({
+    adminId,
+    reservationId,
+    token,
+    onAccessError: handleRequestError,
+    mutationLock,
+    version: state.reservation
+      ? `${state.reservation.status}:${state.reservation.updatedAt ?? ''}`
+      : null,
+    canWrite: () =>
+      !state.busy && !state.recovery && Boolean(state.reservation),
+  });
+  paymentsRef.current = payments;
   const statusRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<HTMLElement>(null);
   const { kind, ownsView } = state;
@@ -114,9 +141,6 @@ function ReservationDetailView({
   }, [kind, ownsView]);
   const reservation = state.reservation;
   const status = reservation ? reservationStatus(reservation.status) : null;
-  const payment = reservation
-    ? reservationPayment(reservation.paymentStatus)
-    : null;
   return (
     <ReservationPage data-admin-reservation-detail>
       <ReservationActions>
@@ -154,7 +178,7 @@ function ReservationDetailView({
           <Button onClick={() => void state.read()}>Zkusit znovu</Button>
         </ReservationPanel>
       ) : null}
-      {reservation && status && payment ? (
+      {reservation && status ? (
         <>
           <ReservationHeading>
             {reservation.reservationNumber}
@@ -172,6 +196,8 @@ function ReservationDetailView({
           <ReservationLifecycleControls
             controller={state}
             statusRef={statusRef}
+            externalBlocked={!payments.canWriteNow()}
+            advanceMissing={Boolean(payments.payments?.advanceBalance)}
           />
           <ReservationCopy role="status" aria-live="polite">
             {state.announcement}
@@ -247,7 +273,7 @@ function ReservationDetailView({
                       <dd>{money(item.rentalPriceSnapshot)}</dd>
                     </div>
                     <div>
-                      <dt>Kauce</dt>
+                      <dt>Vratná kauce</dt>
                       <dd>{money(item.depositSnapshot)}</dd>
                     </div>
                     {item.inventoryCurrent ? (
@@ -283,24 +309,31 @@ function ReservationDetailView({
             </Items>
           </ReservationPanel>
           <ReservationPanel>
-            <ReservationHeading>Platba</ReservationHeading>
-            <StatusBadge tone={payment.tone}>{payment.label}</StatusBadge>
+            <ReservationHeading>Cena rezervace</ReservationHeading>
             <DetailFacts>
               <div>
                 <dt>Cena pronájmu</dt>
                 <dd>{money(reservation.subtotal)}</dd>
               </div>
               <div>
-                <dt>Kauce</dt>
+                <dt>Vratná kauce</dt>
                 <dd>{money(reservation.deposit)}</dd>
               </div>
               <div>
-                <dt>Celkem k úhradě</dt>
+                <dt>Celkem k úhradě podle rezervace</dt>
                 <dd>{money(reservation.totalDue)}</dd>
               </div>
             </DetailFacts>
           </ReservationPanel>
-          <ReservationNotesEditor controller={state} />
+          <ReservationPaymentLedger
+            controller={payments}
+            status={reservation.status}
+            externalBusy={Boolean(state.busy || state.recovery)}
+          />
+          <ReservationNotesEditor
+            controller={state}
+            externalBlocked={!payments.canWriteNow()}
+          />
           {reservation.cancelledAt || reservation.cancellationReason ? (
             <ReservationPanel>
               <ReservationHeading>Zrušení rezervace</ReservationHeading>

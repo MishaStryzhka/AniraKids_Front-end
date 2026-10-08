@@ -9,7 +9,7 @@ export const OrderTranslationsCs = {
   quantity_of_hours: 'Počet hodin',
   quantity_of_days: 'Počet dnů',
   amount: 'Сástka',
-  deposit: 'Záloha',
+  deposit: 'Vratná kauce',
   seller: 'Prodavač',
 
   orderTotal: 'Celková cena',

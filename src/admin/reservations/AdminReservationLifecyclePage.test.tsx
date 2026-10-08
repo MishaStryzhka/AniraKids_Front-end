@@ -1,3 +1,5 @@
+import { getReservationPayments } from '../api/reservationPayments';
+import { paymentLedgerFixture } from '../payments/paymentFixtures';
 import {
   act,
   fireEvent,
@@ -13,7 +15,7 @@ import { AdminApiError } from '../api/errors';
 import { AdminReservationDetailPage } from './AdminReservationDetailPage';
 import { reservationDetailFixture as detail } from './reservationFixtures';
 jest.mock('../../hooks/useAuth', () => ({
-  useAuth: () => ({ token: 'token' }),
+  useAuth: () => ({ token: 'token', user: { _id: 'admin1' } }),
 }));
 const mockAccess = jest.fn(() => false);
 jest.mock('../auth/AdminAccessBoundary', () => ({
@@ -71,6 +73,12 @@ const setup = () =>
     </MemoryRouter>
   );
 beforeEach(() => {
+  sessionStorage.clear();
+  (getReservationPayments as jest.Mock).mockResolvedValue({
+    ...paymentLedgerFixture,
+    advanceRequired: 0,
+    advanceBalance: 0,
+  });
   jest.clearAllMocks();
   get.mockResolvedValue(detail);
   mutate.mockResolvedValue(receipt);
@@ -87,6 +95,7 @@ test('expired pending can confirm; authoritative status changes action and recei
     status: 'confirmed',
     pendingExpired: false,
   });
+  await waitFor(() => expect(confirm).toBeEnabled());
   fireEvent.click(confirm);
   await screen.findByRole('button', { name: 'Připravit rezervaci' });
   expect(
@@ -101,9 +110,7 @@ test('expired pending can confirm; authoritative status changes action and recei
 });
 test('cancel uses safe dialog focus, validates reason, and renders server cancellation after success', async () => {
   setup();
-  fireEvent.click(
-    await screen.findByRole('button', { name: 'Zrušit rezervaci' })
-  );
+  await clickReady('Zrušit rezervaci');
   const dialog = screen.getByRole('dialog', { name: 'Zrušit rezervaci' });
   expect(within(dialog).getByRole('button', { name: 'Zpět' })).toHaveFocus();
   fireEvent.click(
@@ -144,7 +151,7 @@ test('notes limits prevent request, newer pending draft and textarea focus survi
   setup();
   const notes = await screen.findByLabelText('Poznámky');
   fireEvent.change(notes, { target: { value: 'x'.repeat(1501) } });
-  fireEvent.click(screen.getByRole('button', { name: 'Uložit poznámky' }));
+  await clickReady('Uložit poznámky');
   expect(
     screen.getByText('Poznámky mohou mít maximálně 1500 znaků.')
   ).toBeInTheDocument();
@@ -153,7 +160,7 @@ test('notes limits prevent request, newer pending draft and textarea focus survi
   const pending = deferred<typeof receipt>();
   mutate.mockReturnValueOnce(pending.promise);
   get.mockResolvedValueOnce({ ...detail, notes: 'submitted' });
-  fireEvent.click(screen.getByRole('button', { name: 'Uložit poznámky' }));
+  await clickReady('Uložit poznámky');
   notes.focus();
   fireEvent.change(notes, { target: { value: 'newer text' } });
   await act(async () => pending.resolve(receipt));
@@ -162,7 +169,7 @@ test('notes limits prevent request, newer pending draft and textarea focus survi
   expect(notes).toHaveFocus();
   fireEvent.change(notes, { target: { value: '' } });
   get.mockResolvedValueOnce({ ...detail, notes: undefined });
-  fireEvent.click(screen.getByRole('button', { name: 'Uložit poznámky' }));
+  await clickReady('Uložit poznámky');
   await waitFor(() =>
     expect(
       screen.getByRole('button', { name: 'Uložit poznámky' })
@@ -186,9 +193,7 @@ test('unknown outcome visibly blocks lifecycle and notes until explicit GET reco
       message: 'private',
     })
   );
-  fireEvent.click(
-    await screen.findByRole('button', { name: 'Potvrdit rezervaci' })
-  );
+  await clickReady('Potvrdit rezervaci');
   const alert = await screen.findByRole('alert');
   expect(alert).toHaveTextContent('Výsledek změny rezervace není potvrzený');
   await waitFor(() => expect(alert).toHaveFocus());
@@ -214,9 +219,7 @@ test('unknown outcome visibly blocks lifecycle and notes until explicit GET reco
 });
 test('route replacement removes cancel reason and dialog ownership', async () => {
   setup();
-  fireEvent.click(
-    await screen.findByRole('button', { name: 'Zrušit rezervaci' })
-  );
+  await clickReady('Zrušit rezervaci');
   fireEvent.change(screen.getByLabelText('Důvod zrušení'), {
     target: { value: 'private previous reason' },
   });
@@ -224,6 +227,23 @@ test('route replacement removes cancel reason and dialog ownership', async () =>
   fireEvent.click(screen.getByRole('button', { name: 'Other reservation' }));
   await screen.findByRole('heading', { name: 'AK-2' });
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Zrušit rezervaci' }));
+  await clickReady('Zrušit rezervaci');
   expect(screen.getByLabelText('Důvod zrušení')).toHaveValue('');
 });
+
+jest.mock('../api/reservationPayments', () => ({
+  ...jest.requireActual('../api/reservationPayments'),
+  getReservationPayments: jest.fn(),
+  appendReservationPayment: jest.fn(),
+}));
+
+jest.mock('../api/client', () => ({
+  adminApiClient: {},
+  buildAdminRequestConfig: jest.fn(),
+}));
+
+async function clickReady(name: string) {
+  const button = await screen.findByRole('button', { name });
+  await waitFor(() => expect(button).toBeEnabled());
+  fireEvent.click(button);
+}

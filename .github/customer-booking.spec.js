@@ -1,3 +1,4 @@
+const { policy, receiptPayment } = require('./payment-fixtures');
 const { test, expect } = require('@playwright/test');
 const fs = require('fs'),
   path = require('path');
@@ -98,6 +99,10 @@ async function setup(page) {
           contentType: 'application/json',
           body: JSON.stringify(body),
         });
+      if (url.pathname === '/api/v2/booking-policy')
+        return state.policyFailure
+          ? json(503, { error: { code: 'UNAVAILABLE' } })
+          : json(200, policy);
       if (req.method() === 'OPTIONS')
         return route.fulfill({
           status: 204,
@@ -168,10 +173,40 @@ async function setup(page) {
         const existing = state.records.get(key);
         if (existing)
           return json(200, {
-            reservation: { ...existing, status: 'confirmed' },
+            reservation: {
+              ...existing,
+              status: 'confirmed',
+              ...(existing.payment
+                ? {
+                    payment: {
+                      ...existing.payment,
+                      advanceBalance: 0,
+                      rentalBalance: 300,
+                      paymentInstructions: null,
+                    },
+                  }
+                : {}),
+            },
             guestAccessToken: 'secret-never-store',
           });
         const created = receipt(body);
+        if (state.mode.startsWith('payment'))
+          created.payment = receiptPayment(created.reservationNumber);
+        if (state.mode === 'payment-malformed') {
+          state.records.set(key, created);
+          return json(201, {
+            reservation: {
+              ...created,
+              payment: {
+                ...created.payment,
+                paymentInstructions: {
+                  ...created.payment.paymentInstructions,
+                  amount: 201,
+                },
+              },
+            },
+          });
+        }
         state.records.set(key, created);
         if (state.mode === 'network') return route.abort('failed');
         if (state.mode === 'malformed')
@@ -478,4 +513,65 @@ test('public no-env view makes no backend request', async ({ page }) => {
   await page.goto('http://127.0.0.1:4174/pronajem');
   await expect(page.getByText('Katalog nyní není dostupný.')).toBeVisible();
   expect(requests).toEqual([]);
+});
+
+for (const width of [390, 1440])
+  test(`payment policy before booking and local QR receipt at ${width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const state = await setup(page);
+    state.mode = 'payment';
+    await begin(page);
+    await quote(page);
+    await contact(page);
+    await expect(page.getByText(/Rezervační záloha činí 200/)).toBeVisible();
+    await expect(page.getByText(/zbývá z nájemného 300/)).toBeVisible();
+    await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+    const qr = page.getByRole('img', { name: /QR platba rezervační zálohy/ });
+    await expect(qr).toBeVisible();
+    await expect(qr).toHaveAttribute('src', /^data:image\/png;base64,/);
+    await expect(
+      page.getByText('6644781399/0800', { exact: true })
+    ).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await capture(page, 'payment-receipt-' + width);
+    await page.reload();
+    await expect(qr).toBeVisible();
+    expect(state.posts).toHaveLength(1);
+    expect(state.posts[0].authorization).toBeUndefined();
+    expect(await page.evaluate(() => location.href)).not.toContain('jana');
+    expect(
+      await page.evaluate(
+        () => sessionStorage.getItem('anirakids:booking:v1') || ''
+      )
+    ).not.toContain('jana@example.test');
+  });
+test('unavailable policy prevents booking and malformed payment receipt stays recoverable', async ({
+  page,
+}) => {
+  const state = await setup(page);
+  state.policyFailure = true;
+  await begin(page);
+  await quote(page);
+  await contact(page);
+  await expect(
+    page.getByRole('button', { name: 'Rezervovat', exact: true })
+  ).toBeDisabled();
+  expect(state.posts).toHaveLength(0);
+  state.policyFailure = false;
+  await page.getByRole('button', { name: 'Načíst informace o platbě' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Rezervovat', exact: true })
+  ).toBeEnabled();
+  state.mode = 'payment-malformed';
+  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Výsledek rezervace není potvrzený' })
+  ).toBeVisible();
+  await expect(page.getByRole('img', { name: /QR platba/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ověřit stav rezervace' }).click();
+  await expect(page.getByText('Stav: Potvrzená')).toBeVisible();
+  await expect(page.getByRole('img', { name: /QR platba/ })).toHaveCount(0);
+  expect(state.posts[1].key).toBe(state.posts[0].key);
 });

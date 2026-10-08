@@ -1,3 +1,8 @@
+import {
+  BookingPaymentExplanation,
+  ReceiptPaymentInformation,
+  CompanyInformation,
+} from '../payments/PaymentInformation';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
@@ -11,6 +16,7 @@ import {
 import { routes } from '../../navigation/routes';
 import {
   getAvailability,
+  getBookingPolicy,
   PublicApiError,
   sameSelection,
   type Pricing,
@@ -47,7 +53,7 @@ export function PriceSummary({ pricing }: { pricing: Pricing }) {
         <dd>{formatMoney(pricing.rentalPrice)}</dd>
       </div>
       <div>
-        <dt>Kauce</dt>
+        <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
       </div>
       <div>
@@ -67,6 +73,10 @@ export function BookingPage() {
   const booking = useBooking(),
     navigate = useNavigate(),
     draft = booking.draft;
+  const policy = usePublicRead(
+    booking.stored ? null : 'booking-policy',
+    getBookingPolicy
+  );
   const [requested, setRequested] = useState<Selection | null>(null),
     [selectionValidation, setSelectionValidation] = useState<
       ReturnType<typeof selectionErrors>
@@ -144,7 +154,7 @@ export function BookingPage() {
       focusField(first);
       return;
     }
-    await booking.submit(quote);
+    await booking.submit(quote, policy.data);
   };
   const errorFor = (
     field: string,
@@ -220,6 +230,7 @@ export function BookingPage() {
                       ? 'Vrácená platba'
                       : 'Neznámý stav platby'}
               </Copy>
+              <ReceiptPaymentInformation receipt={stored.receipt} />
               <Actions>
                 <Button
                   disabled={booking.storageBlocked}
@@ -496,6 +507,31 @@ export function BookingPage() {
                       Volitelné. Maximálně 1500 znaků.
                     </Copy>
                     {errorFor('notes', contactValidation)}
+                    {policy.loading ? (
+                      <Copy role="status">Načítání informací o platbě…</Copy>
+                    ) : policy.error ? (
+                      <Alert role="alert">
+                        <Copy>
+                          Informace o platbě se nepodařilo načíst. Před
+                          odesláním rezervace je načtěte znovu.
+                        </Copy>
+                        <Button variant="secondary" onClick={policy.reload}>
+                          Načíst informace o platbě
+                        </Button>
+                      </Alert>
+                    ) : policy.data ? (
+                      <>
+                        <BookingPaymentExplanation
+                          policy={policy.data}
+                          rentalPrice={
+                            quote?.pricing.rentalPrice ??
+                            variant?.pricing[draft.selection.rentalMode]
+                              ?.rentalPrice
+                          }
+                        />
+                        <CompanyInformation company={policy.data.company} />
+                      </>
+                    ) : null}
                     <Copy>
                       Odesláním vytvoříte rezervaci čekající na potvrzení.
                     </Copy>
@@ -509,7 +545,11 @@ export function BookingPage() {
                     ) : null}
                     <Button
                       type="submit"
-                      disabled={!quote?.available || booking.storageBlocked}
+                      disabled={
+                        !quote?.available ||
+                        booking.storageBlocked ||
+                        !policy.data
+                      }
                       loading={booking.busy}
                     >
                       Rezervovat

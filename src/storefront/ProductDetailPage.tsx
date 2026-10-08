@@ -128,7 +128,7 @@ export function ProductDetailPage() {
                           </dd>
                         </div>
                         <div>
-                          <dt>Kauce</dt>
+                          <dt>Vratná kauce</dt>
                           <dd>{formatMoney(variant.pricing[mode]!.deposit)}</dd>
                         </div>
                       </Facts>
