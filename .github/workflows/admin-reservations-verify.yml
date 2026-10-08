@@ -1,7 +1,7 @@
-name: Customer Booking Journey Verify
+name: Reservation Payments Verify
 on:
   push:
-    branches: [customer-booking-journey]
+    branches: [admin-reservation-payments]
 concurrency:
   group: admin-reservations-${{ github.ref }}
   cancel-in-progress: true
@@ -15,15 +15,16 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Prepare evidence
         run: |
-          mkdir -p test-evidence/customer-booking
+          mkdir -p test-evidence/customer-booking test-evidence/payments
           node -e "require('fs').writeFileSync('test-evidence/customer-booking/BUILD-METADATA.json',JSON.stringify({sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,branch:process.env.GITHUB_REF_NAME,node:process.version},null,2))"
+          cp test-evidence/customer-booking/BUILD-METADATA.json test-evidence/payments/BUILD-METADATA.json
       - name: TypeScript
         run: npm run typecheck
       - name: Public booking tests and Admin regressions
         run: >
           npm test -- --watchAll=false --runInBand --json
           --outputFile=test-evidence/customer-booking/admin-results.json
-          src/admin src/storefront
+          src/admin src/storefront src/components/Modals/Modal.test.js
       - name: No-env build
         run: npm run build
       - run: mv build build-no-env
@@ -42,8 +43,13 @@ jobs:
           npx --yes serve@14.2.4 -s build-no-env -l 4174 >test-evidence/customer-booking/no-env-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+      - name: Admin payments browser verification
+        run:
+          npx playwright test .github/admin-payments.spec.js
+          .github/auth-modal.spec.js --reporter=line
       - name: Public booking journey browser verification
-        run: npx playwright test .github/customer-booking.spec.js --reporter=line
+        run:
+          npx playwright test .github/customer-booking.spec.js --reporter=line
       - name: Storefront navigation regression
         run: npx playwright test .github/design02f.spec.js --reporter=line
       - name: Reservation list and detail browser verification
@@ -69,6 +75,7 @@ jobs:
         if: always()
         run: |
           find test-evidence/customer-booking -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/customer-booking/MANIFEST.txt
+          find test-evidence/payments -type f ! -name MANIFEST.txt -printf '%P\n' | sort > test-evidence/payments/MANIFEST.txt
       - name: Upload verification artifacts
         if: always()
         uses: actions/upload-artifact@v4

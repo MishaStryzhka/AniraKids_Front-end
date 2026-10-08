@@ -40,9 +40,13 @@ const FocusPanel = styled(ReservationPanel)`
 export function ReservationLifecycleControls({
   controller,
   statusRef,
+  externalBlocked = false,
+  advanceMissing = false,
 }: {
   controller: Controller;
   statusRef: RefObject<HTMLDivElement>;
+  externalBlocked?: boolean;
+  advanceMissing?: boolean;
 }) {
   const [cancelOpen, setCancelOpen] = useState(false),
     [reason, setReason] = useState(''),
@@ -51,7 +55,9 @@ export function ReservationLifecycleControls({
     errorRef = useRef<HTMLElement>(null);
   // Button intentionally has no forwarded ref; focus the existing safe native button through its wrapper.
   const safeFocus = useRef<HTMLElement | null>(null);
-  const blocked = Boolean(controller.busy || controller.recovery),
+  const blocked = Boolean(
+      controller.busy || controller.recovery || externalBlocked
+    ),
     next = controller.reservation
       ? nextReservationAction(controller.reservation.status)
       : null;
@@ -81,10 +87,16 @@ export function ReservationLifecycleControls({
   };
   return (
     <>
+      {next?.action === 'confirm' && advanceMissing ? (
+        <ReservationCopy>
+          Nejprve zaevidujte přijatou rezervační zálohu. Potvrzení rezervace
+          probíhá samostatně.
+        </ReservationCopy>
+      ) : null}
       <ReservationActions aria-label="Akce rezervace">
         {next ? (
           <Button
-            disabled={blocked}
+            disabled={blocked || (next.action === 'confirm' && advanceMissing)}
             loading={controller.busy === next.action}
             onClick={() => void controller.change({ action: next.action })}
           >
@@ -211,8 +223,10 @@ export function ReservationLifecycleControls({
 }
 export function ReservationNotesEditor({
   controller,
+  externalBlocked = false,
 }: {
   controller: Controller;
+  externalBlocked?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -252,7 +266,9 @@ export function ReservationNotesEditor({
         <Button
           variant="secondary"
           disabled={
-            Boolean(controller.busy || controller.recovery) ||
+            Boolean(
+              controller.busy || controller.recovery || externalBlocked
+            ) ||
             controller.notesDraft.trim() ===
               (controller.reservation?.notes ?? '')
           }

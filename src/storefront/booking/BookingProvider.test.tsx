@@ -1,3 +1,4 @@
+import { bookingPolicyFixture as policy } from './bookingFixtures';
 import { act, renderHook } from '@testing-library/react';
 import { BookingProvider, useBooking } from './BookingProvider';
 import { postReservation, PublicApiError } from '../api/publicApi';
@@ -51,8 +52,8 @@ test('attempt is persisted before dispatch, double submit single-flight, receipt
   const view = ready();
   let operation!: Promise<void>;
   act(() => {
-    operation = view.result.current.submit(quote);
-    void view.result.current.submit(quote);
+    operation = view.result.current.submit(quote, policy);
+    void view.result.current.submit(quote, policy);
   });
   expect(post).toHaveBeenCalledTimes(1);
   expect(view.result.current.busy).toBe(true);
@@ -93,7 +94,7 @@ test.each([
     post.mockRejectedValueOnce(error);
     const view = ready();
     await act(async () => {
-      await view.result.current.submit(quote);
+      await view.result.current.submit(quote, policy);
     });
     const attempt = view.result.current.stored;
     expect(attempt?.kind).toBe('attempt');
@@ -115,7 +116,7 @@ test('known inventory conflict preserves editable contact draft, without retry',
   post.mockRejectedValue(new PublicApiError('NO_AVAILABLE_INVENTORY', 409));
   const view = ready();
   await act(async () => {
-    await view.result.current.submit(quote);
+    await view.result.current.submit(quote, policy);
   });
   expect(view.result.current.stored).toBeNull();
   expect(view.result.current.draft?.contact.email).toBe(body.customer.email);
@@ -128,14 +129,14 @@ test('storage failure prevents POST, explicit storage recovery enables retry', a
       throw new Error('Quota');
     });
   await act(async () => {
-    await view.result.current.submit(quote);
+    await view.result.current.submit(quote, policy);
   });
   expect(post).not.toHaveBeenCalled();
   expect(view.result.current.storageBlocked).toBe(true);
   fail.mockRestore();
   act(() => view.result.current.retryStorage());
   await act(async () => {
-    await view.result.current.submit(quote);
+    await view.result.current.submit(quote, policy);
   });
   expect(post).toHaveBeenCalledTimes(1);
 });
@@ -150,7 +151,7 @@ test('receipt persistence failure cannot open a new attempt; recovery persists s
       return original.call(this, key, value);
     });
   await act(async () => {
-    await view.result.current.submit(quote);
+    await view.result.current.submit(quote, policy);
   });
   expect(view.result.current.stored?.kind).toBe('receipt');
   expect(view.result.current.storageBlocked).toBe(true);
@@ -166,7 +167,7 @@ test('unmount aborts client without discarding persisted unknown request', async
   const view = ready();
   let operation!: Promise<void>;
   act(() => {
-    operation = view.result.current.submit(quote);
+    operation = view.result.current.submit(quote, policy);
   });
   const raw = sessionStorage.getItem(SESSION_KEY);
   view.unmount();
@@ -203,4 +204,13 @@ test('persisted receipt survives refresh without any request; unresolved origina
   const { result: pending } = setup();
   expect(pending.current.chooseProduct(product)).toBe(false);
   expect(pending.current.hasActiveDraft).toBe(true);
+});
+
+test('new booking fails closed without valid policy; unresolved attempts remain recoverable', async () => {
+  const view = ready();
+  await act(async () => {
+    await view.result.current.submit(quote);
+  });
+  expect(post).not.toHaveBeenCalled();
+  expect(view.result.current.error).toContain('informace o platbě');
 });

@@ -16,6 +16,7 @@ import {
   unknownReservationOutcome,
 } from './reservationLifecycleModel';
 import { reservationStatus } from './reservationPresentation';
+import type { ReservationMutationLock } from '../payments/paymentModel';
 type Scope = { reservationId: string; token: string };
 type Recovery = { kind: 'unknown' | 'conflict' | 'refresh'; message: string };
 type State = {
@@ -34,6 +35,7 @@ type Request = {
   owner: Scope;
   generation: number;
   controller: AbortController;
+  mutation?: boolean;
 };
 const initial = (owner: Scope): State => ({
   owner,
@@ -57,8 +59,12 @@ export function useReservationDetail(input: {
   reservationId: string;
   token: string;
   onAccessError(error: unknown): boolean;
+  mutationLock?: ReservationMutationLock;
+  canMutate?(change: ReservationChange): boolean;
 }) {
   const { reservationId, token, onAccessError } = input;
+  const mutationOptions = useRef(input);
+  mutationOptions.current = input;
   const scope = useMemo(
     () => ({ reservationId, token }),
     [reservationId, token]
@@ -102,7 +108,14 @@ export function useReservationDetail(input: {
     return value;
   }, [scope, ownsView]);
   const release = useCallback((value: Request) => {
-    if (request.current === value) request.current = null;
+    if (request.current === value) {
+      request.current = null;
+      if (
+        value.mutation &&
+        mutationOptions.current.mutationLock?.current === 'reservation'
+      )
+        mutationOptions.current.mutationLock.current = null;
+    }
   }, []);
   const accept = useCallback(
     (
@@ -194,6 +207,11 @@ export function useReservationDetail(input: {
       mounted.current = null;
       if (request.current?.owner === scope) {
         request.current.controller.abort();
+        if (
+          request.current.mutation &&
+          mutationOptions.current.mutationLock?.current === 'reservation'
+        )
+          mutationOptions.current.mutationLock.current = null;
         request.current = null;
       }
       generation.current += 1;
@@ -203,6 +221,9 @@ export function useReservationDetail(input: {
     async (change: ReservationChange): Promise<boolean> => {
       const before = current.current;
       if (
+        mutationOptions.current.mutationLock?.current ||
+        (mutationOptions.current.canMutate &&
+          !mutationOptions.current.canMutate(change)) ||
         before.owner !== scope ||
         before.kind !== 'success' ||
         !before.reservation ||
@@ -217,8 +238,11 @@ export function useReservationDetail(input: {
         (change.action === 'notes' && reservationNotesError(change.notes))
       )
         return false;
-      const active = start();
+      const active: Request | null = start();
       if (!active) return false;
+      active.mutation = true;
+      if (mutationOptions.current.mutationLock)
+        mutationOptions.current.mutationLock.current = 'reservation';
       commit(previous => ({
         ...previous,
         busy: change.action,

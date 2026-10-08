@@ -1,3 +1,4 @@
+import { parseBookingPolicy, type BookingPolicy } from '../api/bookingPolicy';
 import {
   createContext,
   useContext,
@@ -218,11 +219,23 @@ function useBookingController() {
       if (request.current === controller) request.current = null;
     }
   };
-  const submit = async (quote: Availability | null) => {
+  const submit = async (
+    quote: Availability | null,
+    policy?: BookingPolicy | null
+  ) => {
     const before = current.current,
       draft = before.draft;
     if (request.current || before.stored || before.storageBlocked || !draft)
       return;
+    try {
+      parseBookingPolicy(policy);
+    } catch {
+      commit(v => ({
+        ...v,
+        error: 'Nejprve načtěte aktuální informace o platbě a rezervaci.',
+      }));
+      return;
+    }
     const variant = draft.product.variants.find(
       v => v.id === draft.selection.variantId
     );

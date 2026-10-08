@@ -37,6 +37,10 @@ export function reservationNotesError(value: string) {
 }
 export function reservationConflictMessage(error: unknown) {
   const code = error instanceof AdminApiError ? error.code : '';
+  if (code === 'PAYMENT_ADVANCE_REQUIRED')
+    return 'Nejprve zaevidujte přijatou rezervační zálohu. Potvrzení rezervace je samostatná akce.';
+  if (code === 'PAYMENT_RENTAL_REQUIRED')
+    return 'Před předáním je třeba zaevidovat celé nájemné a vratnou kauci.';
   if (code === 'RESERVATION_CONFIRMATION_CONFLICT')
     return 'Rezervaci nelze potvrdit, protože některý fyzický kus je v daném termínu obsazený.';
   if (code === 'RESERVATION_INVENTORY_NOT_ACTIVE')

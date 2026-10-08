@@ -1,3 +1,5 @@
+import { getReservationPayments } from '../api/reservationPayments';
+import { paymentLedgerFixture } from '../payments/paymentFixtures';
 import {
   fireEvent,
   render,
@@ -18,7 +20,7 @@ import {
   reservationListResponseFixture as list,
 } from './reservationFixtures';
 jest.mock('../../hooks/useAuth', () => ({
-  useAuth: () => ({ token: 'token' }),
+  useAuth: () => ({ token: 'token', user: { _id: 'admin1' } }),
 }));
 const mockAccess = jest.fn(() => false);
 jest.mock('../auth/AdminAccessBoundary', () => ({
@@ -80,6 +82,12 @@ function setup(path = '/admin/rezervace', state?: unknown) {
   );
 }
 beforeEach(() => {
+  sessionStorage.clear();
+  (getReservationPayments as jest.Mock).mockResolvedValue({
+    ...paymentLedgerFixture,
+    advanceRequired: 0,
+    advanceBalance: 0,
+  });
   jest.clearAllMocks();
   getList.mockResolvedValue(list);
   getDetail.mockResolvedValue(detail);
@@ -189,9 +197,11 @@ test('detail renders authoritative Kč, snapshots, expiration and missing curren
   expect(
     screen.getByRole('link', { name: 'Zpět na kalendář' })
   ).toHaveAttribute('href', '/admin/kalendar');
-  expect(
-    screen.getByRole('button', { name: 'Potvrdit rezervaci' })
-  ).toBeEnabled();
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: 'Potvrdit rezervaci' })
+    ).toBeEnabled()
+  );
   expect(
     screen.queryByRole('button', { name: /platbu/i })
   ).not.toBeInTheDocument();
@@ -218,7 +228,9 @@ test('cancelled/refunded detail preserves safe text and current inventory facts'
   });
   setup('/admin/rezervace/r1', { returnTo: 'https://evil.test' });
   await screen.findByText('Zrušená');
-  expect(screen.getByText('Vrácená platba')).toBeInTheDocument();
+  expect(
+    screen.getByRole('heading', { name: 'Platební evidence' })
+  ).toBeInTheDocument();
   expect(screen.getByText('<script>never run</script>')).toBeInTheDocument();
   expect(screen.getByText('V údržbě')).toBeInTheDocument();
   expect(
@@ -253,3 +265,9 @@ test('detail404 has a safe back link; retryable malformed detail never renders a
   fireEvent.click(screen.getByRole('button', { name: 'Zkusit znovu' }));
   await screen.findByRole('heading', { name: 'AK-2026-001' });
 });
+
+jest.mock('../api/reservationPayments', () => ({
+  ...jest.requireActual('../api/reservationPayments'),
+  getReservationPayments: jest.fn(),
+  appendReservationPayment: jest.fn(),
+}));

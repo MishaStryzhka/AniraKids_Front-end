@@ -1,3 +1,4 @@
+import { bookingPolicyFixture } from './bookingFixtures';
 import {
   fireEvent,
   render,
@@ -10,6 +11,7 @@ import { BookingPage } from './BookingPage';
 import { BookingProvider, useBooking } from './BookingProvider';
 import {
   getAvailability,
+  getBookingPolicy,
   postReservation,
   PublicApiError,
 } from '../api/publicApi';
@@ -18,6 +20,7 @@ import { SESSION_KEY } from './bookingModel';
 jest.mock('../api/publicApi', () => ({
   ...jest.requireActual('../api/publicApi'),
   getAvailability: jest.fn(),
+  getBookingPolicy: jest.fn(),
   postReservation: jest.fn(),
 }));
 const get = getAvailability as jest.MockedFunction<typeof getAvailability>,
@@ -42,6 +45,7 @@ function setup() {
   fireEvent.click(screen.getByRole('button', { name: 'Choose product' }));
 }
 beforeEach(() => {
+  (getBookingPolicy as jest.Mock).mockResolvedValue(bookingPolicyFixture);
   sessionStorage.clear();
   get.mockReset();
   post.mockReset();

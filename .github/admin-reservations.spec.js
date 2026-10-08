@@ -1,3 +1,4 @@
+const { ledger } = require('./payment-fixtures');
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
@@ -104,6 +105,8 @@ async function mocks(page) {
         state.writes.push(request.method());
         return route.abort('failed');
       }
+      if (request.method() === 'GET' && url.pathname.endsWith('/payments'))
+        return json(200, { payments: ledger(url.pathname.split('/').at(-2)) });
       if (url.pathname === '/api/v2/admin/products')
         return json(200, {
           items: [],
