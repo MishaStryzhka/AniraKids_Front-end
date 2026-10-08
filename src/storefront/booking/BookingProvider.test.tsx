@@ -1,7 +1,7 @@
 import { bookingPolicyFixture as policy } from './bookingFixtures';
 import { act, renderHook } from '@testing-library/react';
 import { BookingProvider, useBooking } from './BookingProvider';
-import { postReservation, PublicApiError } from '../api/publicApi';
+import { getReservationStatus, postReservation, PublicApiError } from '../api/publicApi';
 import { body, product, quote, receipt, deferred } from './bookingFixtures';
 import {
   initialDraft,
@@ -12,6 +12,7 @@ import {
 jest.mock('../api/publicApi', () => ({
   ...jest.requireActual('../api/publicApi'),
   postReservation: jest.fn(),
+  getReservationStatus: jest.fn(),
 }));
 const post = postReservation as jest.MockedFunction<typeof postReservation>;
 function setup() {
@@ -213,4 +214,24 @@ test('new booking fails closed without valid policy; unresolved attempts remain 
   });
   expect(post).not.toHaveBeenCalled();
   expect(view.result.current.error).toContain('informace o platbě');
+});
+
+test('refresh reads current receipt and never repeats POST; failure retains old receipt with warning', async () => {
+  const read = getReservationStatus as jest.MockedFunction<typeof getReservationStatus>;
+  read.mockReset();
+  const token = 'a'.repeat(43);
+  const before = { ...receipt, guestAccessToken: token };
+  persistBooking({ version: 1, kind: 'receipt', receipt: before });
+  const view = setup();
+  const after = { ...before, status: 'confirmed', expiresAt: null };
+  read.mockResolvedValueOnce(after);
+  await act(async () => { await view.result.current.refreshStatus(); });
+  expect(view.result.current.stored).toEqual({ version: 1, kind: 'receipt', receipt: after });
+  expect(post).not.toHaveBeenCalled();
+  read.mockRejectedValueOnce(new Error('offline'));
+  await act(async () => { await view.result.current.refreshStatus(); });
+  expect(view.result.current.stored).toEqual({ version: 1, kind: 'receipt', receipt: after });
+  expect(view.result.current.error).toContain('nepodařilo ověřit');
+  expect(view.result.current.busy).toBe(false);
+  read.mockReset();
 });

@@ -38,6 +38,7 @@ import {
 } from '../storefrontStyles';
 import { usePublicRead } from '../usePublicRead';
 import { useBooking } from './BookingProvider';
+import { reservationStatusPath } from './BookingStatusPage';
 import {
   contactErrors,
   formatMoney,
@@ -231,6 +232,17 @@ export function BookingPage() {
                       : 'Neznámý stav platby'}
               </Copy>
               <ReceiptPaymentInformation receipt={stored.receipt} />
+              {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
+              {stored.receipt.guestAccessToken && (
+                <Actions>
+                  <Button disabled={booking.busy} onClick={booking.refreshStatus}>
+                    {booking.busy ? 'Ověřování stavu…' : 'Aktualizovat stav rezervace'}
+                  </Button>
+                  <RouteLink to={reservationStatusPath(stored.receipt.reservationNumber, stored.receipt.guestAccessToken)}>
+                    Otevřít aktuální stav rezervace
+                  </RouteLink>
+                </Actions>
+              )}
               <Actions>
                 <Button
                   disabled={booking.storageBlocked}

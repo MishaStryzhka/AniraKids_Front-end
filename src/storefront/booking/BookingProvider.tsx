@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {
   postReservation,
+  getReservationStatus,
   PublicApiError,
   sameSelection,
   type Availability,
@@ -265,6 +266,29 @@ function useBookingController() {
     const stored = current.current.stored;
     if (stored?.kind === 'attempt') await send(stored);
   };
+  const refreshStatus = async () => {
+    const stored = current.current.stored;
+    if (request.current || stored?.kind !== 'receipt' || !stored.receipt.guestAccessToken) return;
+    const controller = new AbortController();
+    request.current = controller;
+    commit(v => ({ ...v, busy: true, error: null }));
+    try {
+      const receipt = await getReservationStatus(stored.receipt.reservationNumber, stored.receipt.guestAccessToken, controller.signal);
+      if (!mounted.current || request.current !== controller) return;
+      const updated: StoredBooking = { version: 1, kind: 'receipt', receipt };
+      let storageBlocked = false;
+      try { persistBooking(updated); } catch { storageBlocked = true; }
+      commit(v => ({ ...v, stored: updated, storageBlocked, error: storageBlocked ? storageMessage : null }));
+    } catch {
+      if (mounted.current && request.current === controller)
+        commit(v => ({ ...v, error: 'Aktuální stav se nepodařilo ověřit. Zobrazeny jsou poslední uložené údaje. Zkuste to znovu nebo nás kontaktujte.' }));
+    } finally {
+      if (request.current === controller) {
+        request.current = null;
+        commit(v => ({ ...v, busy: false }));
+      }
+    }
+  };
   const retryStorage = () => {
     if (request.current) return;
     try {
@@ -300,6 +324,7 @@ function useBookingController() {
     submit,
     recover,
     retryStorage,
+    refreshStatus,
     startNew,
     hasActiveDraft: Boolean(state.draft || state.stored?.kind === 'attempt'),
   };

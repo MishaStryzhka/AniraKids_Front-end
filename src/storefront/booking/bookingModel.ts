@@ -137,7 +137,7 @@ export function parseStored(raw: string): StoredBooking {
     return {
       version: 1,
       kind: 'receipt',
-      receipt: parseReceipt({ reservation: v.receipt }),
+      receipt: parseReceipt({ reservation: v.receipt, guestAccessToken: object(v.receipt) ? v.receipt.guestAccessToken : undefined }),
     };
   throw new Error('Invalid storage');
 }

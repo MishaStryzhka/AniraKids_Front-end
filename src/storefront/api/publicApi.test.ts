@@ -162,3 +162,16 @@ test('no configured API causes no request; errors expose safe code only', async 
     status: 409,
   });
 });
+
+test('status token is scoped to a header; current response must match requested reservation', async () => {
+  const { getReservationStatus } = await import('./publicApi');
+  const token = 'a'.repeat(43), number = 'AK-2030-ABC123';
+  const current = { ...receipt, reservationNumber: number, status: 'confirmed', expiresAt: null };
+  const fetchMock = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ reservation: current }) });
+  global.fetch = fetchMock;
+  process.env.REACT_APP_V2_API_BASE_URL = 'https://api.example.test/api/v2';
+  expect(await getReservationStatus(number, token)).toEqual({ ...current, guestAccessToken: token });
+  expect(fetchMock).toHaveBeenCalledWith('https://api.example.test/api/v2/reservations/' + number, expect.objectContaining({ cache: 'no-store', headers: expect.objectContaining({ Authorization: 'Reservation ' + token }) }));
+  fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => ({ reservation: { ...current, reservationNumber: 'AK-2030-OTHER1' } }) });
+  await expect(getReservationStatus(number, token)).rejects.toThrow();
+});

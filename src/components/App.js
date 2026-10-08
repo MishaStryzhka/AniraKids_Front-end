@@ -33,6 +33,7 @@ import { BookingProvider } from '../storefront/booking/BookingProvider';
 import { CataloguePage } from '../storefront/CataloguePage';
 import { ProductDetailPage } from '../storefront/ProductDetailPage';
 import { BookingPage } from '../storefront/booking/BookingPage';
+import { BookingStatusPage } from '../storefront/booking/BookingStatusPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const DecorAndToysPage = lazy(
@@ -249,6 +250,9 @@ function App() {
               </Route>
             </Route>
 
+            <Route path={routes.reservationStatus} element={<ReservationFlowLayout />}>
+              <Route index element={<BookingStatusPage />} />
+            </Route>
             {/* Focused customer reservation flow. */}
             <Route
               path={routes.reservation}
