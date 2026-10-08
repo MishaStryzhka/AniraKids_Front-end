@@ -89,8 +89,18 @@ async function setup(page) {
           contentType: 'application/json',
           body: JSON.stringify(body),
         });
-      if (request.method() === 'GET' && url.pathname.endsWith('/payments'))
-        return json(200, { payments: ledger(url.pathname.split('/').at(-2)) });
+      if (request.method() === 'GET' && url.pathname.endsWith('/payments')) {
+        const reservationId = parts.at(-2),
+          record = state.records[reservationId];
+        return json(200, {
+          payments: {
+            ...ledger(reservationId),
+            rentalTotal: record.subtotal,
+            rentalBalance: record.subtotal,
+            depositRequired: record.deposit,
+          },
+        });
+      }
       if (url.pathname === '/api/v2/admin/products')
         return json(200, {
           items: [],
@@ -229,9 +239,29 @@ for (const width of [390, 1440])
       await expect(
         page.getByRole('button', { name: 'Zrušit rezervaci', exact: true })
       ).toHaveCount(0);
+      // Lifecycle changes never create payment records. The ledger now owns
+      // payment presentation instead of the potentially stale legacy badge.
+      const payments = page.getByRole('region', { name: 'Platební evidence' });
       await expect(
-        page.getByText('Nezaplaceno', { exact: true })
+        payments
+          .locator('dl > div')
+          .filter({
+            has: page.getByText('Zbývá uhradit nájemné', { exact: true }),
+          })
+          .locator('dd')
+      ).toHaveText('1 200 Kč');
+      await expect(
+        payments
+          .locator('dl > div')
+          .filter({
+            has: page.getByText('Držená vratná kauce', { exact: true }),
+          })
+          .locator('dd')
+      ).toHaveText('0 Kč');
+      await expect(
+        payments.getByText('Žádné platební operace.', { exact: true })
       ).toBeVisible();
+      expect(state.records.r1.paymentStatus).toBe('unpaid');
       await capture(page, 'returned-' + width);
       expect(state.mutations.map(item => item.action)).toEqual([
         'notes',
