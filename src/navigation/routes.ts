@@ -13,6 +13,7 @@ export const routes = {
   search: '/hledani',
   favourites: '/oblibene',
   reservation: '/rezervace',
+  reservationStatus: '/stav-rezervace',
   account: '/ucet',
   accountReservations: '/ucet/rezervace',
   faq: '/faq',

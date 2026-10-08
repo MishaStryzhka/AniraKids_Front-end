@@ -52,6 +52,7 @@ export type ReservationBody = Selection & {
   notes?: string;
 };
 export type Receipt = {
+  guestAccessToken?: string;
   payment?: ReceiptPayment | null;
   reservationNumber: string;
   status: string;
@@ -277,8 +278,9 @@ export function parseReceipt(v: unknown, expected?: Selection): Receipt {
     endDate: r.endDate,
   };
   if (expected && !sameSelection(selection, expected)) return invalid();
-  // Deliberate projection: customer data and the guest access token are never retained.
+  // Retain only the scoped capability (session storage); never retain customer data.
   return {
+    ...(isGuestAccessToken(v.guestAccessToken) ? { guestAccessToken: v.guestAccessToken } : {}),
     reservationNumber: r.reservationNumber,
     status: r.status,
     rentalMode: r.rentalMode,
@@ -413,4 +415,19 @@ export async function getBookingPolicy(signal?: AbortSignal) {
   return parseBookingPolicy(
     (await request('/booking-policy', { signal })).body
   );
+}
+
+export const isGuestAccessToken = (value: unknown): value is string =>
+  typeof value === 'string' && /^[A-Za-z0-9_-]{43}$/.test(value);
+
+export async function getReservationStatus(number: string, token: string, signal?: AbortSignal): Promise<Receipt> {
+  if (!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !isGuestAccessToken(token))
+    throw new PublicApiError('RESERVATION_NOT_FOUND', 404);
+  const result = await request('/reservations/' + encodeURIComponent(number), {
+    headers: { Authorization: 'Reservation ' + token },
+    cache: 'no-store', signal,
+  });
+  const receipt = parseReceipt(result.body);
+  if (receipt.reservationNumber !== number) return invalid();
+  return { ...receipt, guestAccessToken: token };
 }

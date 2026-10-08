@@ -99,3 +99,11 @@ test.each([
     expect(sessionStorage.getItem(SESSION_KEY)).toBe(raw);
   }
 );
+
+test('receipt persists only the scoped guest capability in session storage', () => {
+  const token = 'a'.repeat(43);
+  const stored = { version: 1 as const, kind: 'receipt' as const, receipt: { ...receipt, guestAccessToken: token } };
+  persistBooking(stored);
+  expect(loadBooking()).toEqual(stored);
+  expect(sessionStorage.getItem(SESSION_KEY)).not.toContain('customer');
+});
