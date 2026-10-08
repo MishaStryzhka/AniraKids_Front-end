@@ -3,10 +3,9 @@
 const fs = require('node:fs');
 const sharp = require('sharp');
 const source = fs.readFileSync('src/images/icons/Icon.js', 'utf8');
-const mark = source.match(/<path d="([^"]+)"/)[1];
-const hanger = `<path fill="#5F4A40" d="${mark}"/>`;
-const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="104" fill="#F5EEEA"/><svg x="56" y="114" width="400" height="280" viewBox="88 -4 165 110">${hanger}</svg></svg>`;
-const card = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#FAF8F6"/><rect x="32" y="32" width="1136" height="566" rx="12" fill="#F5EEEA"/><svg x="500" y="94" width="200" height="134" viewBox="88 -4 165 110">${hanger}</svg><text x="600" y="344" text-anchor="middle" font-family="DejaVu Serif,serif" font-size="94" fill="#292522">AniraKids</text><text x="600" y="421" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="30" fill="#655D58">Půjčovna šatů a obleků pro výjimečné chvíle</text><text x="600" y="528" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="24" letter-spacing="3" fill="#7A6254">anirakids.cz</text></svg>`;
+const logo = source.slice(source.indexOf('<g fill='), source.indexOf('    <defs>')).replace(/fill=\{fill \|\| '#fff'\}/, 'fill="#292522"').replace(' clipPath="url(#a)"', '').replaceAll('className=', 'class=');
+const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="#FAF8F6"/><svg x="36" y="140" width="440" height="231" viewBox="0 0 335 176">${logo}</svg></svg>`;
+const card = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#FAF8F6"/><rect x="32" y="32" width="1136" height="566" rx="12" fill="#F5EEEA"/><svg x="350" y="104" width="500" height="263" viewBox="0 0 335 176">${logo}</svg><text x="600" y="442" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="30" fill="#655D58">Půjčovna šatů a obleků pro výjimečné chvíle</text><text x="600" y="534" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="24" letter-spacing="3" fill="#7A6254">anirakids.cz</text></svg>`;
 (async()=>{
  fs.writeFileSync('public/favicon.svg',icon);
  fs.writeFileSync('public/social-preview.svg',card);
