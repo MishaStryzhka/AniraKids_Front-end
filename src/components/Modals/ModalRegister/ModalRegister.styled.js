@@ -4,50 +4,72 @@ import PhotoBgMobileClothers from 'images/bg-clothers-mobile.jpg';
 import PhotoBgTabletClothers from 'images/bg-clothers-tablet.jpg';
 
 export const ModalWindow = styled.div`
-  @media screen and (max-width: 427.5px) {
-    width: 100vw;
-  }
-  width: 428px;
-  height: 628px;
-
+  width: 100%;
+  min-width: 0;
   background-color: ${({ theme }) => theme.color.mainColor1};
   background-image: url(${PhotoBgMobileClothers});
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  z-index: 1;
   position: relative;
-
-  @media screen and (min-width: 768px) {
+  @media (min-width: 768px) {
     background-image: url(${PhotoBgTabletClothers});
-    width: 768px;
   }
-  @media screen and (min-width: 1280px) {
+  @media (min-width: 1280px) {
     background-image: url(${PhotoBgClothes});
-    width: 992px;
-    height: 668px;
   }
 `;
-
 export const WrapForm = styled.div`
-  @media screen and (max-width: 427.5px) {
-    max-width: 100vw;
-  }
   background-color: rgba(255, 255, 255, 0.9);
-  position: absolute;
+  position: relative;
   z-index: 3;
-  max-width: 428px;
-  height: 588px;
-  padding: 20px 14px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 56px 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  @media screen and (min-width: 768px) {
-    padding: 20px 20px;
-    max-width: 400px;
+  @media (min-width: 768px) {
+    width: 448px;
+    padding: 56px 24px 32px;
   }
-  @media screen and (min-width: 1280px) {
-    padding: 40px 48px;
+  @media (min-width: 1280px) {
+    width: 496px;
+    padding: 56px 48px 40px;
+  }
+  & *,
+  & *::before,
+  & *::after {
+    box-sizing: border-box;
+  }
+  & form,
+  & label {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  & input {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+    min-height: 44px;
+  }
+  & input::placeholder {
+    font-size: 16px;
+  }
+  & input:focus-visible,
+  & button:focus-visible,
+  & a:focus-visible {
+    outline: 2px solid #77695e;
+    outline-offset: 2px;
+  }
+  & form button {
+    max-width: 100%;
+    min-height: 44px;
+  }
+  & form p {
+    max-width: 100%;
   }
 `;
 
@@ -63,8 +85,8 @@ export const BoxButtonsNavigation = styled.div`
 
 export const ButtonNav = styled.button`
   @media screen and (max-width: 427.5px) {
-    font-size: 5.2vw;
-    width: 46.7vw;
+    font-size: 18px;
+    width: 50%;
   }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 20px;
@@ -74,7 +96,9 @@ export const ButtonNav = styled.button`
   background-color: transparent;
   border: transparent;
   border-bottom: 2px solid #000;
-  width: 200px;
+  width: 50%;
+  min-width: 0;
+  min-height: 44px;
   text-align: center;
   padding: 8px 0;
   text-transform: uppercase;
@@ -106,7 +130,7 @@ export const WrapButton = styled.div`
 export const ButtonContact = styled.button`
   @media screen and (max-width: 427.5px) {
     font-size: 3.7vw;
-    width: 46.7vw;
+    width: 50%;
   }
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -115,7 +139,9 @@ export const ButtonContact = styled.button`
   border: transparent;
   border-bottom: 2px solid;
   background-color: transparent;
-  width: 200px;
+  width: 50%;
+  min-width: 0;
+  min-height: 44px;
   text-align: center;
   padding: 8px 0;
   cursor: pointer;
@@ -144,12 +170,12 @@ export const Separation = styled.p`
 
   &::before {
     @media screen and (max-width: 427.5px) {
-      width: 34vw;
+      width: 40%;
     }
     content: '';
     display: block;
     height: 2px;
-    width: 162.5px;
+    width: 40%;
     position: absolute;
     top: 50%;
     left: 0;
@@ -159,12 +185,12 @@ export const Separation = styled.p`
 
   &::after {
     @media screen and (max-width: 427.5px) {
-      width: 34vw;
+      width: 40%;
     }
     content: '';
     display: block;
     height: 2px;
-    width: 162.5px;
+    width: 40%;
     position: absolute;
     top: 50%;
     right: 0;

@@ -1,0 +1,39 @@
+name: Auth Modal Scroll Verify
+on:
+  push:
+    branches: [auth-modal-scroll-fix]
+concurrency:
+  group: auth-modal-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run:
+          npm test -- --watchAll=false --runInBand
+          src/components/Modals/Modal.test.js
+      - name: Build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: npm run build
+      - name: Browser runtime
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+          npx --yes serve@14.2.4 -s build -l 4173 >/tmp/auth-server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+      - run:
+          npx playwright test .github/auth-modal.spec.js
+          .github/design02f.spec.js --reporter=line
+      - name: Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-modal-${{ github.sha }}
+          path: test-evidence/payments/

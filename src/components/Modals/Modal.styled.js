@@ -1,5 +1,5 @@
 import IconCross from 'images/icons/IconCross';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const GeneralModalWindow = styled.div`
   position: relative;
@@ -69,7 +69,9 @@ export const TextDone = styled.p`
   padding: 48px 48px;
 
   text-align: center;
-  font-family: Open Sans, sans-serif;
+  font-family:
+    Open Sans,
+    sans-serif;
   font-size: 24px;
   font-weight: 400;
   line-height: 1.4;
@@ -84,6 +86,7 @@ export const Backdrop = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,6 +111,20 @@ export const ModalContainer = styled.div`
     max-width: 920px;
     /* height: 326px; */
   }
+  ${({ $authModal }) =>
+    $authModal &&
+    css`
+      width: 100%;
+      max-width: 992px;
+      min-width: 0;
+      flex-shrink: 0;
+      @media (min-width: 768px) {
+        max-width: 992px;
+      }
+      @media (min-width: 1440px) {
+        max-width: 992px;
+      }
+    `}
 `;
 export const BtnStyled = styled.button`
   cursor: pointer;
@@ -120,7 +137,9 @@ export const BtnStyled = styled.button`
 
 export const ModalDescription = styled.p`
   text-align: center;
-  font-family: Open Sans, sans-serif;
+  font-family:
+    Open Sans,
+    sans-serif;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;
@@ -192,6 +211,17 @@ export const ScrollBox = styled.div`
   width: 100vw;
 
   display: flex;
+  ${({ $authModal }) =>
+    $authModal &&
+    css`
+      height: 100dvh;
+      width: 100%;
+      padding: max(16px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+      overscroll-behavior: contain;
+    `}
 `;
 
 export const ErrorMessage = styled.p`
@@ -216,4 +246,26 @@ export const CloseButton = styled.button`
   position: absolute;
   top: 4px;
   right: 4px;
+  ${({ $authModal }) =>
+    $authModal &&
+    css`
+      width: 44px;
+      height: 44px;
+      top: 4px;
+      right: 4px;
+      z-index: 5;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 2px;
+      display: grid;
+      place-items: center;
+      &:focus-visible {
+        outline: 2px solid #77695e;
+        outline-offset: 2px;
+      }
+      & svg {
+        position: static;
+        width: 24px;
+        height: 24px;
+      }
+    `}
 `;

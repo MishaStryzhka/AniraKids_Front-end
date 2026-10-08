@@ -23,7 +23,7 @@ import { AdminLayout } from '../admin/layout/AdminLayout';
 import { adminRoutes } from '../admin/navigation/adminRoutes';
 import { AdminReservationsPage } from '../admin/reservations/AdminReservationsPage';
 import { AdminReservationDetailPage } from '../admin/reservations/AdminReservationDetailPage';
-import {AdminReservationCalendarPage} from '../admin/calendar/AdminReservationCalendarPage';
+import { AdminReservationCalendarPage } from '../admin/calendar/AdminReservationCalendarPage';
 import { AdminProductsPage } from '../admin/products/AdminProductsPage';
 import { AdminProductCorePage } from '../admin/products/AdminProductCorePage';
 import { AdminHomePage } from '../admin/pages/AdminPlaceholders';
@@ -34,24 +34,46 @@ import { ProductDetailPage } from '../storefront/ProductDetailPage';
 import { BookingPage } from '../storefront/booking/BookingPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
-const DecorAndToysPage = lazy(() => import('../pages/DecorAndToysPage/DecorAndToysPage'));
-const ForChildrenPage = lazy(() => import('../pages/ForChildrenPage/ForChildrenPage'));
+const DecorAndToysPage = lazy(
+  () => import('../pages/DecorAndToysPage/DecorAndToysPage')
+);
+const ForChildrenPage = lazy(
+  () => import('../pages/ForChildrenPage/ForChildrenPage')
+);
 const ForMenPage = lazy(() => import('../pages/ForMenPage/ForMenPage'));
 const ForWomenPage = lazy(() => import('../pages/ForWomenPage/ForWomenPage'));
 const MainPage = lazy(() => import('../pages/MainPage/MainPage'));
 const UserPage = lazy(() => import('../pages/UserPage/UserPage'));
-const ConfirmEmailPage = lazy(() => import('../pages/ConfirmEmailPage/ConfirmEmailPage'));
+const ConfirmEmailPage = lazy(
+  () => import('../pages/ConfirmEmailPage/ConfirmEmailPage')
+);
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage/NotFoundPage'));
 const Profile = lazy(() => import('../pages/UserPage/Pages/Profile/Profile'));
 const Chat = lazy(() => import('../pages/UserPage/Pages/Chat/Chat'));
-const Favorite = lazy(() => import('../pages/UserPage/Pages/Favorite/Favorite'));
+const Favorite = lazy(
+  () => import('../pages/UserPage/Pages/Favorite/Favorite')
+);
 const RentOut = lazy(() => import('../pages/UserPage/Pages/RentOut/RentOut'));
-const UpdateProduct = lazy(() => import('../pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct'));
+const UpdateProduct = lazy(
+  () =>
+    import('../pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct')
+);
 const RentIn = lazy(() => import('../pages/UserPage/Pages/RentIn/RentIn'));
-const MyOrders = lazy(() => import('../pages/UserPage/Pages/MyOrders/MyOrders'));
-const MyPurchases = lazy(() => import('../pages/UserPage/Pages/MyPurchases/MyPurchases'));
-const ViewOrder = lazy(() => import('../pages/UserPage/Pages/MyOrders/Pages/ViewOrder/ViewOrder'));
-const ViewPurchase = lazy(() => import('../pages/UserPage/Pages/MyPurchases/Pages/ViewPurchase/ViewPurchase'));
+const MyOrders = lazy(
+  () => import('../pages/UserPage/Pages/MyOrders/MyOrders')
+);
+const MyPurchases = lazy(
+  () => import('../pages/UserPage/Pages/MyPurchases/MyPurchases')
+);
+const ViewOrder = lazy(
+  () => import('../pages/UserPage/Pages/MyOrders/Pages/ViewOrder/ViewOrder')
+);
+const ViewPurchase = lazy(
+  () =>
+    import(
+      '../pages/UserPage/Pages/MyPurchases/Pages/ViewPurchase/ViewPurchase'
+    )
+);
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
@@ -76,100 +98,175 @@ function App() {
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <GlobalStyles />
-      <ModalAuthContext.Provider value={{ isOpenModalAuth, setIsOpenModalAuth }}>
+      <ModalAuthContext.Provider
+        value={{ isOpenModalAuth, setIsOpenModalAuth }}
+      >
         <BookingProvider>
-        <Routes>
-          <Route
-            element={
-              <RestrictedRoute
-                redirectTo="/"
-                redirectBack="/my-account"
-                component={<StorefrontLayout />}
-              />
-            }
-          >
-            <Route path={routes.home} element={<MainPage />} />
-
-            {/* Canonical storefront routes. */}
-            <Route path={routes.dresses} element={<CataloguePage />} />
-            <Route path={routes.suits} element={<CataloguePage />} />
-            <Route path={routes.newArrivals} element={<CataloguePage />} />
-            <Route path={routes.rental} element={<CataloguePage />} />
-            <Route path={routes.search} element={<CataloguePage />} />
-            <Route path={routes.favourites} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.account} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.accountReservations} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.faq} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.rentalTerms} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.contact} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.terms} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
-            <Route path={routes.cookies} element={<CanonicalRoutePlaceholder />} />
-            <Route path={routes.productPattern} element={<ProductDetailPage />} />
-
-            {/* Legacy pages remain reachable during the controlled migration. */}
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/forMen" element={<ForMenPage />}><Route path=":id" element={<ProductPage />} /></Route>
-            <Route path="/forWomen" element={<ForWomenPage />}><Route path=":id" element={<ProductPage />} /></Route>
-            <Route path="/forChildren" element={<ForChildrenPage />}><Route path=":id" element={<ProductPage />} /></Route>
-            <Route path="/decorAndToys" element={<DecorAndToysPage />}><Route path=":id" element={<ProductPage />} /></Route>
-            <Route path="/aboutUs" element={<AboutUsPage />} />
-            <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
-            <Route path="/refreshPassword" element={<RefreshPasswordPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-
+          <Routes>
             <Route
-              path="/my-account"
               element={
-                <PrivateRoute
+                <RestrictedRoute
                   redirectTo="/"
-                  redirectBack="/my-account/profile"
-                  component={<UserPage />}
+                  redirectBack="/my-account"
+                  component={<StorefrontLayout />}
                 />
               }
             >
-              <Route index element={<Profile />} />
-              <Route path="profile/" element={<Profile />} />
-              <Route path="chat/" element={<Chat />} />
-              <Route path="favorite/" element={<Favorite />}><Route path=":id" element={<ProductPage />} /></Route>
-              <Route path="rent-out/" element={<RentOut />}><Route path=":id" element={<ProductPage />} /></Route>
-              <Route path="rent-out/add-product/" element={<AddProduct />} />
-              <Route path="rent-out/update-product/:id" element={<UpdateProduct />} />
-              <Route path="rent-in/" element={<RentIn />} />
-              <Route path="my-orders/" element={<MyOrders />} />
-              <Route path="my-orders/order/:id" element={<ViewOrder />} />
-              <Route path="my-purchases/" element={<MyPurchases />} />
-              <Route path="my-purchases/purchase/:id" element={<ViewPurchase />} />
-              <Route path="wallet/" element={<Wallet />} />
+              <Route path={routes.home} element={<MainPage />} />
+
+              {/* Canonical storefront routes. */}
+              <Route path={routes.dresses} element={<CataloguePage />} />
+              <Route path={routes.suits} element={<CataloguePage />} />
+              <Route path={routes.newArrivals} element={<CataloguePage />} />
+              <Route path={routes.rental} element={<CataloguePage />} />
+              <Route path={routes.search} element={<CataloguePage />} />
+              <Route
+                path={routes.favourites}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.account}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.accountReservations}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.faq}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.rentalTerms}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.contact}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.terms}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
+              <Route
+                path={routes.cookies}
+                element={<CanonicalRoutePlaceholder />}
+              />
+              <Route
+                path={routes.productPattern}
+                element={<ProductDetailPage />}
+              />
+
+              {/* Legacy pages remain reachable during the controlled migration. */}
+              <Route path="/popular" element={<PopularPage />} />
+              <Route path="/forMen" element={<ForMenPage />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="/forWomen" element={<ForWomenPage />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="/forChildren" element={<ForChildrenPage />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="/decorAndToys" element={<DecorAndToysPage />}>
+                <Route path=":id" element={<ProductPage />} />
+              </Route>
+              <Route path="/aboutUs" element={<AboutUsPage />} />
+              <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
+              <Route
+                path="/refreshPassword"
+                element={<RefreshPasswordPage />}
+              />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+
+              <Route
+                path="/my-account"
+                element={
+                  <PrivateRoute
+                    redirectTo="/"
+                    redirectBack="/my-account/profile"
+                    component={<UserPage />}
+                  />
+                }
+              >
+                <Route index element={<Profile />} />
+                <Route path="profile/" element={<Profile />} />
+                <Route path="chat/" element={<Chat />} />
+                <Route path="favorite/" element={<Favorite />}>
+                  <Route path=":id" element={<ProductPage />} />
+                </Route>
+                <Route path="rent-out/" element={<RentOut />}>
+                  <Route path=":id" element={<ProductPage />} />
+                </Route>
+                <Route path="rent-out/add-product/" element={<AddProduct />} />
+                <Route
+                  path="rent-out/update-product/:id"
+                  element={<UpdateProduct />}
+                />
+                <Route path="rent-in/" element={<RentIn />} />
+                <Route path="my-orders/" element={<MyOrders />} />
+                <Route path="my-orders/order/:id" element={<ViewOrder />} />
+                <Route path="my-purchases/" element={<MyPurchases />} />
+                <Route
+                  path="my-purchases/purchase/:id"
+                  element={<ViewPurchase />}
+                />
+                <Route path="wallet/" element={<Wallet />} />
+                <Route path="cart/" element={<Cart />} />
+              </Route>
+
+              <Route path="favorite/" element={<Favorite />} />
               <Route path="cart/" element={<Cart />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
-            <Route path="favorite/" element={<Favorite />} />
-            <Route path="cart/" element={<Cart />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-
-          <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
-            <Route element={<AdminLayout />}>
-              <Route index element={<AdminHomePage />} />
-              <Route path={adminRoutes.products} element={<AdminProductsPage />} />
-              <Route path={adminRoutes.productNew} element={<AdminProductCorePage mode="create" />} />
-              <Route path={adminRoutes.productDetail} element={<AdminProductCorePage mode="edit" />} />
-              <Route path={adminRoutes.reservations} element={<AdminReservationsPage />} />
-              <Route path={adminRoutes.reservationDetail} element={<AdminReservationDetailPage />} />
-              <Route path={adminRoutes.calendar} element={<AdminReservationCalendarPage />} />
+            <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
+              <Route element={<AdminLayout />}>
+                <Route index element={<AdminHomePage />} />
+                <Route
+                  path={adminRoutes.products}
+                  element={<AdminProductsPage />}
+                />
+                <Route
+                  path={adminRoutes.productNew}
+                  element={<AdminProductCorePage mode="create" />}
+                />
+                <Route
+                  path={adminRoutes.productDetail}
+                  element={<AdminProductCorePage mode="edit" />}
+                />
+                <Route
+                  path={adminRoutes.reservations}
+                  element={<AdminReservationsPage />}
+                />
+                <Route
+                  path={adminRoutes.reservationDetail}
+                  element={<AdminReservationDetailPage />}
+                />
+                <Route
+                  path={adminRoutes.calendar}
+                  element={<AdminReservationCalendarPage />}
+                />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Focused customer reservation flow. */}
-          <Route path={routes.reservation} element={<ReservationFlowLayout />}>
-            <Route index element={<BookingPage />} />
-          </Route>
-        </Routes>
+            {/* Focused customer reservation flow. */}
+            <Route
+              path={routes.reservation}
+              element={<ReservationFlowLayout />}
+            >
+              <Route index element={<BookingPage />} />
+            </Route>
+          </Routes>
         </BookingProvider>
 
         {isOpenModalAuth && !isLoggedIn ? (
-          <Modal closeModal={() => setIsOpenModalAuth(false)}>
+          <Modal
+            authModal
+            prohibitClosingByBackdrop
+            closeModal={() => setIsOpenModalAuth(false)}
+          >
             <ModalRegister handleCloseModal={() => setIsOpenModalAuth(false)} />
           </Modal>
         ) : null}
