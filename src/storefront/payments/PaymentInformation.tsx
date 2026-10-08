@@ -149,7 +149,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
       </Facts>
       {expired ? (
         <Copy role="status">
-          Lhůta předběžné rezervace uplynula. Termín již není blokovaný.
+          Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.
           Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
           nás s číslem rezervace; ověříme platbu a dostupnost termínu.
         </Copy>

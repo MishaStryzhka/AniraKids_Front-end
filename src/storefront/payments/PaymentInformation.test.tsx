@@ -64,7 +64,7 @@ beforeEach(() => {
 
 test('expired paid advance warns that the slot is released instead of promising confirmation', () => {
   render(<ReceiptPaymentInformation receipt={{ ...receipt, expiresAt: '2020-01-01T00:00:00Z', payment: { ...payment, advanceBalance: 0, paymentInstructions: null } }} />);
-  expect(screen.getByRole('status')).toHaveTextContent('Termín již není blokovaný');
+  expect(screen.getByRole('status')).toHaveTextContent('Bez našeho potvrzení již termín není blokovaný');
   expect(screen.queryByText(/Rezervace čeká na ruční potvrzení/)).not.toBeInTheDocument();
   expect(screen.queryByRole('img')).not.toBeInTheDocument();
 });
