@@ -55,7 +55,8 @@ export function BookingPaymentExplanation({
         </Copy>
       ) : null}
       <Copy>
-        Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
+        Zálohu můžete uhradit bankovním převodem pomocí QR kódu nebo po domluvě
+        osobně v hotovosti. Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
       <Copy>
@@ -113,6 +114,8 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
     return () => clearTimeout(timer);
   }, [receipt.expiresAt, now]);
   if (!payment) return null;
+  const expired = receipt.status === 'pending' && Boolean(receipt.expiresAt) &&
+    Date.parse(receipt.expiresAt!) <= now;
   const instructions =
     receipt.status === 'pending' &&
     receipt.expiresAt &&
@@ -144,13 +147,20 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           <dd>{formatMoney(payment.depositHeld)}</dd>
         </div>
       </Facts>
-      {instructions ? (
+      {expired ? (
+        <Copy role="status">
+          Lhůta předběžné rezervace uplynula. Termín již není blokovaný.
+          Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
+          nás s číslem rezervace; ověříme platbu a dostupnost termínu.
+        </Copy>
+      ) : instructions ? (
         <>
           <Heading>Úhrada rezervační zálohy</Heading>
           <Copy>
             Uhraďte {formatMoney(instructions.amount)} bankovním převodem. Před
             potvrzením platby zkontrolujte příjemce, částku a zprávu pro
-            příjemce.
+            příjemce. Platbu odešlete co nejdříve, abychom ji mohli ověřit
+            a rezervaci potvrdit před uvedeným koncem předběžné rezervace.
           </Copy>
           <PaymentQr instructions={instructions} />
           <Facts>
@@ -181,7 +191,9 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           </Facts>
           <Copy>
             Po přijetí zálohy následuje ruční potvrzení rezervace. Vratnou kauci
-            tento QR kód nezahrnuje.
+            tento QR kód nezahrnuje. Pokud jste platbu již odeslali nebo uhradili
+            v hotovosti, neplaťte znovu. Stav na této stránce se po našem
+            potvrzení zatím automaticky neaktualizuje.
           </Copy>
         </>
       ) : receipt.status === 'pending' && payment.advanceBalance === 0 ? (

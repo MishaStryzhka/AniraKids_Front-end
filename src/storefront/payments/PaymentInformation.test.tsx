@@ -60,3 +60,24 @@ beforeEach(() => {
     'data:image/png;base64,fixture'
   );
 });
+
+
+test('expired paid advance warns that the slot is released instead of promising confirmation', () => {
+  render(<ReceiptPaymentInformation receipt={{ ...receipt, expiresAt: '2020-01-01T00:00:00Z', payment: { ...payment, advanceBalance: 0, paymentInstructions: null } }} />);
+  expect(screen.getByRole('status')).toHaveTextContent('Termín již není blokovaný');
+  expect(screen.queryByText(/Rezervace čeká na ruční potvrzení/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('img')).not.toBeInTheDocument();
+});
+
+test('QR disappears when the deadline passes while the page stays open', async () => {
+  jest.useFakeTimers();
+  try {
+    const { act } = require('@testing-library/react');
+    render(<ReceiptPaymentInformation receipt={{ ...receipt, payment, expiresAt: new Date(Date.now() + 1000).toISOString() }} />);
+    await act(async () => {});
+    expect(screen.getByRole('img', { name: /QR platba/ })).toBeInTheDocument();
+    act(() => { jest.advanceTimersByTime(1001); });
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Lhůta předběžné rezervace uplynula');
+  } finally { jest.useRealTimers(); }
+});
