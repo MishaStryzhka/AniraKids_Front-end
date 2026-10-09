@@ -1,3 +1,4 @@
+import { rememberDeviceSignIn } from '../../auth/deviceSignIn';
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { configureLegacyApiBaseUrl } from '../../config/legacyApi';
@@ -25,11 +26,12 @@ export const register = createAsyncThunk(
       const res = await axios.post('api/users/register', credentials);
       // After successful registration, add the token to the HTTP header
       setAuthHeader(res.data.token);
+      rememberDeviceSignIn();
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -49,11 +51,12 @@ export const authByGoogle = createAsyncThunk(
       });
       // After successful registration, add the token to the HTTP header
       setAuthHeader(res.data.token);
+      rememberDeviceSignIn();
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -71,12 +74,13 @@ export const authBySeznam = createAsyncThunk(
 
       // After successful registration, add the token to the HTTP header
       setAuthHeader(res.data.token);
+      rememberDeviceSignIn();
 
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -93,13 +97,14 @@ export const logIn = createAsyncThunk(
       const res = await axios.post('/api/users/login', credentials);
       // After successful login, add the token to the HTTP header
       setAuthHeader(res.data.token);
+      rememberDeviceSignIn();
 
       return res.data;
     } catch (error) {
 
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -115,6 +120,7 @@ export const logOut = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
     // After a successful logout, remove the token from the HTTP header
     clearAuthHeader();
   } catch (error) {
+    if (error.response?.status === 401) { clearAuthHeader(); return; }
     return thunkAPI.rejectWithValue(error.message);
   }
 });
@@ -139,6 +145,7 @@ export const refreshUser = createAsyncThunk(
       // If there is a token, add it to the HTTP header and perform the request
       setAuthHeader(persistedToken);
       const res = await axios.get('/api/users/current');
+      rememberDeviceSignIn();
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -204,8 +211,8 @@ export const updateUserInfo = createAsyncThunk(
     } catch (error) {
 
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -229,8 +236,8 @@ export const updateUserBillingDetails = createAsyncThunk(
     } catch (error) {
 
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -249,8 +256,8 @@ export const updateUserBankAccount = createAsyncThunk(
     } catch (error) {
 
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -268,8 +275,8 @@ export const updateUserEmail = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -285,8 +292,8 @@ export const verifiedEmail = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -321,8 +328,8 @@ export const addToFavorites = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }
@@ -339,8 +346,8 @@ export const removeFromFavorites = createAsyncThunk(
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
-        status: error.response.status,
-        message: error.response.data.message,
+        status: error.response?.status,
+        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }

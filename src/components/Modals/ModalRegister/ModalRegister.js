@@ -21,67 +21,37 @@ import { GoogleLogin } from '@react-oauth/google';
 import { authByGoogle } from '../../../redux/auth/operations';
 import { useDispatch } from 'react-redux';
 import IconSeznamLogoEskoCervena from 'images/icons/IconSeznamLogoEskoCervena';
-import { nanoid } from '@reduxjs/toolkit';
-import { useStorage } from 'hooks';
+import { hasSignedInOnDevice } from '../../../auth/deviceSignIn';
+import { beginSeznamSignIn } from '../../../auth/seznamFlow';
+
 
 const ModalRegister = ({ handleCloseModal }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalRegister',
   });
   const [typeRegistration, setTypeRegistration] = useState('email');
-  const [typeNavigation, setTypeNavigation] = useState('registration');
-  const storage = useStorage();
+  const [typeNavigation, setTypeNavigation] = useState(() => hasSignedInOnDevice() ? 'authorization' : 'registration');
+  const [seznamError, setSeznamError] = useState('');
   const dispatch = useDispatch();
-
-  const [isActiveBtn, setIsActiveBtn] = useState({
-    button1: true,
-    button2: false,
-  });
-  const [isActiveBtnNav, setIsActiveBtnNav] = useState({
-    button1: true,
-    button2: false,
-  });
-
-  const handleButtonClick = (button1, button2) => {
-    setIsActiveBtn(prevStates => ({
-      ...prevStates,
-      [button1]: !prevStates[button1],
-      [button2]: !prevStates[button2],
-    }));
-  };
-
-  const handleButtonNavClick = (button1, button2) => {
-    setIsActiveBtnNav(prevStates => ({
-      ...prevStates,
-      [button1]: !prevStates[button1],
-      [button2]: !prevStates[button2],
-    }));
-  };
-
-  const requestSecretSeznam = nanoid();
-  storage.set('requestSecretSeznam', requestSecretSeznam);
-  const { origin } = new URL(window.location.href);
 
   return (
     <ModalWindow>
       <WrapForm>
         <BoxButtonsNavigation>
           <ButtonNav
-            $isActive={isActiveBtnNav.button1}
+            $isActive={typeNavigation === 'registration'}
             type="button"
             onClick={() => {
               setTypeNavigation('registration');
-              handleButtonNavClick('button1', 'button2');
             }}
           >
             {t('Registration')}
           </ButtonNav>
           <ButtonNav
-            $isActive={isActiveBtnNav.button2}
+            $isActive={typeNavigation === 'authorization'}
             type="button"
             onClick={() => {
               setTypeNavigation('authorization');
-              handleButtonNavClick('button2', 'button1');
             }}
           >
             {t('Authorization')}
@@ -94,21 +64,19 @@ const ModalRegister = ({ handleCloseModal }) => {
             </Description>
             <WrapButton>
               <ButtonContact
-                $isActive={isActiveBtn.button1}
+                $isActive={typeRegistration === 'email'}
                 type="button"
                 onClick={() => {
                   setTypeRegistration('email');
-                  handleButtonClick('button1', 'button2');
                 }}
               >
                 {t('Email')}
               </ButtonContact>
               <ButtonContact
-                $isActive={isActiveBtn.button2}
+                $isActive={typeRegistration === 'primaryPhoneNumber'}
                 type="button"
                 onClick={() => {
                   setTypeRegistration('primaryPhoneNumber');
-                  handleButtonClick('button2', 'button1');
                 }}
               >
                 {t('Phone Number')}
@@ -130,18 +98,20 @@ const ModalRegister = ({ handleCloseModal }) => {
           <AuthForm handleCloseModal={() => handleCloseModal()} />
         )}
         <Separation>{t('Or')}</Separation>
+        {seznamError && <p role="alert">{seznamError}</p>}
         <WrapLinks>
           {/* <StyledNavLink>
             <IconFacebook />
             <DescriptionLink>{t('Facebook')}</DescriptionLink>
           </StyledNavLink> */}
           <StyledNavLink
-            href={`https://login.szn.cz/api/v1/oauth/auth
-	?client_id=${process.env.REACT_APP_SEZNAM_CLIENT_ID}
-	&scope=identity
-	&response_type=code
-	&redirect_uri=${origin}
-	&state=${requestSecretSeznam}`}
+            as="button"
+            type="button"
+            aria-label="Pokračovat přes Seznam"
+            onClick={() => {
+              try { window.location.assign(beginSeznamSignIn(process.env.REACT_APP_SEZNAM_CLIENT_ID)); }
+              catch { setSeznamError('Přihlášení přes Seznam nyní není dostupné. Použijte prosím e-mail.'); }
+            }}
           >
             <StyledSeznamWrap>
               <IconSeznamLogoEskoCervena />

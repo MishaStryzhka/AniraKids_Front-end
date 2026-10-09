@@ -207,6 +207,12 @@ export const WrapLinks = styled.div`
 `;
 
 export const StyledNavLink = styled.a`
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  justify-content: center;
   display: flex;
   flex-direction: column;
   gap: 8px;
