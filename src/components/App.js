@@ -18,7 +18,7 @@ import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { GlobalStyles } from '../design-system/styles/GlobalStyles';
 import { StorefrontLayout } from '../layouts/StorefrontLayout';
 import { ReservationFlowLayout } from '../layouts/ReservationFlowLayout';
-import { CanonicalRoutePlaceholder } from '../pages/CanonicalRoutePlaceholder/CanonicalRoutePlaceholder';
+import { HowRentalPage, FaqPage, ContactPage, CookiesPage } from '../storefront/InformationPages';
 import { routes } from '../navigation/routes';
 import { ModalAuthContext } from '../context/ModalAuthContext';
 import Modal from './Modals/Modal';
@@ -113,7 +113,7 @@ function App() {
               <Route path={routes.dresses} element={<CataloguePage />} />
               <Route path={routes.suits} element={<CataloguePage />} />
               <Route path={routes.newArrivals} element={<CataloguePage />} />
-              <Route path={routes.rental} element={<CataloguePage />} />
+              <Route path={routes.rental} element={<HowRentalPage />} />
               <Route path={routes.search} element={<CataloguePage />} />
               <Route
                 path={routes.favourites}
@@ -129,7 +129,7 @@ function App() {
               />
               <Route
                 path={routes.faq}
-                element={<CanonicalRoutePlaceholder />}
+                element={<FaqPage />}
               />
               <Route
                 path={routes.rentalTerms}
@@ -137,13 +137,13 @@ function App() {
               />
               <Route
                 path={routes.contact}
-                element={<CanonicalRoutePlaceholder />}
+                element={<ContactPage />}
               />
               <Route path={routes.terms} element={<BookingInformationPage />} />
               <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
               <Route
                 path={routes.cookies}
-                element={<CanonicalRoutePlaceholder />}
+                element={<CookiesPage />}
               />
               <Route
                 path={routes.productPattern}

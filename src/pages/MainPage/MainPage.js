@@ -1,24 +1,9 @@
-import SectionAboutAniraK from 'components/SectionAboutAniraK/SectionAboutAniraK';
 import SectionHero from 'components/SectionHero/SectionHero';
-import SectionAboutUs from 'components/SectionAboutUs/SectionAboutUs';
 import { useTitle } from 'hooks';
 import SeznamCallback from '../../auth/SeznamCallback';
-import SectionOurMission from 'components/SectionOurMission/SectionOurMission';
-import SectionSimpleSteps from 'components/SectionSimpleSteps/SectionSimpleSteps';
-import SectionAreYouReady from 'components/SectionAreYouReady/SectionAreYouReady';
+import { HomeContent } from '../../storefront/HomeContent';
 const MainPage = () => {
-  useTitle('AniraK');
-  return (
-    <>
-      <SeznamCallback />
-      <SectionHero />
-      <SectionAboutAniraK />
-      <SectionAboutUs />
-      <SectionOurMission />
-      <SectionSimpleSteps />
-      <SectionAreYouReady />
-    </>
-  );
+  useTitle('ANIRAK — šaty a obleky k pronájmu');
+  return <><SeznamCallback /><SectionHero description="Výjimečné oblečení pro vaše společné chvíle. Šaty a obleky na oslavy, svatby i rodinné focení." cta="Prohlédnout nabídku" to="/saty" /><HomeContent /></>;
 };
-
 export default MainPage;
