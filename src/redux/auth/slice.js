@@ -147,8 +147,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserInfo.fulfilled, (state, action) => {
-        console.log('action.payload', action.payload);
-
+  
         state.user = action.payload.user;
         state.isLoading = false;
       })
@@ -178,8 +177,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserBankAccount.fulfilled, (state, action) => {
-        console.log('action.payload', action.payload);
-
+  
         state.user.bankAccount = action.payload.bankAccount;
         state.user.typeUser = action.payload.typeUser;
 

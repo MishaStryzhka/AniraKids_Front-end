@@ -4,7 +4,6 @@ import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { updateUserEmail } from '../../../redux/auth/operations';
 import { validUpdateEmailScheme } from 'schemas';
-import { useAuth } from 'hooks';
 import { BeatLoader } from 'react-spinners';
 import {
   GeneralModalWindow,
@@ -12,8 +11,7 @@ import {
   ModalTitle,
   TextDone,
 } from '../Modal.styled';
-import { clearDone, clearError } from '../../../redux/auth/slice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { WrapButton } from '../ModalRegister/ModalRegister.styled';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from 'components/Forms/Form.styled';
@@ -22,21 +20,24 @@ const ModalChangeEmail = ({ closeModal }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalChangeEmail',
   });
-  const { isLoading, error, isDone } = useAuth();
+  const [error, setError] = useState(null);
+  const [isDone, setIsDone] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    isDone &&
-      setTimeout(() => {
-        dispatch(clearDone());
-        document.body.style.overflow = 'auto';
-        closeModal();
-      }, 5000);
-  }, [dispatch, isDone, closeModal]);
+    if (!isDone) return;
+    const timer = setTimeout(closeModal, 5000);
+    return () => clearTimeout(timer);
+  }, [isDone, closeModal]);
 
   const handleSubmitEmail = async ({ email }) => {
-    dispatch(clearError());
-    await dispatch(updateUserEmail({ email }));
+    setError(null);
+    try {
+      await dispatch(updateUserEmail({ email })).unwrap();
+      setIsDone(true);
+    } catch (failure) {
+      setError(failure);
+    }
   };
 
   return (
@@ -55,6 +56,7 @@ const ModalChangeEmail = ({ closeModal }) => {
           handleChange,
           handleBlur,
           handleSubmit,
+          isSubmitting,
         }) => {
           return isDone ? (
             <TextDone>
@@ -70,20 +72,20 @@ const ModalChangeEmail = ({ closeModal }) => {
                   type="email"
                   name="email"
                   onChange={e => {
-                    // console.log(e.target.value);
+                    setError(null);
                     handleChange(e);
                   }}
                   onBlur={handleBlur}
-                  placeholder="exsample@gmail.com"
+                  placeholder="novy@email.cz"
                 />
                 <ErrorMessage>
                   {(errors.email && touched.email && errors.email) ||
-                    (error?.message === 'Email in use' && t('Email in use'))}
+                    (error && (error.message === 'Email in use' ? t('Email in use') : 'Změnu e-mailu se nepodařilo odeslat. Zkuste to znovu.'))}
                 </ErrorMessage>
               </LabelModal>
               <WrapButton>
-                <Button type="submit">
-                  {!isLoading ? t('saveButton') : <BeatLoader color="#fff" />}
+                <Button type="submit" disabled={isSubmitting}>
+                  {!isSubmitting ? t('saveButton') : <BeatLoader color="#fff" />}
                 </Button>
               </WrapButton>
             </Form>
