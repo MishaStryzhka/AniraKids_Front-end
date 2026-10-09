@@ -24,3 +24,10 @@ test('rejected or expired links display recovery, not success', async () => {
   mount('/confirmEmail?token=test-only');
   expect(await screen.findByRole('alert')).toHaveTextContent('nepodařilo');
 });
+test('email changes use their own one-time link without treating it as a session credential', async () => {
+  mockDispatch.mockResolvedValue({ meta: { requestStatus: 'fulfilled' } });
+  mount('/confirmEmail?changeToken=test-change-only');
+  expect(await screen.findByText('Vaše e-mailová adresa byla úspěšně potvrzena.')).toBeInTheDocument();
+  expect(mockDispatch).toHaveBeenCalledTimes(1);
+  expect(mockDispatch).toHaveBeenCalledWith({ type: 'confirm', payload: { token: 'test-change-only', changeEmail: true } });
+});

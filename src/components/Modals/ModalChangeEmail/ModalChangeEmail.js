@@ -60,7 +60,7 @@ const ModalChangeEmail = ({ closeModal }) => {
         }) => {
           return isDone ? (
             <TextDone>
-              {t('changeEmailMessage', { email: values.email })}
+              Na adresu {values.email} jsme poslali potvrzovací odkaz. Platí 30 minut. Do potvrzení zůstává vaše původní adresa beze změny.
             </TextDone>
           ) : (
             <Form onSubmit={handleSubmit}>

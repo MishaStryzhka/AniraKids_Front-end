@@ -268,7 +268,7 @@ export const updateUserEmail = createAsyncThunk(
   async ({ email }, thunkAPI) => {
     try {
       const response = await axios.patch(
-        `/api/users/current/refreshEmail?email=${email}`
+        `/api/users/current/refreshEmail?email=${encodeURIComponent(email)}`
       );
 
 
@@ -301,13 +301,15 @@ export const verifiedEmail = createAsyncThunk(
 
 export const confirmUserEmail = createAsyncThunk(
   'auth/confirmEmail',
-  async ({ token }, thunkAPI) => {
+  async ({ token, changeEmail = false }, thunkAPI) => {
     if (!token) return thunkAPI.rejectWithValue({ status: 400, message: 'Missing confirmation token' });
     try {
       // A link must not overwrite the Authorization header of another signed-in account.
-      const response = await axios.post('/api/users/current/confirmEmail', null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = changeEmail
+        ? await axios.post('/api/users/current/confirmEmailChange', { token })
+        : await axios.post('/api/users/current/confirmEmail', null, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({

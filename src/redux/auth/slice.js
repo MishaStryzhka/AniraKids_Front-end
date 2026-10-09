@@ -147,7 +147,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserInfo.fulfilled, (state, action) => {
-  
+
         state.user = action.payload.user;
         state.isLoading = false;
       })
@@ -177,7 +177,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserBankAccount.fulfilled, (state, action) => {
-  
+
         state.user.bankAccount = action.payload.bankAccount;
         state.user.typeUser = action.payload.typeUser;
 
@@ -204,7 +204,11 @@ const authSlice = createSlice({
       })
 
       .addCase(confirmUserEmail.fulfilled, (state, action) => {
-        if (state.user?.email && state.user.email === action.payload.user?.email) {
+        if (action.meta.arg.changeEmail && state.user &&
+            String(state.user.userID || state.user._id) === action.payload.user?.userID) {
+          state.user.email = action.payload.user.email;
+          state.user.emailVerified = true;
+        } else if (!action.meta.arg.changeEmail && state.user?.email && state.user.email === action.payload.user?.email) {
           state.user.emailVerified = true;
         }
       })
