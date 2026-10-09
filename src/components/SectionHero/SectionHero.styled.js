@@ -5,8 +5,9 @@ import BgPhotoTabletUrl from 'images/bg-photo/photo-bg-tablet-1x.jpg';
 
 export const WrapSection = styled.section`
   @media screen and (max-width: 427.5px) {
-    width: 100vw;
+    width: 100%;
   }
+  > div { width: 100%; max-width: 1440px; }
   background-color: ${({ theme }) => theme.color.btnColorBG};
   display: flex;
   flex-direction: column;
@@ -16,17 +17,17 @@ export const WrapSection = styled.section`
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  padding-top: 300px;
-  padding-bottom: 305px;
-  width: 428px;
+  padding-top: clamp(100px, 15vw, 210px);
+  padding-bottom: clamp(100px, 15vw, 210px);
+  width: 100%;
   background-image: url(${BgPhotoMobileUrl});
   @media screen and (min-width: 768px) {
     background-image: url(${BgPhotoTabletUrl});
-    width: 768px;
+    width: 100%;
   }
   @media screen and (min-width: 1280px) {
     background-image: url(${BgPhotoDesktopUrl});
-    width: 1440px;
+    width: 100%;
   }
 `;
 
@@ -74,7 +75,7 @@ export const WrapButton = styled.div`
     margin: 0;
   }
   margin: 0 auto;
-  width: 304px;
+  width: min(304px, 100%);
   @media screen and (min-width: 768px) {
     margin: 0;
   }

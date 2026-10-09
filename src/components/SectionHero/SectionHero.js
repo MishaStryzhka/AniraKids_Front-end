@@ -9,7 +9,7 @@ import { Container } from 'components/Container/Container';
 import { useTranslation } from 'react-i18next';
 import ButtonRent from 'components/Buttons/ButtonRent/ButtonRent';
 
-const SectionHero = () => {
+const SectionHero = ({ description, cta, to = "/popular" }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.sectionHero',
   });
@@ -19,9 +19,9 @@ const SectionHero = () => {
         <MainTitle>
           <Span>A</Span>nira<Span>K</Span>
         </MainTitle>
-        <Description>{t('Platform Description')}</Description>
+        <Description>{description || t('Platform Description')}</Description>
         <WrapButton>
-          <ButtonRent to="/popular">{t('rent')}</ButtonRent>
+          <ButtonRent to={to}>{cta || t('rent')}</ButtonRent>
         </WrapButton>
       </Container>
     </WrapSection>
