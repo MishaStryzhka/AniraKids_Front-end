@@ -34,7 +34,7 @@ const MainPage = () => {
         );
     }
 
-    code && user && navigate('/my-account/profile', { replace: true });
+    code && user && navigate('/ucet', { replace: true });
   }, [dispatch, navigate, searchParams, storage, user, isLoading, isLoggedIn]);
 
   return isLoading ? (
