@@ -1,11 +1,11 @@
 import {useEffect, useRef, useState} from 'react';
-import {getAdminReservationCalendar, type CalendarReservation} from '../api/reservationCalendar';
+import {getAdminReservationCalendar, type CalendarReservation, type CalendarBlock} from '../api/reservationCalendar';
 import {calendarMonthRange, type CalendarMonth} from './calendarDates';
 interface Input {month: CalendarMonth; token: string; revision: number; onAccessError(error: unknown): boolean;}
 type State =
   | {kind: 'loading'; key: string; ownerToken: string}
   | {kind: 'error'; key: string; ownerToken: string}
-  | {kind: 'success'; key: string; ownerToken: string; items: CalendarReservation[]; loadedAt: Date};
+  | {kind: 'success'; key: string; ownerToken: string; items: CalendarReservation[]; blocks?:CalendarBlock[]; blocksTruncated?:boolean; loadedAt: Date};
 export function useReservationCalendar({month, token, revision, onAccessError}: Input) {
   const key = `${month}:${revision}`;
   const [state, setState] = useState<State>({kind: 'loading', key, ownerToken: token});
@@ -17,7 +17,7 @@ export function useReservationCalendar({month, token, revision, onAccessError}: 
     setState({kind: 'loading', key, ownerToken: token});
     if (!token) return () => controller.abort();
     getAdminReservationCalendar({token, ...calendarMonthRange(month), signal: controller.signal}).then(response => {
-      if (ownsRequest()) setState({kind: 'success', key, ownerToken: token, items: response.items, loadedAt: new Date()});
+      if (ownsRequest()) setState({kind: 'success', key, ownerToken: token, items: response.items, ...(response.blocks ? {blocks:response.blocks,blocksTruncated:response.blocksTruncated} : {}), loadedAt: new Date()});
     }).catch(error => {
       if (!ownsRequest()) return;
       if (onAccessError(error)) return;

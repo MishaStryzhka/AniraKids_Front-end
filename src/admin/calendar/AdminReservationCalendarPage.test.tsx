@@ -30,3 +30,13 @@ test('failed reload removes old data and retry recovers without raw backend erro
  get.mockResolvedValueOnce({items:[row]});render(<MemoryRouter><AdminReservationCalendarPage/></MemoryRouter>);await screen.findByText('AK-001');get.mockRejectedValueOnce(new Error('private raw server'));fireEvent.click(screen.getByRole('button',{name:'Obnovit'}));
  const error=await screen.findByRole('alert');expect(error).toHaveTextContent('Kalendář se nepodařilo načíst');expect(screen.queryByText('AK-001')).not.toBeInTheDocument();expect(screen.queryByText('private raw server')).not.toBeInTheDocument();get.mockResolvedValueOnce({items:[row]});fireEvent.click(within(error).getByRole('button',{name:'Zkusit znovu'}));await screen.findByText('AK-001');
 });
+
+test('manual blocks show on their inclusive day and link to the owning product',async()=>{
+ get.mockResolvedValue({items:[],blocks:[{id:'b1',productId:'p1',productName:'Blokované šaty',internalCode:'DRESS-1',reason:'repair',startDate:'2026-10-07',endDate:'2026-10-07'}],blocksTruncated:false});
+ render(<MemoryRouter><AdminReservationCalendarPage/></MemoryRouter>);
+ expect(await screen.findByRole('link',{name:'Blokované šaty'})).toHaveAttribute('href','/admin/produkty/p1');
+ expect(screen.getByText('DRESS-1 · Oprava')).toBeInTheDocument();
+ expect(screen.getByRole('button',{name:/středa 7. října 2026.*Blokace: 1/})).toBeInTheDocument();
+ fireEvent.change(screen.getByLabelText('Vybraný den'),{target:{value:'2026-10-08'}});
+ expect(screen.queryByText('Blokované šaty')).not.toBeInTheDocument();
+});
