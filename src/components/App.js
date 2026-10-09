@@ -72,20 +72,6 @@ const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 
-const DecorAndToysPage = lazy(
-  () => import('../pages/DecorAndToysPage/DecorAndToysPage')
-);
-
-const ForChildrenPage = lazy(
-  () => import('../pages/ForChildrenPage/ForChildrenPage')
-);
-
-const ForMenPage = lazy(() => import('../pages/ForMenPage/ForMenPage'));
-
-const ForWomenPage = lazy(() => import('../pages/ForWomenPage/ForWomenPage'));
-
-const PopularPage = lazy(() => import('../pages/PopularPage/PopularPage'));
-
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
   const [isOpenModalAuth, setIsOpenModalAuth] = useState(false);
@@ -163,19 +149,12 @@ function App() {
               />
 
               {/* Legacy pages remain reachable during the controlled migration. */}
-              <Route path="/popular" element={<PopularPage />} />
-              <Route path="/forMen" element={<ForMenPage />}>
-                <Route path=":id" element={<ProductPage />} />
-              </Route>
-              <Route path="/forWomen" element={<ForWomenPage />}>
-                <Route path=":id" element={<ProductPage />} />
-              </Route>
-              <Route path="/forChildren" element={<ForChildrenPage />}>
-                <Route path=":id" element={<ProductPage />} />
-              </Route>
-              <Route path="/decorAndToys" element={<DecorAndToysPage />}>
-                <Route path=":id" element={<ProductPage />} />
-              </Route>
+              {/* One catalogue and API for canonical and historical category links. */}
+              <Route path="/popular" element={<CataloguePage />} />
+              <Route path="/forMen/*" element={<CataloguePage />} />
+              <Route path="/forWomen/*" element={<CataloguePage />} />
+              <Route path="/forChildren/*" element={<CataloguePage />} />
+              <Route path="/decorAndToys/*" element={<CataloguePage />} />
               <Route path="/aboutUs" element={<AboutUsPage />} />
               <Route path="/confirmEmail" element={<ConfirmEmailPage />} />
               <Route
