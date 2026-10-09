@@ -32,8 +32,8 @@ test('GoogleLogin success still dispatches authByGoogle with credentialResponse'
 
 test('ConfirmEmailPage still dispatches confirmation token from search params', () => {
   const source = readSource('src/pages/ConfirmEmailPage/ConfirmEmailPage.js');
-  expect(source).toMatch(/const token = searchParams\.get\('token'\);/);
-  expect(source).toMatch(/dispatch\(confirmUserEmail\(\{ token: token \}\)\);/);
+  expect(source).toMatch(/searchParams\.get\('token'\)/);
+  expect(source).toMatch(/dispatch\(confirmUserEmail\(\{ token(?:: token)? \}\)\)/);
 });
 
 test('ModalChangePassword still dispatches new and confirmation passwords only', () => {

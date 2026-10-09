@@ -32,6 +32,7 @@ const ModalRegister = ({ handleCloseModal, authNotice = '' }) => {
   const [typeRegistration, setTypeRegistration] = useState('email');
   const [typeNavigation, setTypeNavigation] = useState(() => (authNotice || hasSignedInOnDevice()) ? 'authorization' : 'registration');
   const [seznamError, setSeznamError] = useState('');
+  const [googleError, setGoogleError] = useState('');
   const dispatch = useDispatch();
 
   return (
@@ -100,6 +101,7 @@ const ModalRegister = ({ handleCloseModal, authNotice = '' }) => {
         )}
         <Separation>{t('Or')}</Separation>
         {seznamError && <p role="alert">{seznamError}</p>}
+        {googleError && <p role="alert">{googleError}</p>}
         <WrapLinks>
           {/* <StyledNavLink>
             <IconFacebook />
@@ -121,8 +123,15 @@ const ModalRegister = ({ handleCloseModal, authNotice = '' }) => {
           <GoogleLogin
             type="icon"
             theme="outline"
+            onError={() => setGoogleError('Přihlášení přes Google se nezdařilo. Zkuste to prosím znovu.')}
             onSuccess={credentialResponse => {
-              dispatch(authByGoogle(credentialResponse));
+              setGoogleError('');
+              const request = dispatch(authByGoogle(credentialResponse));
+              request.unwrap().catch(error => {
+                setGoogleError(error?.status === 409
+                  ? 'Tento e-mail již má účet. Přihlaste se prosím původním způsobem.'
+                  : 'Přihlášení přes Google se nezdařilo. Zkuste to prosím znovu.');
+              });
             }}
           />
           {/* <StyledNavLink>
