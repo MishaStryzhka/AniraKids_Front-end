@@ -307,9 +307,7 @@ export const confirmUserEmail = createAsyncThunk(
       // A link must not overwrite the Authorization header of another signed-in account.
       const response = changeEmail
         ? await axios.post('/api/users/current/confirmEmailChange', { token })
-        : await axios.post('/api/users/current/confirmEmail', null, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+        : await axios.post('/api/users/current/confirmEmail', { token });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({

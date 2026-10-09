@@ -8,17 +8,18 @@ import { routes } from '../../navigation/routes';
 const ConfirmEmailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [changeEmail] = useState(() => searchParams.has('changeToken'));
-  const [token] = useState(() => searchParams.get('changeToken') || searchParams.get('token'));
+  const [token] = useState(() => searchParams.get('changeToken') || searchParams.get('verifyToken') || searchParams.get('token'));
   const [status, setStatus] = useState(token ? 'pending' : 'invalid');
   const request = useRef(null);
   const dispatch = useDispatch();
   useEffect(() => {
     if (!token) return;
     // Remove the link credential from the address bar; retain it only for this mounted page.
-    if (searchParams.has('token') || searchParams.has('changeToken')) {
+    if (searchParams.has('token') || searchParams.has('changeToken') || searchParams.has('verifyToken')) {
       const clean = new URLSearchParams(searchParams);
       clean.delete('token');
       clean.delete('changeToken');
+      clean.delete('verifyToken');
       setSearchParams(clean, { replace: true });
     }
     if (!request.current) request.current = dispatch(confirmUserEmail({ token, changeEmail }));
