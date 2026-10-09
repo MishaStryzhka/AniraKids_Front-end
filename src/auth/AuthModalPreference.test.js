@@ -1,12 +1,13 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import theme from '../components/theme';
 import ModalRegister from '../components/Modals/ModalRegister/ModalRegister';
 import { rememberDeviceSignIn } from './deviceSignIn';
-jest.mock('react-redux', () => ({ useDispatch: () => jest.fn() }));
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key }) }));
-jest.mock('@react-oauth/google', () => ({ GoogleLogin: () => null }));
+jest.mock('@react-oauth/google', () => ({ GoogleLogin: ({onSuccess, onError}) => <><button onClick={() => onSuccess({credential:'fixture'})}>Google success</button><button onClick={onError}>Google error</button></> }));
 jest.mock('../redux/auth/operations', () => ({ authByGoogle: jest.fn() }));
 jest.mock('../components/Forms/FormRegistrationEmail/FormRegistrationEmail', () => () => <p>Email registration form</p>);
 jest.mock('../components/Forms/FormRegistrationPhoneNumber/FormRegistrationPhoneNumber', () => () => <p>Phone registration form</p>);
@@ -27,4 +28,22 @@ test('callback error is inside the auth window with sign in selected', () => {
   render(<ThemeProvider theme={theme.light}><ModalRegister authNotice="Seznam failed" handleCloseModal={() => {}} /></ThemeProvider>);
   expect(screen.getByRole('alert')).toHaveTextContent('Seznam failed');
   expect(screen.getByText('Sign in form')).toBeInTheDocument();
+});
+
+test('failed Google exchange is explained inside the modal', async () => {
+  mockDispatch.mockReturnValue({ unwrap: () => Promise.reject({ status: 401 }) });
+  show(); fireEvent.click(screen.getByText('Google success'));
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Přihlášení přes Google se nezdařilo'));
+});
+test('Google provider failure is explained and retry clears the error', async () => {
+  mockDispatch.mockReturnValue({ unwrap: () => Promise.resolve({}) });
+  show(); fireEvent.click(screen.getByText('Google error'));
+  expect(screen.getByRole('alert')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Google success'));
+  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+});
+test('existing third party email gives a useful login instruction', async () => {
+  mockDispatch.mockReturnValue({ unwrap: () => Promise.reject({ status: 409 }) });
+  show(); fireEvent.click(screen.getByText('Google success'));
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('původním způsobem'));
 });
