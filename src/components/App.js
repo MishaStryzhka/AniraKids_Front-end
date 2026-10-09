@@ -1,3 +1,5 @@
+import { FavoritesProvider } from '../storefront/favorites/FavoritesProvider';
+import { FavoritesPage } from '../storefront/favorites/FavoritesPage';
 import AccountPage from '../pages/AccountPage/AccountPage';
 import { BookingInformationPage } from '../storefront/payments/BookingInformationPage';
 import { lazy, useEffect, useState } from 'react';
@@ -44,9 +46,6 @@ const ConfirmEmailPage = lazy(
 );
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage/NotFoundPage'));
 const Chat = lazy(() => import('../pages/UserPage/Pages/Chat/Chat'));
-const Favorite = lazy(
-  () => import('../pages/UserPage/Pages/Favorite/Favorite')
-);
 const RentOut = lazy(() => import('../pages/UserPage/Pages/RentOut/RentOut'));
 const UpdateProduct = lazy(
   () =>
@@ -96,7 +95,7 @@ function App() {
       <ModalAuthContext.Provider
         value={{ isOpenModalAuth, setIsOpenModalAuth, setAuthNotice }}
       >
-        <BookingProvider>
+        <FavoritesProvider><BookingProvider>
           <Routes>
             <Route
               element={
@@ -117,7 +116,7 @@ function App() {
               <Route path={routes.search} element={<CataloguePage />} />
               <Route
                 path={routes.favourites}
-                element={<CanonicalRoutePlaceholder />}
+                element={<FavoritesPage />}
               />
               <Route
                 path={routes.account}
@@ -178,9 +177,7 @@ function App() {
                 <Route index element={<Navigate to={routes.account} replace />} />
                 <Route path="profile/" element={<Navigate to={routes.account} replace />} />
                 <Route path="chat/" element={<Chat />} />
-                <Route path="favorite/" element={<Favorite />}>
-                  <Route path=":id" element={<ProductPage />} />
-                </Route>
+                <Route path="favorite/*" element={<Navigate to={routes.favourites} replace />} />
                 <Route path="rent-out/" element={<RentOut />}>
                   <Route path=":id" element={<ProductPage />} />
                 </Route>
@@ -201,7 +198,7 @@ function App() {
                 <Route path="cart/" element={<Cart />} />
               </Route>
 
-              <Route path="favorite/" element={<Favorite />} />
+              <Route path="favorite/*" element={<Navigate to={routes.favourites} replace />} />
               <Route path="cart/" element={<Cart />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
@@ -247,7 +244,7 @@ function App() {
               <Route index element={<BookingPage />} />
             </Route>
           </Routes>
-        </BookingProvider>
+        </BookingProvider></FavoritesProvider>
 
         {isOpenModalAuth && !isLoggedIn ? (
           <Modal

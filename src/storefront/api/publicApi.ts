@@ -138,6 +138,7 @@ function parseCard(v: unknown): ProductCard {
   };
 }
 export type CatalogueQuery = {
+  ids?: string;
   category?: 'dress' | 'suit' | 'accessory' | 'other' | 'set';
   gender?: 'girls' | 'boys' | 'women' | 'men' | 'unisex' | 'children';
   color?: string;

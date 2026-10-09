@@ -1,3 +1,4 @@
+import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../design-system/components/Button';
@@ -105,6 +106,8 @@ export function ProductDetailPage() {
         </Stack>
         <Stack>
           <Title>{product.name}</Title>
+          <FavoriteButton id={product.id} name={product.name} />
+          <FavoritesFeedback />
           {product.color ? <Copy>Barva: {product.color}</Copy> : null}
           {product.description ? (
             <Copy style={{ whiteSpace: 'pre-wrap' }}>
