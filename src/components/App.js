@@ -1,3 +1,4 @@
+import AccountPage from '../pages/AccountPage/AccountPage';
 import { BookingInformationPage } from '../storefront/payments/BookingInformationPage';
 import { lazy, useEffect, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -128,7 +129,7 @@ function App() {
               />
               <Route
                 path={routes.account}
-                element={<CanonicalRoutePlaceholder />}
+                element={<AccountPage />}
               />
               <Route
                 path={routes.accountReservations}
