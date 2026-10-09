@@ -6,7 +6,6 @@ import {
   AvatarLabel,
   AvatarWrap,
   ButtonEdit,
-  ButtonShow,
   ButtonVerify,
   InputText,
   Label,
@@ -25,11 +24,7 @@ import Modal from 'components/Modals/Modal';
 import ModalAddAvatar from 'components/Modals/ModalAddAvatar/ModalAddAvatar';
 import { useAuth } from 'hooks';
 import { ErrorMessage, InputField } from 'components/Forms/Form.styled';
-import ModalChangePhoneNumber from 'components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber';
 import ModalChangeEmail from 'components/Modals/ModalChangeEmail/ModalChangeEmail';
-import IconEyeOpen from 'images/icons/IconEyeOpen';
-import IconEyeClosed from 'images/icons/IconEyeClosed';
-import theme from 'components/theme';
 import { useDispatch } from 'react-redux';
 import {
   updateUserInfo,
@@ -59,14 +54,12 @@ const Profile = () => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'pages.userPage.profilePage',
   });
-  const { user, currentTheme, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   let { error, isDone } = useAuth();
 
   const [saveMessage, setSaveMessage] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
-  const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
-    useState(false);
   const [isOpenModalChangeEmail, setIsOpenModalChangeEmail] = useState(false);
   const [isOpenModalBecomeLandlord, setIsOpenModalBecomeLandlord] =
     useState(false);
@@ -74,8 +67,6 @@ const Profile = () => {
   const [isOpenBillingDetails, setIsOpenBillingDetails] = useState(false);
   const [isOpenBankAccount, setIsOpenBankAccount] = useState(false);
 
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   const [
     isOpenModalEmailSentSuccessfully,
@@ -121,8 +112,10 @@ const Profile = () => {
     }
   };
 
-  const verifyEmail = () => {
-    dispatch(verifiedEmail());
+  const verifyEmail = async () => {
+    setSaveMessage(null);
+    try { await dispatch(verifiedEmail()).unwrap(); }
+    catch (failure) { setSaveMessage({ ok: false, text: failure?.status === 429 ? 'Před dalším odesláním prosím vyčkejte jednu minutu.' : 'Potvrzovací e-mail se nepodařilo odeslat. Zkuste to znovu.' }); }
   };
 
   return (
@@ -157,192 +150,21 @@ const Profile = () => {
           return (
             <ProfileForm>
               <Wrap>
-                <Label>
-                  {!isLoading ? (
-                    <Placeholder>{t('lastName')}</Placeholder>
-                  ) : (
-                    <SceletonField />
-                  )}
-                  {user?.lastName ? (
-                    <Wrapper>
-                      {!isLoading ? (
-                        <InputText>{user?.lastName}</InputText>
-                      ) : (
-                        <SceletonField />
-                      )}
-                    </Wrapper>
-                  ) : (
-                    <>
-                      {!isLoading ? (
-                        <InputField
-                          type="text"
-                          id="lastName"
-                          value={values.lastName}
-                          name="lastName"
-                          placeholder="Каріна"
-                          onChange={e => {
-                            error = null;
-                            handleChange(e);
-                          }}
-                        />
-                      ) : (
-                        <SceletonFieldInput />
-                      )}
-                      <ErrorMessage>
-                        {errors?.lastName &&
-                          touched?.lastName &&
-                          t(errors?.lastName)}
-                      </ErrorMessage>
-                    </>
-                  )}
-                </Label>
+                {['lastName', 'firstName', 'nickname'].map(field => (
+                  <Label key={field}>
+                    <Placeholder>{field === 'nickname' ? 'Nickname' : t(field)}</Placeholder>
+                    <InputField type="text" id={field} name={field} value={values[field]} disabled={isLoading}
+                      onChange={handleChange} onBlur={handleBlur}
+                      autoComplete={field === 'firstName' ? 'given-name' : field === 'lastName' ? 'family-name' : 'nickname'} />
+                    <ErrorMessage>{touched[field] && errors[field] ? t(errors[field]) : ''}</ErrorMessage>
+                  </Label>
+                ))}
 
                 <Label>
-                  {!isLoading ? (
-                    <Placeholder>{t('firstName')}</Placeholder>
-                  ) : (
-                    <SceletonField />
-                  )}
-                  {user?.firstName ? (
-                    <Wrapper>
-                      {!isLoading ? (
-                        <InputText>{user?.firstName}</InputText>
-                      ) : (
-                        <SceletonField />
-                      )}
-                    </Wrapper>
-                  ) : (
-                    <>
-                      {!isLoading ? (
-                        <InputField
-                          type="text"
-                          id="firstName"
-                          value={values.firstName}
-                          name="firstName"
-                          placeholder="Стрижка"
-                          onChange={e => {
-                            error = null;
-                            handleChange(e);
-                          }}
-                        />
-                      ) : (
-                        <SceletonFieldInput />
-                      )}
-                      <ErrorMessage>
-                        {errors?.firstName &&
-                          touched?.firstName &&
-                          t(errors?.firstName)}
-                      </ErrorMessage>
-                    </>
-                  )}
-                </Label>
-
-                <Label>
-                  {!isLoading ? (
-                    <Placeholder>Nickname</Placeholder>
-                  ) : (
-                    <SceletonField />
-                  )}
-                  {user?.nickname ? (
-                    <Wrapper>
-                      {!isLoading ? (
-                        <InputText>{user?.nickname}</InputText>
-                      ) : (
-                        <SceletonField />
-                      )}
-                    </Wrapper>
-                  ) : (
-                    <div>
-                      {!isLoading ? (
-                        <InputField
-                          type="text"
-                          id="nickname"
-                          value={values.nickname}
-                          name="nickname"
-                          placeholder="@karina.s"
-                          onChange={e => {
-                            e.currentTarget.value =
-                              e.currentTarget.value.replaceAll('@', '').length <
-                              1
-                                ? ''
-                                : `@${e.currentTarget.value.replaceAll(
-                                    '@',
-                                    ''
-                                  )}`;
-                            error = null;
-                            handleChange(e);
-                          }}
-                        />
-                      ) : (
-                        <SceletonFieldInput />
-                      )}
-                    </div>
-                  )}
-                  <ErrorMessage>
-                    {(errors?.nickname &&
-                      touched?.nickname &&
-                      t(errors?.nickname)) ||
-                      (error?.message === 'Nickname must be unique' &&
-                        t('Nickname must be unique'))}
-                  </ErrorMessage>
-                </Label>
-
-                <Label>
-                  {!isLoading ? (
-                    <Placeholder>{t('phoneNumber')}</Placeholder>
-                  ) : (
-                    <SceletonField />
-                  )}
-                  {user?.primaryPhoneNumber ? (
-                    <Wrapper>
-                      {!isLoading ? (
-                        <InputText>{user?.primaryPhoneNumber}</InputText>
-                      ) : (
-                        <SceletonField />
-                      )}
-                      <ButtonEdit
-                        type="button"
-                        title="change phone number"
-                        onClick={() => setIsOpenModalChangePhoneNomber(true)}
-                        disabled={isLoading}
-                      >
-                        <StyledIconPencil />
-                      </ButtonEdit>
-                    </Wrapper>
-                  ) : (
-                    <>
-                      {!isLoading ? (
-                        <InputField
-                          type="text"
-                          id="primaryPhoneNumber"
-                          value={values.primaryPhoneNumber}
-                          name="primaryPhoneNumber"
-                          placeholder="+380"
-                          onChange={e => {
-                            error = null;
-                            handleChange(e);
-                          }}
-                        />
-                      ) : (
-                        <SceletonFieldInput />
-                      )}
-
-                      <ErrorMessage>
-                        {errors?.primaryPhoneNumber &&
-                          touched?.primaryPhoneNumber &&
-                          t(errors?.primaryPhoneNumber)}
-                      </ErrorMessage>
-                    </>
-                  )}
-                  {isOpenModalChangePhoneNomber && (
-                    <Modal
-                      onClick={() => setIsOpenModalChangePhoneNomber(false)}
-                    >
-                      <ModalChangePhoneNumber
-                        onClick={() => setIsOpenModalChangePhoneNomber(false)}
-                      ></ModalChangePhoneNumber>
-                    </Modal>
-                  )}
+                  <Placeholder>{t('phoneNumber')}</Placeholder>
+                  <InputField type="tel" autoComplete="tel" id="primaryPhoneNumber" name="primaryPhoneNumber"
+                    value={values.primaryPhoneNumber} onChange={handleChange} onBlur={handleBlur} disabled={isLoading} placeholder="+420777123456" />
+                  <ErrorMessage>{touched.primaryPhoneNumber && errors.primaryPhoneNumber ? t(errors.primaryPhoneNumber) : ''}</ErrorMessage>
                 </Label>
 
                 <Label as="div">
@@ -424,81 +246,13 @@ const Profile = () => {
                       }
                     >
                       <TextDone>
-                        {t('changeEmailMessage', { email: values.email })}
+                        Potvrzovací odkaz jsme poslali na {values.email}. Odkaz platí 30 minut.
                       </TextDone>
                     </Modal>
                   )}
                 </Label>
 
-                {user?.isFirstLogin && user?.provider === 'Google' && (
-                  <>
-                    <Label>
-                      <Placeholder>{t('newPassword')}</Placeholder>
-                      <InputField
-                        type={!showNewPassword ? 'password' : 'text'}
-                        id="newPassword"
-                        value={values.newPassword}
-                        name="newPassword"
-                        placeholder="********"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
-                      {values.newPassword !== '' && (
-                        <ButtonShow
-                          type="button"
-                          title={t('showPassword')}
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                        >
-                          {!showNewPassword ? (
-                            <IconEyeOpen
-                              fill={theme[currentTheme].color.mainColor2}
-                            />
-                          ) : (
-                            <IconEyeClosed
-                              fill={theme[currentTheme].color.mainColor2}
-                            />
-                          )}
-                        </ButtonShow>
-                      )}
-                    </Label>
-
-                    <Label>
-                      <Placeholder>{t('enterNewPasswordAgain')}</Placeholder>
-                      <InputField
-                        type={!showConfirmNewPassword ? 'password' : 'text'}
-                        id="confirmNewPassword"
-                        value={values.confirmNewPassword}
-                        name="confirmNewPassword"
-                        placeholder="********"
-                        onChange={e => {
-                          error = null;
-                          handleChange(e);
-                        }}
-                      />
-                      {values.confirmNewPassword !== '' && (
-                        <ButtonShow
-                          type="button"
-                          title="show password"
-                          onClick={() =>
-                            setShowConfirmNewPassword(!showConfirmNewPassword)
-                          }
-                        >
-                          {!showConfirmNewPassword ? (
-                            <IconEyeOpen
-                              fill={theme[currentTheme].color.mainColor2}
-                            />
-                          ) : (
-                            <IconEyeClosed
-                              fill={theme[currentTheme].color.mainColor2}
-                            />
-                          )}
-                        </ButtonShow>
-                      )}
-                    </Label>
-                  </>
-                )}
+                <a href="/refreshPassword">Nastavit nebo obnovit heslo</a>
 
                 {saveMessage && (
                   <p role={saveMessage.ok ? 'status' : 'alert'} style={{ color: saveMessage.ok ? '#276749' : '#b42318' }}>{saveMessage.text}</p>

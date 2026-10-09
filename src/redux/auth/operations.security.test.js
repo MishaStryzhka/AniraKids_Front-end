@@ -89,7 +89,7 @@ test('confirmation token is request-scoped and preserves the signed-in session h
   axios.post.mockResolvedValue({ data: { user: { emailVerified: true } } });
   const result = await confirmUserEmail({ token: 'confirmation-only' })(jest.fn(), () => ({}));
   expect(result.meta.requestStatus).toBe('fulfilled');
-  expect(axios.post).toHaveBeenCalledWith('/api/users/current/confirmEmail', null, { headers: { Authorization: 'Bearer confirmation-only' } });
+  expect(axios.post).toHaveBeenCalledWith('/api/users/current/confirmEmail', { token: 'confirmation-only' });
   expect(axios.defaults.headers.common.Authorization).toBe('Bearer existing-session');
 });
 

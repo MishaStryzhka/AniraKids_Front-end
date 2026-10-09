@@ -3,11 +3,12 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'src/storefront/**'
-      - 'src/components/App.js'
       - 'src/auth/**'
       - 'src/redux/auth/**'
       - 'src/pages/AccountPage/**'
+      - 'src/pages/RefreshPasswordPage/**'
+      - 'src/pages/ConfirmEmailPage/**'
+      - 'src/pages/UserPage/Pages/Profile/**'
       - 'src/pages/MainPage/MainPage.js'
       - 'src/components/Modals/ModalRegister/**'
       - '.github/workflows/auth-session-verify.yml'
@@ -29,5 +30,5 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run typecheck
-      - run: CI=true npm test -- --watchAll=false --runInBand src/auth src/pages/AccountPage src/pages/ConfirmEmailPage src/components/Modals/Modal.test.js src/storefront
+      - run: CI=true npm test -- --watchAll=false --runInBand src/auth src/pages/AccountPage src/pages/ConfirmEmailPage src/pages/RefreshPasswordPage src/pages/UserPage/Pages/Profile src/redux/auth/operations.security.test.js src/components/Modals/Modal.test.js src/storefront
       - run: CI=true npm run build

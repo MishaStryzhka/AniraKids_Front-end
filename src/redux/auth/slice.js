@@ -40,6 +40,9 @@ const authSlice = createSlice({
     removeOrderIdFromUserCart: (state, { payload }) => {
       state.user.cart = state.user.cart.filter(order => order !== payload);
     },
+    clearSession: state => {
+      state.user = null; state.token = null; state.isLoggedIn = false; state.isRefreshing = false;
+    },
     clearError: state => {
       state.error = null;
     },
@@ -263,6 +266,7 @@ export const {
   addOrderIdToUserCart,
   removeOrderIdFromUserCart,
   clearError,
+  clearSession,
   clearDone,
   addPickupAddress,
 } = authSlice.actions;
