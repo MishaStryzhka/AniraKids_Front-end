@@ -62,6 +62,7 @@ const Profile = () => {
   const { user, currentTheme, isLoading } = useAuth();
   let { error, isDone } = useAuth();
 
+  const [saveMessage, setSaveMessage] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangePhoneNomber, setIsOpenModalChangePhoneNomber] =
@@ -102,8 +103,22 @@ const Profile = () => {
     setIsOpenModalAddAvatar(true);
   };
 
-  const onSubmit = e => {
-    dispatch(updateUserInfo(e));
+  const onSubmit = async (values, { resetForm }) => {
+    setSaveMessage(null);
+    try {
+      await dispatch(updateUserInfo(values)).unwrap();
+      resetForm({ values });
+      setSaveMessage({ ok: true, text: 'Změny byly uloženy.' });
+    } catch (failure) {
+      const messages = {
+        'Nickname must be unique': 'Tato přezdívka je již obsazená.',
+        'Email in use': 'Tento e-mail je již používán.',
+        'Phone number in use': 'Toto telefonní číslo je již používáno.',
+        'Use the email change flow': 'E-mail změňte pomocí tlačítka s tužkou.',
+        'Use the password reset flow': 'Pro nastavení hesla použijte odkaz Zapomněl(a) jsem své heslo.',
+      };
+      setSaveMessage({ ok: false, text: messages[failure?.message] || 'Údaje se nepodařilo uložit. Zkontrolujte vyplněná pole a zkuste to znovu.' });
+    }
   };
 
   const verifyEmail = () => {
@@ -119,7 +134,7 @@ const Profile = () => {
           lastName: user?.lastName || '',
           companyName: user?.companyName || '',
           nickname: user?.nickname || '',
-          primaryPhoneNumber: '',
+          primaryPhoneNumber: user?.primaryPhoneNumber || '',
           email: user?.email || '',
           newPassword: user?.newPassword || '',
           confirmNewPassword: user?.confirmNewPassword || '',
@@ -136,7 +151,8 @@ const Profile = () => {
           setTouched,
           handleChange,
           handleBlur,
-          handleSubmit,
+          dirty,
+          isSubmitting,
         }) => {
           return (
             <ProfileForm>
@@ -329,7 +345,7 @@ const Profile = () => {
                   )}
                 </Label>
 
-                <Label>
+                <Label as="div">
                   {!isLoading ? (
                     <Placeholder>{t('email')}</Placeholder>
                   ) : (
@@ -344,7 +360,8 @@ const Profile = () => {
                       )}
                       <ButtonEdit
                         type="button"
-                        title="change email"
+                        title="Změnit e-mail"
+                        aria-label="Změnit e-mail"
                         onClick={() => setIsOpenModalChangeEmail(true)}
                         disabled={isLoading}
                       >
@@ -483,12 +500,14 @@ const Profile = () => {
                   </>
                 )}
 
-                {((Object.entries(touched).length !== 0 && user.isFirstLogin) ||
-                  touched?.avatarUrl) && (
+                {saveMessage && (
+                  <p role={saveMessage.ok ? 'status' : 'alert'} style={{ color: saveMessage.ok ? '#276749' : '#b42318' }}>{saveMessage.text}</p>
+                )}
+                {(
                   <StyledButton
                     type="submit"
                     title={t('saveChanges')}
-                    disabled={isLoading}
+                    disabled={!dirty || isSubmitting || isLoading}
                   >
                     {!isLoading ? (
                       t('saveChanges')

@@ -188,7 +188,7 @@ export const updateUserInfo = createAsyncThunk(
   ) => {
     try {
       const formData = new FormData();
-      avatar && formData.append('avatar', avatar);
+      avatar instanceof Blob && formData.append('avatar', avatar);
       firstName && formData.append('firstName', firstName);
       lastName && formData.append('lastName', lastName);
       companyName && formData.append('companyName', companyName);
