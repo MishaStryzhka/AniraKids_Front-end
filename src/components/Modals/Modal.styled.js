@@ -63,21 +63,23 @@ export const TextDescription = styled.p`
 `;
 
 export const TextDone = styled.p`
-  @media screen and (max-width: 427.5px) {
-    padding: 11.2vw;
-  }
-  padding: 48px 48px;
-
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 56px 24px 32px;
+  overflow-wrap: anywhere;
   text-align: center;
-  font-family:
-    Open Sans,
-    sans-serif;
-  font-size: 24px;
+  font-family: Open Sans, sans-serif;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: 0.02px;
-
+  line-height: 1.5;
   color: ${({ theme }) => theme.color.mainColor5};
+
+  @media screen and (min-width: 768px) {
+    padding: 56px 32px 40px;
+    font-size: 18px;
+  }
 `;
 
 export const Backdrop = styled.div`
@@ -95,6 +97,9 @@ export const Backdrop = styled.div`
   z-index: 1200;
 `;
 export const ModalContainer = styled.div`
+  box-sizing: border-box;
+  min-width: 0;
+  max-inline-size: calc(100vw - 32px);
   position: relative;
   background-color: ${({ theme }) => theme.color.mainColor1};
   margin: auto;
@@ -235,6 +240,13 @@ export const ErrorMessage = styled.p`
 `;
 
 export const CloseButton = styled.button`
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  z-index: 5;
+  & svg { position: static; width: 24px; height: 24px; }
+  &:focus-visible { outline: 2px solid #77695e; outline-offset: 2px; }
   @media screen and (max-width: 427.5px) {
     top: 1.9vw;
     right: 1.9vw;
