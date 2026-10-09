@@ -21,7 +21,8 @@ export interface CalendarReservation {
   items: CalendarReservationItem[];
   expiresAt?: string;
 }
-export interface ReservationCalendarResponse {items: CalendarReservation[];}
+export interface CalendarBlock {id:string;productId:string|null;productName:string;internalCode:string;reason:string;startDate:DateOnly;endDate:DateOnly;}
+export interface ReservationCalendarResponse {items: CalendarReservation[];blocks?:CalendarBlock[];blocksTruncated?:boolean;}
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 const isText = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
 function invalidResponse(): never {
@@ -49,7 +50,15 @@ export function parseReservationCalendarResponse(value: unknown): ReservationCal
       occupiedThrough: row.occupiedThrough, customerName: row.customerName, items: products,
       ...(row.expiresAt === undefined ? {} : {expiresAt: row.expiresAt as string})};
   });
-  return {items};
+  if (value.blocks === undefined) return {items};
+  if (!Array.isArray(value.blocks) || typeof value.blocksTruncated !== 'boolean') return invalidResponse();
+  const blockIds = new Set<string>();
+  const blocks = value.blocks.map((r):CalendarBlock => {
+    if (!isRecord(r) || !isText(r.id) || blockIds.has(r.id) || !(r.productId===null || isText(r.productId)) || !isText(r.productName) || !isText(r.internalCode) || !isText(r.reason) || !isDateOnly(r.startDate) || !isDateOnly(r.endDate) || r.startDate>r.endDate) return invalidResponse();
+    blockIds.add(r.id);
+    return {id:r.id,productId:r.productId,productName:r.productName,internalCode:r.internalCode,reason:r.reason,startDate:r.startDate,endDate:r.endDate};
+  });
+  return {items,blocks,blocksTruncated:value.blocksTruncated};
 }
 export async function getAdminReservationCalendar(input: {token: string; from: DateOnly; to: DateOnly; signal?: AbortSignal}): Promise<ReservationCalendarResponse> {
   if (!isCalendarRange(input.from, input.to)) throw new AdminApiError({code: 'ADMIN_CALENDAR_INVALID_RANGE', kind: 'unexpected', message: 'Calendar range must contain between 1 and 366 valid calendar days.'});

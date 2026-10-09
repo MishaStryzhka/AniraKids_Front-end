@@ -1,0 +1,22 @@
+jest.mock('axios',()=>({__esModule:true,default:{isCancel:()=>false},AxiosError:class extends Error{}}));
+import {MemoryRouter} from 'react-router-dom';
+import {render,screen,fireEvent} from '@testing-library/react';
+import {AdminHomePage} from './AdminPlaceholders';
+import {getAdminOverview} from '../api/overview';
+jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'fixture'})}));
+const mockAccess=jest.fn(()=>false);
+jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockAccess})}));
+jest.mock('../api/overview',()=>({getAdminOverview:jest.fn()}));
+const get=getAdminOverview as jest.Mock;
+const empty={total:0,items:[]};
+const fixture={today:'2026-10-10',loadedAt:'2026-10-10T10:00:00Z',pickups:{total:1,items:[{id:'r1',number:'AK-FIXTURE',name:'Jana',product:'Šaty',startDate:'2026-10-10',endDate:'2026-10-11',status:'confirmed'}]},returns:empty,pending:empty,deposits:empty,unpaid:1,overdue:0,maintenance:0,drafts:0};
+beforeEach(()=>jest.clearAllMocks());
+test('renders real queues, detail links and reloads without retaining stale counts on failure',async()=>{
+ get.mockResolvedValueOnce(fixture);render(<MemoryRouter><AdminHomePage/></MemoryRouter>);
+ expect(await screen.findByRole('link',{name:'AK-FIXTURE'})).toHaveAttribute('href','/admin/rezervace/r1');
+ expect(screen.getByText('Žádné evidované kauce k vypořádání.')).toBeInTheDocument();
+ get.mockRejectedValueOnce(new Error('private failure'));fireEvent.click(screen.getByRole('button',{name:'Obnovit'}));
+ expect(await screen.findByRole('alert')).toHaveTextContent('Přehled se nepodařilo načíst');
+ expect(screen.queryByText('AK-FIXTURE')).not.toBeInTheDocument();expect(screen.queryByText('private failure')).not.toBeInTheDocument();
+ get.mockResolvedValueOnce(fixture);fireEvent.click(screen.getByRole('button',{name:'Zkusit znovu'}));expect(await screen.findByText('AK-FIXTURE')).toBeInTheDocument();
+});

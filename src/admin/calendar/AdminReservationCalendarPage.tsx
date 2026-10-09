@@ -2,7 +2,7 @@ import {useMemo, useState} from 'react';
 import styled from 'styled-components';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {NavigationLink} from '../../design-system/components/NavigationLink';
-import {buildAdminReservationDetailPath} from '../navigation/adminRoutes';
+import {buildAdminReservationDetailPath, buildAdminProductDetailPath} from '../navigation/adminRoutes';
 import {Button} from '../../design-system/components/Button';
 import {SelectField} from '../../design-system/components/SelectField';
 import {Spinner} from '../../design-system/components/Spinner';
@@ -59,6 +59,8 @@ export function AdminReservationCalendarPage() {
   const days = useMemo(() => monthCalendarDays(month),[month]);
   const gridDays = useMemo(() => monthCalendarGridDays(month),[month]);
   const items = state.kind === 'success' ? state.items : null;
+  const blocks = state.kind === 'success' ? state.blocks ?? [] : [];
+  const dayBlocks = blocks.filter(b=>b.startDate<=selectedDay && b.endDate>=selectedDay);
   const agenda = useMemo(() => items ? reservationsForDay(items,selectedDay) : [],[items,selectedDay]);
   const navigateMonth = (offset:number) => {
     const next=shiftCalendarMonth(month,offset);setMonth(next);setSelectedDay(`${next}-01`);
@@ -66,7 +68,7 @@ export function AdminReservationCalendarPage() {
   const goToday = () => {const now=pragueToday();setMonth(now.slice(0,7));setSelectedDay(now);};
   const loading=state.kind==='loading';
   return <Page data-admin-calendar-page>
-    <Copy>Přehled rezervací a navazujícího obsazení. Nezobrazuje ruční blokace ani úplnou dostupnost inventáře.</Copy>
+    <Copy>Rezervace, navazující čištění a ruční blokace. Kusy v údržbě zkontrolujte u produktu. Konečnou dostupnost ověřuje rezervace.</Copy>
     <Toolbar>
       <MonthNavigation aria-label="Výběr měsíce">
         <ArrowButton variant="secondary" size="compact" aria-label="Předchozí měsíc" disabled={month==='0001-01'} onClick={()=>navigateMonth(-1)}><ChevronLeft size={20} aria-hidden="true"/></ArrowButton>
@@ -82,6 +84,7 @@ export function AdminReservationCalendarPage() {
       {state.kind==='success'?<>
         <Announcement role="status" aria-live="polite">{formatCalendarDay(selectedDay,true)}. Počet rezervací: {agenda.length}.</Announcement>
         <Copy data-calendar-loaded>Naposledy načteno: {formatPragueLoadedAt(state.loadedAt)}</Copy>
+        {state.blocksTruncated?<Copy role="alert">Zobrazeno prvních 1 000 blokací. Další ověřte přímo u produktu.</Copy>:null}
         {state.items.length===0?<State><StateTitle>Žádné rezervace v tomto období</StateTitle></State>:null}
         <Content>
           <Calendar aria-labelledby="calendar-month-title">
@@ -90,9 +93,9 @@ export function AdminReservationCalendarPage() {
               {gridDays.map((day,index)=>{
                 if (!day) return <div aria-hidden="true" key={`boundary-${index}`}/>;
                 if (!day.startsWith(month+'-')) return <DayButton key={day} size="compact" variant="secondary" disabled data-calendar-adjacent={day} aria-label={`${formatCalendarDay(day,true)}. Mimo zobrazený měsíc.`}><DayNumber>{Number(day.slice(-2))}</DayNumber></DayButton>;
-                const counts=reservationDayCounts(state.items,day);return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} data-weekend={mondayWeekday(day)>=5?'true':undefined} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
-                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}.`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
-                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount><DayCount>Čištění: {counts.cleaning}</DayCount>
+                const counts=reservationDayCounts(state.items,day);const blocked=blocks.filter(b=>b.startDate<=day && b.endDate>=day).length;return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} data-weekend={mondayWeekday(day)>=5?'true':undefined} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
+                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}. Blokace: ${blocked}.`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
+                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount><DayCount>Čištění: {counts.cleaning}</DayCount>{blocked?<DayCount>Blokace: {blocked}</DayCount>:null}
               </DayButton>;})}
             </Days>
           </Calendar>
@@ -106,6 +109,7 @@ export function AdminReservationCalendarPage() {
               <Details><div><dt>Termín</dt><dd>{formatCalendarDay(reservation.startDate)} – {formatCalendarDay(reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
               <ProductItems>{reservation.items.map(item=><li key={item.inventoryItemId}>{item.productName} · velikost {item.size}</li>)}</ProductItems>
             </Card>;})}</Cards>}
+            {dayBlocks.length?<><AgendaTitle>Ruční blokace</AgendaTitle><Cards>{dayBlocks.map(b=><Card key={b.id}><CardHeading>{b.productId?<NavigationLink variant="plain" to={buildAdminProductDetailPath(b.productId)}>{b.productName}</NavigationLink>:b.productName}</CardHeading><Copy>{b.internalCode} · {({repair:'Oprava',cleaning:'Čištění',internal_use:'Interní použití',photoshoot:'Focení',other:'Jiný důvod'} as Record<string,string>)[b.reason] || b.reason}</Copy><Copy>{formatCalendarDay(b.startDate)} – {formatCalendarDay(b.endDate)}</Copy></Card>)}</Cards></>:null}
           </Agenda>
         </Content>
       </>:null}
