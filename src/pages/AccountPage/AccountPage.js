@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { logOut } from '../../redux/auth/operations';
 import { lazy, Suspense, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -35,6 +35,7 @@ export default function AccountPage() {
       <h1 id="account-title">Můj účet</h1>
       {isLoggedIn && <Button type="button" variant="secondary" disabled={leaving} onClick={leave}>{leaving ? 'Odhlašování…' : 'Odhlásit se'}</Button>}
     </div>
+    <nav aria-label="Můj účet" style={{ display: 'flex', gap: 24, marginBottom: 24 }}><Link to="/ucet" aria-current="page">Můj profil</Link><Link to="/ucet/rezervace">Moje rezervace</Link></nav>
     {logoutError && <p role="alert">{logoutError}</p>}
     {isRefreshing ? <p role="status">Načítáme váš účet…</p> :
       isLoggedIn && user ?
