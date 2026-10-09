@@ -7,8 +7,8 @@ import styled from 'styled-components';
 import { Button } from '../design-system/components/Button';
 import { Input } from '../design-system/components/Input';
 import { designTokens as t } from '../design-system/tokens/designTokens';
-import { getCatalogue, PublicApiError, type CatalogueQuery, type ProductCard, } from './api/publicApi';
-import { usePublicRead } from './usePublicRead';
+import { PublicApiError, type CatalogueQuery, type ProductCard, } from './api/publicApi';
+import { useInfiniteCatalogue } from './useInfiniteCatalogue';
 import { Actions, Alert, Copy, Heading, Page, RouteLink, Stack, Title, } from './storefrontStyles';
 import { productPath, routes } from '../navigation/routes';
 export const Grid = styled.ul `
@@ -117,8 +117,9 @@ export function CataloguePage() {
     const fixedCategory = pathname === routes.dresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
     const title = legacy?.title || (fixedCategory === 'dress' ? 'Šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
-    const rawPage = params.get('page') || '1';
-    const page = /^[1-9]\d*$/.test(rawPage) && Number(rawPage) <= 10000 ? Number(rawPage) : 1;
+    useEffect(() => {
+      if (params.has('page')) { const next = new URLSearchParams(params); next.delete('page'); setParams(next, { replace: true }); }
+    }, [params, setParams]);
     const sort = params.get('sort') || (title === 'Novinky' ? 'newest' : 'name');
     const serialized = params.toString();
     const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, params.get(key) || (key === 'rentalMode' ? 'studio' : '')]));
@@ -128,7 +129,7 @@ export function CataloguePage() {
     const [formError, setFormError] = useState('');
     useEffect(() => { setDraft(Object.fromEntries(filterKeys.map(key => [key, new URLSearchParams(serialized).get(key) || (key === 'rentalMode' ? 'studio' : '')]))); setFormError(''); }, [serialized, pathname]);
     useEffect(() => setQuery(q), [q]);
-    const request: CatalogueQuery = { sort: sort as CatalogueQuery['sort'], page, limit: 12 };
+    const request: CatalogueQuery = { sort: sort as CatalogueQuery['sort'], page: 1, limit: 12 };
     for (const key of filterKeys) {
         const value = params.get(key);
         if (value)
@@ -152,17 +153,21 @@ export function CataloguePage() {
             (request.gender && !genders.some(([value]) => value === request.gender)) ||
             (request.rentalMode && !['studio', 'external'].includes(request.rentalMode)) ||
             (request.familyLook && request.familyLook !== 'true') || (request.color?.length || 0) > 80 || (request.size?.length || 0) > 80 ? 'Neplatné filtry. Obnovte prosím výchozí nastavení.' : '');
-    const result = usePublicRead(invalid ? null : JSON.stringify(request), signal => getCatalogue(request, signal));
+    const result = useInfiniteCatalogue(invalid ? null : JSON.stringify(request));
+    const sentinel = useRef<HTMLDivElement>(null);
+    const { hasMore, loadingMore, error, loadMore } = result;
+    useEffect(() => {
+      if (!hasMore || loadingMore || error || !sentinel.current || typeof IntersectionObserver === 'undefined') return;
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) loadMore();
+      }, { rootMargin: '400px 0px' });
+      observer.observe(sentinel.current);
+      return () => observer.disconnect();
+    }, [hasMore, loadingMore, error, loadMore, result.data?.page]);
     const heading = useRef<HTMLHeadingElement>(null);
     const update = (key: string, value: string) => setDraft(previous => ({ ...previous, [key]: value }));
     const reset = () => { const next = new URLSearchParams(); if (q)
         next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? 'studio' : '']))); setFormError(''); };
-    const navigatePage = (value: number) => {
-        const next = new URLSearchParams(params);
-        value === 1 ? next.delete('page') : next.set('page', String(value));
-        setParams(next);
-        requestAnimationFrame(() => heading.current?.focus());
-    };
     const options = (values: string[], selected: string) => Array.from(new Set([...values, ...(selected ? [selected] : [])])).map(value => <option key={value} value={value}>{value}</option>);
     return <Page>
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
@@ -204,12 +209,16 @@ export function CataloguePage() {
       </Filters>
       <div style={{ minWidth: 0 }}>
         <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><label>SEŘADIT PODLE<Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
-        {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>
+        {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error && !result.data ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>
           <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
           {product.color && <Copy>{product.color}</Copy>}
           {product.rentalPriceFrom !== undefined && <Copy>Od {product.rentalPriceFrom.toLocaleString('cs-CZ')} Kč · {request.rentalMode === 'external' ? 'mimo studio' : 've studiu'}</Copy>}
-        </li>)}</Grid> : result.data ? <Empty><IconBeauty className="catalogue-empty-illustration" aria-hidden="true"/><Copy>{result.data.total > 0 ? 'Na této stránce nejsou žádné produkty.' : 'Pro zvolené filtry jsme nenašli žádné produkty.'}</Copy><Button variant="secondary" onClick={page > 1 ? () => navigatePage(1) : reset}>{page > 1 ? 'První stránka' : 'Zrušit filtry'}</Button></Empty> : null}
-        {result.data && result.data.totalPages > 1 && <Actions aria-label="Stránkování"><Button variant="secondary" disabled={page <= 1} onClick={() => navigatePage(page - 1)}>Předchozí</Button><Copy aria-live="polite">Stránka {page} z {result.data.totalPages}</Copy><Button variant="secondary" disabled={page >= result.data.totalPages} onClick={() => navigatePage(page + 1)}>Další</Button></Actions>}
+        </li>)}</Grid> : result.data ? <Empty><IconBeauty className="catalogue-empty-illustration" aria-hidden="true"/><Copy>Pro zvolené filtry jsme nenašli žádné produkty.</Copy><Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Empty> : null}
+        {result.data && result.data.items.length > 0 && <div ref={sentinel} style={{ paddingBlock: 24 }}>
+          <Copy role="status">{loadingMore ? 'Načítání dalších produktů…' : `Zobrazeno ${result.data.items.length} z ${result.data.total} modelů`}</Copy>
+          {result.error ? <Alert role="alert"><Copy>Další produkty se nepodařilo načíst. Váš výběr zůstává zobrazený.</Copy><Button variant="secondary" onClick={result.reload}>Zkusit znovu</Button></Alert>
+            : result.hasMore ? <Button variant="secondary" disabled={loadingMore} onClick={result.loadMore}>Načíst další</Button> : null}
+        </div>}
       </div>
     </Layout>
   </Page>;
