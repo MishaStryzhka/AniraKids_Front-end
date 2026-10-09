@@ -1,3 +1,4 @@
+import { confirmUserEmail } from './operations';
 import { createSlice } from '@reduxjs/toolkit';
 import {
   register,
@@ -201,6 +202,12 @@ const authSlice = createSlice({
       .addCase(updateUserEmail.rejected, (state, action) => {
         state.error = action.payload;
         state.isLoading = false;
+      })
+
+      .addCase(confirmUserEmail.fulfilled, (state, action) => {
+        if (state.user?.email && state.user.email === action.payload.user?.email) {
+          state.user.emailVerified = true;
+        }
       })
 
       // verifiedEmail

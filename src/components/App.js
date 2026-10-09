@@ -2,7 +2,7 @@ import AccountPage from '../pages/AccountPage/AccountPage';
 import { BookingInformationPage } from '../storefront/payments/BookingInformationPage';
 import { lazy, useEffect, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import theme from './theme';
 import { PrivateRoute } from './PrivateRoute';
@@ -37,21 +37,12 @@ import { BookingPage } from '../storefront/booking/BookingPage';
 import { BookingStatusPage } from '../storefront/booking/BookingStatusPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
-const DecorAndToysPage = lazy(
-  () => import('../pages/DecorAndToysPage/DecorAndToysPage')
-);
-const ForChildrenPage = lazy(
-  () => import('../pages/ForChildrenPage/ForChildrenPage')
-);
-const ForMenPage = lazy(() => import('../pages/ForMenPage/ForMenPage'));
-const ForWomenPage = lazy(() => import('../pages/ForWomenPage/ForWomenPage'));
 const MainPage = lazy(() => import('../pages/MainPage/MainPage'));
 const UserPage = lazy(() => import('../pages/UserPage/UserPage'));
 const ConfirmEmailPage = lazy(
   () => import('../pages/ConfirmEmailPage/ConfirmEmailPage')
 );
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage/NotFoundPage'));
-const Profile = lazy(() => import('../pages/UserPage/Pages/Profile/Profile'));
 const Chat = lazy(() => import('../pages/UserPage/Pages/Chat/Chat'));
 const Favorite = lazy(
   () => import('../pages/UserPage/Pages/Favorite/Favorite')
@@ -80,6 +71,19 @@ const ViewPurchase = lazy(
 const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
 const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
 const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
+
+const DecorAndToysPage = lazy(
+  () => import('../pages/DecorAndToysPage/DecorAndToysPage')
+);
+
+const ForChildrenPage = lazy(
+  () => import('../pages/ForChildrenPage/ForChildrenPage')
+);
+
+const ForMenPage = lazy(() => import('../pages/ForMenPage/ForMenPage'));
+
+const ForWomenPage = lazy(() => import('../pages/ForWomenPage/ForWomenPage'));
+
 const PopularPage = lazy(() => import('../pages/PopularPage/PopularPage'));
 
 function App() {
@@ -190,8 +194,8 @@ function App() {
                   />
                 }
               >
-                <Route index element={<Profile />} />
-                <Route path="profile/" element={<Profile />} />
+                <Route index element={<Navigate to={routes.account} replace />} />
+                <Route path="profile/" element={<Navigate to={routes.account} replace />} />
                 <Route path="chat/" element={<Chat />} />
                 <Route path="favorite/" element={<Favorite />}>
                   <Route path=":id" element={<ProductPage />} />

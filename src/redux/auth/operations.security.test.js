@@ -83,3 +83,19 @@ test('failed logIn keeps existing rejectWithValue error contract', async () => {
   });
   expect(axios.defaults.headers.common.Authorization).toBeUndefined();
 });
+test('confirmation token is request-scoped and preserves the signed-in session header', async () => {
+  const { confirmUserEmail } = require('./operations');
+  axios.defaults.headers.common.Authorization = 'Bearer existing-session';
+  axios.post.mockResolvedValue({ data: { user: { emailVerified: true } } });
+  const result = await confirmUserEmail({ token: 'confirmation-only' })(jest.fn(), () => ({}));
+  expect(result.meta.requestStatus).toBe('fulfilled');
+  expect(axios.post).toHaveBeenCalledWith('/api/users/current/confirmEmail', null, { headers: { Authorization: 'Bearer confirmation-only' } });
+  expect(axios.defaults.headers.common.Authorization).toBe('Bearer existing-session');
+});
+
+test('confirmation without token never falls back to current account authentication', async () => {
+  const { confirmUserEmail } = require('./operations');
+  const result = await confirmUserEmail({})(jest.fn(), () => ({}));
+  expect(result.meta.requestStatus).toBe('rejected');
+  expect(axios.post).not.toHaveBeenCalled();
+});
