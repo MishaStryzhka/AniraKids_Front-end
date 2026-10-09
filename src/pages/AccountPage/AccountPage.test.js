@@ -5,7 +5,7 @@ import { ModalAuthContext } from '../../context/ModalAuthContext';
 let mockAuth;
 const mockDispatch = jest.fn(), mockNavigate = jest.fn();
 jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch }));
-jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }));
+jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate, Link: ({ to, children, ...props }) => <a href={to} {...props}>{children}</a> }));
 jest.mock('../../redux/auth/operations', () => ({ logOut: () => ({type: 'logout'}) }));
 jest.mock('hooks', () => ({ useAuth: () => mockAuth, useTitle: () => {} }));
 jest.mock('../UserPage/Pages/Profile/Profile', () => ({ __esModule: true, default: () => <div>Existing profile</div> }));
