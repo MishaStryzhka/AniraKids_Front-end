@@ -1,0 +1,31 @@
+name: Account and Seznam Auth Verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/auth/**'
+      - 'src/redux/auth/**'
+      - 'src/pages/AccountPage/**'
+      - 'src/pages/MainPage/MainPage.js'
+      - 'src/components/Modals/ModalRegister/**'
+      - '.github/workflows/auth-session-verify.yml'
+permissions:
+  contents: read
+concurrency:
+  group: auth-session-${{ github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: 20, cache: npm }
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: CI=true npm test -- --watchAll=false --runInBand src/auth src/pages/AccountPage src/pages/ConfirmEmailPage src/components/Modals/Modal.test.js src/storefront
+      - run: CI=true npm run build
