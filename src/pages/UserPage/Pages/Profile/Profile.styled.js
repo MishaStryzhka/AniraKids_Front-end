@@ -94,10 +94,14 @@ export const ButtonEdit = styled.button`
   padding: 0;
   background-color: transparent;
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 `;
 
 export const ButtonShow = styled.button`
@@ -145,6 +149,7 @@ export const WrapperBiling = styled.div`
 `;
 
 export const StyledIconPencil = styled(IconPencil)`
+  & g { stroke: inherit; }
   width: 20px;
   height: 20px;
   stroke: ${({ theme }) => theme.color.mainColor5};
