@@ -75,6 +75,8 @@ const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
   const [isOpenModalAuth, setIsOpenModalAuth] = useState(false);
+  const [authNotice, setAuthNotice] = useState('');
+  useEffect(() => { if (!isOpenModalAuth) setAuthNotice(''); }, [isOpenModalAuth]);
   const dispatch = useDispatch();
   const { token, isLoggedIn } = useAuth();
 
@@ -92,7 +94,7 @@ function App() {
     <ThemeProvider theme={theme[currentTheme]}>
       <GlobalStyles />
       <ModalAuthContext.Provider
-        value={{ isOpenModalAuth, setIsOpenModalAuth }}
+        value={{ isOpenModalAuth, setIsOpenModalAuth, setAuthNotice }}
       >
         <BookingProvider>
           <Routes>
@@ -253,7 +255,7 @@ function App() {
             prohibitClosingByBackdrop
             closeModal={() => setIsOpenModalAuth(false)}
           >
-            <ModalRegister handleCloseModal={() => setIsOpenModalAuth(false)} />
+            <ModalRegister authNotice={authNotice} handleCloseModal={() => setIsOpenModalAuth(false)} />
           </Modal>
         ) : null}
       </ModalAuthContext.Provider>
