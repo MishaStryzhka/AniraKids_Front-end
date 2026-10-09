@@ -18,6 +18,7 @@ export type ProductCard = {
   name: string;
   category?: string;
   color?: string;
+  rentalPriceFrom?: number;
   photos: Array<{ url: string; alt?: string }>;
 };
 export type PublicVariant = {
@@ -109,7 +110,8 @@ function parseCard(v: unknown): ProductCard {
     !Array.isArray(v.photos) ||
     v.photos.length > 100 ||
     (v.category !== undefined && !string(v.category, 100)) ||
-    (v.color !== undefined && !string(v.color))
+    (v.color !== undefined && !string(v.color)) ||
+    (v.rentalPriceFrom !== undefined && !money(v.rentalPriceFrom))
   )
     return invalid();
   const photos = v.photos.map(p => {
@@ -126,6 +128,7 @@ function parseCard(v: unknown): ProductCard {
     };
   });
   return {
+    ...(v.rentalPriceFrom === undefined ? {} : { rentalPriceFrom: v.rentalPriceFrom as number }),
     id: v.id,
     slug: v.slug,
     name: v.name,
@@ -135,14 +138,22 @@ function parseCard(v: unknown): ProductCard {
   };
 }
 export type CatalogueQuery = {
-  category?: 'dress' | 'suit';
+  category?: 'dress' | 'suit' | 'accessory' | 'other' | 'set';
+  gender?: 'girls' | 'boys' | 'women' | 'men' | 'unisex' | 'children';
+  color?: string;
+  size?: string;
+  familyLook?: 'true';
+  rentalMode?: RentalMode;
+  minPrice?: number;
+  maxPrice?: number;
   q?: string;
-  sort: 'name' | 'newest';
+  sort: 'name' | 'newest' | 'priceAsc' | 'priceDesc';
   page: number;
   limit: number;
 };
 export type Catalogue = {
   items: ProductCard[];
+  facets?: { colors: string[]; sizes: string[] };
   page: number;
   limit: number;
   total: number;
@@ -160,10 +171,20 @@ export function parseCatalogue(v: unknown, query: CatalogueQuery): Catalogue {
     v.items.length > query.limit
   )
     return invalid();
+  let facets: Catalogue['facets'];
+  if (v.facets !== undefined) {
+    if (!object(v.facets)) return invalid();
+    const values = (value: unknown): string[] => {
+      if (!Array.isArray(value) || value.length > 10000 || !value.every(item => string(item, 100))) return invalid();
+      return value as string[];
+    };
+    facets = { colors: values(v.facets.colors), sizes: values(v.facets.sizes) };
+  }
   const items = v.items.map(parseCard);
   if (new Set(items.map(p => p.id)).size !== items.length) return invalid();
   return {
     items,
+    ...(facets ? { facets } : {}),
     page: query.page,
     limit: query.limit,
     total: v.total,

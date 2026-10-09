@@ -175,3 +175,11 @@ test('status token is scoped to a header; current response must match requested 
   fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => ({ reservation: { ...current, reservationNumber: 'AK-2030-OTHER1' } }) });
   await expect(getReservationStatus(number, token)).rejects.toThrow();
 });
+
+test('catalogue parses optional facets and rental price, rejecting malformed values', () => {
+  const data = { items: [{ ...product, rentalPriceFrom: 200 }], facets: { colors: ['Bílá'], sizes: ['110'] }, page: 1, limit: 12, total: 1, totalPages: 1 };
+  expect(parseCatalogue(data, query).items[0].rentalPriceFrom).toBe(200);
+  expect(parseCatalogue(data, query).facets).toEqual(data.facets);
+  expect(() => parseCatalogue({ ...data, facets: { colors: [null], sizes: [] } }, query)).toThrow();
+  expect(() => parseCatalogue({ ...data, items: [{ ...product, rentalPriceFrom: -1 }] }, query)).toThrow();
+});
