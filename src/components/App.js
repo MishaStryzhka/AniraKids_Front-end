@@ -1,3 +1,4 @@
+import { AccountReservationsPage } from '../pages/AccountPage/AccountReservationsPage';
 import { FavoritesProvider } from '../storefront/favorites/FavoritesProvider';
 import { FavoritesPage } from '../storefront/favorites/FavoritesPage';
 import AccountPage from '../pages/AccountPage/AccountPage';
@@ -124,7 +125,7 @@ function App() {
               />
               <Route
                 path={routes.accountReservations}
-                element={<CanonicalRoutePlaceholder />}
+                element={<AccountReservationsPage />}
               />
               <Route
                 path={routes.faq}

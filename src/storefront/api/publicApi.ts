@@ -453,3 +453,10 @@ export async function getReservationStatus(number: string, token: string, signal
   if (receipt.reservationNumber !== number) return invalid();
   return { ...receipt, guestAccessToken: token };
 }
+
+export async function getAccountReservations(token: string, page: number, signal?: AbortSignal): Promise<{ items: Receipt[]; total: number; page: number }> {
+  const result = await request(`/account/reservations?page=${page}`, { signal, headers: { Authorization: `Bearer ${token}` } });
+  const data = result.body;
+  if (!object(data) || !Array.isArray(data.items) || !Number.isSafeInteger(data.total) || (data.total as number) < 0 || data.page !== page) throw new PublicApiError('INVALID_RESPONSE');
+  return { items: data.items.map(item => parseReceipt(item)), total: data.total as number, page };
+}
