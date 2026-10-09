@@ -1,3 +1,4 @@
+import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import IconBeauty from '../images/icons/IconBeauty';
 import { Breadcrumbs } from '../design-system/components/Breadcrumbs';
 import { useEffect, useRef, useState } from 'react';
@@ -10,7 +11,7 @@ import { getCatalogue, PublicApiError, type CatalogueQuery, type ProductCard, } 
 import { usePublicRead } from './usePublicRead';
 import { Actions, Alert, Copy, Heading, Page, RouteLink, Stack, Title, } from './storefrontStyles';
 import { productPath, routes } from '../navigation/routes';
-const Grid = styled.ul `
+export const Grid = styled.ul `
   list-style: none;
   padding: 0;
   margin: 0;
@@ -170,6 +171,7 @@ export function CataloguePage() {
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
     {isSearch && <form onSubmit={event => { event.preventDefault(); setParams(query.trim() ? { q: query.trim() } : {}); }}><Stack><Input label="Hledat produkt" value={query} onChange={event => setQuery(event.target.value)}/><Actions><Button type="submit">Hledat</Button></Actions></Stack></form>}
     <FilterToggle variant="secondary" aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(!open)}>Filtrovat</FilterToggle>
+    <FavoritesFeedback />
     <Layout>
       <Filters id="catalogue-filters" $open={open} aria-label="Filtry produktů" onSubmit={event => {
             event.preventDefault();
@@ -203,7 +205,7 @@ export function CataloguePage() {
       <div style={{ minWidth: 0 }}>
         <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><label>SEŘADIT PODLE<Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
         {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>
-          <RouteLink to={productPath(product.slug)} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink><Heading>{product.name}</Heading>
+          <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
           {product.color && <Copy>{product.color}</Copy>}
           {product.rentalPriceFrom !== undefined && <Copy>Od {product.rentalPriceFrom.toLocaleString('cs-CZ')} Kč · {request.rentalMode === 'external' ? 'mimo studio' : 've studiu'}</Copy>}
         </li>)}</Grid> : result.data ? <Empty><IconBeauty className="catalogue-empty-illustration" aria-hidden="true"/><Copy>{result.data.total > 0 ? 'Na této stránce nejsou žádné produkty.' : 'Pro zvolené filtry jsme nenašli žádné produkty.'}</Copy><Button variant="secondary" onClick={page > 1 ? () => navigatePage(1) : reset}>{page > 1 ? 'První stránka' : 'Zrušit filtry'}</Button></Empty> : null}
