@@ -22,3 +22,9 @@ test('returning device immediately opens sign in and can still register', () => 
   rememberDeviceSignIn(); show(); expect(screen.getByText('Sign in form')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', {name:'Registration'})); expect(screen.getByText('Email registration form')).toBeInTheDocument();
 });
+
+test('callback error is inside the auth window with sign in selected', () => {
+  render(<ThemeProvider theme={theme.light}><ModalRegister authNotice="Seznam failed" handleCloseModal={() => {}} /></ThemeProvider>);
+  expect(screen.getByRole('alert')).toHaveTextContent('Seznam failed');
+  expect(screen.getByText('Sign in form')).toBeInTheDocument();
+});

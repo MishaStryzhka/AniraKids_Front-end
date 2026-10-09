@@ -25,18 +25,19 @@ import { hasSignedInOnDevice } from '../../../auth/deviceSignIn';
 import { beginSeznamSignIn } from '../../../auth/seznamFlow';
 
 
-const ModalRegister = ({ handleCloseModal }) => {
+const ModalRegister = ({ handleCloseModal, authNotice = '' }) => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'components.modalRegister',
   });
   const [typeRegistration, setTypeRegistration] = useState('email');
-  const [typeNavigation, setTypeNavigation] = useState(() => hasSignedInOnDevice() ? 'authorization' : 'registration');
+  const [typeNavigation, setTypeNavigation] = useState(() => (authNotice || hasSignedInOnDevice()) ? 'authorization' : 'registration');
   const [seznamError, setSeznamError] = useState('');
   const dispatch = useDispatch();
 
   return (
     <ModalWindow>
       <WrapForm>
+        {authNotice && <p role="alert" style={{ margin: '0 0 16px', lineHeight: 1.5 }}>{authNotice}</p>}
         <BoxButtonsNavigation>
           <ButtonNav
             $isActive={typeNavigation === 'registration'}
