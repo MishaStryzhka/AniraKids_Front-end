@@ -77,7 +77,7 @@ export function StorefrontLayout() {
       ? 'unresolved'
       : 'guest';
 
-  const currentPrimaryNavigation = resolvePrimaryNavigation(location.pathname, productPrimaryCategory);
+  const currentPrimaryNavigation = resolvePrimaryNavigation(location.pathname, productPrimaryCategory, location.search);
 
   const requestOverlay = useCallback((overlay: Exclude<ActiveOverlay, 'none'>) => {
     const selector = overlay === 'menu' ? '[data-menu-trigger]' : '[data-search-trigger]';

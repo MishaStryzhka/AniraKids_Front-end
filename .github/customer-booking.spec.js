@@ -665,3 +665,39 @@ test('favorites offer the catalogue and retain their source through booking', as
   await expect(page.getByRole('link', { name: 'Prohlédnout Sofia' })).toBeVisible();
   expect(state.posts).toHaveLength(0);
 });
+
+for (const width of [390, 768, 1024, 1440]) {
+  test('women dresses in global navigation and footer ' + width, async ({ page }) => {
+    const state = await setup(page, true);
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto(APP + '/saty');
+    await expect(page.getByRole('navigation', { name: 'Kategorie šatů' })).toHaveCount(0);
+    const mobile = width < 1024;
+    if (mobile) await page.getByRole('button', { name: 'Otevřít menu' }).click();
+    const nav = page.getByRole('navigation', { name: mobile ? 'Menu' : 'Hlavní navigace', exact: true });
+    const women = nav.getByRole('link', { name: 'Dámské šaty', exact: true });
+    await expect(women).toHaveAttribute('href', '/forWomen?category=dress');
+    const box = await women.boundingBox();
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    await women.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(APP + '/forWomen?category=dress');
+    await expect(page.getByRole('heading', { name: 'Dámské šaty', level: 1 })).toBeVisible();
+    if (mobile) {
+      await expect(nav).toHaveCount(0);
+      await page.getByRole('button', { name: 'Otevřít menu' }).click();
+    }
+    await expect(women).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Dívčí šaty', exact: true })).not.toHaveAttribute('aria-current', 'page');
+    if (mobile) await page.getByRole('button', { name: 'Zavřít menu' }).click();
+    await expect(page).toHaveURL(APP + '/forWomen?category=dress');
+    await capture(page, 'global-women-navigation-' + width);
+    await page.locator('footer').getByRole('link', { name: 'Dívčí šaty', exact: true }).click();
+    await expect(page).toHaveURL(APP + '/saty');
+    await page.locator('footer').getByRole('link', { name: 'Dámské šaty', exact: true }).click();
+    await expect(page).toHaveURL(APP + '/forWomen?category=dress');
+    expect(state.posts).toHaveLength(0);
+    expect(state.errors).toEqual([]);
+  });
+}

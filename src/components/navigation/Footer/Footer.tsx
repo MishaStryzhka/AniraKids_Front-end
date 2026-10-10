@@ -116,6 +116,7 @@ const groups: ReadonlyArray<{ title: string; span: number; links: readonly LinkI
     span: 2,
     links: [
       { label: 'Dívčí šaty', to: routes.dresses },
+      { label: 'Dámské šaty', to: routes.womenDresses },
       { label: 'Chlapecké obleky', to: routes.suits },
       { label: 'Novinky', to: routes.newArrivals },
     ],
