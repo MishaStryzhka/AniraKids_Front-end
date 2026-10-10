@@ -19,7 +19,7 @@ test.each([
   { catalogueReturnTo: '/rezervace' },
   { catalogueReturnTo: '/saty/../admin' },
 ])('falls back safely for invalid or unrelated history state: %p', state => {
-  expect(getCatalogueReturnTo(state, 'dress')).toBe('/saty');
+  expect(getCatalogueReturnTo(state, 'dress')).toBe('/novinky?category=dress');
   expect(getCatalogueReturnTo(state, 'suit')).toBe('/obleky');
   expect(getCatalogueReturnTo(state, 'accessory')).toBe('/novinky');
   expect(getCatalogueReturnTo(state)).toBe('/novinky');

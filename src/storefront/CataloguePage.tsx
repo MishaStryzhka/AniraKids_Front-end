@@ -115,11 +115,17 @@ export function CataloguePage() {
         root === '/forMen' ? { title: 'Pánské oblečení', gender: 'men' } :
             root === '/forChildren' ? { title: 'Dětské oblečení', gender: 'children' } : null;
     const fixedCategory = pathname === routes.dresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
-    const title = legacy?.title || (fixedCategory === 'dress' ? 'Šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
+    const fixedGender = pathname === routes.dresses ? 'girls' : legacy?.gender;
+    const title = legacy?.title || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
     useEffect(() => {
-      if (params.has('page')) { const next = new URLSearchParams(params); next.delete('page'); setParams(next, { replace: true }); }
-    }, [params, setParams]);
+      if (params.has('page') || (pathname === routes.dresses && params.has('gender'))) {
+        const next = new URLSearchParams(params);
+        next.delete('page');
+        if (pathname === routes.dresses) next.delete('gender');
+        setParams(next, { replace: true });
+      }
+    }, [params, setParams, pathname]);
     const sort = params.get('sort') || (title === 'Novinky' ? 'newest' : 'name');
     const serialized = params.toString();
     const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, params.get(key) || (key === 'rentalMode' ? 'studio' : '')]));
@@ -137,8 +143,8 @@ export function CataloguePage() {
     }
     if (fixedCategory)
         request.category = fixedCategory;
-    if (legacy)
-        request.gender = legacy.gender as CatalogueQuery['gender'];
+    if (fixedGender)
+        request.gender = fixedGender as CatalogueQuery['gender'];
     if (q)
         request.q = q;
     const priceError = (values: Record<string, string>) => {
@@ -172,6 +178,7 @@ export function CataloguePage() {
     return <Page>
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
     <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
+    {pathname === routes.dresses && <Actions><RouteLink to="/forWomen?category=dress">Prohlédnout dámské šaty</RouteLink></Actions>}
     {pathname === routes.rental && <Copy id="jak-funguje-pronajem">Vyberte produkt, velikost a termín. Po ověření dostupnosti vyplňte kontaktní údaje a odešlete rezervaci.</Copy>}
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
     {isSearch && <form onSubmit={event => { event.preventDefault(); setParams(query.trim() ? { q: query.trim() } : {}); }}><Stack><Input label="Hledat produkt" value={query} onChange={event => setQuery(event.target.value)}/><Actions><Button type="submit">Hledat</Button></Actions></Stack></form>}
@@ -186,14 +193,14 @@ export function CataloguePage() {
                 return;
             const next = new URLSearchParams(params);
             next.delete('page');
-            filterKeys.forEach(key => { const value = draft[key]; value ? next.set(key, value) : next.delete(key); });
+            filterKeys.forEach(key => { const value = key === 'gender' && fixedGender ? '' : draft[key]; value ? next.set(key, value) : next.delete(key); });
             setParams(next);
         }}>
         <h2>FILTROVAT</h2>
         <details><summary>TYP</summary>
           {!fixedCategory && <label>Kategorie<Select value={draft.category} onChange={event => update('category', event.target.value)}><option value="">Všechny</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
-          {!legacy && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
-          {fixedCategory && legacy && <Copy>{title}</Copy>}
+          {!fixedGender && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
+          {fixedCategory && fixedGender && <Copy>{title}</Copy>}
         </details>
         <details><summary>FAMILY LOOK</summary><label><span><input type="checkbox" checked={draft.familyLook === 'true'} onChange={event => update('familyLook', event.target.checked ? 'true' : '')}/> Sladěné rodinné modely</span></label></details>
         <details><summary>CENA</summary>

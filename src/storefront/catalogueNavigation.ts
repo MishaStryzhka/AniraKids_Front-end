@@ -8,7 +8,7 @@ const cataloguePaths = new Set<string>([
 
 /** Keep catalogue filters when returning from a product or reservation. */
 export function getCatalogueReturnTo(state: unknown, category?: string): string {
-  const fallback = category === 'dress' ? routes.dresses
+  const fallback = category === 'dress' ? `${routes.newArrivals}?category=dress`
     : category === 'suit' ? routes.suits : routes.newArrivals;
   if (!state || typeof state !== 'object' || Array.isArray(state)) return fallback;
   const candidate = (state as { catalogueReturnTo?: unknown }).catalogueReturnTo;

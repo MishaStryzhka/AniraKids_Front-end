@@ -106,3 +106,21 @@ test('load-more remains usable without IntersectionObserver', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Načíst další' }));
   await screen.findByRole('heading', { name: 'second' });
 });
+
+test('girls dresses keeps its audience through URL overrides, filters and reset; women remain reachable', async () => {
+    show('/saty?gender=women&color=B%C3%ADl%C3%A1');
+    await screen.findByText('Pro zvolené filtry jsme nenašli žádné produkty.');
+    expect(screen.getByRole('heading', {name:'Dívčí šaty', level:1})).toBeInTheDocument();
+    expect(screen.queryByLabelText('Pro koho')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', {name:'Prohlédnout dámské šaty'})).toHaveAttribute('href','/forWomen?category=dress');
+    expect(get.mock.calls.every(([q]) => q.category === 'dress' && q.gender === 'girls')).toBe(true);
+    await waitFor(() => expect(screen.getByTestId('url')).not.toHaveTextContent('gender='));
+    fireEvent.click(screen.getByRole('button', {name:'Filtrovat'}));
+    fireEvent.click(screen.getByRole('button', {name:'Použít filtry'}));
+    fireEvent.click(screen.getAllByRole('button', {name:'Zrušit filtry'})[0]);
+    await waitFor(() => expect(get).toHaveBeenLastCalledWith(expect.objectContaining({category:'dress',gender:'girls'}), expect.any(AbortSignal)));
+});
+test('women dresses link keeps both product type and audience', async () => {
+    show('/forWomen?category=dress');
+    await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({category:'dress',gender:'women'}), expect.any(AbortSignal)));
+});
