@@ -464,9 +464,9 @@ test('catalogue route mapping, empty, search and unavailable product are honest'
   ]) {
     await page.goto(APP + route);
     await expect(
-      page.getByText('Momentálně nejsou dostupné žádné produkty.')
+      page.getByText('Pro zvolené filtry jsme nenašli žádné produkty.')
     ).toBeVisible();
-    expect(new URLSearchParams(state.reads.at(-1).query).get(key)).toBe(value);
+    expect(new URLSearchParams(state.reads.filter(read => read.url === '/api/v2/catalogue/products').at(-1).query).get(key)).toBe(value);
   }
   await page.goto(APP + '/produkt/missing');
   await expect(
