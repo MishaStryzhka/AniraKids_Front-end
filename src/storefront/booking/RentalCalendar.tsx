@@ -96,7 +96,9 @@ export function RentalCalendar({ selection, enabled, onChange }: {
     setFocused('');
   };
   const prompt = !enabled ? 'Nejprve vyberte velikost a způsob pronájmu.'
-    : choosingEnd ? 'Vyberte datum vrácení.' : 'Vyberte první den pronájmu.';
+    : choosingEnd ? 'Vyberte datum vrácení.'
+    : selection.startDate && selection.endDate ? 'Termín je vybraný. Novým výběrem změníte začátek.'
+    : 'Vyberte první den pronájmu.';
   return <Shell ref={root} aria-label="Kalendář dostupnosti">
     <Header>
       <Nav type="button" aria-label="Předchozí měsíc"
