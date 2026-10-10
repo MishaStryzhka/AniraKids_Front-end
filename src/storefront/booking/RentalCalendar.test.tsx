@@ -32,11 +32,12 @@ test('month loads on size selection, disabled day cannot be selected, start driv
   expect(day('2032-02-02')).toHaveAttribute('aria-disabled','true');
   fireEvent.click(day('2032-02-05'));
   expect(screen.getByTestId('range')).toHaveTextContent('2032-02-03/2032-02-05');
+  await waitFor(()=>expect(day('2032-02-02')).toHaveAttribute('aria-disabled','false'));
 });
 test('keyboard arrows focus days; complete range can restart and a same-day rental works', async()=>{
   render(<Harness/>);
   await waitFor(()=>expect(day('2032-02-02')).toHaveAttribute('aria-disabled','false'));
-  day('2032-02-02').focus();
+  act(() => day('2032-02-02').focus());
   fireEvent.keyDown(day('2032-02-02'),{key:'ArrowRight'});
   expect(day('2032-02-03')).toHaveFocus();
   fireEvent.click(day('2032-02-03'));
@@ -48,6 +49,7 @@ test('keyboard arrows focus days; complete range can restart and a same-day rent
   expect(screen.getByTestId('range')).toHaveTextContent('2032-02-08/');
   fireEvent.click(screen.getByRole('button',{name:'Změnit začátek pronájmu'}));
   expect(screen.getByTestId('range').textContent).toBe('/');
+  await waitFor(()=>expect(day('2032-02-02')).toHaveAttribute('aria-disabled','false'));
 });
 test('cross-month selection retains start; no request before size and no false availability on errors', async()=>{
   const view=render(<Harness enabled={false}/>);
@@ -82,7 +84,7 @@ test('stale size response cannot expose selectable days',async()=>{
   expect(day('2032-03-03')).toHaveAttribute('aria-disabled','true');
 });
 test('strict public calendar contract rejects missing days, wrong selection and optimistic past dates',()=>{
-  const query={...initial,month:'2032-02'};
+  const query={productId:initial.productId,variantId:initial.variantId,rentalMode:initial.rentalMode,month:'2032-02'};
   const valid={calendar:{...data(query),startDate:null}};
   expect(parseRentalCalendar(valid,query).days).toHaveLength(29);
   for(const change of [
