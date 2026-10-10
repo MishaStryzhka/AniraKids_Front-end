@@ -78,7 +78,7 @@ function App() {
   const [authNotice, setAuthNotice] = useState('');
   useEffect(() => { if (!isOpenModalAuth) setAuthNotice(''); }, [isOpenModalAuth]);
   const dispatch = useDispatch();
-  const { token, isLoggedIn } = useAuth();
+  const { token, isLoggedIn, isRefreshing, user } = useAuth();
 
   if (false) setCurrentTheme('light');
 
@@ -96,7 +96,16 @@ function App() {
       <ModalAuthContext.Provider
         value={{ isOpenModalAuth, setIsOpenModalAuth, setAuthNotice }}
       >
-        <FavoritesProvider><BookingProvider>
+        <FavoritesProvider><BookingProvider
+          contactProfile={isRefreshing ? undefined :
+            token && isLoggedIn && user && (user.userID || user._id) ? {
+              accountId: String(user.userID || user._id),
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              phone: user.primaryPhoneNumber,
+            } : null}
+        >
           <Routes>
             <Route
               element={

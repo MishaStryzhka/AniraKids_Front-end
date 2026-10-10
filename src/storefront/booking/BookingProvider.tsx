@@ -1,6 +1,7 @@
 import { parseBookingPolicy, type BookingPolicy } from '../api/bookingPolicy';
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -25,8 +26,20 @@ import {
   selectionErrors,
   type Attempt,
   type BookingDraft,
+  type ContactDraft,
   type StoredBooking,
 } from './bookingModel';
+const contactFields = ['firstName', 'lastName', 'email', 'phone'] as const;
+type ContactField = (typeof contactFields)[number];
+type ContactProfile = {
+  accountId: string;
+} & Partial<Record<ContactField, unknown>>;
+type Prefill = {
+  accountId: string | null;
+  edited: Set<ContactField>;
+  filled: Partial<Record<ContactField, string>>;
+};
+const emptyPrefill = (): Prefill => ({ accountId: null, edited: new Set(), filled: {} });
 type State = {
   draft: BookingDraft | null;
   stored: StoredBooking | null;
@@ -95,18 +108,19 @@ function rejectionCopy(error: PublicApiError) {
     return 'Produkt nebo vybraná velikost už není dostupná. Vyberte prosím znovu.';
   return 'Zkontrolujte prosím zadané údaje a termín pronájmu.';
 }
-function useBookingController() {
+function useBookingController(contactProfile?: ContactProfile | null) {
+  const prefill = useRef<Prefill>(emptyPrefill());
   const [state, setState] = useState(initial),
     current = useRef(state),
     request = useRef<AbortController | null>(null),
     mounted = useRef(true);
   current.current = state;
-  const commit = (update: (before: State) => State) => {
+  const commit = useCallback((update: (before: State) => State) => {
     if (!mounted.current) return;
     const value = update(current.current);
     current.current = value;
     setState(value);
-  };
+  }, []);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -123,6 +137,36 @@ function useBookingController() {
     window.addEventListener('beforeunload', guard);
     return () => window.removeEventListener('beforeunload', guard);
   }, [state.busy, state.stored]);
+  useEffect(() => {
+    // Undefined means the session is refreshing; do not use stale profile data.
+    if (contactProfile === undefined || !state.draft || state.stored ||
+        state.busy || state.storageBlocked) return;
+    const metadata = prefill.current;
+    const contact: ContactDraft = { ...state.draft.contact };
+    const accountId = contactProfile?.accountId ?? null;
+    if (metadata.accountId !== accountId) {
+      // Remove only untouched automatic values when signing out/switching accounts.
+      for (const field of contactFields) {
+        if (!metadata.edited.has(field) && contact[field] === metadata.filled[field])
+          contact[field] = '';
+      }
+      metadata.accountId = accountId;
+      metadata.filled = {};
+    }
+    for (const field of contactFields) {
+      const value = contactProfile?.[field];
+      if (!metadata.edited.has(field) && contact[field] === '' &&
+          typeof value === 'string' && value.trim()) {
+        contact[field] = value.trim();
+        metadata.filled[field] = contact[field];
+      }
+    }
+    if (contactFields.some(field => contact[field] !== state.draft!.contact[field])) {
+      commit(before => before.draft
+        ? { ...before, draft: { ...before.draft, contact } }
+        : before);
+    }
+  }, [contactProfile, state.draft, state.stored, state.busy, state.storageBlocked, commit]);
   const chooseProduct = (product: PublicProduct) => {
     if (
       current.current.stored ||
@@ -130,6 +174,7 @@ function useBookingController() {
       current.current.storageBlocked
     )
       return false;
+    if (current.current.draft?.product.id !== product.id) prefill.current = emptyPrefill();
     commit(before => ({
       ...before,
       draft:
@@ -147,6 +192,10 @@ function useBookingController() {
       current.current.storageBlocked
     )
       return;
+    for (const field of contactFields) {
+      if (draft.contact[field] !== current.current.draft?.contact[field])
+        prefill.current.edited.add(field);
+    }
     commit(before => ({ ...before, draft, error: null }));
   };
   const send = async (attempt: Attempt) => {
@@ -314,6 +363,7 @@ function useBookingController() {
       commit(v => ({ ...v, storageBlocked: true, error: storageMessage }));
       return false;
     }
+    prefill.current = emptyPrefill();
     commit(v => ({ ...v, draft: null, stored: null, error: null }));
     return true;
   };
@@ -331,8 +381,11 @@ function useBookingController() {
 }
 type BookingContextValue = ReturnType<typeof useBookingController>;
 const BookingContext = createContext<BookingContextValue | null>(null);
-export function BookingProvider({ children }: { children: ReactNode }) {
-  const value = useBookingController();
+export function BookingProvider({ children, contactProfile }: {
+  children: ReactNode;
+  contactProfile?: ContactProfile | null;
+}) {
+  const value = useBookingController(contactProfile);
   return (
     <BookingContext.Provider value={value}>{children}</BookingContext.Provider>
   );

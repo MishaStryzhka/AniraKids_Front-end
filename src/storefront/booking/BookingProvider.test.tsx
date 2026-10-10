@@ -1,3 +1,4 @@
+import type { ComponentProps, ReactNode } from 'react';
 import { bookingPolicyFixture as policy } from './bookingFixtures';
 import { act, renderHook } from '@testing-library/react';
 import { BookingProvider, useBooking } from './BookingProvider';
@@ -234,4 +235,89 @@ test('refresh reads current receipt and never repeats POST; failure retains old 
   expect(view.result.current.error).toContain('nepodařilo ověřit');
   expect(view.result.current.busy).toBe(false);
   read.mockReset();
+});
+
+type Profile = ComponentProps<typeof BookingProvider>['contactProfile'];
+const profileFixture = {
+  accountId: 'customer-1',
+  firstName: 'Jana',
+  lastName: 'Nováková',
+  email: 'jana@example.test',
+  phone: '+420777123456',
+};
+function profileView(profile: Profile) {
+  const current = { profile };
+  const view = renderHook(() => useBooking(), {
+    wrapper: ({ children }: { children: ReactNode }) =>
+      <BookingProvider contactProfile={current.profile}>{children}</BookingProvider>,
+  });
+  return {
+    ...view,
+    setProfile(next: Profile) { current.profile = next; view.rerender(); },
+  };
+}
+test('profile fills editable contacts without storing or submitting them', () => {
+  const view = profileView(profileFixture);
+  act(() => { view.result.current.chooseProduct(product); });
+  expect(view.result.current.draft?.contact).toEqual({
+    firstName: 'Jana', lastName: 'Nováková', email: 'jana@example.test',
+    phone: '+420777123456', notes: '',
+  });
+  expect(sessionStorage.getItem(SESSION_KEY)).toBeNull();
+  expect(post).not.toHaveBeenCalled();
+});
+test('late profile never overwrites a manual edit or a deliberately cleared field, including returning to the product', () => {
+  const view = profileView(undefined);
+  act(() => { view.result.current.chooseProduct(product); });
+  act(() => {
+    const draft = view.result.current.draft!;
+    view.result.current.updateDraft({ ...draft, contact: { ...draft.contact, firstName: 'Eva', email: 'typed@example.test' } });
+  });
+  act(() => {
+    const draft = view.result.current.draft!;
+    view.result.current.updateDraft({ ...draft, contact: { ...draft.contact, email: '' } });
+  });
+  view.setProfile(profileFixture);
+  expect(view.result.current.draft?.contact).toMatchObject({ firstName: 'Eva', email: '', lastName: 'Nováková', phone: '+420777123456' });
+  act(() => { view.result.current.chooseProduct(product); });
+  expect(view.result.current.draft?.contact).toMatchObject({ firstName: 'Eva', email: '' });
+  act(() => { view.result.current.chooseProduct({ ...product, id: 'another-product' }); });
+  expect(view.result.current.draft?.contact.email).toBe('jana@example.test');
+});
+test('account switch and logout remove untouched automatic values but preserve manual contact edits', () => {
+  const view = profileView(profileFixture);
+  act(() => { view.result.current.chooseProduct(product); });
+  act(() => {
+    const draft = view.result.current.draft!;
+    view.result.current.updateDraft({ ...draft, contact: { ...draft.contact, firstName: 'Eva', notes: 'Ruční poznámka' } });
+  });
+  view.setProfile(undefined); // Refreshing does not clear current fields.
+  expect(view.result.current.draft?.contact.email).toBe('jana@example.test');
+  view.setProfile({ accountId: 'customer-2', email: 'second@example.test', phone: null });
+  expect(view.result.current.draft?.contact).toEqual({
+    firstName: 'Eva', lastName: '', email: 'second@example.test', phone: '', notes: 'Ruční poznámka',
+  });
+  view.setProfile(null);
+  expect(view.result.current.draft?.contact.email).toBe('');
+  expect(view.result.current.draft?.contact.firstName).toBe('Eva');
+});
+test('profile changes cannot alter a pending request or its frozen recovery body', async () => {
+  const pending = deferred<typeof receipt>();
+  post.mockReturnValue(pending.promise);
+  const view = profileView(profileFixture);
+  act(() => { view.result.current.chooseProduct(product); });
+  act(() => {
+    const draft = view.result.current.draft!;
+    view.result.current.updateDraft({ ...draft, selection: quote });
+  });
+  let operation!: Promise<void>;
+  act(() => { operation = view.result.current.submit(quote, policy); });
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  view.setProfile({ ...profileFixture, accountId: 'customer-2', email: 'other@example.test' });
+  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  expect(post.mock.calls[0][0].customer.email).toBe('jana@example.test');
+  await act(async () => { pending.reject(new PublicApiError('NETWORK')); await operation; });
+  view.setProfile(null);
+  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  expect(view.result.current.stored?.kind).toBe('attempt');
 });
