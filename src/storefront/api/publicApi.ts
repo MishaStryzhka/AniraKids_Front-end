@@ -4,7 +4,7 @@ import {
   parseReceiptPayment,
   type ReceiptPayment,
 } from './bookingPolicy';
-import { isDateOnly } from '../../admin/calendar/calendarDates';
+import { isDateOnly, monthCalendarDays } from '../../admin/calendar/calendarDates';
 export { PublicApiError, object, string, money } from './publicValidation';
 export type RentalMode = 'studio' | 'external';
 export type Pricing = {
@@ -459,4 +459,40 @@ export async function getAccountReservations(token: string, page: number, signal
   const data = result.body;
   if (!object(data) || !Array.isArray(data.items) || !Number.isSafeInteger(data.total) || (data.total as number) < 0 || data.page !== page) throw new PublicApiError('INVALID_RESPONSE');
   return { items: data.items.map(item => parseReceipt(item)), total: data.total as number, page };
+}
+
+export type CalendarQuery = Pick<Selection, 'productId' | 'variantId' | 'rentalMode'> & {
+  month: string;
+  startDate?: string;
+};
+export type RentalCalendar = CalendarQuery & {
+  today: string;
+  checkedAt: string;
+  days: Array<{ date: string; available: boolean }>;
+};
+export function parseRentalCalendar(value: unknown, query: CalendarQuery): RentalCalendar {
+  if (!object(value) || !object(value.calendar)) return invalid();
+  const calendar = value.calendar;
+  const dates = monthCalendarDays(query.month);
+  if (calendar.productId !== query.productId || calendar.variantId !== query.variantId ||
+      calendar.rentalMode !== query.rentalMode || calendar.month !== query.month ||
+      calendar.startDate !== (query.startDate ?? null) ||
+      !isDateOnly(calendar.today) || !instant(calendar.checkedAt) ||
+      !Array.isArray(calendar.days) || calendar.days.length !== dates.length) return invalid();
+  const today = calendar.today;
+  const days = calendar.days.map((day, index) => {
+    if (!object(day) || day.date !== dates[index] || typeof day.available !== 'boolean' ||
+        (day.available && (day.date < today || (query.startDate && day.date < query.startDate))))
+      return invalid();
+    return { date: day.date, available: day.available };
+  });
+  return {...query, today: calendar.today, checkedAt: calendar.checkedAt, days};
+}
+export async function getRentalCalendar(query: CalendarQuery, signal?: AbortSignal) {
+  const { productId, ...params } = query;
+  return parseRentalCalendar((await request(
+    '/catalogue/products/' + encodeURIComponent(productId) + '/availability-calendar?' +
+    new URLSearchParams(params as Record<string, string>),
+    { signal, cache: 'no-store' }
+  )).body, query);
 }
