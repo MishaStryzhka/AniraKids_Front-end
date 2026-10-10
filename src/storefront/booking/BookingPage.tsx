@@ -3,8 +3,9 @@ import {
   ReceiptPaymentInformation,
   CompanyInformation,
 } from '../payments/PaymentInformation';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getCatalogueReturnTo } from '../catalogueNavigation';
 import { Button } from '../../design-system/components/Button';
 import { Input } from '../../design-system/components/Input';
 import { SelectField } from '../../design-system/components/SelectField';
@@ -73,7 +74,9 @@ const formatInstant = (value: string) =>
 export function BookingPage() {
   const booking = useBooking(),
     navigate = useNavigate(),
+    location = useLocation(),
     draft = booking.draft;
+  const catalogueReturnTo = getCatalogueReturnTo(location.state, draft?.product.category);
   const policy = usePublicRead(
     booking.stored ? null : 'booking-policy',
     getBookingPolicy
@@ -103,15 +106,21 @@ export function BookingPage() {
     variant = draft?.product.variants.find(
       v => v.id === draft.selection.variantId
     );
-  const previousState = useRef('');
+  const previousEntry = useRef<string | null>(null);
   const view = booking.storageBlocked
     ? 'storage'
     : booking.busy
       ? 'pending'
       : (booking.stored?.kind ?? (booking.error ? 'error' : 'draft'));
+  useLayoutEffect(() => {
+    if (previousEntry.current === location.key) return;
+    previousEntry.current = location.key;
+    if (view === 'draft') {
+      title.current?.focus({ preventScroll: true });
+      window.scrollTo(0, 0);
+    }
+  }, [location.key, view]);
   useEffect(() => {
-    if (previousState.current === view) return;
-    previousState.current = view;
     const frame = requestAnimationFrame(() => {
       if (view === 'attempt' || view === 'storage' || view === 'error')
         notice.current?.focus();
@@ -247,12 +256,12 @@ export function BookingPage() {
                 <Button
                   disabled={booking.storageBlocked}
                   onClick={() => {
-                    if (booking.startNew()) navigate(routes.rental);
+                    if (booking.startNew()) navigate(catalogueReturnTo);
                   }}
                 >
                   Vytvořit novou rezervaci
                 </Button>
-                <RouteLink to={routes.rental}>Zpět na produkty</RouteLink>
+                <RouteLink to={catalogueReturnTo}>Zpět na produkty</RouteLink>
               </Actions>
             </Panel>
           ) : stored?.kind === 'attempt' ? (
@@ -584,7 +593,7 @@ export function BookingPage() {
               </Copy>
               {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
               <Actions>
-                <RouteLink to={routes.rental}>Prohlédnout produkty</RouteLink>
+                <RouteLink to={catalogueReturnTo}>Prohlédnout produkty</RouteLink>
               </Actions>
             </Panel>
           ) : null}

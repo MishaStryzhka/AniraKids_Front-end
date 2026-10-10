@@ -1,9 +1,10 @@
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../design-system/components/Button';
 import { useStorefrontOutletContext } from '../layouts/StorefrontLayout';
 import { routes } from '../navigation/routes';
+import { getCatalogueReturnTo } from './catalogueNavigation';
 import { getPublicProduct, PublicApiError } from './api/publicApi';
 import { useBooking } from './booking/BookingProvider';
 import { formatMoney, modeLabel } from './booking/bookingModel';
@@ -25,12 +26,14 @@ import { usePublicRead } from './usePublicRead';
 export function ProductDetailPage() {
   const { slug = '' } = useParams(),
     navigate = useNavigate(),
+    location = useLocation(),
     booking = useBooking(),
     { setProductPrimaryCategory } = useStorefrontOutletContext();
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
   const [photo, setPhoto] = useState(0);
   useEffect(() => setPhoto(0), [slug]);
   const product = result.data;
+  const catalogueReturnTo = getCatalogueReturnTo(location.state, product?.category);
   useEffect(() => {
     setProductPrimaryCategory(
       product?.category === 'dress'
@@ -57,7 +60,7 @@ export function ProductDetailPage() {
         </Title>
         <Actions>
           <Button onClick={result.reload}>Zkusit znovu</Button>
-          <RouteLink to={routes.rental}>Zpět na produkty</RouteLink>
+          <RouteLink to={catalogueReturnTo}>Zpět na produkty</RouteLink>
         </Actions>
       </Page>
     );
@@ -69,13 +72,7 @@ export function ProductDetailPage() {
     <Page>
       <Actions>
         <RouteLink
-          to={
-            product.category === 'dress'
-              ? routes.dresses
-              : product.category === 'suit'
-                ? routes.suits
-                : routes.rental
-          }
+          to={catalogueReturnTo}
         >
           Zpět na produkty
         </RouteLink>
@@ -155,7 +152,7 @@ export function ProductDetailPage() {
                 Nejprve otevřete svou rozpracovanou rezervaci nebo její
                 výsledek.
               </Copy>
-              <RouteLink to={routes.reservation}>Otevřít rezervaci</RouteLink>
+              <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Otevřít rezervaci</RouteLink>
             </Alert>
           ) : (
             <Actions>
@@ -163,7 +160,7 @@ export function ProductDetailPage() {
                 disabled={!rentable}
                 onClick={() => {
                   if (booking.chooseProduct(product))
-                    navigate(routes.reservation);
+                    navigate(routes.reservation, { state: { catalogueReturnTo } });
                 }}
               >
                 Vybrat velikost a termín

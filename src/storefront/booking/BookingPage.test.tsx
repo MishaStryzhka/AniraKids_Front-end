@@ -45,6 +45,7 @@ function setup() {
   fireEvent.click(screen.getByRole('button', { name: 'Choose product' }));
 }
 beforeEach(() => {
+  jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
   (getBookingPolicy as jest.Mock).mockResolvedValue(bookingPolicyFixture);
   sessionStorage.clear();
   get.mockReset();
