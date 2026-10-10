@@ -112,7 +112,9 @@ test('girls dresses keeps its audience through URL overrides, filters and reset;
     await screen.findByText('Pro zvolené filtry jsme nenašli žádné produkty.');
     expect(screen.getByRole('heading', {name:'Dívčí šaty', level:1})).toBeInTheDocument();
     expect(screen.queryByLabelText('Pro koho')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', {name:'Prohlédnout dámské šaty'})).toHaveAttribute('href','/forWomen?category=dress');
+    expect(screen.getByRole('navigation', {name:'Kategorie šatů'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name:'Dívčí šaty', exact:true})).toHaveAttribute('aria-current','page');
+    expect(screen.getByRole('link', {name:'Dámské šaty'})).toHaveAttribute('href','/forWomen?category=dress');
     expect(get.mock.calls.every(([q]) => q.category === 'dress' && q.gender === 'girls')).toBe(true);
     await waitFor(() => expect(screen.getByTestId('url')).not.toHaveTextContent('gender='));
     fireEvent.click(screen.getByRole('button', {name:'Filtrovat'}));
@@ -122,5 +124,7 @@ test('girls dresses keeps its audience through URL overrides, filters and reset;
 });
 test('women dresses link keeps both product type and audience', async () => {
     show('/forWomen?category=dress');
+    expect(screen.getByRole('heading', {name:'Dámské šaty',level:1})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name:'Dámské šaty',exact:true})).toHaveAttribute('aria-current','page');
     await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({category:'dress',gender:'women'}), expect.any(AbortSignal)));
 });

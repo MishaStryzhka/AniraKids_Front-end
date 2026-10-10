@@ -1,5 +1,6 @@
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import IconBeauty from '../images/icons/IconBeauty';
+import { NavigationLink } from '../design-system/components/NavigationLink';
 import { Breadcrumbs } from '../design-system/components/Breadcrumbs';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -55,31 +56,64 @@ export function ProductImage({ product }: {
       {url && !failed ? (<img src={url} alt={product.photos[0].alt || product.name} loading="lazy" onError={() => setFailed(true)}/>) : (<Copy>Fotografie není k dispozici.</Copy>)}
     </Cover>);
 }
-const CatalogueTitle = styled(Title) `
-  text-align: center;
-  text-transform: uppercase;
-  font-family: 'Cormorant SC', ${t.font.family.editorial};
-  font-size: clamp(32px, 5vw, 52px);
-  font-weight: 500;
-  padding-block: 12px 24px;
-  border-bottom: 1px solid #d6bbaa;
+const CataloguePageLayout = styled(Page)`
+  padding-block-start: ${t.space[4]};
+  gap: ${t.space[4]};
+`;
+const CatalogueHeader = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: ${t.space[2]} ${t.space[6]};
+  padding-block-end: ${t.space[4]};
+  border-bottom: 1px solid ${t.color.border.subtle};
+`;
+const CatalogueTitle = styled(Title)`
+  font-family: ${t.font.family.editorial};
+  font-size: ${t.type.h1.mobile.size};
+  line-height: ${t.type.h1.mobile.lineHeight};
+  font-weight: ${t.font.weight.medium};
+  letter-spacing: ${t.type.h1.letterSpacing};
+  @media (min-width: ${t.breakpoint.md}) {
+    font-size: ${t.type.h1.md.size};
+    line-height: ${t.type.h1.md.lineHeight};
+  }
+`;
+const DressNavigation = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${t.space[2]};
 `;
 const Layout = styled.div `
-  display: grid;
-  gap: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: ${t.space[4]};
   min-width: 0;
-  @media (min-width: 768px) { grid-template-columns: 220px minmax(0, 1fr); }
+  @media (min-width: ${t.breakpoint.md}) {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'filters toolbar' 'filters products';
+    column-gap: ${t.space[8]};
+    align-items: start;
+  }
+`;
+const Products = styled.div`
+  grid-area: products;
+  min-width: 0;
 `;
 const FilterToggle = styled(Button) `@media (min-width: 768px) { display: none; }`;
 const Filters = styled.form<{
     $open: boolean;
 }> `
+  grid-area: filters;
   display: ${({ $open }) => $open ? 'grid' : 'none'};
   gap: 16px;
   align-content: start;
   min-width: 0;
   @media (min-width: 768px) { display: grid; }
-  h2 { font-size: 18px; letter-spacing: 0.06em; font-weight: 500; }
+  h2 { margin: 0; font-size: 18px; letter-spacing: 0.06em; font-weight: 500; }
   details { border-bottom: 1px solid ${t.color.border.subtle}; padding-bottom: 12px; }
   summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: space-between; }
   summary::after { content: '+'; }
@@ -93,10 +127,27 @@ const Select = styled.select `
   border: 1px solid ${t.color.border.default}; border-radius: 4px; font: inherit;
 `;
 const Toolbar = styled.div `
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: 16px; margin-bottom: 24px;
-  label { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; }
-  select { width: auto; max-width: 100%; }
+  grid-area: toolbar;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: ${t.space[3]};
+  > p { grid-column: 1 / -1; }
+  label { display: flex; align-items: center; gap: ${t.space[3]}; min-width: 0; font-size: 13px; }
+  select { width: 100%; max-width: 100%; min-height: ${t.control.height.default}; }
+  @media (max-width: 767px) {
+    label > span {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+  }
+  @media (min-width: ${t.breakpoint.md}) {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    select { width: auto; min-height: ${t.control.height.compact}; }
+  }
 `;
 const Empty = styled.div `
   min-height: 300px; display: flex; flex-direction: column; align-items: center;
@@ -116,7 +167,8 @@ export function CataloguePage() {
             root === '/forChildren' ? { title: 'Dětské oblečení', gender: 'children' } : null;
     const fixedCategory = pathname === routes.dresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
     const fixedGender = pathname === routes.dresses ? 'girls' : legacy?.gender;
-    const title = legacy?.title || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
+    const isWomenDresses = root === '/forWomen' && params.get('category') === 'dress';
+    const title = (isWomenDresses ? 'Dámské šaty' : legacy?.title) || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
     useEffect(() => {
       if (params.has('page') || (pathname === routes.dresses && params.has('gender'))) {
@@ -175,16 +227,21 @@ export function CataloguePage() {
     const reset = () => { const next = new URLSearchParams(); if (q)
         next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? 'studio' : '']))); setFormError(''); };
     const options = (values: string[], selected: string) => Array.from(new Set([...values, ...(selected ? [selected] : [])])).map(value => <option key={value} value={value}>{value}</option>);
-    return <Page>
+    return <CataloguePageLayout>
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
-    <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
-    {pathname === routes.dresses && <Actions><RouteLink to="/forWomen?category=dress">Prohlédnout dámské šaty</RouteLink></Actions>}
+    <CatalogueHeader>
+      <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
+      {(pathname === routes.dresses || isWomenDresses) && <DressNavigation aria-label="Kategorie šatů">
+        <NavigationLink variant="navigation" to={routes.dresses} aria-current={pathname === routes.dresses ? 'page' : undefined}>Dívčí šaty</NavigationLink>
+        <NavigationLink variant="navigation" to="/forWomen?category=dress" aria-current={isWomenDresses ? 'page' : undefined}>Dámské šaty</NavigationLink>
+      </DressNavigation>}
+    </CatalogueHeader>
     {pathname === routes.rental && <Copy id="jak-funguje-pronajem">Vyberte produkt, velikost a termín. Po ověření dostupnosti vyplňte kontaktní údaje a odešlete rezervaci.</Copy>}
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
     {isSearch && <form onSubmit={event => { event.preventDefault(); setParams(query.trim() ? { q: query.trim() } : {}); }}><Stack><Input label="Hledat produkt" value={query} onChange={event => setQuery(event.target.value)}/><Actions><Button type="submit">Hledat</Button></Actions></Stack></form>}
-    <FilterToggle variant="secondary" aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(!open)}>Filtrovat</FilterToggle>
     <FavoritesFeedback />
     <Layout>
+      <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><FilterToggle variant="secondary" aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(!open)}>Filtrovat</FilterToggle><label><span>SEŘADIT PODLE</span><Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
       <Filters id="catalogue-filters" $open={open} aria-label="Filtry produktů" onSubmit={event => {
             event.preventDefault();
             const error = priceError(draft);
@@ -197,11 +254,10 @@ export function CataloguePage() {
             setParams(next);
         }}>
         <h2>FILTROVAT</h2>
-        <details><summary>TYP</summary>
+        {(!fixedCategory || !fixedGender) && <details><summary>TYP</summary>
           {!fixedCategory && <label>Kategorie<Select value={draft.category} onChange={event => update('category', event.target.value)}><option value="">Všechny</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
           {!fixedGender && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
-          {fixedCategory && fixedGender && <Copy>{title}</Copy>}
-        </details>
+        </details>}
         <details><summary>FAMILY LOOK</summary><label><span><input type="checkbox" checked={draft.familyLook === 'true'} onChange={event => update('familyLook', event.target.checked ? 'true' : '')}/> Sladěné rodinné modely</span></label></details>
         <details><summary>CENA</summary>
           <label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Ve studiu</option><option value="external">Mimo studio</option></Select></label>
@@ -214,8 +270,8 @@ export function CataloguePage() {
         {formError && <Alert role="alert">{formError}</Alert>}
         <Button type="submit">Použít filtry</Button><Button type="button" variant="secondary" onClick={reset}>Zrušit filtry</Button>
       </Filters>
-      <div style={{ minWidth: 0 }}>
-        <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><label>SEŘADIT PODLE<Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
+      <Products>
+
         {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error && !result.data ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>
           <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)}
                   state={{ catalogueReturnTo: pathname + search }} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
@@ -227,7 +283,7 @@ export function CataloguePage() {
           {result.error ? <Alert role="alert"><Copy>Další produkty se nepodařilo načíst. Váš výběr zůstává zobrazený.</Copy><Button variant="secondary" onClick={result.reload}>Zkusit znovu</Button></Alert>
             : result.hasMore ? <Button variant="secondary" disabled={loadingMore} onClick={result.loadMore}>Načíst další</Button> : null}
         </div>}
-      </div>
+      </Products>
     </Layout>
-  </Page>;
+  </CataloguePageLayout>;
 }
