@@ -96,3 +96,38 @@ test('keyboard, continuous range and recoverable month failure',async({page})=>{
   expect(state.posts).toEqual([]);
   expect(state.errors).toEqual([]);
 });
+
+for (const width of [390,768,1440]) {
+  test('manual date edit checks on blur at '+width, async({page})=>{
+    await page.setViewportSize({width,height:1000});
+    const state=await setup(page);
+    await page.getByLabel('Velikost',{exact:true}).selectOption(product.variants[0].id);
+    await page.getByLabel('Od',{exact:true}).fill('2032-02-06');
+    await page.getByLabel('Do',{exact:true}).fill('2032-02-08');
+    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
+    await page.getByLabel('Do',{exact:true}).fill('2032-02-09');
+    await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
+    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
+    await page.getByLabel('Do',{exact:true}).fill('2032-02-05');
+    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
+    expect(state.posts).toEqual([]);
+    expect(state.errors).toEqual([]);
+  });
+}
+test('direct women product highlights its audience, not girls',async({page})=>{
+  await setup(page);
+  await page.route(API+'/api/v2/catalogue/products/sofia', route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({product:{...product,gender:'women'}})
+  }));
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto(APP+'/produkt/sofia');
+  const nav=page.getByRole('navigation',{name:'Hlavní navigace'});
+  await expect(nav.getByRole('link',{name:'Dámské šaty',exact:true})).toHaveAttribute('aria-current','page');
+  await expect(nav.getByRole('link',{name:'Dívčí šaty',exact:true})).not.toHaveAttribute('aria-current','page');
+  await page.setViewportSize({width:390,height:1000});
+  await page.getByRole('button',{name:'Otevřít menu'}).click();
+  await expect(page.getByRole('navigation',{name:'Menu',exact:true}).getByRole('link',{name:'Dámské šaty',exact:true})).toHaveAttribute('aria-current','page');
+});
