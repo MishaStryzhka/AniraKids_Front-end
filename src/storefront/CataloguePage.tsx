@@ -107,7 +107,7 @@ const categories = [['dress', 'Šaty'], ['suit', 'Obleky'], ['set', 'Soupravy'],
 const genders = [['girls', 'Dívky'], ['boys', 'Chlapci'], ['women', 'Ženy'], ['men', 'Muži'], ['unisex', 'Unisex'], ['children', 'Děti']];
 const sorts = [['name', 'Podle názvu'], ['newest', 'Nejnovější'], ['priceAsc', 'Cena od nejnižší'], ['priceDesc', 'Cena od nejvyšší']];
 export function CataloguePage() {
-    const { pathname } = useLocation();
+    const { pathname, search } = useLocation();
     const [params, setParams] = useSearchParams();
     const isSearch = pathname === routes.search;
     const root = '/' + pathname.split('/')[1];
@@ -210,7 +210,8 @@ export function CataloguePage() {
       <div style={{ minWidth: 0 }}>
         <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><label>SEŘADIT PODLE<Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
         {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error && !result.data ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>
-          <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
+          <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)}
+                  state={{ catalogueReturnTo: pathname + search }} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
           {product.color && <Copy>{product.color}</Copy>}
           {product.rentalPriceFrom !== undefined && <Copy>Od {product.rentalPriceFrom.toLocaleString('cs-CZ')} Kč · {request.rentalMode === 'external' ? 'mimo studio' : 've studiu'}</Copy>}
         </li>)}</Grid> : result.data ? <Empty><IconBeauty className="catalogue-empty-illustration" aria-hidden="true"/><Copy>Pro zvolené filtry jsme nenašli žádné produkty.</Copy><Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Empty> : null}

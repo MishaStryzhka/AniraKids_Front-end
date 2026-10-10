@@ -59,7 +59,7 @@ function receipt(body) {
     paymentStatus: 'unpaid',
   };
 }
-async function setup(page) {
+async function setup(page, guest = false) {
   const state = {
     posts: [],
     reads: [],
@@ -75,7 +75,7 @@ async function setup(page) {
   page.on('pageerror', error => state.errors.push(error.message));
   page.on('dialog', dialog => dialog.accept());
   await page.clock.setFixedTime(new Date('2030-10-07T12:00:00Z'));
-  await page.addInitScript(() =>
+  if (!guest) await page.addInitScript(() =>
     localStorage.setItem(
       'persist:auth',
       JSON.stringify({ token: JSON.stringify('legacy-token-must-not-leak') })
@@ -260,7 +260,7 @@ async function capture(page, name) {
     fullPage: true,
   });
 }
-for (const width of [390, 1440])
+for (const width of [390, 768, 1440])
   test(
     'guest catalogue to receipt and deliberate new booking ' + width,
     async ({ page }) => {
@@ -314,7 +314,7 @@ for (const width of [390, 1440])
       await page
         .getByRole('button', { name: 'Vytvořit novou rezervaci' })
         .click();
-      await expect(page).toHaveURL(APP + '/pronajem');
+      await expect(page).toHaveURL(APP + '/saty');
       expect(
         await page.evaluate(() =>
           sessionStorage.getItem('anirakids.booking.v1')
@@ -574,4 +574,93 @@ test('unavailable policy prevents booking and malformed payment receipt stays re
   await expect(page.getByText('Stav: Potvrzená')).toBeVisible();
   await expect(page.getByRole('img', { name: /QR platba/ })).toHaveCount(0);
   expect(state.posts[1].key).toBe(state.posts[0].key);
+});
+
+for (const width of [390, 768, 1440]) {
+  test('filtered catalogue return, history, booking entry and draft preservation ' + width, async ({ page }) => {
+    const state = await setup(page);
+    await page.setViewportSize({ width, height: 1000 });
+    const source = '/saty?gender=girls&size=98&sort=name';
+    await page.goto(APP + source);
+    await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
+    await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', source);
+    await page.goBack();
+    await expect(page).toHaveURL(APP + source);
+    await page.goForward();
+    await page.getByRole('link', { name: 'Zpět na produkty' }).click();
+    await expect(page).toHaveURL(APP + source);
+    await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
+    await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+    const title = page.getByRole('heading', { name: 'Rezervace', exact: true });
+    await expect(title).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    const titleBox = await title.boundingBox();
+    const headerBox = await page.locator('[data-focused-reservation-header]').boundingBox();
+    expect(titleBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height);
+    for (const name of [/^Zpět$/, /^Ukončit/]) {
+      const target = page.getByRole('button', { name });
+      const box = await target.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+    await capture(page, 'navigation-entry-' + width);
+    await page.getByLabel('Velikost', { exact: true }).selectOption(V);
+    await page.getByLabel('Jméno', { exact: true }).fill('Jana');
+    await expect(page.getByLabel('Jméno', { exact: true })).toBeFocused();
+    await page.getByRole('button', { name: 'Zpět', exact: true }).click();
+    await expect(page).toHaveURL(APP + '/produkt/sofia');
+    await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', source);
+    await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+    await expect(title).toBeFocused();
+    await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(V);
+    await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');
+    await page.getByRole('button', { name: /^Ukončit/ }).click();
+    await expect(page).toHaveURL(APP + source);
+    expect(state.posts).toHaveLength(0);
+    expect(state.errors).toEqual([]);
+  });
+}
+
+test('direct product, missing product and empty booking return to catalogues', async ({ page }) => {
+  const state = await setup(page);
+  await page.goto(APP + '/produkt/sofia');
+  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/saty');
+  await page.goto(APP + '/produkt/missing');
+  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/novinky');
+  await page.goto(APP + '/rezervace');
+  await page.getByRole('link', { name: 'Prohlédnout produkty' }).click();
+  await expect(page).toHaveURL(APP + '/novinky');
+  await expect(page.getByRole('link', { name: 'Prohlédnout Sofia' })).toBeVisible();
+  expect(state.posts).toHaveLength(0);
+});
+
+test('search context survives product reload and a failed detail request', async ({ page }) => {
+  await setup(page);
+  const source = '/hledani?q=Sofia&size=98';
+  await page.goto(APP + source);
+  await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
+  await page.reload();
+  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', source);
+  await page.route(API + '/api/v2/catalogue/products/sofia', route =>
+    route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ error: { code: 'PRODUCT_NOT_FOUND' } }) }));
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Produkt není dostupný' })).toBeVisible();
+  await page.getByRole('link', { name: 'Zpět na produkty' }).click();
+  await expect(page).toHaveURL(APP + source);
+});
+
+test('favorites offer the catalogue and retain their source through booking', async ({ page }) => {
+  const state = await setup(page, true);
+  await page.goto(APP + '/oblibene');
+  await page.getByRole('link', { name: 'Prohlédnout nabídku' }).click();
+  await expect(page).toHaveURL(APP + '/novinky');
+  await page.evaluate(id => localStorage.setItem('anirak:favorites:v1', JSON.stringify([id])), P);
+  await page.goto(APP + '/oblibene');
+  await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
+  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/oblibene');
+  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: /^Ukončit/ }).click();
+  await expect(page).toHaveURL(APP + '/oblibene');
+  await expect(page.getByRole('link', { name: 'Prohlédnout Sofia' })).toBeVisible();
+  expect(state.posts).toHaveLength(0);
 });

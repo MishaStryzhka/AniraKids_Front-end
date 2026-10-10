@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useBookingOptional } from '../storefront/booking/BookingProvider';
-import { productPath, routes } from '../navigation/routes';
+import { productPath } from '../navigation/routes';
+import { getCatalogueReturnTo } from '../storefront/catalogueNavigation';
 import type { ReservationHelpAction } from '../components/navigation/FocusedReservationHeader/FocusedReservationHeader';
 import { FocusedReservationHeader } from '../components/navigation/FocusedReservationHeader/FocusedReservationHeader';
 
@@ -18,13 +19,16 @@ export function ReservationFlowLayout({
 }: ReservationFlowLayoutProps) {
   const navigate = useNavigate();
   const booking = useBookingOptional();
+  const location = useLocation();
+  const catalogueReturnTo = getCatalogueReturnTo(location.state, booking?.draft?.product.category);
   const back =
     onBack ??
     (() =>
       navigate(
-        booking?.draft ? productPath(booking.draft.product.slug) : routes.rental
+        booking?.draft ? productPath(booking.draft.product.slug) : catalogueReturnTo,
+        { state: { catalogueReturnTo } }
       ));
-  const exit = onExit ?? (() => navigate(routes.rental));
+  const exit = onExit ?? (() => navigate(catalogueReturnTo));
   return (
     <>
       <FocusedReservationHeader
