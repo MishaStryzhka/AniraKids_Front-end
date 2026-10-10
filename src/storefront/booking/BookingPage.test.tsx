@@ -11,6 +11,7 @@ import { BookingPage } from './BookingPage';
 import { BookingProvider, useBooking } from './BookingProvider';
 import {
   getAvailability,
+  getRentalCalendar,
   getBookingPolicy,
   postReservation,
   PublicApiError,
@@ -20,6 +21,7 @@ import { SESSION_KEY } from './bookingModel';
 jest.mock('../api/publicApi', () => ({
   ...jest.requireActual('../api/publicApi'),
   getAvailability: jest.fn(),
+  getRentalCalendar: jest.fn(),
   getBookingPolicy: jest.fn(),
   postReservation: jest.fn(),
 }));
@@ -46,6 +48,11 @@ function setup() {
 }
 beforeEach(() => {
   (getBookingPolicy as jest.Mock).mockResolvedValue(bookingPolicyFixture);
+  (getRentalCalendar as jest.Mock).mockImplementation(async query => ({
+    ...query, today: '2026-01-01', checkedAt: '2026-01-01T12:00:00Z',
+    days: require('../../admin/calendar/calendarDates').monthCalendarDays(query.month)
+      .map((date: string) => ({date, available: !query.startDate || date >= query.startDate})),
+  }));
   sessionStorage.clear();
   get.mockReset();
   post.mockReset();

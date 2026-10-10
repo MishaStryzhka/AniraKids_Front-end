@@ -1,3 +1,4 @@
+import { RentalCalendar } from './RentalCalendar';
 import {
   BookingPaymentExplanation,
   ReceiptPaymentInformation,
@@ -353,6 +354,15 @@ export function BookingPage() {
                   {errorFor('rentalMode', selectionValidation)}
                 </Stack>
                 <Heading>Termín pronájmu</Heading>
+                <RentalCalendar selection={draft.selection}
+                  enabled={Boolean(variant?.pricing[draft.selection.rentalMode]) && !booking.storageBlocked}
+                  onChange={(startDate, endDate) => {
+                    const selection = { ...draft.selection, startDate, endDate };
+                    setSelectionValidation({});
+                    booking.updateDraft({ ...draft, selection });
+                    setRequested(startDate && endDate ? selection : null);
+                  }}
+                />
                 {(['startDate', 'endDate'] as const).map(field => (
                   <Stack key={field}>
                     <Input
