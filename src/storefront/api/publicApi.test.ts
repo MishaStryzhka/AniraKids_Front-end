@@ -183,3 +183,9 @@ test('catalogue parses optional facets and rental price, rejecting malformed val
   expect(() => parseCatalogue({ ...data, facets: { colors: [null], sizes: [] } }, query)).toThrow();
   expect(() => parseCatalogue({ ...data, items: [{ ...product, rentalPriceFrom: -1 }] }, query)).toThrow();
 });
+
+test('product audience survives parsing; old responses remain compatible', () => {
+  expect(parseProduct({ product: { ...product, gender: 'women' } }).gender).toBe('women');
+  expect(parseProduct({ product }).gender).toBeUndefined();
+  expect(() => parseProduct({ product: { ...product, gender: {} } })).toThrow();
+});
