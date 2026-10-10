@@ -104,14 +104,14 @@ for (const width of [390,768,1440]) {
     await page.getByLabel('Velikost',{exact:true}).selectOption(product.variants[0].id);
     await page.getByLabel('Od',{exact:true}).fill('2032-02-06');
     await page.getByLabel('Do',{exact:true}).fill('2032-02-08');
-    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await page.getByLabel('Jméno',{exact:true}).focus();
     await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
     await page.getByLabel('Do',{exact:true}).fill('2032-02-09');
     await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
-    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await page.getByLabel('Jméno',{exact:true}).focus();
     await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
     await page.getByLabel('Do',{exact:true}).fill('2032-02-05');
-    await page.getByLabel('Do',{exact:true}).press('Tab');
+    await page.getByLabel('Jméno',{exact:true}).focus();
     await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
     expect(state.posts).toEqual([]);
     expect(state.errors).toEqual([]);
