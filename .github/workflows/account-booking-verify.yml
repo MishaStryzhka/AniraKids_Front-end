@@ -1,0 +1,52 @@
+name: Account Booking UX Verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - src/storefront/**
+      - src/pages/AccountPage/**
+      - src/components/App.js
+      - .github/account-booking.spec.js
+      - .github/workflows/account-booking-verify.yml
+permissions:
+  contents: read
+concurrency:
+  group: account-booking-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: 20, cache: npm }
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build against isolated browser fixtures
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: CI=true npm run build
+      - name: Browser dependencies
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start SPA
+        run: |
+          mkdir -p test-evidence/account-booking
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/account-booking/server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+      - name: Account and contact UX at 390 / 768 / 1440
+        run: npx playwright test .github/account-booking.spec.js --workers=2 --reporter=line
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: account-booking-${{ github.event.pull_request.head.sha }}
+          if-no-files-found: error
+          path: |
+            test-evidence/account-booking/
+            test-results/
