@@ -580,8 +580,9 @@ for (const width of [390, 768, 1440]) {
   test('filtered catalogue return, history, booking entry and draft preservation ' + width, async ({ page }) => {
     const state = await setup(page);
     await page.setViewportSize({ width, height: 1000 });
-    const source = '/saty?gender=girls&size=98&sort=name';
-    await page.goto(APP + source);
+    const source = '/saty?size=98&sort=name';
+    await page.goto(APP + '/saty?gender=girls&size=98&sort=name');
+    await expect(page).toHaveURL(APP + source);
     await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
     await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', source);
     await page.goBack();
@@ -624,7 +625,7 @@ for (const width of [390, 768, 1440]) {
 test('direct product, missing product and empty booking return to catalogues', async ({ page }) => {
   const state = await setup(page);
   await page.goto(APP + '/produkt/sofia');
-  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/saty');
+  await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/novinky?category=dress');
   await page.goto(APP + '/produkt/missing');
   await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/novinky');
   await page.goto(APP + '/rezervace');
