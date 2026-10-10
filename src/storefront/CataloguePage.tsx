@@ -1,6 +1,5 @@
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import IconBeauty from '../images/icons/IconBeauty';
-import { NavigationLink } from '../design-system/components/NavigationLink';
 import { Breadcrumbs } from '../design-system/components/Breadcrumbs';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -79,11 +78,6 @@ const CatalogueTitle = styled(Title)`
     font-size: ${t.type.h1.md.size};
     line-height: ${t.type.h1.md.lineHeight};
   }
-`;
-const DressNavigation = styled.nav`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${t.space[2]};
 `;
 const Layout = styled.div `
   display: flex;
@@ -231,10 +225,6 @@ export function CataloguePage() {
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
     <CatalogueHeader>
       <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
-      {(pathname === routes.dresses || isWomenDresses) && <DressNavigation aria-label="Kategorie šatů">
-        <NavigationLink variant="navigation" to={routes.dresses} aria-current={pathname === routes.dresses ? 'page' : undefined}>Dívčí šaty</NavigationLink>
-        <NavigationLink variant="navigation" to="/forWomen?category=dress" aria-current={isWomenDresses ? 'page' : undefined}>Dámské šaty</NavigationLink>
-      </DressNavigation>}
     </CatalogueHeader>
     {pathname === routes.rental && <Copy id="jak-funguje-pronajem">Vyberte produkt, velikost a termín. Po ověření dostupnosti vyplňte kontaktní údaje a odešlete rezervaci.</Copy>}
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
