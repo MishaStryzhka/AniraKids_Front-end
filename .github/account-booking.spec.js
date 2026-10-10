@@ -51,6 +51,7 @@ async function enterBooking(page) {
 }
 async function capture(page, name) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: EVIDENCE + '/' + name + '.png', fullPage: true });
 }
 for (const width of [390, 768, 1440]) {
