@@ -56,10 +56,8 @@ import {
   selectionErrors,
   statusLabel,
 } from './bookingModel';
-const ItemCard = styled(Panel)`
-  padding: ${t.space[4]};
+const ItemCard = styled(Stack)`
   gap: ${t.space[2]};
-  border: 0;
 `;
 const ItemHeader = styled.div`
   display: flex;
