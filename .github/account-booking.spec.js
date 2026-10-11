@@ -65,22 +65,17 @@ for (const width of [390, 768, 1440]) {
     await expect(page.getByRole('link', { name: 'Vybrat šaty' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /^(Předchozí|Další)$/ })).toHaveCount(0);
     await expect(page.getByText('Strana 1')).toHaveCount(0);
-    const guestNote = page.getByText('Rezervace vytvořené bez přihlášení otevřete jejich soukromým odkazem.');
-    await expect(guestNote).not.toBeVisible();
+    await expect(page.locator('summary', { hasText: 'Rezervace bez přihlášení' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Můj profil', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Aktualizovat seznam' })).toHaveCount(0);
     await capture(page, 'empty-history-' + width);
-    const summary = page.locator('summary', { hasText: 'Rezervace bez přihlášení' });
-    await summary.focus();
-    await page.keyboard.press('Enter');
-    await expect(guestNote).toBeVisible();
     const reads = state.historyReads;
-    await page.getByRole('button', { name: 'Aktualizovat seznam' }).click();
+    await page.reload();
     await expect.poll(() => state.historyReads).toBeGreaterThan(reads);
     await expect(catalogue).toBeVisible();
-    for (const target of [catalogue, page.getByRole('button', { name: 'Aktualizovat seznam' })]) {
-      const box = await target.boundingBox();
-      expect(box.height).toBeGreaterThanOrEqual(44);
-      expect(box.width).toBeGreaterThanOrEqual(44);
-    }
+    const box = await catalogue.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(44);
     await catalogue.click();
     await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
     await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
@@ -188,10 +183,12 @@ for (const width of [390,768,1440]) {
     await page.goto(APP+'/ucet/rezervace');
     const claim=page.getByRole('button',{name:'Připojit rezervaci k účtu'});
     await expect(claim).toBeVisible();
+    await expect(page.locator('summary', { hasText: 'Rezervace bez přihlášení' })).toBeVisible();
     expect(claims).toBe(0);
     expect((await claim.boundingBox()).height).toBeGreaterThanOrEqual(44);
     await claim.click();
     await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
+    await expect(page.locator('summary', { hasText: 'Rezervace bez přihlášení' })).toHaveCount(0);
     expect(claims).toBe(1);
     expect(state.posts).toEqual([]);
     await capture(page,'recovered-history-'+width);

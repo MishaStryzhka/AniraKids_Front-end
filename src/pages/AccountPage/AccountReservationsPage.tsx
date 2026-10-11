@@ -44,14 +44,16 @@ export function AccountReservationsPage() {
       result.reload();
     } catch {
       if (mounted.current && currentToken.current === ownerToken)
-        setClaimState({ token: ownerToken, busy: false, error: 'Připojení rezervace se nepodařilo ověřit. Aktualizujte seznam nebo zkuste připojení znovu. Při opakování nevznikne nová rezervace.' });
+        setClaimState({ token: ownerToken, busy: false, error: 'Připojení rezervace se nepodařilo ověřit. Obnovte stránku nebo zkuste připojení znovu. Při opakování nevznikne nová rezervace.' });
     } finally {
       if (claimRequest.current === controller) claimRequest.current = null;
     }
   };
   const ownClaim = claimState?.token === token ? claimState : null;
+  const hasGuestReservation = Boolean(localReceipt && result.data &&
+    !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) &&
+    ownClaim?.claimed !== localReceipt.reservationNumber);
   return <Page><Title>Moje rezervace</Title>
-    <Actions><RouteLink to={routes.account}>Můj profil</RouteLink></Actions>
     {booking?.draftStorageWarning && !booking.stored ? <Copy role="alert">
       Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
     </Copy> : null}
@@ -102,11 +104,10 @@ export function AccountReservationsPage() {
         <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} /></details>
       </Panel>)}
       {(result.data.total > 20 || page > 1) && <Actions aria-label="Stránkování rezervací"><Button variant="secondary" disabled={page === 1} onClick={() => setPage(value => value - 1)}>Předchozí</Button><Copy>Strana {page}</Copy><Button variant="secondary" disabled={page * 20 >= result.data.total} onClick={() => setPage(value => value + 1)}>Další</Button></Actions>}
-      <details>
+      {hasGuestReservation ? <details>
         <summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Rezervace bez přihlášení</summary>
         <Copy>Rezervace vytvořené bez přihlášení otevřete jejich soukromým odkazem.</Copy>
-      </details>
-      <Actions><Button variant="ghost" onClick={result.reload}>Aktualizovat seznam</Button></Actions>
+      </details> : null}
     </Stack> : null}
   </Page>;
 }
