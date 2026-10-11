@@ -149,7 +149,7 @@ async function setup(page) {
 async function open(page) {
   await page.goto('http://127.0.0.1:4173/admin/rezervace/r1');
   await expect(
-    page.getByRole('button', { name: 'Zapsat platební operaci' })
+    page.getByRole('button', { name: 'Zapsat platbu' })
   ).toBeEnabled();
 }
 async function prepare(
@@ -158,7 +158,7 @@ async function prepare(
   amount = '200',
   note = ''
 ) {
-  await page.getByRole('button', { name: 'Zapsat platební operaci' }).click();
+  await page.getByRole('button', { name: 'Zapsat platbu' }).click();
   await page.getByLabel('Druh operace').selectOption(type);
   await page.getByLabel('Částka (Kč)').fill(amount);
   if (note) await page.getByLabel('Důvod / poznámka').fill(note);
@@ -169,23 +169,22 @@ async function prepare(
   await expect(dialog.getByRole('button', { name: 'Zpět' })).toBeFocused();
   return dialog;
 }
-for (const width of [390, 1440])
+for (const width of [390, 768, 1440])
   test(`separate advance/deposit/history and explicit confirmation at ${width}`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
     const state = await setup(page);
     await open(page);
+    await expect(page.getByLabel('Druh operace')).toHaveCount(0);
+    await expect(page.getByText('Vrácené nájemné', { exact: true })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapsat platbu', exact: true })).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Potvrdit rezervaci' })
     ).toBeDisabled();
     const dialog = await prepare(page);
     await dialog.getByRole('button', { name: 'Potvrdit zápis' }).dblclick();
-    await expect(
-      page.getByText(
-        'Operace byla zaznamenána. Evidence sama neprovádí bankovní převod.'
-      )
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapsat platbu', exact: true })).toBeEnabled();
     expect(state.writes).toHaveLength(1);
     await expect(
       page.getByRole('button', { name: 'Potvrdit rezervaci' })
@@ -194,14 +193,13 @@ for (const width of [390, 1440])
     await page.getByRole('button', { name: 'Potvrdit rezervaci' }).click();
     await expect(page.getByText('Potvrzená', { exact: true })).toBeVisible();
     await expect(
-      page.getByRole('button', { name: 'Zapsat platební operaci' })
+      page.getByRole('button', { name: 'Zapsat platbu' })
     ).toBeEnabled();
     await (await prepare(page, 'deposit_received', '2000'))
       .getByRole('button', { name: 'Potvrdit zápis' })
       .click();
-    await expect(
-      page.getByText('Přijatá vratná kauce · 2 000 Kč')
-    ).toBeVisible();
+    await page.getByText('Historie plateb (2)', { exact: true }).click();
+    await expect(page.getByText('Přijatá vratná kauce · 2 000 Kč')).toBeVisible();
     await page
       .getByRole('region', { name: 'Platební evidence' })
       .screenshot({ path: `${evidence}/ledger-${width}.png` });
@@ -232,14 +230,14 @@ test('unknown append survives reload, absent GET permits only original replay; r
     page.getByRole('button', { name: 'Zopakovat původní požadavek' })
   ).toBeEnabled();
   await expect(
-    page.getByRole('button', { name: 'Zapsat platební operaci' })
+    page.getByRole('button', { name: 'Zapsat platbu' })
   ).toBeDisabled();
   state.mode = 'normal';
   await page
     .getByRole('button', { name: 'Zopakovat původní požadavek' })
     .click();
   await expect(
-    page.getByRole('button', { name: 'Zapsat platební operaci' })
+    page.getByRole('button', { name: 'Zapsat platbu' })
   ).toBeEnabled();
   expect(state.writes[1]).toEqual(state.writes[0]);
   state.mode = 'unknown-recorded';
@@ -249,7 +247,7 @@ test('unknown append survives reload, absent GET permits only original replay; r
   await expect(
     page.getByText('Výsledek platební operace není potvrzený')
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Načíst platební evidenci' }).click();
+  await page.getByRole('button', { name: 'Aktualizovat platby' }).click();
   await expect(
     page.getByText('Původní operace je zaznamenána v platební historii.')
   ).toBeVisible();
@@ -269,7 +267,7 @@ test('refund and conditional cancellation fee require reason; 409 reconciles and
     refundableRental: 200,
   };
   await open(page);
-  await page.getByRole('button', { name: 'Zapsat platební operaci' }).click();
+  await page.getByRole('button', { name: 'Zapsat platbu' }).click();
   await page.getByLabel('Druh operace').selectOption('cancellation_fee');
   await page.getByLabel('Částka (Kč)').fill('100');
   await page.getByRole('button', { name: 'Zkontrolovat zápis' }).click();
@@ -282,16 +280,15 @@ test('refund and conditional cancellation fee require reason; 409 reconciles and
     page.getByText('Platební evidence se změnila. Načtěte aktuální stav.')
   ).toBeVisible();
   expect(state.writes[0].method).toBeUndefined();
-  await page.getByRole('button', { name: 'Načíst platební evidenci' }).click();
+  await page.getByRole('button', { name: 'Aktualizovat platby' }).click();
   await expect(page.getByLabel('Důvod / poznámka')).toHaveValue(
     'Individuálně posouzeno'
   );
   state.mode = 'normal';
   await page.getByRole('button', { name: 'Zkontrolovat zápis' }).click();
   await page.getByRole('button', { name: 'Potvrdit zápis' }).click();
-  await expect(
-    page.getByText('Uplatněný storno poplatek · 100 Kč')
-  ).toBeVisible();
+  await page.getByText('Historie plateb (1)', { exact: true }).click();
+  await expect(page.getByText('Uplatněný storno poplatek · 100 Kč')).toBeVisible();
   await (await prepare(page, 'rental_refunded', '100', 'Vráceno zákaznici'))
     .getByRole('button', { name: 'Potvrdit zápis' })
     .click();

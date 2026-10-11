@@ -1,0 +1,49 @@
+name: Payment UI Verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - src/admin/payments/**
+      - .github/admin-payments.spec.js
+      - .github/workflows/payment-ui-verify.yml
+permissions:
+  contents: read
+concurrency:
+  group: payment-ui-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: 20, cache: npm }
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: CI=true npm test -- --watchAll=false --runInBand src/admin/payments src/admin/api/reservationPayments.test.ts src/admin/reservations
+      - name: Build isolated fixtures
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+        run: CI=true npm run build
+      - name: Install browser
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start SPA
+        run: |
+          mkdir -p test-evidence/payments
+          npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/payments/server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+      - run: npx playwright test .github/admin-payments.spec.js --workers=2 --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payment-ui-${{ github.event.pull_request.head.sha }}
+          path: |
+            test-evidence/payments/
+            test-results/
