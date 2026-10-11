@@ -155,3 +155,29 @@ test('known rejection can recheck the same selection without changing contact', 
   expect(screen.getByLabelText('E-mail')).toHaveValue(body.customer.email);
   expect(post).toHaveBeenCalledTimes(1);
 });
+
+test('completed date edits recheck automatically; stale responses and invalid ranges stay disabled', async () => {
+  const first = deferred<typeof quote>(), second = deferred<typeof quote>();
+  get.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+  setup();
+  selection();
+  fireEvent.blur(screen.getByLabelText('Do'));
+  expect(get).toHaveBeenCalledTimes(1);
+  fireEvent.change(screen.getByLabelText('Do'), { target: { value: '2030-10-12' } });
+  fireEvent.blur(screen.getByLabelText('Do'));
+  expect(get).toHaveBeenCalledTimes(2);
+  expect(get.mock.calls[0][1]?.aborted).toBe(true);
+  await act(async () => first.resolve(quote));
+  expect(screen.queryByText('Termín je aktuálně dostupný')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Rezervovat', exact: true })).toBeDisabled();
+  await act(async () => second.resolve({ ...quote, endDate: '2030-10-12' }));
+  expect(screen.getByText('Termín je aktuálně dostupný')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Do'), { target: { value: '2030-10-09' } });
+  fireEvent.blur(screen.getByLabelText('Do'));
+  expect(get).toHaveBeenCalledTimes(2);
+  expect(screen.getByRole('button', { name: 'Rezervovat', exact: true })).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Do'), { target: { value: '' } });
+  fireEvent.blur(screen.getByLabelText('Do'));
+  expect(get).toHaveBeenCalledTimes(2);
+  expect(post).not.toHaveBeenCalled();
+});

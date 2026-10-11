@@ -17,6 +17,7 @@ export type ProductCard = {
   slug: string;
   name: string;
   category?: string;
+  gender?: string;
   color?: string;
   rentalPriceFrom?: number;
   photos: Array<{ url: string; alt?: string }>;
@@ -110,6 +111,7 @@ function parseCard(v: unknown): ProductCard {
     !Array.isArray(v.photos) ||
     v.photos.length > 100 ||
     (v.category !== undefined && !string(v.category, 100)) ||
+    (v.gender !== undefined && !string(v.gender, 100)) ||
     (v.color !== undefined && !string(v.color)) ||
     (v.rentalPriceFrom !== undefined && !money(v.rentalPriceFrom))
   )
@@ -134,6 +136,7 @@ function parseCard(v: unknown): ProductCard {
     name: v.name,
     photos,
     ...(v.category === undefined ? {} : { category: v.category as string }),
+    ...(v.gender === undefined ? {} : { gender: v.gender as string }),
     ...(v.color === undefined ? {} : { color: v.color as string }),
   };
 }

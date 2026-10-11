@@ -140,6 +140,12 @@ export function BookingPage() {
       selection: { ...draft.selection, [field]: value },
     });
   };
+  const checkEditedDates = () => {
+    if (!draft || booking.stored || booking.storageBlocked) return;
+    if (Object.keys(selectionErrors(draft.selection)).length ||
+        !variant?.pricing[draft.selection.rentalMode]) return;
+    setRequested({ ...draft.selection });
+  };
   const check = () => {
     if (!draft) return;
     const errors = selectionErrors(draft.selection);
@@ -377,6 +383,7 @@ export function BookingPage() {
                     <Input
                       name={field}
                       label={field === 'startDate' ? 'Od' : 'Do'}
+                      onBlur={checkEditedDates}
                       type="date"
                       min={
                         field === 'endDate'

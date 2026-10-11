@@ -1,5 +1,5 @@
 export type PrimaryNavigationKey = 'saty' | 'damskeSaty' | 'obleky' | 'novinky' | 'pronajem';
-export type ProductPrimaryCategory = 'saty' | 'obleky';
+export type ProductPrimaryCategory = 'saty' | 'damskeSaty' | 'obleky';
 export type ActiveOverlay = 'none' | 'menu' | 'search';
 export type AuthNavigationState = 'unresolved' | 'guest' | 'authenticated';
 

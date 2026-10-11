@@ -37,7 +37,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     setProductPrimaryCategory(
       product?.category === 'dress'
-        ? 'saty'
+        ? product.gender === 'women' ? 'damskeSaty' : product.gender === 'girls' ? 'saty' : null
         : product?.category === 'suit'
           ? 'obleky'
           : null
