@@ -33,6 +33,7 @@ export type ReceiptPayment = {
   depositRequired: number;
   depositHeld: number;
   paymentInstructions: PaymentInstructions | null;
+  fullPaymentInstructions?: PaymentInstructions | null;
 };
 const invalid = (): never => {
   throw new PublicApiError('INVALID_RESPONSE');
@@ -167,6 +168,21 @@ export function parseReceiptPayment(
       qrPayload: expected,
     };
   }
+  let fullInstructions: PaymentInstructions | null = null;
+  if (value.fullPaymentInstructions != null) {
+    const i = value.fullPaymentInstructions;
+    const payable = (receipt.status === 'pending' && Boolean(receipt.expiresAt)) ||
+      receipt.status === 'confirmed' || receipt.status === 'prepared';
+    const remaining = p.rentalBalance + p.depositRequired - p.depositHeld;
+    if (!object(i) || !money(i.amount) || i.amount <= 0 ||
+        i.amount !== remaining || i.currency !== 'CZK' ||
+        i.message !== receipt.reservationNumber || !payable) return invalid();
+    const details = bank(i);
+    const expected = `SPD*1.0*ACC:${details.iban}*AM:${i.amount.toFixed(2)}*CC:CZK*MSG:${i.message}*PT:IP`;
+    if (i.qrPayload !== expected || (instructions && details.iban !== instructions.iban)) return invalid();
+    fullInstructions = { ...details, amount: i.amount, currency: 'CZK',
+      message: i.message as string, qrPayload: expected };
+  }
   return {
     advanceRequired: p.advanceRequired,
     advanceBalance: p.advanceBalance,
@@ -174,5 +190,6 @@ export function parseReceiptPayment(
     depositRequired: p.depositRequired,
     depositHeld: p.depositHeld,
     paymentInstructions: instructions,
+    ...(value.fullPaymentInstructions !== undefined ? { fullPaymentInstructions: fullInstructions } : {}),
   };
 }

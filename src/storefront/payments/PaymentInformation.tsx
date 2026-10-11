@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { SelectField } from '../../design-system/components/SelectField';
 import styled from 'styled-components';
 import type { BookingPolicy, PaymentInstructions } from '../api/bookingPolicy';
 import type { Receipt } from '../api/publicApi';
@@ -55,8 +56,11 @@ export function BookingPaymentExplanation({
         </Copy>
       ) : null}
       <Copy>
-        Zálohu můžete uhradit bankovním převodem pomocí QR kódu nebo po domluvě
-        osobně v hotovosti. Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
+        Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé
+        částky včetně vratné kauce. Záloha se při plné platbě nepřičítá navíc.
+        Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze
+        po domluvě uhradit také osobně v hotovosti.
+        Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
       <Copy>
@@ -91,7 +95,7 @@ function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
   return image?.payload === instructions.qrPayload ? (
     <Qr
       src={image.url}
-      alt={`QR platba rezervační zálohy ${formatMoney(instructions.amount)}`}
+      alt={`QR platba ${formatMoney(instructions.amount)}`}
     />
   ) : (
     <Copy>Pro platbu můžete použít níže uvedené bankovní údaje.</Copy>
@@ -100,6 +104,10 @@ function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
 export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
+  const [choice, setChoice] = useState('advance');
+  useEffect(() => {
+    setChoice('advance');
+  }, [receipt.reservationNumber, payment?.advanceBalance, payment?.rentalBalance, payment?.depositHeld]);
   useEffect(() => {
     if (!receipt.expiresAt) return;
     const delay = Date.parse(receipt.expiresAt) - Date.now();
@@ -116,12 +124,15 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
   if (!payment) return null;
   const expired = receipt.status === 'pending' && Boolean(receipt.expiresAt) &&
     Date.parse(receipt.expiresAt!) <= now;
-  const instructions =
-    receipt.status === 'pending' &&
-    receipt.expiresAt &&
-    Date.parse(receipt.expiresAt) > now
-      ? payment.paymentInstructions
-      : null;
+  const payable = (receipt.status === 'pending' && Boolean(receipt.expiresAt) &&
+    Date.parse(receipt.expiresAt!) > now) ||
+    receipt.status === 'confirmed' || receipt.status === 'prepared';
+  const advanceInstructions = payable && receipt.status === 'pending' ? payment.paymentInstructions : null;
+  const fullInstructions = payable ? payment.fullPaymentInstructions : null;
+  const cash = choice === 'cash' && payment.advanceBalance === 0 && Boolean(fullInstructions);
+  const selected = cash ? 'cash' : choice === 'advance' && advanceInstructions ? 'advance' : 'full';
+  const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
+  const remaining = payment.rentalBalance + payment.depositRequired - payment.depositHeld;
   return (
     <Stack>
       <Heading>Platba rezervace</Heading>
@@ -147,20 +158,46 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           <dd>{formatMoney(payment.depositHeld)}</dd>
         </div>
       </Facts>
+      {payable && (advanceInstructions || fullInstructions) ? (
+        <SelectField label="Jak chcete zaplatit?" value={selected}
+          onChange={event => setChoice(event.target.value)}>
+          {advanceInstructions ? <option value="advance">
+            Povinná záloha – {formatMoney(advanceInstructions.amount)}
+          </option> : null}
+          {fullInstructions ? <option value="full">
+            {payment.advanceBalance > 0 ? 'Vše včetně kauce' : 'Doplatit včetně kauce'} – {formatMoney(fullInstructions.amount)}
+          </option> : null}
+          {fullInstructions && payment.advanceBalance === 0 ? <option value="cash">
+            Hotově při převzetí
+          </option> : null}
+        </SelectField>
+      ) : null}
       {expired ? (
         <Copy role="status">
           Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.
           Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
           nás s číslem rezervace; ověříme platbu a dostupnost termínu.
         </Copy>
+      ) : cash ? (
+        <Copy role="status">
+          Zbývá doplatit {formatMoney(remaining)} hotově při převzetí:
+          nájemné {formatMoney(payment.rentalBalance)} a vratná kauce{' '}
+          {formatMoney(payment.depositRequired - payment.depositHeld)}.
+          Tato volba nepotvrzuje přijetí platby. Na QR platbu můžete přepnout výše.
+        </Copy>
       ) : instructions ? (
         <>
-          <Heading>Úhrada rezervační zálohy</Heading>
+          <Heading>{selected === 'advance' ? 'Úhrada rezervační zálohy' : 'Úhrada nájemného a vratné kauce'}</Heading>
+          <Copy role="status">
+            {selected === 'advance'
+              ? `Po úhradě zálohy zbývá ${formatMoney(remaining - instructions.amount)} včetně kauce. Zbytek lze doplatit hotově při převzetí nebo QR platbou po zaevidování zálohy.`
+              : `Částka zahrnuje zbývající nájemné ${formatMoney(payment.rentalBalance)} a vratnou kauci ${formatMoney(payment.depositRequired - payment.depositHeld)}. Záloha je již součástí nájemného.`}
+          </Copy>
           <Copy>
             Uhraďte {formatMoney(instructions.amount)} bankovním převodem. Před
             potvrzením platby zkontrolujte příjemce, částku a zprávu pro
-            příjemce. Platbu odešlete co nejdříve, abychom ji mohli ověřit
-            a rezervaci potvrdit před uvedeným koncem předběžné rezervace.
+            příjemce.
+            {receipt.status === 'pending' ? ' Platbu odešlete co nejdříve, abychom ji mohli ověřit a rezervaci potvrdit před uvedeným koncem předběžné rezervace.' : ' Doplatek je třeba uhradit před předáním oděvu.'}
           </Copy>
           <PaymentQr instructions={instructions} />
           <Facts>
@@ -190,12 +227,14 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
             </div>
           </Facts>
           <Copy>
-            Po přijetí zálohy následuje ruční potvrzení rezervace. Vratnou kauci
-            tento QR kód nezahrnuje. Pokud jste platbu již odeslali nebo uhradili
-            v hotovosti, neplaťte znovu. Stav na této stránce se po našem
-            potvrzení zatím automaticky neaktualizuje.
+            Platby ověřujeme a evidujeme ručně. Pokud jste již zaplatili,
+            neodesílejte další platbu ani neměňte QR na vyšší částku.
+            Nejprve aktualizujte stav rezervace a vyčkejte na zaevidování platby.
+            Samotné zobrazení QR kódu ani volba hotovosti neznamenají zaplacení.
           </Copy>
         </>
+      ) : payable && remaining === 0 ? (
+        <Copy role="status">Nájemné a vratná kauce jsou podle posledního načteného stavu uhrazeny.</Copy>
       ) : receipt.status === 'pending' && payment.advanceBalance === 0 ? (
         <Copy>
           Rezervační záloha je podle posledního načteného stavu uhrazena.

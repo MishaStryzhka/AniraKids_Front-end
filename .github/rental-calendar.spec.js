@@ -176,3 +176,54 @@ test('Czech headings and navigation use custom glyphs without fallback',async({p
     if(width<1024)await page.getByRole('button',{name:'Zavřít menu'}).click();
   }
 });
+
+for (const width of [390,768,1440]) {
+  test('full payment includes deposit and remaining cash/QR at '+width, async ({page}) => {
+    await page.setViewportSize({width,height:1000});
+    const state=await setup(page);
+    const number='AK-2032-PAY001';
+    const instructions=amount=>({...policy.bank,amount,currency:'CZK',message:number,
+      qrPayload:`SPD*1.0*ACC:${policy.bank.iban}*AM:${amount.toFixed(2)}*CC:CZK*MSG:${number}*PT:IP`});
+    let receipt={reservationNumber:number,status:'pending',rentalMode:'studio',
+      startDate:'2032-02-06',endDate:'2032-02-08',expiresAt:'2032-02-02T12:00:00Z',
+      item:{productId:product.id,variantId:product.variants[0].id,productName:'Sofia',
+        size:'98',rentalPrice:700,deposit:2000},
+      subtotal:700,deposit:2000,totalDue:2700,paymentStatus:'unpaid',
+      payment:{advanceRequired:200,advanceBalance:200,rentalBalance:700,
+        depositRequired:2000,depositHeld:0,paymentInstructions:instructions(200),
+        fullPaymentInstructions:instructions(2700)}};
+    await page.route(API+'/api/v2/reservations/'+number,route=>route.fulfill({
+      status:200,contentType:'application/json',body:JSON.stringify({reservation:receipt})}));
+    await page.goto(APP+'/stav-rezervace#'+new URLSearchParams({reservation:number,token:'a'.repeat(43)}));
+    const select=page.getByRole('combobox',{name:'Jak chcete zaplatit?'});
+    await expect(select).toHaveValue('advance');
+    await expect(page.getByRole('img',{name:/QR platba 200/})).toBeVisible();
+    await select.selectOption('full');
+    await expect(page.getByRole('img',{name:/QR platba 2.700/})).toBeVisible();
+    await select.scrollIntoViewIfNeeded();
+    await select.focus();
+    const metrics=await select.evaluate(e=>({height:e.getBoundingClientRect().height,
+      outline:getComputedStyle(e).outlineWidth}));
+    expect(metrics.height).toBeGreaterThanOrEqual(44);
+    expect(parseFloat(metrics.outline)).toBeGreaterThanOrEqual(2);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+    await page.screenshot({path:EVIDENCE+'/full-payment-'+width+'.png',fullPage:true});
+    receipt={...receipt,status:'confirmed',expiresAt:null,payment:{...receipt.payment,
+      advanceBalance:0,rentalBalance:500,paymentInstructions:null,fullPaymentInstructions:instructions(2500)}};
+    await page.getByRole('button',{name:'Aktualizovat stav rezervace'}).click();
+    await expect(page.getByRole('img',{name:/QR platba 2.500/})).toBeVisible();
+    await select.selectOption('cash');
+    await expect(page.getByRole('img',{name:/QR platba/})).toHaveCount(0);
+    await expect(page.getByRole('status')).toContainText('hotově při převzetí');
+    await select.selectOption('full');
+    await expect(page.getByRole('img',{name:/QR platba 2.500/})).toBeVisible();
+    receipt={...receipt,paymentStatus:'paid',payment:{...receipt.payment,rentalBalance:0,
+      depositHeld:2000,fullPaymentInstructions:null}};
+    await page.getByRole('button',{name:'Aktualizovat stav rezervace'}).click();
+    await expect(page.getByRole('status')).toContainText('uhrazeny');
+    await expect(select).toHaveCount(0);
+    await expect(page.getByRole('img',{name:/QR platba/})).toHaveCount(0);
+    expect(state.posts).toEqual([]);
+    expect(state.errors).toEqual([]);
+  });
+}
