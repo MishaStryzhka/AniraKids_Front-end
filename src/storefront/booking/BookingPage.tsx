@@ -215,6 +215,9 @@ export function BookingPage() {
               ? 'Rezervace byla vytvořena'
               : 'Rezervace'}
           </Title>
+          {booking.draftStorageWarning && !booking.stored ? <Copy role="alert">
+            Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
+          </Copy> : null}
           {booking.storageBlocked ? (
             <Alert ref={notice} role="alert" tabIndex={-1}>
               <Heading>Rezervaci nyní nelze bezpečně odeslat</Heading>

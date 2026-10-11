@@ -315,6 +315,9 @@ for (const width of [390, 768, 1440]) {
     await expect(page.getByRole('heading', { name: 'Sofia', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Ema', exact: true })).toBeVisible();
     await capture(page, 'multi-draft-' + width);
+    await page.reload();
+    await expect(page.getByText('Rozpracované', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ema', exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Dokončit rezervaci', exact: true }).click();
     await page.getByRole('button', { name: 'Ověřit dostupnost' }).click();
     await expect(page.getByText('Termín je aktuálně dostupný', { exact: true })).toBeVisible();

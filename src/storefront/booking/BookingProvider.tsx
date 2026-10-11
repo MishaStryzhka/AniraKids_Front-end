@@ -24,6 +24,8 @@ import {
   draftSelectionsValid,
   initialDraft,
   loadBooking,
+  loadDraft,
+  persistDraft,
   newAttempt,
   persistBooking,
   reservationBody,
@@ -45,6 +47,7 @@ type Prefill = {
 const emptyPrefill = (): Prefill => ({ accountId: null, edited: new Set(), filled: {} });
 type State = {
   draft: BookingDraft | null;
+  draftStorageWarning?: boolean;
   stored: StoredBooking | null;
   busy: boolean;
   storageBlocked: boolean;
@@ -54,9 +57,15 @@ const storageMessage =
   'Rezervaci se nepodařilo bezpečně uložit v tomto prohlížeči. Zkuste to prosím znovu. Požadavek zůstává chráněný proti opakovanému vytvoření.';
 function initial(): State {
   try {
+    const stored = loadBooking();
+    let draft: BookingDraft | null = null, draftStorageWarning = false;
+    if (!stored) {
+      try { draft = loadDraft(); } catch { draftStorageWarning = true; }
+    }
     return {
-      draft: null,
-      stored: loadBooking(),
+      draft,
+      draftStorageWarning,
+      stored,
       busy: false,
       storageBlocked: false,
       error: null,
@@ -123,7 +132,15 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
   current.current = state;
   const commit = useCallback((update: (before: State) => State) => {
     if (!mounted.current) return;
-    const value = update(current.current);
+    let value = update(current.current);
+    if (value.draft !== current.current.draft || value.stored !== current.current.stored) {
+      try {
+        persistDraft(value.stored ? null : value.draft);
+        value = { ...value, draftStorageWarning: false };
+      } catch {
+        value = { ...value, draftStorageWarning: true };
+      }
+    }
     current.current = value;
     setState(value);
   }, []);

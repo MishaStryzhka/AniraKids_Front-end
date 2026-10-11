@@ -4,6 +4,7 @@ import {
   object,
   objectId,
   parseReceipt,
+  parseProduct,
   type Customer,
   type PublicProduct,
   type Receipt,
@@ -222,3 +223,35 @@ export const formatMoney = (value: number) =>
     currency: 'CZK',
     maximumFractionDigits: 0,
   }).format(value);
+
+export const DRAFT_SESSION_KEY = 'anirakids.draft.v1';
+// Save garment selections only. Contacts are never copied into this draft cache.
+export function persistDraft(draft: BookingDraft | null) {
+  if (!draft) { sessionStorage.removeItem(DRAFT_SESSION_KEY); return; }
+  const raw = JSON.stringify({ version: 1, selection: draft.selection,
+    items: draftItems(draft).map(item => ({ product: item.product, variantId: item.variantId })) });
+  if (raw.length > 500000) throw new Error('Draft too large');
+  sessionStorage.setItem(DRAFT_SESSION_KEY, raw);
+  if (sessionStorage.getItem(DRAFT_SESSION_KEY) !== raw) throw new Error('Draft storage unavailable');
+}
+export function loadDraft(): BookingDraft | null {
+  const raw = sessionStorage.getItem(DRAFT_SESSION_KEY);
+  if (raw === null) return null;
+  if (raw.length > 500000) throw new Error('Invalid draft');
+  const value: unknown = JSON.parse(raw);
+  if (!object(value) || value.version !== 1 || !Array.isArray(value.items) ||
+      !value.items.length || value.items.length > 20 || !object(value.selection))
+    throw new Error('Invalid draft');
+  const items = value.items.map((item): DraftItem => {
+    if (!object(item) || (item.variantId !== '' && !objectId(item.variantId))) throw new Error('Invalid draft item');
+    return { product: parseProduct({ product: item.product }), variantId: item.variantId as string };
+  });
+  const selection = value.selection;
+  if (new Set(items.map(item => item.product.id)).size !== items.length ||
+      !isMode(selection.rentalMode) ||
+      (selection.startDate !== '' && !isDateOnly(selection.startDate)) ||
+      (selection.endDate !== '' && !isDateOnly(selection.endDate))) throw new Error('Invalid draft selection');
+  return { product: items[0].product, additionalItems: items.slice(1), contact: emptyContact(),
+    selection: { productId: items[0].product.id, variantId: items[0].variantId,
+      rentalMode: selection.rentalMode, startDate: selection.startDate as string, endDate: selection.endDate as string } };
+}

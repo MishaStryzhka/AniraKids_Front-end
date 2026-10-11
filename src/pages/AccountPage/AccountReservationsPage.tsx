@@ -52,6 +52,9 @@ export function AccountReservationsPage() {
   const ownClaim = claimState?.token === token ? claimState : null;
   return <Page><Title>Moje rezervace</Title>
     <Actions><RouteLink to={routes.account}>Můj profil</RouteLink></Actions>
+    {booking?.draftStorageWarning && !booking.stored ? <Copy role="alert">
+      Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
+    </Copy> : null}
     {draft ? <Panel aria-label="Rozpracovaná rezervace">
       <div><StatusBadge tone="info">Rozpracované</StatusBadge></div>
       {draftItems(draft).map(item => <div key={item.product.id}>
