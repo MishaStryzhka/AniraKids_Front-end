@@ -39,6 +39,33 @@ const Facts = styled(ReservationFacts)`
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
+const Disclosure = styled.details`
+  min-inline-size: 0;
+  > summary {
+    cursor: pointer;
+    min-height: 44px;
+    padding-block: ${t.space[3]};
+    font-weight: 600;
+    &:focus-visible {
+      outline: 2px solid ${t.color.focus.ring};
+      outline-offset: 2px;
+    }
+  }
+`;
+const Summary = styled.div`
+  display: grid;
+  gap: ${t.space[4]};
+  @media (min-width: 768px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  > section { min-inline-size: 0; }
+  h3 { margin: 0 0 ${t.space[3]}; font-size: inherit; }
+  dl { display: grid; gap: ${t.space[2]}; margin: 0; }
+  dl > div { display: flex; justify-content: space-between; gap: ${t.space[3]}; }
+  dt { min-inline-size: 0; }
+  dd { margin: 0; white-space: nowrap; font-weight: 600; }
+`;
+const Announcement = styled(ReservationCopy)<{ $quiet: boolean }>`
+  ${({ $quiet }) => $quiet ? 'position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%);' : ''}
+`;
 const FocusPanel = styled(ReservationPanel)`
   &:focus {
     outline: 2px solid ${t.color.focus.ring};
@@ -139,14 +166,7 @@ export function ReservationPaymentLedger({
     ) : null;
   return (
     <FocusPanel ref={panel} tabIndex={-1} aria-label="Platební evidence">
-      <ReservationHeading>Platební evidence</ReservationHeading>
-      <ReservationCopy>
-        Záznamy potvrzují skutečně přijaté nebo vrácené částky. Tato evidence
-        neprovádí bankovní převody ani automatické stržení peněz.
-        Pokud zákazník zaplatil nájemné a kauci jedním převodem, zapište dvě
-        operace se stejnou referencí: přijaté nájemné (včetně zálohy) a přijatou
-        vratnou kauci. Celou částku nezapisujte jako rezervační zálohu.
-      </ReservationCopy>
+      <ReservationHeading>Platby</ReservationHeading>
       {state.loading ? (
         <ReservationCopy role="status">
           Načítání platební evidence…
@@ -168,9 +188,9 @@ export function ReservationPaymentLedger({
       {state.error ? (
         <ReservationError role="alert">{state.error}</ReservationError>
       ) : null}
-      <ReservationCopy role="status" aria-live="polite">
+      <Announcement $quiet={state.announcement === 'Aktuální platební evidence byla načtena.'} role="status" aria-live="polite">
         {state.announcement}
-      </ReservationCopy>
+      </Announcement>
       <ReservationActions>
         <Button
           variant="secondary"
@@ -178,7 +198,7 @@ export function ReservationPaymentLedger({
           disabled={state.writing}
           onClick={() => void state.read()}
         >
-          Načíst platební evidenci
+          Aktualizovat platby
         </Button>
         {state.attempt && !state.writing ? (
           <Button
@@ -198,31 +218,26 @@ export function ReservationPaymentLedger({
       {payments ? (
         <>
           {!payments.legacyUnreconciled ? (
-            <Facts>
-              {(
-                [
-                  ['Cena pronájmu', payments.rentalTotal],
-                  [
-                    'Rezervační záloha (součást nájemného)',
-                    payments.advanceRequired,
-                  ],
-                  ['Zbývá uhradit ze zálohy', payments.advanceBalance],
-                  ['Přijaté nájemné včetně zálohy', payments.rentalReceived],
-                  ['Vrácené nájemné', payments.rentalRefunded],
-                  ['Zbývá uhradit nájemné', payments.rentalBalance],
-                  ['Požadovaná vratná kauce', payments.depositRequired],
-                  ['Držená vratná kauce', payments.depositHeld],
-                  ['Vrácená kauce', payments.depositRefunded],
-                  ['Uplatněný storno poplatek', payments.cancellationFee],
-                  ['Nájemné dostupné k vrácení', payments.refundableRental],
-                ] as const
-              ).map(([label, amount]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{money(amount)}</dd>
-                </div>
-              ))}
-            </Facts>
+            <Summary>
+              <section aria-label="Nájemné">
+                <h3>Nájemné</h3>
+                <dl>
+                  <div><dt>Cena pronájmu</dt><dd>{money(payments.rentalTotal)}</dd></div>
+                  <div><dt>Uhrazeno po vrácení plateb</dt><dd>{money(payments.rentalNet)}</dd></div>
+                  <div><dt>Zbývá uhradit</dt><dd>{money(payments.rentalBalance)}</dd></div>
+                </dl>
+                {payments.advanceBalance > 0 && status === 'pending' ? <ReservationCopy>
+                  Z toho rezervační záloha: {money(payments.advanceBalance)}.
+                </ReservationCopy> : null}
+              </section>
+              <section aria-label="Vratná kauce">
+                <h3>Vratná kauce</h3>
+                <dl>
+                  <div><dt>Požadováno</dt><dd>{money(payments.depositRequired)}</dd></div>
+                  <div><dt>Držíme</dt><dd>{money(payments.depositHeld)}</dd></div>
+                </dl>
+              </section>
+            </Summary>
           ) : null}
           {payments.legacyUnreconciled ? (
             <ReservationError role="alert">
@@ -230,34 +245,6 @@ export function ReservationPaymentLedger({
               nejprve účetně ověřit; nové zápisy jsou zablokované.
             </ReservationError>
           ) : null}
-          <ReservationHeading>Historie operací</ReservationHeading>
-          {payments.entries.length ? (
-            <List>
-              {[...payments.entries].reverse().map(entry => (
-                <li key={entry.operationId}>
-                  <strong>
-                    {paymentTypeLabels[entry.type]} · {money(entry.amount)}
-                  </strong>
-                  <ReservationCopy>
-                    {formatPragueLoadedAt(new Date(entry.recordedAt))}
-                    {entry.method ? ` · ${methodLabel(entry.method)}` : ''}
-                  </ReservationCopy>
-                  {entry.reference ? (
-                    <ReservationCopy>
-                      Reference: {entry.reference}
-                    </ReservationCopy>
-                  ) : null}
-                  {entry.note ? (
-                    <ReservationCopy style={{ whiteSpace: 'pre-wrap' }}>
-                      Důvod / poznámka: {entry.note}
-                    </ReservationCopy>
-                  ) : null}
-                </li>
-              ))}
-            </List>
-          ) : (
-            <ReservationCopy>Žádné platební operace.</ReservationCopy>
-          )}
           {!open ? (
             <ReservationActions
               ref={node => {
@@ -282,12 +269,16 @@ export function ReservationPaymentLedger({
                   });
                 }}
               >
-                Zapsat platební operaci
+                Zapsat platbu
               </Button>
             </ReservationActions>
           ) : (
             <Stack ref={form}>
-              <ReservationHeading>Nová platební operace</ReservationHeading>
+              <ReservationHeading>Zapsat platbu</ReservationHeading>
+              <ReservationCopy>Zapište pouze skutečně přijaté nebo vrácené peníze. Zápis neodesílá platbu.</ReservationCopy>
+              <Disclosure><summary>Jak zapsat společnou platbu?</summary>
+                <ReservationCopy>Nájemné a kauci přijaté jedním převodem zapište zvlášť se stejnou referencí. Záloha je součástí nájemného.</ReservationCopy>
+              </Disclosure>
               <SelectField
                 label="Druh operace"
                 name="type"
@@ -407,6 +398,49 @@ export function ReservationPaymentLedger({
               </ReservationActions>
             </Stack>
           )}
+          <Disclosure><summary>Historie plateb ({payments.entries.length})</summary>
+          {payments.entries.length ? (
+            <List>
+              {[...payments.entries].reverse().map(entry => (
+                <li key={entry.operationId}>
+                  <strong>
+                    {paymentTypeLabels[entry.type]} · {money(entry.amount)}
+                  </strong>
+                  <ReservationCopy>
+                    {formatPragueLoadedAt(new Date(entry.recordedAt))}
+                    {entry.method ? ` · ${methodLabel(entry.method)}` : ''}
+                  </ReservationCopy>
+                  {entry.reference ? (
+                    <ReservationCopy>
+                      Reference: {entry.reference}
+                    </ReservationCopy>
+                  ) : null}
+                  {entry.note ? (
+                    <ReservationCopy style={{ whiteSpace: 'pre-wrap' }}>
+                      Důvod / poznámka: {entry.note}
+                    </ReservationCopy>
+                  ) : null}
+                </li>
+              ))}
+            </List>
+          ) : (
+            <ReservationCopy>Žádné platební operace.</ReservationCopy>
+          )}
+</Disclosure>
+          {!payments.legacyUnreconciled ? <Disclosure>
+            <summary>Podrobný rozpis</summary>
+            <Facts>
+              {([
+                ['Rezervační záloha (součást nájemného)', payments.advanceRequired],
+                ['Zbývá uhradit ze zálohy', payments.advanceBalance],
+                ['Přijaté nájemné včetně zálohy', payments.rentalReceived],
+                ['Vrácené nájemné', payments.rentalRefunded],
+                ['Vrácená kauce', payments.depositRefunded],
+                ['Uplatněný storno poplatek', payments.cancellationFee],
+                ['Nájemné dostupné k vrácení', payments.refundableRental],
+              ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt><dd>{money(amount)}</dd></div>)}
+            </Facts>
+          </Disclosure> : null}
         </>
       ) : null}
       <Dialog
