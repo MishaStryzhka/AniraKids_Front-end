@@ -283,7 +283,7 @@ test('late profile never overwrites a manual edit or a deliberately cleared fiel
   act(() => { view.result.current.chooseProduct(product); });
   expect(view.result.current.draft?.contact).toMatchObject({ firstName: 'Eva', email: '' });
   act(() => { view.result.current.chooseProduct({ ...product, id: 'another-product' }); });
-  expect(view.result.current.draft?.contact.email).toBe('jana@example.test');
+  expect(view.result.current.draft?.contact.email).toBe('');
 });
 test('account switch and logout remove untouched automatic values but preserve manual contact edits', () => {
   const view = profileView(profileFixture);
@@ -395,4 +395,49 @@ test('late authenticated response remains hidden from a switched account', async
   expect(JSON.parse(sessionStorage.getItem(SESSION_KEY)!).accountId).toBe(ownerSession.accountId);
   view.changeSession(ownerSession);
   expect(view.result.current.stored?.kind).toBe('receipt');
+});
+
+test('adding products retains shared dates and contacts; selecting again does not duplicate; removing primary promotes next', () => {
+  const view = ready();
+  const second = { ...product, id: '444444444444444444444444', slug: 'ema', name: 'Ema' };
+  act(() => { view.result.current.chooseProduct(second); });
+  expect(view.result.current.draft?.product.id).toBe(product.id);
+  expect(view.result.current.draft?.additionalItems).toEqual([{ product: second, variantId: '' }]);
+  expect(view.result.current.draft?.selection.startDate).toBe(body.startDate);
+  expect(view.result.current.draft?.contact.email).toBe(body.customer.email);
+  act(() => { view.result.current.chooseProduct(second); });
+  expect(view.result.current.draft?.additionalItems).toHaveLength(1);
+  act(() => { view.result.current.removeProduct(product.id); });
+  expect(view.result.current.draft?.product.id).toBe(second.id);
+  expect(view.result.current.draft?.selection).toMatchObject({ productId: second.id, variantId: '', startDate: body.startDate });
+  act(() => { view.result.current.removeProduct(second.id); });
+  expect(view.result.current.draft).toBeNull();
+});
+test('all-item quote required; unknown multi-item request freezes and replays complete basket with same key', async () => {
+  const view = ready();
+  const second = { ...product, id: '444444444444444444444444', name: 'Ema' };
+  act(() => { view.result.current.chooseProduct(second); });
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  expect(post).not.toHaveBeenCalled();
+  act(() => { const draft = view.result.current.draft!;
+    view.result.current.updateDraft({ ...draft, additionalItems: [{ product: second, variantId: second.variants[0].id }] });
+  });
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  expect(post).not.toHaveBeenCalled();
+  const basketQuote = { ...quote, items: [quote, { ...quote, productId: second.id }],
+    pricing: { rentalPrice: 1000, deposit: 2000, totalDue: 3000 } };
+  post.mockRejectedValueOnce(new PublicApiError('NETWORK'));
+  await act(async () => { await view.result.current.submit(basketQuote, policy); });
+  const attempt = view.result.current.stored;
+  expect(attempt).toMatchObject({ kind: 'attempt', body: { items: [
+    { productId: product.id, variantId: product.variants[0].id },
+    { productId: second.id, variantId: second.variants[0].id },
+  ] } });
+  act(() => { expect(view.result.current.removeProduct(product.id)).toBe(false); });
+  view.unmount();
+  const restored = setup();
+  expect(restored.result.current.stored).toEqual(attempt);
+  await act(async () => { await restored.result.current.recover(); });
+  expect(post.mock.calls[1][0]).toEqual(post.mock.calls[0][0]);
+  expect(post.mock.calls[1][1]).toBe(post.mock.calls[0][1]);
 });

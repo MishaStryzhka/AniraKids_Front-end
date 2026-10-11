@@ -21,6 +21,7 @@ import {
   getBookingPolicy,
   PublicApiError,
   sameSelection,
+  receiptItems,
   type Pricing,
   type Selection,
 } from '../api/publicApi';
@@ -43,6 +44,9 @@ import { useBooking } from './BookingProvider';
 import { reservationStatusPath } from './BookingStatusPage';
 import {
   contactErrors,
+  draftItems,
+  draftSelections,
+  draftSelectionsValid,
   formatMoney,
   modeLabel,
   selectionErrors,
@@ -82,7 +86,8 @@ export function BookingPage() {
     booking.stored ? null : 'booking-policy',
     getBookingPolicy
   );
-  const [requested, setRequested] = useState<Selection | null>(null),
+  const [requested, setRequested] = useState<Selection[] | null>(null),
+    [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
       ReturnType<typeof selectionErrors>
     >({}),
@@ -95,14 +100,20 @@ export function BookingPage() {
   const key =
     requested &&
     draft &&
-    sameSelection(requested, draft.selection) &&
+    requested.length === draftSelections(draft).length &&
+    requested.every((selection, index) => sameSelection(selection, draftSelections(draft)[index])) &&
     !booking.stored &&
     !booking.error
       ? JSON.stringify(requested)
       : null;
-  const availability = usePublicRead(key, signal =>
-    getAvailability(requested!, signal)
-  );
+  const availability = usePublicRead(key, async signal => {
+    const items = await Promise.all(requested!.map(selection => getAvailability(selection, signal)));
+    return { ...items[0], items, available: items.every(item => item.available),
+      pricing: items.reduce((sum, item) => ({
+        rentalPrice: sum.rentalPrice + item.pricing.rentalPrice,
+        deposit: sum.deposit + item.pricing.deposit, totalDue: sum.totalDue + item.pricing.totalDue,
+      }), { rentalPrice: 0, deposit: 0, totalDue: 0 }) };
+  });
   const quote = availability.data,
     variant = draft?.product.variants.find(
       v => v.id === draft.selection.variantId
@@ -135,6 +146,7 @@ export function BookingPage() {
     if (!draft) return;
     setRequested(null);
     setSelectionValidation({});
+    setItemValidation({});
     booking.updateDraft({
       ...draft,
       selection: { ...draft.selection, [field]: value },
@@ -142,9 +154,8 @@ export function BookingPage() {
   };
   const checkEditedDates = () => {
     if (!draft || booking.stored || booking.storageBlocked) return;
-    if (Object.keys(selectionErrors(draft.selection)).length ||
-        !variant?.pricing[draft.selection.rentalMode]) return;
-    setRequested({ ...draft.selection });
+    if (!draftSelectionsValid(draft)) return;
+    setRequested(draftSelections(draft));
   };
   const check = () => {
     if (!draft) return;
@@ -152,14 +163,24 @@ export function BookingPage() {
     if (!variant?.pricing[draft.selection.rentalMode])
       errors.rentalMode =
         'Tento způsob pronájmu není dostupný pro vybranou velikost.';
+    const itemErrors: Record<string, string> = {};
+    for (const item of draft.additionalItems ?? []) {
+      if (!item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode])
+        itemErrors[item.product.id] = 'Vyberte dostupnou velikost pro tento způsob pronájmu.';
+    }
+    setItemValidation(itemErrors);
     setSelectionValidation(errors);
     const first = Object.keys(errors)[0];
     if (first) {
       focusField(first);
       return;
     }
+    if (Object.keys(itemErrors).length) {
+      focusField('variant-' + Object.keys(itemErrors)[0]);
+      return;
+    }
     booking.updateDraft(draft); // Explicit recheck clears a known rejection, never a frozen attempt.
-    setRequested({ ...draft.selection });
+    setRequested(draftSelections(draft));
     availability.reload();
   };
   const submit = async () => {
@@ -209,12 +230,10 @@ export function BookingPage() {
               <Copy role="status">
                 Stav: {statusLabel(stored.receipt.status)}
               </Copy>
-              <Heading>{stored.receipt.item.productName}</Heading>
+              {receiptItems(stored.receipt).map((item, index) => <div key={index}>
+                <Heading>{item.productName}</Heading><Copy>Velikost {item.size}</Copy>
+              </div>)}
               <Facts>
-                <div>
-                  <dt>Velikost</dt>
-                  <dd>{stored.receipt.item.size}</dd>
-                </div>
                 <div>
                   <dt>Způsob pronájmu</dt>
                   <dd>{modeLabel(stored.receipt.rentalMode)}</dd>
@@ -312,8 +331,8 @@ export function BookingPage() {
           ) : draft ? (
             <Columns>
               <Stack>
+                <Heading>Položky rezervace</Heading>
                 <Heading>{draft.product.name}</Heading>
-                <Heading>Velikost a termín</Heading>
                 <Stack>
                   <SelectField
                     label="Velikost"
@@ -340,6 +359,27 @@ export function BookingPage() {
                   </SelectField>
                   {errorFor('variantId', selectionValidation)}
                 </Stack>
+                <Actions><Button variant="ghost" onClick={() => { setRequested(null); booking.removeProduct(draft.product.id); }}>
+                  Odebrat {draft.product.name}
+                </Button></Actions>
+                {(draft.additionalItems ?? []).map(item => <Panel key={item.product.id}>
+                  <Heading>{item.product.name}</Heading>
+                  <SelectField label={'Velikost – ' + item.product.name} name={'variant-' + item.product.id}
+                    value={item.variantId} aria-invalid={Boolean(itemValidation[item.product.id]) || undefined}
+                    aria-describedby={itemValidation[item.product.id] ? 'booking-variant-' + item.product.id + '-error' : undefined}
+                    onChange={event => {
+                      setRequested(null); setItemValidation({});
+                      booking.updateDraft({ ...draft, additionalItems: draft.additionalItems!.map(row =>
+                        row.product.id === item.product.id ? { ...row, variantId: event.target.value } : row) });
+                    }}>
+                    <option value="">Vyberte velikost</option>
+                    {item.product.variants.map(v => <option key={v.id} value={v.id}>{v.size}</option>)}
+                  </SelectField>
+                  {itemValidation[item.product.id] ? <ErrorCopy id={'booking-variant-' + item.product.id + '-error'}>{itemValidation[item.product.id]}</ErrorCopy> : null}
+                  <Actions><Button variant="ghost" onClick={() => { setRequested(null); booking.removeProduct(item.product.id); }}>Odebrat {item.product.name}</Button></Actions>
+                </Panel>)}
+                <Actions><RouteLink to={catalogueReturnTo}>Přidat další produkt</RouteLink></Actions>
+
                 <Stack>
                   <SelectField
                     label="Způsob pronájmu"
@@ -372,14 +412,14 @@ export function BookingPage() {
                   </SelectField>
                   {errorFor('rentalMode', selectionValidation)}
                 </Stack>
-                <Heading>Termín pronájmu</Heading>
-                <RentalCalendar selection={draft.selection}
-                  enabled={Boolean(variant?.pricing[draft.selection.rentalMode]) && !booking.storageBlocked}
+                <Heading>{draft.additionalItems?.length ? 'Společný termín pronájmu' : 'Termín pronájmu'}</Heading>
+                <RentalCalendar selection={draft.selection} selections={draftSelections(draft)}
+                  enabled={draftItems(draft).every(item => Boolean(item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode])) && !booking.storageBlocked}
                   onChange={(startDate, endDate) => {
                     const selection = { ...draft.selection, startDate, endDate };
                     setSelectionValidation({});
                     booking.updateDraft({ ...draft, selection });
-                    setRequested(startDate && endDate ? selection : null);
+                    setRequested(startDate && endDate ? draftSelections({ ...draft, selection }) : null);
                   }}
                 />
                 {(['startDate', 'endDate'] as const).map(field => (
@@ -444,7 +484,7 @@ export function BookingPage() {
                     {quote.available ? (
                       <>
                         <Copy>
-                          {draft.product.name} · velikost {variant?.size}
+                          {draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}
                         </Copy>
                         <Copy>
                           {modeLabel(quote.rentalMode)} ·{' '}
@@ -567,8 +607,7 @@ export function BookingPage() {
                           policy={policy.data}
                           rentalPrice={
                             quote?.pricing.rentalPrice ??
-                            variant?.pricing[draft.selection.rentalMode]
-                              ?.rentalPrice
+                            draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)
                           }
                         />
                         <CompanyInformation company={policy.data.company} />

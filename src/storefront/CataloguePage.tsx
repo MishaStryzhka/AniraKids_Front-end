@@ -1,3 +1,4 @@
+import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import IconBeauty from '../images/icons/IconBeauty';
 import { Breadcrumbs } from '../design-system/components/Breadcrumbs';
@@ -267,6 +268,7 @@ export function CataloguePage() {
                   state={{ catalogueReturnTo: pathname + search }} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product}/></RouteLink></div><Heading>{product.name}</Heading>
           {product.color && <Copy>{product.color}</Copy>}
           {product.rentalPriceFrom !== undefined && <Copy>Od {product.rentalPriceFrom.toLocaleString('cs-CZ')} Kč · {request.rentalMode === 'external' ? 'mimo studio' : 've studiu'}</Copy>}
+          <ResumeReservationLink productId={product.id} catalogueReturnTo={pathname + search} />
         </li>)}</Grid> : result.data ? <Empty><IconBeauty className="catalogue-empty-illustration" aria-hidden="true"/><Copy>Pro zvolené filtry jsme nenašli žádné produkty.</Copy><Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Empty> : null}
         {result.data && result.data.items.length > 0 && <div ref={sentinel} style={{ paddingBlock: 24 }}>
           <Copy role="status">{loadingMore ? 'Načítání dalších produktů…' : `Zobrazeno ${result.data.items.length} z ${result.data.total} modelů`}</Copy>

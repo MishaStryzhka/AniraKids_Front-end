@@ -6,6 +6,7 @@ on:
       - src/storefront/**
       - src/pages/AccountPage/**
       - src/components/App.js
+      - src/components/navigation/**
       - .github/account-booking.spec.js
       - .github/workflows/account-booking-verify.yml
 permissions:
@@ -25,6 +26,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Account history and draft tests
+        run: CI=true npm test -- --watchAll=false --runInBand src/pages/AccountPage/AccountReservationsPage.test.tsx
       - name: Build against isolated browser fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test

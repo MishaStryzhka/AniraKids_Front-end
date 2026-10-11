@@ -11,11 +11,23 @@ import {
   type Selection,
 } from '../api/publicApi';
 export type ContactDraft = Customer & { notes: string };
+export type DraftItem = { product: PublicProduct; variantId: string };
 export type BookingDraft = {
+  additionalItems?: DraftItem[];
   product: PublicProduct;
   selection: Selection;
   contact: ContactDraft;
 };
+export const draftItems = (draft: BookingDraft): DraftItem[] => [
+  { product: draft.product, variantId: draft.selection.variantId }, ...(draft.additionalItems ?? []),
+];
+export const draftSelections = (draft: BookingDraft): Selection[] =>
+  draftItems(draft).map(item => ({ ...draft.selection, productId: item.product.id, variantId: item.variantId }));
+export function draftSelectionsValid(draft: BookingDraft) {
+  return draftSelections(draft).every((selection, index) =>
+    Object.keys(selectionErrors(selection)).length === 0 &&
+    Boolean(draftItems(draft)[index].product.variants.find(v => v.id === selection.variantId)?.pricing[selection.rentalMode]));
+}
 export const emptyContact = (): ContactDraft => ({
   firstName: '',
   lastName: '',
@@ -67,6 +79,9 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
+    ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
+      productId: item.product.id, variantId: item.variantId,
+    })) } : {}),
     customer: {
       firstName: contact.firstName.trim(),
       lastName: contact.lastName.trim(),
@@ -92,11 +107,21 @@ export function parseBody(v: unknown): ReservationBody {
     (v.notes !== undefined && typeof v.notes !== 'string')
   )
     throw new Error('Invalid attempt');
+  let items: ReservationBody['items'];
+  if (v.items !== undefined) {
+    if (!Array.isArray(v.items) || !v.items.length || v.items.length > 20 ||
+        v.items.some(item => !object(item) || !objectId(item.productId) || !objectId(item.variantId)))
+      throw new Error('Invalid attempt items');
+    items = v.items.map(item => ({ productId: item.productId as string, variantId: item.variantId as string }));
+    if (items[0].productId !== v.productId || items[0].variantId !== v.variantId)
+      throw new Error('Invalid attempt primary item');
+  }
   const customer = v.customer as Customer,
     contact = { ...customer, notes: (v.notes as string | undefined) ?? '' };
   if (Object.keys(contactErrors(contact)).length)
     throw new Error('Invalid attempt');
   return {
+    ...(items ? { items } : {}),
     productId: v.productId,
     variantId: v.variantId,
     rentalMode: v.rentalMode,

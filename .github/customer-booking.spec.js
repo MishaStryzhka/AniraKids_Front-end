@@ -398,8 +398,9 @@ test('single-flight survives leaving route while request is pending', async ({
     });
   await expect.poll(() => Boolean(state.release)).toBe(true);
   await page.getByRole('button', { name: 'Ukončit', exact: true }).click();
-  await page.getByRole('link', { name: /Rezervace — máte/ }).click();
+  await page.getByRole('link', { name: /Moje rezervace — máte/ }).click();
   await expect(page.getByText('Odesílání rezervace…')).toBeVisible();
+  await page.getByRole('link', { name: 'Otevřít rezervaci', exact: true }).click();
   state.release();
   await expect(page.getByText('AK-2030-001')).toBeVisible();
   expect(state.posts).toHaveLength(1);
@@ -611,7 +612,7 @@ for (const width of [390, 768, 1440]) {
     await page.getByRole('button', { name: 'Zpět', exact: true }).click();
     await expect(page).toHaveURL(APP + '/produkt/sofia');
     await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', source);
-    await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+    await page.getByRole('link', { name: 'Dokončit rezervaci', exact: true }).click();
     await expect(title).toBeFocused();
     await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(V);
     await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');

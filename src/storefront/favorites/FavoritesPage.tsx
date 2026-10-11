@@ -1,3 +1,4 @@
+import { ResumeReservationLink } from '../booking/ResumeReservationLink';
 import { Breadcrumbs } from '../../design-system/components/Breadcrumbs';
 import { Button } from '../../design-system/components/Button';
 import { productPath, routes } from '../../navigation/routes';
@@ -27,6 +28,7 @@ export function FavoritesPage() {
       <Grid>{result.data.items.map(product => <li key={product.id}>
         <div style={{ position: 'relative' }}><span style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><FavoriteButton id={product.id} name={product.name} /></span><RouteLink to={productPath(product.slug)} state={{ catalogueReturnTo: routes.favourites }} aria-label={`Prohlédnout ${product.name}`} style={{ display: 'block', padding: 0 }}><ProductImage product={product} /></RouteLink></div>
         <Heading>{product.name}</Heading>{product.color && <Copy>{product.color}</Copy>}{product.rentalPriceFrom !== undefined && <Copy>Od {product.rentalPriceFrom.toLocaleString('cs-CZ')} Kč · ve studiu</Copy>}
+        <ResumeReservationLink productId={product.id} catalogueReturnTo={routes.favourites} />
       </li>)}</Grid>
       <Actions>{favorites.ids.filter(id => !result.data!.items.some(product => product.id === id)).map(id => <div key={id}><Copy>Produkt nyní není dostupný</Copy><FavoriteButton id={id} name="Nedostupný produkt" /></div>)}</Actions>
     </>}

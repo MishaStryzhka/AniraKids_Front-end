@@ -212,3 +212,19 @@ test('claim sends both independent proofs without email-based assignment', async
   fetchMock.mockResolvedValue(response({ reservation: { ...owned, reservationNumber: 'AK-2030-OTHER1' } }));
   await expect(claimReservation(owned.reservationNumber, 'a'.repeat(43), 'account-secret')).rejects.toThrow();
 });
+
+test('multi-item request sends one basket and requires all receipt items and summed amounts', async () => {
+  const second = { ...receipt.item, productId: '444444444444444444444444', productName: 'Ema', rentalPrice: 700, deposit: 1500 };
+  const basket = { ...receipt, items: [receipt.item, second], subtotal: 1200, deposit: 2500, totalDue: 3700 };
+  const request = { ...body, items: basket.items.map(i => ({ productId: i.productId, variantId: i.variantId })) };
+  fetchMock.mockResolvedValue(response({ reservation: basket }, 201));
+  expect(await postReservation(request, 'basket-key')).toEqual(basket);
+  const wire = JSON.parse(fetchMock.mock.calls[0][1].body);
+  expect(wire.items).toEqual(request.items);
+  expect(wire.productId).toBeUndefined();
+  expect(wire.variantId).toBeUndefined();
+  expect(wire.startDate).toBe(body.startDate);
+  expect(() => parseReceipt({ reservation: receipt }, request)).toThrow();
+  expect(() => parseReceipt({ reservation: { ...basket, totalDue: 1 } }, request)).toThrow();
+  expect(() => parseReceipt({ reservation: { ...basket, items: [receipt.item, { ...second, variantId: product.variants[1].id }] } }, request)).toThrow();
+});
