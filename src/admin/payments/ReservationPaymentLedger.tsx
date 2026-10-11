@@ -281,10 +281,6 @@ export function ReservationPaymentLedger({
           ) : (
             <Stack ref={form}>
               <ReservationHeading>Zapsat platbu</ReservationHeading>
-              <ReservationCopy>Zapište pouze skutečně přijaté nebo vrácené peníze. Zápis neodesílá platbu.</ReservationCopy>
-              <Disclosure><summary>Jak zapsat společnou platbu?</summary>
-                <ReservationCopy>Nájemné a kauci přijaté jedním převodem zapište zvlášť se stejnou referencí. Záloha je součástí nájemného.</ReservationCopy>
-              </Disclosure>
               <SelectField
                 label="Druh operace"
                 name="type"
@@ -345,12 +341,7 @@ export function ReservationPaymentLedger({
                   <option value="bank_transfer">Bankovním převodem</option>
                   <option value="cash">Hotově</option>
                 </SelectField>
-              ) : (
-                <ReservationCopy>
-                  Storno se neposuzuje automaticky. Záznamem potvrzujete
-                  individuální posouzení a důvod; nejde o nový bankovní převod.
-                </ReservationCopy>
-              )}
+              ) : null}
               <Input
                 name="reference"
                 label="Reference platby"
@@ -373,17 +364,13 @@ export function ReservationPaymentLedger({
                 disabled={blocked}
                 error={Boolean(errors.note)}
                 aria-describedby={
-                  errors.note ? 'payment-note-error' : 'payment-note-help'
+                  errors.note ? 'payment-note-error' : undefined
                 }
                 onChange={e => {
                   setDraft({ ...draft, note: e.target.value });
                   setErrors({});
                 }}
               />
-              <ReservationCopy id="payment-note-help">
-                Maximálně 500 znaků. Při vrácení, stornu nebo přijetí peněz ke
-                zrušené rezervaci uveďte alespoň 5 znaků.
-              </ReservationCopy>
               {error('note')}
               <ReservationActions>
                 <Button
