@@ -13,14 +13,15 @@ jest.mock('../../hooks/useAuth', () => ({ useAuth: () => mockAuth }));
 jest.mock('../../storefront/usePublicRead', () => ({ usePublicRead: (...args: unknown[]) => mockRead(...args) }));
 beforeEach(() => { mockAuth.isLoggedIn = true; mockRead.mockReset(); mockBooking.stored = null; mockBooking.draft = null; mockBooking.busy = false; mockBooking.storageBlocked = false; mockBooking.accountBlocked = false; (claimReservation as jest.Mock).mockReset(); });
 function view() { return render(<MemoryRouter><AccountReservationsPage /></MemoryRouter>); }
-test('empty history explains guest links and offers the catalogue', () => {
+test('empty history offers the catalogue without unrelated controls', () => {
   mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false }); view();
   expect(screen.getByText('Zatím zde nejsou žádné rezervace.')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Prohlédnout nabídku' })).toHaveAttribute('href', '/novinky');
   expect(screen.queryByRole('link', { name: 'Vybrat šaty' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Předchozí' })).not.toBeInTheDocument();
   expect(screen.queryByText('Strana 1')).not.toBeInTheDocument();
-  expect(screen.getByText(/soukromým odkazem/).closest('details')).not.toHaveAttribute('open');
+  expect(screen.queryByText('Rezervace bez přihlášení')).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Můj profil' })).not.toBeInTheDocument();
 });
 test('history failure offers retry without showing cached reservations', () => {
   mockRead.mockReturnValue({ error: new Error('offline'), loading: false, reload: jest.fn() }); view();
@@ -35,13 +36,12 @@ test('logged-out visitors cannot load account history', () => {
   mockAuth.isLoggedIn = true;
 });
 
-test('one page has no pagination and refresh remains available', () => {
+test('one page has no pagination or redundant refresh button', () => {
   const reload = jest.fn();
   mockRead.mockReturnValue({ data: { items: [], total: 20 }, loading: false, reload });
   view();
   expect(screen.queryByRole('button', { name: 'Další' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Aktualizovat seznam' }));
-  expect(reload).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('button', { name: 'Aktualizovat seznam' })).not.toBeInTheDocument();
 });
 test('multiple pages remain reachable and an emptied later page can return to page one', () => {
   mockRead.mockReturnValue({ data: { items: [], total: 21 }, loading: false, reload: jest.fn() });
@@ -63,11 +63,13 @@ test('guest receipt is explicitly linked using its secret, without creating anot
   mockBooking.stored = { version: 1, kind: 'receipt', receipt: { ...receipt, guestAccessToken: 'a'.repeat(43) } };
   (claimReservation as jest.Mock).mockResolvedValue(receipt);
   view();
+  expect(screen.getByText('Rezervace bez přihlášení')).toBeInTheDocument();
   expect(claimReservation).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Připojit rezervaci k účtu' }));
   await waitFor(() => expect(reload).toHaveBeenCalledTimes(1));
   expect(claimReservation).toHaveBeenCalledWith(receipt.reservationNumber, 'a'.repeat(43), 'test-session', expect.anything());
   expect(screen.getByRole('status')).toHaveTextContent('připojena');
+  expect(screen.queryByText('Rezervace bez přihlášení')).not.toBeInTheDocument();
 });
 test('unknown claim result stays retryable and does not claim success', async () => {
   mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false, reload: jest.fn() });
