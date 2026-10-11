@@ -215,7 +215,7 @@ for (const width of [390, 768, 1440]) {
       await enterBooking(page);
       await page.getByLabel('Velikost', { exact: true }).selectOption(product.variants[0].id);
       await page.getByLabel('Jméno', { exact: true }).fill('Eva');
-      await page.getByRole('button', { name: 'Ukončit', exact: true }).click();
+      await page.getByRole('button', { name: /^Ukončit/ }).click();
       const cards = page.locator('li').filter({ has: page.getByRole('heading', { name: 'Sofia', exact: true }) });
       await expect(cards.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toBeVisible();
       const otherCard = page.locator('li').filter({ has: page.getByRole('heading', { name: 'Ema', exact: true }) });
@@ -308,7 +308,7 @@ for (const width of [390, 768, 1440]) {
     await page.getByLabel('Velikost – Ema', { exact: true }).selectOption(second.variants[0].id);
     await expect(page.locator('button[data-date="2030-10-12"]')).toHaveAttribute('aria-disabled', 'true');
     await expect(page.locator('button[data-date="2030-10-11"]')).toHaveAttribute('aria-disabled', 'false');
-    await page.getByRole('button', { name: 'Ukončit', exact: true }).click();
+    await page.getByRole('button', { name: /^Ukončit/ }).click();
     await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toHaveCount(2);
     await page.getByRole('link', { name: /^Moje rezervace/ }).filter({ visible: true }).click();
     await expect(page.getByText('Rozpracované', { exact: true })).toBeVisible();
