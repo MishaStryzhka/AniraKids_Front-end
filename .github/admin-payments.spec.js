@@ -182,10 +182,19 @@ for (const width of [390, 768, 1440])
     await expect(
       page.getByRole('button', { name: 'Potvrdit rezervaci' })
     ).toBeDisabled();
+    const panel = page.getByRole('region', { name: 'Platební evidence' });
+    await expect(panel.getByText('Zatím nebyla zaznamenána žádná platba.')).toBeVisible();
+    await expect(panel.getByRole('heading', { name: 'Nájemné' })).toHaveCount(0);
+    await expect(panel.locator('summary')).toHaveCount(0);
+    await expect(panel.getByRole('button', { name: 'Aktualizovat platby' })).toHaveCount(0);
+    await panel.screenshot({ path: `${evidence}/empty-${width}.png` });
     const dialog = await prepare(page);
+    expect(await page.getByLabel('Druh operace').locator('option').evaluateAll(options => options.map(o => o.value))).toEqual(['advance_received', 'rental_received', 'deposit_received']);
     await dialog.getByRole('button', { name: 'Potvrdit zápis' }).dblclick();
     await expect(page.getByRole('button', { name: 'Zapsat platbu', exact: true })).toBeEnabled();
     expect(state.writes).toHaveLength(1);
+    await expect(panel.getByText('Zatím nebyla zaznamenána žádná platba.')).toHaveCount(0);
+    await expect(panel.getByRole('heading', { name: 'Nájemné' })).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Potvrdit rezervaci' })
     ).toBeEnabled();
@@ -295,4 +304,29 @@ test('refund and conditional cancellation fee require reason; 409 reconciles and
   await expect(
     page.getByText('Vrácené nájemné / záloha · 100 Kč')
   ).toBeVisible();
+});
+
+test('refund choices follow balances after refresh and never silently change an edited operation', async ({ page }) => {
+  const state = await setup(page);
+  state.payments.rentalReceived = 200;
+  state.payments.rentalNet = 200;
+  state.payments.refundableRental = 200;
+  await open(page);
+  await page.getByRole('button', { name: 'Zapsat platbu', exact: true }).click();
+  const select = page.getByLabel('Druh operace');
+  await expect(select.locator('option[value="rental_refunded"]')).toHaveCount(1);
+  await expect(select.locator('option[value="deposit_refunded"]')).toHaveCount(0);
+  await expect(select.locator('option[value="cancellation_fee"]')).toHaveCount(0);
+  await select.selectOption('rental_refunded');
+  await page.getByLabel('Částka (Kč)').fill('100');
+  await page.getByLabel('Důvod / poznámka').fill('Vráceno zákaznici');
+  state.payments.refundableRental = 0;
+  await page.getByRole('button', { name: 'Aktualizovat platby' }).click();
+  await expect(select.locator('option:checked')).toHaveText('Vyberte dostupnou operaci');
+  await page.getByRole('button', { name: 'Zkontrolovat zápis' }).click();
+  await expect(page.getByText('Tato operace už není dostupná. Vyberte jiný druh operace.')).toBeVisible();
+  expect(state.writes).toHaveLength(0);
+  state.payments.depositHeld = 2000;
+  await page.getByRole('button', { name: 'Aktualizovat platby' }).click();
+  await expect(select.locator('option[value="deposit_refunded"]')).toHaveCount(1);
 });
