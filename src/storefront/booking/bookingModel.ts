@@ -227,7 +227,11 @@ export const formatMoney = (value: number) =>
 export const DRAFT_SESSION_KEY = 'anirakids.draft.v1';
 // Save garment selections only. Contacts are never copied into this draft cache.
 export function persistDraft(draft: BookingDraft | null) {
-  if (!draft) { sessionStorage.removeItem(DRAFT_SESSION_KEY); return; }
+  if (!draft) {
+    sessionStorage.removeItem(DRAFT_SESSION_KEY);
+    if (sessionStorage.getItem(DRAFT_SESSION_KEY) !== null) throw new Error('Draft storage unavailable');
+    return;
+  }
   const raw = JSON.stringify({ version: 1, selection: draft.selection,
     items: draftItems(draft).map(item => ({ product: item.product, variantId: item.variantId })) });
   if (raw.length > 500000) throw new Error('Draft too large');
