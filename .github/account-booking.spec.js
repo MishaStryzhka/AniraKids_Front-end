@@ -233,7 +233,7 @@ for (const width of [390, 768, 1440]) {
       expect(box.height).toBeGreaterThanOrEqual(44);
       await capture(page, 'draft-hub-' + width + '-' + guest);
       await resume.press('Enter');
-      await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
+      await expect(page.getByRole('group', { name: 'Sofia', exact: true }).getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
       await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Eva');
       await page.getByRole('button', { name: 'Zpět', exact: true }).click();
       await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toBeVisible();
@@ -300,9 +300,9 @@ for (const width of [390, 768, 1440]) {
     await page.getByRole('link', { name: 'Přidat další produkt' }).click();
     await page.getByRole('link', { name: 'Prohlédnout Ema' }).click();
     await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
-    await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
+    await expect(page.getByRole('group', { name: 'Sofia', exact: true }).getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
     await expect(page.getByLabel('Od', { exact: true })).toHaveValue('2030-10-10');
-    await page.getByLabel('Velikost – Ema', { exact: true }).selectOption(second.variants[0].id);
+    await page.getByRole('group', { name: 'Ema', exact: true }).getByLabel('Velikost', { exact: true }).selectOption(second.variants[0].id);
     await expect(page.locator('button[data-date="2030-10-12"]')).toHaveAttribute('aria-disabled', 'true');
     await expect(page.locator('button[data-date="2030-10-11"]')).toHaveAttribute('aria-disabled', 'false');
     await page.getByRole('button', { name: /^Ukončit/ }).click();
