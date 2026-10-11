@@ -155,6 +155,8 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
     </Grid>
     <Legend>Volné dny lze vybrat. Přeškrtnuté dny nejsou dostupné.</Legend>
     {choosingEnd ? <Button variant="ghost" onClick={() => onChange('', '')}>Změnit začátek pronájmu</Button> : null}
-    <Legend>Dostupnost zahrnuje čas na čištění. Termín potvrdíme při odeslání rezervace.</Legend>
+    <Legend>{selection.rentalMode === 'studio'
+      ? 'Pronájem ve studiu neblokuje další dny na dopravu ani čištění.'
+      : 'Dostupnost zahrnuje čas na čištění.'} Termín potvrdíme při odeslání rezervace.</Legend>
   </Shell>;
 }
