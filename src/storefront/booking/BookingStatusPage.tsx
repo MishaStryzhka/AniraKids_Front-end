@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
 import { routes } from '../../navigation/routes';
-import { getReservationStatus, isGuestAccessToken } from '../api/publicApi';
+import { receiptItems, getReservationStatus, isGuestAccessToken } from '../api/publicApi';
 import { ReceiptPaymentInformation } from '../payments/PaymentInformation';
 import { Actions, Copy, Heading, Page, Panel, RouteLink, Title } from '../storefrontStyles';
 import { usePublicRead } from '../usePublicRead';
@@ -31,8 +31,9 @@ export function BookingStatusPage() {
         </> : result.data ? <>
           <Heading>{result.data.reservationNumber}</Heading>
           <Copy>Stav: {statusLabel(result.data.status)}</Copy>
-          <Heading>{result.data.item.productName}</Heading>
-          <Copy>Velikost: {result.data.item.size}</Copy>
+          {receiptItems(result.data).map((item, index) => <div key={index}>
+            <Heading>{item.productName}</Heading><Copy>Velikost: {item.size}</Copy>
+          </div>)}
           <Copy>{formatCalendarDay(result.data.startDate)} – {formatCalendarDay(result.data.endDate)}</Copy>
           <ReceiptPaymentInformation receipt={result.data} />
           <Button onClick={result.reload}>Aktualizovat stav rezervace</Button>

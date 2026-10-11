@@ -1,5 +1,8 @@
 import {
   contactErrors,
+  persistDraft,
+  loadDraft,
+  DRAFT_SESSION_KEY,
   initialDraft,
   isUuid,
   loadBooking,
@@ -118,4 +121,18 @@ test('account owner survives attempt and receipt storage while legacy attempts s
   const old = newAttempt(body);
   expect(parseStored(JSON.stringify(old))).not.toHaveProperty('accountId');
   expect(() => parseStored(JSON.stringify({ ...old, accountId: 'invalid' }))).toThrow();
+});
+
+test('multi-product draft restores shared selections without persisting contact details', () => {
+  const second = { ...product, id: '444444444444444444444444', slug: 'ema' };
+  const draft = { ...initialDraft(product), selection: quote, contact: { ...body.customer, notes: 'private notes' },
+    additionalItems: [{ product: second, variantId: second.variants[0].id }] };
+  persistDraft(draft);
+  expect(loadDraft()).toMatchObject({ product, selection: { productId: quote.productId, variantId: quote.variantId, startDate: quote.startDate, endDate: quote.endDate }, additionalItems: draft.additionalItems });
+  const raw = sessionStorage.getItem(DRAFT_SESSION_KEY)!;
+  expect(raw).not.toContain(body.customer.email);
+  expect(raw).not.toContain('private notes');
+  expect(loadDraft()?.contact.email).toBe('');
+  persistDraft(null);
+  expect(loadDraft()).toBeNull();
 });

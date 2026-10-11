@@ -14,17 +14,21 @@ import {
   getAccountReservationStatus,
   PublicApiError,
   sameSelection,
-  type Availability,
+  type BookingQuote,
   type PublicProduct,
 } from '../api/publicApi';
 import {
   contactErrors,
+  draftItems,
+  draftSelections,
+  draftSelectionsValid,
   initialDraft,
   loadBooking,
+  loadDraft,
+  persistDraft,
   newAttempt,
   persistBooking,
   reservationBody,
-  selectionErrors,
   type Attempt,
   type BookingDraft,
   type ContactDraft,
@@ -43,6 +47,7 @@ type Prefill = {
 const emptyPrefill = (): Prefill => ({ accountId: null, edited: new Set(), filled: {} });
 type State = {
   draft: BookingDraft | null;
+  draftStorageWarning?: boolean;
   stored: StoredBooking | null;
   busy: boolean;
   storageBlocked: boolean;
@@ -52,9 +57,15 @@ const storageMessage =
   'Rezervaci se nepodařilo bezpečně uložit v tomto prohlížeči. Zkuste to prosím znovu. Požadavek zůstává chráněný proti opakovanému vytvoření.';
 function initial(): State {
   try {
+    const stored = loadBooking();
+    let draft: BookingDraft | null = null, draftStorageWarning = false;
+    if (!stored) {
+      try { draft = loadDraft(); } catch { draftStorageWarning = true; }
+    }
     return {
-      draft: null,
-      stored: loadBooking(),
+      draft,
+      draftStorageWarning,
+      stored,
       busy: false,
       storageBlocked: false,
       error: null,
@@ -121,7 +132,15 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
   current.current = state;
   const commit = useCallback((update: (before: State) => State) => {
     if (!mounted.current) return;
-    const value = update(current.current);
+    let value = update(current.current);
+    if (value.draft !== current.current.draft || value.stored !== current.current.stored) {
+      try {
+        persistDraft(value.stored ? null : value.draft);
+        value = { ...value, draftStorageWarning: false };
+      } catch {
+        value = { ...value, draftStorageWarning: true };
+      }
+    }
     current.current = value;
     setState(value);
   }, []);
@@ -178,13 +197,21 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       current.current.storageBlocked
     )
       return false;
-    if (current.current.draft?.product.id !== product.id) prefill.current = emptyPrefill();
+    const previous = current.current.draft;
+    if (previous && !draftItems(previous).some(item => item.product.id === product.id) &&
+        draftItems(previous).length >= 20) {
+      commit(before => ({ ...before, error: 'Do jedné rezervace lze přidat nejvýše 20 produktů.' }));
+      return false;
+    }
+    if (!previous) prefill.current = emptyPrefill();
     commit(before => ({
       ...before,
-      draft:
-        before.draft?.product.id === product.id
-          ? { ...before.draft, product }
-          : initialDraft(product),
+      draft: !before.draft ? initialDraft(product) :
+        before.draft.product.id === product.id ? { ...before.draft, product } :
+        before.draft.additionalItems?.some(item => item.product.id === product.id)
+          ? { ...before.draft, additionalItems: before.draft.additionalItems.map(item =>
+              item.product.id === product.id ? { ...item, product } : item) }
+          : { ...before.draft, additionalItems: [...(before.draft.additionalItems ?? []), { product, variantId: '' }] },
       error: null,
     }));
     return true;
@@ -201,6 +228,18 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
         prefill.current.edited.add(field);
     }
     commit(before => ({ ...before, draft, error: null }));
+  };
+  const removeProduct = (productId: string) => {
+    const before = current.current;
+    if (!before.draft || before.stored || before.busy || before.storageBlocked) return false;
+    const items = draftItems(before.draft).filter(item => item.product.id !== productId);
+    commit(value => ({ ...value, draft: items.length ? {
+      ...before.draft!, product: items[0].product,
+      selection: { ...before.draft!.selection, productId: items[0].product.id, variantId: items[0].variantId },
+      additionalItems: items.slice(1),
+    } : null, error: null }));
+    if (!items.length) prefill.current = emptyPrefill();
+    return true;
   };
   const send = async (attempt: Attempt) => {
     if (request.current || current.current.storageBlocked) return;
@@ -282,7 +321,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     }
   };
   const submit = async (
-    quote: Availability | null,
+    quote: BookingQuote | null,
     policy?: BookingPolicy | null
   ) => {
     const before = current.current,
@@ -305,7 +344,9 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       !quote?.available ||
       !sameSelection(quote, draft.selection) ||
       !variant?.pricing[draft.selection.rentalMode] ||
-      Object.keys(selectionErrors(draft.selection)).length ||
+      !draftSelectionsValid(draft) ||
+      (draft.additionalItems?.length ? !quote.items || quote.items.length !== draftSelections(draft).length ||
+        draftSelections(draft).some((selection, index) => !quote.items![index].available || !sameSelection(quote.items![index], selection)) : false) ||
       Object.keys(contactErrors(draft.contact)).length
     ) {
       commit(v => ({
@@ -397,6 +438,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     accountBlocked,
     chooseProduct,
     updateDraft,
+    removeProduct,
     submit,
     recover,
     retryStorage,

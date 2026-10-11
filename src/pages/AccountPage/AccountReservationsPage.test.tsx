@@ -1,17 +1,17 @@
-import { receipt } from '../../storefront/booking/bookingFixtures';
-import type { StoredBooking } from '../../storefront/booking/bookingModel';
+import { product, receipt, body } from '../../storefront/booking/bookingFixtures';
+import { initialDraft, type BookingDraft, type StoredBooking } from '../../storefront/booking/bookingModel';
 import { claimReservation } from '../../storefront/api/publicApi';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AccountReservationsPage } from './AccountReservationsPage';
 const mockRead = jest.fn();
-const mockBooking = { stored: null as StoredBooking | null };
+const mockBooking = { stored: null as StoredBooking | null, draft: null as BookingDraft | null, busy: false, storageBlocked: false, accountBlocked: false };
 jest.mock('../../storefront/booking/BookingProvider', () => ({ useBookingOptional: () => mockBooking }));
 jest.mock('../../storefront/api/publicApi', () => ({ ...jest.requireActual('../../storefront/api/publicApi'), claimReservation: jest.fn() }));
 const mockAuth = { token: 'test-session', isLoggedIn: true, isRefreshing: false };
 jest.mock('../../hooks/useAuth', () => ({ useAuth: () => mockAuth }));
 jest.mock('../../storefront/usePublicRead', () => ({ usePublicRead: (...args: unknown[]) => mockRead(...args) }));
-beforeEach(() => { mockAuth.isLoggedIn = true; mockRead.mockReset(); mockBooking.stored = null; (claimReservation as jest.Mock).mockReset(); });
+beforeEach(() => { mockAuth.isLoggedIn = true; mockRead.mockReset(); mockBooking.stored = null; mockBooking.draft = null; mockBooking.busy = false; mockBooking.storageBlocked = false; mockBooking.accountBlocked = false; (claimReservation as jest.Mock).mockReset(); });
 function view() { return render(<MemoryRouter><AccountReservationsPage /></MemoryRouter>); }
 test('empty history explains guest links and offers the catalogue', () => {
   mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false }); view();
@@ -78,4 +78,30 @@ test('unknown claim result stays retryable and does not claim success', async ()
   await screen.findByRole('alert');
   expect(screen.queryByText('Rezervace byla připojena k vašemu účtu.')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Připojit rezervaci k účtu' })).toBeEnabled();
+});
+
+test.each([true, false])('draft is reachable with logged-in=%s and does not show empty history', loggedIn => {
+  mockAuth.isLoggedIn = loggedIn;
+  mockBooking.draft = initialDraft(product);
+  mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false });
+  view();
+  expect(screen.getByText('Rozpracované')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Dokončit rezervaci' })).toHaveAttribute('href', '/rezervace');
+  expect(screen.queryByText('Zatím zde nejsou žádné rezervace.')).not.toBeInTheDocument();
+});
+test('draft remains visible when history fails', () => {
+  mockBooking.draft = initialDraft(product);
+  mockRead.mockReturnValue({ error: new Error('offline'), reload: jest.fn() });
+  view();
+  expect(screen.getByRole('link', { name: 'Dokončit rezervaci' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Zkusit znovu' })).toBeInTheDocument();
+});
+test('unknown submission is recovery, never an editable draft', () => {
+  mockBooking.draft = initialDraft(product);
+  mockBooking.stored = { version: 1, kind: 'attempt', key: 'test-key', body };
+  mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false });
+  view();
+  expect(screen.queryByText('Rozpracované')).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Dokončit rezervaci' })).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Otevřít rezervaci' })).toBeInTheDocument();
 });

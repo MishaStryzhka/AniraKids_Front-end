@@ -1,3 +1,5 @@
+import { draftItems } from './booking/bookingModel';
+import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -146,7 +148,8 @@ export function ProductDetailPage() {
             Cena pronájmu je za rezervaci, nikoli za den. Dostupnost ověříme pro
             vybraný termín.
           </Copy>
-          {booking.stored || booking.storageBlocked ? (
+          {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
+          {booking.stored || booking.storageBlocked || booking.accountBlocked ? (
             <Alert>
               <Copy>
                 Nejprve otevřete svou rozpracovanou rezervaci nebo její
@@ -154,10 +157,12 @@ export function ProductDetailPage() {
               </Copy>
               <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Otevřít rezervaci</RouteLink>
             </Alert>
+          ) : booking.draft && draftItems(booking.draft).some(item => item.product.id === product.id) ? (
+            <Actions><ResumeReservationLink productId={product.id} catalogueReturnTo={catalogueReturnTo} /></Actions>
           ) : (
             <Actions>
               <Button
-                disabled={!rentable}
+                disabled={!rentable || Boolean(booking.draft && draftItems(booking.draft).length >= 20)}
                 onClick={() => {
                   if (booking.chooseProduct(product))
                     navigate(routes.reservation, { state: { catalogueReturnTo } });

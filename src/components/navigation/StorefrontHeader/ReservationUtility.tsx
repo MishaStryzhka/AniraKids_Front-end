@@ -55,20 +55,20 @@ const Marker = styled.span`
 `;
 
 export function ReservationUtility({ hasActiveDraft, presentation }: { hasActiveDraft: boolean; presentation: 'desktop' | 'collapsed' }) {
-  const label = hasActiveDraft ? 'Rezervace — máte rozpracovanou rezervaci.' : 'Rezervace';
+  const label = hasActiveDraft ? 'Moje rezervace — máte rozpracovanou rezervaci.' : 'Moje rezervace';
   const content = (
     <>
       <IconWrap>
         <CalendarDays aria-hidden="true" />
         {hasActiveDraft ? <Marker aria-hidden="true" /> : null}
       </IconWrap>
-      {presentation === 'desktop' ? <span>Rezervace</span> : null}
+      {presentation === 'desktop' ? <span>Moje rezervace</span> : null}
     </>
   );
 
   return presentation === 'desktop' ? (
-    <DesktopLink to={routes.reservation} aria-label={label}>{content}</DesktopLink>
+    <DesktopLink to={routes.accountReservations} aria-label={label}>{content}</DesktopLink>
   ) : (
-    <CollapsedLink to={routes.reservation} aria-label={label}>{content}</CollapsedLink>
+    <CollapsedLink to={routes.accountReservations} aria-label={label}>{content}</CollapsedLink>
   );
 }

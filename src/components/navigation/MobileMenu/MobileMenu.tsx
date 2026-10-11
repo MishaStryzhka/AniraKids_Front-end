@@ -117,11 +117,11 @@ export function MobileMenu({ authState, currentPrimaryNavigation, onLogin, onClo
             {authState === 'authenticated' ? (
               <>
                 <li><MenuLink variant="plain" to={routes.account}>Můj účet</MenuLink></li>
-                <li><MenuLink variant="plain" to={routes.accountReservations}>Moje rezervace</MenuLink></li>
               </>
             ) : authState === 'guest' ? (
               <li><Action type="button" onClick={onLogin}>Přihlásit se</Action></li>
             ) : null}
+            <li><MenuLink variant="plain" to={routes.accountReservations}>Moje rezervace</MenuLink></li>
             <li><MenuLink variant="plain" to={routes.favourites}>Oblíbené</MenuLink></li>
           </GroupList>
         </Group>

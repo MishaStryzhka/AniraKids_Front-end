@@ -61,7 +61,8 @@ const Legend = styled(Copy)`
   color: ${t.color.text.secondary};
 `;
 
-export function RentalCalendar({ selection, enabled, onChange }: {
+export function RentalCalendar({ selection, selections, enabled, onChange }: {
+  selections?: Selection[];
   selection: Selection;
   enabled: boolean;
   onChange: (startDate: string, endDate: string) => void;
@@ -80,7 +81,15 @@ export function RentalCalendar({ selection, enabled, onChange }: {
   const visibleMonth = choosingEnd && month < selection.startDate.slice(0, 7)
     ? selection.startDate.slice(0, 7) : month;
   query.month = visibleMonth;
-  const read = usePublicRead(enabled ? JSON.stringify(query) : null, signal => getRentalCalendar(query, signal));
+  const queries = (selections ?? [selection]).map(item => ({
+    ...query, productId: item.productId, variantId: item.variantId,
+  }));
+  const read = usePublicRead(enabled ? JSON.stringify(queries) : null, async signal => {
+    const calendars = await Promise.all(queries.map(item => getRentalCalendar(item, signal)));
+    return { ...calendars[0], days: calendars[0].days.map((day, index) => ({
+      date: day.date, available: calendars.every(calendar => calendar.days[index].available),
+    })) };
+  });
   const reload = useRef(read.reload);
   reload.current = read.reload;
   useEffect(() => {

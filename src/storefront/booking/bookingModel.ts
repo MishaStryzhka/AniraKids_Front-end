@@ -4,6 +4,7 @@ import {
   object,
   objectId,
   parseReceipt,
+  parseProduct,
   type Customer,
   type PublicProduct,
   type Receipt,
@@ -11,11 +12,23 @@ import {
   type Selection,
 } from '../api/publicApi';
 export type ContactDraft = Customer & { notes: string };
+export type DraftItem = { product: PublicProduct; variantId: string };
 export type BookingDraft = {
+  additionalItems?: DraftItem[];
   product: PublicProduct;
   selection: Selection;
   contact: ContactDraft;
 };
+export const draftItems = (draft: BookingDraft): DraftItem[] => [
+  { product: draft.product, variantId: draft.selection.variantId }, ...(draft.additionalItems ?? []),
+];
+export const draftSelections = (draft: BookingDraft): Selection[] =>
+  draftItems(draft).map(item => ({ ...draft.selection, productId: item.product.id, variantId: item.variantId }));
+export function draftSelectionsValid(draft: BookingDraft) {
+  return draftSelections(draft).every((selection, index) =>
+    Object.keys(selectionErrors(selection)).length === 0 &&
+    Boolean(draftItems(draft)[index].product.variants.find(v => v.id === selection.variantId)?.pricing[selection.rentalMode]));
+}
 export const emptyContact = (): ContactDraft => ({
   firstName: '',
   lastName: '',
@@ -67,6 +80,9 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
+    ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
+      productId: item.product.id, variantId: item.variantId,
+    })) } : {}),
     customer: {
       firstName: contact.firstName.trim(),
       lastName: contact.lastName.trim(),
@@ -92,11 +108,21 @@ export function parseBody(v: unknown): ReservationBody {
     (v.notes !== undefined && typeof v.notes !== 'string')
   )
     throw new Error('Invalid attempt');
+  let items: ReservationBody['items'];
+  if (v.items !== undefined) {
+    if (!Array.isArray(v.items) || !v.items.length || v.items.length > 20 ||
+        v.items.some(item => !object(item) || !objectId(item.productId) || !objectId(item.variantId)))
+      throw new Error('Invalid attempt items');
+    items = v.items.map(item => ({ productId: item.productId as string, variantId: item.variantId as string }));
+    if (items[0].productId !== v.productId || items[0].variantId !== v.variantId)
+      throw new Error('Invalid attempt primary item');
+  }
   const customer = v.customer as Customer,
     contact = { ...customer, notes: (v.notes as string | undefined) ?? '' };
   if (Object.keys(contactErrors(contact)).length)
     throw new Error('Invalid attempt');
   return {
+    ...(items ? { items } : {}),
     productId: v.productId,
     variantId: v.variantId,
     rentalMode: v.rentalMode,
@@ -197,3 +223,39 @@ export const formatMoney = (value: number) =>
     currency: 'CZK',
     maximumFractionDigits: 0,
   }).format(value);
+
+export const DRAFT_SESSION_KEY = 'anirakids.draft.v1';
+// Save garment selections only. Contacts are never copied into this draft cache.
+export function persistDraft(draft: BookingDraft | null) {
+  if (!draft) {
+    sessionStorage.removeItem(DRAFT_SESSION_KEY);
+    if (sessionStorage.getItem(DRAFT_SESSION_KEY) !== null) throw new Error('Draft storage unavailable');
+    return;
+  }
+  const raw = JSON.stringify({ version: 1, selection: draft.selection,
+    items: draftItems(draft).map(item => ({ product: item.product, variantId: item.variantId })) });
+  if (raw.length > 500000) throw new Error('Draft too large');
+  sessionStorage.setItem(DRAFT_SESSION_KEY, raw);
+  if (sessionStorage.getItem(DRAFT_SESSION_KEY) !== raw) throw new Error('Draft storage unavailable');
+}
+export function loadDraft(): BookingDraft | null {
+  const raw = sessionStorage.getItem(DRAFT_SESSION_KEY);
+  if (raw === null) return null;
+  if (raw.length > 500000) throw new Error('Invalid draft');
+  const value: unknown = JSON.parse(raw);
+  if (!object(value) || value.version !== 1 || !Array.isArray(value.items) ||
+      !value.items.length || value.items.length > 20 || !object(value.selection))
+    throw new Error('Invalid draft');
+  const items = value.items.map((item): DraftItem => {
+    if (!object(item) || (item.variantId !== '' && !objectId(item.variantId))) throw new Error('Invalid draft item');
+    return { product: parseProduct({ product: item.product }), variantId: item.variantId as string };
+  });
+  const selection = value.selection;
+  if (new Set(items.map(item => item.product.id)).size !== items.length ||
+      !isMode(selection.rentalMode) ||
+      (selection.startDate !== '' && !isDateOnly(selection.startDate)) ||
+      (selection.endDate !== '' && !isDateOnly(selection.endDate))) throw new Error('Invalid draft selection');
+  return { product: items[0].product, additionalItems: items.slice(1), contact: emptyContact(),
+    selection: { productId: items[0].product.id, variantId: items[0].variantId,
+      rentalMode: selection.rentalMode, startDate: selection.startDate as string, endDate: selection.endDate as string } };
+}

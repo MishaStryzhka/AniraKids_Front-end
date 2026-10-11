@@ -49,7 +49,10 @@ export type Customer = {
   email: string;
   phone: string;
 };
+export type ReservationSelection = Pick<Selection, 'productId' | 'variantId'>;
+export type BookingQuote = Availability & { items?: Availability[] };
 export type ReservationBody = Selection & {
+  items?: ReservationSelection[];
   customer: Customer;
   notes?: string;
 };
@@ -62,19 +65,22 @@ export type Receipt = {
   startDate: string;
   endDate: string;
   expiresAt: string | null;
-  item: {
+  items?: ReservationItem[];
+  item: ReservationItem;
+  subtotal: number;
+  deposit: number;
+  totalDue: number;
+  paymentStatus: string;
+};
+export type ReservationItem = {
     productId: string;
     variantId: string;
     productName: string;
     size: string;
     rentalPrice: number;
     deposit: number;
-  };
-  subtotal: number;
-  deposit: number;
-  totalDue: number;
-  paymentStatus: string;
 };
+export const receiptItems = (receipt: Receipt): ReservationItem[] => receipt.items ?? [receipt.item];
 export const objectId = (v: unknown): v is string =>
   typeof v === 'string' && /^[a-f\d]{24}$/.test(v);
 const instant = (v: unknown): v is string =>
@@ -267,77 +273,47 @@ export function parseAvailability(
     pricing: parsePricing(a.pricing),
   };
 }
-export function parseReceipt(v: unknown, expected?: Selection): Receipt {
+function parseReservationItem(item: unknown): ReservationItem {
+  if (!object(item) || !objectId(item.productId) || !objectId(item.variantId) ||
+      !string(item.productName) || !string(item.size, 100) ||
+      !money(item.rentalPrice) || !money(item.deposit)) return invalid();
+  return { productId: item.productId, variantId: item.variantId, productName: item.productName,
+    size: item.size, rentalPrice: item.rentalPrice, deposit: item.deposit };
+}
+export function parseReceipt(v: unknown, expected?: Selection & { items?: ReservationSelection[] }): Receipt {
   if (!object(v) || !object(v.reservation)) return invalid();
-  const r = v.reservation,
-    item = r.item;
-  if (
-    !string(r.reservationNumber, 100) ||
-    !string(r.status, 100) ||
-    !isMode(r.rentalMode) ||
-    !isDateOnly(r.startDate) ||
-    !isDateOnly(r.endDate) ||
-    r.endDate < r.startDate ||
-    (r.expiresAt !== null && !instant(r.expiresAt)) ||
-    !string(r.paymentStatus, 100) ||
-    !object(item) ||
-    !objectId(item.productId) ||
-    !objectId(item.variantId) ||
-    !string(item.productName) ||
-    !string(item.size, 100) ||
-    !money(item.rentalPrice) ||
-    !money(item.deposit) ||
-    !money(r.subtotal) ||
-    !money(r.deposit) ||
-    !money(r.totalDue) ||
-    r.subtotal !== item.rentalPrice ||
-    r.deposit !== item.deposit ||
-    r.totalDue !== r.subtotal + r.deposit
-  )
-    return invalid();
-  const selection = {
-    productId: item.productId,
-    variantId: item.variantId,
-    rentalMode: r.rentalMode,
-    startDate: r.startDate,
-    endDate: r.endDate,
-  };
-  if (expected && !sameSelection(selection, expected)) return invalid();
-  // Retain only the scoped capability (session storage); never retain customer data.
+  const r = v.reservation;
+  const item = parseReservationItem(r.item);
+  const items = r.items === undefined ? [item] :
+    Array.isArray(r.items) && r.items.length > 0 && r.items.length <= 20
+      ? r.items.map(parseReservationItem) : invalid();
+  if (JSON.stringify(items[0]) !== JSON.stringify(item) ||
+      !string(r.reservationNumber, 100) || !string(r.status, 100) ||
+      !isMode(r.rentalMode) || !isDateOnly(r.startDate) || !isDateOnly(r.endDate) ||
+      r.endDate < r.startDate || (r.expiresAt !== null && !instant(r.expiresAt)) ||
+      !string(r.paymentStatus, 100) || !money(r.subtotal) || !money(r.deposit) ||
+      !money(r.totalDue) || r.subtotal !== items.reduce((n, i) => n + i.rentalPrice, 0) ||
+      r.deposit !== items.reduce((n, i) => n + i.deposit, 0) ||
+      r.totalDue !== r.subtotal + r.deposit) return invalid();
+  const selection = { productId: item.productId, variantId: item.variantId,
+    rentalMode: r.rentalMode, startDate: r.startDate, endDate: r.endDate };
+  if (expected) {
+    const expectedItems = expected.items ?? [expected];
+    if (!sameSelection(selection, expected) || expectedItems.length !== items.length ||
+        expectedItems.some((i, index) => i.productId !== items[index].productId ||
+          i.variantId !== items[index].variantId)) return invalid();
+  }
   return {
     ...(isGuestAccessToken(v.guestAccessToken) ? { guestAccessToken: v.guestAccessToken } : {}),
-    reservationNumber: r.reservationNumber,
-    status: r.status,
-    rentalMode: r.rentalMode,
-    startDate: r.startDate,
-    endDate: r.endDate,
-    expiresAt: r.expiresAt as string | null,
-    item: {
-      productId: item.productId,
-      variantId: item.variantId,
-      productName: item.productName,
-      size: item.size,
-      rentalPrice: item.rentalPrice,
-      deposit: item.deposit,
-    },
-    subtotal: r.subtotal,
-    deposit: r.deposit,
-    totalDue: r.totalDue,
-    paymentStatus: r.paymentStatus,
-    ...(r.payment === undefined
-      ? {}
-      : {
-          payment:
-            r.payment === null
-              ? null
-              : parseReceiptPayment(r.payment, {
-                  reservationNumber: r.reservationNumber,
-                  subtotal: r.subtotal,
-                  deposit: r.deposit,
-                  status: r.status,
-                  expiresAt: r.expiresAt as string | null,
-                }),
-        }),
+    reservationNumber: r.reservationNumber, status: r.status, rentalMode: r.rentalMode,
+    startDate: r.startDate, endDate: r.endDate, expiresAt: r.expiresAt as string | null,
+    item, ...(r.items === undefined ? {} : { items }),
+    subtotal: r.subtotal, deposit: r.deposit, totalDue: r.totalDue, paymentStatus: r.paymentStatus,
+    ...(r.payment === undefined ? {} : { payment: r.payment === null ? null :
+      parseReceiptPayment(r.payment, {
+        reservationNumber: r.reservationNumber, subtotal: r.subtotal, deposit: r.deposit,
+        status: r.status, expiresAt: r.expiresAt as string | null,
+      }) }),
   };
 }
 export function publicApiBase() {
@@ -429,7 +405,10 @@ export async function postReservation(
 ) {
   const result = await request('/reservations', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body.items ? {
+      items: body.items, rentalMode: body.rentalMode, startDate: body.startDate,
+      endDate: body.endDate, customer: body.customer, ...(body.notes === undefined ? {} : { notes: body.notes }),
+    } : body),
     headers: { 'Idempotency-Key': key, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     signal,
   });

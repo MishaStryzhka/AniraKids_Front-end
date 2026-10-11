@@ -107,7 +107,7 @@ test('late profile preserves typed and cleared fields after returning to the pro
   await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Eva');
   await expect(page.getByLabel('E-mail', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Zpět', exact: true }).click();
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('link', { name: 'Dokončit rezervaci', exact: true }).click();
   await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Eva');
   await expect(page.getByLabel('E-mail', { exact: true })).toHaveValue('');
   expect(state.posts).toEqual([]);
@@ -195,6 +195,149 @@ for (const width of [390,768,1440]) {
     expect(claims).toBe(1);
     expect(state.posts).toEqual([]);
     await capture(page,'recovered-history-'+width);
+    expect(state.errors).toEqual([]);
+  });
+}
+
+for (const width of [390, 768, 1440]) {
+  for (const guest of [false, true]) {
+    test('draft hub and matching product only ' + width + ' guest=' + guest, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      const state = await setup(page, { guest });
+      const other = { ...product, id: '333333333333333333333333', slug: 'ema', name: 'Ema' };
+      await page.route(API + '/api/v2/catalogue/products?**', route => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ items: [product, other], page: 1, limit: 12, total: 2, totalPages: 1 })
+      }));
+      await page.route(API + '/api/v2/catalogue/products/ema', route => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ product: other })
+      }));
+      await enterBooking(page);
+      await page.getByLabel('Velikost', { exact: true }).selectOption(product.variants[0].id);
+      await page.getByLabel('Jméno', { exact: true }).fill('Eva');
+      await page.getByRole('button', { name: /^Ukončit/ }).click();
+      const cards = page.locator('li').filter({ has: page.getByRole('heading', { name: 'Sofia', exact: true }) });
+      await expect(cards.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toBeVisible();
+      const otherCard = page.locator('li').filter({ has: page.getByRole('heading', { name: 'Ema', exact: true }) });
+      await expect(otherCard.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toHaveCount(0);
+      await page.getByRole('link', { name: 'Prohlédnout Ema' }).click();
+      await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Vybrat velikost a termín' })).toBeVisible();
+      await page.getByRole('link', { name: /^Moje rezervace/ }).filter({ visible: true }).click();
+      await expect(page).toHaveURL(APP + '/ucet/rezervace');
+      await expect(page.getByText('Rozpracované', { exact: true })).toBeVisible();
+      await expect(page.getByText('Zatím zde nejsou žádné rezervace.')).toHaveCount(0);
+      const resume = page.getByRole('link', { name: 'Dokončit rezervaci', exact: true });
+      await expect(resume).toBeVisible();
+      await resume.focus();
+      await expect(resume).toBeFocused();
+      const box = await resume.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      await capture(page, 'draft-hub-' + width + '-' + guest);
+      await resume.press('Enter');
+      await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
+      await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Eva');
+      await page.getByRole('button', { name: 'Zpět', exact: true }).click();
+      await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Vybrat velikost a termín' })).toHaveCount(0);
+      expect(state.posts).toEqual([]);
+      expect(state.errors).toEqual([]);
+      if (guest) expect(state.historyReads).toBe(0);
+    });
+  }
+}
+
+for (const width of [390, 768, 1440]) {
+  test('two garments share dates, calendar, one POST and complete history ' + width, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.clock.install({ time: new Date('2030-10-07T12:00:00Z') });
+    const state = await setup(page);
+    const second = { ...product, id: '444444444444444444444444', slug: 'ema', name: 'Ema',
+      variants: [{ id: '555555555555555555555555', size: 'M',
+        pricing: { studio: { rentalPrice: 700, deposit: 1500, totalDue: 2200 }, external: null } }] };
+    await page.route(API + '/api/v2/catalogue/products?**', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ items: [product, second], page: 1, limit: 12, total: 2, totalPages: 1 })
+    }));
+    await page.route(API + '/api/v2/catalogue/products/ema', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ product: second })
+    }));
+    await page.route('**/availability-calendar?**', route => {
+      const url = new URL(route.request().url()), q = Object.fromEntries(url.searchParams);
+      const id = url.pathname.split('/')[5];
+      const count = new Date(Number(q.month.slice(0, 4)), Number(q.month.slice(5)), 0).getDate();
+      const days = Array.from({ length: count }, (_, index) => {
+        const date = q.month + '-' + String(index + 1).padStart(2, '0');
+        return { date, available: date >= '2030-10-07' && (!q.startDate || date >= q.startDate) &&
+          !(id === second.id && (date === '2030-10-12' || (q.startDate && q.startDate <= '2030-10-12' && date >= '2030-10-12'))) };
+      });
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ calendar: {
+        ...q, productId: id, startDate: q.startDate ?? null, today: '2030-10-07', checkedAt: '2030-10-07T12:00:00Z', days
+      } }) });
+    });
+    await page.route('**/availability?**', route => {
+      const url = new URL(route.request().url()), q = Object.fromEntries(url.searchParams);
+      const selected = url.pathname.includes(second.id) ? second : product;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ availability: {
+        ...q, productId: selected.id, available: true, checkedAt: '2030-10-07T12:00:00Z',
+        pricing: selected.variants[0].pricing.studio,
+      } }) });
+    });
+    const basketReceipt = { ...ownedReceipt, reservationNumber: 'AK-2030-MULTI1',
+      items: [ownedReceipt.item, { productId: second.id, variantId: second.variants[0].id,
+        productName: second.name, size: 'M', rentalPrice: 700, deposit: 1500 }],
+      subtotal: 1200, deposit: 2500, totalDue: 3700 };
+    let posted = [];
+    await page.route(API + '/api/v2/reservations', route => {
+      posted.push(route.request().postDataJSON());
+      expect(route.request().headers().authorization).toBe('Bearer test-session');
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ reservation: basketReceipt }) });
+    });
+    await page.route(API + '/api/v2/account/reservations?**', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ items: posted.length ? [{ reservation: basketReceipt }] : [], total: posted.length ? 1 : 0, page: 1 })
+    }));
+    await enterBooking(page);
+    await page.getByLabel('Velikost', { exact: true }).selectOption(product.variants[0].id);
+    await page.getByLabel('Od', { exact: true }).fill('2030-10-10');
+    await page.getByLabel('Do', { exact: true }).fill('2030-10-11');
+    await page.getByRole('link', { name: 'Přidat další produkt' }).click();
+    await page.getByRole('link', { name: 'Prohlédnout Ema' }).click();
+    await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+    await expect(page.getByLabel('Velikost', { exact: true })).toHaveValue(product.variants[0].id);
+    await expect(page.getByLabel('Od', { exact: true })).toHaveValue('2030-10-10');
+    await page.getByLabel('Velikost – Ema', { exact: true }).selectOption(second.variants[0].id);
+    await expect(page.locator('button[data-date="2030-10-12"]')).toHaveAttribute('aria-disabled', 'true');
+    await expect(page.locator('button[data-date="2030-10-11"]')).toHaveAttribute('aria-disabled', 'false');
+    await page.getByRole('button', { name: /^Ukončit/ }).click();
+    await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toHaveCount(2);
+    await page.getByRole('link', { name: /^Moje rezervace/ }).filter({ visible: true }).click();
+    await expect(page.getByText('Rozpracované', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sofia', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ema', exact: true })).toBeVisible();
+    await capture(page, 'multi-draft-' + width);
+    await page.reload();
+    await expect(page.getByText('Rozpracované', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ema', exact: true })).toBeVisible();
+    await page.getByRole('link', { name: 'Dokončit rezervaci', exact: true }).click();
+    await page.getByRole('button', { name: 'Ověřit dostupnost' }).click();
+    await expect(page.getByText('Termín je aktuálně dostupný', { exact: true })).toBeVisible();
+    await capture(page, 'multi-checkout-' + width);
+    await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Rezervace byla vytvořena', exact: true })).toBeVisible();
+    expect(posted).toHaveLength(1);
+    expect(posted[0].items).toEqual([
+      { productId: product.id, variantId: product.variants[0].id },
+      { productId: second.id, variantId: second.variants[0].id }
+    ]);
+    expect(posted[0].startDate).toBe('2030-10-10');
+    expect(posted[0].endDate).toBe('2030-10-11');
+    await expect(page.getByRole('heading', { name: 'Sofia', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ema', exact: true })).toBeVisible();
+    await page.getByRole('link', { name: 'Otevřít aktuální stav rezervace' }).click();
+    await expect(page.getByText('Sofia · Velikost 98', { exact: true })).toBeVisible();
+    await expect(page.getByText('Ema · Velikost M', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Dokončit rezervaci', exact: true })).toHaveCount(0);
+    await capture(page, 'multi-history-' + width);
     expect(state.errors).toEqual([]);
   });
 }
