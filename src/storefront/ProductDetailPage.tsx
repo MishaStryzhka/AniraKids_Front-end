@@ -9,7 +9,7 @@ import { routes } from '../navigation/routes';
 import { getCatalogueReturnTo } from './catalogueNavigation';
 import { getPublicProduct, PublicApiError } from './api/publicApi';
 import { useBooking } from './booking/BookingProvider';
-import { formatMoney, modeLabel } from './booking/bookingModel';
+import { formatMoney, modeLabel, statusLabel } from './booking/bookingModel';
 import { ProductImage } from './CataloguePage';
 import {
   Actions,
@@ -149,14 +149,27 @@ export function ProductDetailPage() {
             vybraný termín.
           </Copy>
           {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
-          {booking.stored || booking.storageBlocked || booking.accountBlocked ? (
+          {booking.stored?.kind === 'attempt' || booking.storageBlocked || booking.accountBlocked ? (
             <Alert>
               <Copy>
-                Nejprve otevřete svou rozpracovanou rezervaci nebo její
-                výsledek.
+                {booking.accountBlocked ? 'Pro zobrazení rezervace se přihlaste ke stejnému účtu.' :
+                  booking.storageBlocked ? 'Uložení rezervace vyžaduje kontrolu. Otevřete rezervaci a zkuste obnovení.' :
+                  'Nejprve ověřte výsledek předchozího odeslání rezervace.'}
               </Copy>
               <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Otevřít rezervaci</RouteLink>
             </Alert>
+          ) : booking.stored?.kind === 'receipt' ? (
+            <Stack>
+              <Copy>Předchozí rezervace {booking.stored.receipt.reservationNumber} již byla vytvořena.
+                {' '}Stav: {statusLabel(booking.stored.receipt.status)}. Můžete vytvořit další rezervaci.</Copy>
+              <Actions>
+                <Button disabled={!rentable || booking.busy} onClick={() => {
+                  if (booking.startNew() && booking.chooseProduct(product))
+                    navigate(routes.reservation, { state: { catalogueReturnTo } });
+                }}>Vytvořit novou rezervaci</Button>
+                <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Zobrazit předchozí rezervaci</RouteLink>
+              </Actions>
+            </Stack>
           ) : booking.draft && draftItems(booking.draft).some(item => item.product.id === product.id) ? (
             <Actions><ResumeReservationLink productId={product.id} catalogueReturnTo={catalogueReturnTo} /></Actions>
           ) : (

@@ -1,4 +1,5 @@
 import { parseBookingPolicy, type BookingPolicy } from '../api/bookingPolicy';
+import { preserveGuestReservationLink } from './guestReservationLinks';
 import {
   createContext,
   useCallback,
@@ -413,13 +414,18 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     }
   };
   const startNew = () => {
+    const stored = current.current.stored;
+    const auth = sessionRef.current;
     if (
       request.current ||
-      current.current.stored?.kind === 'attempt' ||
+      stored?.kind === 'attempt' ||
+      (stored?.accountId && (auth.pending || stored.accountId !== auth.session?.accountId)) ||
       current.current.storageBlocked
     )
       return false;
     try {
+      if (stored?.kind === 'receipt' && !stored.accountId)
+        preserveGuestReservationLink(stored.receipt);
       persistBooking(null);
     } catch {
       commit(v => ({ ...v, storageBlocked: true, error: storageMessage }));

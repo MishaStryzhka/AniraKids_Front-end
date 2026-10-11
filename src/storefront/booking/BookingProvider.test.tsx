@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { BookingProvider, useBooking } from './BookingProvider';
 import { getReservationStatus, getAccountReservationStatus, postReservation, PublicApiError } from '../api/publicApi';
 import { body, product, quote, receipt, deferred } from './bookingFixtures';
+import { loadGuestReservationLinks } from './guestReservationLinks';
 import {
   initialDraft,
   newAttempt,
@@ -209,6 +210,23 @@ test('persisted receipt survives refresh without any request; unresolved origina
   expect(pending.current.hasActiveDraft).toBe(true);
 });
 
+test('starting another guest booking preserves access, and storage failure retains the original receipt', () => {
+  const completed = { ...receipt, guestAccessToken: 'a'.repeat(43) };
+  persistBooking({ version: 1, kind: 'receipt', receipt: completed });
+  const view = setup();
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  const write = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+  act(() => { expect(view.result.current.startNew()).toBe(false); });
+  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  expect(view.result.current.stored?.kind).toBe('receipt');
+  write.mockRestore();
+  act(() => { view.result.current.retryStorage(); });
+  act(() => { expect(view.result.current.startNew()).toBe(true); });
+  expect(loadGuestReservationLinks()).toEqual([{ reservationNumber: completed.reservationNumber, guestAccessToken: completed.guestAccessToken }]);
+  expect(JSON.stringify(loadGuestReservationLinks())).not.toContain(body.customer.email);
+  expect(post).not.toHaveBeenCalled();
+});
+
 test('new booking fails closed without valid policy; unresolved attempts remain recoverable', async () => {
   const view = ready();
   await act(async () => {
@@ -337,6 +355,18 @@ function fill(view: ReturnType<typeof sessionView>) {
   act(() => { view.result.current.updateDraft({ ...initialDraft(product), selection: quote,
     contact: { ...body.customer, notes: body.notes! } }); });
 }
+test('starting new cannot clear a receipt belonging to another or refreshing account', () => {
+  persistBooking({ version: 1, kind: 'receipt', receipt, accountId: ownerSession.accountId });
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  const view = sessionView(null);
+  expect(view.result.current.startNew()).toBe(false);
+  view.changeSession(ownerSession, true);
+  expect(view.result.current.startNew()).toBe(false);
+  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  view.changeSession(ownerSession);
+  act(() => { expect(view.result.current.startNew()).toBe(true); });
+  expect(loadGuestReservationLinks()).toEqual([]);
+});
 test('signed-in booking sends bearer, persists owner but never token, and refreshes as owner', async () => {
   const view = sessionView(ownerSession); fill(view);
   await act(async () => { await view.result.current.submit(quote, policy); });
