@@ -12,3 +12,13 @@ test('empty means no history or received amounts and never unresolved legacy dat
   expect(visiblePaymentTypes(p, 'cancelled')).not.toContain('cancellation_fee_reversed');
   expect(visiblePaymentTypes({ ...p, cancellationFee: 100 }, 'cancelled')).toContain('cancellation_fee_reversed');
 });
+
+jest.mock('../api/client', () => ({
+  adminApiClient: { get: jest.fn(), post: jest.fn() },
+  buildAdminRequestConfig: jest.fn(),
+}));
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: { isCancel: () => false },
+  AxiosError: class extends Error {},
+}));
