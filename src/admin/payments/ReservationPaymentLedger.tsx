@@ -8,7 +8,6 @@ import { TextareaField } from '../../design-system/components/TextareaField';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import {
   isFee,
-  paymentTypes,
   type PaymentOperation,
 } from '../api/reservationPayments';
 import { formatPragueLoadedAt } from '../calendar/reservationCalendarModel';
@@ -23,6 +22,8 @@ import {
 } from '../reservations/reservationStyles';
 import {
   emptyPaymentDraft,
+  isEmptyPaymentLedger,
+  visiblePaymentTypes,
   methodLabel,
   paymentDraftErrors,
   paymentOperation,
@@ -115,6 +116,9 @@ export function ReservationPaymentLedger({
         payments?.legacyUnreconciled ||
         externalBusy
     );
+  const empty = Boolean(payments && isEmptyPaymentLedger(payments));
+  const types = payments ? visiblePaymentTypes(payments, status) : [];
+  const selectedTypeAvailable = types.includes(draft.type);
   const { focus, ownsView } = state;
   useEffect(() => {
     if (!focus || confirm) return;
@@ -138,6 +142,7 @@ export function ReservationPaymentLedger({
   const prepare = () => {
     if (!payments || blocked) return;
     const problems = paymentDraftErrors(draft, status);
+    if (!selectedTypeAvailable) problems.type = 'Tato operace už není dostupná. Vyberte jiný druh operace.';
     setErrors(problems);
     const first = Object.keys(problems)[0];
     if (first) {
@@ -191,7 +196,7 @@ export function ReservationPaymentLedger({
       <Announcement $quiet={state.announcement === 'Aktuální platební evidence byla načtena.'} role="status" aria-live="polite">
         {state.announcement}
       </Announcement>
-      <ReservationActions>
+      {!empty || state.loading || state.error || state.attempt || state.conflict || state.storageBlocked ? <ReservationActions>
         <Button
           variant="secondary"
           loading={state.loading}
@@ -214,10 +219,11 @@ export function ReservationPaymentLedger({
             Zopakovat původní požadavek
           </Button>
         ) : null}
-      </ReservationActions>
+      </ReservationActions> : null}
       {payments ? (
         <>
-          {!payments.legacyUnreconciled ? (
+          {empty && !state.loading && !state.error && !state.attempt && !state.conflict && !state.storageBlocked ? <ReservationCopy>Zatím nebyla zaznamenána žádná platba.</ReservationCopy> : null}
+          {!payments.legacyUnreconciled && !empty ? (
             <Summary>
               <section aria-label="Nájemné">
                 <h3>Nájemné</h3>
@@ -295,7 +301,8 @@ export function ReservationPaymentLedger({
                   setErrors({});
                 }}
               >
-                {paymentTypes.map(type => (
+                {!selectedTypeAvailable ? <option value={draft.type} disabled>Vyberte dostupnou operaci</option> : null}
+                {types.map(type => (
                   <option
                     key={type}
                     value={type}
@@ -398,7 +405,7 @@ export function ReservationPaymentLedger({
               </ReservationActions>
             </Stack>
           )}
-          <Disclosure><summary>Historie plateb ({payments.entries.length})</summary>
+          {payments.entries.length > 0 ? <Disclosure><summary>Historie plateb ({payments.entries.length})</summary>
           {payments.entries.length ? (
             <List>
               {[...payments.entries].reverse().map(entry => (
@@ -426,8 +433,8 @@ export function ReservationPaymentLedger({
           ) : (
             <ReservationCopy>Žádné platební operace.</ReservationCopy>
           )}
-</Disclosure>
-          {!payments.legacyUnreconciled ? <Disclosure>
+</Disclosure> : null}
+          {!payments.legacyUnreconciled && !empty ? <Disclosure>
             <summary>Podrobný rozpis</summary>
             <Facts>
               {([
