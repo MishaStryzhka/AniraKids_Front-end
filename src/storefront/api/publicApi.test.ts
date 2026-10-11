@@ -3,6 +3,8 @@ import {
   getPublicProduct,
   getAvailability,
   postReservation,
+  getAccountReservationStatus,
+  claimReservation,
   parseCatalogue,
   parseProduct,
   parseAvailability,
@@ -188,4 +190,25 @@ test('product audience survives parsing; old responses remain compatible', () =>
   expect(parseProduct({ product: { ...product, gender: 'women' } }).gender).toBe('women');
   expect(parseProduct({ product }).gender).toBeUndefined();
   expect(() => parseProduct({ product: { ...product, gender: {} } })).toThrow();
+});
+
+test('authenticated booking and status carry bearer only in headers', async () => {
+  const owned = { ...receipt, reservationNumber: 'AK-2030-ABC123' };
+  fetchMock.mockResolvedValue(response({ reservation: owned }));
+  await postReservation(body, 'attempt-key', undefined, 'account-secret');
+  expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer account-secret');
+  expect(fetchMock.mock.calls[0][1].body).not.toContain('account-secret');
+  await getAccountReservationStatus(owned.reservationNumber, 'account-secret');
+  expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe('Bearer account-secret');
+  expect(fetchMock.mock.calls[1][0]).not.toContain('account-secret');
+});
+test('claim sends both independent proofs without email-based assignment', async () => {
+  const owned = { ...receipt, reservationNumber: 'AK-2030-ABC123' };
+  fetchMock.mockResolvedValue(response({ reservation: owned }));
+  await claimReservation(owned.reservationNumber, 'a'.repeat(43), 'account-secret');
+  expect(fetchMock.mock.calls[0][0]).toBe('https://public.test/api/v2/account/reservations/AK-2030-ABC123/claim');
+  expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer account-secret');
+  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ guestAccessToken: 'a'.repeat(43) });
+  fetchMock.mockResolvedValue(response({ reservation: { ...owned, reservationNumber: 'AK-2030-OTHER1' } }));
+  await expect(claimReservation(owned.reservationNumber, 'a'.repeat(43), 'account-secret')).rejects.toThrow();
 });

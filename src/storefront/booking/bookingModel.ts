@@ -116,12 +116,13 @@ export const MAX_ENVELOPE_LENGTH = 24000;
 export type Attempt = {
   version: 1;
   kind: 'attempt';
+  accountId?: string;
   key: string;
   body: ReservationBody;
 };
 export type StoredBooking =
   | Attempt
-  | { version: 1; kind: 'receipt'; receipt: Receipt };
+  | { version: 1; kind: 'receipt'; receipt: Receipt; accountId?: string };
 export const isUuid = (v: unknown): v is string =>
   typeof v === 'string' &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
@@ -131,12 +132,15 @@ export function parseStored(raw: string): StoredBooking {
   if (raw.length > MAX_ENVELOPE_LENGTH) throw new Error('Invalid storage');
   const v: unknown = JSON.parse(raw);
   if (!object(v) || v.version !== 1) throw new Error('Invalid storage');
+  if (v.accountId !== undefined && !objectId(v.accountId)) throw new Error('Invalid booking owner');
+  const owner = v.accountId === undefined ? {} : { accountId: v.accountId as string };
   if (v.kind === 'attempt' && isUuid(v.key))
-    return { version: 1, kind: 'attempt', key: v.key, body: parseBody(v.body) };
+    return { version: 1, kind: 'attempt', ...owner, key: v.key, body: parseBody(v.body) };
   if (v.kind === 'receipt')
     return {
       version: 1,
       kind: 'receipt',
+      ...owner,
       receipt: parseReceipt({ reservation: v.receipt, guestAccessToken: object(v.receipt) ? v.receipt.guestAccessToken : undefined }),
     };
   throw new Error('Invalid storage');
@@ -158,14 +162,15 @@ export function persistBooking(value: StoredBooking | null) {
   if (sessionStorage.getItem(SESSION_KEY) !== raw)
     throw new Error('Storage unavailable');
 }
-export function newAttempt(body: ReservationBody): Attempt {
+export function newAttempt(body: ReservationBody, accountId?: string): Attempt {
+  if (accountId !== undefined && !objectId(accountId)) throw new Error('Invalid booking owner');
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   bytes[6] = (bytes[6] & 15) | 64;
   bytes[8] = (bytes[8] & 63) | 128;
   const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
   const key = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
-  return { version: 1, kind: 'attempt', key, body: parseBody(body) };
+  return { version: 1, kind: 'attempt', key, body: parseBody(body), ...(accountId ? { accountId } : {}) };
 }
 export const modeLabel = (mode: string) =>
   mode === 'studio'

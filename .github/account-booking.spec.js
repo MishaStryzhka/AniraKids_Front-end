@@ -6,7 +6,7 @@ const API = 'http://admin-api.test';
 const EVIDENCE = 'test-evidence/account-booking';
 fs.mkdirSync(EVIDENCE, { recursive: true });
 const profile = {
-  _id: 'customer-1', firstName: 'Jana', lastName: 'Nováková',
+  _id: 'aaaaaaaaaaaaaaaaaaaaaaaa', firstName: 'Jana', lastName: 'Nováková',
   email: 'jana@example.test', primaryPhoneNumber: '+420777123456',
 };
 const product = {
@@ -121,3 +121,80 @@ test('guest booking remains editable with empty contacts', async ({ page }) => {
   await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Eva');
   expect(state.posts).toEqual([]);
 });
+
+const ownedReceipt = {
+  reservationNumber:'AK-2030-OWN001',status:'pending',rentalMode:'studio',
+  startDate:'2030-10-10',endDate:'2030-10-11',expiresAt:'2030-10-08T13:00:00Z',
+  item:{productId:product.id,variantId:product.variants[0].id,productName:'Sofia',size:'98',rentalPrice:500,deposit:1000},
+  subtotal:500,deposit:1000,totalDue:1500,paymentStatus:'unpaid',
+};
+for (const width of [390,768,1440]) {
+  test('authenticated creation appears in history and refresh uses same account '+width,async({page})=>{
+    await page.setViewportSize({width,height:1000});
+    await page.clock.install({time:new Date('2030-10-07T12:00:00Z')});
+    const state=await setup(page);
+    let posted=null, reads=0;
+    await page.route(API+'/api/v2/catalogue/products/'+product.id+'/availability?**', route=>{
+      const q=Object.fromEntries(new URL(route.request().url()).searchParams);
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({availability:{
+        ...q,productId:product.id,available:true,pricing:product.variants[0].pricing.studio,checkedAt:'2030-10-07T12:00:00Z'}})});
+    });
+    await page.route(API+'/api/v2/reservations', async route=>{
+      posted={authorization:route.request().headers().authorization,body:route.request().postDataJSON()};
+      return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({reservation:ownedReceipt})});
+    });
+    await page.route(API+'/api/v2/reservations/'+ownedReceipt.reservationNumber,route=>{
+      expect(route.request().headers().authorization).toBe('Bearer test-session'); reads++;
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reservation:ownedReceipt})});
+    });
+    await page.route(API+'/api/v2/account/reservations?**',route=>{
+      expect(route.request().headers().authorization).toBe('Bearer test-session');
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:posted?[{reservation:ownedReceipt}]:[],total:posted?1:0,page:1})});
+    });
+    await enterBooking(page);
+    await expect(page.getByLabel('E-mail',{exact:true})).toHaveValue(profile.email);
+    await page.getByLabel('Velikost',{exact:true}).selectOption(product.variants[0].id);
+    await page.getByLabel('Od',{exact:true}).fill('2030-10-10');
+    await page.getByLabel('Do',{exact:true}).fill('2030-10-11');
+    await page.getByLabel('Jméno',{exact:true}).focus();
+    await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+    await expect(page.getByRole('heading',{name:ownedReceipt.reservationNumber,exact:true})).toBeVisible();
+    expect(posted.authorization).toBe('Bearer test-session');
+    expect(posted.body.customerId).toBeUndefined();
+    expect(await page.evaluate(()=>sessionStorage.getItem('anirakids.booking.v1'))).not.toContain('test-session');
+    await page.getByRole('button',{name:'Aktualizovat stav rezervace'}).click();
+    await expect.poll(()=>reads).toBe(1);
+    await page.getByRole('link',{name:'Otevřít aktuální stav rezervace'}).click();
+    await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
+    await capture(page,'owned-history-'+width);
+    expect(state.errors).toEqual([]);
+  });
+  test('stored guest reservation can be linked without another booking '+width,async({page})=>{
+    await page.setViewportSize({width,height:1000});
+    const state=await setup(page);
+    await page.addInitScript(r=>sessionStorage.setItem('anirakids.booking.v1',JSON.stringify({
+      version:1,kind:'receipt',receipt:{...r,guestAccessToken:'g'.repeat(43)}
+    })),ownedReceipt);
+    let linked=false, claims=0;
+    await page.route(API+'/api/v2/account/reservations?**',route=>route.fulfill({status:200,
+      contentType:'application/json',body:JSON.stringify({items:linked?[{reservation:ownedReceipt}]:[],total:linked?1:0,page:1})}));
+    await page.route(API+'/api/v2/account/reservations/'+ownedReceipt.reservationNumber+'/claim',route=>{
+      expect(route.request().headers().authorization).toBe('Bearer test-session');
+      expect(route.request().postDataJSON()).toEqual({guestAccessToken:'g'.repeat(43)});
+      linked=true;claims++;
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reservation:ownedReceipt})});
+    });
+    await page.goto(APP+'/ucet/rezervace');
+    const claim=page.getByRole('button',{name:'Připojit rezervaci k účtu'});
+    await expect(claim).toBeVisible();
+    expect(claims).toBe(0);
+    expect((await claim.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await claim.click();
+    await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
+    expect(claims).toBe(1);
+    expect(state.posts).toEqual([]);
+    await capture(page,'recovered-history-'+width);
+    expect(state.errors).toEqual([]);
+  });
+}

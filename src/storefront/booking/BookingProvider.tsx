@@ -11,6 +11,7 @@ import {
 import {
   postReservation,
   getReservationStatus,
+  getAccountReservationStatus,
   PublicApiError,
   sameSelection,
   type Availability,
@@ -108,7 +109,10 @@ function rejectionCopy(error: PublicApiError) {
     return 'Produkt nebo vybraná velikost už není dostupná. Vyberte prosím znovu.';
   return 'Zkontrolujte prosím zadané údaje a termín pronájmu.';
 }
-function useBookingController(contactProfile?: ContactProfile | null) {
+type BookingSession = { accountId: string; token: string };
+function useBookingController(contactProfile?: ContactProfile | null, session: BookingSession | null = null, sessionPending = false) {
+  const sessionRef = useRef({ session, pending: sessionPending });
+  sessionRef.current = { session, pending: sessionPending };
   const prefill = useRef<Prefill>(emptyPrefill());
   const [state, setState] = useState(initial),
     current = useRef(state),
@@ -200,6 +204,11 @@ function useBookingController(contactProfile?: ContactProfile | null) {
   };
   const send = async (attempt: Attempt) => {
     if (request.current || current.current.storageBlocked) return;
+    const auth = sessionRef.current;
+    if (attempt.accountId && (auth.pending || auth.session?.accountId !== attempt.accountId || !auth.session?.token)) {
+      commit(v => ({ ...v, error: 'Pro ověření původní rezervace se přihlaste ke stejnému účtu.' }));
+      return;
+    }
     const controller = new AbortController();
     request.current = controller;
     try {
@@ -218,10 +227,11 @@ function useBookingController(contactProfile?: ContactProfile | null) {
       const receipt = await postReservation(
         attempt.body,
         attempt.key,
-        controller.signal
+        controller.signal,
+        attempt.accountId ? auth.session!.token : undefined
       );
       if (!mounted.current || request.current !== controller) return;
-      const stored: StoredBooking = { version: 1, kind: 'receipt', receipt };
+      const stored: StoredBooking = { version: 1, kind: 'receipt', receipt, ...(attempt.accountId ? { accountId: attempt.accountId } : {}) };
       let storageBlocked = false;
       try {
         persistBooking(stored);
@@ -260,7 +270,9 @@ function useBookingController(contactProfile?: ContactProfile | null) {
           ...before,
           busy: false,
           error:
-            error instanceof PublicApiError &&
+            error instanceof PublicApiError && error.status === 401
+              ? 'Přihlášení vypršelo. Přihlaste se ke stejnému účtu a ověřte původní rezervaci.'
+              : error instanceof PublicApiError &&
             error.code === 'IDEMPOTENCY_KEY_REUSED'
               ? 'Původní požadavek nelze bezpečně změnit. Ověřte jeho stav stejným požadavkem.'
               : null,
@@ -302,9 +314,13 @@ function useBookingController(contactProfile?: ContactProfile | null) {
       }));
       return;
     }
+    if (sessionRef.current.pending) {
+      commit(v => ({ ...v, error: 'Počkejte prosím na ověření přihlášení.' }));
+      return;
+    }
     let attempt: Attempt;
     try {
-      attempt = newAttempt(reservationBody(draft));
+      attempt = newAttempt(reservationBody(draft), sessionRef.current.session?.accountId);
     } catch {
       commit(v => ({ ...v, storageBlocked: true, error: storageMessage }));
       return;
@@ -317,14 +333,19 @@ function useBookingController(contactProfile?: ContactProfile | null) {
   };
   const refreshStatus = async () => {
     const stored = current.current.stored;
-    if (request.current || stored?.kind !== 'receipt' || !stored.receipt.guestAccessToken) return;
+    if (request.current || stored?.kind !== 'receipt') return;
+    const auth = sessionRef.current;
+    if (stored.accountId && (auth.pending || auth.session?.accountId !== stored.accountId)) return;
+    if (!stored.accountId && !stored.receipt.guestAccessToken) return;
     const controller = new AbortController();
     request.current = controller;
     commit(v => ({ ...v, busy: true, error: null }));
     try {
-      const receipt = await getReservationStatus(stored.receipt.reservationNumber, stored.receipt.guestAccessToken, controller.signal);
+      const receipt = stored.accountId
+        ? await getAccountReservationStatus(stored.receipt.reservationNumber, auth.session!.token, controller.signal)
+        : await getReservationStatus(stored.receipt.reservationNumber, stored.receipt.guestAccessToken!, controller.signal);
       if (!mounted.current || request.current !== controller) return;
-      const updated: StoredBooking = { version: 1, kind: 'receipt', receipt };
+      const updated: StoredBooking = { version: 1, kind: 'receipt', receipt, ...(stored.accountId ? { accountId: stored.accountId } : {}) };
       let storageBlocked = false;
       try { persistBooking(updated); } catch { storageBlocked = true; }
       commit(v => ({ ...v, stored: updated, storageBlocked, error: storageBlocked ? storageMessage : null }));
@@ -367,8 +388,13 @@ function useBookingController(contactProfile?: ContactProfile | null) {
     commit(v => ({ ...v, draft: null, stored: null, error: null }));
     return true;
   };
+  const accountBlocked = Boolean(state.stored?.accountId &&
+    (sessionPending || state.stored.accountId !== session?.accountId));
   return {
     ...state,
+    stored: accountBlocked ? null : state.stored,
+    draft: accountBlocked ? null : state.draft,
+    accountBlocked,
     chooseProduct,
     updateDraft,
     submit,
@@ -381,11 +407,13 @@ function useBookingController(contactProfile?: ContactProfile | null) {
 }
 type BookingContextValue = ReturnType<typeof useBookingController>;
 const BookingContext = createContext<BookingContextValue | null>(null);
-export function BookingProvider({ children, contactProfile }: {
+export function BookingProvider({ children, contactProfile, session, sessionPending }: {
   children: ReactNode;
   contactProfile?: ContactProfile | null;
+  session?: BookingSession | null;
+  sessionPending?: boolean;
 }) {
-  const value = useBookingController(contactProfile);
+  const value = useBookingController(contactProfile, session, sessionPending);
   return (
     <BookingContext.Provider value={value}>{children}</BookingContext.Provider>
   );

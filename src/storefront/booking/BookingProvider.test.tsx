@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { bookingPolicyFixture as policy } from './bookingFixtures';
 import { act, renderHook } from '@testing-library/react';
 import { BookingProvider, useBooking } from './BookingProvider';
-import { getReservationStatus, postReservation, PublicApiError } from '../api/publicApi';
+import { getReservationStatus, getAccountReservationStatus, postReservation, PublicApiError } from '../api/publicApi';
 import { body, product, quote, receipt, deferred } from './bookingFixtures';
 import {
   initialDraft,
@@ -14,6 +14,7 @@ jest.mock('../api/publicApi', () => ({
   ...jest.requireActual('../api/publicApi'),
   postReservation: jest.fn(),
   getReservationStatus: jest.fn(),
+  getAccountReservationStatus: jest.fn(),
 }));
 const post = postReservation as jest.MockedFunction<typeof postReservation>;
 function setup() {
@@ -320,4 +321,78 @@ test('profile changes cannot alter a pending request or its frozen recovery body
   view.setProfile(null);
   expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
   expect(view.result.current.stored?.kind).toBe('attempt');
+});
+
+const ownerSession = { accountId: 'aaaaaaaaaaaaaaaaaaaaaaaa', token: 'owner-session-secret' };
+function sessionView(initialSession: typeof ownerSession | null, pending = false) {
+  const auth = { session: initialSession, pending };
+  const view = renderHook(() => useBooking(), { wrapper: ({ children }: { children: ReactNode }) =>
+    <BookingProvider session={auth.session} sessionPending={auth.pending}>{children}</BookingProvider> });
+  return { ...view, changeSession(session: typeof ownerSession | null, nextPending = false) {
+    auth.session = session; auth.pending = nextPending; view.rerender();
+  } };
+}
+function fill(view: ReturnType<typeof sessionView>) {
+  act(() => { view.result.current.chooseProduct(product); });
+  act(() => { view.result.current.updateDraft({ ...initialDraft(product), selection: quote,
+    contact: { ...body.customer, notes: body.notes! } }); });
+}
+test('signed-in booking sends bearer, persists owner but never token, and refreshes as owner', async () => {
+  const view = sessionView(ownerSession); fill(view);
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  expect(post.mock.calls[0][3]).toBe(ownerSession.token);
+  expect(view.result.current.stored).toMatchObject({ kind: 'receipt', accountId: ownerSession.accountId });
+  expect(sessionStorage.getItem(SESSION_KEY)).not.toContain(ownerSession.token);
+  const read = getAccountReservationStatus as jest.Mock;
+  read.mockResolvedValueOnce({ ...receipt, status: 'confirmed', expiresAt: null });
+  await act(async () => { await view.result.current.refreshStatus(); });
+  expect(read).toHaveBeenCalledWith(receipt.reservationNumber, ownerSession.token, expect.anything());
+  expect(view.result.current.stored).toMatchObject({ accountId: ownerSession.accountId, receipt: { status: 'confirmed' } });
+  view.changeSession(null);
+  expect(view.result.current.accountBlocked).toBe(true);
+  expect(view.result.current.stored).toBeNull();
+  view.changeSession(ownerSession);
+  expect(view.result.current.stored?.kind).toBe('receipt');
+});
+test('unknown authenticated attempt remains bound after account switch and reload', async () => {
+  post.mockRejectedValueOnce(new PublicApiError('NETWORK'));
+  const view = sessionView(ownerSession); fill(view);
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  const key = post.mock.calls[0][1];
+  view.changeSession({ accountId: 'bbbbbbbbbbbbbbbbbbbbbbbb', token: 'another-session' });
+  expect(view.result.current.stored).toBeNull();
+  await act(async () => { await view.result.current.recover(); });
+  expect(post).toHaveBeenCalledTimes(1);
+  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  view.unmount();
+  const restored = sessionView({ ...ownerSession, token: 'refreshed-session' });
+  await act(async () => { await restored.result.current.recover(); });
+  expect(post.mock.calls[1][1]).toBe(key);
+  expect(post.mock.calls[1][3]).toBe('refreshed-session');
+  expect(restored.result.current.stored?.kind).toBe('receipt');
+});
+test('session refresh blocks new booking, but legacy guest retry remains guest after sign-in', async () => {
+  const view = sessionView(ownerSession, true); fill(view);
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  expect(post).not.toHaveBeenCalled();
+  expect(sessionStorage.getItem(SESSION_KEY)).toBeNull();
+  view.unmount();
+  const attempt = newAttempt(body); persistBooking(attempt);
+  const restored = sessionView(ownerSession);
+  await act(async () => { await restored.result.current.recover(); });
+  expect(post.mock.calls[0][1]).toBe(attempt.key);
+  expect(post.mock.calls[0][3]).toBeUndefined();
+});
+test('late authenticated response remains hidden from a switched account', async () => {
+  const pending = deferred<typeof receipt>(); post.mockReturnValueOnce(pending.promise);
+  const view = sessionView(ownerSession); fill(view);
+  let operation!: Promise<void>;
+  act(() => { operation = view.result.current.submit(quote, policy); });
+  view.changeSession({ accountId: 'bbbbbbbbbbbbbbbbbbbbbbbb', token: 'other' });
+  await act(async () => { pending.resolve(receipt); await operation; });
+  expect(view.result.current.stored).toBeNull();
+  expect(JSON.parse(sessionStorage.getItem(SESSION_KEY)!).accountId).toBe(ownerSession.accountId);
+  view.changeSession(ownerSession);
+  expect(view.result.current.stored?.kind).toBe('receipt');
 });

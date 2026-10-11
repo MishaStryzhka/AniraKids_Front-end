@@ -97,6 +97,8 @@ function App() {
         value={{ isOpenModalAuth, setIsOpenModalAuth, setAuthNotice }}
       >
         <FavoritesProvider><BookingProvider
+          sessionPending={isRefreshing || Boolean(token && (!isLoggedIn || !(user?.userID || user?._id)))}
+          session={token && isLoggedIn && (user?.userID || user?._id) ? { accountId: String(user.userID || user._id), token } : null}
           contactProfile={isRefreshing ? undefined :
             token && isLoggedIn && user && (user.userID || user._id) ? {
               accountId: String(user.userID || user._id),
