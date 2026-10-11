@@ -1,3 +1,7 @@
+import styled from 'styled-components';
+import { X } from 'lucide-react';
+import { IconButton } from '../../design-system/components/IconButton';
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { RentalCalendar } from './RentalCalendar';
 import {
   BookingPaymentExplanation,
@@ -52,6 +56,18 @@ import {
   selectionErrors,
   statusLabel,
 } from './bookingModel';
+const ItemCard = styled(Panel)`
+  padding: ${t.space[4]};
+  gap: ${t.space[2]};
+`;
+const ItemHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${t.space[2]};
+  min-inline-size: 0;
+  > h3 { min-inline-size: 0; align-self: center; }
+`;
 export function PriceSummary({ pricing }: { pricing: Pricing }) {
   return (
     <Facts>
@@ -335,7 +351,12 @@ export function BookingPage() {
             <Columns>
               <Stack>
                 <Heading>Položky rezervace</Heading>
-                <Heading>{draft.product.name}</Heading>
+                <ItemCard role="group" aria-label={draft.product.name}>
+                  <ItemHeader>
+                    <Heading as="h3">{draft.product.name}</Heading>
+                    <IconButton aria-label={'Odebrat ' + draft.product.name} icon={<X aria-hidden="true" />}
+                      onClick={() => { setRequested(null); booking.removeProduct(draft.product.id); }} />
+                  </ItemHeader>
                 <Stack>
                   <SelectField
                     label="Velikost"
@@ -362,12 +383,14 @@ export function BookingPage() {
                   </SelectField>
                   {errorFor('variantId', selectionValidation)}
                 </Stack>
-                <Actions><Button variant="ghost" onClick={() => { setRequested(null); booking.removeProduct(draft.product.id); }}>
-                  Odebrat {draft.product.name}
-                </Button></Actions>
-                {(draft.additionalItems ?? []).map(item => <Panel key={item.product.id}>
-                  <Heading>{item.product.name}</Heading>
-                  <SelectField label={'Velikost – ' + item.product.name} name={'variant-' + item.product.id}
+                </ItemCard>
+                {(draft.additionalItems ?? []).map(item => <ItemCard key={item.product.id} role="group" aria-label={item.product.name}>
+                  <ItemHeader>
+                    <Heading as="h3">{item.product.name}</Heading>
+                    <IconButton aria-label={'Odebrat ' + item.product.name} icon={<X aria-hidden="true" />}
+                      onClick={() => { setRequested(null); booking.removeProduct(item.product.id); }} />
+                  </ItemHeader>
+                  <SelectField label="Velikost" name={'variant-' + item.product.id}
                     value={item.variantId} aria-invalid={Boolean(itemValidation[item.product.id]) || undefined}
                     aria-describedby={itemValidation[item.product.id] ? 'booking-variant-' + item.product.id + '-error' : undefined}
                     onChange={event => {
@@ -379,8 +402,7 @@ export function BookingPage() {
                     {item.product.variants.map(v => <option key={v.id} value={v.id}>{v.size}</option>)}
                   </SelectField>
                   {itemValidation[item.product.id] ? <ErrorCopy id={'booking-variant-' + item.product.id + '-error'}>{itemValidation[item.product.id]}</ErrorCopy> : null}
-                  <Actions><Button variant="ghost" onClick={() => { setRequested(null); booking.removeProduct(item.product.id); }}>Odebrat {item.product.name}</Button></Actions>
-                </Panel>)}
+                </ItemCard>)}
                 <Actions><RouteLink to={catalogueReturnTo}>Přidat další produkt</RouteLink></Actions>
 
                 <Stack>
