@@ -181,6 +181,10 @@ export function BookingPage() {
       <ErrorCopy id={`booking-${field}-error`}>{errors[field]}</ErrorCopy>
     ) : null;
   const stored = booking.stored;
+  if (booking.accountBlocked) return <Page><Title>Rezervace vašeho účtu</Title>
+    <Panel><Copy>Pro zobrazení nebo ověření této rezervace se přihlaste ke stejnému účtu, ze kterého byla vytvořena.</Copy>
+      <RouteLink to={routes.account}>Přejít k přihlášení</RouteLink>
+    </Panel></Page>;
   return (
     <Page>
       <div ref={root}>
@@ -249,12 +253,12 @@ export function BookingPage() {
               </Copy>
               <ReceiptPaymentInformation receipt={stored.receipt} />
               {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
-              {stored.receipt.guestAccessToken && (
+              {(stored.receipt.guestAccessToken || stored.accountId) && (
                 <Actions>
                   <Button disabled={booking.busy} onClick={booking.refreshStatus}>
                     {booking.busy ? 'Ověřování stavu…' : 'Aktualizovat stav rezervace'}
                   </Button>
-                  <RouteLink to={reservationStatusPath(stored.receipt.reservationNumber, stored.receipt.guestAccessToken)}>
+                  <RouteLink to={stored.accountId ? routes.accountReservations : reservationStatusPath(stored.receipt.reservationNumber, stored.receipt.guestAccessToken!)}>
                     Otevřít aktuální stav rezervace
                   </RouteLink>
                 </Actions>

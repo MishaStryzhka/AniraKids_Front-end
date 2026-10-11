@@ -1,9 +1,10 @@
-import { useContext, useState } from 'react';
+import { useBookingOptional } from '../../storefront/booking/BookingProvider';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { ModalAuthContext } from '../../context/ModalAuthContext';
 import { routes } from '../../navigation/routes';
 import { Button } from '../../design-system/components/Button';
-import { getAccountReservations } from '../../storefront/api/publicApi';
+import { getAccountReservations, claimReservation } from '../../storefront/api/publicApi';
 import { usePublicRead } from '../../storefront/usePublicRead';
 import { ReceiptPaymentInformation } from '../../storefront/payments/PaymentInformation';
 import { statusLabel } from '../../storefront/booking/bookingModel';
@@ -12,13 +13,50 @@ import { Page, Title, Panel, Copy, Heading, Stack, Actions, RouteLink } from '..
 export function AccountReservationsPage() {
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const auth = useContext(ModalAuthContext);
+  const booking = useBookingOptional();
+  const localReceipt = booking?.stored?.kind === 'receipt' && !booking.stored.accountId &&
+    booking.stored.receipt.guestAccessToken ? booking.stored.receipt : null;
+  const currentToken = useRef(token);
+  currentToken.current = isLoggedIn && !isRefreshing ? token : null;
+  const claimRequest = useRef<AbortController | null>(null);
+  const mounted = useRef(true);
+  const [claimState, setClaimState] = useState<{ token: string; busy: boolean; error?: string; claimed?: string } | null>(null);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; claimRequest.current?.abort(); }; }, []);
   const [page, setPage] = useState(1);
-  const result = usePublicRead(isLoggedIn && token ? `${token}:${page}` : null, signal => getAccountReservations(token, page, signal));
+  const result = usePublicRead(isLoggedIn && token && !isRefreshing ? `${token}:${page}` : null, signal => getAccountReservations(token, page, signal));
+  const claim = async () => {
+    if (!localReceipt?.guestAccessToken || !currentToken.current || claimRequest.current) return;
+    const ownerToken = currentToken.current;
+    const controller = new AbortController();
+    claimRequest.current = controller;
+    setClaimState({ token: ownerToken, busy: true });
+    try {
+      await claimReservation(localReceipt.reservationNumber, localReceipt.guestAccessToken, ownerToken, controller.signal);
+      if (!mounted.current || currentToken.current !== ownerToken) return;
+      setClaimState({ token: ownerToken, busy: false, claimed: localReceipt.reservationNumber });
+      setPage(1);
+      result.reload();
+    } catch {
+      if (mounted.current && currentToken.current === ownerToken)
+        setClaimState({ token: ownerToken, busy: false, error: 'Připojení rezervace se nepodařilo ověřit. Aktualizujte seznam nebo zkuste připojení znovu. Při opakování nevznikne nová rezervace.' });
+    } finally {
+      if (claimRequest.current === controller) claimRequest.current = null;
+    }
+  };
+  const ownClaim = claimState?.token === token ? claimState : null;
   return <Page><Title>Moje rezervace</Title>
     <Actions><RouteLink to={routes.account}>Můj profil</RouteLink></Actions>
     {isRefreshing ? <Copy role="status">Načítáme účet…</Copy> : !isLoggedIn ? <Panel><Copy>Pro zobrazení svých rezervací se přihlaste.</Copy><Button onClick={() => auth?.setIsOpenModalAuth(true)}>Přihlásit se</Button></Panel>
     : result.loading ? <Copy role="status">Načítáme rezervace…</Copy> : result.error ? <Panel><Copy role="alert">Rezervace se nepodařilo načíst. Zkuste to znovu; pokud přihlášení vypršelo, přihlaste se znovu.</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Panel>
     : result.data ? <Stack>
+      {localReceipt && !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) && ownClaim?.claimed !== localReceipt.reservationNumber ? <Panel>
+        <Heading>Rezervace z tohoto prohlížeče</Heading>
+        <Copy>{localReceipt.reservationNumber} byla vytvořena jako host. Můžete ji připojit k právě přihlášenému účtu.</Copy>
+        {ownClaim?.error ? <Copy role="alert">{ownClaim.error}</Copy> : null}
+        <Actions><Button disabled={ownClaim?.busy} loading={ownClaim?.busy} onClick={() => void claim()}>Připojit rezervaci k účtu</Button>
+          <RouteLink to={routes.reservation}>Otevřít rezervaci</RouteLink></Actions>
+      </Panel> : null}
+      {ownClaim?.claimed ? <Copy role="status">Rezervace byla připojena k vašemu účtu.</Copy> : null}
       {result.data.total > 0 && <Copy>Celkem rezervací: {result.data.total}.</Copy>}
       {result.data.items.length === 0 && <Panel>
         <Copy>{page === 1 ? 'Zatím zde nejsou žádné rezervace.' : 'Na této stránce už nejsou žádné rezervace.'}</Copy>

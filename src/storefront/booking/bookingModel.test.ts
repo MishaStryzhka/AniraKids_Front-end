@@ -107,3 +107,15 @@ test('receipt persists only the scoped guest capability in session storage', () 
   expect(loadBooking()).toEqual(stored);
   expect(sessionStorage.getItem(SESSION_KEY)).not.toContain('customer');
 });
+
+test('account owner survives attempt and receipt storage while legacy attempts stay guest', () => {
+  const accountId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+  const attempt = newAttempt(body, accountId);
+  persistBooking(attempt);
+  expect(loadBooking()).toEqual(attempt);
+  persistBooking({ version: 1, kind: 'receipt', receipt, accountId });
+  expect(loadBooking()).toMatchObject({ accountId });
+  const old = newAttempt(body);
+  expect(parseStored(JSON.stringify(old))).not.toHaveProperty('accountId');
+  expect(() => parseStored(JSON.stringify({ ...old, accountId: 'invalid' }))).toThrow();
+});

@@ -424,12 +424,13 @@ export async function getAvailability(
 export async function postReservation(
   body: ReservationBody,
   key: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  token?: string
 ) {
   const result = await request('/reservations', {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { 'Idempotency-Key': key },
+    headers: { 'Idempotency-Key': key, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     signal,
   });
   if (result.status !== 200 && result.status !== 201) return invalid();
@@ -498,4 +499,25 @@ export async function getRentalCalendar(query: CalendarQuery, signal?: AbortSign
     new URLSearchParams(params as Record<string, string>),
     { signal, cache: 'no-store' }
   )).body, query);
+}
+
+export async function getAccountReservationStatus(number: string, token: string, signal?: AbortSignal): Promise<Receipt> {
+  if (!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !token) throw new PublicApiError('RESERVATION_NOT_FOUND', 404);
+  const result = await request('/reservations/' + encodeURIComponent(number), {
+    headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal,
+  });
+  const receipt = parseReceipt(result.body);
+  if (receipt.reservationNumber !== number) return invalid();
+  return receipt;
+}
+export async function claimReservation(number: string, guestAccessToken: string, token: string, signal?: AbortSignal): Promise<Receipt> {
+  if (!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !isGuestAccessToken(guestAccessToken) || !token)
+    throw new PublicApiError('RESERVATION_NOT_FOUND', 404);
+  const result = await request('/account/reservations/' + encodeURIComponent(number) + '/claim', {
+    method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ guestAccessToken }), signal,
+  });
+  const receipt = parseReceipt(result.body);
+  if (receipt.reservationNumber !== number) return invalid();
+  return receipt;
 }

@@ -59,7 +59,7 @@ function receipt(body) {
     paymentStatus: 'unpaid',
   };
 }
-async function setup(page, guest = false) {
+async function setup(page, guest = true) {
   const state = {
     posts: [],
     reads: [],
@@ -85,7 +85,7 @@ async function setup(page, guest = false) {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ user: { _id: 'legacy-user' } }),
+      body: JSON.stringify({ user: { _id: 'aaaaaaaaaaaaaaaaaaaaaaaa' } }),
     })
   );
   await page.route(
@@ -701,3 +701,13 @@ for (const width of [390, 768, 1024, 1440]) {
     expect(state.errors).toEqual([]);
   });
 }
+
+
+test('signed-in catalogue and availability stay public without bearer', async ({ page }) => {
+  const state = await setup(page, false);
+  await begin(page);
+  await quote(page);
+  expect(state.reads.length).toBeGreaterThan(0);
+  expect(state.reads.every(read => !read.authorization)).toBe(true);
+  expect(state.posts).toHaveLength(0);
+});
