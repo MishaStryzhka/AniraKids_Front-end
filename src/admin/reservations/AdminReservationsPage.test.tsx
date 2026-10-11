@@ -202,9 +202,8 @@ test('detail renders authoritative Kč, snapshots, expiration and missing curren
       screen.getByRole('button', { name: 'Potvrdit rezervaci' })
     ).toBeEnabled()
   );
-  expect(
-    screen.queryByRole('button', { name: /platbu/i })
-  ).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Zapsat platbu' })).toBeEnabled();
+  expect(screen.queryByLabelText('Částka (Kč)')).not.toBeInTheDocument();
 });
 test('cancelled/refunded detail preserves safe text and current inventory facts', async () => {
   getDetail.mockResolvedValueOnce({
@@ -229,7 +228,7 @@ test('cancelled/refunded detail preserves safe text and current inventory facts'
   setup('/admin/rezervace/r1', { returnTo: 'https://evil.test' });
   await screen.findByText('Zrušená');
   expect(
-    screen.getByRole('heading', { name: 'Platební evidence' })
+    screen.getByRole('heading', { name: 'Platby' })
   ).toBeInTheDocument();
   expect(screen.getByText('<script>never run</script>')).toBeInTheDocument();
   expect(screen.getByText('V údržbě')).toBeInTheDocument();
