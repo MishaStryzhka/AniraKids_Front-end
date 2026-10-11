@@ -1,4 +1,6 @@
 import { StatusBadge } from '../../design-system/components/StatusBadge';
+import { loadGuestReservationLinks } from '../../storefront/booking/guestReservationLinks';
+import { reservationStatusPath } from '../../storefront/booking/BookingStatusPage';
 import { draftItems, modeLabel } from '../../storefront/booking/bookingModel';
 import { useBookingOptional } from '../../storefront/booking/BookingProvider';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -16,6 +18,9 @@ export function AccountReservationsPage() {
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const auth = useContext(ModalAuthContext);
   const booking = useBookingOptional();
+  const [savedGuestLinks] = useState(() => {
+    try { return loadGuestReservationLinks(); } catch { return []; }
+  });
   const draft = booking?.draft && !booking.stored && !booking.busy &&
     !booking.storageBlocked && !booking.accountBlocked ? booking.draft : null;
   const needsRecovery = Boolean(booking?.stored?.kind === 'attempt' ||
@@ -80,6 +85,14 @@ export function AccountReservationsPage() {
       {receiptItems(localReceipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
       <Actions><RouteLink to={routes.reservation}>Otevřít rezervaci</RouteLink></Actions>
     </Panel> : null}
+    {savedGuestLinks.length > 0 ? <Panel>
+      <Heading>Dřívější rezervace bez přihlášení</Heading>
+      <Copy>Soukromé odkazy jsou uložené pro tuto relaci prohlížeče. Pro pozdější přístup si je uložte.</Copy>
+      <Actions>{savedGuestLinks.map(link => <RouteLink key={link.reservationNumber}
+        to={reservationStatusPath(link.reservationNumber, link.guestAccessToken)}>
+        {link.reservationNumber}
+      </RouteLink>)}</Actions>
+    </Panel> : null}
     {isRefreshing ? <Copy role="status">Načítáme účet…</Copy> : !isLoggedIn ? <Panel><Copy>Pro zobrazení rezervací uložených v účtu se přihlaste.</Copy><Button onClick={() => auth?.setIsOpenModalAuth(true)}>Přihlásit se</Button></Panel>
     : result.loading ? <Copy role="status">Načítáme rezervace…</Copy> : result.error ? <Panel><Copy role="alert">Rezervace se nepodařilo načíst. Zkuste to znovu; pokud přihlášení vypršelo, přihlaste se znovu.</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Panel>
     : result.data ? <Stack>
@@ -92,7 +105,7 @@ export function AccountReservationsPage() {
       </Panel> : null}
       {ownClaim?.claimed ? <Copy role="status">Rezervace byla připojena k vašemu účtu.</Copy> : null}
       {result.data.total > 0 && <Copy>Celkem rezervací: {result.data.total}.</Copy>}
-      {result.data.items.length === 0 && (!draft || page > 1) && !needsRecovery && !localReceipt && <Panel>
+      {result.data.items.length === 0 && (!draft || page > 1) && !needsRecovery && !localReceipt && savedGuestLinks.length === 0 && <Panel>
         <Copy>{page === 1 ? 'Zatím zde nejsou žádné rezervace.' : 'Na této stránce už nejsou žádné rezervace.'}</Copy>
         {page === 1 ? <Actions><RouteLink to={routes.newArrivals}>Prohlédnout nabídku</RouteLink></Actions>
           : <Button variant="secondary" onClick={() => setPage(1)}>Zpět na první stránku</Button>}

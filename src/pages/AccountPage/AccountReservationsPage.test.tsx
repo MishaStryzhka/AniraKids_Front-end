@@ -4,6 +4,8 @@ import { claimReservation } from '../../storefront/api/publicApi';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AccountReservationsPage } from './AccountReservationsPage';
+import { preserveGuestReservationLink } from '../../storefront/booking/guestReservationLinks';
+import { reservationStatusPath } from '../../storefront/booking/BookingStatusPage';
 const mockRead = jest.fn();
 const mockBooking = { stored: null as StoredBooking | null, draft: null as BookingDraft | null, busy: false, storageBlocked: false, accountBlocked: false };
 jest.mock('../../storefront/booking/BookingProvider', () => ({ useBookingOptional: () => mockBooking }));
@@ -13,6 +15,20 @@ jest.mock('../../hooks/useAuth', () => ({ useAuth: () => mockAuth }));
 jest.mock('../../storefront/usePublicRead', () => ({ usePublicRead: (...args: unknown[]) => mockRead(...args) }));
 beforeEach(() => { mockAuth.isLoggedIn = true; mockRead.mockReset(); mockBooking.stored = null; mockBooking.draft = null; mockBooking.busy = false; mockBooking.storageBlocked = false; mockBooking.accountBlocked = false; (claimReservation as jest.Mock).mockReset(); });
 function view() { return render(<MemoryRouter><AccountReservationsPage /></MemoryRouter>); }
+beforeEach(() => sessionStorage.clear());
+test.each([true, false])('previous guest reservations remain accessible alongside a new draft, logged-in=%s', loggedIn => {
+  mockAuth.isLoggedIn = loggedIn;
+  const previous = { ...receipt, reservationNumber: 'AK-2030-ABC123', guestAccessToken: 'a'.repeat(43) };
+  preserveGuestReservationLink(previous);
+  preserveGuestReservationLink(previous);
+  mockBooking.draft = initialDraft(product);
+  mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false });
+  view();
+  expect(screen.getAllByRole('link', { name: previous.reservationNumber })).toHaveLength(1);
+  expect(screen.getByRole('link', { name: previous.reservationNumber })).toHaveAttribute('href', reservationStatusPath(previous.reservationNumber, previous.guestAccessToken));
+  expect(screen.getByRole('link', { name: 'Dokončit rezervaci' })).toBeInTheDocument();
+  expect(claimReservation).not.toHaveBeenCalled();
+});
 test('empty history offers the catalogue without unrelated controls', () => {
   mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false }); view();
   expect(screen.getByText('Zatím zde nejsou žádné rezervace.')).toBeInTheDocument();
