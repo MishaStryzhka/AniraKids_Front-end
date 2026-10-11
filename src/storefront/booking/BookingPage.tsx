@@ -59,6 +59,7 @@ import {
 const ItemCard = styled(Panel)`
   padding: ${t.space[4]};
   gap: ${t.space[2]};
+  border: 0;
 `;
 const ItemHeader = styled.div`
   display: flex;
