@@ -528,7 +528,7 @@ for (const width of [390, 1440])
     await expect(page.getByText(/Rezervační záloha činí 200/)).toBeVisible();
     await expect(page.getByText(/zbývá z nájemného 300/)).toBeVisible();
     await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
-    const qr = page.getByRole('img', { name: /QR platba rezervační zálohy/ });
+    const qr = page.getByRole('img', { name: /QR platba 200/ });
     await expect(qr).toBeVisible();
     await expect(qr).toHaveAttribute('src', /^data:image\/png;base64,/);
     await expect(

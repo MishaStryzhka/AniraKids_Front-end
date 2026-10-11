@@ -143,6 +143,9 @@ export function ReservationPaymentLedger({
       <ReservationCopy>
         Záznamy potvrzují skutečně přijaté nebo vrácené částky. Tato evidence
         neprovádí bankovní převody ani automatické stržení peněz.
+        Pokud zákazník zaplatil nájemné a kauci jedním převodem, zapište dvě
+        operace se stejnou referencí: přijaté nájemné (včetně zálohy) a přijatou
+        vratnou kauci. Celou částku nezapisujte jako rezervační zálohu.
       </ReservationCopy>
       {state.loading ? (
         <ReservationCopy role="status">
