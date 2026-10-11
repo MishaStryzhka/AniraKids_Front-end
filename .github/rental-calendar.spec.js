@@ -131,3 +131,48 @@ test('direct women product highlights its audience, not girls',async({page})=>{
   await page.getByRole('button',{name:'Otevřít menu'}).click();
   await expect(page.getByRole('navigation',{name:'Menu',exact:true}).getByRole('link',{name:'Dámské šaty',exact:true})).toHaveAttribute('aria-current','page');
 });
+
+test('Czech headings and navigation use custom glyphs without fallback',async({page})=>{
+  await setup(page);
+  await page.goto(APP+'/saty');
+  await page.evaluate(async()=>{
+    const h=document.querySelector('h1');
+    h.textContent='Dívčí šaty — Příliš žluťoučký kůň úpěl ďábelské ódy';
+    await document.fonts.ready;
+  });
+  const cdp=await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('CSS.enable');
+  const fontsFor=async selector=>{
+    const {root}=await cdp.send('DOM.getDocument');
+    const {nodeId}=await cdp.send('DOM.querySelector',{nodeId:root.nodeId,selector});
+    return (await cdp.send('CSS.getPlatformFontsForNode',{nodeId})).fonts.filter(f=>f.glyphCount>0);
+  };
+  for(const width of [390,768,1024,1440]){
+    await page.setViewportSize({width,height:1000});
+    await page.evaluate(()=>document.fonts.ready);
+    const editorial=await fontsFor('h1');
+    expect(editorial.length).toBeGreaterThan(0);
+    expect(editorial.every(f=>f.isCustomFont && /Cormorant/i.test(f.familyName))).toBe(true);
+    if(width<1024)await page.getByRole('button',{name:'Otevřít menu'}).click();
+    const nav=page.getByRole('navigation',{name:width<1024?'Menu':'Hlavní navigace',exact:true});
+    const women=nav.getByRole('link',{name:'Dámské šaty',exact:true});
+    await women.evaluate(e=>e.setAttribute('data-font-check',''));
+    await page.evaluate(()=>document.fonts.ready);
+    const ui=await fontsFor('[data-font-check]');
+    expect(ui.length).toBeGreaterThan(0);
+    expect(ui.every(f=>f.isCustomFont && /Inter/i.test(f.familyName))).toBe(true);
+    await women.evaluate(e=>e.removeAttribute('data-font-check'));
+    const box=await women.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    if(width>=1024){
+      const end=await nav.getByRole('link',{name:'Pronájem',exact:true}).boundingBox();
+      const utilities=await page.locator('[data-desktop-utilities]').boundingBox();
+      expect(end.x+end.width).toBeLessThanOrEqual(utilities.x);
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+    await page.screenshot({path:EVIDENCE+'/czech-fonts-'+width+'.png',fullPage:true});
+    console.log(JSON.stringify({width,editorial,ui}));
+    if(width<1024)await page.getByRole('button',{name:'Zavřít menu'}).click();
+  }
+});

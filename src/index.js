@@ -1,9 +1,9 @@
 import React from 'react';
-import '@fontsource/inter/latin-ext-400.css';
-import '@fontsource/inter/latin-ext-500.css';
-import '@fontsource/inter/latin-ext-600.css';
-import '@fontsource/cormorant-garamond/latin-ext-500.css';
-import '@fontsource/cormorant-garamond/latin-ext-600.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/600.css';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
