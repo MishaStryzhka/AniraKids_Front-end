@@ -1,4 +1,4 @@
-import { Heart, Search } from 'lucide-react';
+import { Heart, LayoutDashboard, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconButton } from '../../../design-system/components/IconButton';
@@ -6,6 +6,7 @@ import { designTokens as t } from '../../../design-system/tokens/designTokens';
 import { routes, type AuthNavigationState } from '../../../navigation/routes';
 import { AccountUtility } from './AccountUtility';
 import { ReservationUtility } from './ReservationUtility';
+import { adminRoutes } from '../../../admin/navigation/adminRoutes';
 
 const Utilities = styled.div`
   display: flex;
@@ -41,6 +42,7 @@ const IconRouteLink = styled(Link)`
 
 export interface DesktopUtilitiesProps {
   authState: AuthNavigationState;
+  canAccessAdmin?: boolean;
   hasActiveReservationDraft: boolean;
   onSearchOpen(): void;
   onOpenAuth(): void;
@@ -48,6 +50,7 @@ export interface DesktopUtilitiesProps {
 
 export function DesktopUtilities({
   authState,
+  canAccessAdmin = false,
   hasActiveReservationDraft,
   onSearchOpen,
   onOpenAuth,
@@ -66,6 +69,11 @@ export function DesktopUtilities({
       </IconRouteLink>
       <ReservationUtility hasActiveDraft={hasActiveReservationDraft} presentation="desktop" />
       <AccountUtility authState={authState} onOpenAuth={onOpenAuth} />
+      {authState === 'authenticated' && canAccessAdmin ? (
+        <IconRouteLink to={adminRoutes.root} aria-label="Administrace" title="Administrace">
+          <LayoutDashboard aria-hidden="true" />
+        </IconRouteLink>
+      ) : null}
     </Utilities>
   );
 }

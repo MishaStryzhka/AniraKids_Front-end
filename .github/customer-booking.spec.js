@@ -708,7 +708,12 @@ test('signed-in catalogue and availability stay public without bearer', async ({
   const state = await setup(page, false);
   await begin(page);
   await quote(page);
-  expect(state.reads.length).toBeGreaterThan(0);
-  expect(state.reads.every(read => !read.authorization)).toBe(true);
+  const adminChecks = state.reads.filter(read => read.url === '/api/v2/admin/products');
+  const publicReads = state.reads.filter(read => read.url !== '/api/v2/admin/products');
+  expect(publicReads.some(read => read.url.startsWith('/api/v2/catalogue/products'))).toBe(true);
+  expect(publicReads.some(read => read.url.endsWith('/availability'))).toBe(true);
+  expect(publicReads.every(read => !read.authorization)).toBe(true);
+  expect(adminChecks.length).toBeGreaterThan(0);
+  expect(adminChecks.every(read => read.method === 'GET' && read.authorization === 'Bearer legacy-token-must-not-leak')).toBe(true);
   expect(state.posts).toHaveLength(0);
 });
