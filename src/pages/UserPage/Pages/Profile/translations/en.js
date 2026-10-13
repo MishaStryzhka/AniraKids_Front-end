@@ -15,7 +15,6 @@ export const ProfileTranslationsEn = {
   saveChanges: 'Save Changes',
   profilePhoto: 'Profile Photo',
   maxFileSize: 'Maximum file size - 5 MB',
-  BECOME_LANDLORD: 'BECOME A LANDLORD',
   verify: 'Verify',
   verified: 'Verified',
 

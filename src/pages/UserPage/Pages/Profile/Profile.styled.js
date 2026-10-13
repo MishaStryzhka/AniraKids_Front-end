@@ -135,12 +135,6 @@ export const ButtonVerify = styled.button`
   }
 `;
 
-export const WrapperBiling = styled.div`
-  padding: 8px;
-  border-bottom: 1px solid;
-
-  border-color: ${({ theme }) => theme.color.additionalColorBrown};
-`;
 
 export const StyledIconPencil = styled(IconPencil)`
   & g { stroke: inherit; }
