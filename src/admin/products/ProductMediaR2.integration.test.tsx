@@ -51,7 +51,7 @@ function deferred<T>() {
   return {promise, resolve, reject};
 }
 const media = () => screen.getByRole('region', {name: 'Fotografie'});
-const live = () => within(media()).getByRole('status');
+const live = () => within(screen.queryByRole('dialog', {name: 'Přidat fotografii'}) ?? media()).getByRole('status');
 async function open(p = product) {
   get.mockResolvedValueOnce({product: p, variants: []});
   const router = createMemoryRouter([
@@ -63,6 +63,7 @@ async function open(p = product) {
   return {...view, router};
 }
 function selectFile() {
+  fireEvent.click(screen.getByRole('button', {name: 'Přidat fotografii'}));
   const input = media().querySelector<HTMLInputElement>('input[type="file"]')!;
   fireEvent.change(input, {target: {files: [new File(['fixture'], 'x.jpg', {type: 'image/jpeg'})]}});
 }
@@ -108,20 +109,20 @@ test('real phase progression has one polite channel and progress ticks do not an
   const observer = new MutationObserver(changed);
   observer.observe(live(), {subtree: true, childList: true, characterData: true});
   await act(async () => {progressCallback(25);});
-  expect(within(media()).getByRole('progressbar')).toHaveAttribute('value', '25');
+  expect(screen.getByRole('progressbar')).toHaveAttribute('value', '25');
   await act(async () => {progressCallback(75);});
-  expect(within(media()).getByRole('progressbar')).toHaveAttribute('value', '75');
+  expect(screen.getByRole('progressbar')).toHaveAttribute('value', '75');
   expect(live().textContent).toBe(announcement);
   expect(live()).not.toHaveTextContent('%');
   expect(changed).not.toHaveBeenCalled();
   observer.disconnect();
   await act(async () => uploaded.resolve({publicId: 'products/p1/x'}));
   await waitFor(() => expect(live()).toHaveTextContent('Ověřujeme připojení fotografie k produktu…'));
-  expect(within(media()).queryByRole('progressbar')).not.toBeInTheDocument();
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   await act(async () => attached.reject(error('ADMIN_NETWORK_ERROR', null, 'network')));
   await waitFor(() => expect(live()).toHaveTextContent('Připojení fotografie není potvrzené'));
   expect(live()).toHaveTextContent('Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');
-  expect(within(media()).getAllByRole('status')).toHaveLength(1);
+  expect(screen.getAllByRole('status')).toHaveLength(1);
 });
 
 test('confirmed provider identity and category survive a failed 502 COMPLETE retry', async () => {
@@ -264,4 +265,69 @@ test('pending Back proceeds once when committed deletion resolves the last dirty
   await waitFor(() => expect(router.state.location.pathname).toBe('/admin/produkty'));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(remove).toHaveBeenCalledTimes(1);
+});
+
+
+test('empty upload dialog can cancel; invalid files stay in the dialog without requests', async () => {
+  await open();
+  fireEvent.click(screen.getByRole('button', {name: 'Přidat fotografii'}));
+  const dialog = screen.getByRole('dialog', {name: 'Přidat fotografii'});
+  expect(within(dialog).getByRole('button', {name: 'Vybrat fotografii'})).toHaveFocus();
+  fireEvent.change(media().querySelector('input[type="file"]')!, {target: {files: [new File(['x'], 'bad.svg', {type: 'image/svg+xml'})]}});
+  expect(within(dialog).getByRole('status')).toHaveTextContent(/JPG|JPEG|PNG|WEBP/);
+  expect(sign).not.toHaveBeenCalled();
+  fireEvent.keyDown(document, {key: 'Escape'});
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  await waitFor(() => expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toHaveFocus());
+});
+
+test('pending upload blocks Escape and cancellation; confirmed attachment closes the dialog', async () => {
+  await open({...product, photos: []});
+  const signed = deferred<Awaited<ReturnType<typeof signProductPhoto>>>();
+  sign.mockReturnValueOnce(signed.promise);
+  provider.mockResolvedValueOnce({publicId: 'products/p1/x'});
+  complete.mockResolvedValueOnce({product: {...product, photos: [photo('products/p1/x')]}});
+  startUpload();
+  fireEvent.keyDown(document, {key: 'Escape'});
+  expect(screen.getByRole('dialog', {name: 'Přidat fotografii'})).toBeInTheDocument();
+  expect(screen.getByRole('button', {name: 'Zrušit', exact: true})).toBeDisabled();
+  await act(async () => signed.resolve({upload: descriptor}));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(media().querySelectorAll('[data-photo-id="products/p1/x"]')).toHaveLength(1);
+  await waitFor(() => expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toHaveFocus());
+});
+
+test('closing an uncertain upload retains same-ID recovery on reopening', async () => {
+  await open({...product, photos: []});
+  sign.mockResolvedValueOnce({upload: descriptor});
+  provider.mockResolvedValueOnce({publicId: 'products/p1/x'});
+  complete.mockRejectedValueOnce(error('ADMIN_NETWORK_ERROR', null, 'network'))
+    .mockResolvedValueOnce({product: {...product, photos: [photo('products/p1/x')]}});
+  startUpload();
+  await screen.findByRole('button', {name: 'Zkusit připojit znovu'});
+  fireEvent.keyDown(document, {key: 'Escape'});
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', {name: 'Pokračovat v nahrávání'}));
+  fireEvent.click(screen.getByRole('button', {name: 'Zkusit připojit znovu'}));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(sign).toHaveBeenCalledTimes(1);
+  expect(provider).toHaveBeenCalledTimes(1);
+  expect(complete.mock.calls.map(([request]) => request.publicId)).toEqual(['products/p1/x', 'products/p1/x']);
+});
+
+test('browser navigation swaps upload for one leave dialog, and staying restores the selection', async () => {
+  const {router} = await open();
+  selectFile();
+  await act(async () => {void router.navigate('/admin/produkty');});
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.getByRole('dialog')).toHaveTextContent('Neuložené nebo nedokončené změny');
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Zůstat'}));
+  await screen.findByRole('dialog', {name: 'Přidat fotografii'});
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.getByText('x.jpg')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', {name: 'Zrušit', exact: true}));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  await act(async () => {void router.navigate('/admin/produkty');});
+  expect(await screen.findByText('List')).toBeInTheDocument();
+  expect(sign).not.toHaveBeenCalled();
 });

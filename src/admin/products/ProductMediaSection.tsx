@@ -1,6 +1,7 @@
 import {forwardRef, useImperativeHandle, useCallback, useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
+import {Dialog} from '../../design-system/components/Dialog';
 import {Divider} from '../../design-system/components/Divider';
 import {Spinner} from '../../design-system/components/Spinner';
 import {StatusBadge} from '../../design-system/components/StatusBadge';
@@ -45,9 +46,17 @@ const AltEditor = styled.div`
 `;
 const Upload = styled.div`display:grid;gap:${t.space[3]};min-inline-size:0;`;
 const Selected = styled.div`
-  display:grid;grid-template-columns:96px minmax(0,1fr);gap:${t.space[4]};align-items:start;overflow-wrap:anywhere;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:${t.space[4]};align-items:start;overflow-wrap:anywhere;
   .selected-actions{grid-column:1/-1;min-inline-size:0;display:flex;flex-wrap:wrap;gap:${t.space[2]};}
   @media(max-width:767px){.selected-actions{display:grid;grid-template-columns:minmax(0,1fr);}}
+`;
+const UploadPreview = styled.img`
+  inline-size:100%;block-size:240px;max-block-size:35dvh;object-fit:contain;
+  border-radius:${t.radius[2]};background:${t.color.bg.subtle};
+`;
+const FileChoice = styled.div`
+  display:grid;justify-items:center;gap:${t.space[3]};padding:${t.space[6]};
+  border:1px dashed ${t.color.border.default};border-radius:${t.radius[2]};text-align:center;
 `;
 const Progress = styled.progress`inline-size:100%;block-size:8px;accent-color:${t.color.action.primary.bg};`;
 const Status = styled.div`min-block-size:20px;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};overflow-wrap:anywhere;`;
@@ -85,6 +94,8 @@ export interface ProductMediaSectionProps {
   onRequestDelete?(intent: MediaDeleteIntent): void;
   deleteRequest?: {publicId: string; nonce: number} | null;
   onDeleteSettled?(result: MediaDeleteSettlement): void;
+  /** Leave/delete confirmations temporarily take over the single visible dialog. */
+  uploadDialogSuspended?: boolean;
 }
 
 function available(element: HTMLElement | null | undefined): element is HTMLElement {
@@ -109,6 +120,9 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
   const c = useProductMediaController(props);
   useImperativeHandle(ref,()=>({getActivationGuardSnapshot:c.getActivationGuardSnapshot}),[c.getActivationGuardSnapshot]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const uploadBodyRef = useRef<HTMLDivElement>(null);
+  const [choosingFile, setChoosingFile] = useState(false);
+  const [uploadMinimized, setUploadMinimized] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   const lifetime = useRef({productId: props.productId, alive: true, generation: 0, frames: new Set<number>()});
@@ -177,6 +191,25 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
   const onPendingRiskChange = props.onPendingRiskChange;
   useEffect(() => onPendingRiskChange?.(pendingRisk), [onPendingRiskChange, pendingRisk]);
   const disabled = c.guard !== 'available' || busy || !props.token;
+  const uploadDialogOpen = (choosingFile || Boolean(c.attempt && !uploadMinimized)) && !props.uploadDialogSuspended;
+  useEffect(() => {
+    if (!uploadDialogOpen) return;
+    const body = uploadBodyRef.current;
+    if (busy) body?.focus();
+    else body?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+  }, [uploadDialogOpen, busy, c.attempt?.attemptId]);
+  const closeUpload = () => {
+    if (busy || c.getActivationGuardSnapshot().pendingMutation) return;
+    setChoosingFile(false);
+    if (c.uploadPhase === 'selected' || c.uploadPhase === 'idle') c.discardUpload();
+    else setUploadMinimized(true);
+  };
+  const cancelUpload = () => {
+    if (busy || c.getActivationGuardSnapshot().pendingMutation) return;
+    c.discardUpload();
+    setChoosingFile(false);
+    setUploadMinimized(false);
+  };
   const statusText = [phaseCopy[c.uploadPhase], c.feedback].filter(Boolean).filter((value, i, values) => values.indexOf(value) === i).join(' ');
   const move = (publicId: string, delta: -1 | 1) => {
     if (disabled) return;
@@ -201,26 +234,42 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
     <Upload>
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-describedby="product-media-file-help"
         onChange={event => {const file = event.currentTarget.files?.[0]; if (file && !disabled) c.selectFile(file); event.currentTarget.value = '';}}/>
-      <Button data-photo-file-trigger disabled={disabled || c.photos.length >= 10 || c.uploadPhase !== 'idle'} onClick={() => inputRef.current?.click()}>Přidat fotografii</Button>
+      <Button data-photo-file-trigger disabled={disabled || c.photos.length >= 10 || c.uploadPhase !== 'idle'}
+        onClick={() => {c.clearFeedback(); setUploadMinimized(false); setChoosingFile(true);}}>Přidat fotografii</Button>
       <Copy id="product-media-file-help">JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
       {c.photos.length >= 10 ? <Status>Produkt může mít maximálně 10 fotografií.</Status> : null}
+      {c.attempt && uploadMinimized ? <Button variant="secondary" onClick={() => setUploadMinimized(false)}>Pokračovat v nahrávání</Button> : null}
+    </Upload>
+    <Dialog open={uploadDialogOpen} title="Přidat fotografii" description="Vyberte fotografii produktu a zkontrolujte její náhled před nahráním."
+      onEscape={closeUpload} resolveRestoreFocus={() => sectionRef.current?.querySelector<HTMLElement>('button:not(:disabled)') ?? sectionRef.current?.querySelector<HTMLElement>('#product-media-title') ?? null}>
+      <Upload data-product-photo-upload ref={uploadBodyRef} tabIndex={-1} onKeyDown={event => {
+        if (busy && event.key === 'Tab') event.preventDefault();
+      }}>
       {c.attempt ? <Selected>
-        {c.attempt.previewUrl ? <Preview src={c.attempt.previewUrl} alt="Náhled vybrané fotografie"/> : null}
-        <div><strong>{c.attempt.filename}</strong><Copy>{phaseCopy[c.uploadPhase]}</Copy>
-          {c.feedback && c.feedback !== phaseCopy[c.uploadPhase] ? <Copy>{c.feedback}</Copy> : null}</div>
+        {c.attempt.previewUrl ? <UploadPreview src={c.attempt.previewUrl} alt="Náhled vybrané fotografie"/> : null}
+        <strong>{c.attempt.filename}</strong>
+        {c.uploadPhase === 'selected' ? <Button variant="secondary" disabled={disabled} onClick={() => inputRef.current?.click()}>Vybrat jinou fotografii</Button> : null}
+        <Status role="status" aria-live="polite" aria-atomic="true">{statusText}</Status>
         <div className="selected-actions">
-          {c.uploadPhase === 'selected' ? <Button disabled={disabled} onClick={c.upload}>Nahrát fotografii</Button> : null}
+          {c.uploadPhase === 'selected' ? <Button disabled={disabled} onClick={() => {setChoosingFile(false); void c.upload();}}>Nahrát fotografii</Button> : null}
           {c.uploadPhase === 'unknown' ? <Button disabled={disabled || !c.attempt.candidate} onClick={c.recover}>Ověřit a připojit</Button> : null}
           {c.uploadPhase === 'provider-confirmed-unattached' ? <Button disabled={disabled || !c.attempt.providerPublicId} onClick={c.recover}>Zkusit připojit znovu</Button> : null}
-          <Button variant="secondary" disabled={busy} onClick={c.discardUpload}>Zrušit</Button>
+          <Button variant="secondary" disabled={busy} onClick={cancelUpload}>Zrušit</Button>
+          {!['idle','selected','signing','uploading','completing'].includes(c.uploadPhase) ? <Button variant="secondary" disabled={busy} onClick={closeUpload}>Zavřít</Button> : null}
         </div>
         {c.uploadPhase === 'uploading' ? <div style={{gridColumn: '1/-1'}}>
           <Progress aria-label="Průběh nahrávání fotografie" max={100} {...(c.progress === null ? {} : {value: c.progress})}/>
           <Copy>{c.progress === null ? 'Nahrávání…' : `${c.progress} %`}</Copy>
         </div> : null}
         {c.uploadPhase === 'signing' || c.uploadPhase === 'completing' ? <Spinner size="sm"/> : null}
-      </Selected> : null}
-    </Upload>
+      </Selected> : <>
+        <FileChoice><strong>Fotografie produktu</strong><Copy>JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
+          <Button disabled={disabled} onClick={() => inputRef.current?.click()}>Vybrat fotografii</Button></FileChoice>
+        <Status role="status" aria-live="polite" aria-atomic="true">{c.feedback}</Status>
+        <Button variant="secondary" onClick={cancelUpload}>Zrušit</Button>
+      </>}
+      </Upload>
+    </Dialog>
     {c.photos.length === 0 ? <Empty><strong>Produkt zatím nemá žádné fotografie.</strong>
       <Copy>Přidejte první fotografii. Po připojení se automaticky stane hlavní fotografií produktu.</Copy></Empty>
       : <List data-photo-list>{ordered.map((photo, index) => <Item key={photo.publicId} data-photo-id={photo.publicId}>
@@ -250,6 +299,6 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
     {c.guard === 'product-missing' ? <Empty><strong>Produkt už není dostupný</strong><Copy>Produkt už nebyl nalezen. Další změny fotografií nelze uložit.</Copy>
       <Copy>Vaše neuložené změny na této stránce zůstávají zachované, dokud ji neopustíte.</Copy></Empty> : null}
     {c.refreshReason ? <Button variant="secondary" disabled={disabled} onClick={c.refresh}>Načíst aktuální fotografie</Button> : null}
-    <Status role="status" aria-live="polite" aria-atomic="true">{statusText}</Status>
+    {!uploadDialogOpen ? <Status role="status" aria-live="polite" aria-atomic="true">{statusText}</Status> : null}
   </Section>;
 });

@@ -202,7 +202,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     setRecoveryFailed(false);
   };
   const upload = async () => {
-    if (!attempt || guard !== 'available' || operation || uploadPhase !== 'selected') return;
+    if (!attempt || guard !== 'available' || immediatePending.current || uploadPhase !== 'selected') return;
     const {generation, signal} = begin('upload');
     let providerSucceeded = false;
     try {
@@ -245,7 +245,7 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
     } finally {finish(generation);}
   };
   const recover = async () => {
-    if (!attempt || operation || guard !== 'available' || !['unknown', 'provider-confirmed-unattached'].includes(uploadPhase)) return;
+    if (!attempt || immediatePending.current || guard !== 'available' || !['unknown', 'provider-confirmed-unattached'].includes(uploadPhase)) return;
     const previousPhase = uploadPhase;
     const publicId = previousPhase === 'provider-confirmed-unattached' ? attempt.providerPublicId : attempt.candidate;
     if (!publicId) {setFeedback('Výsledek nahrání se nepodařilo potvrdit.'); return;}
@@ -373,6 +373,6 @@ export function useProductMediaController(input: ProductMediaControllerInput) {
   return {
     getActivationGuardSnapshot, photos, guard, drafts, setDrafts, operation, feedback, refreshReason, lostAltNotice, reconciliationNotice, recoveryFailed, uploadPhase,
     progress, attempt, editingAlt, orderDirty, risk, selectFile, discardUpload, upload, recover,
-    startAlt, cancelAlt, saveAlt, move, cancelOrder, saveOrder, remove, refresh,
+    startAlt, cancelAlt, saveAlt, move, cancelOrder, saveOrder, remove, refresh, clearFeedback: () => setFeedback(null),
   };
 }

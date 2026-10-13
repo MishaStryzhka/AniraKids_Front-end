@@ -131,16 +131,16 @@ test.each(['draft', 'archived'] as const)('%s final photo cancel restores trigge
   expect(remove).toHaveBeenCalledTimes(1);
 });
 
-test('selected unsent file makes heading the legitimate final-photo focus fallback', async () => {
+test('cancelling a selected upload restores the final-photo deletion focus target', async () => {
   remove.mockResolvedValueOnce({product: product([])});
   const {container} = await mountEditor(product(['a']));
   fireEvent.change(container.querySelector<HTMLInputElement>('input[type="file"]')!, {
     target: {files: [new File(['fixture'], 'pending.jpg', {type: 'image/jpeg'})]},
   });
-  expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toBeDisabled();
+  fireEvent.click(within(screen.getByRole('dialog', {name: 'Přidat fotografii'})).getByRole('button', {name: 'Zrušit'}));
+  expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toBeEnabled();
   confirm('a');
   await screen.findByText('Produkt zatím nemá žádné fotografie.');
-  await waitFor(() => expect(screen.getByRole('heading', {name: 'Fotografie'})).toHaveFocus());
-  expect(screen.getByRole('heading', {name: 'Fotografie'})).toHaveAttribute('tabindex', '-1');
-  expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toBeDisabled();
+  await waitFor(() => expect(screen.getByRole('button', {name: 'Přidat fotografii'})).toHaveFocus());
+  expect(URL.revokeObjectURL).toHaveBeenCalled();
 });
