@@ -74,7 +74,7 @@ const apiError = (status: number | null, code: string, kind: AdminApiErrorKind =
   new AdminApiError({status, code, message: 'raw backend english', kind, details});
 const photo = (publicId: string) => ({publicId, url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', alt: publicId});
 const media = () => screen.getByRole('region', {name: 'Fotografie'});
-const status = () => within(media()).getByRole('status');
+const status = () => within(screen.queryByRole('dialog', {name: 'Přidat fotografii'}) ?? media()).getByRole('status');
 const save = () => screen.getByRole('button', {name: 'Uložit', exact: true});
 function renderRouter(initial = '/admin/produkty/novy') {
   const router = createMemoryRouter([
@@ -374,7 +374,7 @@ test('unknown provider and 502 recovery keep one actionable retry using the real
   const firstRetry = await screen.findByRole('button', {name: 'Ověřit a připojit'});
   fireEvent.click(firstRetry);
   await waitFor(() => expect(status()).toHaveTextContent('Služba fotografie nepotvrdila'));
-  const retries = within(media()).getAllByRole('button').filter(button => /Ověřit a připojit|Zkusit ověřit znovu/.test(button.textContent ?? ''));
+  const retries = within(screen.getByRole('dialog', {name: 'Přidat fotografii'})).getAllByRole('button').filter(button => /Ověřit a připojit|Zkusit ověřit znovu/.test(button.textContent ?? ''));
   expect(retries).toHaveLength(1);
   expect(retries[0]).toBeEnabled();
   expect(completeMock.mock.calls[0][0].publicId).toBe('products/p1/x');

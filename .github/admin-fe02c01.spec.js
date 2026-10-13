@@ -45,6 +45,10 @@ async function mocks(page, seed = product, options = {}) {
   });
   await page.addInitScript(() => localStorage.setItem('persist:auth', JSON.stringify({token: JSON.stringify('admin-test-token')})));
   await page.route('https://example.test/api/users/current', route => json(route, {user: {_id: 'admin-user'}}));
+  await page.route('https://example.test/api/users/favorites/storefront', route => {
+    expect(route.request().method()).toBe('GET');
+    return json(route, {favorites: []});
+  });
   await page.route(matchesAdminProducts, async route => {
     const request = route.request();
     const url = new URL(request.url());
@@ -77,6 +81,7 @@ async function mocks(page, seed = product, options = {}) {
     }
     if (options.upload && method === 'POST' && url.pathname === `${detailPath}/photos/sign`) {
       state.sign++;
+      if (options.signGate) await options.signGate;
       return json(route, {upload: {cloudName: 'fixture', apiKey: 'fixture-key', signature: 'fixture-signature', resourceType: 'image',
         params: {timestamp: 1, folder: 'products/p1', public_id: 'x', overwrite: false, allowed_formats: 'jpg,jpeg,png,webp'}}});
     }
@@ -112,12 +117,13 @@ async function capture(page, name) {
   })));
 }
 async function chooseFile(page) {
-  const chooser = page.waitForEvent('filechooser');
   await page.getByRole('button', {name: 'Přidat fotografii'}).click();
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('dialog').getByRole('button', {name: 'Vybrat fotografii', exact: true}).click();
   await (await chooser).setFiles(UPLOAD_FILE);
 }
 async function assertSelectedActions(page, buttonName, evidenceName) {
-  const actions = page.locator('[data-product-media-section] .selected-actions');
+  const actions = page.locator('[data-product-photo-upload] .selected-actions');
   const parent = actions.locator('..');
   const primary = actions.getByRole('button', {name: buttonName, exact: true});
   await expect(primary).toBeVisible();
@@ -295,19 +301,18 @@ test('allowed final-photo deletion focuses file trigger and cancel restores dele
   await expect(page.getByText('Produkt zatím nemá žádné fotografie.')).toBeVisible();
   await capture(page, 'delete-final-file-trigger');
 });
-test('final-photo deletion uses heading fallback when an unsent selected file disables its trigger', async ({page}) => {
+test('cancelling a selected upload restores the final-photo deletion trigger', async ({page}) => {
   const state = await mocks(page, {...product, photos: [photo('a')]});
   await page.goto(`${APP}/admin/produkty/p1`);
   await chooseFile(page);
-  await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeDisabled();
+  await page.getByRole('dialog').getByRole('button', {name: 'Zrušit'}).click();
+  await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeFocused();
   await page.getByRole('button', {name: 'Odebrat fotografii'}).click();
   await page.getByRole('dialog').getByRole('button', {name: 'Odebrat fotografii'}).click();
-  const heading = page.getByRole('heading', {name: 'Fotografie', exact: true});
-  await expect(heading).toHaveAttribute('tabindex', '-1');
-  await expect(heading).toBeFocused();
-  await expect(page.getByText('fixture.png')).toBeVisible();
+  await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeFocused();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(state.requests.filter(r => r.method === 'POST')).toHaveLength(0);
-  await capture(page, 'delete-final-heading-fallback');
+  await capture(page, 'cancel-selected-then-delete-final');
 });
 test('broken image uses deliberate fallback while successful image stays loaded', async ({page}) => {
   await mocks(page, {...product, photos: [photo('ok'), photo('broken', 'data:image/png;base64,broken')]});
@@ -324,9 +329,12 @@ test('mocked browser upload retains same-ID COMPLETE retry and never reuploads a
   await chooseFile(page);
   await page.getByRole('button', {name: 'Nahrát fotografii'}).click();
   const media = page.locator('[data-product-media-section]');
-  await expect(media.getByRole('status')).toContainText('Připojení fotografie není potvrzené');
-  await expect(media.getByRole('status')).toContainText('Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText('Připojení fotografie není potvrzené');
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText('Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');
   await assertSelectedActions(page, 'Zkusit připojit znovu', 'confirmed-provider-unconfirmed-attachment');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', {name: 'Pokračovat v nahrávání'}).click();
   await page.getByRole('button', {name: 'Zkusit připojit znovu'}).click();
   await expect(media.getByText('1 / 10 uložených')).toBeVisible();
   await expect(media.locator('[data-photo-id="products/p1/x"] img')).toHaveJSProperty('naturalWidth', 96);
@@ -344,8 +352,8 @@ test('unknown provider outcome and 502 keep one truthful recovery action', async
   await page.getByRole('button', {name: 'Nahrát fotografii'}).click();
   await page.getByRole('button', {name: 'Ověřit a připojit'}).click();
   const media = page.locator('[data-product-media-section]');
-  await expect(media.getByRole('status')).toContainText('Služba fotografie nepotvrdila, zda soubor existuje.');
-  const retry = media.getByRole('button', {name: /^(Ověřit a připojit|Zkusit ověřit znovu)$/});
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText('Služba fotografie nepotvrdila, zda soubor existuje.');
+  const retry = page.getByRole('dialog').getByRole('button', {name: /^(Ověřit a připojit|Zkusit ověřit znovu)$/});
   await expect(retry).toHaveCount(1);
   await expect(retry).toBeEnabled();
   await assertSelectedActions(page, 'Ověřit a připojit', 'unknown-provider-502-recovery');
@@ -354,4 +362,63 @@ test('unknown provider outcome and 502 keep one truthful recovery action', async
   expect(state.sign).toBe(1);
   expect(state.provider).toBe(1);
   expect(state.complete).toEqual(['products/p1/x', 'products/p1/x']);
+});
+
+
+test('upload modal handles invalid files, replacement, focus and browser Back with one dialog', async ({page}) => {
+  const state = await mocks(page);
+  await page.goto(`${APP}/admin/produkty`);
+  await page.getByRole('link', {name: /^Sofia/}).first().click();
+  await chooseFile(page);
+  const dialog = page.getByRole('dialog', {name: 'Přidat fotografii'});
+  await expect(dialog).toHaveCount(1);
+  await expect(page.locator('#root')).toHaveAttribute('inert', '');
+  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button', {name: 'Zrušit'})).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button', {name: 'Vybrat jinou fotografii'})).toBeFocused();
+  const chooser = page.waitForEvent('filechooser');
+  await dialog.getByRole('button', {name: 'Vybrat jinou fotografii'}).click();
+  await (await chooser).setFiles({name: 'bad.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>')});
+  await expect(dialog.getByRole('status')).toContainText('Použijte obrázek');
+  await expect(dialog.getByText('fixture.png')).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await expect(page.getByRole('dialog')).toContainText('Neuložené nebo nedokončené změny');
+  await page.getByRole('dialog').getByRole('button', {name: 'Zůstat'}).click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('fixture.png')).toBeVisible();
+  await expect(page.locator('#root')).toHaveAttribute('inert', '');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('#root')).not.toHaveAttribute('inert', '');
+  await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+  await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeFocused();
+  expect(state.requests.filter(r => r.method === 'POST')).toHaveLength(0);
+});
+
+
+test('pending upload stays in its modal until attachment is confirmed', async ({page}) => {
+  await page.setViewportSize({width: 390, height: 640});
+  let release;
+  const signGate = new Promise(resolve => {release = resolve;});
+  const state = await mocks(page, {...product, photos: []}, {upload: true, signGate});
+  await page.goto(`${APP}/admin/produkty/p1`);
+  await chooseFile(page);
+  const dialog = page.getByRole('dialog', {name: 'Přidat fotografii'});
+  await dialog.getByRole('button', {name: 'Nahrát fotografii'}).click();
+  await expect(dialog.getByRole('status')).toContainText('Připravujeme bezpečné nahrání');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Tab');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', {name: 'Zrušit'})).toBeDisabled();
+  await expect(dialog.locator('[data-product-photo-upload]')).toBeFocused();
+  release();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByText('1 / 10 uložených')).toBeVisible();
+  await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeFocused();
+  expect(state.sign).toBe(1);
+  expect(state.provider).toBe(1);
+  expect(state.complete).toEqual(['products/p1/x']);
 });

@@ -1,0 +1,52 @@
+name: Product Photo Modal Verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/admin/products/**'
+      - 'src/design-system/components/Dialog/**'
+      - '.github/admin-fe02c01.spec.js'
+      - '.github/workflows/product-photo-modal-verify.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - name: Photo upload and navigation regressions
+        run: >
+          npm test -- --watchAll=false --runInBand
+          src/admin/products/ProductMediaSection.test.tsx
+          src/admin/products/ProductMediaR2.integration.test.tsx
+          src/admin/products/AdminProductCorePage.test.tsx
+          src/admin/products/AdminProductDeleteFocus.test.tsx
+          src/admin/products/useProductMediaController.test.tsx
+      - run: npm run build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: http://admin-api.test/api/v2
+      - name: Install browser
+        run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Responsive photo workflow
+        run: |
+          npx --yes serve@14.2.4 -s build -l 4173 >/tmp/photo-modal-server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          curl --silent --fail http://127.0.0.1:4173/ >/dev/null
+          npx playwright test .github/admin-fe02c01.spec.js --workers=2 --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: product-photo-modal-failure
+          path: |
+            test-results/
+            test-evidence/admin-fe02c01/

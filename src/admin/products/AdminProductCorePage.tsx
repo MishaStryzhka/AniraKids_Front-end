@@ -467,7 +467,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       onChange={next=>{currentRef.current=next;setCurrent(next);}} onSubmit={submit}/>
     {mode === 'edit' && productId ? <ProductMediaSection ref={mediaRef} key={productId} productId={productId} productName={mediaProductName || current.name}
       status={status} token={token ?? ''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onPendingRiskChange={setMediaPending} onAccessError={handleRequestError}
-      onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete}/> : null}
+      onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete} uploadDialogSuspended={dialogState.kind !== 'none'}/> : null}
     {mode === 'edit' && productId ? <ProductVariantsSection key={`variants:${productId}`} ref={variantsRef} productId={productId}
       token={token ?? ''} initialVariants={variantSeed} onRiskChange={setVariantRisk} onPendingRiskChange={setVariantPending}
       onInventoryRiskChange={setInventoryRisk} onRequestEditorSwitch={requestEditorSwitch}
