@@ -2,6 +2,7 @@ import Button from 'components/Button/Button';
 import { Form } from 'formik';
 import IconPencil from 'images/icons/IconPencil';
 import styled from 'styled-components';
+import { designTokens as t } from '../../../../design-system/tokens/designTokens';
 
 export const ProfileForm = styled(Form)`
   display: flex;
@@ -60,9 +61,13 @@ export const Label = styled.label`
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
+
+  > p { margin: 0; }
+  > p:empty { display: none; }
 `;
 export const Placeholder = styled.p`
+  margin: 0;
   color: ${({ theme }) => theme.color.mainColor5};
   font-family: Open Sans, sans-serif;
   font-size: 14px;
@@ -73,15 +78,61 @@ export const Placeholder = styled.p`
 
 export const Wrapper = styled.div`
   display: flex;
-  padding: 8px 0;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 `;
 
-export const InputText = styled.p`
+export const EmailDetails = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+`;
+
+export const InputText = styled.span`
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: Open Sans, sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.43;
+`;
+
+export const EmailStatus = styled.span`
+  padding: 4px 8px;
+  border-radius: ${t.radius.full};
+  background: ${t.color.status.success.bg};
+  color: ${t.color.status.success.strong};
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+`;
+
+export const PasswordLink = styled.a`
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  color: ${t.color.text.brand};
+  font-family: ${t.font.family.ui};
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  overflow-wrap: anywhere;
+
+  &:visited { color: ${t.color.text.brand}; }
+  &:hover { text-decoration-thickness: 2px; }
+  &:focus-visible {
+    outline: 2px solid ${t.color.focus.ring};
+    outline-offset: 4px;
+    border-radius: ${t.radius[1]};
+  }
 `;
 
 export const ButtonEdit = styled.button`
@@ -94,7 +145,11 @@ export const ButtonEdit = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  color: ${t.color.text.brand};
+  border-radius: ${t.radius[2]};
   cursor: pointer;
+  &:hover:not(:disabled) { background: ${t.color.action.ghost.bgHover}; }
+  &:disabled { opacity: 0.5; cursor: default; }
   &:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 `;
 
@@ -115,6 +170,10 @@ export const StyledButton = styled(Button)`
 `;
 
 export const ButtonVerify = styled.button`
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: ${t.radius[1]};
   cursor: pointer;
   font-family: 'Open Sans Hebrew', sans-serif;
   font-size: 14px;
@@ -123,7 +182,7 @@ export const ButtonVerify = styled.button`
   text-transform: uppercase;
   border: 1px solid;
 
-  color: ${({ theme }) => theme.color.mainColor5};
+  color: ${t.color.text.brand};
   border-color: ${({ theme }) => theme.color.mainColor3};
   background-color: transparent;
 
@@ -131,8 +190,9 @@ export const ButtonVerify = styled.button`
     color: ${({ theme }) => theme.color.mainColor3};
   }
   &:active {
-    background-color: ${({ theme }) => theme.color.mainColor3};
+    background-color: ${t.color.action.secondary.bgActive};
   }
+  &:focus-visible { outline: 2px solid ${t.color.focus.ring}; outline-offset: 2px; }
 `;
 
 
@@ -140,5 +200,6 @@ export const StyledIconPencil = styled(IconPencil)`
   & g { stroke: inherit; }
   width: 20px;
   height: 20px;
-  stroke: ${({ theme }) => theme.color.mainColor5};
+  display: block;
+  stroke: currentColor;
 `;

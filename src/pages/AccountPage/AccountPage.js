@@ -12,7 +12,7 @@ const Content = styled.section`
   width: 100%; max-width: 904px; margin: 0 auto;
   padding: 32px 24px 64px; min-height: 320px;
   h1 { margin: 0 0 24px; }
-  p { margin: 0 0 20px; }
+  > p { margin: 0 0 20px; }
   @media (max-width: 767px) { padding: 24px 16px 40px; }
 `;
 

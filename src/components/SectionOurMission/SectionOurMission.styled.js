@@ -1,3 +1,4 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
@@ -21,7 +22,7 @@ export const PictureContainer = styled(Container)`
 
 export const Title = styled.h3`
   font-family: ${({ $mainPage }) =>
-    $mainPage ? 'Cormorant SC' : 'Open Sans Hebrew'};
+    $mainPage ? t.font.family.editorial : 'Open Sans Hebrew'};
   font-size: ${({ $mainPage }) => ($mainPage ? '32px' : '20px')};
   font-weight: ${({ $mainPage }) => ($mainPage ? '500' : '700')};
   line-height: ${({ $mainPage }) => ($mainPage ? '1.25' : '1.4')};

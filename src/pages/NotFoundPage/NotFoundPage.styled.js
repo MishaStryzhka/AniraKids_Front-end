@@ -1,3 +1,4 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import IconGirl from 'images/icons/IconGirl';
 import styled from 'styled-components';
 
@@ -42,7 +43,7 @@ export const Title = styled.h3`
   @media screen and (max-width: 427.5px) {
     font-size: 16.4vw;
   }
-  font-family: 'Cormorant SC', serif;
+  font-family: ${t.font.family.editorial};
   font-size: 70px;
   font-weight: 500;
   /* font-weight: 600; */
@@ -69,7 +70,7 @@ export const TitleDescription = styled.p`
   @media screen and (max-width: 427.5px) {
     font-size: 6vw;
   }
-  font-family: 'Cormorant SC';
+  font-family: ${t.font.family.editorial};
   font-size: 26px;
   font-weight: 500;
   /* font-weight: 600; */

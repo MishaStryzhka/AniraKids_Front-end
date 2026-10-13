@@ -1,3 +1,4 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import styled from 'styled-components';
 import BgPhotoDesktopUrl from 'images/bg-photo/bg-desktop-1x.jpg';
 import BgPhotoMobileUrl from 'images/bg-photo/photo-bg-mobile-1x.jpg';
@@ -35,7 +36,7 @@ export const MainTitle = styled.h1`
   @media screen and (max-width: 427.5px) {
     font-size: 16vw;
   }
-  font-family: 'Cormorant SC';
+  font-family: ${t.font.family.editorial};
   /* font-size - тимчасово має бути 100px */
   font-size: 70px;
   /*  */

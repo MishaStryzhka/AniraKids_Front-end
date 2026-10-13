@@ -1,3 +1,4 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import styled from 'styled-components';
 
 export const Title = styled.h2`
@@ -7,7 +8,7 @@ export const Title = styled.h2`
   text-transform: uppercase;
 
   margin-top: 24px;
-  font-family: 'Cormorant SC';
+  font-family: ${t.font.family.editorial};
   font-size: 32px;
   font-weight: 500;
   line-height: 1.25;

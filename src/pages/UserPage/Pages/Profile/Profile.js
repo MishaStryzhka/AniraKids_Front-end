@@ -7,9 +7,12 @@ import {
   AvatarWrap,
   ButtonEdit,
   ButtonVerify,
+  EmailDetails,
+  EmailStatus,
   InputText,
   Label,
   Placeholder,
+  PasswordLink,
   ProfileForm,
   SecondWrap,
   StyledButton,
@@ -162,22 +165,24 @@ const Profile = () => {
                   )}
                   {user?.email ? (
                     <Wrapper>
-                      {!isLoading ? (
-                        <InputText>{user?.email}</InputText>
-                      ) : (
-                        <SceletonField />
-                      )}
-                      <ButtonEdit
-                        type="button"
-                        title="Změnit e-mail"
-                        aria-label="Změnit e-mail"
-                        onClick={() => setIsOpenModalChangeEmail(true)}
-                        disabled={isLoading}
-                      >
-                        <StyledIconPencil />
-                      </ButtonEdit>
+                      <EmailDetails>
+                        {!isLoading ? (
+                          <InputText>{user?.email}</InputText>
+                        ) : (
+                          <SceletonField />
+                        )}
+                        <ButtonEdit
+                          type="button"
+                          title="Změnit e-mail"
+                          aria-label="Změnit e-mail"
+                          onClick={() => setIsOpenModalChangeEmail(true)}
+                          disabled={isLoading}
+                        >
+                          <StyledIconPencil />
+                        </ButtonEdit>
+                      </EmailDetails>
                       {user.emailVerified ? (
-                        <p>{t('verified')}</p>
+                        <EmailStatus>{t('verified')}</EmailStatus>
                       ) : (
                         <ButtonVerify
                           type="button"
@@ -239,7 +244,7 @@ const Profile = () => {
                   )}
                 </Label>
 
-                <a href="/refreshPassword">Nastavit nebo obnovit heslo</a>
+                <PasswordLink href="/refreshPassword">Nastavit nebo obnovit heslo</PasswordLink>
 
                 {saveMessage && (
                   <p role={saveMessage.ok ? 'status' : 'alert'} style={{ color: saveMessage.ok ? '#276749' : '#b42318' }}>{saveMessage.text}</p>

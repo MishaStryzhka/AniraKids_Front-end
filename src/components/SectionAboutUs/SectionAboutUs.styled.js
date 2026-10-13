@@ -1,3 +1,4 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { Container } from 'components/Container/Container';
 import styled from 'styled-components';
 
@@ -19,7 +20,7 @@ export const Title = styled.h2`
     font-size: 8vw;
   }
   text-align: center;
-  font-family: 'Cormorant SC';
+  font-family: ${t.font.family.editorial};
   font-size: 32px;
   font-weight: 500;
   line-height: 1.25;
