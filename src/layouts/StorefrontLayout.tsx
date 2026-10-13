@@ -22,6 +22,10 @@ import {
 } from '../navigation/routes';
 import { useContext } from 'react';
 import { useBookingOptional } from '../storefront/booking/BookingProvider';
+import { getCatalogue } from '../storefront/api/publicApi';
+import { usePublicRead } from '../storefront/usePublicRead';
+
+const placeholderImage: string = require('../images/photo-plug.jpg');
 
 const Main = styled.main`
   min-inline-size: 0;
@@ -62,9 +66,30 @@ export function StorefrontLayout() {
   const activeOverlay = overlay.entry === location.key ? overlay.type : 'none';
   const [productPrimaryCategory, setProductPrimaryCategory] = useState<ProductPrimaryCategory | null>(null);
   const [query, setQuery] = useState('');
-
-  const searchStatus: SearchStatus = 'idle';
-  const suggestions: readonly SearchProductSuggestion[] = [];
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const normalizedQuery = query.trim();
+  useEffect(() => {
+    if (activeOverlay !== 'search') {
+      setDebouncedQuery('');
+      return;
+    }
+    const timer = window.setTimeout(() => setDebouncedQuery(normalizedQuery), 250);
+    return () => window.clearTimeout(timer);
+  }, [activeOverlay, normalizedQuery]);
+  const searchKey = activeOverlay === 'search' && normalizedQuery.length >= 2 &&
+    debouncedQuery === normalizedQuery ? normalizedQuery : null;
+  const searchResult = usePublicRead(searchKey, signal => getCatalogue({
+    q: normalizedQuery, sort: 'name', page: 1, limit: 4,
+  }, signal));
+  const searchStatus: SearchStatus = normalizedQuery.length < 2 ? 'idle' :
+    !searchKey || searchResult.loading ? 'loading' : searchResult.error ? 'error' :
+      searchResult.data?.items.length ? 'results' : 'empty';
+  const suggestions: readonly SearchProductSuggestion[] = searchResult.data?.items.map(product => ({
+    slug: product.slug,
+    name: product.name,
+    image: { src: product.photos[0]?.url || placeholderImage, alt: product.photos[0]?.alt || product.name },
+    meta: product.color || '',
+  })) ?? [];
   const hasActiveReservationDraft = useBookingOptional()?.hasActiveDraft ?? false;
 
   const focusOriginRef = useRef<HTMLElement | null>(null);
@@ -83,11 +108,14 @@ export function StorefrontLayout() {
   const currentPrimaryNavigation = resolvePrimaryNavigation(location.pathname, productPrimaryCategory, location.search);
 
   const requestOverlay = useCallback((overlay: Exclude<ActiveOverlay, 'none'>) => {
+    if (overlay === 'search') {
+      setQuery(location.pathname === routes.search ? new URLSearchParams(location.search).get('q') || '' : '');
+    }
     const selector = overlay === 'menu' ? '[data-menu-trigger]' : '[data-search-trigger]';
     focusOriginRef.current = firstVisible(selector);
     focusOriginOverlayRef.current = overlay;
     setOverlay({ type: overlay, entry: location.key });
-  }, [location.key]);
+  }, [location.key, location.pathname, location.search]);
 
   const closeOverlay = useCallback((options?: { restoreFocus?: boolean }) => {
     const origin = focusOriginRef.current;

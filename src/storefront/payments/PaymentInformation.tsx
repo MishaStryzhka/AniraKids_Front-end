@@ -6,6 +6,10 @@ import type { BookingPolicy, PaymentInstructions } from '../api/bookingPolicy';
 import type { Receipt } from '../api/publicApi';
 import { Copy, Facts, Heading, Stack } from '../storefrontStyles';
 import { formatMoney } from '../booking/bookingModel';
+const PaymentFacts = styled(Facts)`
+  > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
+  dd { white-space: nowrap; }
+`;
 const Qr = styled.img`
   display: block;
   width: 256px;
@@ -136,7 +140,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
   return (
     <Stack>
       <Heading>Platba rezervace</Heading>
-      <Facts>
+      <PaymentFacts>
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
           <dd>{formatMoney(payment.advanceRequired)}</dd>
@@ -157,7 +161,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           <dt>Držená vratná kauce</dt>
           <dd>{formatMoney(payment.depositHeld)}</dd>
         </div>
-      </Facts>
+      </PaymentFacts>
       {payable && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
           onChange={event => setChoice(event.target.value)}>
@@ -183,7 +187,6 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           Zbývá doplatit {formatMoney(remaining)} hotově při převzetí:
           nájemné {formatMoney(payment.rentalBalance)} a vratná kauce{' '}
           {formatMoney(payment.depositRequired - payment.depositHeld)}.
-          Tato volba nepotvrzuje přijetí platby. Na QR platbu můžete přepnout výše.
         </Copy>
       ) : instructions ? (
         <>
@@ -246,7 +249,6 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           Neodesílejte platbu podle dřívějšího QR kódu.
         </Copy>
       )}
-      <Copy>Částky a stav odpovídají poslednímu načtení rezervace.</Copy>
     </Stack>
   );
 }

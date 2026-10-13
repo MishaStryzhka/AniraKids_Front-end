@@ -31,11 +31,9 @@ import {
   verifiedEmail,
 } from '../../../../redux/auth/operations';
 import { useTranslation } from 'react-i18next';
-import ModalBecomeLandlord from 'components/Modals/ModalBecomeLandlord/ModalBecomeLandlord';
 import { BeatLoader } from 'react-spinners';
 import { clearDone } from '../../../../redux/auth/slice';
 import { TextDone } from 'components/Modals/Modal.styled';
-import ButtonAdd from 'components/Buttons/ButtonAdd/ButtonAdd';
 import {
   SceletonAvatar,
   SceletonDescription,
@@ -61,8 +59,6 @@ const Profile = () => {
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangeEmail, setIsOpenModalChangeEmail] = useState(false);
-  const [isOpenModalBecomeLandlord, setIsOpenModalBecomeLandlord] =
-    useState(false);
 
   const [isOpenBillingDetails, setIsOpenBillingDetails] = useState(false);
   const [isOpenBankAccount, setIsOpenBankAccount] = useState(false);
@@ -336,26 +332,6 @@ const Profile = () => {
                     </Modal>
                   )}
                 </AvatarLabel>
-                {user.typeUser !== 'owner' && (
-                  <>
-                    <ButtonAdd
-                      onClick={() => setIsOpenModalBecomeLandlord(true)}
-                      disabled={isLoading}
-                    >
-                      {t('BECOME_LANDLORD')}
-                    </ButtonAdd>
-                  </>
-                )}
-                {isOpenModalBecomeLandlord && (
-                  <Modal
-                    prohibitClosingByBackdrop
-                    closeModal={() => setIsOpenModalBecomeLandlord(false)}
-                  >
-                    <ModalBecomeLandlord
-                      onClick={() => setIsOpenModalBecomeLandlord(false)}
-                    ></ModalBecomeLandlord>
-                  </Modal>
-                )}
               </SecondWrap>
             </ProfileForm>
           );
