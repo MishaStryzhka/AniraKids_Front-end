@@ -137,7 +137,7 @@ test('Czech headings and navigation use custom glyphs without fallback',async({p
   await page.goto(APP+'/saty');
   await page.evaluate(async()=>{
     const h=document.querySelector('h1');
-    h.textContent='Dívčí šaty — Příliš žluťoučký kůň úpěl ďábelské ódy';
+    h.textContent='Dívčí šaty — Příliš žluťoučký kůň úpěl ďábelské ódy — ČĎĚŇŘŠŤŮŽ';
     await document.fonts.ready;
   });
   const cdp=await page.context().newCDPSession(page);
@@ -153,7 +153,7 @@ test('Czech headings and navigation use custom glyphs without fallback',async({p
     await page.evaluate(()=>document.fonts.ready);
     const editorial=await fontsFor('h1');
     expect(editorial.length).toBeGreaterThan(0);
-    expect(editorial.every(f=>f.isCustomFont && /Cormorant/i.test(f.familyName))).toBe(true);
+    expect(editorial.every(f=>f.isCustomFont && /Lora/i.test(f.familyName))).toBe(true);
     if(width<1024)await page.getByRole('button',{name:'Otevřít menu'}).click();
     const nav=page.getByRole('navigation',{name:width<1024?'Menu':'Hlavní navigace',exact:true});
     const women=nav.getByRole('link',{name:'Dámské šaty',exact:true});

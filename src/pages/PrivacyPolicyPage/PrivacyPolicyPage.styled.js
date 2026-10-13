@@ -1,10 +1,11 @@
+import { designTokens as t } from '../../design-system/tokens/designTokens';
 import styled from 'styled-components';
 
 export const Title = styled.h2`
   @media screen and (max-width: 427.5px) {
     font-size: 4.7vw;
   }
-  font-family: 'Cormorant SC';
+  font-family: ${t.font.family.editorial};
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;

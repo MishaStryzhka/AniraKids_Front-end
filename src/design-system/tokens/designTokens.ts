@@ -86,7 +86,7 @@ export const designTokens = {
   color: semanticColor,
   font: {
     family: {
-      editorial: '"Cormorant Garamond", Georgia, serif',
+      editorial: '"Lora", Georgia, serif',
       ui: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     },
     weight: { regular: 400, medium: 500, semibold: 600 },
