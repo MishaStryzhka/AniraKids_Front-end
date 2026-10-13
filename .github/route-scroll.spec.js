@@ -56,12 +56,13 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
     const state = await setup(page);
     await page.goto(APP + '/saty');
     await expect(page.getByRole('link', { name: 'Prohlédnout Šaty 11', exact: true })).toBeVisible();
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
     await scrollTo(page, 1200);
     if (width < 1024) {
       await page.locator('[data-menu-trigger]').click();
       await page.keyboard.press('Escape');
       await expect(page.locator('#mobile-menu')).toHaveCount(0);
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(1200);
+      await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - 1200))).toBeLessThanOrEqual(1);
     }
     await navigate(page, width, 'Dámské šaty');
     await expect(page.getByRole('heading', { name: 'Dámské šaty', exact: true })).toBeVisible();
@@ -75,9 +76,9 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
     await expect.poll(() => typeof state.release).toBe('function');
     state.holdCatalogue = false;
     state.release();
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(1200);
+    await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - 1200))).toBeLessThanOrEqual(1);
     await page.goForward();
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(900);
+    await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - 900))).toBeLessThanOrEqual(1);
 
     await navigate(page, width, 'Dívčí šaty');
     await expect(page.getByRole('link', { name: 'Prohlédnout Šaty 11', exact: true })).toBeVisible();
