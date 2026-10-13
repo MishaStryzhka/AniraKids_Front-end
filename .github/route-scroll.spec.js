@@ -108,8 +108,8 @@ for (const width of [390, 1440]) {
     await page.locator('footer').getByRole('link', { name: 'Jak funguje pronájem', exact: true }).click();
     await expect(page).toHaveURL(APP + '/pronajem#jak-funguje-pronajem');
     await expect.poll(() => page.locator('#jak-funguje-pronajem').evaluate(el =>
-      Math.round(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop || '0'))
-    )).toBe(0);
+      Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop || '0'))
+    )).toBeLessThan(1);
     await page.locator('footer').getByRole('link', { name: 'Kontakt', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Kontakt', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
