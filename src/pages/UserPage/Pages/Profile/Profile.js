@@ -1,4 +1,4 @@
-import { Field, Formik } from 'formik';
+import { Formik } from 'formik';
 import { validationProfileSchema } from 'schemas';
 import {
   Avatar,
@@ -54,6 +54,7 @@ const Profile = () => {
   const [saveMessage, setSaveMessage] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isOpenModalChangeEmail, setIsOpenModalChangeEmail] = useState(false);
 
 
@@ -79,9 +80,26 @@ const Profile = () => {
   }
 
   const isChangeAvatarUrl = e => {
-    const { files } = e.currentTarget;
-    setAvatar(files[0]);
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+      setSaveMessage({ ok: false, text: 'Vyberte obrázek o velikosti nejvýše 5 MB.' });
+      return;
+    }
+    setSaveMessage(null);
+    setAvatar(file);
     setIsOpenModalAddAvatar(true);
+  };
+
+  const closeAvatarEditor = () => {
+    setIsOpenModalAddAvatar(false);
+    setAvatar(null);
+  };
+
+  const saveAvatar = async file => {
+    await dispatch(updateUserInfo({ avatarUrl: file })).unwrap();
+    setSaveMessage({ ok: true, text: 'Profilová fotografie byla uložena.' });
   };
 
   const onSubmit = async (values, { resetForm }) => {
@@ -112,7 +130,6 @@ const Profile = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <Formik
         initialValues={{
-          avatarUrl: user?.avatar || '',
           firstName: user?.firstName || '',
           lastName: user?.lastName || '',
           companyName: user?.companyName || '',
@@ -130,8 +147,6 @@ const Profile = () => {
           values,
           errors,
           touched,
-          setFieldValue,
-          setTouched,
           handleChange,
           handleBlur,
           dirty,
@@ -265,29 +280,25 @@ const Profile = () => {
               </Wrap>
               <SecondWrap>
                 <AvatarLabel>
-                  <Field
+                  <input
                     style={{ display: 'none' }}
                     type="file"
                     id="avatarUrl"
                     value=""
                     name="avatarUrl"
-                    onChange={e => {
-                      setTouched({ ...touched, avatarUrl: true });
-                      isChangeAvatarUrl(e);
-                    }}
+                    accept="image/*"
+                    aria-label={t('profilePhoto')}
+                    disabled={isLoading || isSavingAvatar}
+                    onChange={isChangeAvatarUrl}
                   />
-                  <AvatarWrap $avatar={values.avatarUrl} htmlFor="avatarUrl">
-                    {values.avatarUrl ? (
+                  <AvatarWrap htmlFor="avatarUrl">
+                    {user.avatar ? (
                       <>
                         {!isLoading ? (
                           <Avatar
                             width={197}
                             height={197}
-                            src={
-                              typeof values.avatarUrl === 'object'
-                                ? URL.createObjectURL(values.avatarUrl)
-                                : values.avatarUrl
-                            }
+                            src={user.avatar}
                             alt="avatar"
                           />
                         ) : (
@@ -316,14 +327,13 @@ const Profile = () => {
                   )}
                   {isOpenModalAddAvatar && (
                     <Modal
-                      closeModal={() => {
-                        setIsOpenModalAddAvatar(false);
-                      }}
+                      closeModal={isSavingAvatar ? undefined : closeAvatarEditor}
                     >
                       <ModalAddAvatar
                         avatar={avatar}
-                        setFieldValue={setFieldValue}
-                        setIsOpenModalAddAvatar={setIsOpenModalAddAvatar}
+                        onSave={saveAvatar}
+                        onClose={closeAvatarEditor}
+                        onSavingChange={setIsSavingAvatar}
                       />
                     </Modal>
                   )}

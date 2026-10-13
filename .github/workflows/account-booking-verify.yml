@@ -5,9 +5,14 @@ on:
     paths:
       - src/storefront/**
       - src/pages/AccountPage/**
+      - src/pages/UserPage/Pages/Profile/**
+      - src/components/CropperWrap/**
+      - src/components/Modals/ModalAddAvatar/**
+      - src/helpers/cropImage.js
       - src/components/App.js
       - src/components/navigation/**
       - .github/account-booking.spec.js
+      - .github/avatar-editor.spec.js
       - .github/workflows/account-booking-verify.yml
 permissions:
   contents: read
@@ -27,7 +32,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Account history and draft tests
-        run: CI=true npm test -- --watchAll=false --runInBand src/pages/AccountPage/AccountReservationsPage.test.tsx
+        run: CI=true npm test -- --watchAll=false --runInBand src/pages/AccountPage/AccountReservationsPage.test.tsx src/pages/UserPage/Pages/Profile/Profile.test.js src/pages/UserPage/Pages/Profile/Profile.nullSafety.test.js src/components/CropperWrap/CropperWrap.test.js
       - name: Build against isolated browser fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
@@ -43,7 +48,7 @@ jobs:
           npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/account-booking/server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
       - name: Account and contact UX at 390 / 768 / 1440
-        run: npx playwright test .github/account-booking.spec.js --workers=2 --reporter=line
+        run: npx playwright test .github/account-booking.spec.js .github/avatar-editor.spec.js --workers=2 --reporter=line
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,4 +57,5 @@ jobs:
           if-no-files-found: error
           path: |
             test-evidence/account-booking/
+            test-evidence/avatar-editor/
             test-results/

@@ -1,97 +1,96 @@
-import { useAuth } from 'hooks';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Cropper from 'react-easy-crop';
-import { PreviewBox, PreviewButtonWraper } from './CropperWrap.styled';
+import {
+  PreviewBox, PreviewButtonWraper, CropHint, CropError, ZoomControl, CropButton,
+} from './CropperWrap.styled';
 import { getCroppedImg } from 'helpers';
-import { ButtonBack } from 'components/Modals/ModalLogOut/ModalLogOut.styled';
-import Button from 'components/Button/Button';
 
-const CropperWrap = ({ image, name, setImage, onClose }) => {
+const CropperWrap = ({ image, onSave, onClose, onSavingChange }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState(null);
-  const [avatarWidth, setAvatarWidth] = useState(300);
-  const [avatarHeight, setAvatarHeight] = useState(400);
+  const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageBase64, setImageBase64] = useState(null);
-  const { user } = useAuth();
+  const [error, setError] = useState('');
+  const saving = useRef(false);
 
   useEffect(() => {
-    if (image) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(image);
-      img.onload = function () {
-        setAvatarWidth(img.width);
-        setAvatarHeight(img.height);
-      };
-
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.addEventListener('load', () => {
-        setImageBase64(reader.result);
-      });
-    }
+    if (!image) return;
+    const url = URL.createObjectURL(image);
+    setImageUrl(url);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedArea(null);
+    setError('');
+    return () => URL.revokeObjectURL(url);
   }, [image]);
 
-  const onCropComplete = useCallback(
-    (croppedArea, croppedAreaPixels) => {
-      setCroppedArea(croppedAreaPixels);
-    },
-    [setCroppedArea]
-  );
+  const onCropComplete = useCallback((_, pixels) => setCroppedArea(pixels), []);
 
-  const hendleSave = async () => {
+  const handleSave = async () => {
+    if (saving.current || !imageUrl || !croppedArea) return;
+    saving.current = true;
     setIsLoading(true);
-    const canvas = await getCroppedImg(URL.createObjectURL(image), croppedArea);
-
-    canvas.toBlob(blob => {
-      const file = new File([blob], `${user.userID}-${name}`, {
-        type: image.type,
+    onSavingChange(true);
+    setError('');
+    try {
+      const canvas = await getCroppedImg(imageUrl, croppedArea);
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(result => {
+          if (result) resolve(result);
+          else reject(new Error('Image encoding failed'));
+        }, 'image/jpeg', 0.92);
       });
-
-      setImage(file);
-    });
-    setIsLoading(false);
-    onClose();
+      if (blob.size > 5 * 1024 * 1024) throw new Error('Image too large');
+      await onSave(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+      onClose();
+    } catch (failure) {
+      setError('Fotografii se nepodařilo uložit. Zkuste to prosím znovu.');
+    } finally {
+      saving.current = false;
+      setIsLoading(false);
+      onSavingChange(false);
+    }
   };
 
-  if (!imageBase64) {
-    return;
-  }
-
   return (
-    <>
-      <PreviewBox width={avatarWidth} height={avatarHeight}>
-        <Cropper
-          image={imageBase64}
-          crop={crop}
-          zoom={zoom}
-          aspect={3 / 3}
-          onCropChange={setCrop}
-          onCropComplete={onCropComplete}
-          onZoomChange={setZoom}
-          zoomSpeed={0.1}
-        />
+    <div aria-busy={isLoading}>
+      <CropHint id="avatar-crop-hint">Posunutím fotografie upravte výřez. Velikost změňte posuvníkem.</CropHint>
+      <PreviewBox aria-label="Náhled profilové fotografie" $busy={isLoading}>
+        {imageUrl && (
+          <Cropper
+            image={imageUrl}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            cropShape="round"
+            showGrid={false}
+            objectFit="cover"
+            onCropChange={isLoading ? () => {} : setCrop}
+            onCropAreaChange={onCropComplete}
+            onZoomChange={isLoading ? () => {} : setZoom}
+            zoomSpeed={0.1}
+            mediaProps={{ alt: 'Fotografie k oříznutí', onError: () => {
+              setCroppedArea(null);
+              setError('Fotografii nelze načíst. Vyberte prosím jiný obrázek.');
+            } }}
+          />
+        )}
       </PreviewBox>
-      <PreviewButtonWraper style={{ marginTop: 24 }}>
-        <ButtonBack
-          onClick={() => {
-            onClose();
-          }}
-        >
-          Zrušit
-        </ButtonBack>
-        <Button
-          type="button"
-          disabled={isLoading}
-          onClick={e => {
-            hendleSave(e);
-          }}
-        >
-          Uložit
-        </Button>
+      <ZoomControl>
+        <span>Přiblížení</span>
+        <input type="range" min="1" max="3" step="0.01" value={zoom}
+          aria-describedby="avatar-crop-hint" disabled={isLoading || !croppedArea}
+          onChange={event => setZoom(Number(event.target.value))} />
+      </ZoomControl>
+      {error && <CropError role="alert">{error}</CropError>}
+      <PreviewButtonWraper>
+        <CropButton type="button" $secondary disabled={isLoading} onClick={onClose}>Zrušit</CropButton>
+        <CropButton type="button" disabled={isLoading || !croppedArea} onClick={handleSave}>
+          {isLoading ? 'Ukládání…' : 'Uložit'}
+        </CropButton>
       </PreviewButtonWraper>
-    </>
+    </div>
   );
 };
 

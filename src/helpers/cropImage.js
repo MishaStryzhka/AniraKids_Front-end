@@ -3,7 +3,7 @@ const createImage = url =>
     const image = new Image();
     image.addEventListener('load', () => resolve(image));
     image.addEventListener('error', error => reject(error));
-    image.setAttribute('crossOrigin', 'anonymus');
+    image.setAttribute('crossOrigin', 'anonymous');
     image.src = url;
   });
 
@@ -12,9 +12,26 @@ const getRadianAngle = degreeValue => {
 };
 
 export default async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
+  if (!pixelCrop || pixelCrop.width <= 0 || pixelCrop.height <= 0) {
+    throw new Error('Crop is not ready');
+  }
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas is unavailable');
+
+  // Avatar crops need no full-size intermediate canvas, even for panoramas.
+  if (rotation === 0) {
+    const size = Math.min(1024, pixelCrop.width, pixelCrop.height);
+    const scale = size / Math.min(pixelCrop.width, pixelCrop.height);
+    canvas.width = Math.round(pixelCrop.width * scale);
+    canvas.height = Math.round(pixelCrop.height * scale);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
+      0, 0, canvas.width, canvas.height);
+    return canvas;
+  }
 
   const maxSize = Math.max(image.width, image.height);
   const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
