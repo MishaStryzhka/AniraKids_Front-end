@@ -1,7 +1,9 @@
 import {forwardRef, useImperativeHandle, useCallback, useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
+import {Pencil} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
 import {Dialog} from '../../design-system/components/Dialog';
+import {IconButton} from '../../design-system/components/IconButton';
 import {Divider} from '../../design-system/components/Divider';
 import {Spinner} from '../../design-system/components/Spinner';
 import {StatusBadge} from '../../design-system/components/StatusBadge';
@@ -9,6 +11,7 @@ import {designTokens as t} from '../../design-system/tokens/designTokens';
 import type {AdminProductPhoto, AdminProductStatus} from '../api/products';
 import type {ActivationDomainGuardSnapshot} from './productActivationModel';
 import {useProductMediaController, type UploadPhase} from './useProductMediaController';
+import {ProductPhotoEditor} from './ProductPhotoEditor';
 
 const Section = styled.section`
   inline-size:100%;max-inline-size:840px;margin-block-start:${t.space[8]};display:grid;gap:${t.space[6]};min-inline-size:0;
@@ -51,8 +54,14 @@ const Selected = styled.div`
   @media(max-width:767px){.selected-actions{display:grid;grid-template-columns:minmax(0,1fr);}}
 `;
 const UploadPreview = styled.img`
-  inline-size:100%;block-size:240px;max-block-size:35dvh;object-fit:contain;
+  display:block;inline-size:100%;block-size:240px;max-block-size:35dvh;object-fit:contain;
   border-radius:${t.radius[2]};background:${t.color.bg.subtle};
+`;
+const PreviewFrame = styled.div`position:relative;min-inline-size:0;`;
+const EditPhotoButton = styled(IconButton)`
+  position:absolute;inset-block-start:8px;inset-inline-end:8px;
+  background:${t.color.bg.surface};border:1px solid ${t.color.border.default};
+  &>svg{inline-size:18px;block-size:18px;}
 `;
 const FileChoice = styled.div`
   display:grid;justify-items:center;gap:${t.space[3]};padding:${t.space[6]};
@@ -123,6 +132,7 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
   const uploadBodyRef = useRef<HTMLDivElement>(null);
   const [choosingFile, setChoosingFile] = useState(false);
   const [uploadMinimized, setUploadMinimized] = useState(false);
+  const [editingAttemptId, setEditingAttemptId] = useState<number|null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   const lifetime = useRef({productId: props.productId, alive: true, generation: 0, frames: new Set<number>()});
@@ -192,12 +202,13 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
   useEffect(() => onPendingRiskChange?.(pendingRisk), [onPendingRiskChange, pendingRisk]);
   const disabled = c.guard !== 'available' || busy || !props.token;
   const uploadDialogOpen = (choosingFile || Boolean(c.attempt && !uploadMinimized)) && !props.uploadDialogSuspended;
+  const editingPhoto = Boolean(c.attempt && editingAttemptId === c.attempt.attemptId && c.uploadPhase === 'selected');
   useEffect(() => {
-    if (!uploadDialogOpen) return;
+    if (!uploadDialogOpen || editingPhoto) return;
     const body = uploadBodyRef.current;
     if (busy) body?.focus();
     else body?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
-  }, [uploadDialogOpen, busy, c.attempt?.attemptId]);
+  }, [uploadDialogOpen, busy, c.attempt?.attemptId, editingPhoto]);
   const closeUpload = () => {
     if (busy || c.getActivationGuardSnapshot().pendingMutation) return;
     setChoosingFile(false);
@@ -240,13 +251,17 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
       {c.photos.length >= 10 ? <Status>Produkt může mít maximálně 10 fotografií.</Status> : null}
       {c.attempt && uploadMinimized ? <Button variant="secondary" onClick={() => setUploadMinimized(false)}>Pokračovat v nahrávání</Button> : null}
     </Upload>
-    <Dialog open={uploadDialogOpen} title="Přidat fotografii" description="Vyberte fotografii produktu a zkontrolujte její náhled před nahráním."
+    <Dialog open={uploadDialogOpen && !editingPhoto} title="Přidat fotografii" description="Vyberte fotografii produktu a zkontrolujte její náhled před nahráním."
       onEscape={closeUpload} resolveRestoreFocus={() => sectionRef.current?.querySelector<HTMLElement>('button:not(:disabled)') ?? sectionRef.current?.querySelector<HTMLElement>('#product-media-title') ?? null}>
       <Upload data-product-photo-upload ref={uploadBodyRef} tabIndex={-1} onKeyDown={event => {
         if (busy && event.key === 'Tab') event.preventDefault();
       }}>
       {c.attempt ? <Selected>
-        {c.attempt.previewUrl ? <UploadPreview src={c.attempt.previewUrl} alt="Náhled vybrané fotografie"/> : null}
+        {c.attempt.previewUrl ? <PreviewFrame>
+          <UploadPreview src={c.attempt.previewUrl} alt="Náhled vybrané fotografie"/>
+          {c.uploadPhase === 'selected' ? <EditPhotoButton variant="secondary" aria-label="Upravit fotografii" title="Upravit"
+            disabled={disabled} icon={<Pencil aria-hidden="true"/>} onClick={() => {c.clearFeedback();setEditingAttemptId(c.attempt!.attemptId);}}/> : null}
+        </PreviewFrame> : null}
         <strong>{c.attempt.filename}</strong>
         {c.uploadPhase === 'selected' ? <Button variant="secondary" disabled={disabled} onClick={() => inputRef.current?.click()}>Vybrat jinou fotografii</Button> : null}
         <Status role="status" aria-live="polite" aria-atomic="true">{statusText}</Status>
@@ -270,6 +285,9 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
       </>}
       </Upload>
     </Dialog>
+    {editingPhoto && c.attempt ? <ProductPhotoEditor key={c.attempt.attemptId} open={uploadDialogOpen}
+      source={c.attempt.file} sourceUrl={c.attempt.previewUrl} onCancel={() => setEditingAttemptId(null)}
+      onApply={file => {c.selectFile(file);setEditingAttemptId(null);}}/> : null}
     {c.photos.length === 0 ? <Empty><strong>Produkt zatím nemá žádné fotografie.</strong>
       <Copy>Přidejte první fotografii. Po připojení se automaticky stane hlavní fotografií produktu.</Copy></Empty>
       : <List data-photo-list>{ordered.map((photo, index) => <Item key={photo.publicId} data-photo-id={photo.publicId}>
