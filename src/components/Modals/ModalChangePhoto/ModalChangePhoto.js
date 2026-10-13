@@ -18,7 +18,7 @@ const ModalChangePhoto = ({ onClick }) => {
     <ModalWindow>
       <ModalTitle>{t('addPhoto')}</ModalTitle>
       <Picture>
-        <img src={PhotoPlug} alt="Фото-заглушка" />
+        <img src={PhotoPlug} alt="Zástupná fotografie" />
       </Picture>
       <LabelModal>
         <InputModal placeholder={t('textPlaceholder')} />

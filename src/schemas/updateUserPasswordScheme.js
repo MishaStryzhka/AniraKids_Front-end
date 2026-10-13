@@ -2,19 +2,19 @@ import * as Yup from 'yup';
 
 export const validPasswordScheme = Yup.object().shape({
   password: Yup.string()
-    .required('Field is required')
-    .min(8, 'Пароль має бути не менше 8 символів')
-    .max(32, 'Пароль має бути менше 32 символів')
+    .required('Toto pole je povinné.')
+    .min(8, 'Heslo musí mít alespoň 8 znaků.')
+    .max(32, 'Heslo může mít nejvýše 32 znaků.')
     .matches(
       /^(?=.*[A-Z])(?=.*\d).{8,16}$/,
-      'Пароль повинен містити мінімум 8 латинських символів, одну велику літеру, одну цифру'
+      'Heslo musí obsahovat alespoň 8 znaků, jedno velké písmeno latinky a jednu číslici.'
     ),
   newPassword: Yup.string()
-    .required('Field is required')
-    .min(8, 'Пароль має бути не менше 8 символів')
-    .max(32, 'Пароль має бути менше 32 символів')
+    .required('Toto pole je povinné.')
+    .min(8, 'Heslo musí mít alespoň 8 znaků.')
+    .max(32, 'Heslo může mít nejvýše 32 znaků.')
     .matches(
       /^(?=.*[A-Z])(?=.*\d).{8,16}$/,
-      'Пароль повинен містити мінімум 8 латинських символів, одну велику літеру, одну цифру'
+      'Heslo musí obsahovat alespoň 8 znaků, jedno velké písmeno latinky a jednu číslici.'
     ),
 });

@@ -66,7 +66,7 @@ const SectionAboutUs = () => {
             srcSet={`${PhotoAboutMobile1x} 1x, ${PhotoAboutMobile2x} 2x`}
           />
 
-          <Image srcSet={`${PhotoAbout1x}`} alt="Гардероб" />
+          <Image srcSet={`${PhotoAbout1x}`} alt="Šatník" />
         </Picture>
       </PictureContainer>
       <Container>

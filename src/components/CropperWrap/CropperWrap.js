@@ -79,7 +79,7 @@ const CropperWrap = ({ image, name, setImage, onClose }) => {
             onClose();
           }}
         >
-          Скасувати
+          Zrušit
         </ButtonBack>
         <Button
           type="button"
@@ -88,7 +88,7 @@ const CropperWrap = ({ image, name, setImage, onClose }) => {
             hendleSave(e);
           }}
         >
-          Зберегти
+          Uložit
         </Button>
       </PreviewButtonWraper>
     </>
