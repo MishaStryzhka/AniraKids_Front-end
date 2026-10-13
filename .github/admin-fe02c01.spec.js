@@ -100,6 +100,7 @@ async function mocks(page, seed = product, options = {}) {
   });
   if (options.upload) await page.route('https://api.cloudinary.com/v1_1/fixture/image/upload', route => {
     state.provider++;
+    if (options.onProviderUpload) options.onProviderUpload(route.request());
     expect(route.request().method()).toBe('POST');
     expect(route.request().headers().authorization).toBeUndefined();
     if (options.providerUnknown) return route.abort('failed');
@@ -116,11 +117,11 @@ async function capture(page, name) {
     dialogCount: document.querySelectorAll('[role="dialog"]').length,
   })));
 }
-async function chooseFile(page) {
+async function chooseFile(page, file = UPLOAD_FILE) {
   await page.getByRole('button', {name: 'Přidat fotografii'}).click();
   const chooser = page.waitForEvent('filechooser');
   await page.getByRole('dialog').getByRole('button', {name: 'Vybrat fotografii', exact: true}).click();
-  await (await chooser).setFiles(UPLOAD_FILE);
+  await (await chooser).setFiles(file);
 }
 async function assertSelectedActions(page, buttonName, evidenceName) {
   const actions = page.locator('[data-product-photo-upload] .selected-actions');
@@ -377,7 +378,7 @@ test('upload modal handles invalid files, replacement, focus and browser Back wi
   await page.keyboard.press('Shift+Tab');
   await expect(dialog.getByRole('button', {name: 'Zrušit'})).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(dialog.getByRole('button', {name: 'Vybrat jinou fotografii'})).toBeFocused();
+  await expect(dialog.getByRole('button', {name: 'Upravit fotografii'})).toBeFocused();
   const chooser = page.waitForEvent('filechooser');
   await dialog.getByRole('button', {name: 'Vybrat jinou fotografii'}).click();
   await (await chooser).setFiles({name: 'bad.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>')});
@@ -421,4 +422,84 @@ test('pending upload stays in its modal until attachment is confirmed', async ({
   expect(state.sign).toBe(1);
   expect(state.provider).toBe(1);
   expect(state.complete).toEqual(['products/p1/x']);
+});
+
+
+async function cropFixture(page) {
+  const data = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');canvas.width=600;canvas.height=400;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='rgb(180,40,40)';ctx.fillRect(0,0,200,400);
+    ctx.fillStyle='rgb(20,160,80)';ctx.fillRect(200,0,200,400);
+    ctx.fillStyle='rgb(40,40,180)';ctx.fillRect(400,0,200,400);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  return {name:'crop-fixture.png',mimeType:'image/png',buffer:Buffer.from(data,'base64')};
+}
+for (const width of [390,768,1440]) test(`photo editor crop and upload ${width}`, async ({page}) => {
+  await page.setViewportSize({width,height:852});
+  const state=await mocks(page,{...product,photos:[]},{upload:true,onProviderUpload:request => {
+    const body=request.postDataBuffer();
+    expect(body.toString('latin1')).toContain('filename="crop-fixture-orez.png"');
+    const start=body.indexOf(Buffer.from([137,80,78,71,13,10,26,10]));
+    expect(start).toBeGreaterThan(0);
+    expect(body.readUInt32BE(start+16)).toBe(100);
+    expect(body.readUInt32BE(start+20)).toBe(100);
+  }});
+  await page.goto(`${APP}/admin/produkty/p1`);
+  await page.getByLabel('Barva').fill('Růžová');
+  await chooseFile(page,await cropFixture(page));
+  const edit=page.getByRole('button',{name:'Upravit fotografii',exact:true});
+  const box=await edit.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
+  await edit.click();
+  const editor=page.getByRole('dialog',{name:'Upravit fotografii',exact:true});
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await editor.getByLabel('Poměr stran').selectOption('square');
+  await editor.getByLabel('Přiblížení').press('End');
+  await expect(editor.getByLabel('Přiblížení')).toHaveValue('4');
+  await capture(page,`photo-crop-editor-${width}`);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+  await editor.getByRole('button',{name:'Uložit',exact:true}).click();
+  const upload=page.getByRole('dialog',{name:'Přidat fotografii',exact:true});
+  await expect(upload).toBeVisible();
+  await expect(upload.getByText('crop-fixture-orez.png')).toBeVisible();
+  const preview=upload.getByRole('img',{name:'Náhled vybrané fotografie'});
+  await expect(preview).toHaveJSProperty('naturalWidth',100);
+  await expect(preview).toHaveJSProperty('naturalHeight',100);
+  const pixel=await preview.evaluate(img => {const canvas=document.createElement('canvas');canvas.width=100;canvas.height=100;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);return [...ctx.getImageData(0,0,1,1).data];});
+  expect(pixel).toEqual([20,160,80,255]);
+  expect(state.sign).toBe(0);expect(state.provider).toBe(0);expect(state.complete).toEqual([]);
+  await upload.getByRole('button',{name:'Nahrát fotografii'}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('1 / 10 uložených')).toBeVisible();
+  expect(state.sign).toBe(1);expect(state.provider).toBe(1);expect(state.complete).toEqual(['products/p1/x']);
+  await expect(page.getByLabel('Barva')).toHaveValue('Růžová');
+});
+
+test('crop cancel preserves the original; browser Back keeps one dialog and restores the crop draft', async ({page}) => {
+  const state=await mocks(page);
+  await page.goto(`${APP}/admin/produkty`);
+  await page.getByRole('link',{name:/^Sofia/}).first().click();
+  await chooseFile(page,await cropFixture(page));
+  const original=await page.getByRole('img',{name:'Náhled vybrané fotografie'}).getAttribute('src');
+  await page.getByRole('button',{name:'Upravit fotografii',exact:true}).click();
+  const editor=page.getByRole('dialog',{name:'Upravit fotografii',exact:true});
+  await editor.getByLabel('Poměr stran').selectOption('square');
+  await editor.getByLabel('Přiblížení').press('End');
+  await page.goBack();
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await page.getByRole('dialog').getByRole('button',{name:'Zůstat'}).click();
+  await expect(editor).toBeVisible();
+  await expect(editor.getByLabel('Poměr stran')).toHaveValue('square');
+  await expect(editor.getByLabel('Přiblížení')).toHaveValue('4');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog',{name:'Přidat fotografii'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Upravit fotografii',exact:true})).toBeFocused();
+  await expect(page.getByRole('img',{name:'Náhled vybrané fotografie'})).toHaveAttribute('src',original);
+  await expect(page.getByText('crop-fixture.png')).toBeVisible();
+  await expect(page.locator('#root')).toHaveAttribute('inert','');
+  await page.getByRole('dialog').getByRole('button',{name:'Zrušit',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('#root')).not.toHaveAttribute('inert','');
+  expect(state.requests.filter(r=>r.method==='POST')).toHaveLength(0);
 });

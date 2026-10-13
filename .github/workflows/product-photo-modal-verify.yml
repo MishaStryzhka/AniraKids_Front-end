@@ -29,6 +29,8 @@ jobs:
           src/admin/products/AdminProductCorePage.test.tsx
           src/admin/products/AdminProductDeleteFocus.test.tsx
           src/admin/products/useProductMediaController.test.tsx
+          src/admin/products/ProductPhotoEditor.test.tsx
+          src/admin/products/cropProductPhoto.test.ts
       - run: npm run build
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
