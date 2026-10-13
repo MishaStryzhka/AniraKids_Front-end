@@ -9,6 +9,8 @@ on:
       - src/components/App.js
       - src/components/navigation/**
       - src/navigation/**
+      - src/admin/auth/useAdminEntryAccess*
+      - .github/admin-entry.spec.js
       - .github/customer-booking.spec.js
       - .github/route-scroll.spec.js
       - .github/marketplace-retirement.spec.js
@@ -31,6 +33,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Admin entry authorization states
+        run: CI=true npm test -- --watchAll=false --runInBand src/admin/auth/useAdminEntryAccess.test.tsx
       - name: Build against isolated browser fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
@@ -49,7 +53,7 @@ jobs:
         env:
           # The existing Storefront Payment Guidance job builds without API env.
           BOOKING_SKIP_NO_ENV: '1'
-        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js --workers=2 --reporter=line
+        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js .github/admin-entry.spec.js --workers=2 --reporter=line
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,4 +62,5 @@ jobs:
           if-no-files-found: error
           path: |
             test-evidence/customer-booking/
+            test-evidence/admin-entry/
             test-results/

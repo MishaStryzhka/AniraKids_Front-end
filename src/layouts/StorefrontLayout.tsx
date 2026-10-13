@@ -24,6 +24,7 @@ import { useContext } from 'react';
 import { useBookingOptional } from '../storefront/booking/BookingProvider';
 import { getCatalogue } from '../storefront/api/publicApi';
 import { usePublicRead } from '../storefront/usePublicRead';
+import { useAdminEntryAccess } from '../admin/auth/useAdminEntryAccess';
 
 const placeholderImage: string = require('../images/photo-plug.jpg');
 
@@ -57,6 +58,7 @@ export function StorefrontLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn, token } = useAuth();
+  const canAccessAdmin = useAdminEntryAccess();
   const authModal = useContext(ModalAuthContext);
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
 
@@ -215,6 +217,7 @@ export function StorefrontLayout() {
         activeOverlay={activeOverlay}
         currentPrimaryNavigation={currentPrimaryNavigation}
         authState={authState}
+        canAccessAdmin={canAccessAdmin}
         hasActiveReservationDraft={hasActiveReservationDraft}
         onRequestOverlay={requestOverlay}
         onCloseOverlay={() => closeOverlay()}
@@ -224,6 +227,7 @@ export function StorefrontLayout() {
       {activeOverlay === 'menu' && !isDesktop ? (
         <MobileMenu
           authState={authState}
+          canAccessAdmin={canAccessAdmin}
           currentPrimaryNavigation={currentPrimaryNavigation}
           onLogin={loginFromMenu}
           onClose={() => closeOverlay()}

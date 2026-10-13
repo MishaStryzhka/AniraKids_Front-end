@@ -1,6 +1,6 @@
 import { Menu, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Container } from '../../../design-system/components/Container';
 import { IconButton } from '../../../design-system/components/IconButton';
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
@@ -51,7 +51,7 @@ const Left = styled.div`justify-self: start;`;
 const Centre = styled.div`justify-self: center; min-inline-size: 0;`;
 const Right = styled.div`justify-self: end; display: flex; align-items: center; gap: ${t.space[1]};`;
 
-const DesktopRow = styled(Container)`
+const DesktopRow = styled(Container)<{ $hasAdminEntry: boolean }>`
   display: none;
 
   @media (min-width: ${t.breakpoint.lg}) {
@@ -61,6 +61,14 @@ const DesktopRow = styled(Container)`
     align-items: center;
     column-gap: ${t.space[8]};
   }
+
+  ${({ $hasAdminEntry }) => $hasAdminEntry && css`
+    @media (min-width: ${t.breakpoint.lg}) and (max-width: calc(${t.breakpoint.xl} - 1px)) {
+      column-gap: ${t.space[4]};
+      nav a { padding-inline: ${t.space[2]}; }
+      nav a[aria-current='page']::after { inset-inline: ${t.space[2]}; }
+    }
+  `}
 `;
 
 const PrimaryWrap = styled.div`min-inline-size: 0;`;
@@ -69,6 +77,7 @@ export interface StorefrontHeaderProps {
   activeOverlay: ActiveOverlay;
   currentPrimaryNavigation: PrimaryNavigationKey | null;
   authState: AuthNavigationState;
+  canAccessAdmin?: boolean;
   hasActiveReservationDraft: boolean;
   onRequestOverlay(overlay: Exclude<ActiveOverlay, 'none'>): void;
   onCloseOverlay(): void;
@@ -79,6 +88,7 @@ export function StorefrontHeader({
   activeOverlay,
   currentPrimaryNavigation,
   authState,
+  canAccessAdmin = false,
   hasActiveReservationDraft,
   onRequestOverlay,
   onCloseOverlay,
@@ -159,7 +169,7 @@ export function StorefrontHeader({
         </Right>
       </MobileRow>
 
-      <DesktopRow>
+      <DesktopRow $hasAdminEntry={authState === 'authenticated' && canAccessAdmin}>
         <div ref={desktopLogoRef}><BrandLogo /></div>
         <PrimaryWrap ref={desktopPrimaryRef}>
           <DesktopPrimaryNavigation currentPrimaryNavigation={currentPrimaryNavigation} />
@@ -167,6 +177,7 @@ export function StorefrontHeader({
         <div ref={desktopUtilitiesRef}>
           <DesktopUtilities
             authState={authState}
+            canAccessAdmin={canAccessAdmin}
             hasActiveReservationDraft={hasActiveReservationDraft}
             onSearchOpen={() => onRequestOverlay('search')}
             onOpenAuth={onOpenAuth}

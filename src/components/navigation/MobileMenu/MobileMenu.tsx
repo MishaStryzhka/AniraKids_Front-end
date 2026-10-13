@@ -5,6 +5,7 @@ import { NavigationLink } from '../../../design-system/components/NavigationLink
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
 import { primaryNavigationItems, routes, type AuthNavigationState, type PrimaryNavigationKey } from '../../../navigation/routes';
 import { useFocusScope } from '../hooks/useFocusScope';
+import { adminRoutes } from '../../../admin/navigation/adminRoutes';
 
 const Layer = styled.nav`
   position: fixed;
@@ -89,12 +90,13 @@ const Separator = styled(Divider)`margin-block: ${t.space[6]};`;
 
 export interface MobileMenuProps {
   authState: AuthNavigationState;
+  canAccessAdmin?: boolean;
   currentPrimaryNavigation: PrimaryNavigationKey | null;
   onLogin(): void;
   onClose(): void;
 }
 
-export function MobileMenu({ authState, currentPrimaryNavigation, onLogin, onClose }: MobileMenuProps) {
+export function MobileMenu({ authState, canAccessAdmin = false, currentPrimaryNavigation, onLogin, onClose }: MobileMenuProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const getContainers = useCallback(() => {
     const trigger = Array.from(document.querySelectorAll<HTMLElement>('[data-menu-trigger]'))
@@ -117,6 +119,7 @@ export function MobileMenu({ authState, currentPrimaryNavigation, onLogin, onClo
             {authState === 'authenticated' ? (
               <>
                 <li><MenuLink variant="plain" to={routes.account}>Můj účet</MenuLink></li>
+                {canAccessAdmin ? <li><MenuLink variant="plain" to={adminRoutes.root}>Administrace</MenuLink></li> : null}
               </>
             ) : authState === 'guest' ? (
               <li><Action type="button" onClick={onLogin}>Přihlásit se</Action></li>
