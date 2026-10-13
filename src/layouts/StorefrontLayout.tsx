@@ -56,7 +56,10 @@ export function StorefrontLayout() {
   const authModal = useContext(ModalAuthContext);
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
 
-  const [activeOverlay, setActiveOverlay] = useState<ActiveOverlay>('none');
+  const [overlay, setOverlay] = useState<{ type: ActiveOverlay; entry: string }>({ type: 'none', entry: location.key });
+  // Release the scroll lock in the same commit as navigation, before the
+  // shared route restoration runs. Closing it in a later effect restores stale scroll.
+  const activeOverlay = overlay.entry === location.key ? overlay.type : 'none';
   const [productPrimaryCategory, setProductPrimaryCategory] = useState<ProductPrimaryCategory | null>(null);
   const [query, setQuery] = useState('');
 
@@ -83,8 +86,8 @@ export function StorefrontLayout() {
     const selector = overlay === 'menu' ? '[data-menu-trigger]' : '[data-search-trigger]';
     focusOriginRef.current = firstVisible(selector);
     focusOriginOverlayRef.current = overlay;
-    setActiveOverlay(overlay);
-  }, []);
+    setOverlay({ type: overlay, entry: location.key });
+  }, [location.key]);
 
   const closeOverlay = useCallback((options?: { restoreFocus?: boolean }) => {
     const origin = focusOriginRef.current;
@@ -92,7 +95,7 @@ export function StorefrontLayout() {
 
     focusOriginRef.current = null;
     focusOriginOverlayRef.current = null;
-    setActiveOverlay('none');
+    setOverlay(previous => ({ ...previous, type: 'none' }));
 
     if (options?.restoreFocus === false) return;
 
@@ -130,10 +133,9 @@ export function StorefrontLayout() {
   }, [activeOverlay]);
 
   useEffect(() => {
-    if (activeOverlay !== 'none') closeOverlay({ restoreFocus: false });
+    closeOverlay({ restoreFocus: false });
     // location.key changes for browser Back/Forward as well as ordinary route navigation.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
+  }, [location.key, closeOverlay]);
 
   useEffect(() => {
     const wasDesktop = previousDesktopRef.current;

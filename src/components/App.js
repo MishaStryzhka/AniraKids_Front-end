@@ -20,6 +20,7 @@ import { StorefrontLayout } from '../layouts/StorefrontLayout';
 import { ReservationFlowLayout } from '../layouts/ReservationFlowLayout';
 import { HowRentalPage, FaqPage, ContactPage, CookiesPage } from '../storefront/InformationPages';
 import { routes } from '../navigation/routes';
+import { RouteScrollRestoration } from '../navigation/RouteScrollRestoration';
 import { ModalAuthContext } from '../context/ModalAuthContext';
 import Modal from './Modals/Modal';
 import ModalRegister from './Modals/ModalRegister/ModalRegister';
@@ -256,6 +257,7 @@ function App() {
               <Route index element={<BookingPage />} />
             </Route>
           </Routes>
+          <RouteScrollRestoration />
         </BookingProvider></FavoritesProvider>
 
         {isOpenModalAuth && !isLoggedIn ? (
