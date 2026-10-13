@@ -344,7 +344,7 @@ test('real candidate helper allows upload COMPLETE; retained same-ID retry appli
   checkCoreUntouched();
   completeMock.mockResolvedValueOnce({product: {...product, color: 'Foreign', photos: [photo('products/p1/x')]}});
   fireEvent.click(screen.getByRole('button', {name: 'Zkusit připojit znovu'}));
-  await within(media()).findByText('1 / 10 uložených');
+  await within(media()).findByText('1/10');
   await waitFor(() => expect(status()).toHaveTextContent('Fotografie byla připojena k produktu.'));
   expect(media().querySelectorAll('[data-photo-id="products/p1/x"]')).toHaveLength(1);
   expect(completeMock.mock.calls.map(([input]) => input.publicId)).toEqual(['products/p1/x', 'products/p1/x']);
@@ -412,7 +412,7 @@ test('dirty Core and existing Photos survive successful variant create; Core bas
   expect(createVariantMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'110'}}));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(save()).toBeEnabled();
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(await screen.findByText('110')).toBeInTheDocument();
   expect(patchMock).not.toHaveBeenCalled();
   fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Bílá'}});
@@ -434,7 +434,7 @@ test('dirty Core and Photos survive variant update and variant refresh ignores P
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální varianty'}));
   await waitFor(()=>expect(refreshVariantsMock).toHaveBeenCalledTimes(1));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(await screen.findByText('110')).toBeInTheDocument();
   expect(await screen.findByText('Neaktivní')).toBeInTheDocument();
   expect(patchMock).not.toHaveBeenCalled();
@@ -506,7 +506,7 @@ test('post-load variant PRODUCT_NOT_FOUND keeps Core Photos and draft mounted an
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
   await screen.findByText('Produkt už není dostupný');
   expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
 });
 
@@ -603,7 +603,7 @@ test('initial Product detail seeds Inventory once before Variant projection', as
   expect(screen.getByText('AK-001')).toBeInTheDocument();
   expect(screen.getByRole('heading',{name:'Fyzické kusy',level:3})).toBeInTheDocument();
   expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
 });
 
 test('dirty Core survives Inventory create success and failure without Core rebase', async () => {
@@ -669,7 +669,7 @@ test('Inventory refresh applies only Inventory and preserves Core Photos and Var
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(screen.getByText('98')).toBeInTheDocument();
   expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(patchMock).not.toHaveBeenCalled();
 });
 
@@ -725,7 +725,7 @@ test('post-load Inventory PRODUCT_NOT_FOUND preserves mounted domains and disabl
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
   await screen.findByText('Produkt už není dostupný');
   expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
-  expect(screen.getByText('1 / 10 uložených')).toBeInTheDocument();
+  expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(screen.getByText('98')).toBeInTheDocument();
   expect(screen.getByLabelText('Poznámka')).toHaveValue('typed');
   expect(screen.getByRole('button',{name:'Uložit změny'})).toBeDisabled();

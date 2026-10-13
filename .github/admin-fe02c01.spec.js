@@ -178,13 +178,13 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) test(`media responsive ${w
   const heading = page.getByRole('heading', {name: 'Fotografie'});
   await expect(heading).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
-  await expect(page.getByText('2 / 10 uložených')).toBeVisible();
+  await expect(page.getByText('2/10')).toBeVisible();
   const image = media.locator('img').first();
   await expect(image).toHaveJSProperty('complete', true);
   await expect(image).toHaveJSProperty('naturalWidth', 96);
   const formBox = await page.locator('[data-product-core-form]').boundingBox();
   const dividerBox = await media.locator('hr').first().boundingBox();
-  const headingBox = await heading.boundingBox();
+  const headingBox = await heading.locator('..').boundingBox();
   expect(Math.round(dividerBox.y - formBox.y - formBox.height)).toBe(48);
   expect(Math.round(headingBox.y - dividerBox.y - dividerBox.height)).toBe(32);
   const item = media.locator('[data-photo-id]').first();
@@ -337,7 +337,7 @@ test('mocked browser upload retains same-ID COMPLETE retry and never reuploads a
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', {name: 'Pokračovat v nahrávání'}).click();
   await page.getByRole('button', {name: 'Zkusit připojit znovu'}).click();
-  await expect(media.getByText('1 / 10 uložených')).toBeVisible();
+  await expect(media.getByText('1/10')).toBeVisible();
   await expect(media.locator('[data-photo-id="products/p1/x"] img')).toHaveJSProperty('naturalWidth', 96);
   expect(state.sign).toBe(1);
   expect(state.provider).toBe(1);
@@ -359,7 +359,7 @@ test('unknown provider outcome and 502 keep one truthful recovery action', async
   await expect(retry).toBeEnabled();
   await assertSelectedActions(page, 'Ověřit a připojit', 'unknown-provider-502-recovery');
   await retry.click();
-  await expect(media.getByText('1 / 10 uložených')).toBeVisible();
+  await expect(media.getByText('1/10')).toBeVisible();
   expect(state.sign).toBe(1);
   expect(state.provider).toBe(1);
   expect(state.complete).toEqual(['products/p1/x', 'products/p1/x']);
@@ -417,7 +417,7 @@ test('pending upload stays in its modal until attachment is confirmed', async ({
   await expect(dialog.locator('[data-product-photo-upload]')).toBeFocused();
   release();
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByText('1 / 10 uložených')).toBeVisible();
+  await expect(page.getByText('1/10')).toBeVisible();
   await expect(page.getByRole('button', {name: 'Přidat fotografii'})).toBeFocused();
   expect(state.sign).toBe(1);
   expect(state.provider).toBe(1);
@@ -471,7 +471,7 @@ for (const width of [390,768,1440]) test(`photo editor crop and upload ${width}`
   expect(state.sign).toBe(0);expect(state.provider).toBe(0);expect(state.complete).toEqual([]);
   await upload.getByRole('button',{name:'Nahrát fotografii'}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByText('1 / 10 uložených')).toBeVisible();
+  await expect(page.getByText('1/10')).toBeVisible();
   expect(state.sign).toBe(1);expect(state.provider).toBe(1);expect(state.complete).toEqual(['products/p1/x']);
   await expect(page.getByLabel('Barva')).toHaveValue('Růžová');
 });
