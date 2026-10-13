@@ -83,7 +83,7 @@ export function AccountReservationsPage() {
     {!isLoggedIn && !isRefreshing && localReceipt ? <Panel>
       <Heading>{localReceipt.reservationNumber} · {statusLabel(localReceipt.status)}</Heading>
       {receiptItems(localReceipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
-      <Copy>Způsob pronájmu: {modeLabel(localReceipt.rentalMode)}</Copy>
+      <Copy>{modeLabel(localReceipt.rentalMode)}</Copy>
       <Actions><RouteLink to={routes.reservation}>Otevřít rezervaci</RouteLink></Actions>
     </Panel> : null}
     {savedGuestLinks.length > 0 ? <Panel>
@@ -100,7 +100,7 @@ export function AccountReservationsPage() {
       {localReceipt && !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) && ownClaim?.claimed !== localReceipt.reservationNumber ? <Panel>
         <Heading>Rezervace z tohoto prohlížeče</Heading>
         <Copy>{localReceipt.reservationNumber} byla vytvořena jako host. Můžete ji připojit k právě přihlášenému účtu.</Copy>
-        <Copy>Způsob pronájmu: {modeLabel(localReceipt.rentalMode)}</Copy>
+        <Copy>{modeLabel(localReceipt.rentalMode)}</Copy>
         {ownClaim?.error ? <Copy role="alert">{ownClaim.error}</Copy> : null}
         <Actions><Button disabled={ownClaim?.busy} loading={ownClaim?.busy} onClick={() => void claim()}>Připojit rezervaci k účtu</Button>
           <RouteLink to={routes.reservation}>Otevřít rezervaci</RouteLink></Actions>
@@ -115,7 +115,7 @@ export function AccountReservationsPage() {
       {result.data.items.map(receipt => <Panel key={receipt.reservationNumber}>
         <Heading>{receipt.reservationNumber} · {statusLabel(receipt.status)}</Heading>
         {receiptItems(receipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
-        <Copy>Způsob pronájmu: {modeLabel(receipt.rentalMode)}</Copy>
+        <Copy>{modeLabel(receipt.rentalMode)}</Copy>
         <Copy>{formatCalendarDay(receipt.startDate)} – {formatCalendarDay(receipt.endDate)}</Copy>
         <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} /></details>
       </Panel>)}

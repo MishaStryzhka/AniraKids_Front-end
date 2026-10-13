@@ -7,6 +7,14 @@ import { designTokens as t } from '../../../design-system/tokens/designTokens';
 import { useFocusScope } from '../hooks/useFocusScope';
 import { SearchContent, type SearchProductSuggestion, type SearchStatus } from './SearchContent';
 
+const Backdrop = styled.div`
+  position: fixed;
+  inset: 72px 0 0;
+  z-index: var(--layer-overlay);
+  background: ${t.color.text.primary};
+  opacity: 0.18;
+`;
+
 const Layer = styled.section`
   position: fixed;
   inset-block-start: 72px;
@@ -51,6 +59,8 @@ export function DesktopSearchLayer({
   useFocusScope({ active: true, getContainers, getInitialFocus, onEscape: onClose });
 
   return (
+    <>
+    <Backdrop aria-hidden="true" onClick={onClose} />
     <Layer ref={rootRef} aria-label="Vyhledávání">
       <Inner>
         <SearchContent
@@ -71,5 +81,6 @@ export function DesktopSearchLayer({
         />
       </Inner>
     </Layer>
+    </>
   );
 }

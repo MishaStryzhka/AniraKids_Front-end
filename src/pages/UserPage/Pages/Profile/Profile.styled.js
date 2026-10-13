@@ -6,21 +6,20 @@ import styled from 'styled-components';
 export const ProfileForm = styled(Form)`
   display: flex;
   flex-direction: column-reverse;
-  gap: 40px;
-  padding: 0 8px;
+  gap: 24px;
+  padding: 0;
   justify-content: space-between;
 
   @media screen and (min-width: 768px) {
     flex-direction: row;
-    gap: 0;
+    gap: 32px;
   }
 `;
 
 export const Wrap = styled.div`
-  @media screen and (max-width: 427.5px) {
-    width: 93.5vw;
-  }
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
+  min-width: 0;
 
   display: flex;
   flex-direction: column;
@@ -31,13 +30,7 @@ export const SecondWrap = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  @media screen and (min-width: 768px) {
-    gap: 40px;
-  }
-  @media screen and (min-width: 1280) {
-    gap: 64px;
-  }
+  flex-shrink: 0;
 `;
 
 export const AvatarLabel = styled.div`
@@ -46,6 +39,7 @@ export const AvatarLabel = styled.div`
   gap: 8px;
   flex-direction: column;
   align-items: center;
+  p { margin: 0; }
 `;
 export const AvatarWrap = styled.label`
   cursor: pointer;

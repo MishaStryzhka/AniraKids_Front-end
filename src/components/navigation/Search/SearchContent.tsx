@@ -3,6 +3,7 @@ import type { ReactNode, RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconButton } from '../../../design-system/components/IconButton';
+import { Button } from '../../../design-system/components/Button';
 import { Input } from '../../../design-system/components/Input';
 import { Spinner } from '../../../design-system/components/Spinner';
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
@@ -34,7 +35,13 @@ const TopRow = styled.div`
   gap: ${t.space[2]};
   min-inline-size: 0;
 `;
-const SearchField = styled(Input)`flex: 1 1 auto; min-inline-size: 0;`;
+const SearchField = styled(Input)`
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  input::-webkit-search-cancel-button,
+  input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+  input::-ms-clear { display: none; }
+`;
 const Results = styled.div`
   padding-block-start: ${t.space[6]};
   min-inline-size: 0;
@@ -87,7 +94,7 @@ const Meta = styled.span`
 
 export function SearchContent({ query, status, suggestions, inputRef, leadingAction, trailingAction, onQueryChange, onSubmit }: SearchContentProps) {
   const clearAction = query ? (
-    <IconButton aria-label="Vymazat hledání" icon={<X aria-hidden="true" />} variant="ghost" onClick={() => onQueryChange('')} />
+    <IconButton aria-label="Vymazat hledání" icon={<X aria-hidden="true" />} variant="ghost" onClick={() => { onQueryChange(''); inputRef.current?.focus(); }} />
   ) : undefined;
 
   return (
@@ -100,7 +107,9 @@ export function SearchContent({ query, status, suggestions, inputRef, leadingAct
           hideLabel
           type="search"
           inputMode="search"
+          enterKeyHint="search"
           autoComplete="off"
+          maxLength={100}
           value={query}
           onChange={event => onQueryChange(event.target.value)}
           placeholder="Hledat"
@@ -111,6 +120,7 @@ export function SearchContent({ query, status, suggestions, inputRef, leadingAct
       </TopRow>
 
       <Results aria-live="polite">
+        {status === 'idle' ? <Status>Zadejte alespoň 2 znaky názvu nebo kódu modelu.</Status> : null}
         {status === 'loading' ? <Status><Spinner size="sm" /> Načítání…</Status> : null}
         {status === 'empty' ? <Status>Žádné výsledky.</Status> : null}
         {status === 'error' ? <Status>Výsledky se nepodařilo načíst.</Status> : null}
@@ -127,6 +137,7 @@ export function SearchContent({ query, status, suggestions, inputRef, leadingAct
           </SuggestionList>
         ) : null}
       </Results>
+      {query.trim() ? <Button type="submit" variant="secondary">Hledat v katalogu</Button> : null}
     </Form>
   );
 }
