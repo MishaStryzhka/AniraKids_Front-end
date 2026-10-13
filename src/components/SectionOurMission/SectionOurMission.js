@@ -102,7 +102,7 @@ const SectionOurMission = () => {
               srcSet={`${ClosetMobile1x} 1x, ${ClosetMobile2x} 2x`}
             />
 
-            <Image srcSet={`${ClosetDesktop1x}`} alt="Гардероб" />
+            <Image srcSet={`${ClosetDesktop1x}`} alt="Šatník" />
           </Picture>
         </PictureContainer>
       </ImageWrap>
