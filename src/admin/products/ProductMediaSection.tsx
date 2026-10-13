@@ -1,6 +1,6 @@
 import {forwardRef, useImperativeHandle, useCallback, useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
-import {Pencil} from 'lucide-react';
+import {Pencil, Plus} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
 import {Dialog} from '../../design-system/components/Dialog';
 import {IconButton} from '../../design-system/components/IconButton';
@@ -17,11 +17,12 @@ const Section = styled.section`
   inline-size:100%;max-inline-size:840px;margin-block-start:${t.space[8]};display:grid;gap:${t.space[6]};min-inline-size:0;
 `;
 const HeadingRow = styled.div`
-  margin-block-start:${t.space[2]};display:flex;align-items:baseline;justify-content:space-between;gap:${t.space[3]};
-  @media(max-width:767px){align-items:flex-start;flex-direction:column;}
+  margin-block-start:${t.space[2]};display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};
 `;
+const HeadingActions = styled.div`display:flex;align-items:center;gap:${t.space[2]};flex-shrink:0;`;
 const H2 = styled.h2`&:focus{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}margin:0;font:600 22px/30px ${t.font.family.ui};`;
 const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};line-height:${t.type.bodySm.lineHeight};`;
+const PhotoCount = styled(Copy)`white-space:nowrap;font-variant-numeric:tabular-nums;`;
 const List = styled.ol`list-style:none;margin:0;padding:0;border:1px solid ${t.color.border.subtle};border-radius:${t.radius[2]};overflow:visible;`;
 const Item = styled.li`
   padding:${t.space[4]};display:grid;grid-template-columns:96px minmax(0,1fr);gap:${t.space[4]};min-inline-size:0;
@@ -60,8 +61,11 @@ const UploadPreview = styled.img`
 const PreviewFrame = styled.div`position:relative;min-inline-size:0;`;
 const EditPhotoButton = styled(IconButton)`
   position:absolute;inset-block-start:8px;inset-inline-end:8px;
-  background:${t.color.bg.surface};border:1px solid ${t.color.border.default};
-  &>svg{inline-size:18px;block-size:18px;}
+  &:hover:not(:disabled),&:active:not(:disabled){background:transparent;color:${t.color.action.primary.bgHover};}
+  &>svg{
+    inline-size:20.7px;block-size:20.7px;
+    filter:drop-shadow(0 0 1px ${t.color.bg.surface}) drop-shadow(0 1px 2px rgb(41 37 34 / 18%));
+  }
 `;
 const FileChoice = styled.div`
   display:grid;justify-items:center;gap:${t.space[3]};padding:${t.space[6]};
@@ -240,17 +244,19 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
 
   return <Section data-product-media-section ref={sectionRef} aria-labelledby="product-media-title">
     <Divider/>
-    <HeadingRow><H2 id="product-media-title" tabIndex={-1}>Fotografie</H2><Copy>{c.photos.length} / 10 uložených</Copy></HeadingRow>
-    <Copy>Spravujte fotografie produktu a jejich pořadí. První fotografie se používá jako hlavní.</Copy>
-    <Upload>
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-describedby="product-media-file-help"
-        onChange={event => {const file = event.currentTarget.files?.[0]; if (file && !disabled) c.selectFile(file); event.currentTarget.value = '';}}/>
-      <Button data-photo-file-trigger disabled={disabled || c.photos.length >= 10 || c.uploadPhase !== 'idle'}
-        onClick={() => {c.clearFeedback(); setUploadMinimized(false); setChoosingFile(true);}}>Přidat fotografii</Button>
-      <Copy id="product-media-file-help">JPG, JPEG, PNG nebo WEBP, maximálně 15 MB.</Copy>
-      {c.photos.length >= 10 ? <Status>Produkt může mít maximálně 10 fotografií.</Status> : null}
-      {c.attempt && uploadMinimized ? <Button variant="secondary" onClick={() => setUploadMinimized(false)}>Pokračovat v nahrávání</Button> : null}
-    </Upload>
+    <HeadingRow>
+      <H2 id="product-media-title" tabIndex={-1}>Fotografie</H2>
+      <HeadingActions>
+        <PhotoCount aria-label={`${c.photos.length} z 10 fotografií`}>{c.photos.length}/10</PhotoCount>
+        <IconButton data-photo-file-trigger aria-label="Přidat fotografii" title="Přidat fotografii" icon={<Plus aria-hidden="true"/>}
+          disabled={disabled || c.photos.length >= 10 || c.uploadPhase !== 'idle'}
+          onClick={() => {c.clearFeedback(); setUploadMinimized(false); setChoosingFile(true);}}/>
+      </HeadingActions>
+    </HeadingRow>
+    <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden
+      onChange={event => {const file = event.currentTarget.files?.[0]; if (file && !disabled) c.selectFile(file); event.currentTarget.value = '';}}/>
+    {c.photos.length >= 10 ? <Status>Produkt může mít maximálně 10 fotografií.</Status> : null}
+    {c.attempt && uploadMinimized ? <Button variant="secondary" onClick={() => setUploadMinimized(false)}>Pokračovat v nahrávání</Button> : null}
     <Dialog open={uploadDialogOpen && !editingPhoto} title="Přidat fotografii" description="Vyberte fotografii produktu a zkontrolujte její náhled před nahráním."
       onEscape={closeUpload} resolveRestoreFocus={() => sectionRef.current?.querySelector<HTMLElement>('button:not(:disabled)') ?? sectionRef.current?.querySelector<HTMLElement>('#product-media-title') ?? null}>
       <Upload data-product-photo-upload ref={uploadBodyRef} tabIndex={-1} onKeyDown={event => {
@@ -259,7 +265,7 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
       {c.attempt ? <Selected>
         {c.attempt.previewUrl ? <PreviewFrame>
           <UploadPreview src={c.attempt.previewUrl} alt="Náhled vybrané fotografie"/>
-          {c.uploadPhase === 'selected' ? <EditPhotoButton variant="secondary" aria-label="Upravit fotografii" title="Upravit"
+          {c.uploadPhase === 'selected' ? <EditPhotoButton aria-label="Upravit fotografii" title="Upravit"
             disabled={disabled} icon={<Pencil aria-hidden="true"/>} onClick={() => {c.clearFeedback();setEditingAttemptId(c.attempt!.attemptId);}}/> : null}
         </PreviewFrame> : null}
         <strong>{c.attempt.filename}</strong>
