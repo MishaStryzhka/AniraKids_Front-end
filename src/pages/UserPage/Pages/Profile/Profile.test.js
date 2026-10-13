@@ -10,9 +10,6 @@ jest.mock('hooks', () => ({ useAuth: () => mockAuth }));
 jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key }) }));
 jest.mock('../../../../redux/auth/operations', () => ({ updateUserInfo: values => values, verifiedEmail: jest.fn(), updateUserEmail: values => values }));
-jest.mock('components/Forms/FormBillingDetails/FormBillingDetails', () => () => null);
-jest.mock('components/Forms/FormBankAccount/FormBankAccount', () => () => null);
-jest.mock('components/Modals/ModalBecomeLandlord/ModalBecomeLandlord', () => () => null);
 
 beforeEach(() => { mockDispatch.mockReset(); mockDispatch.mockImplementation(() => ({ unwrap: mockUnwrap })); mockUnwrap.mockReset(); const portal = document.createElement('div'); portal.id = 'modal'; document.body.appendChild(portal); });
 afterEach(() => document.getElementById('modal')?.remove());

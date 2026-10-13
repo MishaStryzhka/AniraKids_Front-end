@@ -40,7 +40,7 @@ const FormRegistrationEmail = ({ handleCloseModal }) => {
     dispatch(
       register({ email, password, favorites: storage.get('favorites') || [] })
     );
-    navigate('/my-account/profile', { replace: true });
+    navigate('/ucet', { replace: true });
   };
 
   return (

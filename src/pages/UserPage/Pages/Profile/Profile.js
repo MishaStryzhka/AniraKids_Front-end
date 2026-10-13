@@ -16,7 +16,6 @@ import {
   StyledIconPencil,
   Wrap,
   Wrapper,
-  WrapperBiling,
 } from './Profile.styled';
 import AvatarImage from 'images/photo-plug.jpg';
 import { useEffect, useState } from 'react';
@@ -41,12 +40,6 @@ import {
   SceletonFieldInput,
   SceletonText,
 } from './SceletonProfile.styled';
-import {
-  QuestionDescription,
-  StyledIconArrowUp,
-} from 'components/SectionAnswers/SectionAnswers.styled';
-import FormBillingDetails from 'components/Forms/FormBillingDetails/FormBillingDetails';
-import FormBankAccount from 'components/Forms/FormBankAccount/FormBankAccount';
 
 const Profile = () => {
   const { t } = useTranslation('translation', {
@@ -60,8 +53,6 @@ const Profile = () => {
   const [isOpenModalAddAvatar, setIsOpenModalAddAvatar] = useState(false);
   const [isOpenModalChangeEmail, setIsOpenModalChangeEmail] = useState(false);
 
-  const [isOpenBillingDetails, setIsOpenBillingDetails] = useState(false);
-  const [isOpenBankAccount, setIsOpenBankAccount] = useState(false);
 
 
   const [
@@ -337,56 +328,7 @@ const Profile = () => {
           );
         }}
       </Formik>
-      {user.typeUser === 'owner' && (
-        <>
-          <WrapperBiling>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: 14,
-              }}
-            >
-              <QuestionDescription>{'BillingDetails'}</QuestionDescription>
-              <StyledIconArrowUp
-                $openAnswer={isOpenBillingDetails}
-                onClick={() => setIsOpenBillingDetails(!isOpenBillingDetails)}
-              />
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-evenly',
-              }}
-            >
-              {isOpenBillingDetails && <FormBillingDetails />}
-            </div>
-          </WrapperBiling>
-          <WrapperBiling>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: 14,
-              }}
-            >
-              <QuestionDescription>{'BankAccount'}</QuestionDescription>
-              <StyledIconArrowUp
-                $openAnswer={isOpenBankAccount}
-                onClick={() => setIsOpenBankAccount(!isOpenBankAccount)}
-              />
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-evenly',
-              }}
-            >
-              {isOpenBankAccount && <FormBankAccount />}
-            </div>
-          </WrapperBiling>
-        </>
-      )}
+
     </div>
   );
 };

@@ -25,7 +25,6 @@ jest.mock('axios', () => {
 
 import axios from 'axios';
 import { adminApiClient } from '../admin/api/client';
-import { getProducts } from '../api/product/getProducts';
 import { configureLegacyApiBaseUrl, normalizeLegacyApiBaseUrl } from './legacyApi';
 
 const originalLegacyBaseUrl = process.env.REACT_APP_LEGACY_API_BASE_URL;
@@ -70,16 +69,4 @@ test('Admin axios instance remains isolated from legacy global base configuratio
 
   expect(axios.defaults.baseURL).toBe('https://example.test');
   expect(adminApiClient.defaults.baseURL).toBe('https://admin-isolated.test/api/v2');
-});
-
-test('legacy Product request uses the globally configured environment origin', async () => {
-  process.env.REACT_APP_LEGACY_API_BASE_URL = 'https://example.test/';
-  configureLegacyApiBaseUrl();
-
-  await getProducts({ page: 1 });
-
-  expect(axios.defaults.baseURL).toBe('https://example.test');
-  expect(axios.get).toHaveBeenCalledWith('api/product/getProducts', {
-    params: { page: 1 },
-  });
 });

@@ -78,7 +78,6 @@ jest.mock('./Profile.styled', () => {
     StyledIconPencil: div,
     Wrap: div,
     Wrapper: div,
-    WrapperBiling: div,
   };
 });
 
@@ -97,9 +96,6 @@ jest.mock('components/Modals/Modal', () => {
 jest.mock('components/Modals/ModalAddAvatar/ModalAddAvatar', () => () => null);
 jest.mock('components/Modals/ModalChangePhoneNumber/ModalChangePhoneNumber', () => () => null);
 jest.mock('components/Modals/ModalChangeEmail/ModalChangeEmail', () => () => null);
-jest.mock('components/Modals/ModalBecomeLandlord/ModalBecomeLandlord', () => () => null);
-jest.mock('components/Forms/FormBillingDetails/FormBillingDetails', () => () => null);
-jest.mock('components/Forms/FormBankAccount/FormBankAccount', () => () => null);
 
 jest.mock('images/icons/IconEyeOpen', () => () => null);
 jest.mock('images/icons/IconEyeClosed', () => () => null);
@@ -111,10 +107,6 @@ jest.mock('components/Modals/Modal.styled', () => {
   const React = require('react');
   return { TextDone: props => React.createElement('div', props, props.children) };
 });
-jest.mock('components/Buttons/ButtonAdd/ButtonAdd', () => {
-  const React = require('react');
-  return props => React.createElement('button', props, props.children);
-});
 jest.mock('./SceletonProfile.styled', () => {
   const React = require('react');
   const div = props => React.createElement('div', props, props.children);
@@ -125,11 +117,6 @@ jest.mock('./SceletonProfile.styled', () => {
     SceletonFieldInput: div,
     SceletonText: div,
   };
-});
-jest.mock('components/SectionAnswers/SectionAnswers.styled', () => {
-  const React = require('react');
-  const div = props => React.createElement('div', props, props.children);
-  return { QuestionDescription: div, StyledIconArrowUp: div };
 });
 
 const authenticatedUser = {

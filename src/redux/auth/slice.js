@@ -7,11 +7,7 @@ import {
   refreshUser,
   updateUserInfo,
   updateUserEmail,
-  updateUserBillingDetails,
-  updateUserBankAccount,
   verifiedEmail,
-  addToFavorites,
-  removeFromFavorites,
   authByGoogle,
   authBySeznam,
 } from './operations';
@@ -31,15 +27,6 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    addOrderIdToUserCart: (state, { payload }) => {
-      const orderIdExists = state.user.cart.some(order => order === payload);
-      if (!orderIdExists) {
-        state.user.cart.push(payload);
-      }
-    },
-    removeOrderIdFromUserCart: (state, { payload }) => {
-      state.user.cart = state.user.cart.filter(order => order !== payload);
-    },
     clearSession: state => {
       state.user = null; state.token = null; state.isLoggedIn = false; state.isRefreshing = false;
     },
@@ -49,8 +36,6 @@ const authSlice = createSlice({
     clearDone: state => {
       state.isDone = null;
     },
-    addPickupAddress: ({ user }, { payload }) =>
-      user.pickupAddresses.push(payload),
   },
   extraReducers: builder => {
     builder
@@ -159,39 +144,6 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
 
-      // updateUserBillingDetails
-      .addCase(updateUserBillingDetails.pending, (state, action) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateUserBillingDetails.fulfilled, (state, action) => {
-        state.user.billingDetails = action.payload.billingDetails;
-        state.isLoading = false;
-        state.isDone = true;
-      })
-      .addCase(updateUserBillingDetails.rejected, (state, action) => {
-        state.error = action.payload;
-        state.isLoading = false;
-      })
-
-      // updateUserBillingDetails
-      .addCase(updateUserBankAccount.pending, (state, action) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateUserBankAccount.fulfilled, (state, action) => {
-
-        state.user.bankAccount = action.payload.bankAccount;
-        state.user.typeUser = action.payload.typeUser;
-
-        state.isLoading = false;
-        state.isDone = true;
-      })
-      .addCase(updateUserBankAccount.rejected, (state, action) => {
-        state.error = action.payload;
-        state.isLoading = false;
-      })
-
       // updateUserEmail
       .addCase(updateUserEmail.pending, state => {
         state.isLoading = true;
@@ -227,46 +179,13 @@ const authSlice = createSlice({
       .addCase(verifiedEmail.rejected, (state, action) => {
         state.error = action.payload;
         state.isLoading = false;
-      })
-
-      // addToFavorites
-      .addCase(addToFavorites.pending, state => {
-        state.isLoading = true;
-      })
-      .addCase(addToFavorites.fulfilled, (state, action) => {
-        state.user.favorites.push(action.payload.id);
-        state.isLoading = false;
-        state.isDone = true;
-      })
-      .addCase(addToFavorites.rejected, (state, action) => {
-        state.error = action.payload;
-        state.isLoading = false;
-      })
-
-      // removeFromFavorites
-      .addCase(removeFromFavorites.pending, state => {
-        state.isLoading = true;
-      })
-      .addCase(removeFromFavorites.fulfilled, (state, action) => {
-        state.user.favorites = state.user.favorites.filter(
-          item => item !== action.payload.id
-        );
-        state.isLoading = false;
-        state.isDone = true;
-      })
-      .addCase(removeFromFavorites.rejected, (state, action) => {
-        state.error = action.payload;
-        state.isLoading = false;
       });
   },
 });
 
 export const authReducer = authSlice.reducer;
 export const {
-  addOrderIdToUserCart,
-  removeOrderIdFromUserCart,
   clearError,
   clearSession,
   clearDone,
-  addPickupAddress,
 } = authSlice.actions;

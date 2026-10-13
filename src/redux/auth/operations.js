@@ -218,51 +218,6 @@ export const updateUserInfo = createAsyncThunk(
   }
 );
 
-/*
- * PATCH @ /api/users/current/update-billing-details
- * headers: { 'content-type': 'multipart/form-data' }
- * body: { VATID, city, companyID, name, street, vatMode, zip, сountry }
- */
-export const updateUserBillingDetails = createAsyncThunk(
-  'auth/update-billing-details',
-  async (credentials, thunkAPI) => {
-    try {
-      const response = await axios.patch(
-        `/api/users/current/update-billing-details`,
-        credentials
-      );
-
-      return response.data;
-    } catch (error) {
-
-      return thunkAPI.rejectWithValue({
-        status: error.response?.status,
-        message: error.response?.data?.message || 'Připojení se nezdařilo.',
-      });
-    }
-  }
-);
-
-export const updateUserBankAccount = createAsyncThunk(
-  'auth/update-bank-account',
-  async (credentials, thunkAPI) => {
-    try {
-      const response = await axios.patch(
-        `/api/users/current/update-bank-account`,
-        credentials
-      );
-
-      return response.data;
-    } catch (error) {
-
-      return thunkAPI.rejectWithValue({
-        status: error.response?.status,
-        message: error.response?.data?.message || 'Připojení se nezdařilo.',
-      });
-    }
-  }
-);
-
 export const updateUserEmail = createAsyncThunk(
   'auth/updateEmail',
   async ({ email }, thunkAPI) => {
@@ -313,41 +268,6 @@ export const confirmUserEmail = createAsyncThunk(
       return thunkAPI.rejectWithValue({
         status: error.response?.status || 0,
         message: 'Email confirmation failed',
-      });
-    }
-  }
-);
-
-export const addToFavorites = createAsyncThunk(
-  'auth/favorites/add',
-  async (productId, thunkAPI) => {
-    try {
-      const response = await axios.patch(
-        `/api/users/favorites/add/${productId}`
-      );
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue({
-        status: error.response?.status,
-        message: error.response?.data?.message || 'Připojení se nezdařilo.',
-      });
-    }
-  }
-);
-
-export const removeFromFavorites = createAsyncThunk(
-  'auth/favorites/remove',
-  async (productId, thunkAPI) => {
-    try {
-      const res = await axios.delete(
-        `/api/users/favorites/remove/${productId}`
-      );
-
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue({
-        status: error.response?.status,
-        message: error.response?.data?.message || 'Připojení se nezdařilo.',
       });
     }
   }

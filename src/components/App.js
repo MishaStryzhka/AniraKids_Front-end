@@ -8,11 +8,9 @@ import { ThemeProvider } from 'styled-components';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import theme from './theme';
-import { PrivateRoute } from './PrivateRoute';
 import { RestrictedRoute } from './RestrictedRoute';
 import { refreshUser } from '../redux/auth/operations';
 import { useAuth } from 'hooks';
-import AddProduct from 'pages/UserPage/Pages/RentOut/Pages/AddProduct/AddProduct';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
 import RefreshPasswordPage from 'pages/RefreshPasswordPage/RefreshPasswordPage';
 import { GlobalStyles } from '../design-system/styles/GlobalStyles';
@@ -42,36 +40,10 @@ import { BookingStatusPage } from '../storefront/booking/BookingStatusPage';
 
 const AboutUsPage = lazy(() => import('../pages/AboutUsPage/AboutUsPage'));
 const MainPage = lazy(() => import('../pages/MainPage/MainPage'));
-const UserPage = lazy(() => import('../pages/UserPage/UserPage'));
 const ConfirmEmailPage = lazy(
   () => import('../pages/ConfirmEmailPage/ConfirmEmailPage')
 );
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage/NotFoundPage'));
-const Chat = lazy(() => import('../pages/UserPage/Pages/Chat/Chat'));
-const RentOut = lazy(() => import('../pages/UserPage/Pages/RentOut/RentOut'));
-const UpdateProduct = lazy(
-  () =>
-    import('../pages/UserPage/Pages/RentOut/Pages/UpdateProduct/UpdateProduct')
-);
-const RentIn = lazy(() => import('../pages/UserPage/Pages/RentIn/RentIn'));
-const MyOrders = lazy(
-  () => import('../pages/UserPage/Pages/MyOrders/MyOrders')
-);
-const MyPurchases = lazy(
-  () => import('../pages/UserPage/Pages/MyPurchases/MyPurchases')
-);
-const ViewOrder = lazy(
-  () => import('../pages/UserPage/Pages/MyOrders/Pages/ViewOrder/ViewOrder')
-);
-const ViewPurchase = lazy(
-  () =>
-    import(
-      '../pages/UserPage/Pages/MyPurchases/Pages/ViewPurchase/ViewPurchase'
-    )
-);
-const Wallet = lazy(() => import('../pages/UserPage/Pages/Wallet/Wallet'));
-const Cart = lazy(() => import('../pages/UserPage/Pages/Cart/Cart'));
-const ProductPage = lazy(() => import('../pages/ProductPage/ProductPage'));
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState('light');
@@ -114,7 +86,7 @@ function App() {
               element={
                 <RestrictedRoute
                   redirectTo="/"
-                  redirectBack="/my-account"
+                  redirectBack={routes.account}
                   component={<StorefrontLayout />}
                 />
               }
@@ -162,7 +134,7 @@ function App() {
                 element={<ProductDetailPage />}
               />
 
-              {/* Legacy pages remain reachable during the controlled migration. */}
+
               {/* One catalogue and API for canonical and historical category links. */}
               <Route path="/popular" element={<CataloguePage />} />
               <Route path="/forMen/*" element={<CataloguePage />} />
@@ -177,42 +149,15 @@ function App() {
               />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
-              <Route
-                path="/my-account"
-                element={
-                  <PrivateRoute
-                    redirectTo="/"
-                    redirectBack="/my-account/profile"
-                    component={<UserPage />}
-                  />
-                }
-              >
-                <Route index element={<Navigate to={routes.account} replace />} />
-                <Route path="profile/" element={<Navigate to={routes.account} replace />} />
-                <Route path="chat/" element={<Chat />} />
-                <Route path="favorite/*" element={<Navigate to={routes.favourites} replace />} />
-                <Route path="rent-out/" element={<RentOut />}>
-                  <Route path=":id" element={<ProductPage />} />
-                </Route>
-                <Route path="rent-out/add-product/" element={<AddProduct />} />
-                <Route
-                  path="rent-out/update-product/:id"
-                  element={<UpdateProduct />}
-                />
-                <Route path="rent-in/" element={<RentIn />} />
-                <Route path="my-orders/" element={<MyOrders />} />
-                <Route path="my-orders/order/:id" element={<ViewOrder />} />
-                <Route path="my-purchases/" element={<MyPurchases />} />
-                <Route
-                  path="my-purchases/purchase/:id"
-                  element={<ViewPurchase />}
-                />
-                <Route path="wallet/" element={<Wallet />} />
-                <Route path="cart/" element={<Cart />} />
-              </Route>
-
-              <Route path="favorite/*" element={<Navigate to={routes.favourites} replace />} />
-              <Route path="cart/" element={<Cart />} />
+              {/* Historical links resolve to the current customer experience. */}
+              <Route path="/my-account/favorite/*" element={<Navigate to={routes.favourites} replace />} />
+              <Route path="/my-account/my-orders/*" element={<Navigate to={routes.accountReservations} replace />} />
+              <Route path="/my-account/my-purchases/*" element={<Navigate to={routes.accountReservations} replace />} />
+              <Route path="/my-account/rent-in/*" element={<Navigate to={routes.accountReservations} replace />} />
+              <Route path="/my-account/cart/*" element={<Navigate to={routes.reservation} replace />} />
+              <Route path="/my-account/*" element={<Navigate to={routes.account} replace />} />
+              <Route path="/favorite/*" element={<Navigate to={routes.favourites} replace />} />
+              <Route path="/cart/*" element={<Navigate to={routes.reservation} replace />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
 

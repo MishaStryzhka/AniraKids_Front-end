@@ -11,15 +11,7 @@ const { validUpdateEmailScheme } = require('./updateUserEmailScheme');
 const { validUpdateLoginScheme } = require('./updateUserLoginScheme');
 const { validPhoneNumberScheme } = require('./updateUserPhoneNumberScheme');
 const { validPasswordScheme } = require('./updateUserPasswordScheme');
-const { validationProductSchema } = require('./validationProductScheme');
-const {
-  validationBillingDetailsScheme,
-} = require('./validationBillingDetailsScheme');
-const {
-  validationBankAccountScheme,
-} = require('./validationBankAccountScheme');
 
-const { validationFormOrderScheme } = require('./validationFormOrderScheme');
 module.exports = {
   validationProfileSchema,
   validRegistrationEmailScheme,
@@ -29,8 +21,4 @@ module.exports = {
   validUpdateLoginScheme,
   validPhoneNumberScheme,
   validPasswordScheme,
-  validationProductSchema,
-  validationBillingDetailsScheme,
-  validationBankAccountScheme,
-  validationFormOrderScheme,
 };
