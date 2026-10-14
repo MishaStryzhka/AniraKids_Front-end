@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'src/admin/products/**'
+      - 'src/design-system/components/ColorPalette/**'
+      - 'src/storefront/CataloguePage.tsx'
       - 'src/admin/api/products.ts'
       - '.github/variant-fit-sizes.spec.js'
       - '.github/product-colors.spec.js'
@@ -29,6 +31,7 @@ jobs:
       - name: Photo upload and navigation regressions
         run: >
           npm test -- --watchAll=false --runInBand
+          src/storefront/CataloguePage.test.tsx
           src/admin/products/ProductColorsField.test.tsx
           src/admin/products/ProductCoreForm.test.tsx
           src/admin/products/ProductVariantsSection.test.tsx
