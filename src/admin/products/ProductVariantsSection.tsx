@@ -1,3 +1,5 @@
+import { effectiveFitSizes, inferFitSizes } from './variantFitSizes';
+import { VariantFitSizesField } from './VariantFitSizesField';
 import {
   forwardRef,
   useCallback,
@@ -123,7 +125,7 @@ const Size = styled.div`
     line-height: ${t.type.caption.lineHeight};
   }
 
-  > span:last-child { font-weight: ${t.font.weight.semibold}; }
+  > span[data-variant-size] { font-weight: ${t.font.weight.semibold}; }
 `;
 const VariantStatus = styled.div`grid-area: status; justify-self: start;`;
 const Sku = styled.div`
@@ -234,6 +236,9 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     );
     const [activeEditor, setActiveEditor] = useState<VariantEditorTarget | null>(null);
     const [sizeDraft, setSizeDraft] = useState('');
+    const [fitSizesDraft, setFitSizesDraft] = useState<string[] | null>(null);
+    const fitSizes = useMemo(() => fitSizesDraft ?? (sizeDraft.trim() ? inferFitSizes(sizeDraft) : []), [fitSizesDraft, sizeDraft]);
+    const fitSizesRef = useRef(fitSizes); fitSizesRef.current = fitSizes;
     const sizeDraftRef=useRef(sizeDraft);sizeDraftRef.current=sizeDraft;
     const [fieldError, setFieldError] = useState<string | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -266,8 +271,9 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const editorDirty = useMemo(() => isVariantEditorDirty({
       target: activeEditor,
       sizeDraft,
+      fitSizesDraft: fitSizes,
       variants: canonicalVariants,
-    }), [activeEditor, canonicalVariants, sizeDraft]);
+    }), [activeEditor, canonicalVariants, sizeDraft, fitSizes]);
     const activationPendingRef=useRef(false);activationPendingRef.current=Boolean(operation);
     const risk = editorDirty || operation !== null || unknownCreate !== null;
 
@@ -321,6 +327,8 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       editorTriggerRef.current = trigger ?? pendingSwitchTriggerRef.current;
       pendingSwitchTriggerRef.current = null;
       setActiveEditor(target);
+      const variant = target.kind === 'edit' ? canonicalVariants.find(item => item.id === target.variantId) : undefined;
+      setFitSizesDraft(variant ? effectiveFitSizes(variant) : null);
       setSizeDraft(target.kind === 'add'
         ? ''
         : canonicalVariants.find(variant => variant.id === target.variantId)?.size ?? '');
@@ -334,6 +342,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     const clearVariantEditor = () => {
       setActiveEditor(null);
       setSizeDraft('');
+      setFitSizesDraft(null);
       setFieldError(null);
       setSubmitError(null);
       setMissingVariantId(null);
@@ -417,7 +426,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
     useImperativeHandle(ref, () => ({
       getActivationGuardSnapshot(){
         const child=inventory.getActivationGuardSnapshot();
-        return {hasUnsavedWork:isVariantEditorDirty({target:activeEditor,sizeDraft:sizeDraftRef.current,variants:canonicalVariants})||child.hasUnsavedWork,
+        return {hasUnsavedWork:isVariantEditorDirty({target:activeEditor,sizeDraft:sizeDraftRef.current,fitSizesDraft:fitSizesRef.current,variants:canonicalVariants})||child.hasUnsavedWork,
           pendingMutation:Boolean(activationPendingRef.current||mutationController.current)||child.pendingMutation,
           unresolvedOutcome:Boolean(unknownCreate)||child.unresolvedOutcome};
       },
@@ -549,6 +558,11 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         return;
       }
 
+      if (!fitSizes.length) {
+        setFieldError('Vyberte alespoň jednu velikost pro filtrování.');
+        return;
+      }
+
       if (activeEditor.kind === 'add') {
         const started = beginMutation('create');
         if (!started) return;
@@ -556,7 +570,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           const variant = await createAdminVariant({
             token: props.token,
             productId: started.productId,
-            body: {size: validation.value},
+            body: {size: validation.value, fitSizes},
             signal: started.signal,
           });
           if (!mutationSafe(started.generation, started.productId)) return;
@@ -567,6 +581,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           setCanonicalVariants(previous => reconcileCreatedVariant(previous, variant));
           setActiveEditor(null);
           setSizeDraft('');
+          setFitSizesDraft(null);
           setUnknownCreate(null);
           setRefreshReason(null);
           setFeedback('Varianta byla přidána.');
@@ -588,7 +603,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         const variant = await updateAdminVariantSize({
           token: props.token,
           variantId,
-          body: {size: validation.value},
+          body: {size: validation.value, fitSizes},
           signal: started.signal,
         });
         if (!mutationSafe(started.generation, started.productId)) return;
@@ -599,6 +614,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
         setCanonicalVariants(previous => reconcileUpdatedVariant(previous, variant));
         setActiveEditor(null);
         setSizeDraft('');
+        setFitSizesDraft(null);
         setMissingVariantId(null);
         setRefreshReason(null);
         setFeedback('Velikost byla uložena.');
@@ -689,11 +705,16 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
           onChange={event => {
             sizeDraftRef.current=event.currentTarget.value;
             setSizeDraft(event.currentTarget.value);
+            if (fitSizesDraft === null) fitSizesRef.current = event.currentTarget.value.trim() ? inferFitSizes(event.currentTarget.value) : [];
             setFieldError(null);
             setSubmitError(null);
           }}
         />
         {fieldError ? <ErrorText id="variant-size-error">{fieldError}</ErrorText> : null}
+        <VariantFitSizesField value={fitSizes} size={sizeDraft} disabled={variantActionsDisabled} onChange={value => {
+          fitSizesRef.current = value ?? (sizeDraftRef.current.trim() ? inferFitSizes(sizeDraftRef.current) : []);
+          setFitSizesDraft(value); setFieldError(null); setSubmitError(null);
+        }} />
         {targetMissing ? <Message><strong>Varianta už není dostupná</strong><br/>Velikost nelze uložit, protože varianta už nebyla nalezena.</Message> : null}
         <EditorActions>
           <Button variant="secondary" disabled={Boolean(operation) || Boolean(unknownCreate)} onClick={cancelEditor}>Zrušit</Button>
@@ -738,7 +759,7 @@ export const ProductVariantsSection = forwardRef<ProductVariantsSectionHandle, P
       </Empty> : <List data-variant-list>
         {canonicalVariants.map(variant => <Item key={variant.id} data-variant-id={variant.id}>
           <Row>
-            <Size data-variant-size-cell><span>Velikost</span><span data-variant-size>{variant.size}</span></Size>
+            <Size data-variant-size-cell><span>Velikost</span><span data-variant-size>{variant.size}</span><small>Pro filtr: {effectiveFitSizes(variant).join(", ")}</small></Size>
             <VariantStatus>
               <StatusBadge tone={variant.status === 'active' ? 'success' : 'neutral'}>
                 {variant.status === 'active' ? 'Aktivní' : 'Neaktivní'}

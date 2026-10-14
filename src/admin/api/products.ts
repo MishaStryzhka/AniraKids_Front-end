@@ -29,6 +29,7 @@ export interface AdminVariant {
   id: string;
   productId: string;
   size: string;
+  fitSizes?: string[];
   sku?: string;
   rentalPriceOverrides?: {studio?: number; external?: number};
   salePriceOverride?: number;
@@ -45,10 +46,12 @@ export interface AdminProductDetailVariant extends AdminVariant {
 
 export interface CreateAdminVariantRequest {
   size: string;
+  fitSizes?: string[];
 }
 
 export interface UpdateAdminVariantSizeRequest {
   size: string;
+  fitSizes?: string[];
 }
 
 export interface CreateAdminInventoryItemRequest {
