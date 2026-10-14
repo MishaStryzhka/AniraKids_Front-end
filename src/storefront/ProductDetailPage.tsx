@@ -1,7 +1,7 @@
 import { draftItems } from './booking/bookingModel';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../design-system/components/Button';
 import { useStorefrontOutletContext } from '../layouts/StorefrontLayout';
@@ -10,7 +10,7 @@ import { getCatalogueReturnTo } from './catalogueNavigation';
 import { getPublicProduct, PublicApiError } from './api/publicApi';
 import { useBooking } from './booking/BookingProvider';
 import { formatMoney, modeLabel, statusLabel } from './booking/bookingModel';
-import { ProductImage } from './CataloguePage';
+import { ProductGallery } from './ProductGallery';
 import {
   Actions,
   Alert,
@@ -32,8 +32,6 @@ export function ProductDetailPage() {
     booking = useBooking(),
     { setProductPrimaryCategory } = useStorefrontOutletContext();
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
-  const [photo, setPhoto] = useState(0);
-  useEffect(() => setPhoto(0), [slug]);
   const product = result.data;
   const catalogueReturnTo = getCatalogueReturnTo(location.state, product?.category);
   useEffect(() => {
@@ -80,29 +78,7 @@ export function ProductDetailPage() {
         </RouteLink>
       </Actions>
       <Columns>
-        <Stack>
-          <ProductImage
-            product={{
-              ...product,
-              photos: product.photos.slice(photo, photo + 1),
-            }}
-          />
-          {product.photos.length > 1 ? (
-            <Actions aria-label="Fotografie produktu">
-              {product.photos.map((p, index) => (
-                <Button
-                  key={index}
-                  size="compact"
-                  variant={photo === index ? 'primary' : 'secondary'}
-                  aria-pressed={photo === index}
-                  onClick={() => setPhoto(index)}
-                >
-                  Fotografie {index + 1}
-                </Button>
-              ))}
-            </Actions>
-          ) : null}
-        </Stack>
+        <ProductGallery key={product.id} product={product} />
         <Stack>
           <Title>{product.name}</Title>
           <FavoriteButton id={product.id} name={product.name} />

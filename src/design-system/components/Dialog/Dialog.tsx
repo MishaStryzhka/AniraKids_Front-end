@@ -38,10 +38,12 @@ const Description = styled.p`
 `;
 
 export interface DialogProps {
+  className?: string;
   open: boolean;
   title: string;
   description?: string;
   onEscape(): void;
+  dismissOnBackdrop?: boolean;
   initialFocusRef?: RefObject<HTMLElement>;
   resolveRestoreFocus?(previous: HTMLElement | null): HTMLElement | null;
   children: ReactNode;
@@ -66,7 +68,7 @@ function preserveStyle(style: CSSStyleDeclaration, property: string) {
   };
 }
 
-export function Dialog({open, title, description, onEscape, initialFocusRef, resolveRestoreFocus, children}: DialogProps) {
+export function Dialog({className, open, title, description, onEscape, dismissOnBackdrop = false, initialFocusRef, resolveRestoreFocus, children}: DialogProps) {
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -155,8 +157,8 @@ export function Dialog({open, title, description, onEscape, initialFocusRef, res
 
   if (!open) return null;
   return createPortal(
-    <Backdrop>
-      <Panel ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
+    <Backdrop onClick={event => { if (dismissOnBackdrop && event.target === event.currentTarget) onEscape(); }}>
+      <Panel className={className} ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
         <Title id={titleId}>{title}</Title>
         {description ? <Description id={descriptionId}>{description}</Description> : null}
         {children}
