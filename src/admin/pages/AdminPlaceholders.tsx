@@ -25,10 +25,10 @@ export function AdminHomePage() {
  const {token}=useAuth(); const {handleRequestError}=useAdminAccess(); const [revision,setRevision]=useState(0);
  const state=useReservationRead({requestKey:'overview',token:token??'',revision,onAccessError:handleRequestError,read:signal=>getAdminOverview(token??'',signal)});
  const refresh=()=>setRevision(v=>v+1);
- return <Page><Toolbar><NavigationLink variant="plain" to={adminRoutes.calendar}>Otevřít kalendář</NavigationLink><NavigationLink variant="plain" to={adminRoutes.reservations}>Všechny rezervace</NavigationLink><Button variant="secondary" disabled={state.kind==='loading'} onClick={refresh}>Obnovit</Button></Toolbar>
+ return <Page><Toolbar><Button variant="secondary" disabled={state.kind==='loading'} onClick={refresh}>Obnovit</Button></Toolbar>
  {state.kind==='loading'?<Copy role="status">Načítání přehledu…</Copy>:null}
  {state.kind==='error'||state.kind==='not-found'?<Card role="alert"><Title>Přehled se nepodařilo načíst</Title><Copy>Zkuste to prosím znovu.</Copy><Button onClick={refresh}>Zkusit znovu</Button></Card>:null}
- {state.kind==='success'?<><Copy>Dnes {formatCalendarDay(state.data.today)} · Aktualizováno {formatPragueLoadedAt(new Date(state.data.loadedAt))}. Časy podle Prahy.</Copy>
+ {state.kind==='success'?<><Copy>Aktualizováno {formatPragueLoadedAt(new Date(state.data.loadedAt))}</Copy>
  <Grid>{[
   ['K potvrzení',state.data.pending.total,'#pending'],['K vydání dnes a dříve',state.data.pickups.total,'#pickups'],['K vrácení dnes a dříve',state.data.returns.total,'#returns'],['Po termínu vrácení',state.data.overdue,'#returns'],['Nezaplacené aktivní rezervace',state.data.unpaid,adminRoutes.reservations],['Nevypořádané kauce',state.data.deposits.total,'#deposits'],
  ].map(([label,count,href])=><Card key={String(label)}><Title>{label}</Title><Number>{count}</Number>{String(href).startsWith('#')?<a href={String(href)}>Zobrazit</a>:<NavigationLink variant="plain" to={String(href)}>Otevřít rezervace</NavigationLink>}</Card>)}</Grid>
