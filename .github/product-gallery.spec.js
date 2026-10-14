@@ -41,7 +41,7 @@ test.afterEach(async ({ page }) => {
   if (state) { expect(state.unexpected).toEqual([]); expect(state.errors).toEqual([]); }
 });
 
-for (const width of [375, 390, 768, 1440]) test(`product gallery thumbnails, lightbox and keyboard at ${width}`, async ({ page }) => {
+for (const width of [375, 390, 430, 768, 1440]) test(`product gallery thumbnails, lightbox and keyboard at ${width}`, async ({ page }) => {
   await page.setViewportSize({ width, height: 1000 });
   await setup(page);
   await page.goto(`${APP}/produkt/sofia`);
@@ -64,16 +64,23 @@ for (const width of [375, 390, 768, 1440]) test(`product gallery thumbnails, lig
   await expect(page.locator('#root')).toHaveAttribute('inert', '');
   const scroll = await page.evaluate(() => scrollY);
   const box = await dialog.boundingBox();
-  expect(box.x).toBeGreaterThanOrEqual(15); expect(box.y).toBeGreaterThanOrEqual(15);
-  expect(box.x + box.width).toBeLessThanOrEqual(width - 15);
-  expect(box.y + box.height).toBeLessThanOrEqual(985);
+  if (width < 768) {
+    expect(box).toEqual({ x: 0, y: 0, width, height: 1000 });
+    const imageBox = await dialog.getByRole('img').boundingBox();
+    expect(imageBox).toEqual(box);
+    await expect(dialog.getByRole('group', { name: 'Náhledy fotografií' })).toHaveCount(0);
+  } else {
+    expect(box.x).toBeGreaterThanOrEqual(15); expect(box.y).toBeGreaterThanOrEqual(15);
+    expect(box.x + box.width).toBeLessThanOrEqual(width - 15);
+    expect(box.y + box.height).toBeLessThanOrEqual(985);
+  }
   await expect(dialog.getByRole('img', { name: 'Sofia – pohled 4', exact: true })).toHaveCSS('object-fit', 'contain');
   await page.keyboard.press('ArrowRight');
   await expect(dialog.getByRole('status')).toHaveText('1 / 4');
-  await dialog.getByRole('button', { name: 'Zobrazit fotografii 2 ze 4' }).click();
+  await dialog.getByRole('button', { name: width < 768 ? 'Další fotografie' : 'Zobrazit fotografii 2 ze 4', exact: true }).click();
   await expect(dialog.getByRole('status')).toHaveText('2 / 4');
   await close.focus(); await page.keyboard.press('Shift+Tab');
-  await expect(dialog.getByRole('button', { name: 'Zobrazit fotografii 4 ze 4' })).toBeFocused();
+  await expect(dialog.getByRole('button', { name: width < 768 ? 'Další fotografie' : 'Zobrazit fotografii 4 ze 4', exact: true })).toBeFocused();
   await page.keyboard.press('Tab'); await expect(close).toBeFocused();
   await page.screenshot({ path: `${EVIDENCE}/lightbox-${width}.png`, fullPage: false });
   await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
@@ -83,7 +90,11 @@ for (const width of [375, 390, 768, 1440]) test(`product gallery thumbnails, lig
   await expect(page.locator('#root')).not.toHaveAttribute('inert', '');
   expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
   await trigger.click(); await close.click(); await expect(trigger).toBeFocused();
-  await trigger.click(); await page.mouse.click(4, 4); await expect(dialog).toHaveCount(0);
+  await trigger.click();
+  if (width < 768) {
+    await page.mouse.click(4, 4); await expect(dialog).toBeVisible(); await close.click();
+  } else await page.mouse.click(4, 4);
+  await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 });
@@ -118,7 +129,7 @@ test('short viewport keeps close and photo navigation visible with a long produc
   await expect(dialog.getByRole('button', { name: 'Zavřít galerii' })).toBeVisible();
   await dialog.getByRole('button', { name: 'Další fotografie', exact: true }).click();
   await expect(dialog.getByRole('status')).toHaveText('2 / 4');
-  const box = await dialog.boundingBox(); expect(box.y + box.height).toBeLessThanOrEqual(344);
+  const box = await dialog.boundingBox(); expect(box).toEqual({ x: 0, y: 0, width: 390, height: 360 });
   await expect(dialog.getByRole('group', { name: 'Náhledy fotografií' })).toHaveCount(0);
   await page.screenshot({ path: `${EVIDENCE}/lightbox-short.png` });
 });

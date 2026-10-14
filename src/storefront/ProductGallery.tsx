@@ -69,6 +69,9 @@ const Arrow = styled.div<{ $side: 'left' | 'right' }>`
   inset-block-start: 50%;
   ${({ $side }) => $side}: ${t.space[2]};
   transform: translateY(-50%);
+  @media (max-width: 767px) {
+    ${({ $side }) => $side}: max(${t.space[2]}, env(safe-area-inset-${({ $side }) => $side}));
+  }
 `;
 const Count = styled.span`
   position: absolute;
@@ -130,36 +133,68 @@ const Lightbox = styled(Dialog)`
   background: ${t.color.bg.canvas};
   font-family: ${t.font.family.ui};
   > h2 {
-    padding-inline-end: 52px;
-    margin-block-end: ${t.space[4]};
-    font-family: ${t.font.family.editorial};
-    font-size: 22px;
-    line-height: 28px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
     overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (max-width: 767px) {
+    position: fixed;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100vh;
+    block-size: 100dvh;
+    max-block-size: none;
+    padding: 0;
+    border-radius: 0;
+    overflow: hidden;
+
   }
 `;
 const Close = styled(Control)`
   position: absolute;
   inset-block-start: ${t.space[2]};
   inset-inline-end: ${t.space[2]};
+  z-index: 1;
+  @media (max-width: 767px) {
+    inset-block-start: max(${t.space[2]}, env(safe-area-inset-top));
+    inset-inline-end: max(${t.space[2]}, env(safe-area-inset-right));
+  }
 `;
 const LightboxContent = styled.div`
   display: grid;
   gap: ${t.space[3]};
   min-inline-size: 0;
   @media (max-height: 480px) { ${Rail} { display: none; } }
+  @media (max-width: 767px) {
+    block-size: 100%;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+    ${Rail} { display: none; }
+  }
 `;
 const LargeStage = styled(Stage)`
   aspect-ratio: auto;
-  block-size: clamp(120px, calc(100vh - 250px), 760px);
-  block-size: clamp(120px, calc(100dvh - 250px), 760px);
+  block-size: clamp(120px, calc(100vh - 206px), 760px);
+  block-size: clamp(120px, calc(100dvh - 206px), 760px);
   touch-action: pan-y pinch-zoom;
   @media (max-height: 480px) {
-    block-size: max(120px, calc(100vh - 150px));
-    block-size: max(120px, calc(100dvh - 150px));
+    block-size: max(120px, calc(100vh - 106px));
+    block-size: max(120px, calc(100dvh - 106px));
+  }
+  @media (max-width: 767px) {
+    block-size: 100%;
+    min-block-size: 0;
+    border: 0;
+    border-radius: 0;
+    ${Count} {
+      inset-inline-start: max(${t.space[3]}, env(safe-area-inset-left));
+      inset-block-end: max(${t.space[3]}, env(safe-area-inset-bottom));
+    }
   }
 `;
 
