@@ -62,7 +62,7 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
     if ([390, 1024, 1440].includes(width)) await page.screenshot({ path: 'test-evidence/admin-entry/entry-' + width + '.png' });
     await link.click();
     await expect(page).toHaveURL(APP + '/admin');
-    await expect(page.getByRole('heading', { level: 1, name: 'Přehled administrace' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Přehled' })).toBeVisible();
     expect(state.probes).toBe(2); // The destination independently verifies permission.
     expect(state.writes).toEqual([]); expect(state.errors).toEqual([]);
   });
