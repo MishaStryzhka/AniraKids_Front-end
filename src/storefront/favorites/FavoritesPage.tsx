@@ -1,3 +1,4 @@
+import styled from 'styled-components';
 import { ResumeReservationLink } from '../booking/ResumeReservationLink';
 import { Breadcrumbs } from '../../design-system/components/Breadcrumbs';
 import { Button } from '../../design-system/components/Button';
@@ -8,6 +9,9 @@ import { Actions, Alert, Copy, Heading, Page, RouteLink, Title } from '../storef
 import { usePublicRead } from '../usePublicRead';
 import { FavoriteButton, FavoritesFeedback } from './FavoriteButton';
 import { useFavorites } from './FavoritesProvider';
+
+const FavoritesPageShell = styled(Page)`align-content: start;`;
+
 export function FavoritesPage() {
   const favorites = useFavorites();
   const ids = favorites.ids.join(',');
@@ -17,12 +21,11 @@ export function FavoritesPage() {
     const pages = await Promise.all(chunks.map(chunk => getCatalogue({ ids: chunk.join(','), sort: 'name', page: 1, limit: 24 }, signal)));
     return { items: pages.flatMap(page => page.items) };
   });
-  return <Page>
+  return <FavoritesPageShell>
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: 'Oblíbené' }]} />
     <Title>Oblíbené</Title>
-    <Copy>{favorites.signedIn ? 'Vaše oblíbené produkty jsou uložené v účtu.' : 'Váš výběr ukládáme v tomto prohlížeči. Po přihlášení jej přidáme do vašeho účtu.'}</Copy>
     <FavoritesFeedback />
-    {favorites.loading || result.loading ? <Copy role="status">Načítání oblíbených…</Copy> : result.error ? <Alert role="alert"><Copy>Produkty se nepodařilo načíst.</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : !favorites.error && !favorites.ids.length ? <><Heading>Zatím nemáte žádné oblíbené produkty</Heading><Copy>Uložte si šaty nebo oblek kliknutím na srdíčko.</Copy><RouteLink to={routes.newArrivals}>Prohlédnout nabídku</RouteLink></> : null}
+    {favorites.loading || result.loading ? <Copy role="status">Načítání oblíbených…</Copy> : result.error ? <Alert role="alert"><Copy>Produkty se nepodařilo načíst.</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : !favorites.error && !favorites.ids.length ? <><Heading>Zatím nemáte žádné oblíbené produkty</Heading><RouteLink to={routes.newArrivals}>Prohlédnout nabídku</RouteLink></> : null}
     {!result.loading && result.data && <>
       {result.data.items.length < favorites.ids.length && <Copy>Některé uložené produkty nyní nejsou v nabídce. Můžete je odebrat srdíčkem.</Copy>}
       <Grid>{result.data.items.map(product => <li key={product.id}>
@@ -32,5 +35,5 @@ export function FavoritesPage() {
       </li>)}</Grid>
       <Actions>{favorites.ids.filter(id => !result.data!.items.some(product => product.id === id)).map(id => <div key={id}><Copy>Produkt nyní není dostupný</Copy><FavoriteButton id={id} name="Nedostupný produkt" /></div>)}</Actions>
     </>}
-  </Page>;
+  </FavoritesPageShell>;
 }

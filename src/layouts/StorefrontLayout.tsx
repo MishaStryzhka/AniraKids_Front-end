@@ -28,7 +28,15 @@ import { useAdminEntryAccess } from '../admin/auth/useAdminEntryAccess';
 
 const placeholderImage: string = require('../images/photo-plug.jpg');
 
+const Shell = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+`;
+
 const Main = styled.main`
+  flex: 1 0 auto;
   min-inline-size: 0;
   min-block-size: 1px;
 `;
@@ -212,7 +220,7 @@ export function StorefrontLayout() {
   }), [productPrimaryCategory]);
 
   return (
-    <>
+    <Shell>
       <StorefrontHeader
         activeOverlay={activeOverlay}
         currentPrimaryNavigation={currentPrimaryNavigation}
@@ -264,6 +272,6 @@ export function StorefrontLayout() {
         </Suspense>
       </Main>
       <Footer ref={footerRef} />
-    </>
+    </Shell>
   );
 }
