@@ -1,3 +1,4 @@
+import { ColorPalette } from '../design-system/components/ColorPalette/ColorPalette';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
 import IconBeauty from '../images/icons/IconBeauty';
@@ -256,7 +257,7 @@ export function CataloguePage() {
           <Input label="Cena do (Kč)" type="number" min="0" max="9999999" step="1" value={draft.maxPrice} onChange={event => update('maxPrice', event.target.value)}/>
           <Copy>Cena pronájmu bez vratné kauce.</Copy>
         </details>
-        <details><summary>BARVA</summary><label>Barva<Select value={draft.color} onChange={event => update('color', event.target.value)}><option value="">Všechny barvy</option>{options(result.data?.facets?.colors || [], draft.color)}</Select></label></details>
+        <details><summary>BARVA</summary><ColorPalette label="Paleta barev pro filtrování" colors={result.data?.facets?.colors || []} selected={draft.color ? [draft.color] : []} onToggle={color=>update('color', draft.color===color?'':color)}/><label>Barva<Select value={draft.color} onChange={event => update('color', event.target.value)}><option value="">Všechny barvy</option>{options(result.data?.facets?.colors || [], draft.color)}</Select></label></details>
         <details><summary>VELIKOST</summary><label>Velikost<Select value={draft.size} onChange={event => update('size', event.target.value)}><option value="">Všechny velikosti</option>{options(result.data?.facets?.sizes || [], draft.size)}</Select></label></details>
         {formError && <Alert role="alert">{formError}</Alert>}
         <Button type="submit">Použít filtry</Button><Button type="button" variant="secondary" onClick={reset}>Zrušit filtry</Button>

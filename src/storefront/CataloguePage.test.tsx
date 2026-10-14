@@ -124,3 +124,21 @@ test('women dresses link keeps both product type and audience', async () => {
     expect(screen.getByRole('heading', {name:'Dámské šaty',level:1})).toBeInTheDocument();
     await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({category:'dress',gender:'women'}), expect.any(AbortSignal)));
 });
+
+test('palette synchronizes the select, applies the color and toggles it off', async () => {
+  show('/saty');
+  await screen.findByText('Pro zvolené filtry jsme nenašli žádné produkty.');
+  fireEvent.click(screen.getByRole('button',{name:'Filtrovat'}));
+  const select=screen.getByLabelText('Barva');
+  select.closest('details')!.open=true;
+  const white=screen.getByRole('button',{name:'Bílá',exact:true});
+  fireEvent.click(white);
+  expect(white).toHaveAttribute('aria-pressed','true');
+  expect(select).toHaveValue('Bílá');
+  fireEvent.click(screen.getByRole('button',{name:'Použít filtry'}));
+  await waitFor(()=>expect(get).toHaveBeenLastCalledWith(expect.objectContaining({color:'Bílá'}),expect.any(AbortSignal)));
+  const currentWhite=await screen.findByRole('button',{name:'Bílá',exact:true});
+  fireEvent.click(currentWhite);
+  expect(screen.getByLabelText('Barva')).toHaveValue('');
+  expect(currentWhite).toHaveAttribute('aria-pressed','false');
+});

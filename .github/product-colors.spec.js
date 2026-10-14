@@ -26,7 +26,8 @@ for (const width of [390,768,1440]) test(`color editor saves multiple colors at 
     unexpected.push({method,path:u.pathname});return route.abort();
   });
   await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/produkty/p1');
-  await page.getByLabel('Přidat barvu').selectOption('Červená');
+  await page.getByRole('group',{name:'Paleta barev produktu',exact:true}).getByRole('button',{name:'Červená',exact:true}).click();
+  await expect(page.getByRole('group',{name:'Paleta barev produktu',exact:true}).getByRole('button',{name:'Červená',exact:true})).toHaveAttribute('aria-pressed','true');
   await page.getByRole('button',{name:'Odebrat barvu Bílá',exact:true}).click();
   await expect(page.getByLabel('Přidat barvu')).toBeFocused();
   await expect(page.getByLabel('Barva',{exact:true})).toHaveValue('Světle růžová, Červená');
