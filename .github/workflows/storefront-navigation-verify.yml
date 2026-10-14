@@ -15,6 +15,7 @@ on:
       - .github/route-scroll.spec.js
       - .github/marketplace-retirement.spec.js
       - .github/storefront-search.spec.js
+      - .github/product-gallery.spec.js
       - .github/workflows/storefront-navigation-verify.yml
 permissions:
   contents: read
@@ -53,7 +54,7 @@ jobs:
         env:
           # The existing Storefront Payment Guidance job builds without API env.
           BOOKING_SKIP_NO_ENV: '1'
-        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js .github/admin-entry.spec.js --workers=2 --reporter=line
+        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js .github/admin-entry.spec.js .github/product-gallery.spec.js --workers=2 --reporter=line
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,4 +64,5 @@ jobs:
           path: |
             test-evidence/customer-booking/
             test-evidence/admin-entry/
+            test-evidence/product-gallery/
             test-results/

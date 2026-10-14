@@ -38,10 +38,12 @@ const Description = styled.p`
 `;
 
 export interface DialogProps {
+  className?: string;
   open: boolean;
   title: string;
   description?: string;
   onEscape(): void;
+  dismissOnBackdrop?: boolean;
   initialFocusRef?: RefObject<HTMLElement>;
   resolveRestoreFocus?(previous: HTMLElement | null): HTMLElement | null;
   children: ReactNode;
@@ -66,7 +68,7 @@ function preserveStyle(style: CSSStyleDeclaration, property: string) {
   };
 }
 
-export function Dialog({open, title, description, onEscape, initialFocusRef, resolveRestoreFocus, children}: DialogProps) {
+export function Dialog({className, open, title, description, onEscape, dismissOnBackdrop = false, initialFocusRef, resolveRestoreFocus, children}: DialogProps) {
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -96,6 +98,7 @@ export function Dialog({open, title, description, onEscape, initialFocusRef, res
     const restoreHtmlOverflow = preserveStyle(document.documentElement.style, 'overflow');
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
+    const historyEntry = { url: window.location.href, key: window.history.state?.key };
     root?.setAttribute('inert', '');
     root?.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = 'hidden';
@@ -139,7 +142,9 @@ export function Dialog({open, title, description, onEscape, initialFocusRef, res
       }
       restoreBodyOverflow();
       restoreHtmlOverflow();
-      if (!/jsdom/i.test(window.navigator.userAgent)) window.scrollTo(scrollX, scrollY);
+      // A route change owns its restored position; a closing dialog must not overwrite it.
+      if (!/jsdom/i.test(window.navigator.userAgent) && window.location.href === historyEntry.url &&
+          window.history.state?.key === historyEntry.key) window.scrollTo(scrollX, scrollY);
 
       // Resolve against the committed, accessible DOM, once. An obsolete close must
       // never consume the page's next intent or focus behind a replacement dialog.
@@ -155,8 +160,8 @@ export function Dialog({open, title, description, onEscape, initialFocusRef, res
 
   if (!open) return null;
   return createPortal(
-    <Backdrop>
-      <Panel ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
+    <Backdrop onClick={event => { if (dismissOnBackdrop && event.target === event.currentTarget) onEscape(); }}>
+      <Panel className={className} ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
         <Title id={titleId}>{title}</Title>
         {description ? <Description id={descriptionId}>{description}</Description> : null}
         {children}
