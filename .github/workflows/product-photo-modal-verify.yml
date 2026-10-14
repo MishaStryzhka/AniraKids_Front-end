@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'src/admin/products/**'
+      - 'src/admin/api/products.ts'
+      - '.github/variant-fit-sizes.spec.js'
       - 'src/admin/layout/**'
       - 'src/admin/navigation/**'
       - 'src/design-system/components/Dialog/**'
@@ -26,6 +28,9 @@ jobs:
       - name: Photo upload and navigation regressions
         run: >
           npm test -- --watchAll=false --runInBand
+          src/admin/products/ProductVariantsSection.test.tsx
+          src/admin/products/productVariantsModel.test.ts
+          src/admin/api/products.test.ts
           src/admin/products/ProductMediaSection.test.tsx
           src/admin/products/ProductMediaR2.integration.test.tsx
           src/admin/products/AdminProductCorePage.test.tsx
@@ -46,7 +51,7 @@ jobs:
           npx --yes serve@14.2.4 -s build -l 4173 >/tmp/photo-modal-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           curl --silent --fail http://127.0.0.1:4173/ >/dev/null
-          npx playwright test .github/admin-fe02c01.spec.js --workers=2 --reporter=line
+          npx playwright test .github/admin-fe02c01.spec.js .github/variant-fit-sizes.spec.js --workers=2 --reporter=line
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -54,3 +59,4 @@ jobs:
           path: |
             test-results/
             test-evidence/admin-fe02c01/
+            test-evidence/variant-fit-sizes/

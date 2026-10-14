@@ -56,7 +56,7 @@ test('empty state opens one Add editor and focuses Velikost',async()=>{
   expect(document.querySelectorAll('[data-variant-editor]')).toHaveLength(1);
 });
 
-test('Add trims, submits only size, shows loading/success and focuses created edit action',async()=>{
+test('Add trims, submits size and inferred fit sizes, shows loading/success and focuses created edit action',async()=>{
   let resolve!:(value:any)=>void;
   createMock.mockReturnValue(new Promise(r=>{resolve=r}) as any);
   render(<ProductVariantsSection {...props()}/>);
@@ -64,7 +64,7 @@ test('Add trims, submits only size, shows loading/success and focuses created ed
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 98-104 '}});
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await waitFor(()=>expect(document.querySelector('[data-variant-submit]')).toHaveAttribute('aria-busy','true'));
-  expect(createMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'98-104'}}));
+  expect(createMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'98-104',fitSizes:['98','104']}}));
   resolve({...v('a','98-104'),inventory:undefined});
   await waitFor(()=>expect(screen.getByText('Varianta byla přidána.')).toBeInTheDocument());
   await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit velikost'})).toHaveFocus());
@@ -79,7 +79,7 @@ test('Edit cancel restores trigger; save PATCHes size and focuses same variant a
   fireEvent.click(screen.getByRole('button',{name:'Zrušit'}));await waitFor(()=>expect(trigger).toHaveFocus());
   fireEvent.click(trigger);fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 104 '}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
-  await waitFor(()=>expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({variantId:'a',body:{size:'104'}})));
+  await waitFor(()=>expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({variantId:'a',body:{size:'104',fitSizes:['98']}})));
   await waitFor(()=>expect(screen.getByText('Velikost byla uložena.')).toBeInTheDocument());
   expect(screen.getByText('104')).toBeInTheDocument();
   await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit velikost'})).toHaveFocus());
@@ -146,7 +146,7 @@ test('PRODUCT_NOT_FOUND keeps loaded variants/draft visible and disables mutatio
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
   expect(await screen.findByText('Produkt už není dostupný')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByRole('button',{name:'Uložit velikost'})).toBeDisabled();
 });
 
@@ -178,7 +178,7 @@ test('unknown create refresh absent clears uncertainty and allows explicit retry
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await screen.findByText('Varianta byla přidána.');
   await waitFor(()=>expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument());
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   await waitFor(()=>expect(screen.getByRole('button',{name:'Upravit velikost'})).toHaveFocus());
   expect(createMock).toHaveBeenCalledTimes(2);
 });
@@ -355,7 +355,7 @@ test('Inventory create success preserves Variant canonical size/status and new V
   fireEvent.change(screen.getByLabelText('Interní kód'),{target:{value:'ak-002'}});
   fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
   await screen.findByText('Fyzický kus byl přidán.');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByText('Neaktivní')).toBeInTheDocument();
   expect(screen.getByText('AK-002')).toBeInTheDocument();
 
@@ -412,4 +412,31 @@ test('retire intent is delegated upward and imperative retire seam reconciles ex
   await waitFor(()=>expect(retireInventoryMock).toHaveBeenCalledWith(expect.objectContaining({inventoryItemId:'i1'})));
   await waitFor(()=>expect(screen.getByText('Vyřazený')).toBeInTheDocument());
   expect(screen.queryByRole('button',{name:'Vyřadit'})).not.toBeInTheDocument();
+});
+
+test('fit-only edit is dirty, saves the same variant and preserves inventory', async()=>{
+  const risk=jest.fn();
+  const original={...v('a','74-80-86'),fitSizes:['74','80','86']};
+  updateMock.mockResolvedValue({...original,fitSizes:['74','86']});
+  render(<ProductVariantsSection {...props([original])} onRiskChange={risk}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
+  fireEvent.click(screen.getByRole('button',{name:'Odebrat velikost 80'}));
+  await waitFor(()=>expect(risk).toHaveBeenLastCalledWith(true));
+  fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
+  await waitFor(()=>expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({variantId:'a',body:{size:'74-80-86',fitSizes:['74','86']}})));
+  await waitFor(()=>expect(screen.getByText('Pro filtr: 74, 86')).toBeInTheDocument());
+  expect(createMock).not.toHaveBeenCalled();
+});
+
+test('XS–M prefills S, allows multiple selections and rejects an empty selection', async()=>{
+  render(<ProductVariantsSection {...props()}/>);
+  fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
+  fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'XS–M'}});
+  expect(screen.getByRole('button',{name:'Odebrat velikost S',exact:true})).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Vhodné pro velikosti'),{target:{value:'L'}});
+  expect(screen.getByRole('button',{name:'Odebrat velikost L',exact:true})).toBeInTheDocument();
+  for(const size of ['XS','S','M','L']) fireEvent.click(screen.getByRole('button',{name:`Odebrat velikost ${size}`,exact:true}));
+  fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
+  expect(screen.getByText('Vyberte alespoň jednu velikost pro filtrování.')).toBeInTheDocument();
+  expect(createMock).not.toHaveBeenCalled();
 });

@@ -1,3 +1,4 @@
+import { effectiveFitSizes, normalizeFitSizes } from './variantFitSizes';
 import type {AdminProductDetailVariant, AdminVariant} from '../api/products';
 
 export const normalizeVariantSize = (value: string) => value.trim();
@@ -30,14 +31,16 @@ export type VariantEditorTarget = {kind: 'add'} | {kind: 'edit'; variantId: stri
 export function isVariantEditorDirty(input: {
   target: VariantEditorTarget | null;
   sizeDraft: string;
+  fitSizesDraft?: string[];
   variants: AdminVariant[];
 }) {
   if (!input.target) return false;
   const normalized = normalizeVariantSize(input.sizeDraft);
-  if (input.target.kind === 'add') return normalized !== '';
+  if (input.target.kind === 'add') return normalized !== '' || Boolean(input.fitSizesDraft?.length);
   const editingVariantId = input.target.variantId;
   const canonical = input.variants.find(variant => variant.id === editingVariantId);
-  return canonical ? normalized !== canonical.size : normalized !== '';
+  const fitsChanged = input.fitSizesDraft !== undefined && JSON.stringify(normalizeFitSizes(input.fitSizesDraft)) !== JSON.stringify(canonical ? effectiveFitSizes(canonical) : []);
+  return fitsChanged || (canonical ? normalized !== canonical.size : normalized !== '');
 }
 
 export function projectDetailVariants(variants: AdminProductDetailVariant[]): AdminVariant[] {

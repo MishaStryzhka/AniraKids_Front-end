@@ -409,7 +409,7 @@ test('dirty Core and existing Photos survive successful variant create; Core bas
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 110 '}});
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
   await screen.findByText('Varianta byla přidána.');
-  expect(createVariantMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'110'}}));
+  expect(createVariantMock).toHaveBeenCalledWith(expect.objectContaining({productId:'p1',body:{size:'110',fitSizes:['110']}}));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(save()).toBeEnabled();
   expect(screen.getByText('1/10')).toBeInTheDocument();
@@ -525,7 +525,7 @@ test('dirty Core survives successful variant update and Core Save preserves acti
 
   await screen.findByText('Velikost byla uložena.');
   await waitFor(()=>expect(screen.queryByLabelText('Velikost')).not.toBeInTheDocument());
-  expect(screen.getByText('104')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('104');
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(save()).toBeEnabled();
 
@@ -545,7 +545,7 @@ test('dirty Core survives successful variant update and Core Save preserves acti
   expect(save()).toBeDisabled();
   expect(screen.getByLabelText('Velikost')).toHaveValue('105');
   expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
-  expect(screen.getByText('104')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('104');
   expect(updateVariantMock).toHaveBeenCalledTimes(1);
   expect(createVariantMock).not.toHaveBeenCalled();
 
@@ -570,7 +570,7 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
   expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
 
   altMock.mockResolvedValueOnce({product:{...p,color:'Server-only',photos:[{...a,alt:'Nový ALT'}]}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
@@ -581,7 +581,7 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
 
   expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(updateVariantMock).not.toHaveBeenCalled();
   expect(createVariantMock).not.toHaveBeenCalled();
 
@@ -667,7 +667,7 @@ test('Inventory refresh applies only Inventory and preserves Core Photos and Var
   await waitFor(()=>expect(refreshInventoryMock).toHaveBeenCalledTimes(1));
   expect(await screen.findByText('AK-777')).toBeInTheDocument();
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
   expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(patchMock).not.toHaveBeenCalled();
@@ -726,7 +726,7 @@ test('post-load Inventory PRODUCT_NOT_FOUND preserves mounted domains and disabl
   await screen.findByText('Produkt už není dostupný');
   expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
   expect(screen.getByText('1/10')).toBeInTheDocument();
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByLabelText('Poznámka')).toHaveValue('typed');
   expect(screen.getByRole('button',{name:'Uložit změny'})).toBeDisabled();
 });
@@ -846,7 +846,7 @@ test('R1 C: deferred Inventory refresh commits while active dirty Variant editor
   }));
   expect(await screen.findByText('AK-777')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('99');
-  expect(screen.getByText('98')).toBeInTheDocument();
+  expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
   expect(updateVariantMock).not.toHaveBeenCalled();
   expect(createVariantMock).not.toHaveBeenCalled();
