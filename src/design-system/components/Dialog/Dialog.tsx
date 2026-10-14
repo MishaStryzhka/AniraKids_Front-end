@@ -98,6 +98,7 @@ export function Dialog({className, open, title, description, onEscape, dismissOn
     const restoreHtmlOverflow = preserveStyle(document.documentElement.style, 'overflow');
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
+    const historyEntry = { url: window.location.href, key: window.history.state?.key };
     root?.setAttribute('inert', '');
     root?.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = 'hidden';
@@ -141,7 +142,9 @@ export function Dialog({className, open, title, description, onEscape, dismissOn
       }
       restoreBodyOverflow();
       restoreHtmlOverflow();
-      if (!/jsdom/i.test(window.navigator.userAgent)) window.scrollTo(scrollX, scrollY);
+      // A route change owns its restored position; a closing dialog must not overwrite it.
+      if (!/jsdom/i.test(window.navigator.userAgent) && window.location.href === historyEntry.url &&
+          window.history.state?.key === historyEntry.key) window.scrollTo(scrollX, scrollY);
 
       // Resolve against the committed, accessible DOM, once. An obsolete close must
       // never consume the page's next intent or focus behind a replacement dialog.

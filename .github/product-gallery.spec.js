@@ -145,6 +145,7 @@ test('missing and failed photos have a deliberate fallback and remaining photos 
 
 test('browser Back releases the modal and returning to the product starts with the first photo', async ({ page }) => {
   await setup(page); await page.goto(`${APP}/saty`);
+  await page.getByRole('link', { name: 'Prohlédnout Sofia', exact: true }).scrollIntoViewIfNeeded();
   const catalogueScroll = await page.evaluate(() => scrollY);
   await page.getByRole('link', { name: 'Prohlédnout Sofia', exact: true }).click();
   await page.getByRole('button', { name: 'Zobrazit fotografii 3 ze 4' }).click();

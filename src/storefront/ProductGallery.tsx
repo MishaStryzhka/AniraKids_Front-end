@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { flushSync } from 'react-dom';
 import { ChevronLeft, ChevronRight, Expand, ImageOff, X } from 'lucide-react';
 import styled from 'styled-components';
 import { Dialog } from '../design-system/components/Dialog';
@@ -197,13 +196,6 @@ function Thumbnails({ photos, selected, onSelect }: { photos: Photo[]; selected:
 export function ProductGallery({ product }: { product: GalleryProduct }) {
   const [selected, setSelected] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  useEffect(() => {
-    if (!expanded) return;
-    // Release the dialog's saved scroll position before the router restores a history entry.
-    const beforeHistoryNavigation = () => flushSync(() => setExpanded(false));
-    window.addEventListener('popstate', beforeHistoryNavigation, true);
-    return () => window.removeEventListener('popstate', beforeHistoryNavigation, true);
-  }, [expanded]);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
   const photos = product.photos;
