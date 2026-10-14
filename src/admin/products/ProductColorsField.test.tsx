@@ -11,6 +11,8 @@ function Form() {
 }
 test('adds and removes colors in the existing save field and restores focus', () => {
   render(<Form/>);
+  expect(screen.getByRole('button',{name:'Šampaňská',exact:true})).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Smaragdová',exact:true})).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('Přidat barvu'), {target:{value:'Červená'}});
   expect(screen.getByRole('status')).toHaveTextContent('Bílá, Světle růžová, Červená');
   expect(screen.getByRole('option',{name:'Bílá'})).toBeDisabled();

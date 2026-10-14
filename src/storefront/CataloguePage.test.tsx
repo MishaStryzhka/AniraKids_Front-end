@@ -131,6 +131,7 @@ test('palette synchronizes the select, applies the color and toggles it off', as
   fireEvent.click(screen.getByRole('button',{name:'Filtrovat'}));
   const select=screen.getByLabelText('Barva');
   select.closest('details')!.open=true;
+  expect(screen.queryByRole('button',{name:'Šampaňská',exact:true})).not.toBeInTheDocument();
   const white=screen.getByRole('button',{name:'Bílá',exact:true});
   fireEvent.click(white);
   expect(white).toHaveAttribute('aria-pressed','true');
