@@ -167,10 +167,10 @@ export function AdminLayout() {
           <MobileTitle>Administrace</MobileTitle>
         </MobileHeader>
 
-        <PageHeader>
+        {pageTitle!=='Přehled'?<PageHeader>
           <Heading data-admin-page-title>{pageTitle}</Heading>
           {pageAction ? <PageAction data-admin-page-action>{pageAction}</PageAction> : null}
-        </PageHeader>
+        </PageHeader>:null}
 
         <Main><Outlet /></Main>
       </Content>

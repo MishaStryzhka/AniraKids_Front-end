@@ -1,3 +1,4 @@
+import { LayoutDashboard, Shirt, ClipboardList, CalendarDays, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import type { MouseEvent } from 'react';
 import styled from 'styled-components';
@@ -13,6 +14,8 @@ const Root = styled.nav`
 `;
 
 const AdminLink = styled(NavigationLink)`
+  gap: 12px;
+  svg { flex-shrink: 0; }
   inline-size: 100%;
   min-block-size: 44px;
   padding-inline: ${t.space[3]};
@@ -29,6 +32,8 @@ const AdminLink = styled(NavigationLink)`
 `;
 
 const BackLink = styled(NavigationLink)`
+  gap: 12px;
+  svg { flex-shrink: 0; }
   inline-size: 100%;
   min-block-size: 44px;
   padding-inline: ${t.space[3]};
@@ -39,6 +44,8 @@ const SpacedDivider = styled(Divider)`
   margin-block: ${t.space[3]};
 `;
 
+const icons = {overview: LayoutDashboard, products: Shirt, reservations: ClipboardList, calendar: CalendarDays};
+
 export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
   const current = resolveAdminNavigation(location.pathname);
@@ -48,7 +55,7 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}
 
   return (
     <Root aria-label="Navigace administrace">
-      {adminNavigationItems.map(item => (
+      {adminNavigationItems.map(item => {const Icon=icons[item.key]; return (
         <AdminLink
           key={item.key}
           variant="plain"
@@ -56,11 +63,11 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}
           onClick={navigate}
           aria-current={current === item.key ? 'page' : undefined}
         >
-          {item.label}
+          <Icon size={20} strokeWidth={1.7} aria-hidden="true"/>{item.label}
         </AdminLink>
-      ))}
+      );})}
       <SpacedDivider />
-      <BackLink variant="plain" to="/" onClick={navigate}>Zpět na web</BackLink>
+      <BackLink variant="plain" to="/" onClick={navigate}><ArrowLeft size={20} strokeWidth={1.7} aria-hidden="true"/>Zpět na web</BackLink>
     </Root>
   );
 }

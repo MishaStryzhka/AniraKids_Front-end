@@ -98,7 +98,7 @@ test('auth refresh shows loading state before authorization probe', async ({ pag
 
 test('probe 200 renders AdminLayout and sends bearer token', async ({ page }) => {
   const probe = await openAuthorizedAdmin(page);
-  await expect(page.getByRole('heading', { name: 'Přehled administrace' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Přehled' })).toBeVisible();
   expect(probe.authorization()).toBe('Bearer admin-test-token');
 });
 
