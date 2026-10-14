@@ -1,10 +1,15 @@
-import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
+import {act, configure, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
 import {activateAdminProduct, getAdminProductActivationState, activateAdminInventoryItem, createAdminInventoryItem, createAdminProduct, createAdminVariant, getAdminProductDetail, getAdminProductInventorySnapshot, getAdminProductVariants, moveAdminInventoryItemToMaintenance, retireAdminInventoryItem, updateAdminInventoryItem, updateAdminProduct, updateAdminVariantSize, type AdminInventoryItem, type AdminProduct, type AdminProductDetailVariant} from '../api/products';
 import {completeProductPhoto, deleteProductPhoto, reorderProductPhotos, signProductPhoto, updateProductPhotoAlt} from '../api/productMedia';
 import {ProviderUploadError, uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
+
+// Full-page role queries traverse the expanded color palette in jsdom.
+// Allow asynchronous focus restoration to run between those expensive queries.
+configure({asyncUtilTimeout: 5000});
+jest.setTimeout(20000);
 
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}

@@ -1,10 +1,15 @@
 import {StrictMode} from 'react';
-import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
+import {act, configure, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminProductCorePage} from './AdminProductCorePage';
 import {getAdminProductDetail, updateAdminProduct, type AdminProduct} from '../api/products';
 import {deleteProductPhoto} from '../api/productMedia';
 import {AdminApiError} from '../api/errors';
+
+// Full-page role queries traverse the expanded color palette in jsdom.
+// Allow asynchronous focus restoration to run between those expensive queries.
+configure({asyncUtilTimeout: 5000});
+jest.setTimeout(20000);
 
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}
