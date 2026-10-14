@@ -7,9 +7,10 @@ import { Alert, Copy } from '../storefrontStyles';
 import { useFavorites } from './FavoritesProvider';
 
 const HeartButton = styled(IconButton)`
+  background: rgb(250 248 246 / 25%);
   &[aria-pressed='true']:not(:disabled) { color: ${t.color.action.primary.bg}; }
   &:hover:not(:disabled), &:active:not(:disabled) {
-    background: transparent;
+    background: rgb(250 248 246 / 60%);
     color: ${t.color.action.primary.bgHover};
   }
   & > svg {

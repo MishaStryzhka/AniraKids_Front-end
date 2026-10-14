@@ -1,10 +1,13 @@
-import { Menu, X } from 'lucide-react';
-import { createContext, useContext, useEffect, useLayoutEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { Menu } from 'lucide-react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { flushSync } from 'react-dom';
 import { Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconButton } from '../../design-system/components/IconButton';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { AdminNavigation } from '../navigation/AdminNavigation';
+import { AdminMobileDrawer } from '../navigation/AdminMobileDrawer';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { resolveAdminPageTitle } from '../navigation/adminRoutes';
 
 const Shell = styled.div`
@@ -56,15 +59,6 @@ const MobileTitle = styled.span`
   font-size: ${t.type.bodyMd.size};
   line-height: ${t.type.bodyMd.lineHeight};
   font-weight: ${t.font.weight.semibold};
-`;
-
-const MobileNavigationRegion = styled.div`
-  padding: ${t.space[3]} ${t.container.padding.mobile} ${t.space[4]};
-  background: ${t.color.bg.surface};
-  border-block-end: 1px solid ${t.color.border.subtle};
-
-  @media (min-width: ${t.breakpoint.md}) { padding-inline: ${t.container.padding.md}; }
-  @media (min-width: ${t.breakpoint.lg}) { display: none; }
 `;
 
 const Content = styled.div`min-inline-size: 0;`;
@@ -127,27 +121,33 @@ export function useAdminPageAction(action: ReactNode) {
 
 export function AdminLayout() {
   const location = useLocation();
-  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [navigationEntry, setNavigationEntry] = useState<string | null>(null);
+  const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
+  const mobileNavigationOpen = !isDesktop && navigationEntry === location.key;
   const [pageAction, setPageAction] = useState<ReactNode>(null);
   const pageTitle = resolveAdminPageTitle(location.pathname);
 
-  useEffect(() => { setMobileNavigationOpen(false); }, [location.pathname]);
+  const closeNavigation = useCallback(() => setNavigationEntry(null), []);
+  const resolveRestoreFocus = useCallback(() => {
+    const toggle = shellRef.current?.querySelector<HTMLElement>('[data-admin-nav-toggle]');
+    return toggle?.getClientRects().length ? toggle : shellRef.current?.querySelector<HTMLElement>('[data-admin-sidebar] a[aria-current="page"]') ?? null;
+  }, []);
+  const closeBeforeNavigation = useCallback(() => {
+    // Release the drawer's focus/scroll ownership before a route's leave dialog opens.
+    flushSync(() => setNavigationEntry(null));
+    resolveRestoreFocus()?.focus({ preventScroll: true });
+  }, [resolveRestoreFocus]);
+  useEffect(() => { if (isDesktop) setNavigationEntry(null); }, [isDesktop]);
 
   useEffect(() => {
     if (!mobileNavigationOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      setMobileNavigationOpen(false);
-      window.requestAnimationFrame(() => {
-        document.querySelector<HTMLElement>('[data-admin-nav-toggle]')?.focus({ preventScroll: true });
-      });
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [mobileNavigationOpen]);
+    window.addEventListener('popstate', closeBeforeNavigation, true);
+    return () => window.removeEventListener('popstate', closeBeforeNavigation, true);
+  }, [mobileNavigationOpen, closeBeforeNavigation]);
 
   return (
-    <Shell data-admin-layout>
+    <Shell data-admin-layout ref={shellRef}>
       <Sidebar data-admin-sidebar>
         <SidebarTitle>Administrace</SidebarTitle>
         <AdminNavigation />
@@ -157,21 +157,15 @@ export function AdminLayout() {
       <Content>
         <MobileHeader data-admin-mobile-header>
           <IconButton
-            aria-label={mobileNavigationOpen ? 'Zavřít navigaci administrace' : 'Otevřít navigaci administrace'}
+            aria-label="Otevřít navigaci administrace"
             aria-expanded={mobileNavigationOpen}
-            aria-controls="admin-mobile-navigation"
+            aria-controls={mobileNavigationOpen ? 'admin-mobile-navigation' : undefined}
             data-admin-nav-toggle
-            icon={mobileNavigationOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-            onClick={() => setMobileNavigationOpen(value => !value)}
+            icon={<Menu aria-hidden="true" />}
+            onClick={() => setNavigationEntry(location.key)}
           />
           <MobileTitle>Administrace</MobileTitle>
         </MobileHeader>
-
-        {mobileNavigationOpen ? (
-          <MobileNavigationRegion id="admin-mobile-navigation">
-            <AdminNavigation />
-          </MobileNavigationRegion>
-        ) : null}
 
         <PageHeader>
           <Heading data-admin-page-title>{pageTitle}</Heading>
@@ -181,6 +175,8 @@ export function AdminLayout() {
         <Main><Outlet /></Main>
       </Content>
       </AdminPageActionContext.Provider>
+      {mobileNavigationOpen ? <AdminMobileDrawer backgroundRef={shellRef} onClose={closeNavigation}
+        onNavigate={closeBeforeNavigation} resolveRestoreFocus={resolveRestoreFocus}/> : null}
     </Shell>
   );
 }

@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom';
+import type { MouseEvent } from 'react';
 import styled from 'styled-components';
 import { Divider } from '../../design-system/components/Divider';
 import { NavigationLink } from '../../design-system/components/NavigationLink';
@@ -38,9 +39,12 @@ const SpacedDivider = styled(Divider)`
   margin-block: ${t.space[3]};
 `;
 
-export function AdminNavigation() {
+export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
   const current = resolveAdminNavigation(location.pathname);
+  const navigate = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) onNavigate?.();
+  };
 
   return (
     <Root aria-label="Navigace administrace">
@@ -49,13 +53,14 @@ export function AdminNavigation() {
           key={item.key}
           variant="plain"
           to={item.to}
+          onClick={navigate}
           aria-current={current === item.key ? 'page' : undefined}
         >
           {item.label}
         </AdminLink>
       ))}
       <SpacedDivider />
-      <BackLink variant="plain" to="/">Zpět na web</BackLink>
+      <BackLink variant="plain" to="/" onClick={navigate}>Zpět na web</BackLink>
     </Root>
   );
 }
