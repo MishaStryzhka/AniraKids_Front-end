@@ -171,9 +171,10 @@ async function installAdminMocks(page, listHandler = url => responseFor(url)) {
   return state;
 }
 
-async function openProducts(page, path = '/admin/produkty') {
+async function openProducts(page, path = '/admin/produkty', expandFilters = true) {
   await page.goto(`${APP}${path}`);
   await expect(page.locator('[data-admin-products-page]')).toBeVisible();
+  if (expandFilters) await page.getByRole('button', { name: /^Filtry/ }).click();
 }
 
 test('canonical URL and strict API serializer reject browser-only/unknown query keys', async ({ page }) => {
@@ -430,7 +431,7 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
   test(`Products responsive contract at ${width}px without horizontal document overflow`, async ({ page }) => {
     await installAdminMocks(page);
     await page.setViewportSize({ width, height: 1000 });
-    await openProducts(page);
+    await openProducts(page, '/admin/produkty', false);
     await expect(page.locator('[data-admin-products-list]')).toBeVisible();
 
     const create = page.getByRole('link', { name: 'Přidat produkt' });
@@ -452,11 +453,28 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
       page.getByLabel('Pronájem'),
     ];
 
+    await expect(filterButton).toBeVisible();
+    await expect(filterButton).toHaveAttribute('aria-expanded', 'false');
+    await expect(selects[0]).toBeHidden();
+    const titleBox = await page.getByRole('heading', { name: 'Produkty', exact: true }).boundingBox();
+    for (const control of [filterButton, create]) {
+      const box = await control.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(box.y + box.height / 2 - titleBox.y - titleBox.height / 2)).toBeLessThan(2);
+    }
+    await page.screenshot({ path: `test-evidence/product-toolbar/toolbar-${width}.png`, fullPage: true });
+    await filterButton.click();
+    await expect(filterButton).toHaveAttribute('aria-expanded', 'true');
+    for (const select of selects) await expect(select).toBeVisible();
+    await selects[0].selectOption('active');
+    await expect(filterButton).toHaveAccessibleName('Filtry (1)');
+    await filterButton.click();
+    await expect(selects[0]).toBeHidden();
+    await filterButton.click();
+    await expect(selects[0]).toHaveValue('active');
+
     if (width < 768) {
-      await expect(filterButton).toBeVisible();
-      await expect(selects[0]).toBeHidden();
-      await filterButton.click();
-      for (const select of selects) await expect(select).toBeVisible();
 
       const boxes = await Promise.all(selects.map(select => select.boundingBox()));
       for (let index = 1; index < boxes.length; index += 1) {
@@ -464,7 +482,7 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
         expect(boxes[index].y).toBeGreaterThan(boxes[index - 1].y);
       }
     } else {
-      await expect(filterButton).toBeHidden();
+      await expect(filterButton).toBeVisible();
       for (const select of selects) await expect(select).toBeVisible();
 
       const boxes = await Promise.all(selects.map(select => select.boundingBox()));

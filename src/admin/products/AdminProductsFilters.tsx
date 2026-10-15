@@ -7,26 +7,10 @@ import { countActiveProductFilters } from './productListSearchParams';
 
 const Root = styled.section`
   min-inline-size: 0;
+  &[hidden] { display: none; }
 `;
 
-const MobileDisclosure = styled(Button)`
-  inline-size: 100%;
-  justify-content: space-between;
-
-  @media (min-width: ${t.breakpoint.md}) {
-    display: none;
-  }
-`;
-
-const Body = styled.div<{ $expanded: boolean }>`
-  display: ${({ $expanded }) => ($expanded ? 'block' : 'none')};
-  margin-block-start: ${t.space[3]};
-
-  @media (min-width: ${t.breakpoint.md}) {
-    display: block;
-    margin-block-start: 0;
-  }
-
+const Body = styled.div`
   @media (min-width: ${t.breakpoint.lg}) {
     display: flex;
     align-items: end;
@@ -64,7 +48,6 @@ const ResetWrap = styled.div`
 export interface AdminProductsFiltersProps {
   state: ProductListUrlState;
   expanded: boolean;
-  onToggle(): void;
   onChange(patch: Partial<ProductListUrlState>): void;
   onClear(): void;
 }
@@ -72,25 +55,14 @@ export interface AdminProductsFiltersProps {
 export function AdminProductsFilters({
   state,
   expanded,
-  onToggle,
   onChange,
   onClear,
 }: AdminProductsFiltersProps) {
   const activeCount = countActiveProductFilters(state);
 
   return (
-    <Root aria-label="Filtry produktů">
-      <MobileDisclosure
-        variant="secondary"
-        size="compact"
-        aria-expanded={expanded}
-        aria-controls="admin-products-filter-controls"
-        onClick={onToggle}
-      >
-        {activeCount > 0 ? `Filtry (${activeCount})` : 'Filtry'}
-      </MobileDisclosure>
-
-      <Body id="admin-products-filter-controls" $expanded={expanded}>
+    <Root aria-label="Filtry produktů" id="admin-products-filter-controls" hidden={!expanded}>
+      <Body>
         <Fields>
           <SelectField
             label="Status"
