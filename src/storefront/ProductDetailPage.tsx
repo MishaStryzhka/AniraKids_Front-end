@@ -2,7 +2,8 @@ import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import { useProductSeo } from '../seo/useProductSeo';
 import { draftItems } from './booking/bookingModel';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
-import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
+import { FavoritesFeedback } from './favorites/FavoriteButton';
+import { ProductShareActions } from './ProductShareActions';
 import { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../design-system/components/Button';
@@ -88,7 +89,7 @@ export function ProductDetailPage() {
         <ProductGallery key={product.id} product={product} />
         <Stack>
           <Title>{product.name}</Title>
-          <FavoriteButton id={product.id} name={product.name} />
+          <ProductShareActions key={product.slug} id={product.id} name={product.name} slug={product.slug} />
           <FavoritesFeedback />
           {product.color ? <Copy>Barva: {product.color}</Copy> : null}
           {product.description ? (
