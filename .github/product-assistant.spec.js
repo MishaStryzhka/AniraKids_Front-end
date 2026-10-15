@@ -28,6 +28,12 @@ for(const width of [390,768,1440])test('photo first AI review and save '+width,a
  await page.locator('input[type=file]').setInputFiles(file);await expect(page.getByAltText('Fotografie produktu 1')).toBeVisible();await expect(ai).toBeEnabled();
  await page.getByLabel('Popis',{exact:true}).fill('Ruční poznámka');await ai.click();await expect(page.getByRole('heading',{name:'Návrh AI'})).toBeVisible();await expect(page.getByLabel('Popis',{exact:true})).toHaveValue('Ruční poznámka');
  await page.getByRole('button',{name:'Použít návrh'}).click();await expect(page.getByLabel('Popis',{exact:true})).toHaveValue('Růžové slavnostní šaty s jemnou sukní.');await expect(page.getByLabel('Číselná řada')).toHaveValue('DET');
+ await expect(page.getByLabel('SEO titulek',{exact:true})).toBeHidden();
+ await page.getByText('Pokročilé nastavení',{exact:true}).click();
+ await expect(page.getByLabel('SEO titulek',{exact:true})).toHaveAttribute('placeholder','Dívčí šaty | AniraKids');
+ await page.getByLabel('SEO titulek',{exact:true}).fill('Vlastní titulek');
+ await expect(page.getByLabel('Náhled pro vyhledávače')).toContainText('Vlastní titulek');
+ await page.getByLabel('SEO titulek',{exact:true}).fill('');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.screenshot({path:`test-evidence/product-assistant/create-${width}.png`});
  await page.getByRole('button',{name:'Uložit',exact:true}).click();await expect(page).toHaveURL(new RegExp('/admin/produkty/'+id+'$'));await expect(page.getByText('/produkt/det31')).toBeVisible();

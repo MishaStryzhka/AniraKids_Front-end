@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'src/admin/products/**'
+      - 'src/seo/**'
       - 'src/admin/pages/AdminPlaceholders.tsx'
       - '.github/overview-workday.spec.js'
       - '.github/admin-fe02a.spec.js'
@@ -35,6 +36,9 @@ jobs:
       - name: Photo upload and navigation regressions
         run: >
           npm test -- --watchAll=false --runInBand
+          src/seo/
+          src/storefront/api/publicApi.test.ts
+          src/storefront/ProductDetailPage.test.tsx
           src/storefront/CataloguePage.test.tsx
           src/admin/products/ProductColorsField.test.tsx
           src/admin/products/ProductCoreForm.test.tsx

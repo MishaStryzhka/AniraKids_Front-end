@@ -1,3 +1,4 @@
+import { useProductSeo } from '../seo/useProductSeo';
 import { draftItems } from './booking/bookingModel';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
@@ -33,6 +34,7 @@ export function ProductDetailPage() {
     { setProductPrimaryCategory } = useStorefrontOutletContext();
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
   const product = result.data;
+  useProductSeo(product);
   const catalogueReturnTo = getCatalogueReturnTo(location.state, product?.category);
   useEffect(() => {
     setProductPrimaryCategory(
