@@ -23,6 +23,7 @@ export type InventoryEditorTarget =
 
 export interface InventoryCreateDraft {
   internalCode: string;
+  generatedCode?: string;
   condition: CreateAdminInventoryCondition;
   notes: string;
 }
@@ -58,6 +59,14 @@ export const EMPTY_INVENTORY_CREATE_DRAFT: InventoryCreateDraft = {
   condition: 'good',
   notes: '',
 };
+
+/** Allocate once per editor attempt so unknown-result recovery keeps the same identity. */
+export function newInventoryCreateDraft(): InventoryCreateDraft {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const internalCode = 'KUS-' + Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return {...EMPTY_INVENTORY_CREATE_DRAFT, internalCode, generatedCode: internalCode};
+}
 
 export const INVENTORY_CONDITION_LABEL: Record<AdminInventoryCondition, string> = {
   excellent: 'Výborný',
@@ -146,7 +155,7 @@ export function inventoryNotesErrorCopy(error: InventoryNotesError) {
 }
 
 export function isInventoryCreateDirty(draft: InventoryCreateDraft) {
-  return normalizeInventoryCode(draft.internalCode) !== ''
+  return normalizeInventoryCode(draft.internalCode) !== (draft.generatedCode ?? '')
     || draft.condition !== EMPTY_INVENTORY_CREATE_DRAFT.condition
     || draft.notes !== '';
 }

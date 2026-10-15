@@ -101,3 +101,15 @@ test('unknown Inventory create never auto-replays POST and reconciles explicitly
  await expect(zone.getByText('Výsledek přidání fyzického kusu není potvrzený')).toBeVisible();expect(state.inventoryCreate).toBe(1);await expect(zone.getByRole('button',{name:'Načíst aktuální fyzické kusy'})).toBeVisible();
  await zone.getByRole('button',{name:'Načíst aktuální fyzické kusy'}).click();await expect(zone.getByText('Aktuální fyzické kusy byly načteny. Přidání můžete zkusit znovu.')).toBeVisible();expect(state.inventoryCreate).toBe(1);await expect(zone.getByLabel('Interní kód')).toHaveValue('AK-099');
 });
+
+for(const width of [390,768,1440])test('automatic inventory code '+width,async({page})=>{
+ const state=await mocks(page);await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/produkty/p1');const zone=inventory(page);
+ await zone.getByRole('button',{name:'Přidat fyzický kus'}).first().click();
+ const code=await zone.getByLabel('Interní kód').inputValue();expect(code).toMatch(/^KUS-[0-9A-F]{16}$/);
+ await zone.locator('[data-inventory-submit]').click();
+ await expect(zone.getByText('Fyzický kus byl přidán.')).toBeVisible();await expect(zone.getByText(code,{exact:true})).toBeVisible();expect(state.inventoryCreate).toBe(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await zone.getByRole('button',{name:'Přidat fyzický kus'}).first().click();
+ expect(await zone.getByLabel('Interní kód').inputValue()).not.toBe(code);
+ await page.screenshot({path:`test-evidence/admin-fe02c03/automatic-${width}.png`,fullPage:true});
+});

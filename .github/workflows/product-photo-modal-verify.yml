@@ -42,6 +42,9 @@ jobs:
           src/storefront/CataloguePage.test.tsx
           src/admin/products/ProductColorsField.test.tsx
           src/admin/products/ProductCoreForm.test.tsx
+          src/admin/products/productInventoryModel.test.ts
+          src/admin/products/useProductInventoryController.test.tsx
+          src/admin/products/ProductInventoryItems.test.tsx
           src/admin/products/ProductVariantsSection.test.tsx
           src/admin/products/productVariantsModel.test.ts
           src/admin/api/products.test.ts
@@ -66,6 +69,7 @@ jobs:
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           curl --silent --fail http://127.0.0.1:4173/ >/dev/null
           npx playwright test .github/admin-fe02c01.spec.js .github/variant-fit-sizes.spec.js .github/product-colors.spec.js .github/overview-workday.spec.js .github/catalogue-toolbar.spec.js .github/product-assistant.spec.js --workers=2 --reporter=line
+          npx playwright test .github/admin-fe02c03.spec.js --grep "automatic inventory code" --workers=2 --reporter=line
           npx playwright test .github/admin-fe02a.spec.js --grep 'Products responsive contract|filter changes reset|product search' --workers=2 --reporter=line
       - uses: actions/upload-artifact@v4
         if: failure()
