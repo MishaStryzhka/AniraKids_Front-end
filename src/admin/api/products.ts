@@ -127,6 +127,7 @@ export interface AdminProductListResponse {
 }
 
 export interface AdminProductListQuery {
+  q?: string;
   status?: AdminProductStatus;
   category?: AdminProductCategory;
   gender?: AdminProductGender;
@@ -136,6 +137,7 @@ export interface AdminProductListQuery {
 
 export function serializeAdminProductListParams(query: AdminProductListQuery) {
   const params: {
+    q?: string;
     status?: AdminProductStatus;
     category?: AdminProductCategory;
     gender?: AdminProductGender;
@@ -147,6 +149,7 @@ export function serializeAdminProductListParams(query: AdminProductListQuery) {
     limit: ADMIN_PRODUCTS_PAGE_SIZE,
   };
 
+  if (query.q?.trim()) params.q = query.q.trim().slice(0, 100);
   if (query.status !== undefined) params.status = query.status;
   if (query.category !== undefined) params.category = query.category;
   if (query.gender !== undefined) params.gender = query.gender;

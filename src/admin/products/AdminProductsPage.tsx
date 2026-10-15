@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, SlidersHorizontal } from 'lucide-react';
+import { Plus, SlidersHorizontal, Search, X } from 'lucide-react';
+import { Input } from '../../design-system/components/Input';
 import { IconButton } from '../../design-system/components/IconButton';
 import styled from 'styled-components';
 import { Button } from '../../design-system/components/Button';
@@ -86,6 +87,21 @@ const AddProductLink = styled(NavigationLink)`
   &&:active { background: ${t.color.action.ghost.bgActive}; }
 `;
 
+const ActionsSummary = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${t.space[2]};
+  font-size: ${t.type.bodySm.size};
+  overflow-wrap: anywhere;
+  span { min-width: 0; }
+`;
+const SearchForm = styled.form`
+  display: flex;
+  align-items: end;
+  gap: ${t.space[2]};
+  > div { flex: 1; min-width: 0; }
+`;
+
 const ProductCount = styled.p`
   margin: 0;
   color: ${t.color.text.secondary};
@@ -159,6 +175,9 @@ const paginationLabels = {
 export function AdminProductsPage() {
   const { token } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchInput = useRef<HTMLInputElement>(null);
+  const [searchOpen, setSearchOpen] = useState(() => Boolean(searchParams.get('q')));
+  const [searchDraft, setSearchDraft] = useState(searchParams.get('q') || '');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [retryRevision, setRetryRevision] = useState(0);
   const [requestState, setRequestState] = useState<RequestState>({ status: 'loading' });
@@ -171,6 +190,9 @@ export function AdminProductsPage() {
     [rawSearchKey]
   );
   const canonicalKey = canonical.searchParams.toString();
+  useEffect(() => { setSearchDraft(canonical.state.q || ''); }, [canonical.state.q]);
+  useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
+
 
   useEffect(() => {
     if (!canonical.changed) return;
@@ -248,7 +270,7 @@ export function AdminProductsPage() {
   };
 
   const clearFilters = () => {
-    setSearchParams(buildProductListSearchParams({ page: 1 }));
+    setSearchParams(buildProductListSearchParams({ page: 1, q: canonical.state.q }));
   };
 
   const changePage = (page: number) => {
@@ -259,6 +281,10 @@ export function AdminProductsPage() {
   const activeFilterCount = countActiveProductFilters(canonical.state);
   const pageAction = useMemo(() => (
     <Toolbar>
+      <IconButton aria-label="Hledat produkty" title="Hledat produkty" aria-expanded={searchOpen}
+        aria-controls={searchOpen ? "admin-product-search" : undefined} onClick={() => setSearchOpen(value => !value)}
+        icon={<Search size={22} aria-hidden="true" />}/>
+
       <FilterButton
         aria-label={activeFilterCount ? `Filtry (${activeFilterCount})` : 'Filtry'}
         title="Filtry"
@@ -271,7 +297,7 @@ export function AdminProductsPage() {
         <Plus size={24} strokeWidth={1.7} aria-hidden="true" />
       </AddProductLink>
     </Toolbar>
-  ), [activeFilterCount, filtersExpanded]);
+  ), [activeFilterCount, filtersExpanded, searchOpen]);
   useAdminPageAction(pageAction);
 
   const currentData =
@@ -284,6 +310,18 @@ export function AdminProductsPage() {
 
   return (
     <Page data-admin-products-page>
+      {searchOpen ? <SearchForm id="admin-product-search" role="search" onSubmit={event => {
+        event.preventDefault();
+        updateFilters({ q: searchDraft.trim() || undefined });
+      }}>
+        <Input ref={searchInput} type="search" label="Hledat produkty" placeholder="Název nebo kód produktu" maxLength={100} value={searchDraft} onChange={event => setSearchDraft(event.target.value)} />
+        <IconButton type="submit" aria-label="Vyhledat" title="Vyhledat" icon={<Search size={20} aria-hidden="true" />}/>
+      </SearchForm> : null}
+      {canonical.state.q ? <ActionsSummary>
+        <span>Hledání: {canonical.state.q}</span>
+        <IconButton aria-label="Zrušit hledání" title="Zrušit hledání" onClick={() => updateFilters({ q: undefined })} icon={<X size={18} aria-hidden="true" />}/>
+      </ActionsSummary> : null}
+
       <AdminProductsFilters
         state={canonical.state}
         expanded={filtersExpanded}
@@ -324,7 +362,7 @@ export function AdminProductsPage() {
         {currentData && currentData.pagination.total === 0 ? (
           <StatePanel>
             <StateContent>
-              {activeFilterCount === 0 ? (
+              {activeFilterCount === 0 && !canonical.state.q ? (
                 <>
                   <StateTitle>Zatím tu nejsou žádné produkty</StateTitle>
                   <StateText>Přidejte první produkt a začněte vytvářet katalog.</StateText>
@@ -334,8 +372,8 @@ export function AdminProductsPage() {
                 </>
               ) : (
                 <>
-                  <StateTitle>Žádné produkty neodpovídají vybraným filtrům</StateTitle>
-                  <StateText>Zkuste filtry upravit nebo je zrušte.</StateText>
+                  <StateTitle>Žádné produkty neodpovídají výběru</StateTitle>
+                  <StateText>Zkuste upravit hledání nebo filtry.</StateText>
                   <Button variant="secondary" onClick={clearFilters}>
                     Zrušit filtry
                   </Button>

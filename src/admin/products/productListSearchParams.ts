@@ -6,6 +6,7 @@ import type {
 } from '../api/products';
 
 export interface ProductListUrlState {
+  q?: string;
   status?: AdminProductStatus;
   category?: AdminProductCategory;
   gender?: AdminProductGender;
@@ -37,6 +38,7 @@ function parseRentalEnabled(value: string | null): boolean | undefined {
 
 export function parseProductListSearchParams(params: URLSearchParams): ProductListUrlState {
   return {
+    q: params.get('q')?.trim().slice(0, 100) || undefined,
     status: oneOf(params.get('status'), statuses),
     category: oneOf(params.get('category'), categories),
     gender: oneOf(params.get('gender'), genders),
@@ -48,6 +50,7 @@ export function parseProductListSearchParams(params: URLSearchParams): ProductLi
 export function buildProductListSearchParams(state: ProductListUrlState) {
   const params = new URLSearchParams();
 
+  if (state.q?.trim()) params.set('q', state.q.trim().slice(0, 100));
   if (state.status !== undefined) params.set('status', state.status);
   if (state.category !== undefined) params.set('category', state.category);
   if (state.gender !== undefined) params.set('gender', state.gender);
@@ -70,6 +73,7 @@ export function canonicalizeProductListSearchParams(params: URLSearchParams) {
 
 export function toAdminProductListQuery(state: ProductListUrlState): AdminProductListQuery {
   const query: AdminProductListQuery = { page: state.page };
+  if (state.q) query.q = state.q;
   if (state.status !== undefined) query.status = state.status;
   if (state.category !== undefined) query.category = state.category;
   if (state.gender !== undefined) query.gender = state.gender;
