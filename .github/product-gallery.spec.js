@@ -170,3 +170,45 @@ test('browser Back releases the modal and returning to the product starts with t
   await page.getByRole('link', { name: 'Prohlédnout Sofia', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Fotografie: Sofia', exact: true }).getByRole('status')).toHaveText('1 / 4');
 });
+
+for (const width of [390, 1440]) test(`product share and QR code ${width}`, async ({page}) => {
+  await page.setViewportSize({width,height:900});
+  await setup(page,{count:1});
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator,'share',{value:undefined,configurable:true});
+    Object.defineProperty(navigator,'clipboard',{value:{writeText:async value => {window.copiedLink=value;}},configurable:true});
+  });
+  await page.goto(`${APP}/produkt/sofia?tracking=private#test`);
+  await page.getByRole('button',{name:'Sdílet produkt',exact:true}).click();
+  await expect(page.getByText('Odkaz byl zkopírován.',{exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>window.copiedLink)).toBe(`${APP}/produkt/sofia`);
+  const trigger=page.getByRole('button',{name:'Zobrazit QR kód produktu'});
+  await trigger.click();
+  const dialog=page.getByRole('dialog',{name:'QR kód produktu'});
+  await expect(dialog.getByRole('img',{name:'QR kód: Sofia'})).toHaveAttribute('src',/^data:image\/png;base64,/);
+  await expect(dialog.getByLabel('Odkaz na produkt')).toHaveValue(`${APP}/produkt/sofia`);
+  await expect(dialog.getByRole('button',{name:'Zavřít',exact:true})).toBeFocused();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+  await page.screenshot({path:`test-evidence/product-gallery/share-qr-${width}.png`});
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);await expect(trigger).toBeFocused();
+  await page.screenshot({path:`test-evidence/product-gallery/share-icons-${width}.png`});
+});
+
+test('native sharing cancellation and blocked clipboard fallback',async({page})=>{
+  await setup(page,{count:1});
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'share',{value:async data=>{window.sharedData=data;throw new DOMException('Cancelled','AbortError');},configurable:true});
+    Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw new Error('Denied');}},configurable:true});
+  });
+  await page.goto(`${APP}/produkt/sofia`);
+  const share=page.getByRole('button',{name:'Sdílet produkt',exact:true});await share.click();
+  expect(await page.evaluate(()=>window.sharedData)).toEqual({title:'Sofia',url:`${APP}/produkt/sofia`});
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.evaluate(()=>Object.defineProperty(navigator,'share',{value:undefined}));
+  await share.click();const dialog=page.getByRole('dialog',{name:'Sdílet produkt'});
+  await expect(dialog.getByLabel('Odkaz na produkt')).toHaveValue(`${APP}/produkt/sofia`);
+  await expect(dialog.getByRole('status')).toHaveText('Odkaz zkopírujte z pole níže.');
+  await dialog.getByLabel('Odkaz na produkt').focus();
+  expect(await dialog.getByLabel('Odkaz na produkt').evaluate(el=>el.selectionEnd-el.selectionStart)).toBe(`${APP}/produkt/sofia`.length);
+});
