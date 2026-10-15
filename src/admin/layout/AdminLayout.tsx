@@ -63,11 +63,12 @@ const MobileTitle = styled.span`
 
 const Content = styled.div`min-inline-size: 0;`;
 
-const PageHeader = styled.div`
+const PageHeader = styled.div<{ $compactActions: boolean }>`
   padding: ${t.space[6]} ${t.container.padding.mobile} ${t.space[4]};
   display: grid;
   gap: ${t.space[4]};
   align-items: center;
+  grid-template-columns: ${p => p.$compactActions ? 'minmax(0, 1fr) auto' : 'none'};
 
   @media (min-width: ${t.breakpoint.md}) {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -167,7 +168,7 @@ export function AdminLayout() {
           <MobileTitle>Administrace</MobileTitle>
         </MobileHeader>
 
-        {pageTitle!=='Přehled'?<PageHeader>
+        {pageTitle!=='Přehled'?<PageHeader $compactActions={pageTitle === 'Produkty'}>
           <Heading data-admin-page-title>{pageTitle}</Heading>
           {pageAction ? <PageAction data-admin-page-action>{pageAction}</PageAction> : null}
         </PageHeader>:null}

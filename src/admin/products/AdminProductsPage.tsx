@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Plus, SlidersHorizontal } from 'lucide-react';
+import { IconButton } from '../../design-system/components/IconButton';
 import styled from 'styled-components';
 import { Button } from '../../design-system/components/Button';
 import { NavigationLink } from '../../design-system/components/NavigationLink';
@@ -48,6 +50,40 @@ const CreateLink = styled(NavigationLink)`
     color: ${t.color.action.primary.fg};
     background: ${t.color.action.primary.bgActive};
   }
+`;
+
+const Toolbar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${t.space[2]};
+`;
+const FilterButton = styled(IconButton)`
+  position: relative;
+`;
+const FilterCount = styled.span`
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding-inline: 3px;
+  display: grid;
+  place-items: center;
+  border-radius: ${t.radius.full};
+  background: ${t.color.action.primary.bg};
+  color: ${t.color.action.primary.fg};
+  font-size: 10px;
+  line-height: 1;
+`;
+const AddProductLink = styled(NavigationLink)`
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: ${t.component.iconButton.radius};
+  color: ${t.color.action.ghost.fg};
+  &&:hover { background: ${t.color.action.ghost.bgHover}; }
+  &&:active { background: ${t.color.action.ghost.bgActive}; }
 `;
 
 const ProductCount = styled.p`
@@ -128,16 +164,6 @@ export function AdminProductsPage() {
   const [requestState, setRequestState] = useState<RequestState>({ status: 'loading' });
   const requestSequenceRef = useRef(0);
   const skipFetchForCanonicalKeyRef = useRef<string | null>(null);
-
-  const pageAction = useMemo(
-    () => (
-      <CreateLink variant="plain" to={adminRoutes.productNew}>
-        Přidat produkt
-      </CreateLink>
-    ),
-    []
-  );
-  useAdminPageAction(pageAction);
 
   const rawSearchKey = searchParams.toString();
   const canonical = useMemo(
@@ -231,6 +257,23 @@ export function AdminProductsPage() {
   };
 
   const activeFilterCount = countActiveProductFilters(canonical.state);
+  const pageAction = useMemo(() => (
+    <Toolbar>
+      <FilterButton
+        aria-label={activeFilterCount ? `Filtry (${activeFilterCount})` : 'Filtry'}
+        title="Filtry"
+        aria-expanded={filtersExpanded}
+        aria-controls="admin-products-filter-controls"
+        onClick={() => setFiltersExpanded(value => !value)}
+        icon={<><SlidersHorizontal size={22} strokeWidth={1.7} aria-hidden="true" />{activeFilterCount > 0 ? <FilterCount aria-hidden="true">{activeFilterCount}</FilterCount> : null}</>}
+      />
+      <AddProductLink variant="plain" to={adminRoutes.productNew} aria-label="Přidat produkt" title="Přidat produkt">
+        <Plus size={24} strokeWidth={1.7} aria-hidden="true" />
+      </AddProductLink>
+    </Toolbar>
+  ), [activeFilterCount, filtersExpanded]);
+  useAdminPageAction(pageAction);
+
   const currentData =
     requestState.status === 'success' && requestState.queryKey === canonicalKey
       ? requestState.data
@@ -244,7 +287,6 @@ export function AdminProductsPage() {
       <AdminProductsFilters
         state={canonical.state}
         expanded={filtersExpanded}
-        onToggle={() => setFiltersExpanded(value => !value)}
         onChange={updateFilters}
         onClear={clearFilters}
       />
