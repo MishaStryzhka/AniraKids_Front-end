@@ -532,3 +532,26 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) {
     }
   });
 }
+
+test('product search combines filters, resets pagination and can be cleared', async ({ page }) => {
+  const state = await installAdminMocks(page, url => responseFor(url, products, {page:Number(url.searchParams.get('page')||1),total:40,pages:2}));
+  await page.setViewportSize({width:390,height:1000});
+  await openProducts(page, '/admin/produkty?status=active&page=2', false);
+  const trigger=page.getByRole('button',{name:'Hledat produkty',exact:true});
+  await trigger.click();
+  const input=page.getByRole('searchbox',{name:'Hledat produkty',exact:true});
+  await expect(input).toBeFocused();
+  await input.fill('DET030');await input.press('Enter');
+  await expect.poll(()=>state.listRequests.at(-1)?.searchParams.get('q')).toBe('DET030');
+  expect(state.listRequests.at(-1).searchParams.get('status')).toBe('active');
+  expect(state.listRequests.at(-1).searchParams.get('page')).toBe('1');
+  await trigger.click();await expect(input).toBeHidden();
+  await expect(page.getByText('Hledání: DET030')).toBeVisible();
+  await page.getByRole('button',{name:'Zrušit hledání'}).click();
+  await expect.poll(()=>state.listRequests.at(-1)?.searchParams.has('q')).toBe(false);
+  expect(state.listRequests.at(-1).searchParams.get('status')).toBe('active');
+  await page.goBack();await expect(page.getByText('Hledání: DET030')).toBeVisible();
+  await trigger.click();await expect(input).toHaveValue('DET030');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+  await page.screenshot({path:'test-evidence/product-toolbar/search-390.png'});
+});

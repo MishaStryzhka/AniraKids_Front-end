@@ -50,3 +50,11 @@ test('API mapping cannot forward browser-only or unknown keys', () => {
     page: 2,
   });
 });
+
+test('search is trimmed, bounded, serialized and independent of the filter count', () => {
+  const parsed = canonicalizeProductListSearchParams(new URLSearchParams('q=++DET030++&status=active&page=2'));
+  expect(parsed.state.q).toBe('DET030');
+  expect(parsed.searchParams.get('q')).toBe('DET030');
+  expect(toAdminProductListQuery(parsed.state)).toEqual(expect.objectContaining({q:'DET030',status:'active',page:2}));
+  expect(countActiveProductFilters(parsed.state)).toBe(1);
+});
