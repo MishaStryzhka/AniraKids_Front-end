@@ -175,7 +175,7 @@ const Empty = styled.div `
   min-height: 300px; display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 20px; text-align: center;
 `;
-const filterKeys = ['category', 'gender', 'familyLook', 'color', 'size', 'rentalMode', 'minPrice', 'maxPrice'] as const;
+const filterKeys = ['category', 'gender', 'color', 'size', 'rentalMode', 'minPrice', 'maxPrice'] as const;
 const categories = [['dress', 'Šaty'], ['suit', 'Obleky'], ['set', 'Soupravy'], ['accessory', 'Doplňky'], ['other', 'Ostatní']];
 const genders = [['girls', 'Dívky'], ['boys', 'Chlapci'], ['women', 'Ženy'], ['men', 'Muži'], ['unisex', 'Unisex'], ['children', 'Děti']];
 const sorts = [['name', 'Podle názvu'], ['newest', 'Nejnovější'], ['priceAsc', 'Cena od nejnižší'], ['priceDesc', 'Cena od nejvyšší']];
@@ -193,9 +193,10 @@ export function CataloguePage() {
     const title = (isWomenDresses ? 'Dámské šaty' : legacy?.title) || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
     useEffect(() => {
-      if (params.has('page') || (pathname === routes.dresses && params.has('gender'))) {
+      if (params.has('familyLook') || params.has('page') || (pathname === routes.dresses && params.has('gender'))) {
         const next = new URLSearchParams(params);
         next.delete('page');
+        next.delete('familyLook');
         if (pathname === routes.dresses) next.delete('gender');
         setParams(next, { replace: true });
       }
@@ -232,7 +233,7 @@ export function CataloguePage() {
         (!sorts.some(([value]) => value === sort) || (request.category && !categories.some(([value]) => value === request.category)) ||
             (request.gender && !genders.some(([value]) => value === request.gender)) ||
             (request.rentalMode && !['studio', 'external'].includes(request.rentalMode)) ||
-            (request.familyLook && request.familyLook !== 'true') || (request.color?.length || 0) > 80 || (request.size?.length || 0) > 80 ? 'Neplatné filtry. Obnovte prosím výchozí nastavení.' : '');
+            (request.color?.length || 0) > 80 || (request.size?.length || 0) > 80 ? 'Neplatné filtry. Obnovte prosím výchozí nastavení.' : '');
     const result = useInfiniteCatalogue(invalid ? null : JSON.stringify(request));
     const sentinel = useRef<HTMLDivElement>(null);
     const { hasMore, loadingMore, error, loadMore } = result;
@@ -266,7 +267,8 @@ export function CataloguePage() {
           icon={<><SlidersHorizontal size={22} aria-hidden="true"/>{activeFilterCount > 0 ? <FilterCount id="catalogue-filter-count">{activeFilterCount}<span style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}> aktivních filtrů</span></FilterCount> : null}</>}/>
         <SortControl title={`Seřadit podle: ${sorts.find(([value]) => value === sort)?.[1] || sort}`}>
           <ArrowUpDown size={22} strokeWidth={1.7} aria-hidden="true"/>
-          <select aria-label="SEŘADIT PODLE" value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>
+          <select aria-label="SEŘADIT PODLE" value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page');
+        next.delete('familyLook'); setParams(next); }}>
             {sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </SortControl>
@@ -286,6 +288,7 @@ export function CataloguePage() {
                 return;
             const next = new URLSearchParams(params);
             next.delete('page');
+        next.delete('familyLook');
             filterKeys.forEach(key => { const value = key === 'gender' && fixedGender ? '' : draft[key]; value ? next.set(key, value) : next.delete(key); });
             setParams(next);
         }}>
@@ -294,7 +297,6 @@ export function CataloguePage() {
           {!fixedCategory && <label>Kategorie<Select value={draft.category} onChange={event => update('category', event.target.value)}><option value="">Všechny</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
           {!fixedGender && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
         </details>}
-        <details><summary>FAMILY LOOK</summary><label><span><input type="checkbox" checked={draft.familyLook === 'true'} onChange={event => update('familyLook', event.target.checked ? 'true' : '')}/> Sladěné rodinné modely</span></label></details>
         <details><summary>CENA</summary>
           <label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Ve studiu</option><option value="external">Mimo studio</option></Select></label>
           <Input label="Cena od (Kč)" type="number" min="0" max="9999999" step="1" value={draft.minPrice} onChange={event => update('minPrice', event.target.value)}/>

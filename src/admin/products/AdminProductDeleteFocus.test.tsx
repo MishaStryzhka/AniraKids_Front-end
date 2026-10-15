@@ -60,7 +60,7 @@ async function mountEditor(seed = product(), strict = false) {
   ], {initialEntries: ['/admin/produkty/p1']});
   const element = <div id="root"><RouterProvider router={router}/></div>;
   const view = render(strict ? <StrictMode>{element}</StrictMode> : element);
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/p1');
   return {...view, router};
 }
 function confirm(id: string) {

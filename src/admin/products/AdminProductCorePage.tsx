@@ -1,3 +1,6 @@
+import {SelectField} from '../../design-system/components/SelectField';
+import {ProductDraftPhotos} from './ProductDraftPhotos';
+import {startProductDraft, saveProductDraft, type DraftPhoto, type ProductSuggestion} from '../api/productAssistant';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useBeforeUnload, useBlocker, useLocation, useNavigate, useNavigationType, useParams} from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,7 +12,7 @@ import {Dialog} from '../../design-system/components/Dialog';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import {useAuth} from '../../hooks/useAuth';
 import {AdminApiError} from '../api/errors';
-import {createAdminProduct, getAdminProductDetail, getAdminProductActivationState, type AdminProductActivationState, updateAdminProduct, type AdminProduct, type AdminProductDetailVariant, type AdminProductStatus} from '../api/products';
+import {getAdminProductDetail, getAdminProductActivationState, type AdminProductActivationState, updateAdminProduct, type AdminProduct, type AdminProductDetailVariant, type AdminProductStatus} from '../api/products';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {adminRoutes, buildAdminProductDetailPath} from '../navigation/adminRoutes';
 import {ProductCoreForm, type ProductCoreFormHandle} from './ProductCoreForm';
@@ -81,6 +84,18 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const [, setSeoNoIndex] = useState<boolean|undefined>(validHydration?.seo.noIndex);
   const [mediaPhotos, setMediaPhotos] = useState(() => validHydration?.photos ?? []);
   const [mediaProductName, setMediaProductName] = useState(() => validHydration?.name ?? '');
+  const [draftPhotos,setDraftPhotos]=useState<DraftPhoto[]>([]);
+  const [draftBusy,setDraftBusy]=useState(false);
+  const [createUncertain,setCreateUncertain]=useState(false);
+  const [codePrefix,setCodePrefix]=useState('');
+  const [aiSuggestion,setAiSuggestion]=useState<ProductSuggestion|null>(null);
+  const draftPromise=useRef<Promise<string>|null>(null);
+  const ensureDraft=()=>{
+    if(!draftPromise.current)draftPromise.current=startProductDraft(token??'').then(r=>r.draftId).catch(error=>{draftPromise.current=null;throw error;});
+    return draftPromise.current;
+  };
+  const inferredPrefix=current.gender==='women'?'DAM':current.gender==='men'?'PAN':['girls','boys'].includes(current.gender)?'DET':'';
+  const prefix=['DEK','HRA'].includes(codePrefix)?codePrefix:inferredPrefix||codePrefix;
   const [mediaRisk, setMediaRisk] = useState(false);
   const [mediaPending, setMediaPending] = useState(false);
   const [variantSeed, setVariantSeed] = useState<AdminProductDetailVariant[]>([]);
@@ -122,7 +137,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const [dialogState, commitDialogState] = useState<ActiveDialog>({kind: 'none'});
   const dialogRef=useRef(dialogState);dialogRef.current=dialogState;
   const setDialogState=useCallback((next:ActiveDialog)=>{dialogRef.current=next;commitDialogState(next);},[]);
-  const workRisk = Boolean(coreUnknown) || dirty || submitting || mediaRisk || variantRisk || inventoryRisk.hasRisk || Boolean(retireStartPending);
+  const workRisk = Boolean(coreUnknown) || createUncertain || dirty || draftPhotos.length>0 || draftBusy || submitting || mediaRisk || variantRisk || inventoryRisk.hasRisk || Boolean(retireStartPending);
   const revisionRef=useRef({revision:0,risks:[false,false,false,false]});
   const risks=[dirty,mediaRisk,variantRisk,inventoryRisk.hasRisk||Boolean(retireStartPending)];
   if(risks.some((risk,index)=>risk&&!revisionRef.current.risks[index]))revisionRef.current.revision++;
@@ -255,7 +270,8 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     requestAnimationFrame(()=>{if(scope.current.alive&&scope.current.key===expected&&focusGeneration.current===generation&&dialogRef.current.kind==='none')formRef.current?.focus(target);});
   };
   const submit = async () => {
-    if (saveInFlightRef.current || coreConflictRef.current) return;
+    if (saveInFlightRef.current || coreConflictRef.current || draftBusy) return;
+    if(mode==='create'&&(!prefix||!current.category||!current.gender)){setSubmitError('Vyberte kategorii, určení a číselnou řadu.');return;}
     const validation = validateProductCoreForm({mode, status, value: current});
     setErrors(validation.errors);
     setAgeTagErrors(validation.ageTagErrors);
@@ -275,7 +291,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     const ownsSave=()=>scope.current.alive&&scope.current.key===expectedScope&&generation===saveGeneration.current;
     try {
       const product = mode === 'create'
-        ? await createAdminProduct({token: token ?? '', body: body as Parameters<typeof createAdminProduct>[0]['body'], signal: controller.signal})
+        ? await saveProductDraft(token??'',await ensureDraft(),{...Object.fromEntries(Object.entries(body).filter(([key])=>!['name','slug','familyLookGroup'].includes(key))),prefix},controller.signal)
         : await updateAdminProduct({token: token ?? '', productId: productId!, body, signal: controller.signal});
       if(!ownsSave()||controller.signal.aborted||(mode==='edit'&&product.id!==productId))return;
       const next = productToCoreFormState(product);
@@ -316,6 +332,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
         } else setSubmitError('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.');
       } else if (mode === 'edit' && e.status === 404) setSubmitError('Produkt už nebyl nalezen. Vaše změny zůstaly zachované.');
       else {
+        if(mode==='create'&&(!(error instanceof AdminApiError)||e.status===null||e.status>=500))setCreateUncertain(true);
         if(mode==='edit'&&(!(error instanceof AdminApiError)||e.status===null||e.status>=500)){
           const unknown={productId:productId!,attemptId:generation};coreUnknownRef.current=unknown;setCoreUnknown(unknown);metadataGeneration.current++;
         }
@@ -460,11 +477,18 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   if (mode === 'edit' && loadError === 'not-found') return <State><h2>Produkt nebyl nalezen</h2><p>Produkt už nemusí existovat nebo odkaz není platný.</p><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></State>;
   if (mode === 'edit' && loadError === 'network') return <State><h2>Produkt se nepodařilo načíst</h2><p>Zkuste to prosím znovu.</p><Actions><Button onClick={() => setRetryRevision(x => x + 1)}>Zkusit znovu</Button><NavigationLink variant="plain" to={adminRoutes.products}>Zpět na produkty</NavigationLink></Actions></State>;
   return <Page onPointerDownCapture={()=>{focusGeneration.current++;}} onKeyDownCapture={()=>{focusGeneration.current++;}}>
-    {mode === 'create' ? <Guidance>Produkt se uloží jako koncept. Pro vytvoření je povinný pouze název; ostatní údaje můžete doplnit později.</Guidance> : null}
+    {mode === 'create' ? <Guidance>Přidejte fotografie a zkontrolujte údaje. Produkt se uloží jako koncept s automatickým kódem a URL.</Guidance> : null}
     {feedback ? <ProductSuccessFeedback kind={feedback} onDismiss={() => setFeedback(null)}/> : null}
+    {mode==='create'?<>
+      <ProductDraftPhotos token={token??''} ensureDraft={ensureDraft} photos={draftPhotos} onPhotos={setDraftPhotos} onSuggestion={setAiSuggestion} onBusy={setDraftBusy} disabled={submitting||createUncertain} onAccessError={handleRequestError}/>
+      {aiSuggestion?<State aria-label="Návrh AI"><h2>Návrh AI</h2><p>{aiSuggestion.description}</p><p>Barvy: {aiSuggestion.colors.join(', ')||'Neuvedeno'}</p><p>Kategorie: {aiSuggestion.category?({dress:'Šaty',suit:'Obleky',set:'Sety',accessory:'Doplňky',other:'Ostatní'}[aiSuggestion.category]):'Neuvedeno'} · Určení: {aiSuggestion.gender?({girls:'Dívky',boys:'Chlapci',women:'Ženy',men:'Muži',unisex:'Unisex'}[aiSuggestion.gender]):'Neuvedeno'}</p><p>Věkové označení: {aiSuggestion.ageTags.join(', ')||'Ověřte podle štítku'}</p><p>{aiSuggestion.note}</p><Guidance>Návrh nahradí popis, barvy, kategorii, určení a věková označení. Před uložením je můžete upravit.</Guidance><Actions><Button type="button" disabled={submitting||draftBusy||createUncertain} onClick={()=>{setCurrent(value=>({...value,description:aiSuggestion.description,color:aiSuggestion.colors.join(', '),category:aiSuggestion.category??'',gender:aiSuggestion.gender??'',ageTags:aiSuggestion.ageTags}));setAiSuggestion(null);}}>Použít návrh</Button><Button type="button" variant="secondary" onClick={()=>setAiSuggestion(null)}>Zahodit návrh</Button></Actions></State>:null}
+      <SelectField label="Číselná řada" value={prefix} disabled={submitting||draftBusy||createUncertain} onChange={e=>setCodePrefix(e.target.value)}><option value="">Podle určení…</option><option value="DET">DET — Dětské oblečení</option><option value="DAM">DAM — Dámské oblečení</option><option value="PAN">PAN — Pánské oblečení</option><option value="DEK">DEK — Dekorace</option><option value="HRA">HRA — Hračky</option></SelectField>
+    </>:null}
+    {mode==='create'&&createUncertain?<State role="status"><p>Výsledek uložení zatím není potvrzený. Ověřte původní pokus; nevytvoří se další produkt.</p><Button type="button" disabled={submitting} onClick={()=>void submit()}>Ověřit uložení</Button></State>:null}
+    <fieldset disabled={mode==='create'&&(submitting||createUncertain)} style={{border:0,padding:0,margin:0,minWidth:0}}>
     <ProductCoreForm ref={formRef} mode={mode} status={status} value={current} errors={errors} ageTagErrors={ageTagErrors}
-      submitting={submitting} saveDisabled={submitting || Boolean(coreConflict) || (!dirty && mode === 'edit')} submitError={submitError} submitRecovery={coreConflict?{pending:coreRecovering,onAction:reconcileCoreConflict,error:coreRecoveryError}:undefined}
-      onChange={next=>{currentRef.current=next;setCurrent(next);}} onSubmit={submit}/>
+      submitting={submitting} saveDisabled={submitting || draftBusy || Boolean(coreConflict) || (!dirty && mode === 'edit')} submitError={submitError} submitRecovery={coreConflict?{pending:coreRecovering,onAction:reconcileCoreConflict,error:coreRecoveryError}:undefined}
+      onChange={next=>{currentRef.current=next;setCurrent(next);}} onSubmit={submit}/></fieldset>
     {mode === 'edit' && productId ? <ProductMediaSection ref={mediaRef} key={productId} productId={productId} productName={mediaProductName || current.name}
       status={status} token={token ?? ''} initialPhotos={mediaPhotos} onRiskChange={setMediaRisk} onPendingRiskChange={setMediaPending} onAccessError={handleRequestError}
       onRequestDelete={requestDelete} deleteRequest={deleteRequest} onDeleteSettled={settleDelete} uploadDialogSuspended={dialogState.kind !== 'none'}/> : null}
