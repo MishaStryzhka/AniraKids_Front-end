@@ -18,7 +18,7 @@ import {adminRoutes, buildAdminProductDetailPath} from '../navigation/adminRoute
 import {ProductCoreForm, type ProductCoreFormHandle} from './ProductCoreForm';
 import {ProductMediaSection, type MediaDeleteIntent, type MediaDeleteSettlement, type ProductMediaSectionHandle} from './ProductMediaSection';
 import {ProductVariantsSection, type EditorSwitchIntent, type ProductVariantsSectionHandle, type VariantyEditorTarget} from './ProductVariantsSection';
-import {ProductActivationSection} from './ProductActivationSection';
+import {ProductActivationSection, ProductVisibilityAction} from './ProductActivationSection';
 import {useProductActivationController} from './useProductActivationController';
 import {activationGuardBlocked, usableActivationMetadata, type KnownActivationRequirement} from './productActivationModel';
 import type {InventoryRetireIntent} from './ProductInventoryItems';
@@ -446,7 +446,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const leaveTitle = mode === 'create'
     ? 'Neuložené změny'
     : activation.hasRisk
-      ? workRisk||coreUnknown ? 'Neuložené nebo nedokončené změny' : 'Aktivace produktu není potvrzená'
+      ? workRisk||coreUnknown ? 'Neuložené nebo nedokončené změny' : activation.operation?.kind==='hide'||activation.unknownOutcome?.action==='hide' ? 'Skrytí produktu není potvrzené' : 'Aktivace produktu není potvrzená'
     : lifecycleOnlyRisk
       ? 'Nedokončená změna provozního stavu'
       : inventoryOnlyRisk
@@ -455,7 +455,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const leaveDescription = mode === 'create'
     ? 'Máte neuložené změny. Opravdu chcete odejít?'
     : activation.hasRisk
-      ? workRisk||coreUnknown ? 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.' : 'Výsledek aktivace nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
+      ? workRisk||coreUnknown ? 'Máte neuložené změny nebo nedokončenou práci na této stránce. Pokud odejdete, některé změny se nemusí uložit. Probíhající požadavek už ale mohl být zpracován.' : 'Výsledek změny viditelnosti nemusí být potvrzený. Opuštění stránky neznamená, že se probíhající požadavek vrátí zpět.'
     : lifecycleOnlyRisk
       ? 'Změna provozního stavu probíhá nebo její výsledek není potvrzený. Pokud odejdete, požadavek už mohl být zpracován a opuštění stránky jej nevrátí zpět.'
       : inventoryOnlyRisk
@@ -494,7 +494,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
     </>:null}
     {mode==='create'&&createUncertain?<State role="status"><p>Výsledek uložení zatím není potvrzený. Ověřte původní pokus; nevytvoří se další produkt.</p><Button type="button" disabled={submitting} onClick={()=>void submit()}>Ověřit uložení</Button></State>:null}
     <fieldset disabled={mode==='create'&&(submitting||createUncertain)} style={{border:0,padding:0,margin:0,minWidth:0}}>
-    <ProductCoreForm ref={formRef} mode={mode} status={status} value={current} errors={errors} ageTagErrors={ageTagErrors}
+    <ProductCoreForm ref={formRef} mode={mode} status={status} statusAction={mode==='edit'?<ProductVisibilityAction status={status} controller={activation} blocked={workRisk||dialogState.kind!=='none'}/>:undefined} value={current} errors={errors} ageTagErrors={ageTagErrors}
       submitting={submitting} saveDisabled={submitting || draftBusy || Boolean(coreConflict) || (!dirty && mode === 'edit')} submitError={submitError} submitRecovery={coreConflict?{pending:coreRecovering,onAction:reconcileCoreConflict,error:coreRecoveryError}:undefined}
       onChange={next=>{currentRef.current=next;setCurrent(next);}} onSubmit={submit}/></fieldset>
     {mode === 'edit' && productId ? <ProductMediaSection ref={mediaRef} key={productId} productId={productId} productName={mediaProductName || current.name}

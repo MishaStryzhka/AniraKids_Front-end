@@ -5,7 +5,7 @@ import type {ProductActivationController} from './useProductActivationController
 const attempt={productId:'p1',attemptId:1,generation:1};
 function controller(overrides:Partial<ProductActivationController>={}):ProductActivationController{return {
  operation:null,readiness:null,unknownOutcome:null,conflict:null,productMissing:false,error:null,feedback:null,
- activate:jest.fn(),reconcile:jest.fn(),canActivate:()=>true,invalidateReadiness:jest.fn(),hasRisk:false,hasImmediateRisk:()=>false,...overrides,
+ hide:jest.fn(),canHide:()=>true,activate:jest.fn(),reconcile:jest.fn(),canActivate:()=>true,invalidateReadiness:jest.fn(),hasRisk:false,hasImmediateRisk:()=>false,...overrides,
 };}
 test.each(['active','archived'] as const)('%s hides action but keeps unresolved recovery',status=>{
  const c=controller({unknownOutcome:attempt});render(<ProductActivationSection status={status} controller={c} contextRevision={0} blocked={false} onGoToRequirement={jest.fn()}/>);

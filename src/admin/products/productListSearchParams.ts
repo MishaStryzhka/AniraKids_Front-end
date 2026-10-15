@@ -16,7 +16,7 @@ export interface ProductListUrlState {
 
 export type ProductListFilterKey = 'status' | 'category' | 'gender' | 'rentalEnabled';
 
-const statuses: readonly AdminProductStatus[] = ['draft', 'active', 'archived'];
+const statuses: readonly AdminProductStatus[] = ['draft', 'active', 'hidden', 'archived'];
 const categories: readonly AdminProductCategory[] = ['dress', 'suit', 'set', 'accessory', 'other'];
 const genders: readonly AdminProductGender[] = ['girls', 'boys', 'women', 'men', 'unisex'];
 

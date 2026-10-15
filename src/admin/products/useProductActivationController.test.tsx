@@ -1,11 +1,11 @@
 import {act,renderHook} from '@testing-library/react';
-import {activateAdminProduct,getAdminProductActivationState,type AdminProductActivationState,type AdminProductStatus} from '../api/products';
+import {hideAdminProduct,activateAdminProduct,getAdminProductActivationState,type AdminProductActivationState,type AdminProductStatus} from '../api/products';
 import {AdminApiError} from '../api/errors';
 import {useProductActivationController} from './useProductActivationController';
 import {isReadinessStale} from './productActivationModel';
 jest.mock('axios',()=>({__esModule:true,default:{isCancel:()=>false},AxiosError:class extends Error{}}));
 jest.mock('../api/client',()=>({adminApiClient:{},buildAdminRequestConfig:jest.fn()}));
-jest.mock('../api/products',()=>({activateAdminProduct:jest.fn(),getAdminProductActivationState:jest.fn()}));
+jest.mock('../api/products',()=>({hideAdminProduct:jest.fn(),activateAdminProduct:jest.fn(),getAdminProductActivationState:jest.fn()}));
 const post=activateAdminProduct as jest.MockedFunction<typeof activateAdminProduct>,get=getAdminProductActivationState as jest.MockedFunction<typeof getAdminProductActivationState>;
 const error=(code:string,status=409,details?:string[])=>new AdminApiError({code,status,details,message:'raw backend',kind:'unexpected'});
 function deferred<T>(){let resolve!:(value:T)=>void,reject!:(error:unknown)=>void;const promise=new Promise<T>((yes,no)=>{resolve=yes;reject=no});return{promise,resolve,reject};}
@@ -68,4 +68,35 @@ test('400 is a confirmed rejection; post-load missing blocks without replacing p
 test('older recovery 404 cannot mark Product missing after a newer metadata generation',async()=>{
  post.mockRejectedValue(error('PRODUCT_STATE_CONFLICT'));const pending=deferred<AdminProductActivationState>();get.mockReturnValue(pending.promise);const {result,input}=setup();await act(async()=>result.current.activate());act(()=>{void result.current.reconcile()});input.metadataGeneration.current++;
  await act(async()=>pending.reject(error('PRODUCT_NOT_FOUND',404)));expect(result.current.productMissing).toBe(false);expect(result.current.conflict).not.toBeNull();expect(result.current.operation).toBeNull();
+});
+
+test('hide is guarded, deduplicated and preserves unknown outcome until read-back',async()=>{
+ const hide=hideAdminProduct as jest.MockedFunction<typeof hideAdminProduct>;
+ const pending=deferred<AdminProductActivationState>();hide.mockReturnValue(pending.promise);
+ const {result,input,rerender}=setup();rerender({...input,status:'active'});
+ act(()=>{void result.current.hide();void result.current.hide()});expect(hide).toHaveBeenCalledTimes(1);
+ expect(result.current.hasRisk).toBe(true);
+ await act(async()=>pending.reject(new Error('network')));
+ expect(result.current.unknownOutcome?.action).toBe('hide');expect(result.current.canHide()).toBe(false);
+ get.mockResolvedValue({id:'p1',status:'hidden',seoNoIndex:true});
+ await act(async()=>result.current.reconcile());
+ expect(result.current.feedback).toBe('observed-hidden');expect(result.current.unknownOutcome).toBeNull();
+ expect(input.onMetadata).toHaveBeenCalledWith({id:'p1',status:'hidden',seoNoIndex:true});
+ expect(hide).toHaveBeenCalledTimes(1);
+});
+test('hidden product can be republished and then hidden again',async()=>{
+ const hide=hideAdminProduct as jest.MockedFunction<typeof hideAdminProduct>;
+ const {result,input,rerender}=setup();rerender({...input,status:'hidden'});post.mockResolvedValue(active);
+ await act(async()=>result.current.activate());expect(result.current.feedback).toBe('confirmed-active');
+ rerender({...input,status:'active'});hide.mockResolvedValue({id:'p1',status:'hidden',seoNoIndex:true});
+ await act(async()=>result.current.hide());expect(result.current.feedback).toBe('confirmed-hidden');
+ rerender({...input,status:'hidden'});expect(result.current.canActivate()).toBe(true);
+});
+test('unsaved work blocks hiding and stale hide results cannot update another product',async()=>{
+ const hide=hideAdminProduct as jest.MockedFunction<typeof hideAdminProduct>;
+ const {result,input,rerender}=setup();rerender({...input,status:'active'});input.canStart.mockReturnValue(false);
+ await act(async()=>result.current.hide());expect(hide).not.toHaveBeenCalled();
+ input.canStart.mockReturnValue(true);const pending=deferred<AdminProductActivationState>();hide.mockReturnValue(pending.promise);
+ act(()=>{void result.current.hide()});rerender({...input,productId:'p2',scopeKey:'p2',status:'active'});
+ await act(async()=>pending.resolve({id:'p1',status:'hidden',seoNoIndex:true}));expect(input.onMetadata).not.toHaveBeenCalled();
 });

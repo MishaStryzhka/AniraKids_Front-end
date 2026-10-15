@@ -10,6 +10,7 @@ export const statusPresentation: Record<
 > = {
   draft: { label: 'Koncept', tone: 'info' },
   active: { label: 'Aktivní', tone: 'success' },
+  hidden: { label: 'Skrytý', tone: 'neutral' },
   archived: { label: 'Archivovaný', tone: 'neutral' },
 };
 

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {Info} from 'lucide-react';
+import {Info, Eye, EyeOff} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
 import {Divider} from '../../design-system/components/Divider';
 import {Spinner} from '../../design-system/components/Spinner';
@@ -23,17 +23,30 @@ const Stale = styled(Notice)`padding:${t.space[3]};`;
 // The shared Button owns aria-busy through its generic loading mode, which hides
 // its label. Match the existing Inventory pending-button pattern locally.
 const PendingActivationButton=styled.button`min-inline-size:0;min-block-size:${t.control.height.compact};padding-inline:${t.component.button.paddingInline.compact};border:1px solid transparent;border-radius:${t.component.button.radius};display:inline-flex;align-items:center;justify-content:center;gap:${t.component.button.iconGap};font-family:${t.font.family.ui};font-size:${t.type.button.size};line-height:${t.type.button.lineHeight};font-weight:${t.type.button.weight};letter-spacing:${t.type.button.letterSpacing};color:${t.color.state.disabled.fg};background:${t.color.state.disabled.bg};cursor:not-allowed;white-space:normal;text-align:center;overflow-wrap:anywhere;`;
-const feedbackCopy = {'confirmed-active':'Produkt byl aktivován.','observed-active':'Produkt je nyní aktivní.','observed-draft':'Produkt je stále ve stavu Koncept.','observed-archived':'Produkt je nyní ve stavu Archivovaný.'};
+const feedbackCopy = {'confirmed-hidden':'Produkt byl skryt z nabídky. Existující rezervace zůstávají zachované.','observed-hidden':'Produkt je nyní skrytý.','confirmed-active':'Produkt byl aktivován.','observed-active':'Produkt je nyní aktivní.','observed-draft':'Produkt je stále ve stavu Koncept.','observed-archived':'Produkt je nyní ve stavu Archivovaný.'};
+export function ProductVisibilityAction({status,controller:c,blocked}: {status?:AdminProductStatus;controller:ProductActivationController;blocked:boolean}) {
+  if(status!=='active'&&status!=='hidden')return null;
+  const hiding=status==='active';
+  const pending=c.operation?.kind===(hiding?'hide':'activate');
+  return <Button type="button" size="compact" variant="secondary"
+    disabled={blocked||!(hiding?c.canHide():c.canActivate())}
+    aria-busy={pending||undefined} onClick={hiding?c.hide:c.activate}>
+    {hiding?<EyeOff size={16} aria-hidden="true"/>:<Eye size={16} aria-hidden="true"/>}
+    {pending?(hiding?'Skrývání…':'Zveřejňování…'):(hiding?'Skrýt z nabídky':'Znovu zveřejnit')}
+  </Button>;
+}
+
 export function ProductActivationSection({status,controller:c,contextRevision,blocked,onGoToRequirement}: {
   status?:AdminProductStatus;controller:ProductActivationController;contextRevision:number;blocked:boolean;onGoToRequirement(key:KnownActivationRequirement):void;
 }) {
   const showAction=status==='draft';
   // Recovery remains visible even when an independent observation changed status.
-  if(!showAction&&!c.feedback&&!c.unknownOutcome&&!c.conflict&&!c.productMissing)return null;
+  if(!showAction&&!c.readiness&&!c.error&&!c.feedback&&!c.unknownOutcome&&!c.conflict&&!c.productMissing)return null;
   const pending=c.operation?.kind==='activate';
+  const hiding=(c.unknownOutcome??c.conflict)?.action==='hide';
   return <Section aria-labelledby="product-activation-title" data-product-activation-section>
     <Divider/>
-    <Heading id="product-activation-title" tabIndex={-1}>Aktivace produktu</Heading>
+    <Heading id="product-activation-title" tabIndex={-1}>{status==='draft'?'Aktivace produktu':'Viditelnost produktu'}</Heading>
     {showAction?<Copy>Po kliknutí server ověří, zda produkt splňuje všechny požadavky pro aktivaci. Pokud něco chybí, zobrazíme konkrétní požadavky.</Copy>:null}
     {c.readiness?<Notice $tone="warning">
       <Title id="product-activation-result" tabIndex={-1}>Produkt zatím nelze aktivovat</Title>
@@ -44,12 +57,12 @@ export function ProductActivationSection({status,controller:c,contextRevision,bl
       </Requirement>)}</Requirements>
       {isReadinessStale(c.readiness,contextRevision)?<Stale $tone="info"><Info size={16} aria-hidden="true"/><Copy>Výsledek posledního pokusu už nemusí odpovídat aktuálním údajům.</Copy><Copy>Uložte nebo dokončete změny a spusťte aktivaci znovu pro novou kontrolu.</Copy></Stale>:null}
     </Notice>:null}
-    {c.conflict?<Notice $tone="warning"><Title>{productConflictHeading}</Title><Copy>Aktivace nebyla provedena, protože se produkt během požadavku změnil. Načtěte aktuální stav produktu a potom aktivaci případně spusťte znovu.</Copy></Notice>:null}
-    {c.unknownOutcome?<Notice $tone="info"><Title>Výsledek aktivace není potvrzený</Title><Copy>Požadavek mohl být zpracován. Načtěte aktuální stav produktu, než aktivaci zopakujete.</Copy></Notice>:null}
-    {c.productMissing?<Notice $tone="warning"><Title>Produkt už není dostupný</Title><Copy>Produkt už nebyl nalezen. Aktivaci nelze provést ani ověřit.</Copy><Copy>Vaše rozpracované změny na této stránce zůstávají zachované, dokud stránku neopustíte.</Copy></Notice>:null}
+    {c.conflict?<Notice $tone="warning"><Title>{productConflictHeading}</Title><Copy>Změna nebyla provedena, protože se produkt během požadavku změnil. Načtěte aktuální stav produktu a potom akci případně spusťte znovu.</Copy></Notice>:null}
+    {c.unknownOutcome?<Notice $tone="info"><Title>{hiding?'Výsledek skrytí není potvrzený':'Výsledek aktivace není potvrzený'}</Title><Copy>Požadavek mohl být zpracován. Načtěte aktuální stav produktu, než akci zopakujete.</Copy></Notice>:null}
+    {c.productMissing?<Notice $tone="warning"><Title>Produkt už není dostupný</Title><Copy>Produkt už nebyl nalezen. Změnu nelze provést ani ověřit.</Copy><Copy>Vaše rozpracované změny na této stránce zůstávají zachované, dokud stránku neopustíte.</Copy></Notice>:null}
     {(c.conflict||c.unknownOutcome)&&!c.productMissing?<MainAction aria-busy={c.operation?.kind==='reconcile'||undefined}><Button size="compact" variant="secondary" disabled={Boolean(c.operation)} aria-busy={c.operation?.kind==='reconcile'||undefined} onClick={c.reconcile}>{metadataRecoveryLabel}</Button></MainAction>:null}
     {c.error?<Copy role="alert">{c.error}</Copy>:null}
-    {c.feedback?<Notice $tone={c.feedback==='confirmed-active'?'success':'info'} role="status">{feedbackCopy[c.feedback]}</Notice>:null}
+    {c.feedback?<Notice $tone={c.feedback?.startsWith('confirmed-')?'success':'info'} role="status">{feedbackCopy[c.feedback]}</Notice>:null}
     {showAction?<><MainAction>{pending?<PendingActivationButton type="button" disabled aria-busy="true"><Spinner size="xs"/>Aktivování…</PendingActivationButton>:<Button size="compact" variant="primary" disabled={blocked||!c.canActivate()} onClick={c.activate}>Aktivovat produkt</Button>}</MainAction>
       {blocked?<Copy>Nejprve uložte, dokončete nebo vyřešte rozpracovanou práci na této stránce.</Copy>:null}</>:null}
   </Section>;
