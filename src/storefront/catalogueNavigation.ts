@@ -1,7 +1,7 @@
 import { routes } from '../navigation/routes';
 
 const cataloguePaths = new Set<string>([
-  routes.dresses, routes.suits, routes.newArrivals, routes.search,
+  routes.dresses, routes.suits, routes.familyLooks, routes.newArrivals, routes.search,
   routes.favourites, '/forWomen', '/forMen', '/forChildren',
   '/popular', '/decorAndToys',
 ]);

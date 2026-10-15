@@ -8,6 +8,7 @@ export const adminRoutes = {
   reservations: '/admin/rezervace',
   reservationDetail: '/admin/rezervace/:reservationId',
   calendar: '/admin/kalendar',
+  settings: '/admin/nastaveni',
 } as const;
 
 export function buildAdminProductDetailPath(productId: string) {
@@ -18,13 +19,14 @@ export function buildAdminReservationDetailPath(reservationId: string) {
   return `/admin/rezervace/${encodeURIComponent(reservationId)}`;
 }
 
-export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar';
+export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar' | 'settings';
 
 export const adminNavigationItems: ReadonlyArray<{ key: AdminNavigationKey; label: string; to: string }> = [
   { key: 'overview', label: 'Přehled', to: adminRoutes.root },
   { key: 'products', label: 'Produkty', to: adminRoutes.products },
   { key: 'reservations', label: 'Rezervace', to: adminRoutes.reservations },
   { key: 'calendar', label: 'Kalendář', to: adminRoutes.calendar },
+  { key: 'settings', label: 'Nastavení', to: adminRoutes.settings },
 ];
 
 export function resolveAdminNavigation(pathname: string): AdminNavigationKey | null {
@@ -32,6 +34,7 @@ export function resolveAdminNavigation(pathname: string): AdminNavigationKey | n
   if (matchPath({ path: '/admin/produkty/*', end: false }, pathname)) return 'products';
   if (matchPath({ path: '/admin/rezervace/*', end: false }, pathname)) return 'reservations';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'calendar';
+  if (pathname === adminRoutes.settings) return 'settings';
   return null;
 }
 
@@ -42,5 +45,6 @@ export function resolveAdminPageTitle(pathname: string) {
   if (matchPath({ path: adminRoutes.reservationDetail, end: true }, pathname)) return 'Detail rezervace';
   if (matchPath({ path: adminRoutes.reservations, end: true }, pathname)) return 'Rezervace';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'Kalendář pronájmů';
+  if (pathname === adminRoutes.settings) return 'Nastavení';
   return 'Přehled';
 }

@@ -1,3 +1,4 @@
+import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import { useProductSeo } from '../seo/useProductSeo';
 import { draftItems } from './booking/bookingModel';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
@@ -35,7 +36,11 @@ export function ProductDetailPage() {
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
   const product = result.data;
   useProductSeo(product);
-  const catalogueReturnTo = getCatalogueReturnTo(location.state, product?.category);
+  const {sections}=useSiteSettings();
+  const previousCatalogue=getCatalogueReturnTo(location.state, product?.category);
+  const previousPath=previousCatalogue.split('?')[0];
+  const catalogueReturnTo=(previousPath===routes.suits&&!sections.suits)||(previousPath===routes.familyLooks&&!sections.familyLooks)
+    ? routes.newArrivals : previousCatalogue;
   useEffect(() => {
     setProductPrimaryCategory(
       product?.category === 'dress'

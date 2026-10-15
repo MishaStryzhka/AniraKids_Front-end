@@ -93,6 +93,7 @@ async function setup(page, guest = true) {
     async route => {
       const req = route.request(),
         url = new URL(req.url());
+      if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
       const json = (status, body) =>
         route.fulfill({
           status,

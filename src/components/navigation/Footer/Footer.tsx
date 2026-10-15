@@ -1,3 +1,4 @@
+import {useSiteSettings} from '../../../siteSettings/SiteSettingsProvider';
 import { Instagram } from 'lucide-react';
 import { forwardRef } from 'react';
 import styled, { css } from 'styled-components';
@@ -118,6 +119,7 @@ const groups: ReadonlyArray<{ title: string; span: number; links: readonly LinkI
       { label: 'Dívčí šaty', to: routes.dresses },
       { label: 'Dámské šaty', to: routes.womenDresses },
       { label: 'Chlapecké obleky', to: routes.suits },
+      { label: 'Family looky', to: routes.familyLooks },
       { label: 'Novinky', to: routes.newArrivals },
     ],
   },
@@ -141,6 +143,7 @@ const groups: ReadonlyArray<{ title: string; span: number; links: readonly LinkI
 ];
 
 export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
+  const {sections}=useSiteSettings();
   return (
     <Shell ref={ref}>
       <Inner>
@@ -149,7 +152,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             <Group key={group.title} $span={group.span}>
               <Heading>{group.title}</Heading>
               <List>
-                {group.links.map(item => (
+                {group.links.filter(item=>item.to===routes.suits?sections.suits:item.to===routes.familyLooks?sections.familyLooks:true).map(item => (
                   <li key={item.to}>
                     <FooterLink variant="plain" to={item.to}>{item.label}</FooterLink>
                   </li>

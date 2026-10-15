@@ -182,6 +182,7 @@ const sorts = [['name', 'Podle názvu'], ['newest', 'Nejnovější'], ['priceAsc
 export function CataloguePage() {
     const { pathname, search } = useLocation();
     const [params, setParams] = useSearchParams();
+    const isFamily = pathname === routes.familyLooks;
     const isSearch = pathname === routes.search;
     const root = '/' + pathname.split('/')[1];
     const legacy = root === '/forWomen' ? { title: 'Dámské oblečení', gender: 'women' } :
@@ -190,7 +191,7 @@ export function CataloguePage() {
     const fixedCategory = pathname === routes.dresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
     const fixedGender = pathname === routes.dresses ? 'girls' : legacy?.gender;
     const isWomenDresses = root === '/forWomen' && params.get('category') === 'dress';
-    const title = (isWomenDresses ? 'Dámské šaty' : legacy?.title) || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
+    const title = isFamily ? 'Family looky' : (isWomenDresses ? 'Dámské šaty' : legacy?.title) || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
     useEffect(() => {
       if (params.has('familyLook') || params.has('page') || (pathname === routes.dresses && params.has('gender'))) {
@@ -216,6 +217,7 @@ export function CataloguePage() {
         if (value)
             Object.assign(request, { [key]: key === 'minPrice' || key === 'maxPrice' ? Number(value) : value });
     }
+    if (isFamily) request.familyLook = 'true';
     if (fixedCategory)
         request.category = fixedCategory;
     if (fixedGender)

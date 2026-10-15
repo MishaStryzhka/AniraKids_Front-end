@@ -1,6 +1,7 @@
 import { CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
+import {useSiteSettings} from '../../../siteSettings/SiteSettingsProvider';
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
 import { routes } from '../../../navigation/routes';
 
@@ -22,7 +23,7 @@ const BaseLink = styled(Link)`
   &:active { background: ${t.color.action.ghost.bgActive}; transform: translateY(1px); }
   &:focus-visible { outline: ${t.focus.ring.width} solid ${t.color.focus.ring}; outline-offset: ${t.focus.ring.offset}; }
 `;
-const DesktopLink = styled(BaseLink)`
+const DesktopLink = styled(BaseLink)<{$compact: boolean}>`
   block-size: ${t.control.height.compact};
   padding-inline: ${t.space[4]};
   gap: ${t.space[2]};
@@ -30,6 +31,14 @@ const DesktopLink = styled(BaseLink)`
   line-height: ${t.type.button.lineHeight};
   font-weight: ${t.type.button.weight};
   letter-spacing: ${t.type.button.letterSpacing};
+  ${p=>p.$compact&&css`
+    @media (min-width: ${t.breakpoint.lg}) and (max-width: calc(${t.breakpoint.xl} - 1px)) {
+      inline-size: ${t.control.height.compact};
+      padding-inline: 0;
+      [data-reservation-label] {display:none;}
+    }
+  `}
+
 `;
 const CollapsedLink = styled(BaseLink)`
   inline-size: ${t.control.height.compact};
@@ -55,6 +64,7 @@ const Marker = styled.span`
 `;
 
 export function ReservationUtility({ hasActiveDraft, presentation }: { hasActiveDraft: boolean; presentation: 'desktop' | 'collapsed' }) {
+  const {sections}=useSiteSettings();
   const label = hasActiveDraft ? 'Moje rezervace — máte rozpracovanou rezervaci.' : 'Moje rezervace';
   const content = (
     <>
@@ -62,12 +72,12 @@ export function ReservationUtility({ hasActiveDraft, presentation }: { hasActive
         <CalendarDays aria-hidden="true" />
         {hasActiveDraft ? <Marker aria-hidden="true" /> : null}
       </IconWrap>
-      {presentation === 'desktop' ? <span>Moje rezervace</span> : null}
+      {presentation === 'desktop' ? <span data-reservation-label>Moje rezervace</span> : null}
     </>
   );
 
   return presentation === 'desktop' ? (
-    <DesktopLink to={routes.accountReservations} aria-label={label}>{content}</DesktopLink>
+    <DesktopLink $compact={sections.familyLooks} to={routes.accountReservations} aria-label={label}>{content}</DesktopLink>
   ) : (
     <CollapsedLink to={routes.accountReservations} aria-label={label}>{content}</CollapsedLink>
   );

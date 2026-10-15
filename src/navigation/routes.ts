@@ -1,4 +1,4 @@
-export type PrimaryNavigationKey = 'saty' | 'damskeSaty' | 'obleky' | 'novinky' | 'pronajem';
+export type PrimaryNavigationKey = 'saty' | 'damskeSaty' | 'obleky' | 'novinky' | 'pronajem' | 'familyLooks';
 export type ProductPrimaryCategory = 'saty' | 'damskeSaty' | 'obleky';
 export type ActiveOverlay = 'none' | 'menu' | 'search';
 export type AuthNavigationState = 'unresolved' | 'guest' | 'authenticated';
@@ -8,6 +8,7 @@ export const routes = {
   dresses: '/saty',
   womenDresses: '/forWomen?category=dress',
   suits: '/obleky',
+  familyLooks: '/family-looky',
   newArrivals: '/novinky',
   rental: '/pronajem',
   rentalHowItWorks: '/pronajem#jak-funguje-pronajem',
@@ -38,6 +39,7 @@ export const primaryNavigationItems: ReadonlyArray<{
   { key: 'saty', label: 'Dívčí šaty', to: routes.dresses },
   { key: 'damskeSaty', label: 'Dámské šaty', to: routes.womenDresses },
   { key: 'obleky', label: 'Chlapecké obleky', to: routes.suits },
+  { key: 'familyLooks', label: 'Family looky', to: routes.familyLooks },
   { key: 'novinky', label: 'Novinky', to: routes.newArrivals },
   { key: 'pronajem', label: 'Pronájem', to: routes.rental },
 ];
@@ -49,6 +51,7 @@ export function resolvePrimaryNavigation(
 ): PrimaryNavigationKey | null {
   if (pathname === '/forWomen' && new URLSearchParams(search).get('category') === 'dress') return 'damskeSaty';
   if (pathname === routes.dresses) return 'saty';
+  if (pathname === routes.familyLooks) return 'familyLooks';
   if (pathname === routes.suits) return 'obleky';
   if (pathname === routes.newArrivals) return 'novinky';
   if (pathname === routes.rental) return 'pronajem';

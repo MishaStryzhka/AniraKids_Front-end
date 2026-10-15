@@ -1,7 +1,8 @@
+import {useSiteNavigation} from '../../../siteSettings/SiteSettingsProvider';
 import styled from 'styled-components';
 import { NavigationLink } from '../../../design-system/components/NavigationLink';
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
-import { primaryNavigationItems, type PrimaryNavigationKey } from '../../../navigation/routes';
+import { type PrimaryNavigationKey } from '../../../navigation/routes';
 
 const Nav = styled.nav`
   min-inline-size: 0;
@@ -17,10 +18,11 @@ const List = styled.ul`
 `;
 
 export function DesktopPrimaryNavigation({ currentPrimaryNavigation }: { currentPrimaryNavigation: PrimaryNavigationKey | null }) {
+  const navigationItems=useSiteNavigation();
   return (
     <Nav aria-label="Hlavní navigace">
       <List>
-        {primaryNavigationItems.map(item => (
+        {navigationItems.map(item => (
           <li key={item.key}>
             <NavigationLink
               variant="navigation"

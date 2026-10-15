@@ -1,3 +1,4 @@
+import {SiteSettingsProvider} from '../siteSettings/SiteSettingsProvider';
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
@@ -62,7 +63,8 @@ function canReceiveFocus(element: HTMLElement | null) {
   return Boolean(element && isVisible(element) && !element.closest('[inert]'));
 }
 
-export function StorefrontLayout() {
+export function StorefrontLayout() { return <SiteSettingsProvider><StorefrontShell/></SiteSettingsProvider>; }
+function StorefrontShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn, token } = useAuth();

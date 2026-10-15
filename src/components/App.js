@@ -1,3 +1,5 @@
+import {AdminSettingsPage} from '../admin/settings/AdminSettingsPage';
+import {SiteSectionGate} from '../siteSettings/SiteSettingsProvider';
 import { AccountReservationsPage } from '../pages/AccountPage/AccountReservationsPage';
 import { FavoritesProvider } from '../storefront/favorites/FavoritesProvider';
 import { FavoritesPage } from '../storefront/favorites/FavoritesPage';
@@ -95,7 +97,8 @@ function App() {
 
               {/* Canonical storefront routes. */}
               <Route path={routes.dresses} element={<CataloguePage />} />
-              <Route path={routes.suits} element={<CataloguePage />} />
+              <Route path={routes.suits} element={<SiteSectionGate section="suits"><CataloguePage /></SiteSectionGate>} />
+              <Route path={routes.familyLooks} element={<SiteSectionGate section="familyLooks"><CataloguePage /></SiteSectionGate>} />
               <Route path={routes.newArrivals} element={<CataloguePage />} />
               <Route path={routes.rental} element={<HowRentalPage />} />
               <Route path={routes.search} element={<CataloguePage />} />
@@ -164,6 +167,7 @@ function App() {
             <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminHomePage />} />
+                <Route path={adminRoutes.settings} element={<AdminSettingsPage />} />
                 <Route
                   path={adminRoutes.products}
                   element={<AdminProductsPage />}

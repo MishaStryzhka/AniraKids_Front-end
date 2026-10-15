@@ -9,6 +9,7 @@ async function setup(page) {
   await page.route('**/api/users/favorites/storefront', route => route.fulfill({ json: { ids: [] } }));
   await page.route('http://admin-api.test/**', async route => {
     const url = new URL(route.request().url());
+    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
     if (url.pathname.endsWith('/booking-policy')) return route.fulfill({ json: policy });
     if (!url.pathname.endsWith('/catalogue/products')) return route.fulfill({ status: 404 });
     const q = url.searchParams.get('q') || '';

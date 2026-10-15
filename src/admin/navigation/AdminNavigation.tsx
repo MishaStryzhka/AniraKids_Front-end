@@ -1,4 +1,4 @@
-import { LayoutDashboard, Shirt, ClipboardList, CalendarDays, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Shirt, ClipboardList, CalendarDays, Settings, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import type { MouseEvent } from 'react';
 import styled from 'styled-components';
@@ -44,7 +44,7 @@ const SpacedDivider = styled(Divider)`
   margin-block: ${t.space[3]};
 `;
 
-const icons = {overview: LayoutDashboard, products: Shirt, reservations: ClipboardList, calendar: CalendarDays};
+const icons = {overview: LayoutDashboard, products: Shirt, reservations: ClipboardList, calendar: CalendarDays, settings: Settings};
 
 export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
