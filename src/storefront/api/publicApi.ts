@@ -29,6 +29,7 @@ export type PublicVariant = {
 };
 export type PublicProduct = ProductCard & {
   description?: string;
+  seo?: { title: string; description: string; noIndex: boolean };
   variants: PublicVariant[];
 };
 export type Selection = {
@@ -212,6 +213,7 @@ export function parseProduct(v: unknown, slug?: string): PublicProduct {
     (p.description !== undefined && typeof p.description !== 'string')
   )
     return invalid();
+  if (p.seo !== undefined && (!object(p.seo) || !string(p.seo.title, 70) || !string(p.seo.description, 180) || typeof p.seo.noIndex !== 'boolean')) return invalid();
   const variants = p.variants.map(v => {
     if (
       !object(v) ||
@@ -235,6 +237,7 @@ export function parseProduct(v: unknown, slug?: string): PublicProduct {
     return invalid();
   return {
     ...card,
+    ...(p.seo === undefined ? {} : { seo: p.seo as NonNullable<PublicProduct['seo']> }),
     variants,
     ...(p.description === undefined
       ? {}
