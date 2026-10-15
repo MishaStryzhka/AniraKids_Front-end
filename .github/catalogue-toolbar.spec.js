@@ -10,7 +10,7 @@ for(const width of [390,768,1440]) test('catalogue header actions '+width,async(
   return route.abort();
  });
  await page.setViewportSize({width,height:1000});
- for(const path of ['/saty','/obleky','/novinky','/hledani','/pronajem','/forWomen','/forMen','/forChildren','/decorAndToys']){
+ for(const path of ['/saty','/obleky','/novinky','/hledani','/popular','/forWomen','/forMen','/forChildren','/decorAndToys']){
   await page.goto(APP+path);
   const filter=page.getByRole('button',{name:'Filtrovat',exact:true});
   const sort=page.getByRole('combobox',{name:'SEŘADIT PODLE'});
