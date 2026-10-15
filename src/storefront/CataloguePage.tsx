@@ -1,3 +1,5 @@
+import { ArrowUpDown, SlidersHorizontal } from 'lucide-react';
+import { IconButton } from '../design-system/components/IconButton';
 import { ColorPalette } from '../design-system/components/ColorPalette/ColorPalette';
 import { ResumeReservationLink } from './booking/ResumeReservationLink';
 import { FavoriteButton, FavoritesFeedback } from './favorites/FavoriteButton';
@@ -62,15 +64,16 @@ const CataloguePageLayout = styled(Page)`
   gap: ${t.space[4]};
 `;
 const CatalogueHeader = styled.header`
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: ${t.space[2]} ${t.space[6]};
+  gap: ${t.space[2]};
   padding-block-end: ${t.space[4]};
   border-bottom: 1px solid ${t.color.border.subtle};
 `;
 const CatalogueTitle = styled(Title)`
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: ${t.font.family.editorial};
   font-size: ${t.type.h1.mobile.size};
   line-height: ${t.type.h1.mobile.lineHeight};
@@ -81,16 +84,16 @@ const CatalogueTitle = styled(Title)`
     line-height: ${t.type.h1.md.lineHeight};
   }
 `;
-const Layout = styled.div `
+const Layout = styled.div<{ $filtersOpen: boolean }> `
   display: flex;
   flex-direction: column;
   gap: ${t.space[4]};
   min-width: 0;
   @media (min-width: ${t.breakpoint.md}) {
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: ${p => p.$filtersOpen ? '220px minmax(0, 1fr)' : 'minmax(0, 1fr)'};
     grid-template-rows: auto 1fr;
-    grid-template-areas: 'filters toolbar' 'filters products';
+    grid-template-areas: ${p => p.$filtersOpen ? "'filters toolbar' 'filters products'" : "'toolbar' 'products'"};
     column-gap: ${t.space[8]};
     align-items: start;
   }
@@ -99,7 +102,7 @@ const Products = styled.div`
   grid-area: products;
   min-width: 0;
 `;
-const FilterToggle = styled(Button) `@media (min-width: 768px) { display: none; }`;
+
 const Filters = styled.form<{
     $open: boolean;
 }> `
@@ -108,7 +111,7 @@ const Filters = styled.form<{
   gap: 16px;
   align-content: start;
   min-width: 0;
-  @media (min-width: 768px) { display: grid; }
+
   h2 { margin: 0; font-size: 18px; letter-spacing: 0.06em; font-weight: 500; }
   details { border-bottom: 1px solid ${t.color.border.subtle}; padding-bottom: 12px; }
   summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: space-between; }
@@ -122,28 +125,51 @@ const Select = styled.select `
   background: ${t.color.bg.canvas}; color: ${t.color.text.primary};
   border: 1px solid ${t.color.border.default}; border-radius: 4px; font: inherit;
 `;
-const Toolbar = styled.div `
+const Toolbar = styled.div`
   grid-area: toolbar;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-width: 0;
+`;
+const HeaderActions = styled.div`
+  display: flex;
   align-items: center;
-  gap: ${t.space[3]};
-  > p { grid-column: 1 / -1; }
-  label { display: flex; align-items: center; gap: ${t.space[3]}; min-width: 0; font-size: 13px; }
-  select { width: 100%; max-width: 100%; min-height: ${t.control.height.default}; }
-  @media (max-width: 767px) {
-    label > span {
-      position: absolute; width: 1px; height: 1px;
-      padding: 0; margin: -1px; overflow: hidden;
-      clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
-    }
+  gap: ${t.space[2]};
+`;
+const FilterToggle = styled(IconButton)`position: relative;`;
+const FilterCount = styled.span`
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 3px;
+  display: grid;
+  place-items: center;
+  border-radius: ${t.radius.full};
+  font-size: 10px;
+  line-height: 1;
+  background: ${t.color.action.primary.bg};
+  color: ${t.color.action.primary.fg};
+`;
+const SortControl = styled.label`
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: ${t.component.iconButton.radius};
+  color: ${t.color.action.ghost.fg};
+  &:hover { background: ${t.color.action.ghost.bgHover}; }
+  &:focus-within { outline: 2px solid ${t.color.focus.ring}; outline-offset: 2px; }
+  select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
   }
-  @media (min-width: ${t.breakpoint.md}) {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    select { width: auto; min-height: ${t.control.height.compact}; }
-  }
+  svg { pointer-events: none; }
 `;
 const Empty = styled.div `
   min-height: 300px; display: flex; flex-direction: column; align-items: center;
@@ -219,6 +245,12 @@ export function CataloguePage() {
       return () => observer.disconnect();
     }, [hasMore, loadingMore, error, loadMore, result.data?.page]);
     const heading = useRef<HTMLHeadingElement>(null);
+    const activeFilterCount = filterKeys.filter(key => {
+      const value = params.get(key);
+      if (!value || (key === 'category' && fixedCategory) || (key === 'gender' && fixedGender)) return false;
+      return key !== 'rentalMode' || value !== 'studio';
+    }).length;
+
     const update = (key: string, value: string) => setDraft(previous => ({ ...previous, [key]: value }));
     const reset = () => { const next = new URLSearchParams(); if (q)
         next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? 'studio' : '']))); setFormError(''); };
@@ -227,13 +259,25 @@ export function CataloguePage() {
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
     <CatalogueHeader>
       <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
+      <HeaderActions>
+        <FilterToggle aria-label="Filtrovat" title={activeFilterCount ? `Filtrovat (${activeFilterCount})` : 'Filtrovat'}
+          aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(value => !value)}
+          aria-describedby={activeFilterCount ? 'catalogue-filter-count' : undefined}
+          icon={<><SlidersHorizontal size={22} aria-hidden="true"/>{activeFilterCount > 0 ? <FilterCount id="catalogue-filter-count">{activeFilterCount}<span style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}> aktivních filtrů</span></FilterCount> : null}</>}/>
+        <SortControl title={`Seřadit podle: ${sorts.find(([value]) => value === sort)?.[1] || sort}`}>
+          <ArrowUpDown size={22} strokeWidth={1.7} aria-hidden="true"/>
+          <select aria-label="SEŘADIT PODLE" value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>
+            {sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </SortControl>
+      </HeaderActions>
     </CatalogueHeader>
     {pathname === routes.rental && <Copy id="jak-funguje-pronajem">Vyberte produkt, velikost a termín. Po ověření dostupnosti vyplňte kontaktní údaje a odešlete rezervaci.</Copy>}
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
     {isSearch && <form onSubmit={event => { event.preventDefault(); setParams(query.trim() ? { q: query.trim() } : {}); }}><Stack><Input label="Hledat produkt" value={query} onChange={event => setQuery(event.target.value)}/><Actions><Button type="submit">Hledat</Button></Actions></Stack></form>}
     <FavoritesFeedback />
-    <Layout>
-      <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy><FilterToggle variant="secondary" aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(!open)}>Filtrovat</FilterToggle><label><span>SEŘADIT PODLE</span><Select value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page'); setParams(next); }}>{sorts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label></Toolbar>
+    <Layout $filtersOpen={open}>
+      <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy></Toolbar>
       <Filters id="catalogue-filters" $open={open} aria-label="Filtry produktů" onSubmit={event => {
             event.preventDefault();
             const error = priceError(draft);

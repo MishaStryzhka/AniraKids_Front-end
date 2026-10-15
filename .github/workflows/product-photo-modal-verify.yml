@@ -7,6 +7,7 @@ on:
       - 'src/admin/pages/AdminPlaceholders.tsx'
       - '.github/overview-workday.spec.js'
       - '.github/admin-fe02a.spec.js'
+      - '.github/catalogue-toolbar.spec.js'
       - 'src/design-system/components/ColorPalette/**'
       - 'src/storefront/CataloguePage.tsx'
       - 'src/admin/api/products.ts'
@@ -60,7 +61,7 @@ jobs:
           npx --yes serve@14.2.4 -s build -l 4173 >/tmp/photo-modal-server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
           curl --silent --fail http://127.0.0.1:4173/ >/dev/null
-          npx playwright test .github/admin-fe02c01.spec.js .github/variant-fit-sizes.spec.js .github/product-colors.spec.js .github/overview-workday.spec.js --workers=2 --reporter=line
+          npx playwright test .github/admin-fe02c01.spec.js .github/variant-fit-sizes.spec.js .github/product-colors.spec.js .github/overview-workday.spec.js .github/catalogue-toolbar.spec.js --workers=2 --reporter=line
           npx playwright test .github/admin-fe02a.spec.js --grep 'Products responsive contract|filter changes reset' --workers=2 --reporter=line
       - uses: actions/upload-artifact@v4
         if: failure()
