@@ -167,7 +167,7 @@ test('detail request is intercepted as 200 JSON before editor hydration', async 
   expect(response.headers()['content-type']).toContain('application/json');
   expect(await response.json()).toEqual({product, variants: []});
   expect(state.detailHits).toBe(1);
-  await expect(page.getByLabel('Název')).toHaveValue('Sofia');
+  await expect(page.getByText('/produkt/sofia')).toBeVisible();
   await expect(page.getByRole('heading', {name: 'Fotografie'})).toBeVisible();
 });
 for (const width of [375, 390, 430, 768, 1024, 1440]) test(`media responsive ${width}`, async ({page}) => {
@@ -564,7 +564,7 @@ test('admin side menu releases focus and scroll on desktop resize and stays clos
 test('admin side menu hands dirty navigation and browser Back to one leave dialog',async({page})=>{
   const state=await mocks(page);await page.setViewportSize({width:390,height:852});
   await page.goto(`${APP}/admin/produkty`);await page.getByRole('link',{name:/^Sofia/}).first().click();
-  await page.getByLabel('Název',{exact:true}).fill('Sofia rozepsaná');
+  await page.getByLabel('Popis',{exact:true}).fill('Sofia rozepsaná');
   const toggle=page.getByRole('button',{name:'Otevřít navigaci administrace'});
   await toggle.click();await page.getByRole('dialog',{name:'Administrace',exact:true}).getByRole('link',{name:'Produkty',exact:true}).click();
   const leave=page.getByRole('dialog');
@@ -572,7 +572,7 @@ test('admin side menu hands dirty navigation and browser Back to one leave dialo
   await expect(page.locator('#admin-mobile-navigation')).toHaveCount(0);
   await expect(leave.getByRole('button',{name:'Zůstat'})).toBeFocused();
   await leave.getByRole('button',{name:'Zůstat'}).click();
-  await expect(page.getByLabel('Název',{exact:true})).toHaveValue('Sofia rozepsaná');
+  await expect(page.getByLabel('Popis',{exact:true})).toHaveValue('Sofia rozepsaná');
   await expect(page.locator('#root')).not.toHaveAttribute('inert','');
   await expect(page.locator('[data-admin-layout]')).not.toHaveAttribute('inert','');
   expect(await page.evaluate(()=>({position:document.body.style.position,overflow:document.body.style.overflow}))).toEqual({position:'',overflow:''});
@@ -581,7 +581,7 @@ test('admin side menu hands dirty navigation and browser Back to one leave dialo
   await expect(page.locator('#admin-mobile-navigation')).toHaveCount(0);
   await expect(leave.getByRole('button',{name:'Zůstat'})).toBeFocused();
   await leave.getByRole('button',{name:'Zůstat'}).click();
-  await expect(page.getByLabel('Název',{exact:true})).toHaveValue('Sofia rozepsaná');
+  await expect(page.getByLabel('Popis',{exact:true})).toHaveValue('Sofia rozepsaná');
   expect(await page.evaluate(()=>({position:document.body.style.position,overflow:document.body.style.overflow}))).toEqual({position:'',overflow:''});
   expect(state.requests.filter(r=>r.method!=='GET')).toHaveLength(0);
 });

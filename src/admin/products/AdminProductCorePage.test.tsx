@@ -1,3 +1,5 @@
+import {saveProductDraft, startProductDraft} from '../api/productAssistant';
+jest.mock('../api/productAssistant',()=>({saveProductDraft:jest.fn(),startProductDraft:jest.fn()}));
 import {act, configure, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {createMemoryRouter, RouterProvider} from 'react-router-dom';
 import {AdminApiError, type AdminApiErrorKind} from '../api/errors';
@@ -51,7 +53,8 @@ const maintenanceInventoryMock = moveAdminInventoryItemToMaintenance as jest.Moc
 const retireInventoryMock = retireAdminInventoryItem as jest.MockedFunction<typeof retireAdminInventoryItem>;
 const updateInventoryMock = updateAdminInventoryItem as jest.MockedFunction<typeof updateAdminInventoryItem>;
 const refreshInventoryMock = getAdminProductInventorySnapshot as jest.MockedFunction<typeof getAdminProductInventorySnapshot>;
-const createMock = createAdminProduct as jest.MockedFunction<typeof createAdminProduct>;
+const createMock = saveProductDraft as jest.MockedFunction<typeof saveProductDraft>;
+const fillClassification=()=>{fireEvent.change(screen.getByLabelText("Kategorie"),{target:{value:"dress"}});fireEvent.change(screen.getByLabelText("Určení"),{target:{value:"girls"}});};
 const createVariantMock = createAdminVariant as jest.MockedFunction<typeof createAdminVariant>;
 const refreshVariantsMock = getAdminProductVariants as jest.MockedFunction<typeof getAdminProductVariants>;
 const updateVariantMock = updateAdminVariantSize as jest.MockedFunction<typeof updateAdminVariantSize>;
@@ -107,7 +110,7 @@ function checkCoreUntouched() {
 async function openDirty(p: AdminProduct) {
   getMock.mockResolvedValueOnce({product: p, variants: []});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
 }
 async function openInventoryAdd() {
@@ -138,6 +141,7 @@ function configureUpload() {
 }
 beforeEach(() => {
   jest.resetAllMocks();
+  (startProductDraft as jest.Mock).mockResolvedValue({draftId:"draft1"});
   mockHandleRequestError.mockReturnValue(false);
   URL.createObjectURL = jest.fn(() => 'blob:fixture');
   URL.revokeObjectURL = jest.fn();
@@ -145,17 +149,17 @@ beforeEach(() => {
 });
 afterEach(() => jest.restoreAllMocks());
 
-test('CREATE starts clean, posts only name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback', async () => {
+test('CREATE starts clean, saves classification without name, rebases from response, replaces into hydrated edit without GET or blocker and shows feedback', async () => {
   createMock.mockResolvedValue(product);
   const router = renderRouter();
   expect(save()).toBeEnabled();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: ' Sofia '}});
+  fillClassification();
   fireEvent.click(save());
-  await waitFor(() => expect(createMock).toHaveBeenCalledWith(expect.objectContaining({body: {name: 'Sofia'}})));
+  await waitFor(() => expect(createMock).toHaveBeenCalledWith('fixture-token','draft1',{category:'dress',gender:'girls',prefix:'DET'},expect.any(AbortSignal)));
   await waitFor(() => expect(router.state.location.pathname).toBe('/admin/produkty/p1'));
   expect(router.state.historyAction).toBe('REPLACE');
   expect(getMock).not.toHaveBeenCalled();
-  expect(screen.getByLabelText('URL / slug')).toHaveValue('sofia');
+  expect(screen.getByText('/produkt/sofia')).toBeInTheDocument();
   expect(save()).toBeDisabled();
   expect(screen.getByText('Produkt byl vytvořen.')).toBeInTheDocument();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -167,7 +171,7 @@ test('EDIT seeds Varianty from the same detail GET, hydrates clean baseline and 
   expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');
   expect(screen.queryByLabelText('Název')).not.toBeInTheDocument();
   await act(async () => pending.resolve(detail));
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   expect(save()).toBeDisabled();
   expect(screen.getByRole('heading', {name: 'Varianty'})).toBeInTheDocument();
   expect(screen.getByText('SKU: SKU-1')).toBeInTheDocument();
@@ -193,7 +197,7 @@ test('GET retry reloads after network error', async () => {
   renderRouter('/admin/produkty/p1');
   await screen.findByText('Produkt se nepodařilo načíst');
   fireEvent.click(screen.getByRole('button', {name: 'Zkusit znovu'}));
-  expect(await screen.findByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(await screen.findByText('/produkt/sofia')).toBeInTheDocument();
   expect(getMock).toHaveBeenCalledTimes(2);
 });
 test.each([[404, 'PRODUCT_NOT_FOUND'], [400, 'INVALID_ID']] as const)('GET %s %s renders frozen not-found state', async (httpStatus, code) => {
@@ -210,20 +214,13 @@ test('cancelled GET is silent', async () => {
   expect(screen.getByRole('status')).toHaveTextContent('Načítání produktu…');
   expect(screen.queryByText('Produkt se nepodařilo načíst')).not.toBeInTheDocument();
 });
-test('slug conflict maps inline and focuses slug without raw backend copy', async () => {
-  createMock.mockRejectedValue(apiError(409, 'SLUG_ALREADY_EXISTS'));
-  renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
-  fireEvent.change(screen.getByLabelText('URL / slug'), {target: {value: 'sofia'}});
-  fireEvent.click(save());
-  await screen.findByText('Tuto URL / slug už používá jiný produkt. Zvolte jiný.');
-  await waitFor(() => expect(screen.getByLabelText('URL / slug')).toHaveFocus());
-  expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
+test('creation requires classification and hides manual name and URL', async()=>{
+ renderRouter();fireEvent.click(save());expect(screen.getByText('Vyberte kategorii, určení a číselnou řadu.')).toBeInTheDocument();expect(createMock).not.toHaveBeenCalled();expect(screen.queryByLabelText('Název')).not.toBeInTheDocument();expect(screen.queryByLabelText('URL / slug')).not.toBeInTheDocument();
 });
 test('recognized VALIDATION_ERROR detail maps inline and focuses field', async () => {
   createMock.mockRejectedValue(apiError(400, 'VALIDATION_ERROR', 'unexpected', ['seo.description']));
   renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fillClassification();
   fireEvent.click(save());
   await screen.findByText('Zkontrolujte SEO popis.');
   await waitFor(() => expect(screen.getByLabelText('SEO popis')).toHaveFocus());
@@ -231,7 +228,7 @@ test('recognized VALIDATION_ERROR detail maps inline and focuses field', async (
 test('unsupported VALIDATION_ERROR uses safe form fallback', async () => {
   createMock.mockRejectedValue(apiError(400, 'VALIDATION_ERROR', 'unexpected', ['variants.0.size']));
   renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fillClassification();
   fireEvent.click(save());
   await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte zadané údaje.');
   expect(screen.queryByText('raw backend english')).not.toBeInTheDocument();
@@ -252,7 +249,7 @@ test.each([
   mockHandleRequestError.mockImplementation(e => e === failure);
   createMock.mockRejectedValue(failure);
   renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fillClassification();
   fireEvent.click(save());
   await waitFor(() => expect(mockHandleRequestError).toHaveBeenCalledWith(failure));
   expect(screen.queryByText(/Produkt se nepodařilo uložit/)).not.toBeInTheDocument();
@@ -261,7 +258,7 @@ test('network is not consumed by access context and uses save copy', async () =>
   const failure = apiError(null, 'ADMIN_NETWORK_ERROR', 'network');
   createMock.mockRejectedValue(failure);
   renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fillClassification();
   fireEvent.click(save());
   await screen.findByText('Produkt se nepodařilo uložit. Zkontrolujte připojení a zkuste to znovu.');
   expect(mockHandleRequestError).toHaveBeenCalledWith(failure);
@@ -301,9 +298,9 @@ test('dirty Core survives applied ALT success and failed delete then refresh wit
   expect(screen.queryByRole('button', {name: 'Uložit ALT'})).not.toBeInTheDocument();
   expect(within(media()).getByText('Nový ALT')).toBeInTheDocument();
   checkCoreUntouched();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: ''}});
+  fireEvent.change(screen.getByLabelText('SEO titulek'), {target: {value: 'x'.repeat(71)}});
   fireEvent.click(save());
-  expect(screen.getByText('Název je povinný.')).toBeInTheDocument();
+  expect(screen.getByText('SEO titulek může mít nejvýše 70 znaků.')).toBeInTheDocument();
   deleteMock.mockRejectedValueOnce(apiError(404, 'PHOTO_NOT_FOUND'));
   fireEvent.click(screen.getByRole('button', {name: 'Odebrat fotografii'}));
   fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Odebrat fotografii'}));
@@ -313,11 +310,11 @@ test('dirty Core survives applied ALT success and failed delete then refresh wit
   getMock.mockResolvedValueOnce({product: {...product, color: 'Server-only', photos: []}, variants: []});
   fireEvent.click(screen.getByRole('button', {name: 'Načíst aktuální fotografie'}));
   await within(media()).findByText('Produkt zatím nemá žádné fotografie.');
-  expect(screen.getByText('Název je povinný.')).toBeInTheDocument();
-  expect(screen.getByLabelText('Název')).toHaveValue('');
+  expect(screen.getByText('SEO titulek může mít nejvýše 70 znaků.')).toBeInTheDocument();
+  expect(screen.getByLabelText('SEO titulek')).toHaveValue('x'.repeat(71));
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(patchMock).not.toHaveBeenCalled();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fireEvent.change(screen.getByLabelText('SEO titulek'), {target: {value: ''}});
   checkCoreUntouched();
 });
 
@@ -392,7 +389,7 @@ test('unknown provider and 502 recovery keep one actionable retry using the real
 test('CREATE to EDIT seeds empty Varianty without redundant detail GET', async () => {
   createMock.mockResolvedValue(product);
   renderRouter();
-  fireEvent.change(screen.getByLabelText('Název'), {target: {value: 'Sofia'}});
+  fillClassification();
   fireEvent.click(save());
   await screen.findByText('Produkt byl vytvořen.');
   expect(getMock).not.toHaveBeenCalled();
@@ -408,7 +405,7 @@ test('dirty Core and existing Photos survive successful variant create; Core bas
     createdAt:'2026-09-02T00:00:00Z',updatedAt:'2026-09-02T00:00:00Z',
   });
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'), {target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Přidat variantu'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:' 110 '}});
@@ -430,7 +427,7 @@ test('dirty Core and Photos survive variant update and variant refresh ignores P
   updateVariantMock.mockRejectedValueOnce(apiError(404,'VARIANT_NOT_FOUND'));
   refreshVariantsMock.mockResolvedValueOnce([variant('v2','110','inactive')]);
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
@@ -448,7 +445,7 @@ test('dirty Core and Photos survive variant update and variant refresh ignores P
 test('dirty variant editor uses the single page-owned switch Dialog with exact copy and Stay preserves draft/focus', async () => {
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98'),variant('v2','110')]});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   const edits=screen.getAllByRole('button',{name:'Upravit velikost'});
   fireEvent.click(edits[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
@@ -467,7 +464,7 @@ test('dirty variant editor uses the single page-owned switch Dialog with exact c
 test('dirty variant switch discard opens requested editor and combined navigation uses page-wide EDIT leave copy', async () => {
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98'),variant('v2','110')]});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   const edits=screen.getAllByRole('button',{name:'Upravit velikost'});
   fireEvent.click(edits[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
@@ -489,7 +486,7 @@ test('ambiguous variant create is page risk and never auto-replays POST', async 
   getMock.mockResolvedValueOnce({product,variants:[]});
   createVariantMock.mockRejectedValue(apiError(null,'ADMIN_NETWORK_ERROR','network'));
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getAllByRole('button',{name:'Přidat variantu'})[0]);
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'98'}});
   fireEvent.click(document.querySelector('[data-variant-submit]') as HTMLButtonElement);
@@ -505,12 +502,12 @@ test('post-load variant PRODUCT_NOT_FOUND keeps Core Photos and draft mounted an
   getMock.mockResolvedValueOnce({product:p,variants:[variant()]});
   updateVariantMock.mockRejectedValueOnce(apiError(404,'PRODUCT_NOT_FOUND'));
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit velikost'}));
   await screen.findByText('Produkt už není dostupný');
-  expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(screen.getByText('/produkt/sofia')).toBeInTheDocument();
   expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
 });
@@ -521,7 +518,7 @@ test('dirty Core survives successful variant update and Core Save preserves acti
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98')]});
   updateVariantMock.mockResolvedValueOnce({...variant('v1','104'),inventory:undefined} as any);
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
@@ -569,7 +566,7 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   const p={...product,photos:[a]};
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98')]});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'104'}});
@@ -603,7 +600,7 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
 test('initial Product detail seeds Inventory once before Variant projection', async () => {
   getMock.mockResolvedValueOnce({product:{...product,photos:[photo('a')]},variants:[variant('v1','98','active',[inventoryItem()])]});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   expect(getMock).toHaveBeenCalledTimes(1);
   expect(screen.getByText('AK-001')).toBeInTheDocument();
   expect(screen.getByRole('heading',{name:'Fyzické kusy',level:3})).toBeInTheDocument();
@@ -617,7 +614,7 @@ test('dirty Core survives Inventory create success and failure without Core reba
     .mockResolvedValueOnce(inventoryItem('i2','v1','AK-002'))
     .mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
 
   fireEvent.change(await openInventoryAdd(),{target:{value:'ak-002'}});
@@ -645,7 +642,7 @@ test('Photo ALT draft survives Inventory success and keeps combined page risk', 
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[])]});
   createInventoryMock.mockResolvedValueOnce(inventoryItem('i2','v1','AK-002'));
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
   fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Rozpracovaný ALT'}});
   fireEvent.change(await openInventoryAdd(),{target:{value:'AK-002'}});
@@ -663,7 +660,7 @@ test('Inventory refresh applies only Inventory and preserves Core Photos and Var
   updateInventoryMock.mockRejectedValueOnce(apiError(404,'INVENTORY_ITEM_NOT_FOUND'));
   refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[inventoryItem('i2','v1','AK-777','fair')]}});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
@@ -681,7 +678,7 @@ test('Inventory refresh applies only Inventory and preserves Core Photos and Var
 test('dirty Inventory uses one page Dialog with approved switch copy and Stay restores Inventory focus', async () => {
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(await openInventoryAdd(),{target:{value:'AK-9'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   const dialog=screen.getByRole('dialog');
@@ -699,7 +696,7 @@ test('Inventory-only draft and unresolved create select exact leave copy/actions
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[])]});
   createInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.change(await openInventoryAdd(),{target:{value:'AK-9'}});
   await act(async()=>router.navigate('/admin/produkty'));
@@ -723,13 +720,13 @@ test('post-load Inventory PRODUCT_NOT_FOUND preserves mounted domains and disabl
   updateInventoryMock.mockRejectedValueOnce(apiError(404,'INVENTORY_ITEM_NOT_FOUND'));
   refreshInventoryMock.mockRejectedValueOnce(apiError(404,'PRODUCT_NOT_FOUND'));
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
   await screen.findByText('Fyzický kus už není dostupný');
   fireEvent.click(screen.getByRole('button',{name:'Načíst aktuální fyzické kusy'}));
   await screen.findByText('Produkt už není dostupný');
-  expect(screen.getByDisplayValue('Sofia')).toBeInTheDocument();
+  expect(screen.getByText('/produkt/sofia')).toBeInTheDocument();
   expect(screen.getByText('1/10')).toBeInTheDocument();
   expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
   expect(screen.getByLabelText('Poznámka')).toHaveValue('typed');
@@ -741,7 +738,7 @@ test('Inventory access errors delegate to existing Admin boundary without raw ba
   getMock.mockResolvedValueOnce({product,variants:[variant()]});
   updateInventoryMock.mockRejectedValueOnce(apiError(403,'ADMIN_FORBIDDEN','forbidden'));
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(await openInventoryEdit(),{target:{value:'typed'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
   await waitFor(()=>expect(mockHandleRequestError).toHaveBeenCalled());
@@ -753,7 +750,7 @@ test('R1 A: dirty Core survives successful Inventory update and Core Save preser
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[inventoryItem()])]});
   updateInventoryMock.mockResolvedValueOnce({...inventoryItem(),condition:'fair',notes:'saved'});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   await openInventoryEdit();
@@ -799,7 +796,7 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[inventoryItem()])]});
   altMock.mockResolvedValueOnce({product:{...p,photos:[{...a,alt:'Photo saved'}]}});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   await openInventoryEdit();
   fireEvent.change(screen.getByLabelText('Poznámka'),{target:{value:'inventory-draft'}});
@@ -830,7 +827,7 @@ test('R1 C: deferred Inventory refresh commits while active dirty Variant editor
   const pendingRefresh=deferred<Awaited<ReturnType<typeof getAdminProductInventorySnapshot>>>();
   refreshInventoryMock.mockReturnValueOnce(pendingRefresh.promise);
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.change(await openInventoryEdit(),{target:{value:'inventory-draft-before-refresh'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit změny'}));
@@ -868,7 +865,7 @@ test('R1 unknown Inventory create requires explicit retry after authoritative ab
     .mockResolvedValueOnce(inventoryItem('i9','v1','AK-009','fair'));
   refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[]}});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   const code=await openInventoryAdd();
   fireEvent.change(code,{target:{value:' ak-009 '}});
@@ -906,7 +903,7 @@ test('02D dirty same-item Inventory editor survives maintenance; only canonical 
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
   maintenanceInventoryMock.mockResolvedValueOnce({...active,status:'maintenance'});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(await openInventoryEdit(),{target:{value:'typed-note'}});
   fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
   await screen.findByText('Fyzický kus byl přesunut do údržby.');
@@ -922,7 +919,7 @@ test('02D notes-only dirty maintenance item can activate and draft survives',asy
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
   activateInventoryMock.mockResolvedValueOnce({...maintenance,status:'active'});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(await openInventoryEdit(),{target:{value:'notes-only'}});
   expect(screen.getByRole('button',{name:'Aktivovat'})).toBeEnabled();
   fireEvent.click(screen.getByRole('button',{name:'Aktivovat'}));
@@ -935,7 +932,7 @@ test('02D dirty same-item condition disables activation and issues no lifecycle 
   const maintenance=inventoryItem('i1','v1','AK-001','good','maintenance');
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[maintenance])]});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getByRole('button',{name:'Upravit',exact:true}));
   await waitFor(()=>expect(screen.getByLabelText('Stav kusu')).toHaveFocus());
   fireEvent.change(screen.getByLabelText('Stav kusu'),{target:{value:'fair'}});
@@ -950,7 +947,7 @@ test('02D lifecycle preserves dirty Variant, dirty Core and Photo drafts across 
   getMock.mockResolvedValueOnce({product:{...product,photos:[a]},variants:[variant('v1','98','active',[active])]});
   maintenanceInventoryMock.mockResolvedValue({...active,status:'maintenance'});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
 
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
@@ -974,7 +971,7 @@ test('02D retire uses exactly one page Dialog, cancel restores trigger, confirm 
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
   retireInventoryMock.mockResolvedValueOnce({...active,status:'retired',retiredAt:'2026-10-04T00:00:00Z'});
   renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   const retire=screen.getByRole('button',{name:'Vyřadit'});
   fireEvent.click(retire);
   let dialog=screen.getByRole('dialog');
@@ -1002,7 +999,7 @@ test('02D retire uses exactly one page Dialog, cancel restores trigger, confirm 
 test('02D blocked navigation never replaces retire Dialog; cancel resolves local Dialog then proceeds once when no risk remains',async()=>{
   getMock.mockResolvedValueOnce({product,variants:[variant()]});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getByRole('button',{name:'Vyřadit'}));
   await act(async()=>router.navigate('/admin/produkty'));
   expect(screen.getAllByRole('dialog')).toHaveLength(1);
@@ -1019,7 +1016,7 @@ test('02D lifecycle-only unknown risk uses exact leave copy; explicit Inventory 
   maintenanceInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
   refreshInventoryMock.mockResolvedValueOnce({variantIds:['v1'],inventoryByVariant:{v1:[{...active,status:'maintenance'}]}});
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
   await screen.findByText('Výsledek změny provozního stavu není potvrzený');
   expect(maintenanceInventoryMock).toHaveBeenCalledTimes(1);
@@ -1044,7 +1041,7 @@ test('02D mixed lifecycle unknown plus Core draft uses page-wide leave copy',asy
   getMock.mockResolvedValueOnce({product,variants:[variant('v1','98','active',[active])]});
   maintenanceInventoryMock.mockRejectedValueOnce(apiError(null,'ADMIN_NETWORK_ERROR','network'));
   const router=renderRouter('/admin/produkty/p1');
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
   await screen.findByText('Výsledek změny provozního stavu není potvrzený');
@@ -1062,7 +1059,7 @@ const coreForm=()=>document.querySelector('[data-product-core-form]') as HTMLEle
 const coreRecovery=()=>within(coreForm()).getByRole('button',{name:'Načíst aktuální stav produktu'});
 const activationRecovery=()=>within(activationRegion()).getByRole('button',{name:'Načíst aktuální stav produktu'});
 const activationMetadata=(status:'draft'|'active'|'archived'='active')=>({id:'p1',status,seoNoIndex:status!=='active'});
-async function openActivationPage(){getMock.mockResolvedValue(detail);renderRouter('/admin/produkty/p1');await screen.findByDisplayValue('Sofia');}
+async function openActivationPage(){getMock.mockResolvedValue(detail);renderRouter('/admin/produkty/p1');await screen.findByText('/produkt/sofia');}
 
 test('activation starts clean; new Core and Variant drafts survive its success, existing status receives focus',async()=>{
  const pending=deferred<ReturnType<typeof activationMetadata>>();activationPostMock.mockReturnValue(pending.promise);await openActivationPage();
@@ -1113,8 +1110,8 @@ test('new Core unknown invalidates older activation-conflict GET; independent un
  expect(activationRecovery()).toBeEnabled();expect(screen.getByText('Produkt se mezitím změnil')).toBeInTheDocument();fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});fireEvent.click(screen.getByRole('link',{name:'Zpět',exact:true}));await screen.findByRole('dialog');
 });
 test('readiness is authoritative, focusable and stays stale after a dirty-to-clean episode',async()=>{
- activationPostMock.mockRejectedValue(apiError(409,'PRODUCT_NOT_READY','unexpected',['inventory','rentalPrices.external','name','photos','future-key']));await openActivationPage();fireEvent.click(activationButton());await screen.findByText('Produkt zatím nelze aktivovat');await waitFor(()=>expect(screen.getByRole('heading',{name:'Produkt zatím nelze aktivovat'})).toHaveFocus());
- fireEvent.click(screen.getByRole('button',{name:'Přejít na Název'}));expect(screen.getByLabelText('Název')).toHaveFocus();
+ activationPostMock.mockRejectedValue(apiError(409,'PRODUCT_NOT_READY','unexpected',['inventory','rentalPrices.external','description','photos','future-key']));await openActivationPage();fireEvent.click(activationButton());await screen.findByText('Produkt zatím nelze aktivovat');await waitFor(()=>expect(screen.getByRole('heading',{name:'Produkt zatím nelze aktivovat'})).toHaveFocus());
+ fireEvent.click(screen.getByRole('button',{name:'Přejít na Popis'}));expect(screen.getByLabelText('Popis')).toHaveFocus();
  fireEvent.click(screen.getByRole('button',{name:'Přejít k cenám'}));expect(screen.getByLabelText('Nabízet produkt k pronájmu')).toHaveFocus();
  fireEvent.click(screen.getByRole('button',{name:'Přejít k fotografiím'}));expect(screen.getByRole('heading',{name:'Fotografie'})).toHaveFocus();
  fireEvent.click(screen.getByRole('button',{name:'Přejít k variantám'}));expect(screen.getByRole('heading',{name:'Varianty'})).toHaveFocus();
