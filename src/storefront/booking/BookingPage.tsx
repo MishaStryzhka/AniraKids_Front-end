@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { X } from 'lucide-react';
+import { X, Shirt } from 'lucide-react';
 import { IconButton } from '../../design-system/components/IconButton';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { RentalCalendar } from './RentalCalendar';
@@ -57,8 +57,20 @@ import {
   statusLabel,
 } from './bookingModel';
 const ItemCard = styled(Stack)`
-  gap: ${t.space[2]};
+  gap: ${t.space[2]} ${t.space[3]};
+  grid-template-columns:72px minmax(0,1fr);
+  align-content:start;
+  > :not(:first-child){grid-column:2;}
+  @media(max-width:767px){grid-template-columns:60px minmax(0,1fr);h3{font-size:18px;line-height:1.4;}}
 `;
+const Thumbnail = styled.div`
+  grid-column:1;grid-row:1 / span 3;align-self:start;aspect-ratio:3/4;overflow:hidden;border-radius:8px;background:${t.color.bg.subtle};display:grid;place-items:center;color:${t.color.text.muted};
+  img{width:100%;height:100%;object-fit:cover;}
+`;
+function BookingThumbnail({url,name}:{url?:string;name:string}){
+  const [failed,setFailed]=useState(false);
+  return <Thumbnail>{url&&!failed?<img src={url} alt={'Fotografie: '+name} loading="lazy" onError={()=>setFailed(true)}/>:<Shirt aria-label="Fotografie není k dispozici" size={24}/>}</Thumbnail>;
+}
 const ItemHeader = styled.div`
   display: flex;
   align-items: flex-start;
@@ -351,6 +363,7 @@ export function BookingPage() {
               <Stack>
                 <Heading>Položky rezervace</Heading>
                 <ItemCard role="group" aria-label={draft.product.name}>
+                  <BookingThumbnail key={draft.product.photos[0]?.url||draft.product.id} url={draft.product.photos[0]?.url} name={draft.product.name}/>
                   <ItemHeader>
                     <Heading as="h3">{draft.product.name}</Heading>
                     <IconButton aria-label={'Odebrat ' + draft.product.name} icon={<X aria-hidden="true" />}
@@ -384,6 +397,7 @@ export function BookingPage() {
                 </Stack>
                 </ItemCard>
                 {(draft.additionalItems ?? []).map(item => <ItemCard key={item.product.id} role="group" aria-label={item.product.name}>
+                  <BookingThumbnail key={item.product.photos[0]?.url||item.product.id} url={item.product.photos[0]?.url} name={item.product.name}/>
                   <ItemHeader>
                     <Heading as="h3">{item.product.name}</Heading>
                     <IconButton aria-label={'Odebrat ' + item.product.name} icon={<X aria-hidden="true" />}

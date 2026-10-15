@@ -9,6 +9,7 @@ export const adminRoutes = {
   reservationDetail: '/admin/rezervace/:reservationId',
   calendar: '/admin/kalendar',
   settings: '/admin/nastaveni',
+  fittings: '/admin/zkousky',
 } as const;
 
 export function buildAdminProductDetailPath(productId: string) {
@@ -19,13 +20,14 @@ export function buildAdminReservationDetailPath(reservationId: string) {
   return `/admin/rezervace/${encodeURIComponent(reservationId)}`;
 }
 
-export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar' | 'settings';
+export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'calendar' | 'settings' | 'fittings';
 
 export const adminNavigationItems: ReadonlyArray<{ key: AdminNavigationKey; label: string; to: string }> = [
   { key: 'overview', label: 'Přehled', to: adminRoutes.root },
   { key: 'products', label: 'Produkty', to: adminRoutes.products },
   { key: 'reservations', label: 'Rezervace', to: adminRoutes.reservations },
   { key: 'calendar', label: 'Kalendář', to: adminRoutes.calendar },
+  { key: 'fittings', label: 'Zkoušky', to: adminRoutes.fittings },
   { key: 'settings', label: 'Nastavení', to: adminRoutes.settings },
 ];
 
@@ -34,6 +36,7 @@ export function resolveAdminNavigation(pathname: string): AdminNavigationKey | n
   if (matchPath({ path: '/admin/produkty/*', end: false }, pathname)) return 'products';
   if (matchPath({ path: '/admin/rezervace/*', end: false }, pathname)) return 'reservations';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'calendar';
+  if (pathname === adminRoutes.fittings) return 'fittings';
   if (pathname === adminRoutes.settings) return 'settings';
   return null;
 }
@@ -45,6 +48,7 @@ export function resolveAdminPageTitle(pathname: string) {
   if (matchPath({ path: adminRoutes.reservationDetail, end: true }, pathname)) return 'Detail rezervace';
   if (matchPath({ path: adminRoutes.reservations, end: true }, pathname)) return 'Rezervace';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'Kalendář pronájmů';
+  if (pathname === adminRoutes.fittings) return 'Zkoušky';
   if (pathname === adminRoutes.settings) return 'Nastavení';
   return 'Přehled';
 }

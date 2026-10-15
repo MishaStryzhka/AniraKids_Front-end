@@ -10,7 +10,7 @@ export const paymentTypes = [
   'cancellation_fee_reversed',
 ] as const;
 export type PaymentType = (typeof paymentTypes)[number];
-export type PaymentMethod = 'bank_transfer' | 'cash';
+export type PaymentMethod = 'bank_transfer' | 'cash' | 'card';
 export type PaymentOperation = {
   operationId: string;
   expectedRevision: number;
@@ -115,7 +115,7 @@ export function parsePayments(
     if (
       isFee(type)
         ? e.method !== undefined
-        : !['bank_transfer', 'cash'].includes(e.method as string)
+        : !['bank_transfer', 'cash', 'card'].includes(e.method as string)
     )
       return invalid();
     return {

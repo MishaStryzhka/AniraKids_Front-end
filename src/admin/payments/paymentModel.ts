@@ -30,7 +30,7 @@ export const paymentTypeLabels: Record<PaymentType, string> = {
   cancellation_fee_reversed: 'Zrušení storno poplatku',
 };
 export const methodLabel = (method: PaymentMethod) =>
-  method === 'cash' ? 'Hotově' : 'Bankovním převodem';
+  method === 'cash' ? 'Hotově' : method === 'card' ? 'Kartou' : 'Bankovním převodem';
 export function paymentDraftErrors(draft: PaymentDraft, status: string) {
   const errors: Partial<Record<keyof PaymentDraft, string>> = {};
   if (!/^[1-9]\d*$/.test(draft.amount.trim()) || Number(draft.amount) > 1000000)

@@ -340,6 +340,7 @@ export function ReservationPaymentLedger({
                 >
                   <option value="bank_transfer">Bankovním převodem</option>
                   <option value="cash">Hotově</option>
+                  <option value="card">Kartou</option>
                 </SelectField>
               ) : null}
               <Input

@@ -35,7 +35,7 @@ async function setup(page) {
     return route.fulfill({status:404,contentType:'application/json',body:'{"error":{"code":"NOT_FOUND"}}'});
   });
   await page.goto(APP+'/produkt/sofia');
-  await page.getByRole('button',{name:'Vybrat velikost a termín'}).click();
+  await page.getByRole('button',{name:'Rezervovat'}).click();
   return state;
 }
 const day=(page,date)=>page.locator('[data-date="'+date+'"]');
@@ -227,3 +227,20 @@ for (const width of [390,768,1440]) {
     expect(state.errors).toEqual([]);
   });
 }
+
+for(const width of [390,768,1440])test('reservation shows photos for every item '+width,async({page})=>{
+ const state=await setup(page);await page.setViewportSize({width,height:1000});
+ await page.route(APP+'/fixtures/booking-photo.jpg',route=>route.fulfill({contentType:'image/jpeg',body:fs.readFileSync('src/images/product-card-1.jpg')}));
+ await page.evaluate(({product,photo})=>{
+  const second={...product,id:'444444444444444444444444',slug:'second',name:'Dámské šaty DAM011',photos:[{url:photo}]};
+  sessionStorage.setItem('anirakids.draft.v1',JSON.stringify({version:1,selection:{rentalMode:'studio',startDate:'',endDate:''},items:[{product:{...product,name:'Dětské šaty DET30',photos:[{url:photo}]},variantId:''},{product:second,variantId:''}]}));
+ },{product,photo:APP+'/fixtures/booking-photo.jpg'});
+ await page.reload();
+ for(const name of ['Dětské šaty DET30','Dámské šaty DAM011']){
+  const row=page.getByRole('group',{name,exact:true}),photo=row.getByRole('img',{name:'Fotografie: '+name});
+  await expect(photo).toBeVisible();await expect(row.getByLabel('Velikost',{exact:true})).toBeVisible();
+  expect(await photo.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
+ }
+ await page.screenshot({path:`test-evidence/rental-calendar/item-photos-${width}.png`,fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(state.posts).toEqual([]);expect(state.errors).toEqual([]);
+});

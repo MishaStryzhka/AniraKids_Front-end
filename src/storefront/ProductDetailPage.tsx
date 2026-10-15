@@ -128,6 +128,7 @@ export function ProductDetailPage() {
           ) : (
             <Copy>Momentálně nejsou dostupné žádné velikosti.</Copy>
           )}
+          <Actions><RouteLink to={"/zkouska?product="+encodeURIComponent(product.id)}>Rezervovat zkoušku</RouteLink></Actions>
           <Copy>
             Cena pronájmu je za rezervaci, nikoli za den. Dostupnost ověříme pro
             vybraný termín.
@@ -165,7 +166,7 @@ export function ProductDetailPage() {
                     navigate(routes.reservation, { state: { catalogueReturnTo } });
                 }}
               >
-                Vybrat velikost a termín
+                Rezervovat
               </Button>
             </Actions>
           )}

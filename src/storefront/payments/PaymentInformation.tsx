@@ -67,6 +67,7 @@ export function BookingPaymentExplanation({
         Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
+      <Copy>Máte už zaplacenou zkoušku? Před další platbou požádejte administrátora o započtení 200 Kč do této rezervace. Doplatek na místě lze uhradit také kartou.</Copy>
       <Copy>
         Případný storno poplatek až {formatMoney(policy.cancellation.feeAmount)}{' '}
         se posuzuje individuálně; neúčtuje se automaticky.

@@ -235,7 +235,7 @@ async function begin(page, captureProduct = false) {
   ).toBeVisible();
   if (captureProduct)
     await capture(page, 'product-' + page.viewportSize().width);
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Rezervovat' }).click();
   await page.getByLabel('Velikost', { exact: true }).selectOption(V);
   await page.getByLabel('Od', { exact: true }).fill('2030-10-10');
   await page.getByLabel('Do', { exact: true }).fill('2030-10-11');
@@ -593,7 +593,7 @@ for (const width of [390, 768, 1440]) {
     await page.getByRole('link', { name: 'Zpět na produkty' }).click();
     await expect(page).toHaveURL(APP + source);
     await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
-    await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+    await page.getByRole('button', { name: 'Rezervovat' }).click();
     const title = page.getByRole('heading', { name: 'Rezervace', exact: true });
     await expect(title).toBeFocused();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
@@ -661,7 +661,7 @@ test('favorites offer the catalogue and retain their source through booking', as
   await page.goto(APP + '/oblibene');
   await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
   await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/oblibene');
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Rezervovat' }).click();
   await page.getByRole('button', { name: /^Ukončit/ }).click();
   await expect(page).toHaveURL(APP + '/oblibene');
   await expect(page.getByRole('link', { name: 'Prohlédnout Sofia' })).toBeVisible();
