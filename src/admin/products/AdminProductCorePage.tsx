@@ -137,7 +137,7 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
   const [dialogState, commitDialogState] = useState<ActiveDialog>({kind: 'none'});
   const dialogRef=useRef(dialogState);dialogRef.current=dialogState;
   const setDialogState=useCallback((next:ActiveDialog)=>{dialogRef.current=next;commitDialogState(next);},[]);
-  const workRisk = Boolean(coreUnknown) || createUncertain || dirty || draftPhotos.length>0 || draftBusy || submitting || mediaRisk || variantRisk || inventoryRisk.hasRisk || Boolean(retireStartPending);
+  const workRisk = Boolean(coreUnknown) || dirty || (mode==='create'&&(createUncertain||draftPhotos.length>0||draftBusy)) || submitting || mediaRisk || variantRisk || inventoryRisk.hasRisk || Boolean(retireStartPending);
   const revisionRef=useRef({revision:0,risks:[false,false,false,false]});
   const risks=[dirty,mediaRisk,variantRisk,inventoryRisk.hasRisk||Boolean(retireStartPending)];
   if(risks.some((risk,index)=>risk&&!revisionRef.current.risks[index]))revisionRef.current.revision++;
@@ -297,7 +297,15 @@ export function AdminProductCorePage({mode}: {mode: 'create' | 'edit'}) {
       const next = productToCoreFormState(product);
       setCurrent(next);
       setBaseline(next);
-      if(mode==='create')setStatus(product.status);
+      if(mode==='create'){
+        setStatus(product.status);
+        setMediaPhotos(product.photos);
+        setDraftPhotos([]);
+        setDraftBusy(false);
+        setCreateUncertain(false);
+        setAiSuggestion(null);
+        draftPromise.current=null;
+      }
       setMediaProductName(product.name);
       coreUnknownRef.current=null;setCoreUnknown(null);
       setErrors({});

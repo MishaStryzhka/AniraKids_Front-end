@@ -37,6 +37,9 @@ for(const width of [390,768,1440])test('photo first AI review and save '+width,a
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.screenshot({path:`test-evidence/product-assistant/create-${width}.png`});
  await page.getByRole('button',{name:'Uložit',exact:true}).click();await expect(page).toHaveURL(new RegExp('/admin/produkty/'+id+'$'));await expect(page.getByText('/produkt/det31')).toBeVisible();
+ await expect(page.getByRole('img',{name:'DET31',exact:true})).toBeVisible();
+ await expect(page.getByText('Produkt zatím nemá žádné fotografie.',{exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Aktivovat produkt',exact:true})).toBeEnabled();
  expect(calls.saves).toHaveLength(1);expect(calls.saves[0]).not.toHaveProperty('name');expect(calls.saves[0]).not.toHaveProperty('slug');expect(calls.saves[0].prefix).toBe('DET');expect(errors).toEqual([]);expect(calls.unexpected).toEqual([]);
 });
 test('AI unavailable preserves manual values and permits save',async({page})=>{
