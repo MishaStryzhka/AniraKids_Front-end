@@ -59,7 +59,7 @@ async function open(p = product) {
     {path: '/admin/produkty', element: <div>List</div>},
   ], {initialEntries: ['/admin/produkty', '/admin/produkty/p1'], initialIndex: 1});
   const view = render(<RouterProvider router={router}/>);
-  await screen.findByDisplayValue('Sofia');
+  await screen.findByText('/produkt/sofia');
   return {...view, router};
 }
 function selectFile() {
