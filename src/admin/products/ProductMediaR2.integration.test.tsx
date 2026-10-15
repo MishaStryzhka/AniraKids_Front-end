@@ -7,6 +7,9 @@ import {uploadProductMedia} from '../media/productMediaProviderTransport';
 import {AdminProductCorePage} from './AdminProductCorePage';
 import {ProductMediaSection} from './ProductMediaSection';
 
+// Full-page accessible queries traverse the expanded palette; allow the same budget as Core page regressions.
+jest.setTimeout(20000);
+
 // Real page, controller, candidate helper and errors; all I/O is mocked.
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}
