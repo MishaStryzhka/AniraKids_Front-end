@@ -343,3 +343,16 @@ test('manual block risk synchronously interlocks only its item, feeds activation
 test('an inventory GET started before block draft cannot remove the item or clear its risk',async()=>{
  const hook=setup();const pending=deferred<any>();refreshMock.mockReturnValueOnce(pending.promise);let promise!:Promise<void>;act(()=>{promise=hook.result.current.refresh();});act(()=>hook.result.current.reportManualBlockRisk('i1',{dirty:false,pending:true,unresolved:false}));await act(async()=>{pending.resolve({variantIds:[],items:[]});await promise;});expect(hook.result.current.snapshot.v1.order).toEqual(['i1']);expect(hook.result.current.getActivationGuardSnapshot().pendingMutation).toBe(true);expect(hook.result.current.refreshing).toBe(false);
 });
+
+
+test('new inventory gets a stable automatic code without marking an untouched editor dirty',async()=>{
+ const hook=setup();act(()=>hook.result.current.open({kind:'add',variantId:'v1'}));
+ const code=hook.result.current.createDraft.internalCode;
+ expect(code).toMatch(/^KUS-[0-9A-F]{16}$/);
+ expect(hook.result.current.getActivationGuardSnapshot().hasUnsavedWork).toBe(false);
+ createMock.mockRejectedValueOnce(error('ADMIN_NETWORK_ERROR'));
+ await act(async()=>hook.result.current.saveCreate(()=>null,()=>null));
+ expect(createMock).toHaveBeenCalledWith(expect.objectContaining({body:{internalCode:code,condition:'good'}}));
+ expect(hook.result.current.unknownCreate?.canonicalInternalCode).toBe(code);
+ expect(hook.result.current.createDraft.internalCode).toBe(code);
+});

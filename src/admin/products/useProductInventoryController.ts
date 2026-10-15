@@ -14,6 +14,7 @@ import {
 } from '../api/products';
 import {
   EMPTY_INVENTORY_CREATE_DRAFT,
+  newInventoryCreateDraft,
   buildInventorySnapshot,
   buildInventorySnapshotFromProjection,
   canonicalInventoryCode,
@@ -207,7 +208,7 @@ export function useProductInventoryController(input:UseProductInventoryControlle
     if(operation||unknownCreate||productMissing||(target.kind==='edit'&&manualWriteBlocked(target.inventoryItemId)))return false;
     triggerRef.current=trigger??null;clearMessages();setMissingItemId(null);setMissingVariantId(null);
     if(target.kind==='add'){
-      setCreateDraft({...EMPTY_INVENTORY_CREATE_DRAFT});setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setActiveEditor(target);return true;
+      setCreateDraft(newInventoryCreateDraft());setEditDraft(null);setEditBaseline(null);setEditIdentity(null);setActiveEditor(target);return true;
     }
     const item=findInventoryItem(snapshot,target.variantId,target.inventoryItemId);
     if(!item)return false;
