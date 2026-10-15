@@ -19,7 +19,7 @@ export const activationRequirementCopy = {
   photos: 'Přidejte alespoň jednu fotografii.',
   variants: 'Přidejte alespoň jednu aktivní variantu.',
   inventory: 'Přidejte alespoň jeden aktivní fyzický kus k aktivní variantě.',
-  status: 'Produkt musí být ve stavu Koncept.',
+  status: 'Produkt musí být ve stavu Koncept nebo Skrytý.',
 } as const;
 export type KnownActivationRequirement = keyof typeof activationRequirementCopy;
 export interface ActivationRequirement {key: string | null; copy: string; known: boolean;}
@@ -44,7 +44,7 @@ export const isReadinessStale = (result: ActivationReadinessResult, revision: nu
 export function usableActivationMetadata(value: unknown, productId: string): value is AdminProductActivationState {
   if (!value || typeof value !== 'object') return false;
   const state = value as AdminProductActivationState;
-  return state.id === productId && ['draft', 'active', 'archived'].includes(state.status) && typeof state.seoNoIndex === 'boolean';
+  return state.id === productId && ['draft', 'active', 'hidden', 'archived'].includes(state.status) && typeof state.seoNoIndex === 'boolean';
 }
 export const requirementActions: Partial<Record<KnownActivationRequirement, string>> = {
   name: 'Přejít na Název', slug: 'Přejít na URL / slug', description: 'Přejít na Popis', category: 'Přejít na Kategorii',

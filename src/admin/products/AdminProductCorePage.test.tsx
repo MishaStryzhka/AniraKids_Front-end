@@ -1054,7 +1054,7 @@ test('02D mixed lifecycle unknown plus Core draft uses page-wide leave copy',asy
 const activationPostMock=activateAdminProduct as jest.MockedFunction<typeof activateAdminProduct>;
 const activationGetMock=getAdminProductActivationState as jest.MockedFunction<typeof getAdminProductActivationState>;
 const activationButton=()=>screen.getByRole('button',{name:'Aktivovat produkt',exact:true});
-const activationRegion=()=>screen.getByRole('region',{name:'Aktivace produktu'});
+const activationRegion=()=>screen.getByRole('region',{name:/^(Aktivace|Viditelnost) produktu$/});
 const coreForm=()=>document.querySelector('[data-product-core-form]') as HTMLElement;
 const coreRecovery=()=>within(coreForm()).getByRole('button',{name:'Načíst aktuální stav produktu'});
 const activationRecovery=()=>within(activationRegion()).getByRole('button',{name:'Načíst aktuální stav produktu'});

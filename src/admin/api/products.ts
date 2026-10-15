@@ -3,7 +3,7 @@ import { normalizeAdminApiError } from './errors';
 
 export const ADMIN_PRODUCTS_PAGE_SIZE = 20;
 
-export type AdminProductStatus = 'draft' | 'active' | 'archived';
+export type AdminProductStatus = 'draft' | 'active' | 'hidden' | 'archived';
 export type AdminProductCategory = 'dress' | 'suit' | 'set' | 'accessory' | 'other';
 export type AdminProductGender = 'girls' | 'boys' | 'women' | 'men' | 'unisex';
 export type AdminVariantStatus = 'active' | 'inactive';
@@ -349,6 +349,12 @@ function projectActivationState(data: unknown): AdminProductActivationState {
 export async function activateAdminProduct(input: {token: string; productId: string; signal?: AbortSignal}): Promise<AdminProductActivationState> {
   try {
     const response = await adminApiClient.post(`/admin/products/${encodeURIComponent(input.productId)}/activate`, undefined, buildAdminRequestConfig(input.token, input.signal));
+    return projectActivationState(response.data);
+  } catch (error) {throw normalizeAdminApiError(error);}
+}
+export async function hideAdminProduct(input: {token: string; productId: string; signal?: AbortSignal}): Promise<AdminProductActivationState> {
+  try {
+    const response = await adminApiClient.post(`/admin/products/${encodeURIComponent(input.productId)}/hide`, undefined, buildAdminRequestConfig(input.token, input.signal));
     return projectActivationState(response.data);
   } catch (error) {throw normalizeAdminApiError(error);}
 }

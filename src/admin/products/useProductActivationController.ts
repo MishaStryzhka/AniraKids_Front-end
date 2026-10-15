@@ -1,12 +1,12 @@
 import {useCallback, useEffect, useRef, useState, type MutableRefObject} from 'react';
-import {activateAdminProduct, getAdminProductActivationState, type AdminProductActivationState, type AdminProductStatus} from '../api/products';
+import {activateAdminProduct, hideAdminProduct, getAdminProductActivationState, type AdminProductActivationState, type AdminProductStatus} from '../api/products';
 import {AdminApiError} from '../api/errors';
 import {parseActivationRequirements, usableActivationMetadata, type ActivationReadinessResult} from './productActivationModel';
 
-type Attempt = {productId: string; attemptId: number; generation: number};
-type Feedback = 'confirmed-active' | 'observed-active' | 'observed-draft' | 'observed-archived' | null;
+type Attempt = {productId: string; attemptId: number; generation: number; action?: 'activate' | 'hide'};
+type Feedback = 'confirmed-hidden' | 'observed-hidden' | 'confirmed-active' | 'observed-active' | 'observed-draft' | 'observed-archived' | null;
 interface State {
-  operation: (Attempt & {kind: 'activate' | 'reconcile'}) | null;
+  operation: (Attempt & {kind: 'activate' | 'hide' | 'reconcile'}) | null;
   readiness: ActivationReadinessResult | null;
   unknownOutcome: Attempt | null;
   conflict: Attempt | null;
@@ -46,29 +46,35 @@ export function useProductActivationController(input: Input) {
   }));
   const canActivate = () => {
     const current = stateRef.current;
-    return current.feedback !== 'confirmed-active' && latest.current.status === 'draft' && Boolean(latest.current.token) && latest.current.canStart() &&
+    return current.feedback !== 'confirmed-active' && ['draft', 'hidden'].includes(latest.current.status ?? '') && Boolean(latest.current.token) && latest.current.canStart() &&
       !current.operation && !request.current && !current.unknownOutcome && !current.conflict && !current.productMissing;
   };
-  const activate = async () => {
-    if (!canActivate()) return;
+  const canHide = () => {
+    const current = stateRef.current;
+    return current.feedback !== 'confirmed-hidden' && latest.current.status === 'active' && Boolean(latest.current.token) && latest.current.canStart() &&
+      !current.operation && !request.current && !current.unknownOutcome && !current.conflict && !current.productMissing;
+  };
+  const changeVisibility = async (action: 'activate' | 'hide') => {
+    if (!(action === 'hide' ? canHide() : canActivate())) return;
     const scopeKey = latest.current.scopeKey;
-    const attempt: Attempt = {productId: latest.current.productId, attemptId: ++sequence.current, generation: ++generation.current};
+    const attempt: Attempt = {productId: latest.current.productId, attemptId: ++sequence.current, generation: ++generation.current, action};
     const revision = latest.current.contextRevision;
     const controller = new AbortController(); request.current = controller;
-    publish(previous => ({...previous, operation: {...attempt, kind: 'activate'}, error: null, feedback: null,
+    publish(previous => ({...previous, operation: {...attempt, kind: action}, error: null, feedback: null,
       readiness: previous.readiness ? {...previous.readiness, superseded: true} : null}));
     try {
-      const metadata = await activateAdminProduct({productId: attempt.productId, token: latest.current.token, signal: controller.signal});
+      const metadata = await (action === 'hide' ? hideAdminProduct : activateAdminProduct)({productId: attempt.productId, token: latest.current.token, signal: controller.signal});
       if (!fresh(attempt, scopeKey)) return;
-      if (!usableActivationMetadata(metadata, attempt.productId) || metadata.status !== 'active' || metadata.seoNoIndex !== false) throw new Error('Unusable activation response');
+      if (!usableActivationMetadata(metadata, attempt.productId) || metadata.status !== (action === 'hide' ? 'hidden' : 'active') || metadata.seoNoIndex !== (action === 'hide')) throw new Error('Unusable activation response');
       latest.current.metadataGeneration.current++;
       latest.current.onMetadata(metadata);
-      publish(previous => ({...previous, readiness: null, unknownOutcome: null, conflict: null, feedback: 'confirmed-active'}));
+      publish(previous => ({...previous, readiness: null, unknownOutcome: null, conflict: null, feedback: action === 'hide' ? 'confirmed-hidden' : 'confirmed-active'}));
       latest.current.onFocus('status');
     } catch (error) {
       if (!fresh(attempt, scopeKey)) return;
       if (latest.current.onAccessError(error)) return;
-      if (error instanceof AdminApiError && error.status === 409 && error.code === 'PRODUCT_NOT_READY') {
+      latest.current.onFocus('heading');
+      if (error instanceof AdminApiError && error.status === 409 && error.code === 'PRODUCT_NOT_READY' && action === 'activate') {
         const requirements=parseActivationRequirements(error.details);
         publish(previous => ({...previous, readiness: {attemptId: attempt.attemptId, requirements, contextRevisionAtAttempt: revision, superseded: false}}));
         latest.current.onFocus('result');
@@ -77,7 +83,7 @@ export function useProductActivationController(input: Input) {
       } else if (error instanceof AdminApiError && error.status === 404 && error.code === 'PRODUCT_NOT_FOUND') {
         publish(previous => ({...previous, productMissing: true}));
       } else if (error instanceof AdminApiError && error.status === 400 && ['INVALID_ID', 'VALIDATION_ERROR'].includes(error.code)) {
-        publish(previous => ({...previous, error: 'Aktivaci se nepodařilo provést. Zkontrolujte zadané údaje.'}));
+        publish(previous => ({...previous, error: action === 'hide' ? 'Produkt se nepodařilo skrýt. Zkuste to znovu.' : 'Aktivaci se nepodařilo provést. Zkontrolujte zadané údaje.'}));
       } else {
         // An unusable response, cancellation or generic server failure cannot prove no commit.
         latest.current.metadataGeneration.current++;
@@ -116,9 +122,9 @@ export function useProductActivationController(input: Input) {
       if (fresh(captured, scopeKey)) {request.current = null; publish(previous => ({...previous, operation: null}));}
     }
   };
-  return {...state, activate, reconcile, canActivate, invalidateReadiness,
-    hasRisk: state.operation?.kind === 'activate' || Boolean(state.unknownOutcome),
-    hasImmediateRisk: () => stateRef.current.operation?.kind === 'activate' || Boolean(stateRef.current.unknownOutcome),
+  return {...state, activate: () => changeVisibility('activate'), hide: () => changeVisibility('hide'), reconcile, canActivate, canHide, invalidateReadiness,
+    hasRisk: (state.operation?.kind === 'activate' || state.operation?.kind === 'hide') || Boolean(state.unknownOutcome),
+    hasImmediateRisk: () => (stateRef.current.operation?.kind === 'activate' || stateRef.current.operation?.kind === 'hide') || Boolean(stateRef.current.unknownOutcome),
   };
 }
 export type ProductActivationController = ReturnType<typeof useProductActivationController>;

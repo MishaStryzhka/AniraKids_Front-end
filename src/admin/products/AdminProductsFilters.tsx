@@ -74,6 +74,7 @@ export function AdminProductsFilters({
             <option value="">Vše</option>
             <option value="draft">Koncept</option>
             <option value="active">Aktivní</option>
+            <option value="hidden">Skryté</option>
             <option value="archived">Archivované</option>
           </SelectField>
 
