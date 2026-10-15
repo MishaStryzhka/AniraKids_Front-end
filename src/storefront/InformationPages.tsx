@@ -1,3 +1,4 @@
+import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import styled from 'styled-components';
 import { Button } from '../design-system/components/Button';
 import { Page, Panel, Title, Heading, Copy, Actions, RouteLink } from './storefrontStyles';
@@ -8,7 +9,7 @@ import { BookingPaymentExplanation, CompanyInformation } from './payments/Paymen
 import { routes } from '../navigation/routes';
 const Questions=styled.div`display:grid;gap:16px;details{padding:20px;border:1px solid #e6ded8;border-radius:8px;}summary{cursor:pointer;font-weight:600;min-height:24px;}p{margin-top:16px;line-height:1.7;}`;
 function PaymentDetails(){const policy=usePublicRead('information-policy',getBookingPolicy);return <Panel>{policy.loading?<Copy role="status">Načítání informací…</Copy>:policy.error?<><Copy role="alert">Informace se nepodařilo načíst.</Copy><Button onClick={policy.reload}>Zkusit znovu</Button></>:policy.data?<><BookingPaymentExplanation policy={policy.data}/><CompanyInformation company={policy.data.company}/></>:null}</Panel>;}
-export function HowRentalPage(){return <Page><Title>Pronájem pro vaše výjimečné chvíle</Title><Copy>Od výběru oblečení až po jeho vrácení. Cenu konkrétního kousku a kauci vždy uvidíte před odesláním rezervace.</Copy><Panel id="jak-funguje-pronajem"><Heading>Jak funguje pronájem</Heading><RentalSteps/></Panel><PaymentDetails/><Actions><RouteLink to={routes.dresses}>Vybrat šaty</RouteLink><RouteLink to={routes.suits}>Vybrat oblek</RouteLink><RouteLink to={routes.faq}>Časté dotazy</RouteLink></Actions></Page>;}
+export function HowRentalPage(){const {sections}=useSiteSettings();return <Page><Title>Pronájem pro vaše výjimečné chvíle</Title><Copy>Od výběru oblečení až po jeho vrácení. Cenu konkrétního kousku a kauci vždy uvidíte před odesláním rezervace.</Copy><Panel id="jak-funguje-pronajem"><Heading>Jak funguje pronájem</Heading><RentalSteps/></Panel><PaymentDetails/><Actions><RouteLink to={routes.dresses}>Vybrat šaty</RouteLink>{sections.suits?<RouteLink to={routes.suits}>Vybrat oblek</RouteLink>:null}<RouteLink to={routes.faq}>Časté dotazy</RouteLink></Actions></Page>;}
 const questions=[
  ['Musím mít účet?','Rezervaci můžete vytvořit i bez registrace. Pro sledování si uschovejte soukromý odkaz na její stav. Rezervace vytvořené během přihlášení najdete také v části Můj účet → Moje rezervace.'],
  ['Je rezervace po odeslání potvrzená?','Ne. Po odeslání se zobrazí pokyny k platbě a platnost dočasné rezervace. Po přijetí zálohy rezervaci potvrdíme ručně. Před platbou vždy zkontrolujte aktuální stav a platnost pokynů.'],

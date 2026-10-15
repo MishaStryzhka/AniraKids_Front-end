@@ -4,6 +4,7 @@ for(const width of [390,768,1440]) test('catalogue header actions '+width,async(
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
   const u=new URL(route.request().url());
+  if(u.pathname==='/api/v2/site-settings')return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
   if(u.pathname==='/api/v2/catalogue/products')return route.fulfill({json:{items:[{id:'111111111111111111111111',slug:'sofia',name:'Sofia',photos:[],rentalPriceFrom:500}],page:1,limit:12,total:1,totalPages:1,facets:{colors:['Bílá'],sizes:['74']}}});
   if(u.pathname.endsWith('/favorites/storefront'))return route.fulfill({json:{favorites:[]}});
   if(u.pathname==='/maps/api/js'||u.pathname==='/gsi/client')return route.fulfill({contentType:'application/javascript',body:''});

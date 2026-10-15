@@ -1,9 +1,10 @@
+import {useSiteNavigation} from '../../../siteSettings/SiteSettingsProvider';
 import { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { Divider } from '../../../design-system/components/Divider';
 import { NavigationLink } from '../../../design-system/components/NavigationLink';
 import { designTokens as t } from '../../../design-system/tokens/designTokens';
-import { primaryNavigationItems, routes, type AuthNavigationState, type PrimaryNavigationKey } from '../../../navigation/routes';
+import { routes, type AuthNavigationState, type PrimaryNavigationKey } from '../../../navigation/routes';
 import { useFocusScope } from '../hooks/useFocusScope';
 import { adminRoutes } from '../../../admin/navigation/adminRoutes';
 
@@ -97,6 +98,7 @@ export interface MobileMenuProps {
 }
 
 export function MobileMenu({ authState, canAccessAdmin = false, currentPrimaryNavigation, onLogin, onClose }: MobileMenuProps) {
+  const navigationItems=useSiteNavigation();
   const rootRef = useRef<HTMLDivElement>(null);
   const getContainers = useCallback(() => {
     const trigger = Array.from(document.querySelectorAll<HTMLElement>('[data-menu-trigger]'))
@@ -134,7 +136,7 @@ export function MobileMenu({ authState, canAccessAdmin = false, currentPrimaryNa
         <Group aria-labelledby="mobile-menu-browse">
           <GroupLabel id="mobile-menu-browse">Procházet</GroupLabel>
           <GroupList>
-            {primaryNavigationItems.map(item => (
+            {navigationItems.map(item => (
               <li key={item.key}>
                 <MenuLink
                   variant="plain"

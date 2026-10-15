@@ -18,6 +18,7 @@ async function setup(page, signedIn = true) {
   await page.route('**/api/users/favorites/storefront', route => route.fulfill({ json: { ids: [] } }));
   await page.route('http://admin-api.test/**', route => {
     const url = new URL(route.request().url());
+    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
     if (url.pathname.endsWith('/booking-policy')) return route.fulfill({ json: policy });
     if (url.pathname.endsWith('/account/reservations')) return route.fulfill({ json: { items: [], total: 0, page: 1 } });
     if (url.pathname.endsWith('/catalogue/products')) return route.fulfill({ json: { items: [], page: 1, limit: 12, total: 0, totalPages: 0 } });

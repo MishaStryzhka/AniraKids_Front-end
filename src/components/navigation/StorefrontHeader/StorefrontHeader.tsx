@@ -1,3 +1,4 @@
+import {useSiteSettings} from '../../../siteSettings/SiteSettingsProvider';
 import { Menu, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
@@ -94,6 +95,7 @@ export function StorefrontHeader({
   onCloseOverlay,
   onOpenAuth,
 }: StorefrontHeaderProps) {
+  const {sections}=useSiteSettings();
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
   const [scrolled, setScrolled] = useState(() => typeof window !== 'undefined' && window.scrollY > 0);
   const mobileLeftRef = useRef<HTMLDivElement>(null);
@@ -169,7 +171,7 @@ export function StorefrontHeader({
         </Right>
       </MobileRow>
 
-      <DesktopRow $hasAdminEntry={authState === 'authenticated' && canAccessAdmin}>
+      <DesktopRow $hasAdminEntry={(authState === 'authenticated' && canAccessAdmin)||sections.familyLooks}>
         <div ref={desktopLogoRef}><BrandLogo /></div>
         <PrimaryWrap ref={desktopPrimaryRef}>
           <DesktopPrimaryNavigation currentPrimaryNavigation={currentPrimaryNavigation} />

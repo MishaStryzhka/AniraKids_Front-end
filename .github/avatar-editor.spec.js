@@ -32,6 +32,7 @@ async function setup(page) {
     return json({});
   });
   await page.route('http://admin-api.test/**', route => route.fulfill({ contentType: 'application/json', body: '{"items":[],"total":0}' }));
+  await page.route('http://admin-api.test/api/v2/site-settings',route=>route.fulfill({json:{sections:{suits:true,familyLooks:false}}}));
   await page.goto(APP + '/ucet');
   await expect(page.locator('#firstName')).toHaveValue('Jana');
   return state;
