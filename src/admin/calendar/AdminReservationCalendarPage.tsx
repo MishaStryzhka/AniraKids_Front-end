@@ -68,6 +68,7 @@ export function AdminReservationCalendarPage() {
   const goToday = () => {const now=pragueToday();setMonth(now.slice(0,7));setSelectedDay(now);};
   const loading=state.kind==='loading';
   return <Page data-admin-calendar-page>
+    <div><NavigationLink variant="plain" to="/admin/zkousky">Kalendář zkoušek</NavigationLink></div>
     <Copy>Rezervace, navazující čištění a ruční blokace. Kusy v údržbě zkontrolujte u produktu. Konečnou dostupnost ověřuje rezervace.</Copy>
     <Toolbar>
       <MonthNavigation aria-label="Výběr měsíce">

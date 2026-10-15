@@ -1,3 +1,5 @@
+import {FittingPage,FittingStatusPage} from '../fittings/FittingPage';
+import {AdminFittingsPage} from '../admin/fittings/AdminFittingsPage';
 import {AdminSettingsPage} from '../admin/settings/AdminSettingsPage';
 import {SiteSectionGate} from '../siteSettings/SiteSettingsProvider';
 import { AccountReservationsPage } from '../pages/AccountPage/AccountReservationsPage';
@@ -93,6 +95,8 @@ function App() {
                 />
               }
             >
+              <Route path="/zkouska" element={<FittingPage/>}/>
+              <Route path="/zkouska/:number" element={<FittingStatusPage/>}/>
               <Route path={routes.home} element={<MainPage />} />
 
               {/* Canonical storefront routes. */}
@@ -167,6 +171,7 @@ function App() {
             <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminHomePage />} />
+                <Route path={adminRoutes.fittings} element={<AdminFittingsPage/>}/>
                 <Route path={adminRoutes.settings} element={<AdminSettingsPage />} />
                 <Route
                   path={adminRoutes.products}

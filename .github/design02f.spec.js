@@ -223,13 +223,13 @@ test('reservation layout Back and Exit navigate while preserving the customer dr
   }));
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('http://127.0.0.1:4173/produkt/sofia');
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Rezervovat' }).click();
   await expect(page.locator('[data-focused-reservation-header]')).toBeVisible();
   await expect(page.locator('[data-storefront-header]')).toHaveCount(0);
   await page.getByLabel('Jméno', { exact: true }).fill('Jana');
   await page.getByRole('button', { name: 'Zpět', exact: true }).click();
   await expect(page).toHaveURL(/\/produkt\/sofia$/);
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Rezervovat' }).click();
   await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');
   await page.getByRole('button', { name: 'Ukončit rezervaci' }).click();
   await expect(page).toHaveURL(/\/pronajem$/);
@@ -240,7 +240,7 @@ test('reservation layout Back and Exit navigate while preserving the customer dr
   await expect(page.getByLabel('Jméno', { exact: true })).toHaveValue('Jana');
   await page.getByRole('button', { name: 'Zpět', exact: true }).click();
   await expect(page).toHaveURL(/\/produkt\/sofia$/);
-  await page.getByRole('button', { name: 'Vybrat velikost a termín' }).click();
+  await page.getByRole('button', { name: 'Rezervovat' }).click();
   await page.getByRole('button', { name: 'Ukončit', exact: true }).click();
   await expect(page).toHaveURL(/\/pronajem$/);
   await expect(page.locator('a[aria-label^="Rezervace — máte"]:visible')).toBeVisible();
