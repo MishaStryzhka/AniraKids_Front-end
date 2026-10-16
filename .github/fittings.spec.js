@@ -25,7 +25,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/fittings/slots')return json({enabled:state.settings.enabled,date:u.searchParams.get('date'),slots:['11:00','11:30','12:00'],durationMinutes:30,price:200});
   if(p==='/api/v2/fittings'&&req.method()==='POST'){
    state.creates.push(req.postDataJSON());state.createAuth=req.headers().authorization;const b=req.postDataJSON();
-   state.receipt={number,date:b.date,time:b.time,durationMinutes:30,price:200,address:state.settings.address,status:'pending',paymentStatus:'unpaid',expiresAt:'2030-01-01T08:30:00Z',paymentInstructions:{amount:200,accountNumber:'123456/0800',message:number,qrPayload:'SPD*1.0*ACC:CZ0708000000006644781399*AM:200.00*CC:CZK*MSG:'+number}};
+   state.receipt={number,date:b.date,time:b.time,durationMinutes:30,price:200,address:state.settings.address,status:'pending',paymentStatus:'unpaid',expiresAt:'2030-01-01T09:00:00Z',paymentInstructions:{amount:200,accountNumber:'123456/0800',message:number,qrPayload:'SPD*1.0*ACC:CZ0708000000006644781399*AM:200.00*CC:CZK*MSG:'+number}};
    if(state.lost){state.lost=false;return route.abort();}return json(state.receipt);
   }
   if(p==='/api/v2/fittings/'+number)return json(state.receipt);
