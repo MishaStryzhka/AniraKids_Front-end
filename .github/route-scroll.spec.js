@@ -27,6 +27,7 @@ async function setup(page) {
       } });
     }
     if (url.pathname.endsWith('/favorites')) return route.fulfill({ json: { ids: [] } });
+    if (url.pathname.endsWith('/account/fittings')) return route.fulfill({json:{items:[],total:0,page:1,limit:20}});
     if (url.pathname.endsWith('/account/reservations')) return route.fulfill({ json: { items: [], page: 1, total: 0 } });
     return route.fulfill({ status: 404, json: { error: { code: 'NOT_FOUND' } } });
   });

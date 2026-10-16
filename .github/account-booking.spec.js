@@ -36,6 +36,7 @@ async function setup(page, { guest = false, delayProfile = false } = {}) {
       return route.fulfill({ status: 500 });
     }
     if (url.pathname === '/api/v2/booking-policy') return json(policy);
+    if (url.pathname === '/api/v2/account/fittings') return json({items:[],total:0,page:1,limit:20});
     if (url.pathname === '/api/v2/catalogue/products/sofia') return json({ product });
     if (url.pathname === '/api/v2/catalogue/products') return json({ items: [product], page: 1, limit: 12, total: 1, totalPages: 1 });
     if (url.pathname === '/api/v2/account/reservations') {

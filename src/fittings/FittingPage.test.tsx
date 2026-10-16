@@ -1,0 +1,53 @@
+import {fireEvent,render,screen,waitFor} from '@testing-library/react';
+import {MemoryRouter,Route,Routes} from 'react-router-dom';
+import {FittingPage,FittingStatusPage} from './FittingPage';
+import {AccountFittings} from './AccountFittings';
+import {fittingApi} from './fittingApi';
+const mockAuth={token:'owner-session',isLoggedIn:true,isRefreshing:false,user:{_id:'owner',firstName:'Jana',lastName:'Nová',email:'jana@example.test',primaryPhoneNumber:'+420123456789'}};
+jest.mock('../hooks/useAuth',()=>({useAuth:()=>mockAuth}));
+jest.mock('./fittingApi',()=>({...jest.requireActual('./fittingApi'),fittingApi:jest.fn()}));
+const api=fittingApi as jest.Mock;
+jest.mock('../admin/api/client',()=>({}));
+jest.mock('../admin/api/errors',()=>({}));
+beforeEach(()=>{sessionStorage.clear();api.mockReset();mockAuth.isLoggedIn=true;mockAuth.isRefreshing=false;mockAuth.token='owner-session';api.mockResolvedValue({enabled:true,slots:['11:00']});});
+test('profile prefills editable fields and logout removes profile-derived contacts',async()=>{
+ const view=render(<MemoryRouter><FittingPage/></MemoryRouter>);
+ expect(await screen.findByLabelText('Jméno a příjmení')).toHaveValue('Jana Nová');
+ expect(screen.getByLabelText('E-mail')).toHaveValue('jana@example.test');
+ fireEvent.change(screen.getByLabelText('Telefon'),{target:{value:'+420987654321'}});
+ expect(screen.getByLabelText('Telefon')).toHaveValue('+420987654321');
+ mockAuth.isLoggedIn=false;mockAuth.token='';view.rerender(<MemoryRouter><FittingPage/></MemoryRouter>);
+ await waitFor(()=>expect(screen.getByLabelText('E-mail')).toHaveValue(''));
+ expect(screen.getByLabelText('Jméno a příjmení')).toHaveValue('');expect(screen.getByLabelText('Telefon')).toHaveValue('');
+});
+test('refreshing session cannot submit as guest',async()=>{
+ mockAuth.isRefreshing=true;
+ render(<MemoryRouter><FittingPage/></MemoryRouter>);
+ fireEvent.click(await screen.findByRole('button',{name:'11:00'}));
+ expect(screen.getByRole('button',{name:'Rezervovat a přejít k platbě 200 Kč'})).toBeDisabled();
+ expect(screen.getByLabelText('E-mail')).toHaveValue('');
+});
+test('stored submission cannot be retried under a different account',async()=>{
+ sessionStorage.setItem('anirakids.fitting-attempt.v1',JSON.stringify({token:'a'.repeat(64),operationId:'operation',date:'2030-01-07',email:'guest@example.test',accountId:'other'}));
+ render(<MemoryRouter><FittingPage/></MemoryRouter>);
+ expect(screen.getByRole('button',{name:'Ověřit a pokračovat'})).toBeDisabled();
+ expect(screen.getByRole('alert')).toHaveTextContent('jiné relaci');
+ await waitFor(()=>expect(api).toHaveBeenCalled());
+ expect(api.mock.calls.every(([,options])=>options.method!=='POST')).toBe(true);
+});
+test('account list renders a session-protected detail URL and isolates loading failure',async()=>{
+ api.mockResolvedValue({items:[{number:'ZK-123456ABCDEF',date:'2030-01-07',time:'11:00',status:'confirmed',paymentStatus:'paid'}],total:1});
+ const view=render(<MemoryRouter><AccountFittings token="owner-session"/></MemoryRouter>);
+ expect(await screen.findByRole('link',{name:'Platby a podrobnosti zkoušky'})).toHaveAttribute('href','/zkouska/ZK-123456ABCDEF');
+ expect(api).toHaveBeenCalledWith('/account/fittings?page=1',expect.objectContaining({token:'owner-session'}));
+ api.mockRejectedValue(new Error('offline'));view.rerender(<MemoryRouter><AccountFittings token="other-session"/></MemoryRouter>);
+ expect(screen.queryByText('ZK-123456ABCDEF',{exact:false})).not.toBeInTheDocument();
+ expect(await screen.findByRole('alert')).toHaveTextContent('nepodařilo');
+});
+test('account detail hides cached data immediately on logout',async()=>{
+ api.mockResolvedValue({number:'ZK-123456ABCDEF',date:'2030-01-07',time:'11:00',status:'confirmed',paymentStatus:'paid',address:'Private address'});
+ const tree=<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>;
+ const view=render(tree);expect(await screen.findByText('Adresa: Private address')).toBeInTheDocument();
+ mockAuth.isLoggedIn=false;mockAuth.token='';view.rerender(<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
+ expect(screen.queryByText('Adresa: Private address')).not.toBeInTheDocument();expect(screen.getByRole('link',{name:'Přihlásit se'})).toBeInTheDocument();
+});

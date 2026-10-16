@@ -10,7 +10,13 @@ async function setup(page,{admin=false,lost=false}={}){
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
   const req=route.request(),u=new URL(req.url()),p=u.pathname,json=(body,status=200)=>route.fulfill({status,json:body});
   if(p==='/gsi/client'||p==='/maps/api/js')return route.fulfill({contentType:'application/javascript',body:''});
-  if(p==='/api/users/current')return json({user:{_id:'admin-user'}});
+  if(p==='/api/users/current')return json({user:{_id:'admin-user',firstName:'Jana',lastName:'Nová',email:'jana@example.test',primaryPhoneNumber:'+420123456789'}});
+  if(p==='/api/v2/account/reservations')return json({items:[],total:0,page:1,limit:20});
+  if(p==='/api/v2/account/fittings')return json({items:state.receipt?[state.receipt]:[],total:state.receipt?1:0,page:1,limit:20});
+  if(p==='/api/v2/account/fittings/'+number)return json(state.receipt);
+  if(p==='/api/v2/account/fittings/'+number+'/claim'){state.claim=req.postDataJSON();return json(state.receipt);}
+  if(p==='/api/v2/account/fittings/'+number+'/payment-sent'){state.receipt={...state.receipt,status:'review',paymentInstructions:null};return json(state.receipt);}
+  if(p==='/api/v2/account/fittings/'+number+'/cancel'){state.receipt={...state.receipt,status:'cancelled',paymentInstructions:null};return json(state.receipt);}
   if(p.endsWith('/favorites/storefront'))return json({ids:[]});
   if(p==='/api/v2/site-settings')return json({sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
@@ -18,7 +24,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/admin/fitting-settings'){if(req.method()==='PATCH')state.settings=req.postDataJSON();return json(state.settings);}
   if(p==='/api/v2/fittings/slots')return json({enabled:state.settings.enabled,date:u.searchParams.get('date'),slots:['11:00','11:30','12:00'],durationMinutes:30,price:200});
   if(p==='/api/v2/fittings'&&req.method()==='POST'){
-   state.creates.push(req.postDataJSON());const b=req.postDataJSON();
+   state.creates.push(req.postDataJSON());state.createAuth=req.headers().authorization;const b=req.postDataJSON();
    state.receipt={number,date:b.date,time:b.time,durationMinutes:30,price:200,address:state.settings.address,status:'pending',paymentStatus:'unpaid',expiresAt:'2030-01-01T08:30:00Z',paymentInstructions:{amount:200,accountNumber:'123456/0800',message:number,qrPayload:'SPD*1.0*ACC:CZ0708000000006644781399*AM:200.00*CC:CZK*MSG:'+number}};
    if(state.lost){state.lost=false;return route.abort();}return json(state.receipt);
   }
@@ -54,6 +60,32 @@ for(const width of [390,768,1440])test('fitting settings, booking QR and adminis
  await expect(page.getByRole('link',{name:'AK-2030-ABC123'})).toBeVisible();
  await page.screenshot({path:`test-evidence/fittings/admin-${width}.png`,fullPage:true});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
+});
+for(const width of [390,768,1440])test('account profile, fitting history and claim '+width,async({page})=>{
+ const state=await setup(page,{admin:true});await page.setViewportSize({width,height:1000});
+ await page.goto(APP+'/zkouska');
+ await expect(page.getByLabel('Jméno a příjmení')).toHaveValue('Jana Nová');
+ await expect(page.getByLabel('E-mail',{exact:true})).toHaveValue('jana@example.test');
+ await expect(page.getByLabel('Telefon',{exact:true})).toHaveValue('+420123456789');
+ await page.getByLabel('Telefon',{exact:true}).fill('+420987654321');
+ await page.getByRole('button',{name:'11:00',exact:true}).click();
+ await page.getByRole('button',{name:'Rezervovat a přejít k platbě 200 Kč'}).click();
+ await expect(page.getByRole('heading',{name:'Vaše zkouška'})).toBeVisible();
+ expect(state.createAuth).toBe('Bearer test-admin-token');expect(state.creates[0].phone).toBe('+420987654321');expect(state.creates[0].accountId).toBeUndefined();
+ const privateUrl=page.url();
+ await page.goto(APP+'/ucet/rezervace');
+ const section=page.getByRole('region',{name:'Zkoušky',exact:true});
+ await expect(section.getByText(number,{exact:false})).toBeVisible();
+ await page.screenshot({path:`test-evidence/fittings/account-${width}.png`,fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await section.getByRole('link',{name:'Platby a podrobnosti zkoušky'}).click();
+ await expect(page).toHaveURL(APP+'/zkouska/'+number);
+ await page.getByRole('button',{name:'Platba odeslána',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Ověřujeme vaši platbu'})).toBeVisible();
+ await page.goto(privateUrl);await page.getByRole('button',{name:'Připojit k účtu',exact:true}).click();
+ await expect(page.getByText('Zkouška je uložená ve vašem účtu.')).toBeVisible();
+ expect(state.claim.token).toBe(new URL(privateUrl).hash.slice(1));
+ expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
 });
 test('fitting unknown create outcome survives reload and retries same private identity',async({page})=>{
  const state=await setup(page,{lost:true});await page.goto(APP+'/zkouska');

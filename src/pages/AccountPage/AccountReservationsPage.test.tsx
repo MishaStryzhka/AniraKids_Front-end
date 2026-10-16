@@ -7,6 +7,7 @@ import { AccountReservationsPage } from './AccountReservationsPage';
 import { preserveGuestReservationLink } from '../../storefront/booking/guestReservationLinks';
 import { reservationStatusPath } from '../../storefront/booking/BookingStatusPage';
 const mockRead = jest.fn();
+jest.mock('../../fittings/AccountFittings', () => ({AccountFittings: () => null}));
 const mockBooking = { stored: null as StoredBooking | null, draft: null as BookingDraft | null, busy: false, storageBlocked: false, accountBlocked: false };
 jest.mock('../../storefront/booking/BookingProvider', () => ({ useBookingOptional: () => mockBooking }));
 jest.mock('../../storefront/api/publicApi', () => ({ ...jest.requireActual('../../storefront/api/publicApi'), claimReservation: jest.fn() }));
