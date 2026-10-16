@@ -4,7 +4,7 @@ export interface FittingSettings {enabled:boolean;address:string;weekly:Array<{d
 export interface Slots {enabled:boolean;date:string;slots:string[];price:number;durationMinutes:number;}
 export interface Fitting {number:string;date:string;time:string;durationMinutes:number;price:number;address:string;status:'pending'|'review'|'confirmed'|'completed'|'cancelled'|'expired';paymentStatus:'unpaid'|'paid'|'refunded';expiresAt:string;product?:{id:string;name:string;slug:string};paymentInstructions:{amount:number;accountNumber:string;message:string;qrPayload:string}|null;}
 export interface AdminFitting extends Fitting {id:string;revision:number;customer:{name:string;email:string;phone:string};audit:Array<{action:string;at:string;by:string}>;credit:{reservationId:string;reservationNumber:string}|null;}
-export interface FittingRequest {operationId:string;token:string;date:string;time:string;name:string;email:string;phone:string;productId?:string;}
+export interface FittingRequest {operationId:string;token:string;date:string;time:string;name:string;email:string;phone:string;productId?:string;accountId?:string;}
 export const fittingStatusLabels:Record<Fitting['status'],string>={pending:'Čeká na platbu',review:'Ověřit platbu',confirmed:'Potvrzená',completed:'Proběhla',cancelled:'Zrušená',expired:'Platnost vypršela'};
 export class FittingApiError extends Error {constructor(public code:string,public status:number){super(code);}}
 export const fittingError=(e:unknown)=>{

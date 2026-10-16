@@ -1,4 +1,5 @@
 import { StatusBadge } from '../../design-system/components/StatusBadge';
+import { AccountFittings } from '../../fittings/AccountFittings';
 import { loadGuestReservationLinks } from '../../storefront/booking/guestReservationLinks';
 import { reservationStatusPath } from '../../storefront/booking/BookingStatusPage';
 import { draftItems, modeLabel } from '../../storefront/booking/bookingModel';
@@ -59,6 +60,8 @@ export function AccountReservationsPage() {
     !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) &&
     ownClaim?.claimed !== localReceipt.reservationNumber);
   return <Page><Title>Moje rezervace</Title>
+    {isLoggedIn&&!isRefreshing&&token?<AccountFittings key={token} token={token}/>:null}
+    <Heading>Pronájmy</Heading>
     {booking?.draftStorageWarning && !booking.stored ? <Copy role="alert">
       Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
     </Copy> : null}
