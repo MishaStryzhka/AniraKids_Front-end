@@ -22,6 +22,8 @@ export function usePartnerEntryAccess() {
             current === generation &&
             access.enabled === true &&
             access.partnerId === 'blaze' &&
+            access.owner !== true &&
+            access.managePartners !== true &&
             ['administrator', 'photographer'].includes(access.role)
           )
             setConfirmed({ token, userId });
