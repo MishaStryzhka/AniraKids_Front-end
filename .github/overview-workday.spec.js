@@ -23,6 +23,7 @@ for (const width of [390,768,1440]) test(`workday overview and menu at ${width}`
     }
     unexpected.push({method,path:u.pathname});return route.abort();
   });
+  await page.route('**/api/v2/admin/access',route=>route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}}));
   await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin');
   await expect(page.getByRole('heading',{name:'Přehled',exact:true})).toHaveCount(1);
   await expect(page.getByText('Klára Nováková')).toBeVisible();

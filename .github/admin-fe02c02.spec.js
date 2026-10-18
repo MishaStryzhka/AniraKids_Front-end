@@ -40,7 +40,7 @@ async function mocks(page,options={}){
   if(method==='PATCH'&&u.pathname===detailPath){const body=req.postDataJSON();state.product={...state.product,...body};return json(200,{product:state.product})}
   state.unexpected.push({method,path:u.pathname});return r.abort('failed');
  });
- return state;
+ await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 test.afterEach(async({page})=>{});
 const section=page=>page.locator('[data-product-variants-section]');

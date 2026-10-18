@@ -1,7 +1,9 @@
 import { Menu } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { flushSync } from 'react-dom';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import {useAdminPermissions,permissionForPath} from '../auth/permissions';
+import {adminNavigationItems} from '../navigation/adminRoutes';
 import styled from 'styled-components';
 import { IconButton } from '../../design-system/components/IconButton';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
@@ -122,6 +124,9 @@ export function useAdminPageAction(action: ReactNode) {
 
 export function AdminLayout() {
   const location = useLocation();
+  const access=useAdminPermissions();
+  const allowed=access.owner||access.permissions.includes(permissionForPath(location.pathname)!);
+  const firstAllowed=adminNavigationItems.find(item=>access.permissions.includes(permissionForPath(item.to)!))?.to;
   const shellRef = useRef<HTMLDivElement>(null);
   const [navigationEntry, setNavigationEntry] = useState<string | null>(null);
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
@@ -150,7 +155,7 @@ export function AdminLayout() {
   return (
     <Shell data-admin-layout ref={shellRef}>
       <Sidebar data-admin-sidebar>
-        <SidebarTitle>Administrace</SidebarTitle>
+        <SidebarTitle>ANIRAK</SidebarTitle>
         <AdminNavigation />
       </Sidebar>
 
@@ -165,7 +170,7 @@ export function AdminLayout() {
             icon={<Menu aria-hidden="true" />}
             onClick={() => setNavigationEntry(location.key)}
           />
-          <MobileTitle>Administrace</MobileTitle>
+          <MobileTitle>ANIRAK Administrace</MobileTitle>
         </MobileHeader>
 
         {pageTitle!=='Přehled'?<PageHeader $compactActions={pageTitle === 'Produkty'}>
@@ -173,7 +178,7 @@ export function AdminLayout() {
           {pageAction ? <PageAction data-admin-page-action>{pageAction}</PageAction> : null}
         </PageHeader>:null}
 
-        <Main><Outlet /></Main>
+        <Main>{allowed?<Outlet/>:location.pathname==='/admin'&&firstAllowed?<Navigate to={firstAllowed} replace/>:<p role="alert">Pro tuto sekci nemáte oprávnění. Vyberte dostupnou sekci v menu.</p>}</Main>
       </Content>
       </AdminPageActionContext.Provider>
       {mobileNavigationOpen ? <AdminMobileDrawer backgroundRef={shellRef} onClose={closeNavigation}

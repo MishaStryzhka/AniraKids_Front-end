@@ -106,7 +106,7 @@ async function mocks(page, seed = product, options = {}) {
     if (options.providerUnknown) return route.abort('failed');
     return json(route, {public_id: 'products/p1/x'});
   });
-  return state;
+  await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 async function capture(page, name) {
   await page.screenshot({path: path.join(EVIDENCE, `${name}.png`), fullPage: false});
@@ -511,7 +511,7 @@ for (const width of [375, 390, 430, 768]) test(`admin side menu overlays without
   const title=page.locator('[data-admin-page-title]');
   const before=await title.boundingBox();
   await toggle.click();
-  const drawer=page.getByRole('dialog',{name:'Administrace',exact:true});
+  const drawer=page.getByRole('dialog',{name:'ANIRAK',exact:true});
   await expect(drawer).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(1);
   await expect(page.locator('[data-admin-layout]')).toHaveAttribute('inert','');
@@ -550,7 +550,7 @@ for (const width of [375, 390, 430, 768]) test(`admin side menu overlays without
 test('admin side menu releases focus and scroll on desktop resize and stays closed on return',async({page})=>{
   await mocks(page);await page.setViewportSize({width:390,height:852});await page.goto(`${APP}/admin/produkty`);
   await page.getByRole('button',{name:'Otevřít navigaci administrace'}).click();
-  await expect(page.getByRole('dialog',{name:'Administrace',exact:true})).toBeVisible();
+  await expect(page.getByRole('dialog',{name:'ANIRAK',exact:true})).toBeVisible();
   await page.setViewportSize({width:1024,height:852});
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('[data-admin-layout]')).not.toHaveAttribute('inert','');
@@ -566,7 +566,7 @@ test('admin side menu hands dirty navigation and browser Back to one leave dialo
   await page.goto(`${APP}/admin/produkty`);await page.getByRole('link',{name:/^Sofia/}).first().click();
   await page.getByLabel('Popis',{exact:true}).fill('Sofia rozepsaná');
   const toggle=page.getByRole('button',{name:'Otevřít navigaci administrace'});
-  await toggle.click();await page.getByRole('dialog',{name:'Administrace',exact:true}).getByRole('link',{name:'Produkty',exact:true}).click();
+  await toggle.click();await page.getByRole('dialog',{name:'ANIRAK',exact:true}).getByRole('link',{name:'Produkty',exact:true}).click();
   const leave=page.getByRole('dialog');
   await expect(leave).toHaveCount(1);await expect(leave).toContainText('Neuložené nebo nedokončené změny');
   await expect(page.locator('#admin-mobile-navigation')).toHaveCount(0);

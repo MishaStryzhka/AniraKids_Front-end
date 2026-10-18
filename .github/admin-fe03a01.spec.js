@@ -33,7 +33,7 @@ async function mocks(page,options={}){
   }
   return route.abort('failed');
  });
- return state;
+ await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 const day=(page,value)=>page.locator(`[data-calendar-day="${value}"]`);
 const cards=page=>page.locator('[data-calendar-reservation]');

@@ -14,6 +14,7 @@ for (const width of [390,768,1440]) test(`fit size editor preserves one physical
     const req=route.request(),u=new URL(req.url()),method=req.method();
     const json=body=>route.fulfill({json:body});
     if(method==='GET') {
+      if(u.origin==='http://admin-api.test'&&u.pathname==='/api/v2/admin/access')return json({owner:true,permissions:['products','reservations','fittings','settings']});
       if((u.origin==='https://maps.googleapis.com'&&u.pathname==='/maps/api/js')||(u.origin==='https://accounts.google.com'&&u.pathname==='/gsi/client'))return route.fulfill({contentType:'application/javascript',body:'/* isolated SDK */'});
       if(u.origin==='https://example.test'&&u.pathname==='/api/users/current')return json({user:{_id:'admin'}});
       if(u.origin==='https://example.test'&&u.pathname==='/api/users/favorites/storefront')return json({favorites:[]});

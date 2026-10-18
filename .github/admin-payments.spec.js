@@ -144,7 +144,7 @@ async function setup(page) {
       });
     }
   );
-  return state;
+  await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 async function open(page) {
   await page.goto('http://127.0.0.1:4173/admin/rezervace/r1');

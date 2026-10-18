@@ -167,7 +167,7 @@ async function setup(page) {
       });
     }
   );
-  return state;
+  await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 async function ready(page, id = 'r1') {
   await page.goto(APP + '/admin/rezervace/' + id);

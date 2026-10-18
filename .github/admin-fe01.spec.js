@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 const APP = 'http://127.0.0.1:4173';
 const APP_NO_ENV = 'http://127.0.0.1:4174';
-const ADMIN_PRODUCTS = '**/admin/products**';
+const ADMIN_PRODUCTS = /\/admin\/(?:products|access)(?:\?|$)/;
 
 async function seedToken(page, token = 'admin-test-token') {
   await page.addInitScript(value => {
@@ -39,7 +39,7 @@ async function mockProbe(page, input = {}) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          items: [],
+          ...{owner:true,permissions:['products','reservations','fittings','settings']},items: [],
           pagination: { page: pageNumber, limit: 20, total: 0, pages: 0 },
         }),
       });
@@ -145,7 +145,7 @@ test('network failure renders retry state and retry can recover', async ({ page 
       await route.abort('failed');
       return;
     }
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({owner:true,permissions:['products','reservations','fittings','settings']}) });
   });
   await page.goto(`${APP}/admin`);
   await expect(page.getByText('Administraci se nepodařilo načíst')).toBeVisible();

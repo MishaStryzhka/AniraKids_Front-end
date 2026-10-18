@@ -1,4 +1,5 @@
 import axios, { type AxiosRequestConfig } from 'axios';
+import type {Access} from '../auth/permissions';
 import { createAdminClientNotConfiguredError, normalizeAdminApiError } from './errors';
 
 export const adminApiClient = axios.create();
@@ -22,10 +23,9 @@ export function buildAdminRequestConfig(token: string, signal?: AbortSignal): Ax
 export async function probeAdminAccess(input: { token: string; signal?: AbortSignal }) {
   try {
     const config = buildAdminRequestConfig(input.token, input.signal);
-    await adminApiClient.get('/admin/products', {
-      ...config,
-      params: { page: 1, limit: 1 },
-    });
+    const {data}=await adminApiClient.get<Access>('/admin/access',config);
+    if(typeof data?.owner!=='boolean'||!Array.isArray(data.permissions)||data.permissions.some(p=>!['products','reservations','fittings','settings'].includes(p)))throw new Error('Invalid admin access response');
+    return data;
   } catch (error) {
     throw normalizeAdminApiError(error);
   }

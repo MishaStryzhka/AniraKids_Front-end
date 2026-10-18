@@ -7,6 +7,7 @@ import { Divider } from '../../design-system/components/Divider';
 import { NavigationLink } from '../../design-system/components/NavigationLink';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { adminNavigationItems, resolveAdminNavigation } from './adminRoutes';
+import {useAdminPermissions,permissionForPath} from '../auth/permissions';
 
 const Root = styled.nav`
   display: grid;
@@ -49,6 +50,7 @@ const icons = {fittings: CalendarClock,overview: LayoutDashboard, products: Shir
 
 export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
+  const access=useAdminPermissions();
   const current = resolveAdminNavigation(location.pathname);
   const navigate = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) onNavigate?.();
@@ -56,7 +58,7 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}
 
   return (
     <Root aria-label="Navigace administrace">
-      {adminNavigationItems.map(item => {const Icon=icons[item.key]; return (
+      {adminNavigationItems.filter(item=>access.owner||access.permissions.includes(permissionForPath(item.to)!)).map(item => {const Icon=icons[item.key]; return (
         <AdminLink
           key={item.key}
           variant="plain"
