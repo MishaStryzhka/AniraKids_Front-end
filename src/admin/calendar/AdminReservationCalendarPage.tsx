@@ -1,3 +1,7 @@
+import {useAdminPermissions} from '../auth/permissions';
+import {useFittingCalendar} from './useFittingCalendar';
+import {fittingsOnDay} from '../../partner/partnerCalendarModel';
+import {fittingStatusLabels} from '../../fittings/fittingApi';
 import {useMemo, useState} from 'react';
 import styled from 'styled-components';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
@@ -50,12 +54,16 @@ const weekdays = ['Po','Út','St','Čt','Pá','So','Ne'];
 
 export function AdminReservationCalendarPage() {
   const {token} = useAuth();
+  const access=useAdminPermissions();
+  const canFittings=access.owner||access.permissions.includes('fittings');
   const {handleRequestError} = useAdminAccess();
   const today = pragueToday();
   const [month, setMonth] = useState(() => today.slice(0,7));
   const [selectedDay, setSelectedDay] = useState(today);
   const [revision, setRevision] = useState(0);
   const state = useReservationCalendar({month,token:token??'',revision,onAccessError:handleRequestError});
+  const fittings=useFittingCalendar(month,token??'',revision,canFittings);
+  const fittingAgenda=fittingsOnDay(fittings.items,selectedDay).sort((a,b)=>a.time.localeCompare(b.time));
   const days = useMemo(() => monthCalendarDays(month),[month]);
   const gridDays = useMemo(() => monthCalendarGridDays(month),[month]);
   const items = state.kind === 'success' ? state.items : null;
@@ -68,8 +76,8 @@ export function AdminReservationCalendarPage() {
   const goToday = () => {const now=pragueToday();setMonth(now.slice(0,7));setSelectedDay(now);};
   const loading=state.kind==='loading';
   return <Page data-admin-calendar-page>
-    <div><NavigationLink variant="plain" to="/admin/zkousky">Kalendář zkoušek</NavigationLink></div>
-    <Copy>Rezervace, navazující čištění a ruční blokace. Kusy v údržbě zkontrolujte u produktu. Konečnou dostupnost ověřuje rezervace.</Copy>
+    {canFittings?<div><NavigationLink variant="plain" to="/admin/zkousky">Spravovat zkoušky</NavigationLink></div>:null}
+    <Copy>Pronájmy, zkoušky, navazující čištění a ruční blokace. Kusy v údržbě zkontrolujte u produktu. Konečnou dostupnost ověřuje rezervace.</Copy>
     <Toolbar>
       <MonthNavigation aria-label="Výběr měsíce">
         <ArrowButton variant="secondary" size="compact" aria-label="Předchozí měsíc" disabled={month==='0001-01'} onClick={()=>navigateMonth(-1)}><ChevronLeft size={20} aria-hidden="true"/></ArrowButton>
@@ -83,10 +91,13 @@ export function AdminReservationCalendarPage() {
       {loading?<State role="status"><Loading><Spinner size="sm"/><span>Načítání kalendáře…</span></Loading></State>:null}
       {state.kind==='error'?<State role="alert"><StateTitle>Kalendář se nepodařilo načíst</StateTitle><Copy>Zkuste to prosím znovu.</Copy><Button onClick={()=>setRevision(value=>value+1)}>Zkusit znovu</Button></State>:null}
       {state.kind==='success'?<>
-        <Announcement role="status" aria-live="polite">{formatCalendarDay(selectedDay,true)}. Počet rezervací: {agenda.length}.</Announcement>
+        <Announcement role="status" aria-live="polite">{formatCalendarDay(selectedDay,true)}. Počet rezervací: {agenda.length}.{canFittings?` Zkoušky: ${fittingAgenda.length}.`:null}</Announcement>
         <Copy data-calendar-loaded>Naposledy načteno: {formatPragueLoadedAt(state.loadedAt)}</Copy>
         {state.blocksTruncated?<Copy role="alert">Zobrazeno prvních 1 000 blokací. Další ověřte přímo u produktu.</Copy>:null}
-        {state.items.length===0?<State><StateTitle>Žádné rezervace v tomto období</StateTitle></State>:null}
+        {canFittings&&fittings.loading?<Copy role="status">Načítání zkoušek…</Copy>:null}
+        {canFittings&&fittings.error?<Copy role="alert">Zkoušky se nepodařilo načíst. Zvolte Obnovit.</Copy>:null}
+        {fittings.truncated?<Copy role="alert">Přehled zkoušek není úplný. Další zápisy ověřte v části Zkoušky.</Copy>:null}
+        {state.items.length===0&&!canFittings?<State><StateTitle>Žádné rezervace v tomto období</StateTitle></State>:null}
         <Content>
           <Calendar aria-labelledby="calendar-month-title">
             <Weekdays aria-hidden="true">{weekdays.map((day,index)=><Weekday key={day} $weekend={index>=5}>{day}</Weekday>)}</Weekdays>
@@ -95,12 +106,12 @@ export function AdminReservationCalendarPage() {
                 if (!day) return <div aria-hidden="true" key={`boundary-${index}`}/>;
                 if (!day.startsWith(month+'-')) return <DayButton key={day} size="compact" variant="secondary" disabled data-calendar-adjacent={day} aria-label={`${formatCalendarDay(day,true)}. Mimo zobrazený měsíc.`}><DayNumber>{Number(day.slice(-2))}</DayNumber></DayButton>;
                 const counts=reservationDayCounts(state.items,day);const blocked=blocks.filter(b=>b.startDate<=day && b.endDate>=day).length;return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} data-weekend={mondayWeekday(day)>=5?'true':undefined} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
-                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}. Blokace: ${blocked}.`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
-                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount><DayCount>Čištění: {counts.cleaning}</DayCount>{blocked?<DayCount>Blokace: {blocked}</DayCount>:null}
+                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}. Blokace: ${blocked}.${canFittings?` Zkoušky: ${fittings.loading||fittings.error?'nedostupné':fittingsOnDay(fittings.items,day).length}.`:''}`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
+                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount>{canFittings?<DayCount>Zkoušky: {fittings.loading||fittings.error?'–':fittingsOnDay(fittings.items,day).length}</DayCount>:null}<DayCount>Čištění: {counts.cleaning}</DayCount>{blocked?<DayCount>Blokace: {blocked}</DayCount>:null}
               </DayButton>;})}
             </Days>
           </Calendar>
-          <MobileDay><SelectField label="Vybraný den" value={selectedDay} onChange={event=>setSelectedDay(event.target.value)}>{days.map(day=><option key={day} value={day}>{formatCalendarDay(day,true)}</option>)}</SelectField></MobileDay>
+          <MobileDay><SelectField label="Vybraný den" value={selectedDay} onChange={event=>setSelectedDay(event.target.value)}>{days.map(day=><option key={day} value={day}>{formatCalendarDay(day,true)} · Pronájmy: {items?reservationDayCounts(items,day).rental:0}{canFittings?` · Zkoušky: ${fittings.loading||fittings.error?'–':fittingsOnDay(fittings.items,day).length}`:null}</option>)}</SelectField></MobileDay>
           <Agenda aria-labelledby="calendar-agenda-title">
             <AgendaTitle id="calendar-agenda-title">{formatCalendarDay(selectedDay,true)}</AgendaTitle>
             {agenda.length===0?<Copy>Žádné rezervace pro vybraný den</Copy>:<Cards>{agenda.map(reservation=>{const status=reservationStatusPresentation(reservation.status);return <Card key={reservation.id} data-calendar-reservation={reservation.id}>
@@ -110,6 +121,15 @@ export function AdminReservationCalendarPage() {
               <Details><div><dt>Termín</dt><dd>{formatCalendarDay(reservation.startDate)} – {formatCalendarDay(reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
               <ProductItems>{reservation.items.map(item=><li key={item.inventoryItemId}>{item.productName} · velikost {item.size}</li>)}</ProductItems>
             </Card>;})}</Cards>}
+            {canFittings?<><AgendaTitle>Zkoušky{!fittings.loading&&!fittings.error?` (${fittingAgenda.length})`:''}</AgendaTitle>
+              {fittingAgenda.length?<Cards>{fittingAgenda.map(f=><Card key={f.id} data-calendar-fitting={f.id}>
+                <CardHeading>{f.time} · {f.customer.name}</CardHeading>
+                <CardMeta><StatusBadge tone={f.status==='confirmed'?'success':'neutral'}>{fittingStatusLabels[f.status]}</StatusBadge><span>{f.durationMinutes} minut</span></CardMeta>
+                {f.product?<Copy>{f.product.name}</Copy>:null}
+                <Copy>{f.number}</Copy>
+                <NavigationLink variant="plain" to={'/admin/zkousky?date='+selectedDay}>Spravovat zkoušku</NavigationLink>
+              </Card>)}</Cards>:!fittings.loading&&!fittings.error?<Copy>Žádné zkoušky pro vybraný den</Copy>:null}
+            </>:null}
             {dayBlocks.length?<><AgendaTitle>Ruční blokace</AgendaTitle><Cards>{dayBlocks.map(b=><Card key={b.id}><CardHeading>{b.productId?<NavigationLink variant="plain" to={buildAdminProductDetailPath(b.productId)}>{b.productName}</NavigationLink>:b.productName}</CardHeading><Copy>{b.internalCode} · {({repair:'Oprava',cleaning:'Čištění',internal_use:'Interní použití',photoshoot:'Focení',other:'Jiný důvod'} as Record<string,string>)[b.reason] || b.reason}</Copy><Copy>{formatCalendarDay(b.startDate)} – {formatCalendarDay(b.endDate)}</Copy></Card>)}</Cards></>:null}
           </Agenda>
         </Content>
