@@ -192,22 +192,28 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) test(`media responsive ${w
   const removeBox = await item.getByRole('button', {name: 'Odebrat fotografii'}).boundingBox();
   const earlierBox = await item.getByRole('button', {name: 'Posunout dříve'}).boundingBox();
   const laterBox = await item.getByRole('button', {name: 'Posunout později'}).boundingBox();
-  const badge = item.getByText('Hlavní fotografie').locator('..');
-  const badgeBox = await badge.boundingBox();
-  const textBox = await badge.locator('..').boundingBox();
-  const badgeStyle = await badge.evaluate(element => ({background: getComputedStyle(element).backgroundColor, height: element.getBoundingClientRect().height}));
-  expect(badgeStyle.background).toBe('rgb(244, 240, 236)');
-  expect(badgeStyle.height).toBeGreaterThanOrEqual(28);
-  expect(badgeBox.width).toBeLessThan(textBox.width);
-  if (width < 768) {
-    expect(removeBox.y).toBeGreaterThan(itemBox.y + 120);
-    expect(removeBox.width).toBeGreaterThan(itemBox.width * 0.75);
-    expect(Math.abs(earlierBox.width - laterBox.width)).toBeLessThanOrEqual(1);
-    expect(Math.round(laterBox.x - earlierBox.x - earlierBox.width)).toBe(8);
+  const photoFrame = item.locator('div').first();
+  const frameBox = await photoFrame.boundingBox();
+  const frameStyle = await item.evaluate(element => ({
+    borderColor: getComputedStyle(element).borderColor,
+    borderWidth: getComputedStyle(element).borderTopWidth,
+  }));
+  expect(frameStyle.borderColor).toBe('rgb(122, 98, 84)');
+  expect(frameStyle.borderWidth).toBe('3px');
+  expect(frameBox.height / frameBox.width).toBeCloseTo(4/3, 1);
+  for (const box of [removeBox, earlierBox, laterBox]) {
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
   }
+  expect(removeBox.y).toBeLessThan(itemBox.y + itemBox.height/3);
+  expect(earlierBox.y).toBeGreaterThan(itemBox.y + itemBox.height/2);
+  expect(laterBox.y).toBeGreaterThan(itemBox.y + itemBox.height/2);
+  expect(earlierBox.x).toBeLessThan(laterBox.x);
+  expect(await item.getByText('Alternativní text').count()).toBe(0);
+  expect(await item.getByRole('button').count()).toBe(4); // photo ALT action + three visible icons
   output(`geometry-${width}.json`, {width, viewport: await page.evaluate(() => ({w: innerWidth, h: innerHeight, scrollWidth: document.documentElement.scrollWidth})),
     form: formBox, divider: dividerBox, heading: headingBox, item: itemBox, remove: removeBox,
-    earlier: earlierBox, later: laterBox, badge: badgeBox, badgeStyle, imageLoaded: true});
+    earlier: earlierBox, later: laterBox, frame: frameBox, frameStyle, imageLoaded: true});
   await page.screenshot({path: path.join(EVIDENCE, `responsive-${width}.png`), fullPage: true});
   await chooseFile(page);
   await assertSelectedActions(page, 'Nahrát fotografii', `selected-upload-actions-${width}`);
@@ -271,7 +277,7 @@ test('reorder focus follows same photo at both edges with native keyboard and no
   await expect(b.getByRole('button', {name: 'Posunout dříve'})).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(b.getByRole('button', {name: 'Posunout později'})).toBeFocused();
-  await expect(b.getByText('Hlavní fotografie')).toBeVisible();
+  await expect(b).toHaveAttribute('data-main', 'true');
   expect(state.currentProduct.photos.map(p => p.publicId)).toEqual(['a', 'b', 'c']);
   expect(state.requests.filter(r => r.method === 'PATCH')).toHaveLength(0);
   await capture(page, 'reorder-first-position-focus');
