@@ -17,6 +17,8 @@ beforeEach(()=>{
   jest.clearAllMocks();
   Object.defineProperty(window,'isSecureContext',{configurable:true,value:true});
   Object.defineProperty(window,'PushManager',{configurable:true,value:function(){}});
+  Object.defineProperty(window,'atob',{configurable:true,value:(value:string)=>Buffer.from(value,'base64').toString('binary')});
+
   Object.defineProperty(window,'Notification',{configurable:true,value:{permission:'default',requestPermission:permission}});
   Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{getRegistration,register}});
   permission.mockResolvedValue('granted');
