@@ -64,7 +64,8 @@ test('loads saved device preferences and persists topic changes without requesti
     return Promise.resolve({ok:true});
   });
   render(<AdminPushNotifications token="t"/>);
-  const checkbox=await screen.findByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
+  await screen.findByRole('button',{name:'Vypnout upozornění'});
+  const checkbox=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
   await waitFor(()=>expect(checkbox).toBeChecked());
   expect(permission).not.toHaveBeenCalled();
   fireEvent.click(checkbox);
@@ -75,7 +76,8 @@ test('loads saved device preferences and persists topic changes without requesti
 
 test('does not enable push when all topic subscriptions are off', async()=>{
   render(<AdminPushNotifications token="t"/>);
-  const checkbox=await screen.findByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
+  await screen.findByRole('button',{name:'Zapnout upozornění'});
+  const checkbox=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
   fireEvent.click(checkbox);
   expect(checkbox).not.toBeChecked();
   expect(screen.getByRole('button',{name:'Zapnout upozornění'})).toBeDisabled();
