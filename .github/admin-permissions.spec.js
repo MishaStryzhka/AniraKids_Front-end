@@ -22,7 +22,7 @@ async function fixture(page,owner=true){
  });return state;
 }
 for(const width of [390,768,1440])test('owner manages granular access and revokes safely '+width,async({page})=>{
- const s=await fixture(page);await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/nastaveni');
+ const s=await fixture(page);await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Administrátoři'}).click();
  const card=page.getByRole('region',{name:'Administrátoři',exact:true});await expect(card.getByText('Hlavní správce')).toBeVisible();
  await card.getByLabel('E-mail uživatele').fill('jana@example.test');await card.getByRole('button',{name:'Vyhledat účet'}).click();
  await card.getByLabel('Produkty a sklad').check();await card.getByLabel('Zkoušky a jejich platby').check();
@@ -44,7 +44,7 @@ test('limited administrator lands on allowed section and cannot open settings',a
  await page.goto(APP+'/admin/nastaveni');await expect(page.getByRole('alert')).toContainText('nemáte oprávnění');await expect(page.getByRole('region',{name:'Administrátoři'})).toHaveCount(0);expect(s.unexpected).toEqual([]);
 });
 test('lookup errors and conflicting saves preserve edits and require review',async({page})=>{
- const s=await fixture(page);await page.goto(APP+'/admin/nastaveni');const card=page.getByRole('region',{name:'Administrátoři',exact:true});
+ const s=await fixture(page);await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Administrátoři'}).click();const card=page.getByRole('region',{name:'Administrátoři',exact:true});
  s.missing=true;await card.getByLabel('E-mail uživatele').fill('missing@example.test');await card.getByRole('button',{name:'Vyhledat účet'}).click();await expect(card.getByRole('alert')).toContainText('nebyl nalezen');
  s.missing=false;await card.getByLabel('E-mail uživatele').fill('jana@example.test');await card.getByRole('button',{name:'Vyhledat účet'}).click();await card.getByLabel('Produkty a sklad').check();s.fail=true;await card.getByRole('button',{name:'Uložit oprávnění'}).click();await expect(card.getByRole('alert')).toContainText('mezitím změnila');await expect(card.getByLabel('Produkty a sklad')).toBeChecked();expect(s.permissions).toEqual([]);
 });

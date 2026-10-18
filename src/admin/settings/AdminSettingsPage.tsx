@@ -4,11 +4,12 @@ import {useAdminPermissions} from '../auth/permissions';
 import {useEffect, useRef, useState} from 'react';
 import {useBlocker} from 'react-router-dom';
 import styled from 'styled-components';
-import {Eye, Users, Shirt} from 'lucide-react';
+import {Eye, Users, Shirt, CalendarClock} from 'lucide-react';
 import {useAuth} from '../../hooks/useAuth';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {getAdminSettings, saveAdminSettings} from '../api/settings';
-import type {SiteSections} from '../../siteSettings/siteSettings';
+import {sectionLabels,filterLabels,defaultCatalogueFilters,type SiteSettings,type SectionKey,type SiteSections,type CatalogueFilters} from '../../siteSettings/siteSettings';
+import {SettingsDisclosure} from './SettingsDisclosure';
 import {Button} from '../../design-system/components/Button';
 import {CheckboxField} from '../../design-system/components/CheckboxField';
 import {Dialog} from '../../design-system/components/Dialog';
@@ -21,15 +22,15 @@ const Fieldset = styled.fieldset`border:0;padding:0;margin:16px 0 0;min-width:0;
 const Row = styled.div`padding:20px 0;display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;border-top:1px solid ${t.color.border.subtle};&>svg{margin-top:12px;color:${t.color.text.secondary};}label{font-weight:600;}p{margin:0;}`;
 const Actions = styled.div`display:flex;gap:12px;flex-wrap:wrap;align-items:center;@media(max-width:767px){>button{width:100%;}}`;
 const Feedback = styled.p`margin:0;line-height:1.6;`;
-const keys: Array<keyof SiteSections> = ['suits','familyLooks'];
+const keys=Object.keys(sectionLabels) as SectionKey[];
 
 export function AdminSettingsPage() {
   const {token} = useAuth();
   const access=useAdminPermissions();
   const [administratorsDirty,setAdministratorsDirty]=useState(false);
   const {handleRequestError} = useAdminAccess();
-  const [baseline,setBaseline] = useState<SiteSections | null>(null);
-  const [draft,setDraft] = useState<SiteSections | null>(null);
+  const [baseline,setBaseline] = useState<SiteSettings | null>(null);
+  const [draft,setDraft] = useState<SiteSettings | null>(null);
   const [revision,setRevision] = useState(0);
   const [loading,setLoading] = useState(true);
   const [saving,setSaving] = useState(false);
@@ -39,7 +40,7 @@ export function AdminSettingsPage() {
   const busy = useRef(false);
   const cancelButton = useRef<HTMLButtonElement | null>(null);
   const [fittingDirty,setFittingDirty]=useState(false);
-  const dirty = Boolean(draft && baseline && keys.some(key => draft[key] !== baseline[key]));
+  const dirty = Boolean(draft && baseline && JSON.stringify(draft)!==JSON.stringify(baseline));
   const blocker = useBlocker(dirty || saving || fittingDirty || administratorsDirty);
   useEffect(() => {
     if (!dirty && !saving && !fittingDirty && !administratorsDirty) return;
@@ -62,7 +63,9 @@ export function AdminSettingsPage() {
     if (!draft || !baseline || !dirty || busy.current) return;
     busy.current=true;setSaving(true);setError('');setSuccess(false);
     const controller=new AbortController();request.current=controller;
-    const patch=Object.fromEntries(keys.filter(key => draft[key]!==baseline[key]).map(key => [key,draft[key]]));
+    const sections:Partial<SiteSections>={},filters:Partial<CatalogueFilters>={};
+    for(const key of keys){if(draft.sections[key]!==baseline.sections[key])sections[key]=draft.sections[key];if(JSON.stringify(draft.filters[key])!==JSON.stringify(baseline.filters[key]))filters[key]=draft.filters[key];}
+    const patch={...(Object.keys(sections).length?{sections}:{}),...(Object.keys(filters).length?{filters}:{})};
     try {
       const value=await saveAdminSettings(token ?? '',patch,controller.signal);
       if (!controller.signal.aborted) {setDraft(value);setBaseline(value);setSuccess(true);}
@@ -73,14 +76,20 @@ export function AdminSettingsPage() {
   if (loading) return <Page role="status">Načítání nastavení…</Page>;
   if (!draft) return <Page><Feedback role="alert">{error}</Feedback><Actions><Button onClick={()=>setRevision(x=>x+1)}>Zkusit znovu</Button></Actions></Page>;
   return <Page>
+    <SettingsDisclosure title="Sekce na webu" icon={<Eye size={22} aria-hidden="true"/>} dirty={dirty}>
     <form onSubmit={event=>{event.preventDefault();void save();}}>
-      <Card aria-labelledby="settings-sections">
-        <h2 id="settings-sections"><Eye size={22} aria-hidden="true"/>Sekce na webu</h2>
+      <Card aria-label="Sekce na webu">
+
         <Copy>Vyberte, které sekce se zobrazí v menu, na úvodní stránce a v patičce webu. Vypnutá sekce nebude dostupná ani přes přímý odkaz.</Copy>
         <Fieldset disabled={saving}>
           <legend style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}>Viditelnost sekcí</legend>
-          <Row><Shirt size={24} aria-hidden="true"/><div><CheckboxField label="Chlapecké obleky" checked={draft.suits} aria-describedby="suits-help" onChange={event=>{setDraft({...draft,suits:event.target.checked});setSuccess(false);}}/><Copy id="suits-help">Samostatná nabídka chlapeckých obleků.</Copy></div></Row>
-          <Row><Users size={24} aria-hidden="true"/><div><CheckboxField label="Family looky" checked={draft.familyLooks} aria-describedby="family-help" onChange={event=>{setDraft({...draft,familyLooks:event.target.checked});setSuccess(false);}}/><Copy id="family-help">Kolekce produktů zařazených do rodinného looku.</Copy></div></Row>
+          {keys.map(key=><Row key={key}>{key==='familyLooks'?<Users size={24} aria-hidden="true"/>:<Shirt size={24} aria-hidden="true"/>}<div>
+            <CheckboxField label={sectionLabels[key]} checked={draft.sections[key]} onChange={event=>{setDraft({...draft,sections:{...draft.sections,[key]:event.target.checked}});setSuccess(false);}}/>
+            <details style={{marginTop:12}}><summary style={{cursor:'pointer',minHeight:44,display:'flex',alignItems:'center',gap:8}}>Filtry pro zákazníky · {draft.filters[key].length} vybráno ▾</summary>
+              <Copy>Vyberte filtry zobrazené v této sekci. Prázdný výběr skryje filtrování. Zařazení produktů se nemění.</Copy>
+              <div role="group" style={{display:'grid',gap:8,marginTop:12}} aria-label={'Filtry: '+sectionLabels[key]}>{defaultCatalogueFilters[key].map(filter=><CheckboxField key={filter} label={filterLabels[filter]} checked={draft.filters[key].includes(filter)} onChange={event=>{const next=event.target.checked?[...draft.filters[key],filter]:draft.filters[key].filter(f=>f!==filter);setDraft({...draft,filters:{...draft.filters,[key]:next}});setSuccess(false);}}/>)}</div>
+            </details>
+          </div></Row>)}
         </Fieldset>
         <Copy>Produkty zůstávají v celkové nabídce. Fotografie, fyzické kusy ani rezervace se nemění.</Copy>
       </Card>
@@ -88,8 +97,9 @@ export function AdminSettingsPage() {
     </form>
     {error?<Feedback role="alert">{error}</Feedback>:null}
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
-    <FittingSettingsSection onDirty={setFittingDirty}/>
-    {access.owner?<AdministratorsSection key={token} onDirty={setAdministratorsDirty}/>:null}
+    </SettingsDisclosure>
+    <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure>
+    {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
       <Actions ref={node=>{cancelButton.current=node?.querySelector<HTMLButtonElement>('button')??null;}}><Button onClick={()=>blocker.state==='blocked'&&blocker.reset()}>Zůstat</Button><Button variant="secondary" onClick={()=>blocker.state==='blocked'&&blocker.proceed()}>Odejít</Button></Actions>
     </Dialog>

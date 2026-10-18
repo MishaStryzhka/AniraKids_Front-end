@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const APP='http://127.0.0.1:4173';
 async function fixture(page,options={}){
- const state={sections:{suits:true,familyLooks:false},patches:[],queries:[],unexpected:[],fail:options.fail||false,readFail:options.readFail||false};
+ const state={sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false},filters:{girlsDresses:['price','rentalMode','color','size'],womenDresses:['price','rentalMode','color','size'],suits:['gender','price','rentalMode','color','size'],familyLooks:['category','gender','price','rentalMode','color','size']},patches:[],queries:[],unexpected:[],fail:options.fail||false,readFail:options.readFail||false};
  if(!options.guest) await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('admin-test-token')})));
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
   const req=route.request(),u=new URL(req.url()),p=u.pathname;
@@ -11,14 +11,14 @@ async function fixture(page,options={}){
   if(p==='/maps/api/js'||p==='/gsi/client')return route.fulfill({contentType:'application/javascript',body:''});
   if(p==='/api/v2/admin/fitting-settings')return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
-  if(p==='/api/v2/site-settings')return state.readFail?json({},503):json({sections:state.sections});
+  if(p==='/api/v2/site-settings')return state.readFail?json({},503):json({sections:state.sections,filters:state.filters});
   if(p==='/api/v2/admin/settings'){
    if(req.method()==='PATCH'){
     state.patches.push(req.postDataJSON());
     if(state.fail){state.fail=false;return json({error:{code:'UPSTREAM_ERROR',message:'test'}},503);}
-    Object.assign(state.sections,req.postDataJSON().sections);
+    Object.assign(state.sections,req.postDataJSON().sections);Object.assign(state.filters,req.postDataJSON().filters);
    }
-   return json({sections:state.sections});
+   return json({sections:state.sections,filters:state.filters});
   }
   if(p==='/api/v2/catalogue/products'){
    state.queries.push(Object.fromEntries(u.searchParams));
@@ -30,13 +30,13 @@ async function fixture(page,options={}){
 }
 for(const width of [390,768,1024,1440])test('section settings persist and control storefront '+width,async({page})=>{
  const state=await fixture(page),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/nastaveni');
+ await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Sekce na webu'}).click();
  await expect(page.getByRole('heading',{name:'Nastavení',exact:true})).toBeVisible();
  const suits=page.getByLabel('Chlapecké obleky',{exact:true}),family=page.getByLabel('Family looky',{exact:true}),save=page.getByRole('button',{name:'Uložit',exact:true});
  await expect(suits).toBeChecked();await expect(family).not.toBeChecked();await expect(save).toBeDisabled();
  await suits.uncheck();await family.check();await save.click();await expect(page.getByRole('status')).toContainText('Nastavení bylo uloženo');
  expect(state.patches).toEqual([{sections:{suits:false,familyLooks:true}}]);
- await page.reload();await expect(suits).not.toBeChecked();await expect(family).toBeChecked();
+ await page.reload();await page.locator('summary').filter({hasText:'Sekce na webu'}).click();await expect(suits).not.toBeChecked();await expect(family).toBeChecked();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.screenshot({path:'test-evidence/site-settings/admin-'+width+'.png'});
  await page.goto(APP+'/');
@@ -65,7 +65,7 @@ for(const width of [390,768,1024,1440])test('section settings persist and contro
  expect(state.unexpected).toEqual([]);expect(errors).toEqual([]);
 });
 test('failed save preserves draft, dirty navigation asks, retry persists only changed key',async({page})=>{
- const state=await fixture(page,{fail:true});await page.setViewportSize({width:1440,height:1000});await page.goto(APP+'/admin/nastaveni');
+ const state=await fixture(page,{fail:true});await page.setViewportSize({width:1440,height:1000});await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Sekce na webu'}).click();
  await page.getByLabel('Family looky',{exact:true}).check();
  await page.getByRole('link',{name:'Zpět na web',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'Neuložené změny'})).toBeVisible();
@@ -93,4 +93,29 @@ test('all section links fit the 1024 guest header',async({page})=>{
  await expect(nav.getByRole('link',{name:'Family looky'})).toBeVisible();
  const last=await nav.getByRole('link').last().boundingBox(),utilities=await page.locator('[data-desktop-utilities]').boundingBox();
  expect(last.x+last.width).toBeLessThanOrEqual(utilities.x);
+});
+
+for(const width of [390,768,1440])test('collapsible settings preserve drafts and apply section filters '+width,async({page})=>{
+ const s=await fixture(page);await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/nastaveni');
+ const summary=page.locator('summary').filter({hasText:'Sekce na webu'});
+ await expect(page.getByLabel('Dívčí šaty',{exact:true})).not.toBeVisible();
+ await summary.click();await page.getByLabel('Dívčí šaty',{exact:true}).uncheck();
+ const group=page.getByRole('group',{name:'Filtry: Dámské šaty',includeHidden:true});
+ await group.locator('..').locator('summary').click();
+ await group.getByLabel('Cena',{exact:true}).uncheck();await group.getByLabel('Způsob pronájmu',{exact:true}).uncheck();await group.getByLabel('Barva',{exact:true}).uncheck();
+ await summary.click();await expect(summary).toContainText('Neuložené změny');await summary.click();
+ await expect(page.getByLabel('Dívčí šaty',{exact:true})).not.toBeChecked();await expect(group.getByLabel('Velikost',{exact:true})).toBeChecked();
+ await expect(group.getByLabel('Cena',{exact:true})).not.toBeChecked();
+ await page.screenshot({path:`test-evidence/site-settings/filters-${width}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.getByRole('button',{name:'Uložit',exact:true}).click();await expect(summary).not.toContainText('Neuložené změny');
+ expect(s.patches).toEqual([{sections:{girlsDresses:false},filters:{womenDresses:['size']}}]);
+ await page.goto(APP+'/saty');await expect(page.getByRole('heading',{name:'Tato sekce momentálně není dostupná'})).toBeVisible();await expect(page.locator('a[href="/saty"]')).toHaveCount(0);
+ await page.goto(APP+'/forWomen?category=dress&color=Bílá&minPrice=bad&size=M');await expect(page.getByRole('heading',{name:'Dámské šaty',exact:true})).toBeVisible();
+ await expect.poll(()=>new URL(page.url()).searchParams.has('minPrice')).toBe(false);await expect.poll(()=>new URL(page.url()).searchParams.has('color')).toBe(false);
+ await page.getByRole('button',{name:'Filtrovat',exact:true}).click();await page.getByText('VELIKOST',{exact:true}).click();await expect(page.getByRole('combobox',{name:'Velikost',exact:true})).toBeVisible();await expect(page.getByRole('combobox',{name:'Barva',exact:true})).toHaveCount(0);await expect(page.getByLabel('Cena od (Kč)',{exact:true})).toHaveCount(0);
+ await expect.poll(()=>s.queries.some(q=>q.gender==='women')).toBe(true);
+ expect(s.queries.filter(q=>q.gender==='women').every(q=>q.category==='dress'&&!q.color&&!q.minPrice)).toBe(true);
+ await page.getByRole('button',{name:'Zrušit filtry',exact:true}).first().click();await expect(page.getByRole('heading',{name:'Dámské šaty',exact:true})).toBeVisible();
+ s.filters.womenDresses=[];await page.reload();await expect(page.getByRole('button',{name:'Filtrovat',exact:true})).toHaveCount(0);
+ s.sections.womenDresses=false;await page.reload();await expect(page.getByRole('heading',{name:'Tato sekce momentálně není dostupná'})).toBeVisible();expect(s.unexpected).toEqual([]);
 });

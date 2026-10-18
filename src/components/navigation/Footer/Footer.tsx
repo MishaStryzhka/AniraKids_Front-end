@@ -152,7 +152,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             <Group key={group.title} $span={group.span}>
               <Heading>{group.title}</Heading>
               <List>
-                {group.links.filter(item=>item.to===routes.suits?sections.suits:item.to===routes.familyLooks?sections.familyLooks:true).map(item => (
+                {group.links.filter(item=>item.to===routes.dresses?sections.girlsDresses:item.to===routes.womenDresses?sections.womenDresses:item.to===routes.suits?sections.suits:item.to===routes.familyLooks?sections.familyLooks:true).map(item => (
                   <li key={item.to}>
                     <FooterLink variant="plain" to={item.to}>{item.label}</FooterLink>
                   </li>

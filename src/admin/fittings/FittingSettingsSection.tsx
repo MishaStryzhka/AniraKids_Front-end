@@ -1,6 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
 import styled from 'styled-components';
-import {CalendarClock} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
 import {Input} from '../../design-system/components/Input';
 import {CheckboxField} from '../../design-system/components/CheckboxField';
@@ -23,7 +22,7 @@ export function FittingSettingsSection({onDirty}:{onDirty:(value:boolean)=>void}
  try{const v=await fittingAdmin<FittingSettings>(token??'','/admin/fitting-settings',draft,c.signal);if(!c.signal.aborted){setDraft(v);setBaseline(JSON.stringify(v));setSuccess(true);}}
  catch(e){if(!c.signal.aborted&&!handleRequestError(e))setError(fittingError(e));}finally{lock.current=false;if(!c.signal.aborted)setBusy(false);}}
  function change(value:FittingSettings){setDraft(value);setSuccess(false);}
- return <Card aria-labelledby="fitting-settings"><h2 id="fitting-settings"><CalendarClock size={22} aria-hidden="true"/>Zkoušky</h2>
+ return <Card aria-label="Zkoušky">
  <p>30 minut · 200 Kč QR převodem · jeden zákazník současně. Zaplacená zkouška se může jednou započíst do ceny pronájmu.</p>
  {!draft?error?<><p role="alert">{error}</p><Button onClick={()=>setRevision(x=>x+1)}>Načíst nastavení zkoušek</Button></>:<p role="status">Načítání nastavení zkoušek…</p>:<form onSubmit={e=>{e.preventDefault();void save();}}><fieldset disabled={busy} style={{border:0,padding:0,margin:0,minWidth:0,display:'grid',gap:20}}><legend style={{position:'absolute',clipPath:'inset(100%)'}}>Nastavení zkoušek</legend>
  <CheckboxField label="Povolit online zápis na zkoušky" checked={draft.enabled} onChange={e=>change({...draft,enabled:e.target.checked})}/>
