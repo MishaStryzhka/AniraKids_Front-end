@@ -113,10 +113,12 @@ export function ProductDetailPage() {
                             {formatMoney(variant.pricing[mode]!.rentalPrice)}
                           </dd>
                         </div>
-                        <div>
-                          <dt>Vratná kauce</dt>
-                          <dd>{formatMoney(variant.pricing[mode]!.deposit)}</dd>
-                        </div>
+                        {mode === 'external' && (
+                          <div>
+                            <dt>Vratná kauce</dt>
+                            <dd>{formatMoney(variant.pricing[mode]!.deposit)}</dd>
+                          </div>
+                        )}
                       </Facts>
                     ) : (
                       <Copy>Tento způsob pronájmu není dostupný.</Copy>

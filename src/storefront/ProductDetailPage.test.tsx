@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProductDetailPage } from './ProductDetailPage';
 import { BookingProvider, useBooking } from './booking/BookingProvider';
@@ -49,4 +49,13 @@ test('unresolved submission still requires recovery before a new booking', () =>
   expect(screen.getByText('Nejprve ověřte výsledek předchozího odeslání rezervace.')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Vytvořit novou rezervaci' })).not.toBeInTheDocument();
   expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+});
+
+test('studio price has no deposit row while external price retains its deposit', () => {
+  view();
+  const studio = screen.getAllByText('Studio')[0].parentElement!;
+  const external = screen.getAllByText('Mimo studio')[0].parentElement!;
+  expect(within(studio).queryByText('Vratná kauce')).not.toBeInTheDocument();
+  expect(within(studio).getByText('Cena pronájmu')).toBeInTheDocument();
+  expect(within(external).getByText('Vratná kauce')).toBeInTheDocument();
 });
