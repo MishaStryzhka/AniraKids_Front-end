@@ -18,7 +18,7 @@ const Content = styled.section`
 `;
 
 export default function AccountPage() {
-  const { isLoggedIn, isRefreshing, user } = useAuth();
+  const { isLoggedIn, isRefreshing, user, token } = useAuth();
   const { setIsOpenModalAuth } = useContext(ModalAuthContext);
   useTitle('Můj účet – ANIRAK');
   const dispatch = useDispatch();
@@ -32,7 +32,7 @@ export default function AccountPage() {
     finally { setLeaving(false); }
   };
   return <Content aria-labelledby="account-title">
-    <PartnerEntry />
+    <PartnerEntry token={token} isLoggedIn={isLoggedIn} />
     <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
       <h1 id="account-title">Můj účet</h1>
       {isLoggedIn && <Button type="button" variant="secondary" disabled={leaving} onClick={leave}>{leaving ? 'Odhlašování…' : 'Odhlásit se'}</Button>}

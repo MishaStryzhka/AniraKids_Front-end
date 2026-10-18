@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import { partnerApi } from './api';
-export function PartnerEntry() {
-  const { token, isLoggedIn } = useAuth();
+export function PartnerEntry({token,isLoggedIn}:{token?:string;isLoggedIn:boolean}) {
   const [allowed, setAllowed] = useState(false);
   useEffect(() => {
     let active = true;
