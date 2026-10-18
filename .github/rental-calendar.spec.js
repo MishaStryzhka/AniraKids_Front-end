@@ -17,6 +17,7 @@ async function setup(page) {
     const request=route.request(),url=new URL(request.url()),q=Object.fromEntries(url.searchParams);
     const json=body=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
     if(request.method()!=='GET'){state.posts.push(url.pathname);return route.fulfill({status:500});}
+    if(url.pathname==='/api/v2/site-settings')return json({sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false}});
     if(url.pathname==='/api/v2/booking-policy')return json(policy);
     if(url.pathname==='/api/v2/catalogue/products/sofia')return json({product});
     if(url.pathname.endsWith('/availability-calendar')) {
@@ -135,6 +136,7 @@ test('direct women product highlights its audience, not girls',async({page})=>{
 test('Czech headings and navigation use custom glyphs without fallback',async({page})=>{
   await setup(page);
   await page.goto(APP+'/saty');
+  await expect(page.getByRole('heading',{name:'Dívčí šaty',exact:true})).toBeVisible();
   await page.evaluate(async()=>{
     const h=document.querySelector('h1');
     h.textContent='Dívčí šaty — Příliš žluťoučký kůň úpěl ďábelské ódy — ČĎĚŇŘŠŤŮŽ';
