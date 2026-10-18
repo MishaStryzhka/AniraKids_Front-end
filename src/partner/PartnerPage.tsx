@@ -114,6 +114,28 @@ const Row = styled.div`
     border-radius: 8px;
   }
 `;
+const Toolbar = styled(Row)`
+  align-items: flex-end;
+  @media (max-width: 479px) {
+    > button {
+      flex: 1 1 auto;
+    }
+  }
+`;
+const MonthFields = styled.div`
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 100px;
+  gap: 12px;
+  @media (max-width: 479px) {
+    width: 100%;
+  }
+`;
+const monthNames = Array.from({ length: 12 }, (_, index) =>
+  new Intl.DateTimeFormat('cs-CZ', { month: 'long', timeZone: 'UTC' }).format(
+    new Date(Date.UTC(2026, index, 1))
+  )
+);
+const years = Array.from({ length: 100 }, (_, index) => String(2000 + index));
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -134,10 +156,10 @@ const Form = styled.form`
 `;
 const labels: any = {
   overview: 'Přehled',
+  fittings: 'Zkoušky',
   reservations: 'Rezervace',
   calendar: 'Kalendář',
   catalogue: 'Šaty ve studiu',
-  fittings: 'Zkoušky',
   balance: 'Platby a vyúčtování',
   members: 'Tým a odkazy',
 };
@@ -170,7 +192,12 @@ function PaymentQr({ payload }: { payload: string }) {
     <img src={image} alt="QR kód" style={{ width: 240, maxWidth: '100%' }} />
   ) : null;
 }
-export function LegacyPartnerRedirect(){const location=useLocation();return <Navigate replace to={'/partner/blaze'+location.search+location.hash}/>;}
+export function LegacyPartnerRedirect() {
+  const location = useLocation();
+  return (
+    <Navigate replace to={'/partner/blaze' + location.search + location.hash} />
+  );
+}
 export function PartnerPage() {
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const [params, setParams] = useSearchParams();
@@ -347,13 +374,35 @@ export function PartnerPage() {
           </Card>
         ) : null}
         {['overview', 'reservations', 'calendar', 'fittings'].includes(tab) ? (
-          <Row>
-            <Input
-              label="Měsíc"
-              type="month"
-              value={month}
-              onChange={e => setMonth(e.target.value)}
-            />
+          <Toolbar>
+            <MonthFields>
+              <SelectField
+                label="Měsíc"
+                value={month.slice(5, 7)}
+                onChange={e =>
+                  setMonth(`${month.slice(0, 4)}-${e.target.value}`)
+                }
+              >
+                {monthNames.map((name, index) => (
+                  <option key={name} value={String(index + 1).padStart(2, '0')}>
+                    {name}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                label="Rok"
+                value={month.slice(0, 4)}
+                onChange={e =>
+                  setMonth(`${e.target.value}-${month.slice(5, 7)}`)
+                }
+              >
+                {years.map(year => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </SelectField>
+            </MonthFields>
             <Button
               variant="secondary"
               disabled={busy}
@@ -376,7 +425,7 @@ export function PartnerPage() {
                 Nová zkouška
               </Button>
             )}
-          </Row>
+          </Toolbar>
         ) : null}
         {creating ? (
           <Card>
