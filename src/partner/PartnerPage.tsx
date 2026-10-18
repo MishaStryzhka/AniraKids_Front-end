@@ -119,6 +119,21 @@ const Row = styled.div`
     border-radius: 8px;
   }
 `;
+const FittingHeader = styled(Row)`
+  justify-content: space-between;
+  align-items: flex-start;
+`;
+const SourceBadge = styled.span`
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border: 1px solid ${t.color.border.subtle};
+  border-radius: 20px;
+  background: ${t.color.bg.subtle};
+  color: ${t.color.text.secondary};
+  font-size: 13px;
+  font-weight: 600;
+`;
 const Toolbar = styled(Row)`
   align-items: flex-end;
   @media (max-width: 479px) {
@@ -701,9 +716,12 @@ export function PartnerPage() {
             ) : null}
             {fittingItems.map((f: any) => (
               <Card key={f.id}>
-                <h2>
-                  {f.date} · {f.time}
-                </h2>
+                <FittingHeader>
+                  <h2>{f.date} · {f.time}</h2>
+                  <SourceBadge aria-label={`Zdroj klienta: ${f.source === 'partner' ? 'Blaze' : f.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>
+                    {f.source === 'partner' ? 'Blaze' : f.source === 'anirak' ? 'ANIRAK' : 'Zdroj neuveden'}
+                  </SourceBadge>
+                </FittingHeader>
                 <p>
                   {f.customer.name} · {f.customer.email} · {f.customer.phone}
                 </p>
