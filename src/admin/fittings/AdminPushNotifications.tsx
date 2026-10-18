@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Bell} from 'lucide-react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
+import {CheckboxField} from '../../design-system/components/CheckboxField';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import {fittingAdmin} from '../../fittings/fittingApi';
 
@@ -11,6 +12,11 @@ const Region = styled.div`
   border-radius:${t.radius[2]};background:${t.color.bg.surface};
 `;
 const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:14px;line-height:20px;flex:1 1 240px;`;
+const Topics = styled.div`inline-size:100%;display:grid;gap:${t.space[2]};padding-block-start:${t.space[3]};border-block-start:1px solid ${t.color.border.subtle};`;
+const Detail = styled.p`margin:0;color:${t.color.text.secondary};font-size:14px;line-height:20px;`;
+const TopicName = styled.strong`font-size:15px;`;
+const topicId = 'fitting_payment_reported' as const;
+type PushPreferences = {subscribed:boolean;topics:string[]};
 type PushConfig = {enabled:boolean;publicKey:string};
 type State = 'loading'|'off'|'on'|'unsupported'|'unconfigured'|'denied';
 
@@ -31,6 +37,7 @@ export function AdminPushNotifications({token}:{token:string}) {
   const [state,setState]=useState<State>('loading');
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
+  const [topics,setTopics]=useState<string[]>([topicId]);
   useEffect(()=>{
     if(!token)return;
     let mounted=true;
@@ -42,7 +49,12 @@ export function AdminPushNotifications({token}:{token:string}) {
       if(!result.enabled){setState('unconfigured');return;}
       const registration=await navigator.serviceWorker.getRegistration('/admin-push-sw.js');
       const subscription=await registration?.pushManager.getSubscription();
-      if(mounted)setState(subscription?'on':'off');
+      if(!mounted)return;
+      if(!subscription){setTopics([topicId]);setState('off');return;}
+      const prefs=await fittingAdmin<PushPreferences>(token,'/admin/push/preferences',{endpoint:subscription.endpoint});
+      if(!mounted)return;
+      setTopics(prefs.subscribed ? prefs.topics : [topicId]);
+      setState(prefs.subscribed ? 'on' : 'off');
     }).catch(()=>{if(mounted)setState('unconfigured');});
     return()=>{mounted=false;};
   },[token]);
@@ -62,7 +74,7 @@ export function AdminPushNotifications({token}:{token:string}) {
           userVisibleOnly:true,applicationServerKey:decodePublicKey(config.publicKey),
         });
       }
-      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint});
+      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,topics});
       setState('on');
     }catch{
       setError('Upozornění se nepodařilo zapnout. Zkuste to znovu.');
@@ -85,22 +97,45 @@ export function AdminPushNotifications({token}:{token:string}) {
     finally{setBusy(false);}
   }
 
-  return <Region aria-label="Push upozornění na platby za zkoušky">
+  async function setTopic(enabled:boolean){
+    if(busy)return;
+    const next=enabled?[topicId]:[];
+    if(state!=='on'){setTopics(next);return;}
+    setBusy(true);setError('');
+    try{
+      const registration=await navigator.serviceWorker.getRegistration('/admin-push-sw.js');
+      const subscription=await registration?.pushManager.getSubscription();
+      if(!subscription)throw new Error('PUSH_SUBSCRIPTION_MISSING');
+      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,topics:next});
+      setTopics(next);
+    }catch{setError('Změnu odběru se nepodařilo uložit. Původní nastavení zůstalo zachované.');}
+    finally{setBusy(false);}
+  }
+
+  return <Region aria-label="Odběry upozornění na tomto zařízení">
     <Bell size={20} aria-hidden="true" color={t.color.text.brand}/>
     <Copy role="status">
       {state==='loading'?'Načítání upozornění…':
-       state==='on'?'Upozornění na nahlášené platby jsou zapnutá pro tento prohlížeč.':
+       state==='on'?'Push je zapnutý pro tento prohlížeč. Vyberte, které události chcete odebírat.':
        state==='unsupported'?'Prohlížeč nepodporuje push. Na iPhonu přidejte ANIRAK na plochu a otevřete jej z ikony.':
        state==='denied'?'Upozornění jsou zakázaná v nastavení prohlížeče.':
        state==='unconfigured'?'Push upozornění čekají na aktivaci serveru.':
-       'Dostávejte upozornění, když klient označí platbu za zkoušku jako odeslanou.'}
+       'Zapněte push pro toto zařízení. Potom vyberte, které události chcete odebírat.'}
       {error?' '+error:''}
     </Copy>
-    {state==='off'?<Button variant="secondary" disabled={busy} onClick={()=>void enable()}>
+    {state==='off'?<Button variant="secondary" disabled={busy||topics.length===0} onClick={()=>void enable()}>
       {busy?'Zapínání…':'Zapnout upozornění'}
     </Button>:null}
     {state==='on'?<Button variant="secondary" disabled={busy} onClick={()=>void disable()}>
       {busy?'Vypínání…':'Vypnout upozornění'}
     </Button>:null}
+    <Topics role="group" aria-label="Typy upozornění">
+      <TopicName>Zkoušky</TopicName>
+      <CheckboxField label="Klient oznámil odeslání platby za zkoušku"
+        checked={topics.includes(topicId)} disabled={busy||!['on','off'].includes(state)}
+        onChange={event=>{void setTopic(event.target.checked);}}/>
+      <Detail>Upozornění otevře seznam zkoušek, kde můžete ověřit přijetí 200 Kč.
+      Každý prohlížeč má vlastní odběry. Další typy přidáme po zapojení jejich událostí.</Detail>
+    </Topics>
   </Region>;
 }
