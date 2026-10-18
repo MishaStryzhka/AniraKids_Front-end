@@ -210,7 +210,15 @@ for (const width of [375, 390, 430, 768, 1024, 1440]) test(`media responsive ${w
   expect(laterBox.y).toBeGreaterThan(itemBox.y + itemBox.height/2);
   expect(earlierBox.x).toBeLessThan(laterBox.x);
   expect(await item.getByText('Alternativní text').count()).toBe(0);
-  expect(await item.getByRole('button').count()).toBe(4); // photo ALT action + three visible icons
+  expect(await item.getByRole('button').count()).toBe(3); // only two ordering arrows and delete X
+  expect(await item.getByRole('button', {name: 'Upravit ALT'}).count()).toBe(0);
+  expect(frameBox.width).toBeGreaterThanOrEqual(width < 768 ? 140 : 180);
+  const controlStyle = await item.getByRole('button', {name: 'Odebrat fotografii'}).evaluate(element => ({
+    borderRadius: getComputedStyle(element).borderRadius,
+    boxShadow: getComputedStyle(element).boxShadow,
+  }));
+  expect(controlStyle.borderRadius).toBe('9999px');
+  expect(controlStyle.boxShadow).toBe('none');
   output(`geometry-${width}.json`, {width, viewport: await page.evaluate(() => ({w: innerWidth, h: innerHeight, scrollWidth: document.documentElement.scrollWidth})),
     form: formBox, divider: dividerBox, heading: headingBox, item: itemBox, remove: removeBox,
     earlier: earlierBox, later: laterBox, frame: frameBox, frameStyle, imageLoaded: true});

@@ -178,13 +178,12 @@ test.each([
   expect(complete).toHaveBeenCalledTimes(1);
 });
 
-test('PHOTO_NOT_FOUND refresh retry preserves lost ALT context and re-enables surviving photo editor', async () => {
+test('PHOTO_NOT_FOUND deletion refresh retry preserves dirty Core and surviving photo actions', async () => {
   await open();
   fireEvent.change(screen.getByLabelText('Barva'), {target: {value: 'Růžová'}});
-  fireEvent.click(screen.getAllByRole('button', {name: 'Upravit ALT'})[0]);
-  fireEvent.change(screen.getByLabelText('Alternativní text'), {target: {value: 'Unsaved ALT for a'}});
-  alt.mockRejectedValueOnce(error('PHOTO_NOT_FOUND', 404));
-  fireEvent.click(screen.getByRole('button', {name: 'Uložit ALT'}));
+  remove.mockRejectedValueOnce(error('PHOTO_NOT_FOUND', 404));
+  fireEvent.click(within(media()).getAllByRole('button', {name: 'Odebrat fotografii'})[0]);
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Odebrat fotografii'}));
   await waitFor(() => expect(live()).toHaveTextContent('Fotografie už u produktu není.'));
   get.mockRejectedValueOnce(error('ADMIN_NETWORK_ERROR', null, 'network'));
   fireEvent.click(screen.getByRole('button', {name: 'Načíst aktuální fotografie'}));
@@ -193,11 +192,9 @@ test('PHOTO_NOT_FOUND refresh retry preserves lost ALT context and re-enables su
   get.mockResolvedValueOnce({product: {...product, color: 'Foreign Core', photos: [photo('b')]}, variants: []});
   fireEvent.click(screen.getByRole('button', {name: 'Načíst aktuální fotografie'}));
   await waitFor(() => expect(media().querySelector('[data-photo-id="a"]')).not.toBeInTheDocument());
-  expect(within(media()).getByText('Unsaved ALT for a')).toBeInTheDocument();
-  expect(screen.getByRole('button', {name: 'Upravit ALT'})).toBeEnabled();
-  fireEvent.click(screen.getByRole('button', {name: 'Upravit ALT'}));
-  expect(screen.getByLabelText('Alternativní text')).toHaveValue('b');
-  expect(alt).toHaveBeenCalledTimes(1);
+  expect(within(media()).getByRole('button', {name: 'Odebrat fotografii'})).toBeEnabled();
+  expect(within(media()).queryByRole('button', {name: 'Upravit ALT'})).not.toBeInTheDocument();
+  expect(remove).toHaveBeenCalledTimes(1);
   retainedCore();
 });
 

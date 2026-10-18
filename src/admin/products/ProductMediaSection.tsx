@@ -24,7 +24,8 @@ const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:${t.typ
 const PhotoCount = styled(Copy)`white-space:nowrap;font-variant-numeric:tabular-nums;`;
 const List = styled.ol`
   list-style:none;margin:0;padding:0;min-inline-size:0;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:${t.space[4]};
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:${t.space[3]};
+  @media(max-width:767px){grid-template-columns:repeat(2,minmax(0,1fr));gap:${t.space[2]};}
 `;
 const Item = styled.li`
   min-inline-size:0;align-self:start;display:grid;gap:${t.space[2]};
@@ -35,37 +36,28 @@ const PhotoFrame = styled.div`
   position:relative;min-inline-size:0;aspect-ratio:3/4;overflow:hidden;
   border-radius:${t.radius[2]};background:${t.color.bg.subtle};
 `;
-const PhotoEditArea = styled.button`
-  position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;
-  padding:0;border:0;background:transparent;cursor:pointer;color:${t.color.text.secondary};
-  &:focus-visible{outline:3px solid ${t.color.focus.ring};outline-offset:-3px;}
-  &:disabled{cursor:not-allowed;}
-`;
 const Preview = styled.img`
   display:block;inline-size:100%;block-size:100%;object-fit:contain;object-position:center;
 `;
-const Broken = styled.span`
+const Broken = styled.div`
   display:grid;place-items:center;inline-size:100%;block-size:100%;
   padding:${t.space[2]};box-sizing:border-box;text-align:center;
   color:${t.color.text.secondary};font-size:12px;
 `;
 const PhotoControl = styled(IconButton)`
-  position:absolute;z-index:1;background:${t.color.bg.surface};
-  border-color:${t.color.border.subtle};box-shadow:${t.shadow.sm};
-  &:hover:not(:disabled){background:${t.color.action.secondary.bgHover};border-color:${t.color.border.strong};}
+  position:absolute;z-index:1;border-radius:${t.radius.full};
+  color:${t.color.text.brand};background:rgb(250 248 246 / 85%);
+  border-color:rgb(230 222 216 / 60%);box-shadow:none;backdrop-filter:blur(4px);
+  &>svg{inline-size:18px;block-size:18px;stroke-width:1.7;}
+  &:hover:not(:disabled){background:${t.color.bg.surface};border-color:${t.color.border.subtle};}
+  &&:disabled{color:${t.color.text.muted};background:rgb(250 248 246 / 65%);opacity:0.6;}
 `;
-const PhotoDelete = styled(PhotoControl)`inset-block-start:8px;inset-inline-end:8px;`;
+const PhotoDelete = styled(PhotoControl)`inset-block-start:8px;inset-inline-end:8px;&:hover:not(:disabled){color:${t.color.status.danger.fg};}`;
 const PhotoEarlier = styled(PhotoControl)`inset-block-end:8px;inset-inline-start:8px;`;
 const PhotoLater = styled(PhotoControl)`inset-block-end:8px;inset-inline-end:8px;`;
 const Actions = styled.div`
   display:flex;flex-wrap:wrap;gap:${t.space[2]};
   @media(max-width:767px){display:grid;grid-template-columns:1fr 1fr;&>[data-wide]{grid-column:1/-1;}}
-`;
-const AltEditor = styled.div`
-  display:grid;gap:${t.space[2]};padding:${t.space[2]};
-  textarea{inline-size:100%;min-block-size:96px;resize:vertical;padding:${t.space[3]};border:1px solid ${t.color.border.default};
-    border-radius:${t.radius[2]};font:inherit;box-sizing:border-box;}
-  ${Actions}{display:grid;grid-template-columns:minmax(0,1fr);>button{min-inline-size:0;}}
 `;
 const Upload = styled.div`display:grid;gap:${t.space[3]};min-inline-size:0;`;
 const Selected = styled.div`
@@ -318,12 +310,9 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
       : <List data-photo-list>{ordered.map((photo, index) => <Item key={photo.publicId} data-photo-id={photo.publicId}
           data-main={index === 0 ? 'true' : undefined} aria-label={index === 0 ? 'Hlavní fotografie' : undefined}>
         <PhotoFrame>
-          <PhotoEditArea type="button" data-media-action="edit" aria-label="Upravit ALT" title="Upravit alternativní text"
-            disabled={disabled || Boolean(c.editingAlt && c.editingAlt !== photo.publicId)} onClick={() => c.startAlt(photo.publicId)}>
-            {broken[photo.publicId] ? <Broken>Náhled fotografie nelze zobrazit</Broken>
-              : <Preview src={photo.url} alt={photo.alt || props.productName}
-                onError={() => setBroken(previous => ({...previous, [photo.publicId]: true}))}/>}
-          </PhotoEditArea>
+          {broken[photo.publicId] ? <Broken>Náhled fotografie nelze zobrazit</Broken>
+            : <Preview src={photo.url} alt={photo.alt || props.productName}
+              onError={() => setBroken(previous => ({...previous, [photo.publicId]: true}))}/>}
           <PhotoDelete data-media-action="delete" aria-label="Odebrat fotografii" title="Odebrat fotografii"
             icon={<X aria-hidden="true"/>} disabled={disabled}
             onClick={event => props.onRequestDelete?.({publicId: photo.publicId, trigger: event.currentTarget, distinctCount: new Set(c.photos.map(p => p.publicId)).size, isMain: index === 0})}/>
@@ -332,18 +321,10 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
           <PhotoLater data-media-action="later" aria-label="Posunout později" title="Posunout později"
             icon={<ArrowRight aria-hidden="true"/>} disabled={disabled || index === ordered.length - 1} onClick={() => move(photo.publicId, 1)}/>
         </PhotoFrame>
-        {c.editingAlt === photo.publicId ? <AltEditor>
-          <label htmlFor={`alt-${photo.publicId}`}><strong>Alternativní text</strong></label>
-          <textarea id={`alt-${photo.publicId}`} maxLength={180} disabled={disabled} value={c.drafts.altById[photo.publicId] ?? ''}
-            onChange={event => {const value = event.currentTarget.value; c.setDrafts(d => ({...d, altById: {...d.altById, [photo.publicId]: value}}));}}/>
-          <Actions><Button disabled={disabled} onClick={c.saveAlt}>Uložit ALT</Button>
-            <Button variant="secondary" disabled={busy} onClick={c.cancelAlt}>Zrušit</Button></Actions>
-        </AltEditor> : null}
       </Item>)}</List>}
     {c.orderDirty ? <OrderActions data-order-actions><Button disabled={disabled} onClick={c.saveOrder}>Uložit pořadí</Button>
       <Button variant="secondary" disabled={busy} onClick={c.cancelOrder}>Zrušit změny pořadí</Button></OrderActions> : null}
     {c.reconciliationNotice ? <Copy data-media-reconciliation-note>{c.reconciliationNotice}</Copy> : null}
-    {c.lostAltNotice !== null ? <Empty><strong>Rozpracovaný ALT text</strong><Copy>{c.lostAltNotice || 'Prázdný ALT text'}</Copy></Empty> : null}
     {c.guard === 'product-missing' ? <Empty><strong>Produkt už není dostupný</strong><Copy>Produkt už nebyl nalezen. Další změny fotografií nelze uložit.</Copy>
       <Copy>Vaše neuložené změny na této stránce zůstávají zachované, dokud ji neopustíte.</Copy></Empty> : null}
     {c.refreshReason ? <Button variant="secondary" disabled={disabled} onClick={c.refresh}>Načíst aktuální fotografie</Button> : null}
