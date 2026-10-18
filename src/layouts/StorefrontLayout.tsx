@@ -26,6 +26,7 @@ import { useBookingOptional } from '../storefront/booking/BookingProvider';
 import { getCatalogue } from '../storefront/api/publicApi';
 import { usePublicRead } from '../storefront/usePublicRead';
 import { useAdminEntryAccess } from '../admin/auth/useAdminEntryAccess';
+import {usePartnerEntryAccess} from '../partner/usePartnerEntryAccess';
 
 const placeholderImage: string = require('../images/photo-plug.jpg');
 
@@ -69,6 +70,8 @@ function StorefrontShell() {
   const navigate = useNavigate();
   const { isLoggedIn, token } = useAuth();
   const canAccessAdmin = useAdminEntryAccess();
+  const canAccessPartner=usePartnerEntryAccess();
+  const adminHref=canAccessAdmin?'/admin':'/partner/blaze';
   const authModal = useContext(ModalAuthContext);
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
 
@@ -227,7 +230,8 @@ function StorefrontShell() {
         activeOverlay={activeOverlay}
         currentPrimaryNavigation={currentPrimaryNavigation}
         authState={authState}
-        canAccessAdmin={canAccessAdmin}
+        canAccessAdmin={canAccessAdmin||canAccessPartner}
+        adminHref={adminHref}
         hasActiveReservationDraft={hasActiveReservationDraft}
         onRequestOverlay={requestOverlay}
         onCloseOverlay={() => closeOverlay()}
@@ -237,7 +241,8 @@ function StorefrontShell() {
       {activeOverlay === 'menu' && !isDesktop ? (
         <MobileMenu
           authState={authState}
-          canAccessAdmin={canAccessAdmin}
+          canAccessAdmin={canAccessAdmin||canAccessPartner}
+          adminHref={adminHref}
           currentPrimaryNavigation={currentPrimaryNavigation}
           onLogin={loginFromMenu}
           onClose={() => closeOverlay()}

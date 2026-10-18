@@ -92,12 +92,13 @@ const Separator = styled(Divider)`margin-block: ${t.space[6]};`;
 export interface MobileMenuProps {
   authState: AuthNavigationState;
   canAccessAdmin?: boolean;
+  adminHref?: string;
   currentPrimaryNavigation: PrimaryNavigationKey | null;
   onLogin(): void;
   onClose(): void;
 }
 
-export function MobileMenu({ authState, canAccessAdmin = false, currentPrimaryNavigation, onLogin, onClose }: MobileMenuProps) {
+export function MobileMenu({ authState, canAccessAdmin = false, adminHref=adminRoutes.root, currentPrimaryNavigation, onLogin, onClose }: MobileMenuProps) {
   const navigationItems=useSiteNavigation();
   const rootRef = useRef<HTMLDivElement>(null);
   const getContainers = useCallback(() => {
@@ -121,7 +122,7 @@ export function MobileMenu({ authState, canAccessAdmin = false, currentPrimaryNa
             {authState === 'authenticated' ? (
               <>
                 <li><MenuLink variant="plain" to={routes.account}>Můj účet</MenuLink></li>
-                {canAccessAdmin ? <li><MenuLink variant="plain" to={adminRoutes.root}>Administrace</MenuLink></li> : null}
+                {canAccessAdmin ? <li><MenuLink variant="plain" to={adminHref}>Administrace</MenuLink></li> : null}
               </>
             ) : authState === 'guest' ? (
               <li><Action type="button" onClick={onLogin}>Přihlásit se</Action></li>

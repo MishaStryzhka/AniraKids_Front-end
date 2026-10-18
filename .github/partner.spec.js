@@ -151,6 +151,11 @@ for (const width of [390, 768, 1440])
     await expect(
       page.getByText('AK-2026-BLAZE1', { exact: true })
     ).toBeVisible();
+    await expect(page).toHaveURL(APP+'/partner/blaze');
+    const headerEntry=page.locator('[data-storefront-header]').getByRole('link',{name:'Administrace',exact:true});
+    await expect(headerEntry).toBeVisible();
+    await expect(headerEntry).toHaveAttribute('href','/partner/blaze');
+    await headerEntry.click();
     await page
       .getByRole('link', { name: 'Platby a vyúčtování', exact: true })
       .click();

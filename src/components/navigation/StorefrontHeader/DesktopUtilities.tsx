@@ -15,7 +15,7 @@ const Utilities = styled.div`
   white-space: nowrap;
 `;
 
-const IconRouteLink = styled(Link)`
+export const IconRouteLink = styled(Link)`
   inline-size: ${t.control.height.compact};
   block-size: ${t.control.height.compact};
   display: inline-grid;
@@ -43,6 +43,7 @@ const IconRouteLink = styled(Link)`
 export interface DesktopUtilitiesProps {
   authState: AuthNavigationState;
   canAccessAdmin?: boolean;
+  adminHref?: string;
   hasActiveReservationDraft: boolean;
   onSearchOpen(): void;
   onOpenAuth(): void;
@@ -51,6 +52,7 @@ export interface DesktopUtilitiesProps {
 export function DesktopUtilities({
   authState,
   canAccessAdmin = false,
+  adminHref = adminRoutes.root,
   hasActiveReservationDraft,
   onSearchOpen,
   onOpenAuth,
@@ -70,7 +72,7 @@ export function DesktopUtilities({
       <ReservationUtility hasActiveDraft={hasActiveReservationDraft} presentation="desktop" />
       <AccountUtility authState={authState} onOpenAuth={onOpenAuth} />
       {authState === 'authenticated' && canAccessAdmin ? (
-        <IconRouteLink to={adminRoutes.root} aria-label="Administrace" title="Administrace">
+        <IconRouteLink to={adminHref} aria-label="Administrace" title="Administrace">
           <LayoutDashboard aria-hidden="true" />
         </IconRouteLink>
       ) : null}

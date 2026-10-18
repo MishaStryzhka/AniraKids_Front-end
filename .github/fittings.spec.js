@@ -19,6 +19,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/account/fittings/'+number+'/cancel'){state.receipt={...state.receipt,status:'cancelled',paymentInstructions:null};return json(state.receipt);}
   if(p.endsWith('/favorites/storefront'))return json({ids:[]});
   if(p==='/api/v2/site-settings')return json({sections:{suits:true,familyLooks:false}});
+  if(p==='/api/v2/partner/access')return json({error:{code:'FORBIDDEN'}},403);
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
   if(p==='/api/v2/admin/settings')return json({sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/admin/fitting-settings'){if(req.method()==='PATCH')state.settings=req.postDataJSON();return json(state.settings);}

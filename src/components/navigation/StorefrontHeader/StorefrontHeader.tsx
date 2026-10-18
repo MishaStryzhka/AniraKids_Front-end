@@ -1,5 +1,5 @@
 import {useSiteSettings} from '../../../siteSettings/SiteSettingsProvider';
-import { Menu, Search, X } from 'lucide-react';
+import { LayoutDashboard, Menu, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { Container } from '../../../design-system/components/Container';
@@ -10,7 +10,7 @@ import type { ActiveOverlay, AuthNavigationState, PrimaryNavigationKey } from '.
 import { setInert } from '../hooks/useInert';
 import { BrandLogo } from './BrandLogo';
 import { DesktopPrimaryNavigation } from './DesktopPrimaryNavigation';
-import { DesktopUtilities } from './DesktopUtilities';
+import { DesktopUtilities, IconRouteLink } from './DesktopUtilities';
 import { ReservationUtility } from './ReservationUtility';
 
 const Shell = styled.header<{ $scrolled: boolean }>`
@@ -48,7 +48,7 @@ const MobileRow = styled(Container)`
   @media (min-width: ${t.breakpoint.lg}) { display: none; }
 `;
 
-const Left = styled.div`justify-self: start;`;
+const Left = styled.div`justify-self: start; display: flex; align-items: center;`;
 const Centre = styled.div`justify-self: center; min-inline-size: 0;`;
 const Right = styled.div`justify-self: end; display: flex; align-items: center; gap: ${t.space[1]};`;
 
@@ -79,6 +79,7 @@ export interface StorefrontHeaderProps {
   currentPrimaryNavigation: PrimaryNavigationKey | null;
   authState: AuthNavigationState;
   canAccessAdmin?: boolean;
+  adminHref?: string;
   hasActiveReservationDraft: boolean;
   onRequestOverlay(overlay: Exclude<ActiveOverlay, 'none'>): void;
   onCloseOverlay(): void;
@@ -90,6 +91,7 @@ export function StorefrontHeader({
   currentPrimaryNavigation,
   authState,
   canAccessAdmin = false,
+  adminHref = '/admin',
   hasActiveReservationDraft,
   onRequestOverlay,
   onCloseOverlay,
@@ -155,6 +157,7 @@ export function StorefrontHeader({
             data-menu-trigger
             onClick={() => menuOpen ? onCloseOverlay() : onRequestOverlay('menu')}
           />
+          {authState==='authenticated'&&canAccessAdmin&&adminHref==='/partner/blaze'?<IconRouteLink to={adminHref} aria-label="Administrace" title="Administrace"><LayoutDashboard aria-hidden="true"/></IconRouteLink>:null}
         </Left>
 
         <Centre ref={mobileLogoRef}><BrandLogo /></Centre>
@@ -180,6 +183,7 @@ export function StorefrontHeader({
           <DesktopUtilities
             authState={authState}
             canAccessAdmin={canAccessAdmin}
+            adminHref={adminHref}
             hasActiveReservationDraft={hasActiveReservationDraft}
             onSearchOpen={() => onRequestOverlay('search')}
             onOpenAuth={onOpenAuth}

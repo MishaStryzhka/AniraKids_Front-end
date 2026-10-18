@@ -8,6 +8,7 @@ async function fixture(page,options={}){
   const json=(body,status=200)=>route.fulfill({status,json:body});
   if(p==='/api/users/current')return json({user:{_id:'admin-user'}});
   if(p.endsWith('/favorites/storefront'))return json({ids:[]});
+  if(p==='/api/v2/partner/access')return json({error:{code:'FORBIDDEN'}},403);
   if(p==='/maps/api/js'||p==='/gsi/client')return route.fulfill({contentType:'application/javascript',body:''});
   if(p==='/api/v2/admin/fitting-settings')return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
