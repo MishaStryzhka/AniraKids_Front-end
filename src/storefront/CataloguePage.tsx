@@ -1,3 +1,5 @@
+import {useSiteSettings,SiteSectionGate} from '../siteSettings/SiteSettingsProvider';
+import type {SectionKey,FilterKey} from '../siteSettings/siteSettings';
 import { ArrowUpDown, SlidersHorizontal } from 'lucide-react';
 import { IconButton } from '../design-system/components/IconButton';
 import { ColorPalette } from '../design-system/components/ColorPalette/ColorPalette';
@@ -179,7 +181,11 @@ const filterKeys = ['category', 'gender', 'color', 'size', 'rentalMode', 'minPri
 const categories = [['dress', 'Šaty'], ['suit', 'Obleky'], ['set', 'Soupravy'], ['accessory', 'Doplňky'], ['other', 'Ostatní']];
 const genders = [['girls', 'Dívky'], ['boys', 'Chlapci'], ['women', 'Ženy'], ['men', 'Muži'], ['unisex', 'Unisex'], ['children', 'Děti']];
 const sorts = [['name', 'Podle názvu'], ['newest', 'Nejnovější'], ['priceAsc', 'Cena od nejnižší'], ['priceDesc', 'Cena od nejvyšší']];
-export function CataloguePage() {
+function sectionFor(path:string,search:string):SectionKey|null{
+ return path===routes.dresses?'girlsDresses':path===routes.suits?'suits':path===routes.familyLooks?'familyLooks':path.split('/')[1]==='forWomen'&&new URLSearchParams(search).get('category')==='dress'?'womenDresses':null;
+}
+export function CataloguePage(){const {pathname,search}=useLocation();const section=sectionFor(pathname,search);return section?<SiteSectionGate section={section}><CatalogueContent/></SiteSectionGate>:<CatalogueContent/>;}
+function CatalogueContent() {
     const { pathname, search } = useLocation();
     const [params, setParams] = useSearchParams();
     const isFamily = pathname === routes.familyLooks;
@@ -188,9 +194,14 @@ export function CataloguePage() {
     const legacy = root === '/forWomen' ? { title: 'Dámské oblečení', gender: 'women' } :
         root === '/forMen' ? { title: 'Pánské oblečení', gender: 'men' } :
             root === '/forChildren' ? { title: 'Dětské oblečení', gender: 'children' } : null;
-    const fixedCategory = pathname === routes.dresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
-    const fixedGender = pathname === routes.dresses ? 'girls' : legacy?.gender;
     const isWomenDresses = root === '/forWomen' && params.get('category') === 'dress';
+    const {filters}=useSiteSettings();
+    const section=sectionFor(pathname,search);
+    const allowed=section?filters[section]:['category','gender','price','rentalMode','color','size'];
+    const visible=(key:string)=>allowed.includes((key==='minPrice'||key==='maxPrice'?'price':key) as FilterKey);
+    const allowedKey=allowed.join(',');
+    const fixedCategory = pathname === routes.dresses || isWomenDresses ? 'dress' : pathname === routes.suits ? 'suit' : root === '/decorAndToys' ? 'accessory' : '';
+    const fixedGender = pathname === routes.dresses ? 'girls' : legacy?.gender;
     const title = isFamily ? 'Family looky' : (isWomenDresses ? 'Dámské šaty' : legacy?.title) || (fixedCategory === 'dress' ? 'Dívčí šaty' : fixedCategory === 'suit' ? 'Obleky' : fixedCategory === 'accessory' ? 'Doplňky' : root === '/popular' || pathname === routes.newArrivals ? 'Novinky' : isSearch ? 'Hledání' : 'Pronájem');
     const q = (params.get('q') || '').trim();
     useEffect(() => {
@@ -202,9 +213,10 @@ export function CataloguePage() {
         setParams(next, { replace: true });
       }
     }, [params, setParams, pathname]);
+    useEffect(()=>{const next=new URLSearchParams(params);let changed=false;for(const key of filterKeys){if(!visible(key)&&!(key==='category'&&isWomenDresses)&&next.has(key)){next.delete(key);changed=true;}}if(changed)setParams(next,{replace:true});},[params,setParams,allowedKey,isWomenDresses]); // eslint-disable-line react-hooks/exhaustive-deps
     const sort = params.get('sort') || (title === 'Novinky' ? 'newest' : 'name');
     const serialized = params.toString();
-    const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, params.get(key) || (key === 'rentalMode' ? 'studio' : '')]));
+    const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, (visible(key)?params.get(key):'') || (key === 'rentalMode' ? 'studio' : '')]));
     const [draft, setDraft] = useState(readFilters);
     const [query, setQuery] = useState(q);
     const [open, setOpen] = useState(false);
@@ -214,7 +226,7 @@ export function CataloguePage() {
     const request: CatalogueQuery = { sort: sort as CatalogueQuery['sort'], page: 1, limit: 12 };
     for (const key of filterKeys) {
         const value = params.get(key);
-        if (value)
+        if (value && visible(key))
             Object.assign(request, { [key]: key === 'minPrice' || key === 'maxPrice' ? Number(value) : value });
     }
     if (isFamily) request.familyLook = 'true';
@@ -250,12 +262,12 @@ export function CataloguePage() {
     const heading = useRef<HTMLHeadingElement>(null);
     const activeFilterCount = filterKeys.filter(key => {
       const value = params.get(key);
-      if (!value || (key === 'category' && fixedCategory) || (key === 'gender' && fixedGender)) return false;
+      if (!visible(key) || !value || (key === 'category' && fixedCategory) || (key === 'gender' && fixedGender)) return false;
       return key !== 'rentalMode' || value !== 'studio';
     }).length;
 
     const update = (key: string, value: string) => setDraft(previous => ({ ...previous, [key]: value }));
-    const reset = () => { const next = new URLSearchParams(); if (q)
+    const reset = () => { const next = new URLSearchParams(); if(isWomenDresses)next.set('category','dress'); if (q)
         next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? 'studio' : '']))); setFormError(''); };
     const options = (values: string[], selected: string) => Array.from(new Set([...values, ...(selected ? [selected] : [])])).map(value => <option key={value} value={value}>{value}</option>);
     return <CataloguePageLayout>
@@ -263,10 +275,10 @@ export function CataloguePage() {
     <CatalogueHeader>
       <CatalogueTitle ref={heading} tabIndex={-1}>{title}</CatalogueTitle>
       <HeaderActions>
-        <FilterToggle aria-label="Filtrovat" title={activeFilterCount ? `Filtrovat (${activeFilterCount})` : 'Filtrovat'}
+        {allowed.length>0&&<FilterToggle aria-label="Filtrovat" title={activeFilterCount ? `Filtrovat (${activeFilterCount})` : 'Filtrovat'}
           aria-expanded={open} aria-controls="catalogue-filters" onClick={() => setOpen(value => !value)}
           aria-describedby={activeFilterCount ? 'catalogue-filter-count' : undefined}
-          icon={<><SlidersHorizontal size={22} aria-hidden="true"/>{activeFilterCount > 0 ? <FilterCount id="catalogue-filter-count">{activeFilterCount}<span style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}> aktivních filtrů</span></FilterCount> : null}</>}/>
+          icon={<><SlidersHorizontal size={22} aria-hidden="true"/>{activeFilterCount > 0 ? <FilterCount id="catalogue-filter-count">{activeFilterCount}<span style={{position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0,0,0,0)'}}> aktivních filtrů</span></FilterCount> : null}</>}/>}
         <SortControl title={`Seřadit podle: ${sorts.find(([value]) => value === sort)?.[1] || sort}`}>
           <ArrowUpDown size={22} strokeWidth={1.7} aria-hidden="true"/>
           <select aria-label="SEŘADIT PODLE" value={sort} onChange={event => { const next = new URLSearchParams(params); next.set('sort', event.target.value); next.delete('page');
@@ -280,9 +292,9 @@ export function CataloguePage() {
     {pathname.split('/').filter(Boolean).length > 1 && <Copy>Původní odkaz na produkt již není aktuální. Vyberte prosím z aktuální nabídky.</Copy>}
     {isSearch && <form onSubmit={event => { event.preventDefault(); setParams(query.trim() ? { q: query.trim() } : {}); }}><Stack><Input label="Hledat produkt" value={query} onChange={event => setQuery(event.target.value)}/><Actions><Button type="submit">Hledat</Button></Actions></Stack></form>}
     <FavoritesFeedback />
-    <Layout $filtersOpen={open}>
+    <Layout $filtersOpen={open&&allowed.length>0}>
       <Toolbar><Copy aria-live="polite">{result.loading ? 'Načítání…' : result.data ? `Počet modelů: ${result.data.total}` : ''}</Copy></Toolbar>
-      <Filters id="catalogue-filters" $open={open} aria-label="Filtry produktů" onSubmit={event => {
+      {allowed.length>0&&<Filters id="catalogue-filters" $open={open} aria-label="Filtry produktů" onSubmit={event => {
             event.preventDefault();
             const error = priceError(draft);
             setFormError(error);
@@ -291,25 +303,26 @@ export function CataloguePage() {
             const next = new URLSearchParams(params);
             next.delete('page');
         next.delete('familyLook');
-            filterKeys.forEach(key => { const value = key === 'gender' && fixedGender ? '' : draft[key]; value ? next.set(key, value) : next.delete(key); });
+            filterKeys.forEach(key => { const value = (key === 'gender' && fixedGender)||!visible(key) ? '' : draft[key]; value ? next.set(key, value) : next.delete(key); });
+            if(isWomenDresses)next.set('category','dress');
             setParams(next);
         }}>
         <h2>FILTROVAT</h2>
-        {(!fixedCategory || !fixedGender) && <details><summary>TYP</summary>
-          {!fixedCategory && <label>Kategorie<Select value={draft.category} onChange={event => update('category', event.target.value)}><option value="">Všechny</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
-          {!fixedGender && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
+        {((!fixedCategory&&visible('category')) || (!fixedGender&&visible('gender'))) && <details><summary>TYP</summary>
+          {!fixedCategory && visible('category') && <label>Kategorie<Select value={draft.category} onChange={event => update('category', event.target.value)}><option value="">Všechny</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
+          {!fixedGender && visible('gender') && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
         </details>}
-        <details><summary>CENA</summary>
-          <label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Ve studiu</option><option value="external">Mimo studio</option></Select></label>
-          <Input label="Cena od (Kč)" type="number" min="0" max="9999999" step="1" value={draft.minPrice} onChange={event => update('minPrice', event.target.value)}/>
+        {(visible('price')||visible('rentalMode'))&&<details><summary>CENA</summary>
+          {visible('rentalMode')&&<label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Ve studiu</option><option value="external">Mimo studio</option></Select></label>}
+          {visible('price')&&<><Input label="Cena od (Kč)" type="number" min="0" max="9999999" step="1" value={draft.minPrice} onChange={event => update('minPrice', event.target.value)}/>
           <Input label="Cena do (Kč)" type="number" min="0" max="9999999" step="1" value={draft.maxPrice} onChange={event => update('maxPrice', event.target.value)}/>
-          <Copy>Cena pronájmu bez vratné kauce.</Copy>
-        </details>
-        <details><summary>BARVA</summary><ColorPalette label="Paleta barev pro filtrování" colors={result.data?.facets?.colors || []} selected={draft.color ? [draft.color] : []} onToggle={color=>update('color', draft.color===color?'':color)}/><label>Barva<Select value={draft.color} onChange={event => update('color', event.target.value)}><option value="">Všechny barvy</option>{options(result.data?.facets?.colors || [], draft.color)}</Select></label></details>
-        <details><summary>VELIKOST</summary><label>Velikost<Select value={draft.size} onChange={event => update('size', event.target.value)}><option value="">Všechny velikosti</option>{options(result.data?.facets?.sizes || [], draft.size)}</Select></label></details>
+          <Copy>Cena pronájmu bez vratné kauce.</Copy></>}
+        </details>}
+        {visible('color')&&<details><summary>BARVA</summary><ColorPalette label="Paleta barev pro filtrování" colors={result.data?.facets?.colors || []} selected={draft.color ? [draft.color] : []} onToggle={color=>update('color', draft.color===color?'':color)}/><label>Barva<Select value={draft.color} onChange={event => update('color', event.target.value)}><option value="">Všechny barvy</option>{options(result.data?.facets?.colors || [], draft.color)}</Select></label></details>}
+        {visible('size')&&<details><summary>VELIKOST</summary><label>Velikost<Select value={draft.size} onChange={event => update('size', event.target.value)}><option value="">Všechny velikosti</option>{options(result.data?.facets?.sizes || [], draft.size)}</Select></label></details>}
         {formError && <Alert role="alert">{formError}</Alert>}
         <Button type="submit">Použít filtry</Button><Button type="button" variant="secondary" onClick={reset}>Zrušit filtry</Button>
-      </Filters>
+      </Filters>}
       <Products>
 
         {invalid ? <Alert role="alert">{invalid}<Button variant="secondary" onClick={reset}>Zrušit filtry</Button></Alert> : result.loading ? <Copy role="status">Načítání produktů…</Copy> : result.error && !result.data ? <Alert role="alert"><Heading>Produkty se nepodařilo načíst</Heading><Copy>{result.error instanceof PublicApiError && result.error.code === 'NOT_CONFIGURED' ? 'Katalog nyní není dostupný.' : 'Zkuste to prosím znovu.'}</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Alert> : result.data?.items.length ? <Grid>{result.data.items.map(product => <li key={product.id}>

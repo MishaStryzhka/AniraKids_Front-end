@@ -38,7 +38,7 @@ async function setup(page,{admin=false,lost=false}={}){
 }
 for(const width of [390,768,1440])test('fitting settings, booking QR and administration '+width,async({page})=>{
  const state=await setup(page,{admin:true});await page.setViewportSize({width,height:1000});
- await page.goto(APP+'/admin/nastaveni');const card=page.getByRole('region',{name:'Zkoušky',exact:true});
+ await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Zkoušky'}).click();const card=page.getByRole('region',{name:'Zkoušky',exact:true});
  await card.getByLabel('Adresa zkoušky').fill('Adresa zkoušky 22, Praha');
  await card.getByRole('button',{name:'Uložit zkoušky',exact:true}).click();await expect(card.getByRole('status')).toHaveText('Nastavení zkoušek bylo uloženo.');
  await page.screenshot({path:`test-evidence/fittings/settings-${width}.png`,fullPage:true});

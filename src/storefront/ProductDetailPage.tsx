@@ -40,7 +40,7 @@ export function ProductDetailPage() {
   const {sections}=useSiteSettings();
   const previousCatalogue=getCatalogueReturnTo(location.state, product?.category);
   const previousPath=previousCatalogue.split('?')[0];
-  const catalogueReturnTo=(previousPath===routes.suits&&!sections.suits)||(previousPath===routes.familyLooks&&!sections.familyLooks)
+  const catalogueReturnTo=(previousPath===routes.dresses&&!sections.girlsDresses)||(previousPath==='/forWomen'&&new URLSearchParams(previousCatalogue.split('?')[1]).get('category')==='dress'&&!sections.womenDresses)||(previousPath===routes.suits&&!sections.suits)||(previousPath===routes.familyLooks&&!sections.familyLooks)
     ? routes.newArrivals : previousCatalogue;
   useEffect(() => {
     setProductPrimaryCategory(

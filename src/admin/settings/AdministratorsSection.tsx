@@ -39,7 +39,7 @@ export function AdministratorsSection({onDirty}:{onDirty:(dirty:boolean)=>void})
   catch(e){if(!c.signal.aborted&&!handleRequestError(e))setError(errorText(e));}
   finally{if(!c.signal.aborted){lock.current=false;setBusy(false);}}
  }
- return <Card aria-label="Administrátoři"><Stack><h2>Administrátoři</h2><p>Vyhledejte registrovaný účet a vyberte sekce, které smí prohlížet a spravovat. Oprávnění zahrnuje čtení i změny v dané sekci.</p>
+ return <Card aria-label="Administrátoři"><Stack><p>Vyhledejte registrovaný účet a vyberte sekce, které smí prohlížet a spravovat. Oprávnění zahrnuje čtení i změny v dané sekci.</p>
  <form onSubmit={e=>{e.preventDefault();void lookup();}}><Stack><Input label="E-mail uživatele" type="email" required maxLength={254} value={email} disabled={busy||dirty} onChange={e=>setEmail(e.target.value)}/><Actions><Button type="submit" disabled={busy||dirty}>Vyhledat účet</Button></Actions></Stack></form>
  {error?<p role="alert">{error}</p>:null}{notice?<p role="status">{notice}</p>:null}
  {selected?<Row><h3>{selected.name||selected.email}</h3><span>{selected.email}</span>{selected.owner?<p>Hlavní administrátor má plný přístup včetně správy ostatních administrátorů. Jeho přístup je chráněný.</p>:<>
