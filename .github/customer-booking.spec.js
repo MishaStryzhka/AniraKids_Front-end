@@ -709,8 +709,9 @@ test('signed-in catalogue and availability stay public without bearer', async ({
   const state = await setup(page, false);
   await begin(page);
   await quote(page);
-  const adminChecks = state.reads.filter(read => read.url === '/api/v2/admin/access');
-  const publicReads = state.reads.filter(read => read.url !== '/api/v2/admin/access');
+  const accessPaths=['/api/v2/admin/access','/api/v2/partner/access'];
+  const adminChecks = state.reads.filter(read => accessPaths.includes(read.url));
+  const publicReads = state.reads.filter(read => !accessPaths.includes(read.url));
   expect(publicReads.some(read => read.url.startsWith('/api/v2/catalogue/products'))).toBe(true);
   expect(publicReads.some(read => read.url.endsWith('/availability'))).toBe(true);
   expect(publicReads.every(read => !read.authorization)).toBe(true);
