@@ -287,16 +287,11 @@ test('dirty Core baseline survives applied order success conflict and media refr
   checkCoreUntouched();
 });
 
-test('dirty Core survives applied ALT success and failed delete then refresh without losing baseline or validation', async () => {
+test('dirty Core survives failed photo deletion and refresh without losing baseline or validation', async () => {
   const a = photo('a');
   await openDirty({...product, photos: [a]});
-  altMock.mockResolvedValueOnce({product: {...product, color: 'Do not hydrate', photos: [{...a, alt: 'Nový ALT'}]}});
-  fireEvent.click(screen.getByRole('button', {name: 'Upravit ALT'}));
-  fireEvent.change(screen.getByLabelText('Alternativní text'), {target: {value: 'Nový ALT'}});
-  fireEvent.click(screen.getByRole('button', {name: 'Uložit ALT'}));
-  await waitFor(() => expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
-  expect(screen.queryByRole('button', {name: 'Uložit ALT'})).not.toBeInTheDocument();
-  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Nový ALT');
+  expect(within(media()).queryByRole('button', {name: 'Upravit ALT'})).not.toBeInTheDocument();
+  expect(within(media()).queryByText('Alternativní text')).not.toBeInTheDocument();
   checkCoreUntouched();
   fireEvent.change(screen.getByLabelText('SEO titulek'), {target: {value: 'x'.repeat(71)}});
   fireEvent.click(save());
@@ -561,9 +556,9 @@ test('dirty Core survives successful variant update and Core Save preserves acti
   expect(screen.getByLabelText('Velikost')).toHaveValue('105');
 });
 
-test('photo ALT mutation preserves active variant editor draft canonical variants and page risk', async () => {
-  const a=photo('a');
-  const p={...product,photos:[a]};
+test('photo reorder save preserves active variant editor draft canonical variants and page risk', async () => {
+  const a=photo('a'), b=photo('b');
+  const p={...product,photos:[a,b]};
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98')]});
   const router=renderRouter('/admin/produkty/p1');
   await screen.findByText('/produkt/sofia');
@@ -574,12 +569,11 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
   expect(document.querySelector('[data-variant-size]')).toHaveTextContent('98');
 
-  altMock.mockResolvedValueOnce({product:{...p,color:'Server-only',photos:[{...a,alt:'Nový ALT'}]}});
-  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
-  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Nový ALT'}});
-  fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
-  await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
-  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Nový ALT');
+  reorderMock.mockResolvedValueOnce({product:{...p,color:'Server-only',photos:[b,a]}});
+  fireEvent.click(within(media()).getAllByRole('button',{name:'Posunout později'})[0]);
+  fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
+  await waitFor(()=>expect(status()).toHaveTextContent('Pořadí fotografií bylo uloženo.'));
+  expect(media().querySelector('[data-photo-id="b"]')).toHaveAttribute('data-main','true');
 
   expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
@@ -595,7 +589,6 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   expect(router.state.location.pathname).toBe('/admin/produkty/p1');
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
 });
-
 
 test('initial Product detail seeds Inventory once before Variant projection', async () => {
   getMock.mockResolvedValueOnce({product:{...product,photos:[photo('a')]},variants:[variant('v1','98','active',[inventoryItem()])]});
@@ -637,18 +630,20 @@ test('dirty Core survives Inventory create success and failure without Core reba
   expect(patchMock).not.toHaveBeenCalled();
 });
 
-test('Photo ALT draft survives Inventory success and keeps combined page risk', async () => {
-  const p={...product,photos:[photo('a')]};
+test('unsaved photo order survives Inventory success and keeps combined page risk', async () => {
+  const a=photo('a'),b=photo('b');
+  const p={...product,photos:[a,b]};
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[])]});
   createInventoryMock.mockResolvedValueOnce(inventoryItem('i2','v1','AK-002'));
   const router=renderRouter('/admin/produkty/p1');
   await screen.findByText('/produkt/sofia');
-  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
-  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Rozpracovaný ALT'}});
+  fireEvent.click(within(media()).getAllByRole('button',{name:'Posunout později'})[0]);
+  expect(media().querySelector('[data-photo-id="b"]')).toHaveAttribute('data-main','true');
   fireEvent.change(await openInventoryAdd(),{target:{value:'AK-002'}});
   fireEvent.click(document.querySelector('[data-inventory-submit]') as HTMLButtonElement);
   await screen.findByText('Fyzický kus byl přidán.');
-  expect(screen.getByLabelText('Alternativní text')).toHaveValue('Rozpracovaný ALT');
+  expect(media().querySelector('[data-photo-id="b"]')).toHaveAttribute('data-main','true');
+  expect(screen.getByRole('button',{name:'Uložit pořadí'})).toBeEnabled();
   expect(screen.getByText('AK-002')).toBeInTheDocument();
   await act(async()=>router.navigate('/admin/produkty'));
   expect(screen.getByRole('dialog')).toHaveTextContent('Neuložené nebo nedokončené změny');
@@ -790,11 +785,11 @@ test('R1 A: dirty Core survives successful Inventory update and Core Save preser
   expect(dialog).toHaveTextContent('Máte neuložené změny fyzického kusu. Opravdu chcete odejít?');
 });
 
-test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft canonical item and leave risk', async () => {
-  const a=photo('a');
-  const p={...product,photos:[a]};
+test('R1 B: real photo order save preserves active dirty Inventory editor draft canonical item and leave risk', async () => {
+  const a=photo('a'), b=photo('b');
+  const p={...product,photos:[a,b]};
   getMock.mockResolvedValueOnce({product:p,variants:[variant('v1','98','active',[inventoryItem()])]});
-  altMock.mockResolvedValueOnce({product:{...p,photos:[{...a,alt:'Photo saved'}]}});
+  reorderMock.mockResolvedValueOnce({product:{...p,photos:[b,a]}});
   const router=renderRouter('/admin/produkty/p1');
   await screen.findByText('/produkt/sofia');
 
@@ -803,11 +798,10 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   expect(screen.getByLabelText('Poznámka')).toHaveValue('inventory-draft');
   expect(within(document.querySelector<HTMLElement>('[data-inventory-id="i1"] [data-inventory-condition-cell]')!).getByText('Dobrý')).toBeInTheDocument();
 
-  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
-  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Photo saved'}});
-  fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
-  await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
-  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Photo saved');
+  fireEvent.click(within(media()).getAllByRole('button',{name:'Posunout později'})[0]);
+  fireEvent.click(screen.getByRole('button',{name:'Uložit pořadí'}));
+  await waitFor(()=>expect(status()).toHaveTextContent('Pořadí fotografií bylo uloženo.'));
+  expect(media().querySelector('[data-photo-id="b"]')).toHaveAttribute('data-main','true');
 
   const inventoryRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
   expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
@@ -942,9 +936,9 @@ test('02D dirty same-item condition disables activation and issues no lifecycle 
   expect(activateInventoryMock).not.toHaveBeenCalled();
 });
 
-test('02D lifecycle preserves dirty Variant, dirty Core and Photo drafts across successful maintenance',async()=>{
-  const a=photo('a'),active=inventoryItem();
-  getMock.mockResolvedValueOnce({product:{...product,photos:[a]},variants:[variant('v1','98','active',[active])]});
+test('02D lifecycle preserves dirty Variant, dirty Core and photo order across successful maintenance',async()=>{
+  const a=photo('a'), b=photo('b'),active=inventoryItem();
+  getMock.mockResolvedValueOnce({product:{...product,photos:[a,b]},variants:[variant('v1','98','active',[active])]});
   maintenanceInventoryMock.mockResolvedValue({...active,status:'maintenance'});
   renderRouter('/admin/produkty/p1');
   await screen.findByText('/produkt/sofia');
@@ -952,16 +946,16 @@ test('02D lifecycle preserves dirty Variant, dirty Core and Photo drafts across 
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Růžová'}});
   fireEvent.click(screen.getByRole('button',{name:'Upravit velikost'}));
   fireEvent.change(screen.getByLabelText('Velikost'),{target:{value:'99'}});
-  fireEvent.click(screen.getByRole('button',{name:'Upravit ALT'}));
-  fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'draft-alt'}});
+  fireEvent.click(within(media()).getAllByRole('button',{name:'Posunout později'})[0]);
 
   fireEvent.click(screen.getByRole('button',{name:'Přesunout do údržby'}));
   await screen.findByText('Fyzický kus byl přesunut do údržby.');
   expect(screen.getByLabelText('Barva')).toHaveValue('Růžová');
   expect(screen.getByLabelText('Velikost')).toHaveValue('99');
-  expect(screen.getByLabelText('Alternativní text')).toHaveValue('draft-alt');
+  expect(media().querySelector('[data-photo-id="b"]')).toHaveAttribute('data-main','true');
+  expect(screen.getByRole('button',{name:'Uložit pořadí'})).toBeEnabled();
   expect(screen.getByText('V údržbě')).toBeInTheDocument();
-  expect(updateVariantMock).not.toHaveBeenCalled();expect(altMock).not.toHaveBeenCalled();expect(patchMock).not.toHaveBeenCalled();
+  expect(updateVariantMock).not.toHaveBeenCalled();expect(reorderMock).not.toHaveBeenCalled();expect(patchMock).not.toHaveBeenCalled();
   fireEvent.change(screen.getByLabelText('Barva'),{target:{value:'Bílá'}});
   expect(save()).toBeDisabled();
 });
