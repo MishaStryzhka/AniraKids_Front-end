@@ -155,7 +155,7 @@ export function AdminLayout() {
   return (
     <Shell data-admin-layout ref={shellRef}>
       <Sidebar data-admin-sidebar>
-        <SidebarTitle>Administrace</SidebarTitle>
+        <SidebarTitle>ANIRAK</SidebarTitle>
         <AdminNavigation />
       </Sidebar>
 
@@ -170,7 +170,7 @@ export function AdminLayout() {
             icon={<Menu aria-hidden="true" />}
             onClick={() => setNavigationEntry(location.key)}
           />
-          <MobileTitle>Administrace</MobileTitle>
+          <MobileTitle>ANIRAK Administrace</MobileTitle>
         </MobileHeader>
 
         {pageTitle!=='Přehled'?<PageHeader $compactActions={pageTitle === 'Produkty'}>

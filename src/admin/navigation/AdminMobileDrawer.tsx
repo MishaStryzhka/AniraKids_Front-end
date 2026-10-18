@@ -84,7 +84,7 @@ export function AdminMobileDrawer({ backgroundRef, onClose, onNavigate, resolveR
   return createPortal(<Backdrop data-admin-nav-backdrop onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <Panel id="admin-mobile-navigation" ref={panelRef} role="dialog" aria-modal="true" aria-labelledby="admin-mobile-navigation-title">
       <Header>
-        <Title id="admin-mobile-navigation-title">Administrace</Title>
+        <Title id="admin-mobile-navigation-title">ANIRAK</Title>
         <IconButton aria-label="Zavřít navigaci administrace" icon={<X aria-hidden="true" />} onClick={onClose}/>
       </Header>
       <Links><AdminNavigation onNavigate={onNavigate}/></Links>
