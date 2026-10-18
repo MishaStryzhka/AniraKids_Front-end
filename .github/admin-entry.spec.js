@@ -16,11 +16,11 @@ async function setup(page, { guest = false, status = 200, delayed = false } = {}
     const request = route.request(), pathname = new URL(request.url()).pathname;
     if (pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
     if (request.method() !== 'GET') state.writes.push(pathname);
-    if (pathname === '/api/v2/admin/products') {
+    if (pathname === '/api/v2/admin/access') {
       state.probes++;
       if (delayed) { await new Promise(resolve => { state.release = resolve; }); delayed = false; }
       if (status === 'network') return route.abort('failed');
-      return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(status === 200 ? { items: [], total: 0 } : { error: { code: status === 403 ? 'ADMIN_FORBIDDEN' : 'ADMIN_API_DISABLED', message: 'Unavailable' } }) });
+      return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(status === 200 ? {owner:true,permissions:['products','reservations','fittings','settings']} : { error: { code: status === 403 ? 'ADMIN_FORBIDDEN' : 'ADMIN_API_DISABLED', message: 'Unavailable' } }) });
     }
     if (pathname === '/api/v2/admin/overview') {
       const group = { total: 0, items: [] };

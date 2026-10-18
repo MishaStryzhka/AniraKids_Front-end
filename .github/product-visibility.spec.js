@@ -22,7 +22,7 @@ async function fixture(page,ambiguous=false){
   }
   state.unexpected.push(p);return route.abort();
  });
- return state;
+ await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 for(const width of [390,768,1440])test('hide and republish at '+width,async({page})=>{
  const state=await fixture(page),errors=[];page.on('pageerror',e=>errors.push(e.message));

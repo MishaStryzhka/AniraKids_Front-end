@@ -106,7 +106,7 @@ async function mocks(page, seed = product, options = {}) {
     if (options.providerUnknown) return route.abort('failed');
     return json(route, {public_id: 'products/p1/x'});
   });
-  return state;
+  await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 async function capture(page, name) {
   await page.screenshot({path: path.join(EVIDENCE, `${name}.png`), fullPage: false});

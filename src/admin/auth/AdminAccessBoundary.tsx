@@ -11,6 +11,7 @@ import { ModalAuthContext } from '../../context/ModalAuthContext';
 import { useAuth } from '../../hooks/useAuth';
 import { refreshUser } from '../../redux/auth/operations';
 import { probeAdminAccess } from '../api/client';
+import {AdminPermissions,type Access} from './permissions';
 import { AdminApiError, normalizeAdminApiError } from '../api/errors';
 
 export type AdminAccessState =
@@ -154,6 +155,7 @@ export function AdminAccessBoundary() {
   const authModal = useContext(ModalAuthContext);
   const [state, setState] = useState<AdminAccessState>('auth_refreshing');
   const [retryRevision, setRetryRevision] = useState(0);
+  const [access,setAccess]=useState<{token:string;value:Access}|null>(null);
 
   useEffect(() => {
     if (isRefreshing || (token && !isLoggedIn)) {
@@ -170,8 +172,8 @@ export function AdminAccessBoundary() {
     setState('probing');
 
     probeAdminAccess({ token, signal: controller.signal })
-      .then(() => {
-        if (!controller.signal.aborted) setState('authorized');
+      .then(value => {
+        if (!controller.signal.aborted) {setAccess({token,value});setState('authorized');}
       })
       .catch(error => {
         if (controller.signal.aborted) return;
@@ -190,7 +192,7 @@ export function AdminAccessBoundary() {
 
   if (state === 'auth_refreshing') return <LoadingState label="Ověřujeme přihlášení…" />;
   if (state === 'probing') return <LoadingState label="Ověřujeme přístup do administrace…" />;
-  if (state === 'authorized') return <AdminAccessContext.Provider value={accessContext}><Outlet /></AdminAccessContext.Provider>;
+  if (state === 'authorized') return access&&access.token===token&&isLoggedIn&&!isRefreshing?<AdminPermissions.Provider value={access.value}><AdminAccessContext.Provider value={accessContext}><Outlet /></AdminAccessContext.Provider></AdminPermissions.Provider>:<LoadingState label="Ověřujeme přístup do administrace…"/>;
 
   return (
     <AccessStateView

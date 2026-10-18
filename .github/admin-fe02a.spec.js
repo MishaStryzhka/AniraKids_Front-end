@@ -168,7 +168,7 @@ async function installAdminMocks(page, listHandler = url => responseFor(url)) {
     });
   });
 
-  return state;
+  await page.route('**/api/v2/admin/access',route=>{state.probeRequests++;return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 
 async function openProducts(page, path = '/admin/produkty', expandFilters = true) {

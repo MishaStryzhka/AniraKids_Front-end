@@ -5,6 +5,7 @@ import {Input} from '../../design-system/components/Input';
 import {Dialog} from '../../design-system/components/Dialog';
 import {SelectField} from '../../design-system/components/SelectField';
 import {useAuth} from '../../hooks/useAuth';
+import {useAdminPermissions} from '../auth/permissions';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {pragueToday,monthCalendarGridDays,formatCalendarMonth} from '../calendar/calendarDates';
 import {fittingAdmin,fittingApi,fittingError,fittingStatusLabels,fittingDateLabel,type AdminFitting,type Slots} from '../../fittings/fittingApi';
@@ -17,6 +18,7 @@ const Badge=styled.span`border-radius:20px;background:${t.color.bg.subtle};color
 const Card=styled(Panel)`overflow-wrap:anywhere;`;
 const labels:Record<string,string>={confirm:'Potvrdit přijetí 200 Kč',complete:'Označit jako proběhlou',cancel:'Zrušit zkoušku',refund:'Zaznamenat vrácení 200 Kč','late-payment':'Zaznamenat pozdní platbu 200 Kč',reschedule:'Přesunout termín',credit:'Započíst 200 Kč do pronájmu'};
 export function AdminFittingsPage(){
+ const access=useAdminPermissions();
  const {token}=useAuth(),{handleRequestError}=useAdminAccess();
  const today=pragueToday(),[month,setMonth]=useState(today.slice(0,7)),[day,setDay]=useState(''),[filter,setFilter]=useState('all');
  const [items,setItems]=useState<AdminFitting[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false),[success,setSuccess]=useState('');
@@ -33,7 +35,7 @@ export function AdminFittingsPage(){
  {error&&!intent?<Copy role="alert">{error}</Copy>:null}{success?<Copy role="status">{success}</Copy>:null}{loading?<Copy role="status">Načítání zkoušek…</Copy>:null}{truncated?<Copy role="alert">Přehled je příliš rozsáhlý. Vyberte konkrétní den pro úplný seznam.</Copy>:null}
  {!loading&&!visible.length&&!error?<Copy>Pro tento výběr nejsou žádné zkoušky.</Copy>:null}
  {visible.map(item=><Card key={item.id}><Actions><Heading>{fittingDateLabel(item.date)} · {item.time}</Heading><Badge>{fittingStatusLabels[item.status]}</Badge><Badge>{item.paymentStatus==='paid'?'Zaplaceno 200 Kč':item.paymentStatus==='refunded'?'Vráceno 200 Kč':'Platba nepotvrzena'}</Badge></Actions><strong>{item.customer.name}</strong><Copy>{item.customer.email} · {item.customer.phone}</Copy><Copy>{item.number} · {item.address}</Copy>{item.product?<RouteLink to={'/produkt/'+encodeURIComponent(item.product.slug)}>{item.product.name}</RouteLink>:null}{item.credit?<Copy>Započteno do rezervace <RouteLink to={'/admin/rezervace/'+item.credit.reservationId}>{item.credit.reservationNumber}</RouteLink></Copy>:null}<Actions>
- {(['pending','review'].includes(item.status)?['confirm','cancel']:item.status==='confirmed'?['complete','reschedule','cancel']:['expired','cancelled'].includes(item.status)?item.paymentStatus==='paid'?['refund']:item.paymentStatus==='unpaid'?['late-payment']:[]:item.status==='completed'&&item.paymentStatus==='paid'&&!item.credit?['credit']:[]).map(action=><Button key={action} variant="secondary" disabled={busy} onClick={()=>{setError('');setReservationNumber('');setIntent({item,action});}}>{labels[action]}</Button>)}
+ {(['pending','review'].includes(item.status)?['confirm','cancel']:item.status==='confirmed'?['complete','reschedule','cancel']:['expired','cancelled'].includes(item.status)?item.paymentStatus==='paid'?['refund']:item.paymentStatus==='unpaid'?['late-payment']:[]:item.status==='completed'&&item.paymentStatus==='paid'&&!item.credit?['credit']:[]).filter(action=>action!=='credit'||access.owner||access.permissions.includes('reservations')).map(action=><Button key={action} variant="secondary" disabled={busy} onClick={()=>{setError('');setReservationNumber('');setIntent({item,action});}}>{labels[action]}</Button>)}
  </Actions></Card>)}
  <Dialog open={!!intent} title={intent?labels[intent.action]:''} onEscape={()=>!busy&&setIntent(null)}><Stack><Copy>{intent?.item.customer.name} · {intent?.item.number}</Copy>
  {intent?.action==='confirm'||intent?.action==='late-payment'?<Copy>Potvrďte pouze po ověření skutečně přijatého převodu 200 Kč se správnou zprávou pro příjemce. Pozdní platba neobnovuje uvolněný termín.</Copy>:intent?.action==='refund'?<Copy>Tato akce pouze zaznamená, že jste již vrátili 200 Kč. Sama peníze neodesílá.</Copy>:intent?.action==='cancel'?<Copy>Termín se uvolní. Případné vrácení platby vyřešte samostatně; peníze se automaticky nevracejí.</Copy>:intent?.action==='complete'?<Copy>Označte až po uskutečnění zkoušky. Poté lze započíst zaplacených 200 Kč do pronájmu.</Copy>:null}

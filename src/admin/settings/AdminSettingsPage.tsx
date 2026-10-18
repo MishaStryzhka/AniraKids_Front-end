@@ -1,4 +1,6 @@
 import {FittingSettingsSection} from '../fittings/FittingSettingsSection';
+import {AdministratorsSection} from './AdministratorsSection';
+import {useAdminPermissions} from '../auth/permissions';
 import {useEffect, useRef, useState} from 'react';
 import {useBlocker} from 'react-router-dom';
 import styled from 'styled-components';
@@ -23,6 +25,8 @@ const keys: Array<keyof SiteSections> = ['suits','familyLooks'];
 
 export function AdminSettingsPage() {
   const {token} = useAuth();
+  const access=useAdminPermissions();
+  const [administratorsDirty,setAdministratorsDirty]=useState(false);
   const {handleRequestError} = useAdminAccess();
   const [baseline,setBaseline] = useState<SiteSections | null>(null);
   const [draft,setDraft] = useState<SiteSections | null>(null);
@@ -36,13 +40,13 @@ export function AdminSettingsPage() {
   const cancelButton = useRef<HTMLButtonElement | null>(null);
   const [fittingDirty,setFittingDirty]=useState(false);
   const dirty = Boolean(draft && baseline && keys.some(key => draft[key] !== baseline[key]));
-  const blocker = useBlocker(dirty || saving || fittingDirty);
+  const blocker = useBlocker(dirty || saving || fittingDirty || administratorsDirty);
   useEffect(() => {
-    if (!dirty && !saving && !fittingDirty) return;
+    if (!dirty && !saving && !fittingDirty && !administratorsDirty) return;
     const warn = (event: BeforeUnloadEvent) => {event.preventDefault();event.returnValue='';};
     window.addEventListener('beforeunload',warn);
     return () => window.removeEventListener('beforeunload',warn);
-  }, [dirty,saving,fittingDirty]);
+  }, [dirty,saving,fittingDirty,administratorsDirty]);
   useEffect(() => {
     const controller = new AbortController();request.current=controller;
     setLoading(true);setError('');setBaseline(null);setDraft(null);
@@ -85,6 +89,7 @@ export function AdminSettingsPage() {
     {error?<Feedback role="alert">{error}</Feedback>:null}
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
     <FittingSettingsSection onDirty={setFittingDirty}/>
+    {access.owner?<AdministratorsSection key={token} onDirty={setAdministratorsDirty}/>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
       <Actions ref={node=>{cancelButton.current=node?.querySelector<HTMLButtonElement>('button')??null;}}><Button onClick={()=>blocker.state==='blocked'&&blocker.reset()}>Zůstat</Button><Button variant="secondary" onClick={()=>blocker.state==='blocked'&&blocker.proceed()}>Odejít</Button></Actions>
     </Dialog>

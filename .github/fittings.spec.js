@@ -34,7 +34,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/admin/fittings')return json({items:[{...state.receipt,number,date:'2030-01-07',time:'11:00',durationMinutes:30,price:200,address:state.settings.address,status:state.adminStatus||'review',paymentStatus:state.adminStatus?'paid':'unpaid',id:'111111111111111111111111',revision:state.actions.length,customer:{name:'Jana Nová',email:'jana@example.test',phone:'+420123456789'},audit:[],credit:state.credited?{reservationId:'222222222222222222222222',reservationNumber:'AK-2030-ABC123'}:null}]});
   if(p==='/api/v2/admin/fittings/111111111111111111111111/actions'){state.actions.push(req.postDataJSON());if(req.postDataJSON().action==='confirm')state.adminStatus='confirmed';if(req.postDataJSON().action==='complete')state.adminStatus='completed';if(req.postDataJSON().action==='credit')state.credited=true;return json({ok:true});}
   state.unexpected.push(p);return route.abort();
- });return state;
+ });await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});await page.route('**/api/v2/admin/administrators?*',route=>route.fulfill({json:{owners:[],items:[],total:0}}));return state;
 }
 for(const width of [390,768,1440])test('fitting settings, booking QR and administration '+width,async({page})=>{
  const state=await setup(page,{admin:true});await page.setViewportSize({width,height:1000});

@@ -38,7 +38,7 @@ async function mocks(page,options={}){
   }
   state.unexpected.push({method,path:u.pathname});return r.abort('failed');
  });
- return state;
+ await page.route('**/api/v2/admin/access',route=>{return route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}});});return state;
 }
 const activation=page=>page.locator('[data-product-activation-section]');
 const activate=page=>activation(page).getByRole('button',{name:'Aktivovat produkt',exact:true});

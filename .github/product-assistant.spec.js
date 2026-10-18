@@ -19,7 +19,7 @@ async function fixture(page,aiFails=false){
   if(p.endsWith('/suggest')){calls.suggest++;return aiFails?json({error:{code:'AI_NOT_CONFIGURED',message:'AI zatím není připojena. Údaje můžete vyplnit ručně.'}},503):json({suggestion:{description:'Růžové slavnostní šaty s jemnou sukní.',colors:['Růžová'],category:'dress',gender:'girls',ageTags:[],note:'Věk ověřte podle štítku.'}});}
   if(p.endsWith('/save')){calls.saves.push(req.postDataJSON());return json({product:{id,name:'DET31',slug:'det31',description:req.postDataJSON().description,category:'dress',gender:'girls',color:'Růžová',occasion:[],ageTags:[],photos:[{url:image,publicId:'draft/photo'}],rentalEnabled:false,saleEnabled:false,defaultDeposit:0,status:'draft',seo:{noIndex:true}}});}
   calls.unexpected.push(p);return route.abort();
- });return calls;
+ });await page.route('**/api/v2/admin/access',route=>route.fulfill({json:{owner:true,permissions:['products','reservations','fittings','settings']}}));return calls;
 }
 for(const width of [390,768,1440])test('photo first AI review and save '+width,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));const calls=await fixture(page);await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin/produkty/novy');
