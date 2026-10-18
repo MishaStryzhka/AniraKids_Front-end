@@ -1,3 +1,6 @@
+import {AdminPermissions} from '../auth/permissions';
+import {fittingAdmin} from '../../fittings/fittingApi';
+jest.mock('../../fittings/fittingApi',()=>({fittingAdmin:jest.fn(),fittingStatusLabels:{confirmed:'Potvrzená'}}));
 import {MemoryRouter} from 'react-router-dom';
 import {act,fireEvent,render,screen,waitFor,within} from '@testing-library/react';
 import {getAdminReservationCalendar,type CalendarReservation} from '../api/reservationCalendar';
@@ -39,4 +42,24 @@ test('manual blocks show on their inclusive day and link to the owning product',
  expect(screen.getByRole('button',{name:/středa 7. října 2026.*Blokace: 1/})).toBeInTheDocument();
  fireEvent.change(screen.getByLabelText('Vybraný den'),{target:{value:'2026-10-08'}});
  expect(screen.queryByText('Blokované šaty')).not.toBeInTheDocument();
+});
+
+test('fittings appear with rental counts, exclude expired entries and link to selected day',async()=>{
+ get.mockResolvedValue({items:[row]});
+ (fittingAdmin as jest.Mock).mockResolvedValue({items:[
+ {id:'fit1',number:'ZK-1',date:'2026-10-07',time:'16:00',status:'confirmed',durationMinutes:30,customer:{name:'Jana fitting'}},
+ {id:'fit2',number:'ZK-2',date:'2026-10-07',time:'17:00',status:'expired',customer:{name:'Expired fitting'}}]});
+ render(<MemoryRouter><AdminPermissions.Provider value={{owner:true,permissions:[]}}><AdminReservationCalendarPage/></AdminPermissions.Provider></MemoryRouter>);
+ expect(await screen.findByText('16:00 · Jana fitting')).toBeInTheDocument();
+ expect(screen.queryByText(/Expired fitting/)).not.toBeInTheDocument();
+ expect(screen.getByRole('button',{name:/středa 7. října 2026.*Zkoušky: 1/})).toBeInTheDocument();
+ expect(screen.getByRole('link',{name:'Spravovat zkoušku'})).toHaveAttribute('href','/admin/zkousky?date=2026-10-07');
+ expect(screen.getByText('AK-001')).toBeInTheDocument();
+});
+test('fitting fetch failure preserves rentals and reports missing fitting data',async()=>{
+ get.mockResolvedValue({items:[row]});(fittingAdmin as jest.Mock).mockRejectedValue(new Error('private detail'));
+ render(<MemoryRouter><AdminPermissions.Provider value={{owner:true,permissions:[]}}><AdminReservationCalendarPage/></AdminPermissions.Provider></MemoryRouter>);
+ expect(await screen.findByText('AK-001')).toBeInTheDocument();
+ expect(await screen.findByText('Zkoušky se nepodařilo načíst. Zvolte Obnovit.')).toBeInTheDocument();
+ expect(screen.queryByText('private detail')).not.toBeInTheDocument();
 });

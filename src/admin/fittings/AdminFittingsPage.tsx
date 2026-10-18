@@ -1,3 +1,4 @@
+import {useSearchParams} from 'react-router-dom';
 import {useEffect,useRef,useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
@@ -19,9 +20,12 @@ const Badge=styled.span`border-radius:20px;background:${t.color.bg.subtle};color
 const Card=styled(Panel)`overflow-wrap:anywhere;`;
 const labels:Record<string,string>={confirm:'Potvrdit přijetí 200 Kč',complete:'Označit jako proběhlou',cancel:'Zrušit zkoušku',refund:'Zaznamenat vrácení 200 Kč','late-payment':'Zaznamenat pozdní platbu 200 Kč',reschedule:'Přesunout termín',credit:'Započíst 200 Kč do pronájmu'};
 export function AdminFittingsPage(){
+ const [search]=useSearchParams();
+ const requestedDay=search.get('date')??'';
+ const initialDay=/^20\d{2}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(requestedDay)?requestedDay:'';
  const access=useAdminPermissions();
  const {token}=useAuth(),{handleRequestError}=useAdminAccess();
- const today=pragueToday(),[month,setMonth]=useState(today.slice(0,7)),[day,setDay]=useState(''),[filter,setFilter]=useState('all');
+ const today=pragueToday(),[month,setMonth]=useState((initialDay||today).slice(0,7)),[day,setDay]=useState(initialDay),[filter,setFilter]=useState('all');
  const [items,setItems]=useState<AdminFitting[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false),[success,setSuccess]=useState('');
  const [intent,setIntent]=useState<{item:AdminFitting;action:string}|null>(null),[newDate,setNewDate]=useState(today),[newTime,setNewTime]=useState(''),[slots,setSlots]=useState<Slots|null>(null),[reservationNumber,setReservationNumber]=useState('');
  const lock=useRef(false),active=useRef(true),[truncated,setTruncated]=useState(false);
