@@ -37,6 +37,9 @@ test('never asks notification permission on mount and subscribes only after user
   expect(permission).not.toHaveBeenCalled();
   fireEvent.click(button);
   await waitFor(()=>expect(permission).toHaveBeenCalledTimes(1));
+  await waitFor(()=>expect(register).toHaveBeenCalledWith('/admin-push-sw.js'));
+  await waitFor(()=>expect(getSubscription).toHaveBeenCalledTimes(1));
+  await waitFor(()=>expect(subscribe).toHaveBeenCalledTimes(1));
   await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint}));
   expect(subscribe).toHaveBeenCalledTimes(1);
   expect(await screen.findByRole('button',{name:'Vypnout upozornění'})).toBeEnabled();
