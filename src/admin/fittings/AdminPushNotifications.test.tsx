@@ -24,6 +24,8 @@ beforeEach(()=>{
   permission.mockResolvedValue('granted');
   getRegistration.mockResolvedValue(undefined);
   getSubscription.mockResolvedValue(null);
+  subscribe.mockResolvedValue(pushSubscription);
+  pushSubscription.unsubscribe.mockResolvedValue(true);
   register.mockResolvedValue({pushManager:{getSubscription,subscribe}});
   api.mockImplementation((_token:string,path:string)=>{
     if(path==='/admin/push/config')return Promise.resolve({enabled:true,publicKey});
