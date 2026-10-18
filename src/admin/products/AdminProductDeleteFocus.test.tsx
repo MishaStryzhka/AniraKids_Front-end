@@ -94,7 +94,7 @@ test('success intent survives visible kind none and is consumed once after modal
   expect(document.getElementById('root')).not.toHaveAttribute('aria-hidden');
   expect(document.body.style.overflow).not.toBe('hidden');
   act(() => frames.splice(0).forEach(callback => callback(0)));
-  expect(row('c').getByRole('button', {name: 'Upravit ALT'})).toHaveFocus();
+  expect(row('c').getByRole('button', {name: 'Odebrat fotografii'})).toHaveFocus();
   expect(screen.getByLabelText('Barva')).toHaveValue('Unsaved pink');
   expect(patch).not.toHaveBeenCalled();
   expect(screen.getByRole('button', {name: 'Uložit', exact: true})).toBeEnabled();
@@ -107,7 +107,7 @@ test('previous-photo success fallback is not reused by a later cancel or rejecte
   remove.mockResolvedValueOnce({product: product(['a', 'b'])});
   await mountEditor();
   confirm('c');
-  await waitFor(() => expect(row('b').getByRole('button', {name: 'Upravit ALT'})).toHaveFocus());
+  await waitFor(() => expect(row('b').getByRole('button', {name: 'Odebrat fotografii'})).toHaveFocus());
   const trigger = row('a').getByRole('button', {name: 'Odebrat fotografii'});
   click(trigger);
   fireEvent.keyDown(document, {key: 'Escape'});
@@ -118,7 +118,7 @@ test('previous-photo success fallback is not reused by a later cancel or rejecte
   await screen.findByText('Fotografii nelze odebrat. Aktivní produkt musí mít alespoň jednu fotografii.');
   await waitFor(() => expect(trigger).toHaveFocus());
   expect(document.querySelector('[data-photo-id="a"]')).toBeInTheDocument();
-  expect(row('b').getByRole('button', {name: 'Upravit ALT'})).not.toHaveFocus();
+  expect(row('b').getByRole('button', {name: 'Odebrat fotografii'})).not.toHaveFocus();
 });
 
 test.each(['draft', 'archived'] as const)('%s final photo cancel restores trigger and success restores file trigger', async status => {
