@@ -1,11 +1,12 @@
 import {FittingSettingsSection} from '../fittings/FittingSettingsSection';
 import {Link} from 'react-router-dom';
 import {AdministratorsSection} from './AdministratorsSection';
+import {AdminPushNotifications} from '../fittings/AdminPushNotifications';
 import {useAdminPermissions} from '../auth/permissions';
 import {useEffect, useRef, useState} from 'react';
 import {useBlocker} from 'react-router-dom';
 import styled from 'styled-components';
-import {Eye, Users, Shirt, CalendarClock} from 'lucide-react';
+import {Eye, Users, Shirt, CalendarClock, Bell} from 'lucide-react';
 import {useAuth} from '../../hooks/useAuth';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {getAdminSettings, saveAdminSettings} from '../api/settings';
@@ -103,6 +104,7 @@ export function AdminSettingsPage() {
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
     </SettingsDisclosure>
     <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure></> : null}
+    {access.owner&&token?<SettingsDisclosure title="Upozornění" icon={<Bell size={22} aria-hidden="true"/>}><AdminPushNotifications token={token}/></SettingsDisclosure>:null}
     {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
     {canPartners?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
