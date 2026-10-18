@@ -1,12 +1,11 @@
 import {forwardRef, useImperativeHandle, useCallback, useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
-import {Pencil, Plus} from 'lucide-react';
+import {ArrowLeft, ArrowRight, Pencil, Plus, X} from 'lucide-react';
 import {Button} from '../../design-system/components/Button';
 import {Dialog} from '../../design-system/components/Dialog';
 import {IconButton} from '../../design-system/components/IconButton';
 import {Divider} from '../../design-system/components/Divider';
 import {Spinner} from '../../design-system/components/Spinner';
-import {StatusBadge} from '../../design-system/components/StatusBadge';
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 import type {AdminProductPhoto, AdminProductStatus} from '../api/products';
 import type {ActivationDomainGuardSnapshot} from './productActivationModel';
@@ -23,30 +22,50 @@ const HeadingActions = styled.div`display:flex;align-items:center;gap:${t.space[
 const H2 = styled.h2`&:focus{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}margin:0;font:600 22px/30px ${t.font.family.ui};`;
 const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:${t.type.bodySm.size};line-height:${t.type.bodySm.lineHeight};`;
 const PhotoCount = styled(Copy)`white-space:nowrap;font-variant-numeric:tabular-nums;`;
-const List = styled.ol`list-style:none;margin:0;padding:0;border:1px solid ${t.color.border.subtle};border-radius:${t.radius[2]};overflow:visible;`;
-const Item = styled.li`
-  padding:${t.space[4]};display:grid;grid-template-columns:96px minmax(0,1fr);gap:${t.space[4]};min-inline-size:0;
-  &+&{border-block-start:1px solid ${t.color.border.subtle};}
+const List = styled.ol`
+  list-style:none;margin:0;padding:0;min-inline-size:0;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:${t.space[4]};
 `;
-const Preview = styled.img`
-  inline-size:96px;block-size:128px;object-fit:contain;object-position:center;
+const Item = styled.li`
+  min-inline-size:0;align-self:start;display:grid;gap:${t.space[2]};
+  border:3px solid transparent;border-radius:${t.radius[3]};
+  &[data-main='true']{border-color:${t.color.action.primary.bg};}
+`;
+const PhotoFrame = styled.div`
+  position:relative;min-inline-size:0;aspect-ratio:3/4;overflow:hidden;
   border-radius:${t.radius[2]};background:${t.color.bg.subtle};
 `;
-const Broken = styled.div`
-  inline-size:96px;block-size:128px;display:grid;place-items:center;text-align:center;
-  border-radius:${t.radius[2]};background:${t.color.bg.subtle};color:${t.color.text.secondary};font-size:12px;
+const PhotoEditArea = styled.button`
+  position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;
+  padding:0;border:0;background:transparent;cursor:pointer;color:${t.color.text.secondary};
+  &:focus-visible{outline:3px solid ${t.color.focus.ring};outline-offset:-3px;}
+  &:disabled{cursor:not-allowed;}
 `;
-const Body = styled.div`min-inline-size:0;display:grid;align-content:start;gap:${t.space[3]};overflow-wrap:anywhere;`;
-const MainBadge = styled(StatusBadge)`justify-self:start;`;
+const Preview = styled.img`
+  display:block;inline-size:100%;block-size:100%;object-fit:contain;object-position:center;
+`;
+const Broken = styled.span`
+  display:grid;place-items:center;inline-size:100%;block-size:100%;
+  padding:${t.space[2]};box-sizing:border-box;text-align:center;
+  color:${t.color.text.secondary};font-size:12px;
+`;
+const PhotoControl = styled(IconButton)`
+  position:absolute;z-index:1;background:${t.color.bg.surface};
+  border-color:${t.color.border.subtle};box-shadow:${t.shadow.sm};
+  &:hover:not(:disabled){background:${t.color.action.secondary.bgHover};border-color:${t.color.border.strong};}
+`;
+const PhotoDelete = styled(PhotoControl)`inset-block-start:8px;inset-inline-end:8px;`;
+const PhotoEarlier = styled(PhotoControl)`inset-block-end:8px;inset-inline-start:8px;`;
+const PhotoLater = styled(PhotoControl)`inset-block-end:8px;inset-inline-end:8px;`;
 const Actions = styled.div`
   display:flex;flex-wrap:wrap;gap:${t.space[2]};
   @media(max-width:767px){display:grid;grid-template-columns:1fr 1fr;&>[data-wide]{grid-column:1/-1;}}
 `;
-const ItemActions = styled(Actions)`grid-column:1/-1;@media(min-width:768px){grid-column:2;}`;
 const AltEditor = styled.div`
-  grid-column:1/-1;display:grid;gap:${t.space[2]};
+  display:grid;gap:${t.space[2]};padding:${t.space[2]};
   textarea{inline-size:100%;min-block-size:96px;resize:vertical;padding:${t.space[3]};border:1px solid ${t.color.border.default};
     border-radius:${t.radius[2]};font:inherit;box-sizing:border-box;}
+  ${Actions}{display:grid;grid-template-columns:minmax(0,1fr);>button{min-inline-size:0;}}
 `;
 const Upload = styled.div`display:grid;gap:${t.space[3]};min-inline-size:0;`;
 const Selected = styled.div`
@@ -296,18 +315,23 @@ export const ProductMediaSection = forwardRef<ProductMediaSectionHandle,ProductM
       onApply={file => {c.selectFile(file);setEditingAttemptId(null);}}/> : null}
     {c.photos.length === 0 ? <Empty><strong>Produkt zatím nemá žádné fotografie.</strong>
       <Copy>Přidejte první fotografii. Po připojení se automaticky stane hlavní fotografií produktu.</Copy></Empty>
-      : <List data-photo-list>{ordered.map((photo, index) => <Item key={photo.publicId} data-photo-id={photo.publicId}>
-        {broken[photo.publicId] ? <Broken>Náhled fotografie nelze zobrazit</Broken>
-          : <Preview src={photo.url} alt={photo.alt || props.productName} onError={() => setBroken(previous => ({...previous, [photo.publicId]: true}))}/>}
-        <Body>{index === 0 ? <MainBadge tone="neutral">Hlavní fotografie</MainBadge> : null}
-          <div><strong>Alternativní text</strong><Copy>{photo.alt || props.productName}</Copy></div></Body>
-        <ItemActions>
-          <Button data-media-action="edit" data-wide size="compact" variant="secondary" disabled={disabled || Boolean(c.editingAlt && c.editingAlt !== photo.publicId)} onClick={() => c.startAlt(photo.publicId)}>Upravit ALT</Button>
-          <Button data-media-action="delete" data-wide size="compact" variant="destructive" disabled={disabled}
-            onClick={event => props.onRequestDelete?.({publicId: photo.publicId, trigger: event.currentTarget, distinctCount: new Set(c.photos.map(p => p.publicId)).size, isMain: index === 0})}>Odebrat fotografii</Button>
-          <Button data-media-action="earlier" size="compact" variant="secondary" disabled={disabled || index === 0} onClick={() => move(photo.publicId, -1)}>Posunout dříve</Button>
-          <Button data-media-action="later" size="compact" variant="secondary" disabled={disabled || index === ordered.length - 1} onClick={() => move(photo.publicId, 1)}>Posunout později</Button>
-        </ItemActions>
+      : <List data-photo-list>{ordered.map((photo, index) => <Item key={photo.publicId} data-photo-id={photo.publicId}
+          data-main={index === 0 ? 'true' : undefined} aria-label={index === 0 ? 'Hlavní fotografie' : undefined}>
+        <PhotoFrame>
+          <PhotoEditArea type="button" data-media-action="edit" aria-label="Upravit ALT" title="Upravit alternativní text"
+            disabled={disabled || Boolean(c.editingAlt && c.editingAlt !== photo.publicId)} onClick={() => c.startAlt(photo.publicId)}>
+            {broken[photo.publicId] ? <Broken>Náhled fotografie nelze zobrazit</Broken>
+              : <Preview src={photo.url} alt={photo.alt || props.productName}
+                onError={() => setBroken(previous => ({...previous, [photo.publicId]: true}))}/>}
+          </PhotoEditArea>
+          <PhotoDelete data-media-action="delete" aria-label="Odebrat fotografii" title="Odebrat fotografii"
+            icon={<X aria-hidden="true"/>} disabled={disabled}
+            onClick={event => props.onRequestDelete?.({publicId: photo.publicId, trigger: event.currentTarget, distinctCount: new Set(c.photos.map(p => p.publicId)).size, isMain: index === 0})}/>
+          <PhotoEarlier data-media-action="earlier" aria-label="Posunout dříve" title="Posunout dříve"
+            icon={<ArrowLeft aria-hidden="true"/>} disabled={disabled || index === 0} onClick={() => move(photo.publicId, -1)}/>
+          <PhotoLater data-media-action="later" aria-label="Posunout později" title="Posunout později"
+            icon={<ArrowRight aria-hidden="true"/>} disabled={disabled || index === ordered.length - 1} onClick={() => move(photo.publicId, 1)}/>
+        </PhotoFrame>
         {c.editingAlt === photo.publicId ? <AltEditor>
           <label htmlFor={`alt-${photo.publicId}`}><strong>Alternativní text</strong></label>
           <textarea id={`alt-${photo.publicId}`} maxLength={180} disabled={disabled} value={c.drafts.altById[photo.publicId] ?? ''}
