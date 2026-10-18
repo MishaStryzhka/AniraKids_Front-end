@@ -1,0 +1,26 @@
+name: Admin Fitting Push Verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/admin/fittings/AdminPushNotifications*'
+      - 'src/admin/fittings/AdminFittingsPage.tsx'
+      - 'public/admin-push-sw.js'
+      - '.github/workflows/admin-fitting-push-verify.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: CI=true npm test -- --watchAll=false --runInBand src/admin/fittings/AdminPushNotifications.test.tsx
+      - run: node --check public/admin-push-sw.js
+      - run: CI=true npm run build

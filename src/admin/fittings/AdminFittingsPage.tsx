@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
+import {AdminPushNotifications} from './AdminPushNotifications';
 import {Input} from '../../design-system/components/Input';
 import {Dialog} from '../../design-system/components/Dialog';
 import {SelectField} from '../../design-system/components/SelectField';
@@ -31,6 +32,7 @@ export function AdminFittingsPage(){
  catch(e){if(active.current&&!handleRequestError(e))setError(fittingError(e));}finally{lock.current=false;if(active.current)setBusy(false);}}
  const visible=items.filter(i=>filter==='all'||(filter==='review'?i.status==='review':filter==='refund'?(i.status==='cancelled'||i.status==='expired')&&i.paymentStatus==='paid':i.status===filter));
  return <Page><Actions><Input label="Měsíc" type="month" value={month} disabled={busy} onChange={e=>{if(e.target.value){setMonth(e.target.value);setDay('');}}}/><SelectField label="Stav zkoušky" value={filter} onChange={e=>setFilter(e.target.value)} ><option value="all">Vše</option><option value="pending">Čeká na platbu</option><option value="review">Ověřit platbu</option><option value="confirmed">Potvrzené</option><option value="completed">Proběhlé</option><option value="refund">Zrušené s přijatou platbou</option></SelectField><Button variant="secondary" disabled={busy} onClick={()=>{setIntent(null);setRevision(x=>x+1);}}>Obnovit přehled</Button><RouteLink to="/admin/nastaveni">Nastavení zkoušek</RouteLink><RouteLink to="/admin/kalendar">Kalendář pronájmů</RouteLink></Actions>
+ {access.owner&&token?<AdminPushNotifications token={token}/>:null}
  <CalendarCard><Heading>{formatCalendarMonth(month)}</Heading><Calendar aria-label="Kalendář zkoušek">{['Po','Út','St','Čt','Pá','So','Ne'].map(d=><Copy key={d} style={{textAlign:'center'}}>{d}</Copy>)}{monthCalendarGridDays(month).map((date,index)=>date?<Button key={date} variant={day===date?'primary':'secondary'} aria-label={`Zkoušky ${date}`} aria-pressed={day===date} disabled={busy||date.slice(0,7)!==month} onClick={()=>setDay(day===date?'':date)}><span>{Number(date.slice(-2))}</span>{!day?<small>{items.filter(i=>i.date===date&&!['cancelled','expired'].includes(i.status)).length||'–'}</small>:null}</Button>:<span key={index}/>)}</Calendar>{day?<Actions><Copy>{fittingDateLabel(day)}</Copy><Button variant="ghost" onClick={()=>setDay('')}>Celý měsíc</Button></Actions>:null}</CalendarCard>
  {error&&!intent?<Copy role="alert">{error}</Copy>:null}{success?<Copy role="status">{success}</Copy>:null}{loading?<Copy role="status">Načítání zkoušek…</Copy>:null}{truncated?<Copy role="alert">Přehled je příliš rozsáhlý. Vyberte konkrétní den pro úplný seznam.</Copy>:null}
  {!loading&&!visible.length&&!error?<Copy>Pro tento výběr nejsou žádné zkoušky.</Copy>:null}
