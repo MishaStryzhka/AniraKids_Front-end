@@ -296,7 +296,7 @@ test('dirty Core survives applied ALT success and failed delete then refresh wit
   fireEvent.click(screen.getByRole('button', {name: 'Uložit ALT'}));
   await waitFor(() => expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
   expect(screen.queryByRole('button', {name: 'Uložit ALT'})).not.toBeInTheDocument();
-  expect(within(media()).getByText('Nový ALT')).toBeInTheDocument();
+  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Nový ALT');
   checkCoreUntouched();
   fireEvent.change(screen.getByLabelText('SEO titulek'), {target: {value: 'x'.repeat(71)}});
   fireEvent.click(save());
@@ -579,7 +579,7 @@ test('photo ALT mutation preserves active variant editor draft canonical variant
   fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Nový ALT'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
   await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
-  expect(within(media()).getByText('Nový ALT')).toBeInTheDocument();
+  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Nový ALT');
 
   expect(document.querySelector('[data-variant-id="v1"] [data-variant-editor]')).toBeInTheDocument();
   expect(screen.getByLabelText('Velikost')).toHaveValue('104');
@@ -807,7 +807,7 @@ test('R1 B: real Photo ALT save preserves active dirty Inventory editor draft ca
   fireEvent.change(screen.getByLabelText('Alternativní text'),{target:{value:'Photo saved'}});
   fireEvent.click(screen.getByRole('button',{name:'Uložit ALT'}));
   await waitFor(()=>expect(status()).toHaveTextContent('Alternativní text byl uložen.'));
-  expect(within(media()).getByText('Photo saved')).toBeInTheDocument();
+  expect(media().querySelector('[data-photo-id="a"] img')).toHaveAttribute('alt', 'Photo saved');
 
   const inventoryRow=document.querySelector<HTMLElement>('[data-inventory-id="i1"]')!;
   expect(document.querySelector('[data-inventory-editor-kind="edit"]')).toBeInTheDocument();
