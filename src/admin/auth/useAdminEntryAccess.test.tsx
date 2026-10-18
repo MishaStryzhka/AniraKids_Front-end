@@ -67,3 +67,16 @@ test('returning to the window rechecks access and hides a revoked entry', async 
   expect(result.current).toBe(false);
   expect(probe).toHaveBeenCalledTimes(2);
 });
+
+test('partner fallback requires an explicit forbidden result, never a pending or failed probe', async()=>{
+  const {useAdminEntryState}=require('./useAdminEntryAccess');
+  let reject:any;
+  probe.mockImplementationOnce(()=>new Promise((_resolve,no)=>{reject=no;}));
+  const {result}=renderHook(useAdminEntryState);
+  expect(result.current).toEqual({canAccessAdmin:false,canUsePartnerEntry:false});
+  await act(async()=>reject({kind:'network'}));
+  expect(result.current).toEqual({canAccessAdmin:false,canUsePartnerEntry:false});
+  probe.mockRejectedValue({kind:'forbidden'});
+  await act(async()=>window.dispatchEvent(new Event('focus')));
+  expect(result.current).toEqual({canAccessAdmin:false,canUsePartnerEntry:true});
+});

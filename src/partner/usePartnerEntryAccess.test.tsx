@@ -59,3 +59,10 @@ test('focus checks revocation', async () => {
   await act(async () => window.dispatchEvent(new Event('focus')));
   expect(result.current).toBe(false);
 });
+
+test.each([{owner:true},{managePartners:true}])('site administrators never use the partner shortcut (%j)',async flags=>{
+  probe.mockResolvedValue({...access,...flags});
+  const {result}=renderHook(usePartnerEntryAccess);
+  await act(async()=>{});
+  expect(result.current).toBe(false);
+});

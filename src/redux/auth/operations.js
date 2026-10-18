@@ -144,13 +144,15 @@ export const refreshUser = createAsyncThunk(
     try {
       // If there is a token, add it to the HTTP header and perform the request
       setAuthHeader(persistedToken);
-      const res = await axios.get('/api/users/current');
+      const res = await axios.get('/api/users/current', { headers: { Authorization: `Bearer ${persistedToken}` } });
       rememberDeviceSignIn();
       return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      if (error.response?.status === 401 && thunkAPI.getState().auth.token === persistedToken) clearAuthHeader();
+      return thunkAPI.rejectWithValue({ status: error.response?.status || 0, message: 'Přihlášení se nepodařilo ověřit.' });
     }
-  }
+  },
+  { condition: (_, { getState }) => Boolean(getState().auth.token) && !getState().auth.isRefreshing }
 );
 
 /*

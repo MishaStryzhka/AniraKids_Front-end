@@ -151,13 +151,17 @@ export function useAdminAccess(){const value=useContext(AdminAccessContext);if(!
 
 export function AdminAccessBoundary() {
   const dispatch = useDispatch<any>();
-  const { token, isLoggedIn, isRefreshing } = useAuth();
+  const { token, isLoggedIn, isRefreshing, refreshError } = useAuth();
   const authModal = useContext(ModalAuthContext);
   const [state, setState] = useState<AdminAccessState>('auth_refreshing');
   const [retryRevision, setRetryRevision] = useState(0);
   const [access,setAccess]=useState<{token:string;value:Access}|null>(null);
 
   useEffect(() => {
+    if (token && !isLoggedIn && !isRefreshing && refreshError) {
+      setState('network_error');
+      return;
+    }
     if (isRefreshing || (token && !isLoggedIn)) {
       setState('auth_refreshing');
       return;
@@ -183,9 +187,12 @@ export function AdminAccessBoundary() {
       });
 
     return () => controller.abort();
-  }, [isLoggedIn, isRefreshing, retryRevision, token]);
+  }, [isLoggedIn, isRefreshing, refreshError, retryRevision, token]);
 
-  const retry = useCallback(() => setRetryRevision(value => value + 1), []);
+  const retry = useCallback(() => {
+    if (token && !isLoggedIn) dispatch(refreshUser());
+    else setRetryRevision(value => value + 1);
+  }, [dispatch, token, isLoggedIn]);
   const handleRequestError=useCallback((error:unknown)=>{const normalized=normalizeAdminApiError(error);if(!['unauthorized','forbidden','admin_disabled','configuration_error'].includes(normalized.kind))return false;setState(stateFromAdminError(normalized));return true;},[]);
   const accessContext=useMemo(()=>({handleRequestError}),[handleRequestError]);
   const recoverSession = useCallback(() => { dispatch(refreshUser()); }, [dispatch]);
