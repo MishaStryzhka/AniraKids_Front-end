@@ -1,4 +1,6 @@
 import {FittingPage,FittingStatusPage} from '../fittings/FittingPage';
+import {ReferralCapture} from '../partner/referral';
+import {PartnerPage} from '../partner/PartnerPage';
 import {AdminFittingsPage} from '../admin/fittings/AdminFittingsPage';
 import {AdminSettingsPage} from '../admin/settings/AdminSettingsPage';
 import {SiteSectionGate} from '../siteSettings/SiteSettingsProvider';
@@ -85,6 +87,7 @@ function App() {
               phone: user.primaryPhoneNumber,
             } : null}
         >
+          <ReferralCapture />
           <Routes>
             <Route
               element={
@@ -96,6 +99,7 @@ function App() {
               }
             >
               <Route path="/zkouska" element={<FittingPage/>}/>
+              <Route path="/partner" element={<PartnerPage/>}/>
               <Route path="/zkouska/:number" element={<FittingStatusPage/>}/>
               <Route path={routes.home} element={<MainPage />} />
 

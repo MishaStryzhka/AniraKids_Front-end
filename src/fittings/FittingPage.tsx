@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import {getReferralToken} from '../partner/referral';
 import {useLocation,useNavigate,useParams,useSearchParams} from 'react-router-dom';
 import styled from 'styled-components';
 import {CalendarClock} from 'lucide-react';
@@ -42,7 +43,7 @@ function FittingForm(){
  async function submit(){
   if(busyRef.current||sessionPending||accountBlocked)return;busyRef.current=true;setBusy(true);setError('');
   try{
-   const request=attemptRef.current||{...contact,date,time,accountId,operationId:crypto.randomUUID(),token:randomToken(),...(params.get('product')?{productId:params.get('product')!}:{})};
+   const request=attemptRef.current||{...contact,date,time,accountId,...(getReferralToken()?{referralToken:getReferralToken()}:{}),operationId:crypto.randomUUID(),token:randomToken(),...(params.get('product')?{productId:params.get('product')!}:{})};
    sessionStorage.setItem(STORAGE,JSON.stringify(request));attemptRef.current=request;setAttempt(request);
    const {accountId:requestOwner,...body}=request;
    const result=await fittingApi<Fitting>('/fittings',{method:'POST',body,token:requestOwner?authToken:undefined});

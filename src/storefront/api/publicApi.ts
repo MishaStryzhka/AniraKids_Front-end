@@ -40,6 +40,7 @@ export type Selection = {
   endDate: string;
 };
 export type Availability = Selection & {
+  additionalDressDiscount?: number;
   available: boolean;
   checkedAt: string;
   pricing: Pricing;
@@ -53,6 +54,7 @@ export type Customer = {
 export type ReservationSelection = Pick<Selection, 'productId' | 'variantId'>;
 export type BookingQuote = Availability & { items?: Availability[] };
 export type ReservationBody = Selection & {
+  referralToken?: string;
   items?: ReservationSelection[];
   customer: Customer;
   notes?: string;
@@ -272,6 +274,7 @@ export function parseAvailability(
     startDate: expected.startDate,
     endDate: expected.endDate,
     available: a.available,
+    ...(a.additionalDressDiscount===20?{additionalDressDiscount:20}:{}),
     checkedAt: a.checkedAt,
     pricing: parsePricing(a.pricing),
   };
@@ -410,6 +413,7 @@ export async function postReservation(
     method: 'POST',
     body: JSON.stringify(body.items ? {
       items: body.items, rentalMode: body.rentalMode, startDate: body.startDate,
+      ...(body.referralToken?{referralToken:body.referralToken}:{}),
       endDate: body.endDate, customer: body.customer, ...(body.notes === undefined ? {} : { notes: body.notes }),
     } : body),
     headers: { 'Idempotency-Key': key, ...(token ? { Authorization: `Bearer ${token}` } : {}) },

@@ -1,4 +1,5 @@
 import {FittingSettingsSection} from '../fittings/FittingSettingsSection';
+import {Link} from 'react-router-dom';
 import {AdministratorsSection} from './AdministratorsSection';
 import {useAdminPermissions} from '../auth/permissions';
 import {useEffect, useRef, useState} from 'react';
@@ -100,6 +101,7 @@ export function AdminSettingsPage() {
     </SettingsDisclosure>
     <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure>
     {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
+    {access.owner?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
       <Actions ref={node=>{cancelButton.current=node?.querySelector<HTMLButtonElement>('button')??null;}}><Button onClick={()=>blocker.state==='blocked'&&blocker.reset()}>Zůstat</Button><Button variant="secondary" onClick={()=>blocker.state==='blocked'&&blocker.proceed()}>Odejít</Button></Actions>
     </Dialog>

@@ -1,4 +1,5 @@
 import { isDateOnly, pragueToday } from '../../admin/calendar/calendarDates';
+import {getReferralToken} from '../../partner/referral';
 import {
   isMode,
   object,
@@ -80,6 +81,7 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
+    ...(getReferralToken()?{referralToken:getReferralToken()}:{}),
     ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
       productId: item.product.id, variantId: item.variantId,
     })) } : {}),
@@ -105,7 +107,8 @@ export function parseBody(v: unknown): ReservationBody {
     !['firstName', 'lastName', 'email', 'phone'].every(
       key => typeof (v.customer as Record<string, unknown>)[key] === 'string'
     ) ||
-    (v.notes !== undefined && typeof v.notes !== 'string')
+    (v.notes !== undefined && typeof v.notes !== 'string') ||
+    (v.referralToken !== undefined && (typeof v.referralToken !== 'string' || v.referralToken.length>1200))
   )
     throw new Error('Invalid attempt');
   let items: ReservationBody['items'];
@@ -135,6 +138,7 @@ export function parseBody(v: unknown): ReservationBody {
       phone: customer.phone,
     },
     ...(v.notes === undefined ? {} : { notes: v.notes as string }),
+    ...(v.referralToken === undefined ? {} : { referralToken: v.referralToken as string }),
   };
 }
 export const SESSION_KEY = 'anirakids.booking.v1';
