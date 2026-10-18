@@ -7,7 +7,7 @@ async function setup(page,{authFail=false}={}){
   window.permissionRequests=0;
   Object.defineProperty(window,'Notification',{configurable:true,value:{permission:'granted',requestPermission:async()=>{window.permissionRequests++;return 'granted';}}});
   Object.defineProperty(window,'PushManager',{configurable:true,value:function(){}});
-  Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{getRegistration:async()=>({pushManager:{getSubscription:async()=>({endpoint:'https://fcm.googleapis.com/fcm/send/fixture-endpoint-long-enough'})}})}});
+  Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{register:async()=>({}),getRegistration:async()=>({pushManager:{getSubscription:async()=>({endpoint:'https://fcm.googleapis.com/fcm/send/fixture-endpoint-long-enough',toJSON:()=>({keys:{p256dh:'fixture-public-key',auth:'fixture-auth'}})})}})}});
  });
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
   const p=new URL(route.request().url()).pathname,method=route.request().method();
@@ -38,7 +38,10 @@ for(const width of [375,390,430,768,1024,1440])test('notification settings prese
  const region=page.getByLabel('Odběry upozornění na tomto zařízení');
  await expect(region.getByRole('button',{name:'Zkusit znovu'})).toBeVisible();state.pushFail=false;
  await region.getByRole('button',{name:'Zkusit znovu'}).click();
- const checkbox=region.getByRole('checkbox');await expect(checkbox).toBeChecked();
+ const checkbox=region.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});await expect(checkbox).toBeChecked();
+ const created=region.getByRole('checkbox',{name:'Nová rezervace zkoušky'});await expect(created).not.toBeChecked();
+ await created.click();await expect(created).toBeChecked();
+ expect(state.topics).toEqual(['fitting_created','fitting_payment_reported']);
  state.saveFail=true;await checkbox.click();await expect(region).toContainText('Původní nastavení zůstalo zachované.');await expect(checkbox).toBeChecked();
  state.saveFail=false;await checkbox.click();await expect(checkbox).not.toBeChecked();
  await expect(page.getByRole('heading',{name:'Nastavení',exact:true})).toBeVisible();
@@ -46,7 +49,8 @@ for(const width of [375,390,430,768,1024,1440])test('notification settings prese
  expect(await page.evaluate(()=>window.permissionRequests)).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.screenshot({path:'test-evidence/notification-session/settings-'+width+'.png'});
- await page.reload();await page.locator('summary').filter({hasText:'Upozornění'}).click();await expect(checkbox).not.toBeChecked();
+ await page.reload();await page.locator('summary').filter({hasText:'Upozornění'}).click();await expect(checkbox).not.toBeChecked();await expect(created).toBeChecked();
+ expect(state.topics).toEqual(['fitting_created']);
  expect(errors).toEqual([]);
 });
 test('cold admin session retries after 503 without losing persisted login',async({page})=>{
