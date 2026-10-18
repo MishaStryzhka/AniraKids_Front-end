@@ -21,7 +21,12 @@ import { discountQuotes } from './discount';
 import { statusLabel } from '../storefront/booking/bookingModel';
 import { fittingStatusLabels } from '../fittings/fittingApi';
 import { fittingApi, type Slots } from '../fittings/fittingApi';
-import { pragueToday } from '../admin/calendar/calendarDates';
+import {
+  pragueToday,
+  formatCalendarDay,
+} from '../admin/calendar/calendarDates';
+import { PartnerCalendar } from './PartnerCalendar';
+import { rentalsOnDay, fittingsOnDay } from './partnerCalendarModel';
 const formatMoney = (amount: number) =>
   new Intl.NumberFormat('cs-CZ', {
     style: 'currency',
@@ -215,6 +220,18 @@ export function PartnerPage() {
   const mutation = useRef(false);
   const dataKey = `${tab}:${month}:${revision}:${token}`;
   const data = loadedKey === dataKey ? rawData : null;
+  const [calendarDay, setCalendarDay] = useState(pragueToday());
+  const selectedDay = calendarDay.startsWith(month + '-')
+    ? calendarDay
+    : month + '-01';
+  const rentalItems =
+    tab === 'calendar'
+      ? rentalsOnDay<any>(data?.items || [], selectedDay)
+      : data?.items || [];
+  const fittingItems =
+    tab === 'calendar'
+      ? fittingsOnDay<any>(data?.fittings || [], selectedDay)
+      : data?.items || [];
   const [creating, setCreating] = useState(false);
   const [creatingFitting, setCreatingFitting] = useState(false);
   useEffect(() => {
@@ -261,10 +278,21 @@ export function PartnerPage() {
       access.role === 'administrator'
         ? partnerApi('members', token)
         : Promise.resolve({ items: [] }),
+      tab === 'calendar'
+        ? partnerApi('fittings?month=' + month, token)
+        : Promise.resolve({ items: [], truncated: false }),
     ])
-      .then(([v, c, team]) => {
+      .then(([v, c, team, fittings]) => {
         if (active) {
-          setData(v);
+          setData(
+            tab === 'calendar'
+              ? {
+                  ...v,
+                  fittings: fittings.items,
+                  truncated: v.truncated || fittings.truncated,
+                }
+              : v
+          );
           setLoadedKey(dataKey);
           setCatalogue(c.items);
           setMembers(team.items);
@@ -403,28 +431,32 @@ export function PartnerPage() {
                 ))}
               </SelectField>
             </MonthFields>
-            <Button
-              variant="secondary"
-              disabled={busy}
-              onClick={() => setRevision(v => v + 1)}
-            >
-              Obnovit
-            </Button>
-            {tab !== 'fittings' ? (
-              <Button
-                disabled={!access.enabled}
-                onClick={() => setCreating(v => !v)}
-              >
-                <Plus size={18} /> Nová rezervace
-              </Button>
-            ) : (
-              <Button
-                disabled={!access.enabled}
-                onClick={() => setCreatingFitting(v => !v)}
-              >
-                Nová zkouška
-              </Button>
-            )}
+            {tab !== 'calendar' ? (
+              <>
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setRevision(v => v + 1)}
+                >
+                  Obnovit
+                </Button>
+                {tab !== 'fittings' ? (
+                  <Button
+                    disabled={!access.enabled}
+                    onClick={() => setCreating(v => !v)}
+                  >
+                    <Plus size={18} /> Nová rezervace
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={!access.enabled}
+                    onClick={() => setCreatingFitting(v => !v)}
+                  >
+                    Nová zkouška
+                  </Button>
+                )}
+              </>
+            ) : null}
           </Toolbar>
         ) : null}
         {creating ? (
@@ -457,7 +489,25 @@ export function PartnerPage() {
           </Card>
         ) : null}
         {data?.truncated ? (
-          <p role="alert">Zobrazeno prvních 500 záznamů.</p>
+          <p role="alert">
+            Zobrazeno prvních 500 záznamů každého typu. Počty nemusí být úplné.
+          </p>
+        ) : null}
+        {tab === 'calendar' && data ? (
+          <>
+            <PartnerCalendar
+              month={month}
+              selectedDay={selectedDay}
+              onSelectDay={setCalendarDay}
+              rentals={data.items}
+              fittings={data.fittings}
+            />
+            <h2>{formatCalendarDay(selectedDay, true)}</h2>
+            <p role="status">
+              Zkoušky: {fittingItems.length} · Pronájmy: {rentalItems.length}
+            </p>
+            <h2>Pronájmy</h2>
+          </>
         ) : null}
         {['overview', 'reservations', 'calendar'].includes(tab) &&
         data?.items ? (
@@ -479,10 +529,14 @@ export function PartnerPage() {
                 </Card>
               </Grid>
             ) : null}
-            {!data.items.length ? (
-              <Card>V tomto měsíci nejsou žádné rezervace.</Card>
+            {!rentalItems.length ? (
+              <Card>
+                {tab === 'calendar'
+                  ? 'V tento den nejsou žádné pronájmy.'
+                  : 'V tomto měsíci nejsou žádné rezervace.'}
+              </Card>
             ) : (
-              data.items.map((r: any) => (
+              rentalItems.map((r: any) => (
                 <Card key={r.id}>
                   <Row>
                     <h2>{r.number}</h2>
@@ -635,12 +689,17 @@ export function PartnerPage() {
             ))}
           </Grid>
         ) : null}
-        {tab === 'fittings' && data?.items ? (
+        {['fittings', 'calendar'].includes(tab) && data?.items ? (
           <>
-            {!data.items.length ? (
-              <Card>V tomto měsíci nejsou žádné zkoušky.</Card>
+            {tab === 'calendar' ? <h2>Zkoušky</h2> : null}
+            {!fittingItems.length ? (
+              <Card>
+                {tab === 'calendar'
+                  ? 'V tento den nejsou žádné zkoušky.'
+                  : 'V tomto měsíci nejsou žádné zkoušky.'}
+              </Card>
             ) : null}
-            {data.items.map((f: any) => (
+            {fittingItems.map((f: any) => (
               <Card key={f.id}>
                 <h2>
                   {f.date} · {f.time}
