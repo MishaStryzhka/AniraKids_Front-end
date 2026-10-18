@@ -18,7 +18,7 @@ async function setup(page,{authFail=false}={}){
   if(p.endsWith('/admin/push/preferences'))return state.pushFail?json({},503):json({subscribed:true,topics:state.topics});
   if(p.endsWith('/admin/push/subscribe')){state.writes.push(route.request().postDataJSON());if(state.saveFail)return json({},503);state.topics=route.request().postDataJSON().topics;return json({ok:true});}
   if(p.endsWith('/admin/settings')||p.endsWith('/site-settings'))return json({sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false}});
-  if(p.endsWith('/admin/fitting-settings'))return json({enabled:false,address:'',weekly:[],blockedDates:[]});
+  if(p.endsWith('/admin/fitting-settings'))return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});
   if(p.endsWith('/admin/administrators'))return json({owners:[],items:[],total:0});
   if(p.endsWith('/admin/fittings'))return json({items:[]});
   if(p.endsWith('/admin/products'))return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
@@ -40,7 +40,7 @@ for(const width of [375,390,430,768,1024,1440])test('notification settings prese
  await region.getByRole('button',{name:'Zkusit znovu'}).click();
  const checkbox=region.getByRole('checkbox');await expect(checkbox).toBeChecked();
  state.saveFail=true;await checkbox.click();await expect(region).toContainText('Původní nastavení zůstalo zachované.');await expect(checkbox).toBeChecked();
- state.saveFail=false;await checkbox.uncheck();await expect(checkbox).not.toBeChecked();
+ state.saveFail=false;await checkbox.click();await expect(checkbox).not.toBeChecked();
  await expect(page.getByRole('heading',{name:'Nastavení',exact:true})).toBeVisible();
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('persist:auth')).token)).toBe(JSON.stringify('session-fixture'));
  expect(await page.evaluate(()=>window.permissionRequests)).toBe(0);
