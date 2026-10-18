@@ -19,7 +19,7 @@ test.each([
 
 test('confirmed attachment uncertainty exposes only same-ID retry',()=>{renderPhase('provider-confirmed-unattached','Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');expect(screen.getByRole('button',{name:'Zkusit připojit znovu'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Ověřit a připojit'})).not.toBeInTheDocument()});
 test('unknown state exposes one recovery action',()=>{renderPhase('unknown');expect(screen.getByRole('button',{name:'Ověřit a připojit'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Zkusit ověřit znovu'})).not.toBeInTheDocument()});
-test('main photo uses neutral StatusBadge semantics and refresh is state-driven',()=>{hook.mockReturnValue({...base,refreshReason:'photo-missing',feedback:'Fotografie už u produktu není.'});render(<ProductMediaSection {...props}/>);expect(screen.getByText('Hlavní fotografie')).toBeInTheDocument();expect(screen.getByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled()});
+test('main photo uses neutral StatusBadge semantics and refresh is state-driven',()=>{hook.mockReturnValue({...base,refreshReason:'photo-missing',feedback:'Fotografie už u produktu není.'});render(<ProductMediaSection {...props}/>);expect(screen.getByRole('listitem',{name:'Hlavní fotografie'})).toHaveAttribute('data-main', 'true');expect(screen.getByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled()});
 
 
 test('reports pending media risk only for active/unresolved phases',async()=>{
