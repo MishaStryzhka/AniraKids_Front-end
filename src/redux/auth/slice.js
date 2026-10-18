@@ -19,6 +19,9 @@ const initialState = {
   isLoading: false,
   isDone: null,
   isRefreshing: false,
+  refreshRequestId: null,
+  refreshToken: null,
+  refreshError: null,
   error: null,
   isFirstLogin: false,
 };
@@ -114,19 +117,33 @@ const authSlice = createSlice({
         state.isFirstLogin = false;
       })
       // refreshUser
-      .addCase(refreshUser.pending, state => {
+      .addCase(refreshUser.pending, (state, action) => {
         state.isRefreshing = true;
+        state.refreshRequestId = action.meta.requestId;
+        state.refreshToken = state.token;
+        state.refreshError = null;
       })
       .addCase(refreshUser.fulfilled, (state, action) => {
+        if (state.refreshRequestId !== action.meta.requestId) return;
+        state.isRefreshing = false;
+        if (state.refreshToken !== state.token) return;
         if (!state.token) { state.isRefreshing = false; return; }
         state.user = action.payload.user;
         state.isLoggedIn = true;
         state.isRefreshing = false;
         state.isFirstLogin = false;
       })
-      .addCase(refreshUser.rejected, state => {
+      .addCase(refreshUser.rejected, (state, action) => {
+        if (state.refreshRequestId !== action.meta.requestId) return;
         state.isRefreshing = false;
-        state.token = null;
+        if (state.refreshToken !== state.token) return;
+        if (action.payload?.status === 401) {
+          state.token = null;
+          state.user = null;
+          state.isLoggedIn = false;
+        } else {
+          state.refreshError = action.payload || { status: 0 };
+        }
       })
 
       // updateUserInfo

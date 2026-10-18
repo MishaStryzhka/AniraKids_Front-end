@@ -103,8 +103,9 @@ export function AdminSettingsPage() {
     {error?<Feedback role="alert">{error}</Feedback>:null}
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
     </SettingsDisclosure>
-    <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure></> : null}
-    {access.owner&&token?<SettingsDisclosure title="Upozornění" icon={<Bell size={22} aria-hidden="true"/>}><AdminPushNotifications token={token}/></SettingsDisclosure>:null}
+    <SettingsDisclosure id="zkousky" title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure></> : null}
+    {access.owner&&token?<SettingsDisclosure id="upozorneni" title="Upozornění" icon={<Bell size={22} aria-hidden="true"/>}><AdminPushNotifications token={token}/></SettingsDisclosure>:null}
+
     {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
     {canPartners?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>

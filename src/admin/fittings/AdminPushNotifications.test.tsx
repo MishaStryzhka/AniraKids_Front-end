@@ -83,3 +83,20 @@ test('does not enable push when all topic subscriptions are off', async()=>{
   expect(screen.getByRole('button',{name:'Zapnout upozornění'})).toBeDisabled();
   expect(permission).not.toHaveBeenCalled();
 });
+
+test('temporary preferences error is retryable without asking permission or losing saved topics', async()=>{
+  getRegistration.mockResolvedValue({pushManager:{getSubscription,subscribe}});
+  getSubscription.mockResolvedValue(pushSubscription);
+  let failed=true;
+  api.mockImplementation((_token:string,path:string)=>{
+    if(path==='/admin/push/config')return Promise.resolve({enabled:true,publicKey});
+    if(path==='/admin/push/preferences'&&failed)return Promise.reject(new Error('offline'));
+    return Promise.resolve({subscribed:true,topics:[]});
+  });
+  render(<AdminPushNotifications token="t"/>);
+  fireEvent.click(await screen.findByRole('button',{name:'Zkusit znovu'}));
+  failed=false;
+  await screen.findByRole('button',{name:'Vypnout upozornění'});
+  expect(screen.getByRole('checkbox')).not.toBeChecked();
+  expect(permission).not.toHaveBeenCalled();
+});

@@ -18,7 +18,7 @@ const TopicName = styled.strong`font-size:15px;`;
 const topicId = 'fitting_payment_reported' as const;
 type PushPreferences = {subscribed:boolean;topics:string[]};
 type PushConfig = {enabled:boolean;publicKey:string};
-type State = 'loading'|'off'|'on'|'unsupported'|'unconfigured'|'denied';
+type State = 'loading'|'off'|'on'|'unsupported'|'unconfigured'|'denied'|'error';
 
 const supported = () =>
   typeof window !== 'undefined' &&
@@ -38,9 +38,11 @@ export function AdminPushNotifications({token}:{token:string}) {
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
   const [topics,setTopics]=useState<string[]>([topicId]);
+  const [revision,setRevision]=useState(0);
   useEffect(()=>{
     if(!token)return;
     let mounted=true;
+    setState('loading');setError('');
     if(!supported()){setState('unsupported');return;}
     if(Notification.permission==='denied'){setState('denied');return;}
     fittingAdmin<PushConfig>(token,'/admin/push/config').then(async result=>{
@@ -55,9 +57,9 @@ export function AdminPushNotifications({token}:{token:string}) {
       if(!mounted)return;
       setTopics(prefs.subscribed ? prefs.topics : [topicId]);
       setState(prefs.subscribed ? 'on' : 'off');
-    }).catch(()=>{if(mounted)setState('unconfigured');});
+    }).catch(()=>{if(mounted)setState('error');});
     return()=>{mounted=false;};
-  },[token]);
+  },[token,revision]);
 
   async function enable(){
     if(!supported()||!config?.enabled||busy)return;
@@ -120,9 +122,11 @@ export function AdminPushNotifications({token}:{token:string}) {
        state==='unsupported'?'Prohlížeč nepodporuje push. Na iPhonu přidejte ANIRAK na plochu a otevřete jej z ikony.':
        state==='denied'?'Upozornění jsou zakázaná v nastavení prohlížeče.':
        state==='unconfigured'?'Push upozornění čekají na aktivaci serveru.':
+       state==='error'?'Odběry se nepodařilo načíst. Zkontrolujte připojení a zkuste to znovu.':
        'Zapněte push pro toto zařízení. Potom vyberte, které události chcete odebírat.'}
       {error?' '+error:''}
     </Copy>
+    {state==='error'?<Button variant="secondary" onClick={()=>setRevision(value=>value+1)}>Zkusit znovu</Button>:null}
     {state==='off'?<Button variant="secondary" disabled={busy||topics.length===0} onClick={()=>void enable()}>
       {busy?'Zapínání…':'Zapnout upozornění'}
     </Button>:null}

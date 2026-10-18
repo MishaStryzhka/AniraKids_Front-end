@@ -18,6 +18,7 @@ export const useAuth = () => {
   const isRefreshing = useSelector(selectIsRefreshing);
   const user = useSelector(selectUser);
   const error = useSelector(selectError);
+  const refreshError = useSelector(state => state.auth.refreshError);
   const currentTheme = useSelector(selectCurrentTheme);
   const isFirstLogin = useSelector(selectIsFirstLogin);
   const isDone = useSelector(selectIsDone);
@@ -29,6 +30,7 @@ export const useAuth = () => {
     isRefreshing,
     user,
     error,
+    refreshError,
     currentTheme,
     isFirstLogin,
     isDone,
