@@ -452,7 +452,7 @@ export function PartnerPage() {
                     disabled={!access.enabled}
                     onClick={() => setCreatingFitting(v => !v)}
                   >
-                    Nová zkouška
+                    <Plus size={18} aria-hidden="true" /> Nová zkouška
                   </Button>
                 )}
               </>
