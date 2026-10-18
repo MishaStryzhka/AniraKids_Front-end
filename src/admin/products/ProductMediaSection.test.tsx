@@ -1,4 +1,4 @@
-import {render,screen,waitFor} from '@testing-library/react';
+import {render,screen,waitFor,within} from '@testing-library/react';
 import {ProductMediaSection} from './ProductMediaSection';
 import {useProductMediaController} from './useProductMediaController';
 jest.mock('./useProductMediaController',()=>({useProductMediaController:jest.fn()}));
@@ -19,8 +19,22 @@ test.each([
 
 test('confirmed attachment uncertainty exposes only same-ID retry',()=>{renderPhase('provider-confirmed-unattached','Fotografie byla nahrána, ale její připojení k produktu se nepodařilo potvrdit.');expect(screen.getByRole('button',{name:'Zkusit připojit znovu'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Ověřit a připojit'})).not.toBeInTheDocument()});
 test('unknown state exposes one recovery action',()=>{renderPhase('unknown');expect(screen.getByRole('button',{name:'Ověřit a připojit'})).toBeEnabled();expect(screen.queryByRole('button',{name:'Zkusit ověřit znovu'})).not.toBeInTheDocument()});
-test('main photo uses neutral StatusBadge semantics and refresh is state-driven',()=>{hook.mockReturnValue({...base,refreshReason:'photo-missing',feedback:'Fotografie už u produktu není.'});render(<ProductMediaSection {...props}/>);expect(screen.getByRole('listitem',{name:'Hlavní fotografie'})).toHaveAttribute('data-main', 'true');expect(screen.getByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled()});
+test('main photo has highlighted position and refresh is state-driven',()=>{hook.mockReturnValue({...base,refreshReason:'photo-missing',feedback:'Fotografie už u produktu není.'});render(<ProductMediaSection {...props}/>);expect(screen.getByRole('listitem',{name:'Hlavní fotografie'})).toHaveAttribute('data-main', 'true');expect(screen.getByRole('button',{name:'Načíst aktuální fotografie'})).toBeEnabled()});
 
+
+test('photo tile exposes exactly three controls, keeps ALT metadata and never opens ALT editor', () => {
+  hook.mockReturnValue({...base});
+  render(<ProductMediaSection {...props}/>);
+  const item=screen.getByRole('listitem',{name:'Hlavní fotografie'});
+  expect(within(item).getAllByRole('button')).toHaveLength(3);
+  expect(within(item).getByRole('img',{name:'A'})).toHaveAttribute('alt','A');
+  expect(within(item).getByRole('button',{name:'Odebrat fotografii'})).toBeEnabled();
+  expect(within(item).getByRole('button',{name:'Posunout dříve'})).toBeDisabled();
+  expect(within(item).getByRole('button',{name:'Posunout později'})).toBeDisabled();
+  expect(screen.queryByRole('button',{name:'Upravit ALT'})).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Alternativní text')).not.toBeInTheDocument();
+  expect(base.startAlt).not.toHaveBeenCalled();
+});
 
 test('reports pending media risk only for active/unresolved phases',async()=>{
   const pending=jest.fn();
