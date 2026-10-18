@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   LayoutDashboard,
@@ -170,6 +170,7 @@ function PaymentQr({ payload }: { payload: string }) {
     <img src={image} alt="QR kód" style={{ width: 240, maxWidth: '100%' }} />
   ) : null;
 }
+export function LegacyPartnerRedirect(){const location=useLocation();return <Navigate replace to={'/partner/blaze'+location.search+location.hash}/>;}
 export function PartnerPage() {
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const [params, setParams] = useSearchParams();
