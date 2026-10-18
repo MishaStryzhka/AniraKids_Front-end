@@ -28,6 +28,8 @@ const keys=Object.keys(sectionLabels) as SectionKey[];
 export function AdminSettingsPage() {
   const {token} = useAuth();
   const access=useAdminPermissions();
+  const canSettings=access.owner||access.permissions.includes('settings');
+  const canPartners=access.owner||access.permissions.includes('partners');
   const [administratorsDirty,setAdministratorsDirty]=useState(false);
   const {handleRequestError} = useAdminAccess();
   const [baseline,setBaseline] = useState<SiteSettings | null>(null);
@@ -52,6 +54,7 @@ export function AdminSettingsPage() {
   useEffect(() => {
     const controller = new AbortController();request.current=controller;
     setLoading(true);setError('');setBaseline(null);setDraft(null);
+    if(!canSettings){setLoading(false);return ()=>controller.abort();}
     getAdminSettings(token ?? '',controller.signal).then(value => {
       if (!controller.signal.aborted) {setBaseline(value);setDraft(value);setLoading(false);}
     }).catch(error => {
@@ -59,7 +62,7 @@ export function AdminSettingsPage() {
       setError('Nastavení se nepodařilo načíst. Zkuste to znovu.');setLoading(false);
     });
     return () => {controller.abort();request.current?.abort();busy.current=false;};
-  }, [token,revision,handleRequestError]);
+  }, [token,revision,handleRequestError,canSettings]);
   async function save() {
     if (!draft || !baseline || !dirty || busy.current) return;
     busy.current=true;setSaving(true);setError('');setSuccess(false);
@@ -75,9 +78,9 @@ export function AdminSettingsPage() {
     } finally {if (!controller.signal.aborted) {busy.current=false;setSaving(false);}}
   }
   if (loading) return <Page role="status">Načítání nastavení…</Page>;
-  if (!draft) return <Page><Feedback role="alert">{error}</Feedback><Actions><Button onClick={()=>setRevision(x=>x+1)}>Zkusit znovu</Button></Actions></Page>;
+  if (canSettings && !draft) return <Page><Feedback role="alert">{error}</Feedback><Actions><Button onClick={()=>setRevision(x=>x+1)}>Zkusit znovu</Button></Actions></Page>;
   return <Page>
-    <SettingsDisclosure title="Sekce na webu" icon={<Eye size={22} aria-hidden="true"/>} dirty={dirty}>
+    {canSettings && draft ? <><SettingsDisclosure title="Sekce na webu" icon={<Eye size={22} aria-hidden="true"/>} dirty={dirty}>
     <form onSubmit={event=>{event.preventDefault();void save();}}>
       <Card aria-label="Sekce na webu">
 
@@ -99,9 +102,9 @@ export function AdminSettingsPage() {
     {error?<Feedback role="alert">{error}</Feedback>:null}
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
     </SettingsDisclosure>
-    <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure>
+    <SettingsDisclosure title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure></> : null}
     {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
-    {access.owner?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
+    {canPartners?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
       <Actions ref={node=>{cancelButton.current=node?.querySelector<HTMLButtonElement>('button')??null;}}><Button onClick={()=>blocker.state==='blocked'&&blocker.reset()}>Zůstat</Button><Button variant="secondary" onClick={()=>blocker.state==='blocked'&&blocker.proceed()}>Odejít</Button></Actions>
     </Dialog>

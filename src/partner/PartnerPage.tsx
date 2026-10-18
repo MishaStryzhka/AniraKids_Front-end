@@ -383,7 +383,7 @@ export function PartnerPage() {
               Kabinet čeká na aktivaci. Po aktivaci se nové rezervace a zkoušky
               zahrnou do evidence Blaze.
             </p>
-            {access.owner ? (
+            {(access.owner || access.managePartners) ? (
               <Button
                 disabled={busy}
                 onClick={() => act('setup', { enabled: true })}
@@ -645,7 +645,7 @@ export function PartnerPage() {
                         busy={busy}
                         act={act}
                       />
-                      {access.owner ? (
+                      {(access.owner || access.managePartners) ? (
                         <>
                           <SourceChange reservation={r} busy={busy} act={act} />
                           <Link to={'/admin/rezervace/' + r.id}>
@@ -713,7 +713,7 @@ export function PartnerPage() {
                 {f.paymentInstructions?.qrPayload ? (
                   <PaymentQr payload={f.paymentInstructions.qrPayload} />
                 ) : null}
-                {access.owner && ['pending', 'review'].includes(f.status) ? (
+                {(access.owner || access.managePartners) && ['pending', 'review'].includes(f.status) ? (
                   <Button
                     disabled={busy}
                     onClick={() =>
@@ -774,7 +774,7 @@ export function PartnerPage() {
               platby. Zkouška se započítá po jejím dokončení. Kauce není
               odměnou.
             </p>
-            {access.owner ? (
+            {(access.owner || access.managePartners) ? (
               <Settlement data={data} busy={busy} act={act} />
             ) : null}
             {data.lines.map((l: any) => (
@@ -809,7 +809,7 @@ export function PartnerPage() {
               <h2>Odkaz studia</h2>
               <ReferralLink code="blaze" />
             </Card>
-            {access.owner ? <MemberForm busy={busy} act={act} /> : null}
+            {(access.owner || access.managePartners) ? <MemberForm busy={busy} act={act} /> : null}
             {data.items?.map((m: any) => (
               <Card key={m.id}>
                 <h2>{m.email}</h2>
@@ -818,7 +818,7 @@ export function PartnerPage() {
                   {m.active ? 'Aktivní' : 'Přístup vypnutý'}
                 </p>
                 <ReferralLink code={m.referralCode} />
-                {access.owner ? (
+                {(access.owner || access.managePartners) ? (
                   <Row>
                     <Button
                       variant="secondary"

@@ -7,7 +7,7 @@ import { Divider } from '../../design-system/components/Divider';
 import { NavigationLink } from '../../design-system/components/NavigationLink';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { adminNavigationItems, resolveAdminNavigation } from './adminRoutes';
-import {useAdminPermissions,permissionForPath} from '../auth/permissions';
+import {useAdminPermissions,canAccessAdminPath} from '../auth/permissions';
 
 const Root = styled.nav`
   display: grid;
@@ -58,7 +58,7 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}
 
   return (
     <Root aria-label="Navigace administrace">
-      {adminNavigationItems.filter(item=>access.owner||access.permissions.includes(permissionForPath(item.to)!)).map(item => {const Icon=icons[item.key]; return (
+      {adminNavigationItems.filter(item=>access.owner||canAccessAdminPath(access,item.to)).map(item => {const Icon=icons[item.key]; return (
         <AdminLink
           key={item.key}
           variant="plain"

@@ -24,7 +24,7 @@ export async function probeAdminAccess(input: { token: string; signal?: AbortSig
   try {
     const config = buildAdminRequestConfig(input.token, input.signal);
     const {data}=await adminApiClient.get<Access>('/admin/access',config);
-    if(typeof data?.owner!=='boolean'||!Array.isArray(data.permissions)||data.permissions.some(p=>!['products','reservations','fittings','settings'].includes(p)))throw new Error('Invalid admin access response');
+    if(typeof data?.owner!=='boolean'||!Array.isArray(data.permissions)||data.permissions.some(p=>!['products','reservations','fittings','settings','partners'].includes(p)))throw new Error('Invalid admin access response');
     return data;
   } catch (error) {
     throw normalizeAdminApiError(error);

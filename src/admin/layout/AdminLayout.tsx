@@ -2,7 +2,7 @@ import { Menu } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { flushSync } from 'react-dom';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import {useAdminPermissions,permissionForPath} from '../auth/permissions';
+import {useAdminPermissions,canAccessAdminPath} from '../auth/permissions';
 import {adminNavigationItems} from '../navigation/adminRoutes';
 import styled from 'styled-components';
 import { IconButton } from '../../design-system/components/IconButton';
@@ -125,8 +125,8 @@ export function useAdminPageAction(action: ReactNode) {
 export function AdminLayout() {
   const location = useLocation();
   const access=useAdminPermissions();
-  const allowed=access.owner||access.permissions.includes(permissionForPath(location.pathname)!);
-  const firstAllowed=adminNavigationItems.find(item=>access.permissions.includes(permissionForPath(item.to)!))?.to;
+  const allowed=canAccessAdminPath(access,location.pathname);
+  const firstAllowed=adminNavigationItems.find(item=>canAccessAdminPath(access,item.to))?.to;
   const shellRef = useRef<HTMLDivElement>(null);
   const [navigationEntry, setNavigationEntry] = useState<string | null>(null);
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
