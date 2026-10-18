@@ -77,6 +77,11 @@ async function fixture(page, role = 'administrator') {
             },
           ],
         });
+      if (p === '/api/v2/partner/fittings')
+        return json({items: [
+          {id:'fitting-active', number:'ZK-CALENDAR', date:'2026-10-20', time:'16:00', status:'pending', paymentStatus:'unpaid', customer:{name:'Eva Kalendářová', email:'eva@example.test',phone:'+420777111222'}},
+          {id:'fitting-expired', number:'ZK-EXPIRED', date:'2026-10-20', time:'17:00', status:'expired', paymentStatus:'unpaid', customer:{name:'Expired client'}}
+        ]});
       if (p === '/api/v2/partner/reservations')
         return json({
           items: [
@@ -208,4 +213,36 @@ test('signed referral is captured without changing existing reservation storage'
       )
     )
     .toBe('signed.referral');
+});
+
+for (const width of [390, 768, 1440]) test('combined partner calendar ' + width, async ({page}) => {
+  const state = await fixture(page);
+  await page.setViewportSize({width, height:1000});
+  await page.goto(APP + '/partner/blaze?section=calendar');
+  await page.getByLabel('Rok', {exact:true}).selectOption('2026');
+  await page.getByLabel('Měsíc', {exact:true}).selectOption('10');
+  const day = page.locator('[data-calendar-day="2026-10-20"]');
+  await expect(day).toHaveAttribute('aria-label', /Zkoušky: 1. Pronájmy: 1./);
+  await day.click();
+  await expect(page.getByText('AK-2026-BLAZE1', {exact:true})).toBeVisible();
+  await expect(page.getByText(/Eva Kalendářová/)).toBeVisible();
+  await expect(page.getByText(/ZK-EXPIRED/)).toHaveCount(0);
+  await expect(page.getByRole('button', {name:'Obnovit',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button', {name:'Nová rezervace',exact:true})).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  await page.screenshot({path:'test-evidence/partner/calendar-'+width+'.png',fullPage:true});
+  await page.locator('[data-calendar-day="2026-10-21"]').click();
+  await expect(page.getByText('V tento den nejsou žádné zkoušky.')).toBeVisible();
+  await expect(page.getByText('V tento den nejsou žádné pronájmy.')).toBeVisible();
+  await page.getByLabel('Měsíc',{exact:true}).selectOption('11');
+  await expect(page.locator('[data-calendar-day="2026-11-01"]')).toHaveAttribute('aria-pressed','true');
+  expect(state.errors).toEqual([]);
+});
+
+test('calendar does not present incomplete counts when fittings fail', async ({page}) => {
+  await fixture(page);
+  await page.route('**/api/v2/partner/fittings?*', route => route.fulfill({status:503,json:{error:{code:'UNAVAILABLE'}}}));
+  await page.goto(APP + '/partner/blaze?section=calendar');
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page.locator('[data-calendar-day]')).toHaveCount(0);
 });
