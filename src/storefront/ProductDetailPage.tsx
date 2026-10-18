@@ -104,7 +104,7 @@ export function ProductDetailPage() {
                 <Heading>Velikost {variant.size}</Heading>
                 {(['studio', 'external'] as const).map(mode => (
                   <Stack key={mode}>
-                    <strong>{modeLabel(mode)}</strong>
+                    <strong>{mode === 'studio' ? 'Studio (Blaze)' : modeLabel(mode)}</strong>
                     {variant.pricing[mode] ? (
                       <Facts>
                         <div>
