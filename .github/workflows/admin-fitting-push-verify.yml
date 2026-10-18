@@ -6,6 +6,7 @@ on:
       - 'src/admin/fittings/AdminPushNotifications*'
       - 'src/admin/fittings/AdminFittingsPage.tsx'
       - 'public/admin-push-sw.js'
+      - 'scripts/check-admin-push-worker.js'
       - '.github/workflows/admin-fitting-push-verify.yml'
 permissions:
   contents: read
@@ -23,4 +24,5 @@ jobs:
       - run: npm run typecheck
       - run: CI=true npm test -- --watchAll=false --runInBand src/admin/fittings/AdminPushNotifications.test.tsx
       - run: node --check public/admin-push-sw.js
+      - run: node scripts/check-admin-push-worker.js
       - run: CI=true npm run build

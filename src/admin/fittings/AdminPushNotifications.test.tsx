@@ -8,7 +8,8 @@ const permission=jest.fn();
 const register=jest.fn();
 const getRegistration=jest.fn();
 const endpoint='https://fcm.googleapis.com/fcm/send/validpushendpoint1234567890';
-const pushSubscription={endpoint,unsubscribe:jest.fn().mockResolvedValue(true)};
+const keys={p256dh:'browser-public-key',auth:'browser-auth-secret'};
+const pushSubscription={endpoint,toJSON:()=>({endpoint,keys}),unsubscribe:jest.fn().mockResolvedValue(true)};
 const subscribe=jest.fn().mockResolvedValue(pushSubscription);
 const getSubscription=jest.fn().mockResolvedValue(null);
 const publicKey=Buffer.concat([Buffer.from([4]),Buffer.alloc(64,1)]).toString('base64url');
@@ -42,7 +43,7 @@ test('never asks notification permission on mount and subscribes only after user
   await waitFor(()=>expect(register).toHaveBeenCalledWith('/admin-push-sw.js'));
   await waitFor(()=>expect(getSubscription).toHaveBeenCalledTimes(1));
   await waitFor(()=>expect(subscribe).toHaveBeenCalledTimes(1));
-  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,topics:['fitting_payment_reported']}));
+  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_created','fitting_payment_reported']}));
   expect(subscribe).toHaveBeenCalledTimes(1);
   expect(await screen.findByRole('button',{name:'Vypnout upozornění'})).toBeEnabled();
 });
@@ -69,7 +70,7 @@ test('loads saved device preferences and persists topic changes without requesti
   await waitFor(()=>expect(checkbox).toBeChecked());
   expect(permission).not.toHaveBeenCalled();
   fireEvent.click(checkbox);
-  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,topics:[]}));
+  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:[]}));
   await waitFor(()=>expect(checkbox).not.toBeChecked());
   expect(permission).not.toHaveBeenCalled();
 });
@@ -78,6 +79,7 @@ test('does not enable push when all topic subscriptions are off', async()=>{
   render(<AdminPushNotifications token="t"/>);
   await screen.findByRole('button',{name:'Zapnout upozornění'});
   const checkbox=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
+  fireEvent.click(screen.getByRole('checkbox',{name:'Nová rezervace zkoušky'}));
   fireEvent.click(checkbox);
   expect(checkbox).not.toBeChecked();
   expect(screen.getByRole('button',{name:'Zapnout upozornění'})).toBeDisabled();
@@ -97,6 +99,25 @@ test('temporary preferences error is retryable without asking permission or losi
   fireEvent.click(await screen.findByRole('button',{name:'Zkusit znovu'}));
   failed=false;
   await screen.findByRole('button',{name:'Vypnout upozornění'});
-  expect(screen.getByRole('checkbox')).not.toBeChecked();
+  for(const checkbox of screen.getAllByRole('checkbox'))expect(checkbox).not.toBeChecked();
+  expect(permission).not.toHaveBeenCalled();
+});
+
+test('enables new-fitting alerts without changing existing payment preference',async()=>{
+  getRegistration.mockResolvedValue({pushManager:{getSubscription,subscribe}});
+  getSubscription.mockResolvedValue(pushSubscription);
+  api.mockImplementation((_token:string,path:string)=>Promise.resolve(path==='/admin/push/config'?{enabled:true,publicKey}:path==='/admin/push/preferences'?{subscribed:true,topics:['fitting_payment_reported']}:{ok:true}));
+  render(<AdminPushNotifications token="t"/>);
+  await screen.findByRole('button',{name:'Vypnout upozornění'});
+  const created=screen.getByRole('checkbox',{name:'Nová rezervace zkoušky'});
+  const payment=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
+  expect(created).not.toBeChecked();expect(payment).toBeChecked();
+  fireEvent.click(created);
+  await waitFor(()=>expect(created).toBeChecked());
+  expect(api).toHaveBeenLastCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_created','fitting_payment_reported']});
+  fireEvent.click(payment);
+  await waitFor(()=>expect(payment).not.toBeChecked());
+  expect(created).toBeChecked();
+  expect(api).toHaveBeenLastCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_created']});
   expect(permission).not.toHaveBeenCalled();
 });

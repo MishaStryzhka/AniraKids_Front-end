@@ -15,7 +15,11 @@ const Copy = styled.p`margin:0;color:${t.color.text.secondary};font-size:14px;li
 const Topics = styled.div`inline-size:100%;display:grid;gap:${t.space[2]};padding-block-start:${t.space[3]};border-block-start:1px solid ${t.color.border.subtle};`;
 const Detail = styled.p`margin:0;color:${t.color.text.secondary};font-size:14px;line-height:20px;`;
 const TopicName = styled.strong`font-size:15px;`;
-const topicId = 'fitting_payment_reported' as const;
+const topicOptions = [
+  {id:'fitting_created',label:'Nová rezervace zkoušky'},
+  {id:'fitting_payment_reported',label:'Klient oznámil odeslání platby za zkoušku'},
+];
+const defaultTopics = topicOptions.map(topic=>topic.id);
 type PushPreferences = {subscribed:boolean;topics:string[]};
 type PushConfig = {enabled:boolean;publicKey:string};
 type State = 'loading'|'off'|'on'|'unsupported'|'unconfigured'|'denied'|'error';
@@ -37,7 +41,7 @@ export function AdminPushNotifications({token}:{token:string}) {
   const [state,setState]=useState<State>('loading');
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
-  const [topics,setTopics]=useState<string[]>([topicId]);
+  const [topics,setTopics]=useState<string[]>(defaultTopics);
   const [revision,setRevision]=useState(0);
   useEffect(()=>{
     if(!token)return;
@@ -50,12 +54,14 @@ export function AdminPushNotifications({token}:{token:string}) {
       setConfig(result);
       if(!result.enabled){setState('unconfigured');return;}
       const registration=await navigator.serviceWorker.getRegistration('/admin-push-sw.js');
+      // Check for the worker that understands event types, without prompting for permission.
+      if(registration)await navigator.serviceWorker.register('/admin-push-sw.js');
       const subscription=await registration?.pushManager.getSubscription();
       if(!mounted)return;
-      if(!subscription){setTopics([topicId]);setState('off');return;}
+      if(!subscription){setTopics(defaultTopics);setState('off');return;}
       const prefs=await fittingAdmin<PushPreferences>(token,'/admin/push/preferences',{endpoint:subscription.endpoint});
       if(!mounted)return;
-      setTopics(prefs.subscribed ? prefs.topics : [topicId]);
+      setTopics(prefs.subscribed ? prefs.topics : defaultTopics);
       setState(prefs.subscribed ? 'on' : 'off');
     }).catch(()=>{if(mounted)setState('error');});
     return()=>{mounted=false;};
@@ -76,7 +82,7 @@ export function AdminPushNotifications({token}:{token:string}) {
           userVisibleOnly:true,applicationServerKey:decodePublicKey(config.publicKey),
         });
       }
-      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,topics});
+      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,keys:subscription.toJSON().keys,topics});
       setState('on');
     }catch{
       setError('Upozornění se nepodařilo zapnout. Zkuste to znovu.');
@@ -99,16 +105,16 @@ export function AdminPushNotifications({token}:{token:string}) {
     finally{setBusy(false);}
   }
 
-  async function setTopic(enabled:boolean){
+  async function setTopic(topicId:string,enabled:boolean){
     if(busy)return;
-    const next=enabled?[topicId]:[];
+    const next=topicOptions.map(topic=>topic.id).filter(id=>id===topicId?enabled:topics.includes(id));
     if(state!=='on'){setTopics(next);return;}
     setBusy(true);setError('');
     try{
       const registration=await navigator.serviceWorker.getRegistration('/admin-push-sw.js');
       const subscription=await registration?.pushManager.getSubscription();
       if(!subscription)throw new Error('PUSH_SUBSCRIPTION_MISSING');
-      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,topics:next});
+      await fittingAdmin(token,'/admin/push/subscribe',{endpoint:subscription.endpoint,keys:subscription.toJSON().keys,topics:next});
       setTopics(next);
     }catch{setError('Změnu odběru se nepodařilo uložit. Původní nastavení zůstalo zachované.');}
     finally{setBusy(false);}
@@ -135,11 +141,11 @@ export function AdminPushNotifications({token}:{token:string}) {
     </Button>:null}
     <Topics role="group" aria-label="Typy upozornění">
       <TopicName>Zkoušky</TopicName>
-      <CheckboxField label="Klient oznámil odeslání platby za zkoušku"
-        checked={topics.includes(topicId)} disabled={busy||!['on','off'].includes(state)}
-        onChange={event=>{void setTopic(event.target.checked);}}/>
-      <Detail>Upozornění otevře seznam zkoušek, kde můžete ověřit přijetí 200 Kč.
-      Každý prohlížeč má vlastní odběry. Další typy přidáme po zapojení jejich událostí.</Detail>
+      {topicOptions.map(topic=><CheckboxField key={topic.id} label={topic.label}
+        checked={topics.includes(topic.id)} disabled={busy||!['on','off'].includes(state)}
+        onChange={event=>{void setTopic(topic.id,event.target.checked);}}/>)}
+      <Detail>Upozornění otevře seznam zkoušek. Oznámení o odeslání platby není potvrzením jejího přijetí — ověřte připsání 200 Kč.
+      Každý prohlížeč má vlastní odběry.</Detail>
     </Topics>
   </Region>;
 }
