@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import {discountQuotes} from '../../partner/discount';
 import { X, Shirt } from 'lucide-react';
 import { IconButton } from '../../design-system/components/IconButton';
 import { designTokens as t } from '../../design-system/tokens/designTokens';
@@ -134,7 +135,7 @@ export function BookingPage() {
       ? JSON.stringify(requested)
       : null;
   const availability = usePublicRead(key, async signal => {
-    const items = await Promise.all(requested!.map(selection => getAvailability(selection, signal)));
+    const items = discountQuotes(await Promise.all(requested!.map(selection => getAvailability(selection, signal))));
     return { ...items[0], items, available: items.every(item => item.available),
       pricing: items.reduce((sum, item) => ({
         rentalPrice: sum.rentalPrice + item.pricing.rentalPrice,
