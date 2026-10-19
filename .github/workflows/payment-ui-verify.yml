@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - src/admin/payments/**
+      - src/admin/fittings/**
+      - src/admin/reservations/**
+      - .github/fitting-discount.spec.js
       - .github/admin-payments.spec.js
       - .github/workflows/payment-ui-verify.yml
 permissions:
@@ -24,7 +27,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run typecheck
-      - run: CI=true npm test -- --watchAll=false --runInBand src/admin/payments src/admin/api/reservationPayments.test.ts src/admin/reservations
+      - run: CI=true npm test -- --watchAll=false --runInBand src/admin/fittings src/admin/payments src/admin/api/reservationPayments.test.ts src/admin/reservations
       - name: Build isolated fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
@@ -39,7 +42,7 @@ jobs:
           mkdir -p test-evidence/payments
           npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/payments/server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
-      - run: npx playwright test .github/admin-payments.spec.js --workers=2 --reporter=line
+      - run: npx playwright test .github/admin-payments.spec.js .github/fitting-discount.spec.js --workers=2 --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()
         with:
