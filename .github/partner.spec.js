@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const APP = 'http://127.0.0.1:4173';
 async function fixture(page, role = 'administrator') {
-  const state = { writes: [], errors: [] };
+  const state = { writes: [], errors: [], pending: false, failure: null };
   page.on('pageerror', e => state.errors.push(e.message));
   await page.addInitScript(() =>
     localStorage.setItem(
@@ -88,7 +88,7 @@ async function fixture(page, role = 'administrator') {
             {
               id: '555555555555555555555555',
               number: 'AK-2026-BLAZE1',
-              status: 'confirmed',
+              status: state.pending ? 'pending' : 'confirmed',
               startDate: '2026-10-20',
               endDate: '2026-10-20',
               rentalMode: 'studio',
@@ -138,6 +138,10 @@ async function fixture(page, role = 'administrator') {
         });
       if (p === '/api/v2/partner/reservations/555555555555555555555555') {
         state.writes.push(req.postDataJSON());
+        if (state.failure === 'network') return route.abort('failed');
+        if (state.failure === 'html') return route.fulfill({status:502,contentType:'text/html',body:'Bad gateway'});
+        if (state.failure) return json({error:{code:state.failure,requestId:'12345678-1234-1234-1234-123456789abc'}},state.failure === 'INTERNAL_ERROR' ? 500 : 409);
+        state.pending = false;
         return json({ ok: true });
       }
       return json({ error: { code: 'NOT_FOUND' } }, 404);
@@ -245,4 +249,45 @@ test('calendar does not present incomplete counts when fittings fail', async ({p
   await page.goto(APP + '/partner/blaze?section=calendar');
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.locator('[data-calendar-day]')).toHaveCount(0);
+});
+
+for (const width of [390,1440]) test('failed confirmation is visible at the action and success refreshes status '+width,async({page})=>{
+ const state=await fixture(page);state.pending=true;state.failure='PAYMENT_ADVANCE_REQUIRED';
+ await page.setViewportSize({width,height:700});
+ await page.goto(APP+'/partner/blaze?section=reservations');
+ const confirm=page.getByRole('button',{name:'Potvrdit rezervaci',exact:true});
+ await confirm.click();
+ const alert=page.getByRole('alert');
+ await expect(alert).toContainText('nejprve zaznamenejte přijetí požadované zálohy');
+ await expect(alert).toBeFocused();
+ await expect(alert).toBeInViewport();
+ await expect(alert).toContainText('12345678-1234-1234-1234-123456789abc');
+ await expect(confirm).toBeEnabled();
+ for(const failure of ['INTERNAL_ERROR','network','html']){
+  state.failure=failure;await confirm.click();await expect(alert).toBeVisible();await expect(confirm).toBeEnabled();
+  await expect(alert).toContainText(failure==='INTERNAL_ERROR'?'Operaci se nepodařilo potvrdit':'Výsledek operace není ověřený');
+ }
+ state.failure=null;await confirm.click();
+ await expect(page.getByRole('status').filter({hasText:'Potvrzení bylo úspěšně uloženo.'})).toBeVisible();
+ await expect(confirm).toHaveCount(0);
+ await expect(page.getByText('Potvrzená',{exact:true})).toBeVisible();
+ expect(state.writes).toHaveLength(5);expect(state.errors).toEqual([]);
+});
+
+for(const width of [390,1440]) test('cash form submits payment and reports failures '+width,async({page})=>{
+ const state=await fixture(page);state.failure='CONFLICT';
+ await page.setViewportSize({width,height:700});
+ await page.goto(APP+'/partner/blaze?section=reservations');
+ await page.getByText('Platby a QR',{exact:true}).click();
+ await page.getByLabel('Přijatá hotovost v Kč').fill('600');
+ await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('Údaje se změnily');
+ expect(state.writes).toHaveLength(1);
+ expect(state.writes[0]).toMatchObject({action:'payment',payment:{amount:600,type:'rental_received',method:'cash',expectedRevision:1}});
+ const operation=state.writes[0].payment.operationId;
+ state.failure=null;
+ await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
+ await expect(page.getByRole('status').filter({hasText:'Změna byla úspěšně uložena.'})).toBeVisible();
+ expect(state.writes).toHaveLength(2);expect(state.writes[1].payment.operationId).toBe(operation);
+ expect(state.errors).toEqual([]);
 });
