@@ -228,8 +228,9 @@ export function ReservationPaymentLedger({
               <section aria-label="Nájemné">
                 <h3>Nájemné</h3>
                 <dl>
-                  <div><dt>Cena pronájmu</dt><dd>{money(payments.rentalTotal)}</dd></div>
-                  <div><dt>Uhrazeno po vrácení plateb</dt><dd>{money(payments.rentalNet)}</dd></div>
+                  <div><dt>Cena pronájmu</dt><dd>{money(payments.rentalTotal + (payments.fittingCredit ?? 0))}</dd></div>
+                  {payments.fittingCredit ? <div><dt>Započtená platba za zkoušku</dt><dd>{money(payments.fittingCredit)}</dd></div> : null}
+                  <div><dt>{payments.fittingCredit ? 'Další uhrazené nájemné po vrácení plateb' : 'Uhrazeno po vrácení plateb'}</dt><dd>{money(payments.rentalNet)}</dd></div>
                   <div><dt>Zbývá uhradit</dt><dd>{money(payments.rentalBalance)}</dd></div>
                 </dl>
                 {payments.advanceBalance > 0 && status === 'pending' ? <ReservationCopy>

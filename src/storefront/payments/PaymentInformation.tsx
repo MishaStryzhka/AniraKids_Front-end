@@ -39,10 +39,12 @@ export function BookingPaymentExplanation({
   policy,
   rentalPrice,
   hasDeposit = true,
+  fittingCredit = 0,
 }: {
   policy: BookingPolicy;
   rentalPrice?: number;
   hasDeposit?: boolean;
+  fittingCredit?: number;
 }) {
   const advance =
     rentalPrice === undefined
@@ -52,25 +54,24 @@ export function BookingPaymentExplanation({
     <Stack>
       <Heading>Platba a potvrzení rezervace</Heading>
       <Copy>
-        Rezervační záloha činí {formatMoney(advance)} a započítává se do ceny
-        pronájmu.{hasDeposit ? ' Vratná kauce je samostatná částka.' : ''}
+        {fittingCredit > 0
+          ? `Zaplacenou zkoušku ${formatMoney(fittingCredit)} započteme jako rezervační zálohu. Zálohu znovu neplatíte.`
+          : `Rezervační záloha činí ${formatMoney(advance)} a započítává se do ceny pronájmu.`}
+        {hasDeposit ? ' Vratná kauce je samostatná částka.' : ''}
       </Copy>
       {rentalPrice !== undefined ? (
         <Copy>
-          Po uhrazení zálohy zbývá z nájemného{' '}
-          {formatMoney(rentalPrice - advance)}. Před předáním je třeba uhradit
+          {fittingCredit > 0 ? 'Po započtení zkoušky zbývá doplatit ' : 'Po uhrazení zálohy zbývá z nájemného '}
+          {formatMoney(fittingCredit > 0 ? rentalPrice : rentalPrice - advance)}. Před předáním je třeba uhradit
           celé nájemné{hasDeposit ? ' a vratnou kauci' : ''}.
         </Copy>
       ) : null}
       <Copy>
-        Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé
-        částky{hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc.
-        Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze
-        po domluvě uhradit také osobně v hotovosti.
+        {fittingCredit > 0 ? 'Po vytvoření rezervace můžete doplatek uhradit QR platbou nebo při převzetí.' : `Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé částky${hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc. Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze po domluvě uhradit také osobně v hotovosti.`}
         Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
-      <Copy>Slevu 200 Kč za absolvovanou zkoušku můžete uplatnit při rezervaci přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste ji neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
+      <Copy>Platbu 200 Kč za absolvovanou zkoušku můžete započíst jako zálohu při rezervaci přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste ji nezapočetli, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
       <Copy>
         Případný storno poplatek až {formatMoney(policy.cancellation.feeAmount)}{' '}
         se posuzuje individuálně; neúčtuje se automaticky.
@@ -146,22 +147,16 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
     <Stack>
       <Heading>Platba rezervace</Heading>
       <PaymentFacts>
-        {showRentalPrice ? <>
-          <RentalPriceRows rentalPrice={receipt.subtotal} discount={receipt.fittingDiscount} />
-          {receipt.fittingDiscount ? <div>
-            <dt>Nájemné po slevě</dt>
-            <dd>{formatMoney(receipt.subtotal)}</dd>
-          </div> : null}
-        </> : null}
+        {showRentalPrice ? <RentalPriceRows rentalPrice={receipt.subtotal} discount={receipt.fittingDiscount} /> : null}
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
-          <dd>{formatMoney(payment.advanceRequired)}</dd>
+          <dd>{formatMoney(payment.advanceRequired)}{receipt.fittingDiscount && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
         </div>
         {payment.advanceBalance > 0 && payment.advanceBalance < payment.advanceRequired ? <div>
           <dt>Zbývá uhradit ze zálohy</dt>
           <dd>{formatMoney(payment.advanceBalance)}</dd>
         </div> : null}
-        {payment.rentalBalance !== receipt.subtotal ? <div>
+        {receipt.fittingDiscount || payment.rentalBalance !== receipt.subtotal ? <div>
           <dt>Zbývá uhradit nájemné</dt>
           <dd>{formatMoney(payment.rentalBalance)}</dd>
         </div> : null}

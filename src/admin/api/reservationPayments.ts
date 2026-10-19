@@ -32,6 +32,7 @@ export type ReservationPayments = {
   legacyUnreconciled: boolean;
   advanceRequired: number;
   rentalTotal: number;
+  fittingCredit?: number;
   depositRequired: number;
   rentalReceived: number;
   rentalRefunded: number;
@@ -90,6 +91,7 @@ export function parsePayments(
     !integer(p.revision) ||
     typeof p.legacyUnreconciled !== 'boolean' ||
     !amounts.every(key => integer(p[key])) ||
+    (p.fittingCredit !== undefined && ![0, 200].includes(p.fittingCredit as number)) ||
     !Array.isArray(p.entries) ||
     p.entries.length > 500
   )
@@ -140,6 +142,7 @@ export function parsePayments(
     revision: p.revision,
     currency: 'CZK',
     legacyUnreconciled: p.legacyUnreconciled,
+    ...(p.fittingCredit === undefined ? {} : {fittingCredit: p.fittingCredit as number}),
     ...Object.fromEntries(amounts.map(key => [key, p[key]])),
     entries,
   } as ReservationPayments;

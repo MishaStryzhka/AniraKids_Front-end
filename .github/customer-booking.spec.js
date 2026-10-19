@@ -192,7 +192,7 @@ async function setup(page, guest = true) {
             guestAccessToken: 'secret-never-store',
           });
         const created = receipt(body);
-        if(body.fittingDiscount) Object.assign(created,{subtotal:300,totalDue:1300,fittingDiscount:{number:body.fittingDiscount.number,amount:200}});
+        if(body.fittingDiscount) Object.assign(created,{subtotal:300,totalDue:1300,fittingDiscount:{number:body.fittingDiscount.number,amount:200},payment:{...receiptPayment(created.reservationNumber),advanceBalance:0,rentalBalance:300,paymentInstructions:null,fullPaymentInstructions:{...policy.bank,amount:1300,currency:'CZK',message:created.reservationNumber,qrPayload:`SPD*1.0*ACC:${policy.bank.iban}*AM:1300.00*CC:CZK*MSG:${created.reservationNumber}*PT:IP`}}});
         if (state.mode.startsWith('payment'))
           created.payment = receiptPayment(created.reservationNumber);
         if (state.mode === 'payment-malformed') {
@@ -725,15 +725,17 @@ for (const guest of [true,false]) test('fitting discount customer redemption '+(
  const state=await setup(page,guest);state.discount=true;
  if(guest){await page.goto(APP+'/saty#fitting=ZK-ABCDEF123456&token='+ 'a'.repeat(64));await expect(page).toHaveURL(APP+'/saty');}
  await begin(page);await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
- await page.getByRole('button',{name:'Uplatnit slevu',exact:true}).click();
- await expect(page.getByText('Uplatněna sleva 200 Kč · ZK-ABCDEF123456')).toBeVisible();
+ await page.getByRole('button',{name:'Započíst platbu',exact:true}).click();
+ await expect(page.getByText('Započtena platba 200 Kč · ZK-ABCDEF123456')).toBeVisible();
  await contact(page);await capture(page,'fitting-discount-'+(guest?'link':'account'));
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
  expect(state.posts).toHaveLength(1);expect(state.posts[0].body.fittingDiscount).toEqual({number:'ZK-ABCDEF123456',...(guest?{token:'a'.repeat(64)}:{})});
- const discountRow = page.locator('dl > div').filter({ has: page.getByText('Sleva za zkoušku ZK-ABCDEF123456', { exact: true }) });
+ const discountRow = page.locator('dl > div').filter({ has: page.getByText('Započtená platba za zkoušku ZK-ABCDEF123456', { exact: true }) });
  await expect(discountRow.locator('dd')).toHaveText('−200 Kč');
  const rentRow = page.locator('dl > div').filter({ has: page.getByText('Cena pronájmu', { exact: true }) });
  await expect(rentRow.locator('dd')).toHaveText('500 Kč');
+ await expect(page.getByRole('option',{name:/Povinná záloha/})).toHaveCount(0);
+ await expect(page.getByRole('img',{name:'QR platba 1 300 Kč'})).toBeVisible();
  expect(state.errors).toEqual([]);
 });

@@ -3,9 +3,9 @@ const APP='http://127.0.0.1:4173';
 const bank={beneficiary:'GlamGarb Rentals s.r.o.',accountNumber:'6644781399/0800',iban:'CZ0708000000006644781399',bic:'GIBACZPX'};
 const number='AK-2030-ABC123';
 const instructions=amount=>({...bank,amount,currency:'CZK',message:number,qrPayload:`SPD*1.0*ACC:${bank.iban}*AM:${amount.toFixed(2)}*CC:CZK*MSG:${number}*PT:IP`});
-for(const width of [375,390,430,768,1024,1440])test('account fitting discount and advance stay separate '+width,async({page})=>{
+for(const width of [375,390,430,768,1024,1440])test('paid fitting covers advance and leaves 600 Kč '+width,async({page})=>{
  const item={productId:'111111111111111111111111',variantId:'222222222222222222222222',productName:'Dámské šaty DAM006',size:'S-M-L',rentalPrice:800,deposit:0};
- const receipt={reservationNumber:number,status:'pending',rentalMode:'studio',startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:'2099-01-01T00:00:00Z',item,subtotal:600,deposit:0,totalDue:600,paymentStatus:'unpaid',fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},payment:{advanceRequired:200,advanceBalance:200,rentalBalance:600,depositRequired:0,depositHeld:0,paymentInstructions:instructions(200),fullPaymentInstructions:instructions(600)}};
+ const receipt={reservationNumber:number,status:'pending',rentalMode:'studio',startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:'2099-01-01T00:00:00Z',item,subtotal:600,deposit:0,totalDue:600,paymentStatus:'unpaid',fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},payment:{advanceRequired:200,advanceBalance:0,rentalBalance:600,depositRequired:0,depositHeld:0,paymentInstructions:null,fullPaymentInstructions:instructions(600)}};
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('account-fixture')})));
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
@@ -24,23 +24,25 @@ for(const width of [375,390,430,768,1024,1440])test('account fitting discount an
  await page.getByText('Platby a podrobnosti',{exact:true}).click();
  const row=label=>page.locator('dt').filter({hasText:new RegExp('^'+label+'$')}).locator('..');
  await expect(row('Cena pronájmu')).toContainText('800 Kč');
- await expect(row('Sleva za zkoušku ZK-ABCDEF123456')).toContainText('−200 Kč');
- await expect(row('Nájemné po slevě')).toContainText('600 Kč');
- await expect(page.getByText('Rezervační záloha (součást nájemného)',{exact:true}).locator('..')).toContainText('200 Kč');
+ await expect(row('Započtená platba za zkoušku ZK-ABCDEF123456')).toContainText('−200 Kč');
+ await expect(row('Zbývá uhradit nájemné')).toContainText('600 Kč');
+ await expect(page.getByText('Rezervační záloha (součást nájemného)',{exact:true}).locator('..')).toContainText('200 Kč · uhrazeno');
  await expect(page.getByText('Zbývá uhradit ze zálohy',{exact:true})).toHaveCount(0);
- await expect(page.getByText('Zbývá uhradit nájemné',{exact:true})).toHaveCount(0);
- await expect(page.getByRole('img',{name:'QR platba 200 Kč'})).toBeVisible();
- await expect(page.getByText(/Po úhradě zálohy zbývá 400/)).toBeVisible();
- const edges=await page.locator('dt').filter({hasText:/^(Cena pronájmu|Sleva za zkoušku ZK-ABCDEF123456|Nájemné po slevě)$/}).evaluateAll(elements=>elements.map(element=>element.nextElementSibling.getBoundingClientRect().right));
+ await expect(page.getByRole('option',{name:/Povinná záloha/})).toHaveCount(0);
+ await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
+ await expect(page.getByText(/zbývající nájemné 600/)).toBeVisible();
+ const edges=await page.locator('dt').filter({hasText:/^(Cena pronájmu|Započtená platba za zkoušku ZK-ABCDEF123456|Zbývá uhradit nájemné)$/}).evaluateAll(elements=>elements.map(element=>element.nextElementSibling.getBoundingClientRect().right));
  expect(Math.max(...edges)-Math.min(...edges)).toBeLessThan(2);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.locator('details').filter({hasText:'Platby a podrobnosti'}).screenshot({path:`test-evidence/account-payment/discount-${width}.png`});
+ await page.getByRole('combobox',{name:'Jak chcete zaplatit?'}).selectOption('cash');
+ await expect(page.getByText(/Zbývá doplatit 600\sKč hotově/)).toBeVisible();
  await page.getByRole('combobox',{name:'Jak chcete zaplatit?'}).selectOption('full');
  await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
  Object.assign(receipt,{status:'confirmed',expiresAt:null});
  Object.assign(receipt.payment,{advanceBalance:0,rentalBalance:400,paymentInstructions:null,fullPaymentInstructions:instructions(400)});
  await page.reload();await page.getByText('Platby a podrobnosti',{exact:true}).click();
- await expect(row('Nájemné po slevě')).toContainText('600 Kč');
+ await expect(row('Cena pronájmu')).toContainText('800 Kč');
  await expect(row('Zbývá uhradit nájemné')).toContainText('400 Kč');
  await expect(page.getByRole('img',{name:'QR platba 400 Kč'})).toBeVisible();
  expect(errors).toEqual([]);
