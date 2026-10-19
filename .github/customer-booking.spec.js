@@ -684,8 +684,7 @@ for (const width of [390, 768, 1024, 1440]) {
     const box = await women.boundingBox();
     expect(box.width).toBeGreaterThanOrEqual(44);
     expect(box.height).toBeGreaterThanOrEqual(44);
-    await women.focus();
-    await page.keyboard.press('Enter');
+    await women.press('Enter');
     await expect(page).toHaveURL(APP + '/forWomen?category=dress');
     await expect(page.getByRole('heading', { name: 'Dámské šaty', level: 1 })).toBeVisible();
     if (mobile) {
@@ -732,6 +731,9 @@ for (const guest of [true,false]) test('fitting discount customer redemption '+(
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
  expect(state.posts).toHaveLength(1);expect(state.posts[0].body.fittingDiscount).toEqual({number:'ZK-ABCDEF123456',...(guest?{token:'a'.repeat(64)}:{})});
- await expect(page.getByText('Uplatněná sleva za zkoušku ZK-ABCDEF123456: −200 Kč')).toBeVisible();
+ const discountRow = page.locator('dl > div').filter({ has: page.getByText('Sleva za zkoušku ZK-ABCDEF123456', { exact: true }) });
+ await expect(discountRow.locator('dd')).toHaveText('−200 Kč');
+ const rentRow = page.locator('dl > div').filter({ has: page.getByText('Cena pronájmu', { exact: true }) });
+ await expect(rentRow.locator('dd')).toHaveText('500 Kč');
  expect(state.errors).toEqual([]);
 });
