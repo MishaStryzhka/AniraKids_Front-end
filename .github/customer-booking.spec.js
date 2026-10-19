@@ -100,6 +100,7 @@ async function setup(page, guest = true) {
           contentType: 'application/json',
           body: JSON.stringify(body),
         });
+      if (url.pathname === '/api/v2/fitting-discounts/options') return json(200, {items: state.discount ? [{number:'ZK-ABCDEF123456',date:'2030-10-01',time:'10:00',amount:200}] : []});
       if (url.pathname === '/api/v2/booking-policy')
         return state.policyFailure
           ? json(503, { error: { code: 'UNAVAILABLE' } })
@@ -191,6 +192,7 @@ async function setup(page, guest = true) {
             guestAccessToken: 'secret-never-store',
           });
         const created = receipt(body);
+        if(body.fittingDiscount) Object.assign(created,{subtotal:300,totalDue:1300,fittingDiscount:{number:body.fittingDiscount.number,amount:200}});
         if (state.mode.startsWith('payment'))
           created.payment = receiptPayment(created.reservationNumber);
         if (state.mode === 'payment-malformed') {
@@ -718,4 +720,18 @@ test('signed-in catalogue and availability stay public without bearer', async ({
   expect(adminChecks.length).toBeGreaterThan(0);
   expect(adminChecks.every(read => read.method === 'GET' && read.authorization === 'Bearer legacy-token-must-not-leak')).toBe(true);
   expect(state.posts).toHaveLength(0);
+});
+
+for (const guest of [true,false]) test('fitting discount customer redemption '+(guest?'private link':'account'),async({page})=>{
+ const state=await setup(page,guest);state.discount=true;
+ if(guest){await page.goto(APP+'/saty#fitting=ZK-ABCDEF123456&token='+ 'a'.repeat(64));await expect(page).toHaveURL(APP+'/saty');}
+ await begin(page);await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name:'Uplatnit slevu',exact:true}).click();
+ await expect(page.getByText('Uplatněna sleva 200 Kč · ZK-ABCDEF123456')).toBeVisible();
+ await contact(page);await capture(page,'fitting-discount-'+(guest?'link':'account'));
+ await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
+ expect(state.posts).toHaveLength(1);expect(state.posts[0].body.fittingDiscount).toEqual({number:'ZK-ABCDEF123456',...(guest?{token:'a'.repeat(64)}:{})});
+ await expect(page.getByText('Uplatněná sleva za zkoušku ZK-ABCDEF123456: −200 Kč')).toBeVisible();
+ expect(state.errors).toEqual([]);
 });

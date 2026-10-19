@@ -54,12 +54,14 @@ export type Customer = {
 export type ReservationSelection = Pick<Selection, 'productId' | 'variantId'>;
 export type BookingQuote = Availability & { items?: Availability[] };
 export type ReservationBody = Selection & {
+  fittingDiscount?: import('../../fittings/FittingDiscount').FittingDiscountSelection;
   referralToken?: string;
   items?: ReservationSelection[];
   customer: Customer;
   notes?: string;
 };
 export type Receipt = {
+  fittingDiscount?: {number:string;amount:number};
   guestAccessToken?: string;
   payment?: ReceiptPayment | null;
   reservationNumber: string;
@@ -289,6 +291,9 @@ function parseReservationItem(item: unknown): ReservationItem {
 export function parseReceipt(v: unknown, expected?: Selection & { items?: ReservationSelection[] }): Receipt {
   if (!object(v) || !object(v.reservation)) return invalid();
   const r = v.reservation;
+  const discount=r.fittingDiscount;
+  if(discount!==undefined&&(!object(discount)||discount.amount!==200||typeof discount.number!=='string'||!/^ZK-[A-F0-9]{12}$/.test(discount.number)))return invalid();
+  const fittingDiscount=discount as {number:string;amount:number}|undefined;
   const item = parseReservationItem(r.item);
   const items = r.items === undefined ? [item] :
     Array.isArray(r.items) && r.items.length > 0 && r.items.length <= 20
@@ -298,7 +303,7 @@ export function parseReceipt(v: unknown, expected?: Selection & { items?: Reserv
       !isMode(r.rentalMode) || !isDateOnly(r.startDate) || !isDateOnly(r.endDate) ||
       r.endDate < r.startDate || (r.expiresAt !== null && !instant(r.expiresAt)) ||
       !string(r.paymentStatus, 100) || !money(r.subtotal) || !money(r.deposit) ||
-      !money(r.totalDue) || r.subtotal !== items.reduce((n, i) => n + i.rentalPrice, 0) ||
+      !money(r.totalDue) || r.subtotal !== items.reduce((n, i) => n + i.rentalPrice, 0)-(fittingDiscount?.amount||0) ||
       r.deposit !== items.reduce((n, i) => n + i.deposit, 0) ||
       r.totalDue !== r.subtotal + r.deposit) return invalid();
   const selection = { productId: item.productId, variantId: item.variantId,
@@ -314,6 +319,7 @@ export function parseReceipt(v: unknown, expected?: Selection & { items?: Reserv
     reservationNumber: r.reservationNumber, status: r.status, rentalMode: r.rentalMode,
     startDate: r.startDate, endDate: r.endDate, expiresAt: r.expiresAt as string | null,
     item, ...(r.items === undefined ? {} : { items }),
+    ...(fittingDiscount?{fittingDiscount}:{}),
     subtotal: r.subtotal, deposit: r.deposit, totalDue: r.totalDue, paymentStatus: r.paymentStatus,
     ...(r.payment === undefined ? {} : { payment: r.payment === null ? null :
       parseReceiptPayment(r.payment, {
@@ -413,6 +419,7 @@ export async function postReservation(
     method: 'POST',
     body: JSON.stringify(body.items ? {
       items: body.items, rentalMode: body.rentalMode, startDate: body.startDate,
+      ...(body.fittingDiscount?{fittingDiscount:body.fittingDiscount}:{}),
       ...(body.referralToken?{referralToken:body.referralToken}:{}),
       endDate: body.endDate, customer: body.customer, ...(body.notes === undefined ? {} : { notes: body.notes }),
     } : body),

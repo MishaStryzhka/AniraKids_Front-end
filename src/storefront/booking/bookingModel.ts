@@ -1,3 +1,4 @@
+import {validFittingDiscount} from '../../fittings/fittingDiscountModel';
 import { isDateOnly, pragueToday } from '../../admin/calendar/calendarDates';
 import {getReferralToken} from '../../partner/referral';
 import {
@@ -107,6 +108,7 @@ export function parseBody(v: unknown): ReservationBody {
     !['firstName', 'lastName', 'email', 'phone'].every(
       key => typeof (v.customer as Record<string, unknown>)[key] === 'string'
     ) ||
+    (v.fittingDiscount !== undefined && !validFittingDiscount(v.fittingDiscount)) ||
     (v.notes !== undefined && typeof v.notes !== 'string') ||
     (v.referralToken !== undefined && (typeof v.referralToken !== 'string' || v.referralToken.length>1200))
   )
@@ -138,6 +140,7 @@ export function parseBody(v: unknown): ReservationBody {
       phone: customer.phone,
     },
     ...(v.notes === undefined ? {} : { notes: v.notes as string }),
+    ...(v.fittingDiscount === undefined ? {} : {fittingDiscount:v.fittingDiscount as import('../../fittings/FittingDiscount').FittingDiscountSelection}),
     ...(v.referralToken === undefined ? {} : { referralToken: v.referralToken as string }),
   };
 }
