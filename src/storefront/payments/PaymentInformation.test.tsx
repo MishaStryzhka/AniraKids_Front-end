@@ -124,3 +124,18 @@ test('expired full payment instructions cannot be selected', () => {
   expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   expect(screen.queryByRole('img')).not.toBeInTheDocument();
 });
+
+test('studio advance, full QR and cash omit zero deposit copy and preserve 600 minus 200 balance', async () => {
+ const studio={...receipt,rentalMode:'studio' as const,subtotal:600,deposit:0,totalDue:600,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,rentalBalance:600,depositRequired:0,depositHeld:0,fullPaymentInstructions:fullPayment(600)}};
+ const view=render(<ReceiptPaymentInformation receipt={studio}/>);
+ await screen.findByRole('img');
+ expect(view.container.textContent).not.toMatch(/kauce|kauci/);
+ expect(screen.getByRole('status').textContent?.replace(/\s/g,' ')).toMatch(/Po úhradě zálohy zbývá 400 Kč/);
+ fireEvent.change(screen.getByRole('combobox'),{target:{value:'full'}});
+ await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenLastCalledWith(fullPayment(600).qrPayload,expect.anything()));
+ expect(view.container.textContent).not.toMatch(/kauce|kauci/);
+ view.rerender(<ReceiptPaymentInformation receipt={{...studio,status:'confirmed',payment:{...studio.payment,advanceBalance:0,rentalBalance:400,paymentInstructions:null,fullPaymentInstructions:fullPayment(400)}}}/>);
+ fireEvent.change(screen.getByRole('combobox'),{target:{value:'cash'}});
+ expect(screen.getByRole('status').textContent?.replace(/\s/g,' ')).toMatch(/Zbývá doplatit 400 Kč hotově/);
+ expect(view.container.textContent).not.toMatch(/kauce|kauci/);
+});
