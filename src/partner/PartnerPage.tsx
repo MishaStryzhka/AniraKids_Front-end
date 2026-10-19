@@ -760,9 +760,6 @@ export function PartnerPage() {
                 {f.status === 'completed' && f.paymentStatus === 'paid' ? (
                   <FittingCredit fitting={f} busy={busy} act={act} />
                 ) : null}
-                {manager ? (
-                  <StudioBooking fitting={f} busy={busy} act={act} />
-                ) : null}
               </Card>
             ))}
           </>
@@ -789,7 +786,7 @@ export function PartnerPage() {
             </Grid>
             <p>
               Podíl z pronájmu se započítá po vrácení oblečení podle přijaté
-              platby. Zkouška se započítá po jejím dokončení. Kauce není
+              platby. Za dokončenou zaplacenou zkoušku náleží Blaze 200 Kč. Odměna se odečte pouze při navazujícím potvrzeném pronájmu ve studiu Blaze. Kauce není
               odměnou.
             </p>
             {(access.owner || access.managePartners) ? (
@@ -802,10 +799,8 @@ export function PartnerPage() {
                   <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
                   <strong>{formatMoney(l.amount)}</strong>
                 </Row>
-                {l.reason === 'included_in_share' ? (
-                  <p>Zkouška je zahrnuta v podílu 50 %.</p>
-                ) : l.reason === 'studio_booked' ? (
-                  <p>Bez odměny za zkoušku — rezervované studio.</p>
+                {l.reason === 'studio_rental' ? (
+                  <p>Odměna 200 Kč za zkoušku se odečítá: navazuje na ni potvrzený pronájem ve studiu Blaze.</p>
                 ) : null}
               </Card>
             ))}
@@ -934,35 +929,6 @@ function MemberForm({ busy, act }: any) {
         </Button>
       </Form>
     </Card>
-  );
-}
-function StudioBooking({ fitting: f, busy, act }: any) {
-  const [reference, setReference] = useState(f.studioBookingReference || '');
-  return (
-    <Form
-      onSubmit={e => {
-        e.preventDefault();
-        act('fittings/' + f.id, {
-          action: 'studio-booked',
-          revision: f.revision,
-          studioBooked: !f.studioBooked,
-          reference,
-        });
-      }}
-    >
-      <Input
-        label="Číslo rezervace fotostudia"
-        value={reference}
-        required={!f.studioBooked}
-        maxLength={120}
-        onChange={e => setReference(e.target.value)}
-      />
-      <Button variant="secondary" disabled={busy}>
-        {f.studioBooked
-          ? 'Odebrat potvrzení studia'
-          : 'Potvrdit rezervaci studia'}
-      </Button>
-    </Form>
   );
 }
 function FittingCredit({ fitting: f, busy, act }: any) {
