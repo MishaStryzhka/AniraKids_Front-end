@@ -6,6 +6,7 @@ import type { BookingPolicy, PaymentInstructions } from '../api/bookingPolicy';
 import type { Receipt } from '../api/publicApi';
 import { Copy, Facts, Heading, Stack } from '../storefrontStyles';
 import { formatMoney } from '../booking/bookingModel';
+import { RentalPriceRows } from './RentalPriceRows';
 const PaymentFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
@@ -108,7 +109,7 @@ function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
     <Copy>Pro platbu můžete použít níže uvedené bankovní údaje.</Copy>
   );
 }
-export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
+export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: { receipt: Receipt; showRentalPrice?: boolean }) {
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
@@ -145,18 +146,25 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
     <Stack>
       <Heading>Platba rezervace</Heading>
       <PaymentFacts>
+        {showRentalPrice ? <>
+          <RentalPriceRows rentalPrice={receipt.subtotal} discount={receipt.fittingDiscount} />
+          {receipt.fittingDiscount ? <div>
+            <dt>Nájemné po slevě</dt>
+            <dd>{formatMoney(receipt.subtotal)}</dd>
+          </div> : null}
+        </> : null}
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
           <dd>{formatMoney(payment.advanceRequired)}</dd>
         </div>
-        <div>
+        {payment.advanceBalance > 0 && payment.advanceBalance < payment.advanceRequired ? <div>
           <dt>Zbývá uhradit ze zálohy</dt>
           <dd>{formatMoney(payment.advanceBalance)}</dd>
-        </div>
-        <div>
+        </div> : null}
+        {payment.rentalBalance !== receipt.subtotal ? <div>
           <dt>Zbývá uhradit nájemné</dt>
           <dd>{formatMoney(payment.rentalBalance)}</dd>
-        </div>
+        </div> : null}
         {hasDeposit ? <><div>
           <dt>Požadovaná vratná kauce</dt>
           <dd>{formatMoney(payment.depositRequired)}</dd>
