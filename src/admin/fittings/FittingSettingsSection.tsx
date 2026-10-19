@@ -23,7 +23,7 @@ export function FittingSettingsSection({onDirty}:{onDirty:(value:boolean)=>void}
  catch(e){if(!c.signal.aborted&&!handleRequestError(e))setError(fittingError(e));}finally{lock.current=false;if(!c.signal.aborted)setBusy(false);}}
  function change(value:FittingSettings){setDraft(value);setSuccess(false);}
  return <Card aria-label="Zkoušky">
- <p>30 minut · 200 Kč QR převodem · jeden zákazník současně. Zaplacená zkouška se může jednou započíst do ceny pronájmu.</p>
+ <p>30 minut · 200 Kč QR převodem · jeden zákazník současně. Za zaplacenou a dokončenou zkoušku lze jednou uplatnit slevu 200 Kč na pronájem.</p>
  {!draft?error?<><p role="alert">{error}</p><Button onClick={()=>setRevision(x=>x+1)}>Načíst nastavení zkoušek</Button></>:<p role="status">Načítání nastavení zkoušek…</p>:<form onSubmit={e=>{e.preventDefault();void save();}}><fieldset disabled={busy} style={{border:0,padding:0,margin:0,minWidth:0,display:'grid',gap:20}}><legend style={{position:'absolute',clipPath:'inset(100%)'}}>Nastavení zkoušek</legend>
  <CheckboxField label="Povolit online zápis na zkoušky" checked={draft.enabled} onChange={e=>change({...draft,enabled:e.target.checked})}/>
  <Input label="Adresa zkoušky" required={draft.enabled} maxLength={500} value={draft.address} onChange={e=>change({...draft,address:e.target.value})}/>
