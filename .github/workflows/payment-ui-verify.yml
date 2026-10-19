@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - src/admin/payments/**
+      - src/admin/invoices/**
+      - .github/invoices.spec.js
       - src/admin/fittings/**
       - src/admin/reservations/**
       - .github/fitting-discount.spec.js
@@ -42,7 +44,7 @@ jobs:
           mkdir -p test-evidence/payments
           npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/payments/server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
-      - run: npx playwright test .github/admin-payments.spec.js .github/fitting-discount.spec.js --workers=2 --reporter=line
+      - run: npx playwright test .github/admin-payments.spec.js .github/fitting-discount.spec.js .github/invoices.spec.js --workers=2 --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()
         with:
