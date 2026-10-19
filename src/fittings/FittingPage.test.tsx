@@ -39,6 +39,8 @@ test('account list renders a session-protected detail URL and isolates loading f
  api.mockResolvedValue({items:[{number:'ZK-123456ABCDEF',date:'2030-01-07',time:'11:00',status:'confirmed',paymentStatus:'paid'}],total:1});
  const view=render(<MemoryRouter><AccountFittings token="owner-session"/></MemoryRouter>);
  expect(await screen.findByRole('link',{name:'Platby a podrobnosti zkoušky'})).toHaveAttribute('href','/zkouska/ZK-123456ABCDEF');
+ expect(screen.queryByRole('link',{name:'Rezervovat zkoušku'})).not.toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Obnovit zkoušky'})).not.toBeInTheDocument();
  expect(api).toHaveBeenCalledWith('/account/fittings?page=1',expect.objectContaining({token:'owner-session'}));
  api.mockRejectedValue(new Error('offline'));view.rerender(<MemoryRouter><AccountFittings token="other-session"/></MemoryRouter>);
  expect(screen.queryByText('ZK-123456ABCDEF',{exact:false})).not.toBeInTheDocument();
@@ -50,4 +52,15 @@ test('account detail hides cached data immediately on logout',async()=>{
  const view=render(tree);expect(await screen.findByText('Adresa: Private address')).toBeInTheDocument();
  mockAuth.isLoggedIn=false;mockAuth.token='';view.rerender(<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
  expect(screen.queryByText('Adresa: Private address')).not.toBeInTheDocument();expect(screen.getByRole('link',{name:'Přihlásit se'})).toBeInTheDocument();
+});
+
+test.each([true,false])('private link management is only shown to guests: signed in %s',async(signedIn)=>{
+ mockAuth.isLoggedIn=signedIn;mockAuth.token=signedIn?'owner-session':'';
+ api.mockResolvedValue({number:'ZK-123456ABCDEF',date:'2030-01-07',time:'11:00',status:'confirmed',paymentStatus:'paid',address:'Private address'});
+ render(<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF#'+'a'.repeat(64)]}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
+ await screen.findByText('Adresa: Private address');
+ expect(Boolean(screen.queryByLabelText('Soukromý odkaz na zkoušku'))).toBe(!signedIn);
+ expect(screen.queryByRole('link',{name:'Moje rezervace'})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Zrušit zkoušku',exact:true}));
+ expect(screen.getByRole('dialog')).toBeInTheDocument();
 });
