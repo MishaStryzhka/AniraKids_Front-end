@@ -37,9 +37,11 @@ export function CompanyInformation({
 export function BookingPaymentExplanation({
   policy,
   rentalPrice,
+  hasDeposit = true,
 }: {
   policy: BookingPolicy;
   rentalPrice?: number;
+  hasDeposit?: boolean;
 }) {
   const advance =
     rentalPrice === undefined
@@ -50,18 +52,18 @@ export function BookingPaymentExplanation({
       <Heading>Platba a potvrzení rezervace</Heading>
       <Copy>
         Rezervační záloha činí {formatMoney(advance)} a započítává se do ceny
-        pronájmu. Vratná kauce je samostatná částka.
+        pronájmu.{hasDeposit ? ' Vratná kauce je samostatná částka.' : ''}
       </Copy>
       {rentalPrice !== undefined ? (
         <Copy>
           Po uhrazení zálohy zbývá z nájemného{' '}
           {formatMoney(rentalPrice - advance)}. Před předáním je třeba uhradit
-          celé nájemné a vratnou kauci.
+          celé nájemné{hasDeposit ? ' a vratnou kauci' : ''}.
         </Copy>
       ) : null}
       <Copy>
         Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé
-        částky včetně vratné kauce. Záloha se při plné platbě nepřičítá navíc.
+        částky{hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc.
         Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze
         po domluvě uhradit také osobně v hotovosti.
         Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
@@ -137,6 +139,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
   const cash = choice === 'cash' && payment.advanceBalance === 0 && Boolean(fullInstructions);
   const selected = cash ? 'cash' : choice === 'advance' && advanceInstructions ? 'advance' : 'full';
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
+  const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
   const remaining = payment.rentalBalance + payment.depositRequired - payment.depositHeld;
   return (
     <Stack>
@@ -154,14 +157,14 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           <dt>Zbývá uhradit nájemné</dt>
           <dd>{formatMoney(payment.rentalBalance)}</dd>
         </div>
-        <div>
+        {hasDeposit ? <><div>
           <dt>Požadovaná vratná kauce</dt>
           <dd>{formatMoney(payment.depositRequired)}</dd>
         </div>
         <div>
           <dt>Držená vratná kauce</dt>
           <dd>{formatMoney(payment.depositHeld)}</dd>
-        </div>
+        </div></> : null}
       </PaymentFacts>
       {payable && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
@@ -170,7 +173,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
             Povinná záloha – {formatMoney(advanceInstructions.amount)}
           </option> : null}
           {fullInstructions ? <option value="full">
-            {payment.advanceBalance > 0 ? 'Vše včetně kauce' : 'Doplatit včetně kauce'} – {formatMoney(fullInstructions.amount)}
+            {payment.advanceBalance > 0 ? (hasDeposit ? 'Vše včetně kauce' : 'Celé nájemné') : (hasDeposit ? 'Doplatit včetně kauce' : 'Doplatit nájemné')} – {formatMoney(fullInstructions.amount)}
           </option> : null}
           {fullInstructions && payment.advanceBalance === 0 ? <option value="cash">
             Hotově při převzetí
@@ -185,17 +188,15 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
         </Copy>
       ) : cash ? (
         <Copy role="status">
-          Zbývá doplatit {formatMoney(remaining)} hotově při převzetí:
-          nájemné {formatMoney(payment.rentalBalance)} a vratná kauce{' '}
-          {formatMoney(payment.depositRequired - payment.depositHeld)}.
+          Zbývá doplatit {formatMoney(remaining)} hotově při převzetí{hasDeposit ? `: nájemné ${formatMoney(payment.rentalBalance)} a vratná kauce ${formatMoney(payment.depositRequired - payment.depositHeld)}` : ''}.
         </Copy>
       ) : instructions ? (
         <>
-          <Heading>{selected === 'advance' ? 'Úhrada rezervační zálohy' : 'Úhrada nájemného a vratné kauce'}</Heading>
+          <Heading>{selected === 'advance' ? 'Úhrada rezervační zálohy' : (hasDeposit ? 'Úhrada nájemného a vratné kauce' : 'Úhrada nájemného')}</Heading>
           <Copy role="status">
             {selected === 'advance'
-              ? `Po úhradě zálohy zbývá ${formatMoney(remaining - instructions.amount)} včetně kauce. Zbytek lze doplatit hotově při převzetí nebo QR platbou po zaevidování zálohy.`
-              : `Částka zahrnuje zbývající nájemné ${formatMoney(payment.rentalBalance)} a vratnou kauci ${formatMoney(payment.depositRequired - payment.depositHeld)}. Záloha je již součástí nájemného.`}
+              ? `Po úhradě zálohy zbývá ${formatMoney(remaining - instructions.amount)}${hasDeposit ? ' včetně kauce' : ''}. Zbytek lze doplatit hotově při převzetí nebo QR platbou po zaevidování zálohy.`
+              : `Částka zahrnuje zbývající nájemné ${formatMoney(payment.rentalBalance)}${hasDeposit ? ` a vratnou kauci ${formatMoney(payment.depositRequired - payment.depositHeld)}` : ''}. Záloha je již součástí nájemného.`}
           </Copy>
           <Copy>
             Uhraďte {formatMoney(instructions.amount)} bankovním převodem. Před
@@ -238,7 +239,7 @@ export function ReceiptPaymentInformation({ receipt }: { receipt: Receipt }) {
           </Copy>
         </>
       ) : payable && remaining === 0 ? (
-        <Copy role="status">Nájemné a vratná kauce jsou podle posledního načteného stavu uhrazeny.</Copy>
+        <Copy role="status">{hasDeposit ? 'Nájemné a vratná kauce jsou podle posledního načteného stavu uhrazeny.' : 'Nájemné je podle posledního načteného stavu uhrazeno.'}</Copy>
       ) : receipt.status === 'pending' && payment.advanceBalance === 0 ? (
         <Copy>
           Rezervační záloha je podle posledního načteného stavu uhrazena.

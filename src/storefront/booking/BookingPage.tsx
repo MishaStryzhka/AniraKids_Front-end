@@ -81,22 +81,30 @@ const ItemHeader = styled.div`
   min-inline-size: 0;
   > h3 { min-inline-size: 0; align-self: center; }
 `;
-export function PriceSummary({ pricing }: { pricing: Pricing }) {
+const PriceFacts = styled(Facts)`
+  > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
+  dd { white-space: nowrap; }
+`;
+export function PriceSummary({ pricing, discount }: { pricing: Pricing; discount?: {number: string; amount: number} }) {
   return (
-    <Facts>
+    <PriceFacts>
       <div>
         <dt>Cena pronájmu</dt>
-        <dd>{formatMoney(pricing.rentalPrice)}</dd>
+        <dd>{formatMoney(pricing.rentalPrice + (discount?.amount ?? 0))}</dd>
       </div>
-      <div>
+      {discount ? <div>
+        <dt>Sleva za zkoušku {discount.number}</dt>
+        <dd>−{formatMoney(discount.amount)}</dd>
+      </div> : null}
+      {pricing.deposit > 0 ? <div>
         <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
-      </div>
+      </div> : null}
       <div>
         <dt>Celkem k úhradě</dt>
         <dd>{formatMoney(pricing.totalDue)}</dd>
       </div>
-    </Facts>
+    </PriceFacts>
   );
 }
 const formatInstant = (value: string) =>
@@ -280,8 +288,8 @@ export function BookingPage() {
                   </dd>
                 </div>
               </Facts>
-              {stored.receipt.fittingDiscount?<Copy>Uplatněná sleva za zkoušku {stored.receipt.fittingDiscount.number}: −200 Kč</Copy>:null}
               <PriceSummary
+                discount={stored.receipt.fittingDiscount}
                 pricing={{
                   rentalPrice: stored.receipt.subtotal,
                   deposit: stored.receipt.deposit,
@@ -534,8 +542,7 @@ export function BookingPage() {
                           {formatCalendarDay(quote.startDate)} –{' '}
                           {formatCalendarDay(quote.endDate)}
                         </Copy>
-                        {fittingDiscount?<Copy>Sleva za zkoušku {fittingDiscount.number}: −200 Kč</Copy>:null}
-                        <PriceSummary pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
+                        <PriceSummary discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
                         <Copy>
                           Cena pronájmu je za rezervaci, nikoli za den.
                           Dostupnost a konečnou cenu ověříme při odeslání
@@ -650,6 +657,7 @@ export function BookingPage() {
                       <>
                         <BookingPaymentExplanation
                           policy={policy.data}
+                          hasDeposit={draft.selection.rentalMode !== 'studio'}
                           rentalPrice={
                             (quote?.pricing.rentalPrice ??
                             draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)) - (fittingDiscount ? 200 : 0)
