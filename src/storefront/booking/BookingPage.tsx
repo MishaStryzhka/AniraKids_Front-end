@@ -1,4 +1,5 @@
 import {FittingDiscountPicker,type FittingDiscountSelection} from '../../fittings/FittingDiscount';
+import { RentalPriceRows } from '../payments/RentalPriceRows';
 import styled from 'styled-components';
 import {discountQuotes} from '../../partner/discount';
 import { X, Shirt } from 'lucide-react';
@@ -88,14 +89,7 @@ const PriceFacts = styled(Facts)`
 export function PriceSummary({ pricing, discount }: { pricing: Pricing; discount?: {number: string; amount: number} }) {
   return (
     <PriceFacts>
-      <div>
-        <dt>Cena pronájmu</dt>
-        <dd>{formatMoney(pricing.rentalPrice + (discount?.amount ?? 0))}</dd>
-      </div>
-      {discount ? <div>
-        <dt>Sleva za zkoušku {discount.number}</dt>
-        <dd>−{formatMoney(discount.amount)}</dd>
-      </div> : null}
+      <RentalPriceRows rentalPrice={pricing.rentalPrice} discount={discount} />
       {pricing.deposit > 0 ? <div>
         <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
@@ -313,7 +307,7 @@ export function BookingPage() {
                       ? 'Vrácená platba'
                       : 'Neznámý stav platby'}
               </Copy>
-              <ReceiptPaymentInformation receipt={stored.receipt} />
+              <ReceiptPaymentInformation receipt={stored.receipt} showRentalPrice={false} />
               {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
               {(stored.receipt.guestAccessToken || stored.accountId) && (
                 <Actions>
