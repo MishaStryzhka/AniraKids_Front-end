@@ -25,6 +25,7 @@ export type PaymentEntry = Omit<PaymentOperation, 'expectedRevision'> & {
   recordedBy: string;
 };
 export type ReservationPayments = {
+  invoiceAutomation?: unknown;
   reservationId: string;
   revision: number;
   currency: 'CZK';
@@ -134,6 +135,7 @@ export function parsePayments(
   if (new Set(entries.map(e => e.operationId)).size !== entries.length)
     return invalid();
   return {
+    ...(v.invoiceAutomation ? {invoiceAutomation:v.invoiceAutomation} : {}),
     reservationId,
     revision: p.revision,
     currency: 'CZK',

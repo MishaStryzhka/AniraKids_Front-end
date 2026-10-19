@@ -1,3 +1,4 @@
+import {invoiceAutomationMessage} from '../invoices/automationStatus';
 import {
   loadPaymentAttempt,
   savePaymentAttempt,
@@ -268,7 +269,7 @@ export function useReservationPayments(input: {
         attempt: null,
         conflict: false,
         announcement:
-          'Operace byla zaznamenána. Evidence sama neprovádí bankovní převod.',
+          'Operace byla zaznamenána. Evidence sama neprovádí bankovní převod.'+invoiceAutomationMessage(payments.invoiceAutomation),
         focus: s.focus + 1,
       }));
       return true;
