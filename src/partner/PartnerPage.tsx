@@ -970,7 +970,7 @@ function FittingCredit({ fitting: f, busy, act }: any) {
         required
         onChange={e => setNumber(e.target.value)}
       />
-      <Button disabled={busy}>Započítat zkoušku</Button>
+      <Button type="submit" disabled={busy}>Započítat zkoušku</Button>
     </Form>
   );
 }
@@ -1018,7 +1018,7 @@ function CashPayment({ reservation: r, busy, act }: any) {
           operation.current = crypto.randomUUID();
         }}
       />
-      <Button disabled={busy}>Zaznamenat přijatou hotovost</Button>
+      <Button type="submit" disabled={busy}>Zaznamenat přijatou hotovost</Button>
     </Form>
   );
 }
@@ -1075,7 +1075,7 @@ function Settlement({ data, busy, act }: any) {
             operation.current = crypto.randomUUID();
           }}
         />
-        <Button disabled={busy}>Zaznamenat předání</Button>
+        <Button type="submit" disabled={busy}>Zaznamenat předání</Button>
       </Form>
     </Card>
   );
@@ -1342,7 +1342,7 @@ function Assignment({ reservation: r, members, busy, act }: any) {
             </option>
           ))}
       </SelectField>
-      <Button disabled={busy}>Přiřadit obsluhu</Button>
+      <Button type="submit" disabled={busy}>Přiřadit obsluhu</Button>
     </Form>
   );
 }
@@ -1373,7 +1373,7 @@ function SourceChange({ reservation: r, busy, act }: any) {
         onChange={e => setReason(e.target.value)}
       />
       <p>Změna ovlivní rozdělení příjmu a zapíše se do historie.</p>
-      <Button disabled={busy || source === r.source}>
+      <Button type="submit" disabled={busy || source === r.source}>
         Uložit opravu zdroje
       </Button>
     </Form>
@@ -1502,7 +1502,7 @@ function NewFitting({ token, userId, onDone }: any) {
         platby.
       </p>
       {error ? <p role="alert">{error}</p> : null}
-      <Button disabled={busy || !time}>
+      <Button type="submit" disabled={busy || !time}>
         {busy
           ? 'Odesílání…'
           : attempt.current

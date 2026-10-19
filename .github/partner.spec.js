@@ -273,3 +273,21 @@ for (const width of [390,1440]) test('failed confirmation is visible at the acti
  await expect(page.getByText('Potvrzená',{exact:true})).toBeVisible();
  expect(state.writes).toHaveLength(5);expect(state.errors).toEqual([]);
 });
+
+for(const width of [390,1440]) test('cash form submits payment and reports failures '+width,async({page})=>{
+ const state=await fixture(page);state.failure='CONFLICT';
+ await page.setViewportSize({width,height:700});
+ await page.goto(APP+'/partner/blaze?section=reservations');
+ await page.getByText('Platby a QR',{exact:true}).click();
+ await page.getByLabel('Přijatá hotovost v Kč').fill('600');
+ await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('Údaje se změnily');
+ expect(state.writes).toHaveLength(1);
+ expect(state.writes[0]).toMatchObject({action:'payment',payment:{amount:600,type:'rental_received',method:'cash',expectedRevision:1}});
+ const operation=state.writes[0].payment.operationId;
+ state.failure=null;
+ await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
+ await expect(page.getByRole('status').filter({hasText:'Změna byla úspěšně uložena.'})).toBeVisible();
+ expect(state.writes).toHaveLength(2);expect(state.writes[1].payment.operationId).toBe(operation);
+ expect(state.errors).toEqual([]);
+});
