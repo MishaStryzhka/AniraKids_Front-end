@@ -1,7 +1,9 @@
+import { useAdminPermissions } from '../auth/permissions';
+import { ReservationFittingDiscount } from '../fittings/ReservationFittingDiscount';
 import { useReservationPayments } from '../payments/useReservationPayments';
 import { ReservationPaymentLedger } from '../payments/ReservationPaymentLedger';
 import type { ReservationMutationLock } from '../payments/paymentModel';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '../../design-system/components/Button';
@@ -99,6 +101,8 @@ function ReservationDetailView({
   adminId: string;
 }) {
   const { handleRequestError } = useAdminAccess();
+  const access=useAdminPermissions();
+  const [discountBusy,setDiscountBusy]=useState(false);
   const location = useLocation();
   const context = reservationBackContext(location.state),
     back = reservationListBackLink(context);
@@ -126,7 +130,7 @@ function ReservationDetailView({
       ? `${state.reservation.status}:${state.reservation.updatedAt ?? ''}`
       : null,
     canWrite: () =>
-      !state.busy && !state.recovery && Boolean(state.reservation),
+      !discountBusy && !state.busy && !state.recovery && Boolean(state.reservation),
   });
   paymentsRef.current = payments;
   const statusRef = useRef<HTMLDivElement>(null);
@@ -196,7 +200,7 @@ function ReservationDetailView({
           <ReservationLifecycleControls
             controller={state}
             statusRef={statusRef}
-            externalBlocked={!payments.canWriteNow()}
+            externalBlocked={discountBusy || !payments.canWriteNow()}
             advanceMissing={Boolean(payments.payments?.advanceBalance)}
           />
           <ReservationCopy role="status" aria-live="polite">
@@ -325,14 +329,20 @@ function ReservationDetailView({
               </div>
             </DetailFacts>
           </ReservationPanel>
+          {access.owner || access.permissions.includes('fittings') ? <ReservationFittingDiscount
+            token={token} reservationId={reservationId} reservationNumber={reservation.reservationNumber}
+            version={`${reservation.updatedAt}:${payments.payments?.revision}`} blocked={Boolean(state.busy||state.recovery)||!payments.canWriteNow()}
+            mutationLock={mutationLock} onBusy={setDiscountBusy} onAccessError={handleRequestError}
+            onSaved={async()=>{await state.read();await payments.read(false);}}
+          /> : null}
           <ReservationPaymentLedger
             controller={payments}
             status={reservation.status}
-            externalBusy={Boolean(state.busy || state.recovery)}
+            externalBusy={discountBusy || Boolean(state.busy || state.recovery)}
           />
           <ReservationNotesEditor
             controller={state}
-            externalBlocked={!payments.canWriteNow()}
+            externalBlocked={discountBusy || !payments.canWriteNow()}
           />
           {reservation.cancelledAt || reservation.cancellationReason ? (
             <ReservationPanel>
