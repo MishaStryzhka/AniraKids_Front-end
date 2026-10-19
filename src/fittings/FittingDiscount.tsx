@@ -25,12 +25,12 @@ export function FittingDiscountPicker({token,disabled,total,selected,onChange}:{
  useEffect(()=>{if(total<200&&selected)onChange(undefined);},[total,selected,onChange]);
  if(!token&&!link)return null;
  if(!loading&&!error&&!items.length&&!link)return null;
- return <Panel><Stack><Heading>Sleva za zkoušku</Heading>
- {loading?<Copy role="status">Ověřujeme dostupnou slevu…</Copy>:error?<><Copy role="alert">Slevu se nepodařilo ověřit. Můžete ověření zopakovat nebo rezervovat bez slevy a kontaktovat nás.</Copy><Button variant="secondary" disabled={disabled} onClick={()=>setRefresh(v=>v+1)}>Ověřit znovu</Button></>:items.length?<>
- <Copy>Máte nárok na jednorázovou slevu 200 Kč za zaplacenou a absolvovanou zkoušku. Použijte stejný kontaktní e-mail jako u zkoušky.</Copy>
+ return <Panel><Stack><Heading>Započtená platba za zkoušku</Heading>
+ {loading?<Copy role="status">Ověřujeme platbu za zkoušku…</Copy>:error?<><Copy role="alert">Platbu za zkoušku se nepodařilo ověřit. Zkuste to znovu nebo nás kontaktujte, abyste zálohu neplatili podruhé.</Copy><Button variant="secondary" disabled={disabled} onClick={()=>setRefresh(v=>v+1)}>Ověřit znovu</Button></>:items.length?<>
+ <Copy>Zaplacenou zkoušku 200 Kč započteme jako zálohu na pronájem. Zálohu znovu neplatíte. Použijte stejný kontaktní e-mail jako u zkoušky.</Copy>
  <SelectField label="Vyberte zkoušku" value={choice} disabled={disabled||!!selected} onChange={e=>setChoice(e.target.value)}>{items.map(i=><option key={i.number} value={i.number}>{fittingDateLabel(i.date)} · {i.number}</option>)}</SelectField>
- {selected?<><Copy role="status">Uplatněna sleva 200 Kč · {selected.number}</Copy><Button variant="secondary" disabled={disabled} onClick={()=>onChange(undefined)}>Odebrat slevu</Button></>:<Button disabled={disabled||total<200||!choice} onClick={()=>onChange(link?.number===choice?link:{number:choice})}>Uplatnit slevu</Button>}
- {total<200?<Copy>Slevu lze využít při ceně pronájmu alespoň 200 Kč.</Copy>:null}
- </>:<Copy>Sleva z tohoto odkazu nyní není dostupná. Zkouška musí být zaplacená, dokončená a nesmí být využita u jiné rezervace. Pokud potřebujete pomoc, kontaktujte nás.</Copy>}
+ {selected?<><Copy role="status">Započtena platba 200 Kč · {selected.number}</Copy><Button variant="secondary" disabled={disabled} onClick={()=>onChange(undefined)}>Odebrat započtení</Button></>:<Button disabled={disabled||total<200||!choice} onClick={()=>onChange(link?.number===choice?link:{number:choice})}>Započíst platbu</Button>}
+ {total<200?<Copy>Platbu lze započíst při ceně pronájmu alespoň 200 Kč.</Copy>:null}
+ </>:<Copy>Platbu z tohoto odkazu nyní nelze započíst. Zkouška musí být zaplacená, dokončená a nesmí být využita u jiné rezervace. Pokud potřebujete pomoc, kontaktujte nás.</Copy>}
  </Stack></Panel>;
 }

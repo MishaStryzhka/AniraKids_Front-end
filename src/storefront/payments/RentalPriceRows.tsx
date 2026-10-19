@@ -11,7 +11,7 @@ export function RentalPriceRows({ rentalPrice, discount }: {
       <dd>{formatMoney(rentalPrice + (discount?.amount ?? 0))}</dd>
     </div>
     {discount ? <div>
-      <dt>Sleva za zkoušku {discount.number}</dt>
+      <dt>Započtená platba za zkoušku {discount.number}</dt>
       <dd>−{formatMoney(discount.amount)}</dd>
     </div> : null}
   </>;

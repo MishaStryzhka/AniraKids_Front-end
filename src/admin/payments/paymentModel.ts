@@ -78,6 +78,7 @@ export type ReservationMutationLock = {
 /** UI visibility only; the server remains authoritative for allowed amounts. */
 export function visiblePaymentTypes(payments: ReservationPayments, status: string): PaymentType[] {
   return paymentTypes.filter(type => {
+    if (type === 'advance_received' && payments.fittingCredit && payments.advanceBalance === 0) return false;
     if (type === 'rental_refunded') return payments.refundableRental > 0;
     if (type === 'deposit_refunded') return payments.depositHeld > 0;
     if (type === 'cancellation_fee') return status === 'cancelled';
@@ -86,7 +87,7 @@ export function visiblePaymentTypes(payments: ReservationPayments, status: strin
   });
 }
 export function isEmptyPaymentLedger(payments: ReservationPayments): boolean {
-  return !payments.legacyUnreconciled && payments.entries.length === 0 &&
+  return !payments.legacyUnreconciled && !payments.fittingCredit && payments.entries.length === 0 &&
     [payments.rentalReceived, payments.rentalRefunded, payments.rentalNet,
       payments.depositReceived, payments.depositRefunded, payments.depositHeld,
       payments.cancellationFee].every(amount => amount === 0);

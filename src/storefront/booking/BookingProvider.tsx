@@ -104,8 +104,8 @@ function knownRejection(error: unknown) {
   );
 }
 function rejectionCopy(error: PublicApiError) {
-  if(error.code==='FITTING_DISCOUNT_UNAVAILABLE')return 'Sleva za zkoušku již není dostupná nebo kontaktní e-mail neodpovídá zkoušce. Ověřte údaje a dostupnou slevu znovu.';
-  if(error.code==='FITTING_DISCOUNT_MINIMUM')return 'Pro slevu za zkoušku musí cena pronájmu dosahovat alespoň 200 Kč.';
+  if(error.code==='FITTING_DISCOUNT_UNAVAILABLE')return 'Platbu za zkoušku nelze započíst nebo kontaktní e-mail neodpovídá zkoušce. Ověřte údaje a platbu znovu.';
+  if(error.code==='FITTING_DISCOUNT_MINIMUM')return 'Pro započtení platby za zkoušku musí cena pronájmu dosahovat alespoň 200 Kč.';
   if (
     ['NO_AVAILABLE_INVENTORY', 'INVENTORY_ITEM_NOT_AVAILABLE'].includes(
       error.code

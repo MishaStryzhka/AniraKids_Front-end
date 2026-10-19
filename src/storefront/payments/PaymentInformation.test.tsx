@@ -140,28 +140,38 @@ test('studio advance, full QR and cash omit zero deposit copy and preserve 600 m
  expect(view.container.textContent).not.toMatch(/kauce|kauci/);
 });
 
-test('account receipt separates the paid-fitting discount from the still-required reservation advance', async () => {
- const discounted={...receipt,subtotal:600,deposit:0,totalDue:600,fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,rentalBalance:600,depositRequired:0,depositHeld:0,fullPaymentInstructions:fullPayment(600)}};
- const view=render(<ReceiptPaymentInformation receipt={discounted}/>);
+test('paid fitting covers the reservation advance and leaves only the 600 Kč remainder', async () => {
+ const credited={...receipt,subtotal:600,deposit:0,totalDue:600,fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,advanceBalance:0,paymentInstructions:null,rentalBalance:600,depositRequired:0,depositHeld:0,fullPaymentInstructions:fullPayment(600)}};
+ const view=render(<ReceiptPaymentInformation receipt={credited}/>);
  const row=(label:string)=>screen.getByText(label,{exact:true}).closest('div');
  expect(row('Cena pronájmu')).toHaveTextContent('800 Kč');
- expect(row('Sleva za zkoušku ZK-ABCDEF123456')).toHaveTextContent('−200 Kč');
- expect(row('Nájemné po slevě')).toHaveTextContent('600 Kč');
- expect(row('Rezervační záloha (součást nájemného)')).toHaveTextContent('200 Kč');
+ expect(row('Započtená platba za zkoušku ZK-ABCDEF123456')).toHaveTextContent('−200 Kč');
+ expect(row('Zbývá uhradit nájemné')).toHaveTextContent('600 Kč');
+ expect(row('Rezervační záloha (součást nájemného)')).toHaveTextContent('200 Kč · uhrazeno');
+ expect(screen.queryByText('Nájemné po slevě')).not.toBeInTheDocument();
  expect(screen.queryByText('Zbývá uhradit ze zálohy')).not.toBeInTheDocument();
- expect(screen.queryByText('Zbývá uhradit nájemné')).not.toBeInTheDocument();
- await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenLastCalledWith(payment.paymentInstructions.qrPayload,expect.anything()));
- expect(screen.getByRole('status')).toHaveTextContent('Po úhradě zálohy zbývá 400 Kč');
- view.rerender(<ReceiptPaymentInformation receipt={{...discounted,status:'confirmed',payment:{...discounted.payment,advanceBalance:0,rentalBalance:400,paymentInstructions:null,fullPaymentInstructions:fullPayment(400)}}}/>);
- expect(row('Nájemné po slevě')).toHaveTextContent('600 Kč');
+ expect(screen.queryByRole('option',{name:/Povinná záloha/})).not.toBeInTheDocument();
+ await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenLastCalledWith(fullPayment(600).qrPayload,expect.anything()));
+ expect(screen.getByRole('status')).toHaveTextContent('zbývající nájemné 600 Kč');
+ fireEvent.change(screen.getByRole('combobox'),{target:{value:'cash'}});
+ expect(screen.getByRole('status')).toHaveTextContent('Zbývá doplatit 600 Kč hotově');
+ // A separately recorded 200 Kč payment reduces the remainder only once.
+ view.rerender(<ReceiptPaymentInformation receipt={{...credited,status:'confirmed',payment:{...credited.payment,rentalBalance:400,fullPaymentInstructions:fullPayment(400)}}}/>);
  expect(row('Zbývá uhradit nájemné')).toHaveTextContent('400 Kč');
  await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenLastCalledWith(fullPayment(400).qrPayload,expect.anything()));
+});
+
+test('checkout explains the credited fitting without requesting another advance',()=>{
+ render(<BookingPaymentExplanation policy={policy} rentalPrice={600} hasDeposit={false} fittingCredit={200}/>);
+ expect(screen.getByText(/Zálohu znovu neplatíte/)).toBeInTheDocument();
+ expect(screen.getByText(/Po započtení zkoušky zbývá doplatit/)).toHaveTextContent('600 Kč');
+ expect(screen.queryByText(/Po uhrazení zálohy zbývá/)).not.toBeInTheDocument();
 });
 
 test('undiscounted receipts do not invent a fitting credit and partial advances remain explicit',()=>{
  render(<ReceiptPaymentInformation receipt={{...receipt,payment:{...payment,advanceBalance:100,rentalBalance:400,paymentInstructions:null}}}/>);
  expect(screen.getByText('Cena pronájmu').closest('div')).toHaveTextContent('500 Kč');
- expect(screen.queryByText(/Sleva za zkoušku/)).not.toBeInTheDocument();
+ expect(screen.queryByText(/Započtená platba za zkoušku/)).not.toBeInTheDocument();
  expect(screen.getByText('Zbývá uhradit ze zálohy').closest('div')).toHaveTextContent('100 Kč');
  expect(screen.getByText('Zbývá uhradit nájemné').closest('div')).toHaveTextContent('400 Kč');
 });

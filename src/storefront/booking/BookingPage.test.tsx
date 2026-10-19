@@ -185,6 +185,6 @@ test('completed date edits recheck automatically; stale responses and invalid ra
 test('studio summary shows gross rent then fitting discount and net total without zero deposit', () => {
   const {container}=render(<PriceSummary pricing={{rentalPrice:600,deposit:0,totalDue:600}} discount={{number:'ZK-123456ABCDEF',amount:200}} />);
   const rows=Array.from(container.querySelectorAll('dl > div'));
-  expect(rows.map(row=>row.querySelector('dt')?.textContent)).toEqual(['Cena pronájmu','Sleva za zkoušku ZK-123456ABCDEF','Celkem k úhradě']);
+  expect(rows.map(row=>row.querySelector('dt')?.textContent)).toEqual(['Cena pronájmu','Započtená platba za zkoušku ZK-123456ABCDEF','Celkem k úhradě']);
   expect(rows.map(row=>row.querySelector('dd')?.textContent?.replace(/\s/g,''))).toEqual(['800Kč','−200Kč','600Kč']);
 });

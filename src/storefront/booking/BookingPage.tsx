@@ -652,6 +652,7 @@ export function BookingPage() {
                         <BookingPaymentExplanation
                           policy={policy.data}
                           hasDeposit={draft.selection.rentalMode !== 'studio'}
+                          fittingCredit={fittingDiscount ? 200 : 0}
                           rentalPrice={
                             (quote?.pricing.rentalPrice ??
                             draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)) - (fittingDiscount ? 200 : 0)
