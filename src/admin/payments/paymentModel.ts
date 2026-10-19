@@ -31,10 +31,12 @@ export const paymentTypeLabels: Record<PaymentType, string> = {
 };
 export const methodLabel = (method: PaymentMethod) =>
   method === 'cash' ? 'Hotově' : method === 'card' ? 'Kartou' : 'Bankovním převodem';
-export function paymentDraftErrors(draft: PaymentDraft, status: string) {
+export function paymentDraftErrors(draft: PaymentDraft, status: string, payments?: ReservationPayments) {
   const errors: Partial<Record<keyof PaymentDraft, string>> = {};
   if (!/^[1-9]\d*$/.test(draft.amount.trim()) || Number(draft.amount) > 1000000)
     errors.amount = 'Zadejte celé číslo od 1 do 1 000 000 Kč.';
+  if (draft.type === 'deposit_received' && payments && Number(draft.amount) !== payments.depositRequired - payments.depositHeld)
+    errors.amount = 'Kauci je nutné přijmout v celé zbývající požadované výši.';
   if (draft.reference.trim().length > 120)
     errors.reference = 'Reference může mít maximálně 120 znaků.';
   if (draft.note.trim().length > 500)

@@ -95,3 +95,11 @@ jest.mock('axios', () => ({
   default: { isCancel: () => false },
   AxiosError: class extends Error {},
 }));
+
+test('deposit must cover the entire outstanding required amount',()=>{
+ const payments={...ledger,depositRequired:2000,depositHeld:0};
+ const draft={...emptyPaymentDraft(),type:'deposit_received' as const,amount:'1999'};
+ expect(paymentDraftErrors(draft,'confirmed',payments).amount).toBeTruthy();
+ expect(paymentDraftErrors({...draft,amount:'2000'},'confirmed',payments).amount).toBeUndefined();
+ expect(paymentDraftErrors({...draft,amount:'1500'},'confirmed',{...payments,depositHeld:500}).amount).toBeUndefined();
+});

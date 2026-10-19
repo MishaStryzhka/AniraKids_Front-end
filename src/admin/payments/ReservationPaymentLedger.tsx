@@ -141,7 +141,7 @@ export function ReservationPaymentLedger({
   }, [state.attempt, state.conflict, state.error]);
   const prepare = () => {
     if (!payments || blocked) return;
-    const problems = paymentDraftErrors(draft, status);
+    const problems = paymentDraftErrors(draft, status, payments);
     if (!selectedTypeAvailable) problems.type = 'Tato operace už není dostupná. Vyberte jiný druh operace.';
     setErrors(problems);
     const first = Object.keys(problems)[0];
@@ -293,6 +293,7 @@ export function ReservationPaymentLedger({
                   setDraft({
                     ...draft,
                     type: e.target.value as typeof draft.type,
+                    amount: e.target.value === 'deposit_received' ? String(Math.max(0,payments.depositRequired-payments.depositHeld)) : '',
                   });
                   setErrors({});
                 }}
@@ -314,6 +315,7 @@ export function ReservationPaymentLedger({
                 label="Částka (Kč)"
                 inputMode="numeric"
                 value={draft.amount}
+                readOnly={draft.type === 'deposit_received'}
                 disabled={blocked}
                 error={Boolean(errors.amount)}
                 aria-describedby={

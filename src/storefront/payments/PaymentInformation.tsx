@@ -165,14 +165,14 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
           <dt>Zbývá uhradit nájemné</dt>
           <dd>{formatMoney(payment.rentalBalance)}</dd>
         </div> : null}
-        {hasDeposit ? <><div>
+        {payment.depositRequired > payment.depositHeld ? <div>
           <dt>Požadovaná vratná kauce</dt>
           <dd>{formatMoney(payment.depositRequired)}</dd>
-        </div>
-        <div>
-          <dt>Držená vratná kauce</dt>
+        </div> : null}
+        {payment.depositHeld > 0 ? <div>
+          <dt>Přijatá vratná kauce</dt>
           <dd>{formatMoney(payment.depositHeld)}</dd>
-        </div></> : null}
+        </div> : null}
       </PaymentFacts>
       {payable && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
