@@ -87,6 +87,8 @@ function knownRejection(error: unknown) {
     error.status !== null &&
     error.status < 500 &&
     [
+      'FITTING_DISCOUNT_UNAVAILABLE',
+      'FITTING_DISCOUNT_MINIMUM',
       'VALIDATION_ERROR',
       'INVALID_DATE',
       'PAST_START_DATE',
@@ -102,6 +104,8 @@ function knownRejection(error: unknown) {
   );
 }
 function rejectionCopy(error: PublicApiError) {
+  if(error.code==='FITTING_DISCOUNT_UNAVAILABLE')return 'Sleva za zkoušku již není dostupná nebo kontaktní e-mail neodpovídá zkoušce. Ověřte údaje a dostupnou slevu znovu.';
+  if(error.code==='FITTING_DISCOUNT_MINIMUM')return 'Pro slevu za zkoušku musí cena pronájmu dosahovat alespoň 200 Kč.';
   if (
     ['NO_AVAILABLE_INVENTORY', 'INVENTORY_ITEM_NOT_AVAILABLE'].includes(
       error.code
@@ -323,7 +327,8 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
   };
   const submit = async (
     quote: BookingQuote | null,
-    policy?: BookingPolicy | null
+    policy?: BookingPolicy | null,
+    fittingDiscount?: import('../../fittings/FittingDiscount').FittingDiscountSelection
   ) => {
     const before = current.current,
       draft = before.draft;
@@ -362,7 +367,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     }
     let attempt: Attempt;
     try {
-      attempt = newAttempt(reservationBody(draft), sessionRef.current.session?.accountId);
+      attempt = newAttempt({...reservationBody(draft),...(fittingDiscount?{fittingDiscount}:{})}, sessionRef.current.session?.accountId);
     } catch {
       commit(v => ({ ...v, storageBlocked: true, error: storageMessage }));
       return;
@@ -446,6 +451,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     updateDraft,
     removeProduct,
     submit,
+    discountAuthToken:sessionPending?undefined:session?.token,
     recover,
     retryStorage,
     refreshStatus,

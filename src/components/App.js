@@ -1,3 +1,4 @@
+import {FittingDiscountCapture} from '../fittings/FittingDiscount';
 import {AdminInvoicesPage} from '../admin/invoices/AdminInvoicesPage';
 import {FittingPage,FittingStatusPage} from '../fittings/FittingPage';
 import {ReferralCapture} from '../partner/referral';
@@ -88,7 +89,7 @@ function App() {
               phone: user.primaryPhoneNumber,
             } : null}
         >
-          <ReferralCapture />
+          <ReferralCapture /><FittingDiscountCapture />
           <Routes>
             <Route
               element={

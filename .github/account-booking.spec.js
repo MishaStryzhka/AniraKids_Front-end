@@ -31,6 +31,12 @@ async function setup(page, { guest = false, delayProfile = false } = {}) {
     const request = route.request(), url = new URL(request.url());
     if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
     const json = body => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+    // This POST is a capability-safe read; booking mutations remain forbidden here.
+    if (request.method() === 'POST' && url.pathname === '/api/v2/fitting-discounts/options') {
+      expect(request.postDataJSON()).toEqual({});
+      expect(request.headers().authorization).toBe('Bearer test-session');
+      return json({items:[]});
+    }
     if (request.method() !== 'GET') {
       state.posts.push(url.pathname);
       return route.fulfill({ status: 500 });

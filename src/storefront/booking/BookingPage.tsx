@@ -1,3 +1,4 @@
+import {FittingDiscountPicker,type FittingDiscountSelection} from '../../fittings/FittingDiscount';
 import styled from 'styled-components';
 import {discountQuotes} from '../../partner/discount';
 import { X, Shirt } from 'lucide-react';
@@ -114,6 +115,7 @@ export function BookingPage() {
     booking.stored ? null : 'booking-policy',
     getBookingPolicy
   );
+  const [fittingDiscount,setFittingDiscount]=useState<FittingDiscountSelection>();
   const [requested, setRequested] = useState<Selection[] | null>(null),
     [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
@@ -220,7 +222,8 @@ export function BookingPage() {
       focusField(first);
       return;
     }
-    await booking.submit(quote, policy.data);
+    if(fittingDiscount&&(quote?.pricing.rentalPrice??0)<200){setFittingDiscount(undefined);return;}
+    await booking.submit(quote, policy.data, fittingDiscount);
   };
   const errorFor = (
     field: string,
@@ -277,6 +280,7 @@ export function BookingPage() {
                   </dd>
                 </div>
               </Facts>
+              {stored.receipt.fittingDiscount?<Copy>Uplatněná sleva za zkoušku {stored.receipt.fittingDiscount.number}: −200 Kč</Copy>:null}
               <PriceSummary
                 pricing={{
                   rentalPrice: stored.receipt.subtotal,
@@ -530,7 +534,8 @@ export function BookingPage() {
                           {formatCalendarDay(quote.startDate)} –{' '}
                           {formatCalendarDay(quote.endDate)}
                         </Copy>
-                        <PriceSummary pricing={quote.pricing} />
+                        {fittingDiscount?<Copy>Sleva za zkoušku {fittingDiscount.number}: −200 Kč</Copy>:null}
+                        <PriceSummary pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
                         <Copy>
                           Cena pronájmu je za rezervaci, nikoli za den.
                           Dostupnost a konečnou cenu ověříme při odeslání
@@ -628,6 +633,7 @@ export function BookingPage() {
                       Volitelné. Maximálně 1500 znaků.
                     </Copy>
                     {errorFor('notes', contactValidation)}
+                    <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/>
                     {policy.loading ? (
                       <Copy role="status">Načítání informací o platbě…</Copy>
                     ) : policy.error ? (
@@ -645,8 +651,8 @@ export function BookingPage() {
                         <BookingPaymentExplanation
                           policy={policy.data}
                           rentalPrice={
-                            quote?.pricing.rentalPrice ??
-                            draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)
+                            (quote?.pricing.rentalPrice ??
+                            draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)) - (fittingDiscount ? 200 : 0)
                           }
                         />
                         <CompanyInformation company={policy.data.company} />
