@@ -218,6 +218,15 @@ export function LegacyPartnerRedirect() {
     <Navigate replace to={'/partner/blaze' + location.search + location.hash} />
   );
 }
+type ActionResult = {path: string; kind: 'pending'|'success'|'error'; message: string};
+function ActionFeedback({result,onRefresh}:{result:ActionResult;onRefresh:()=>void}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { if(result.kind === 'error') ref.current?.focus(); }, [result]);
+  return <div ref={ref} tabIndex={-1} role={result.kind === 'error' ? 'alert' : 'status'}>
+    <p>{result.message}</p>
+    {result.kind === 'error' ? <Button variant="secondary" onClick={onRefresh}>Obnovit stav</Button> : null}
+  </div>;
+}
 export function PartnerPage() {
   const { token, isLoggedIn, isRefreshing } = useAuth();
   const [params, setParams] = useSearchParams();
@@ -232,6 +241,11 @@ export function PartnerPage() {
     [error, setError] = useState(''),
     [loading, setLoading] = useState(true),
     [month, setMonth] = useState(pragueToday().slice(0, 7));
+  const [actionResult, setActionResult] = useState<ActionResult|null>(null);
+  useEffect(() => { setActionResult(null); }, [tab, month, token]);
+  const errorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
+  const refreshResult = () => { setActionResult(null); setRevision(v=>v+1); };
   const mutation = useRef(false);
   const dataKey = `${tab}:${month}:${revision}:${token}`;
   const data = loadedKey === dataKey ? rawData : null;
@@ -329,11 +343,14 @@ export function PartnerPage() {
     mutation.current = true;
     setBusy(true);
     setError('');
+    setActionResult({path,kind:'pending',message:'Ukládání…'});
     try {
       await partnerApi(path, token, body);
+      setActionResult({path,kind:'success',message:body.action === 'confirm' ? 'Potvrzení bylo úspěšně uloženo.' : 'Změna byla úspěšně uložena.'});
       setRevision(v => v + 1);
     } catch (e) {
-      setError((e as Error).message);
+      const requestId = e instanceof PartnerApiError ? e.requestId : undefined;
+      setActionResult({path,kind:'error',message:(e as Error).message + (requestId ? ' Kód chyby: ' + requestId : '')});
     } finally {
       mutation.current = false;
       setBusy(false);
@@ -408,8 +425,9 @@ export function PartnerPage() {
             ) : null}
           </Card>
         ) : null}
+        {actionResult && (!data || !['reservations/','fittings/'].some(prefix=>actionResult.path.startsWith(prefix))) ? <Card><ActionFeedback result={actionResult} onRefresh={refreshResult}/></Card> : null}
         {error ? (
-          <Card role="alert">
+          <Card role="alert" ref={errorRef} tabIndex={-1}>
             {error}
             <Button variant="secondary" onClick={() => setRevision(v => v + 1)}>
               Obnovit
@@ -553,6 +571,7 @@ export function PartnerPage() {
             ) : (
               rentalItems.map((r: any) => (
                 <Card key={r.id}>
+                  {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult} onRefresh={refreshResult}/> : null}
                   <Row>
                     <h2>{r.number}</h2>
                     <span>{statusLabel(r.status)}</span>
@@ -716,6 +735,7 @@ export function PartnerPage() {
             ) : null}
             {fittingItems.map((f: any) => (
               <Card key={f.id}>
+                {actionResult?.path === 'fittings/'+f.id ? <ActionFeedback result={actionResult} onRefresh={refreshResult}/> : null}
                 <FittingHeader>
                   <h2>{f.date} · {f.time}</h2>
                   <SourceBadge aria-label={`Zdroj klienta: ${f.source === 'partner' ? 'Blaze' : f.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>

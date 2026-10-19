@@ -3,7 +3,9 @@ const getAdminApiBaseUrl = () =>
 export class PartnerApiError extends Error {
   constructor(
     message: string,
-    readonly status: number
+    readonly status: number,
+    readonly code?: string,
+    readonly requestId?: string
   ) {
     super(message);
   }
@@ -16,7 +18,8 @@ export async function partnerApi(
 ) {
   const base = getAdminApiBaseUrl();
   if (!base) throw new Error('Připojení není nastavené.');
-  const response = await fetch(base + '/partner/' + path, {
+  let response: Response;
+  try { response = await fetch(base + '/partner/' + path, {
     method: body === undefined ? 'GET' : 'POST',
     cache: 'no-store',
     headers: {
@@ -26,7 +29,13 @@ export async function partnerApi(
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const data = await response.json();
+  } catch {
+    throw new PartnerApiError('Spojení se serverem selhalo. Výsledek operace není ověřený. Obnovte přehled před dalším pokusem.', 0, 'NETWORK_ERROR');
+  }
+  let data;
+  try { data = await response.json(); } catch {
+    throw new PartnerApiError('Server vrátil neplatnou odpověď. Výsledek operace není ověřený. Obnovte přehled před dalším pokusem.', response.status, 'INVALID_RESPONSE');
+  }
   if (!response.ok) {
     const code = data.error?.code;
     throw new PartnerApiError(
@@ -37,13 +46,20 @@ export async function partnerApi(
           USER_NOT_FOUND:
             'Účet s tímto e-mailem neexistuje. Nejdříve se musí zaregistrovat.',
           CONFLICT: 'Údaje se změnily. Obnovte přehled.',
+          PAYMENT_ADVANCE_REQUIRED: 'Rezervaci nelze potvrdit: nejprve zaznamenejte přijetí požadované zálohy v části Platby a QR.',
+          INVALID_RESERVATION_TRANSITION: 'Tuto akci nelze provést v aktuálním stavu rezervace. Obnovte přehled.',
+          RESERVATION_CONFIRMATION_CONFLICT: 'Rezervaci nelze potvrdit: oblečení již není v tomto termínu dostupné.',
+          RESERVATION_INVENTORY_NOT_ACTIVE: 'Rezervaci nelze potvrdit: fyzický kus není aktivní.',
+          RESERVATION_NOT_FOUND: 'Rezervace nebyla nalezena. Obnovte přehled.',
+          VALIDATION_ERROR: 'Zkontrolujte vyplněné údaje.',
           PAYMENT_RENTAL_REQUIRED:
             'Před vydáním musí být zaznamenána celá platba a případná kauce.',
           NO_AVAILABLE_INVENTORY: 'Oblečení není v tomto termínu dostupné.',
         } as Record<string, string>
       )[code] ||
         'Operaci se nepodařilo potvrdit. Obnovte přehled před dalším pokusem.',
-      response.status
+      response.status, code,
+      typeof data.error?.requestId === 'string' && /^[a-f0-9-]{36}$/.test(data.error.requestId) ? data.error.requestId : undefined
     );
   }
   return data;
