@@ -1,3 +1,4 @@
+import {AdminInvoicesPage} from '../admin/invoices/AdminInvoicesPage';
 import {FittingPage,FittingStatusPage} from '../fittings/FittingPage';
 import {ReferralCapture} from '../partner/referral';
 import {PartnerPage,LegacyPartnerRedirect} from '../partner/PartnerPage';
@@ -176,6 +177,7 @@ function App() {
             <Route path={adminRoutes.root} element={<AdminAccessBoundary />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminHomePage />} />
+                <Route path={adminRoutes.invoices} element={<AdminInvoicesPage/>}/>
                 <Route path={adminRoutes.fittings} element={<AdminFittingsPage/>}/>
                 <Route path={adminRoutes.settings} element={<AdminSettingsPage />} />
                 <Route

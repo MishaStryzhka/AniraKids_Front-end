@@ -46,7 +46,7 @@ const SpacedDivider = styled(Divider)`
   margin-block: ${t.space[3]};
 `;
 
-const icons = {fittings: CalendarClock,overview: LayoutDashboard, products: Shirt, reservations: ClipboardList, calendar: CalendarDays, settings: Settings};
+const icons = {invoices: ClipboardList,fittings: CalendarClock,overview: LayoutDashboard, products: Shirt, reservations: ClipboardList, calendar: CalendarDays, settings: Settings};
 
 export function AdminNavigation({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
