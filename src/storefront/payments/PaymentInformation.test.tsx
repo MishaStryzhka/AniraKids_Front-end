@@ -165,3 +165,11 @@ test('undiscounted receipts do not invent a fitting credit and partial advances 
  expect(screen.getByText('Zbývá uhradit ze zálohy').closest('div')).toHaveTextContent('100 Kč');
  expect(screen.getByText('Zbývá uhradit nájemné').closest('div')).toHaveTextContent('400 Kč');
 });
+
+test.each([0,2000])('deposit label follows confirmed receipt, held %s',async(depositHeld)=>{
+ render(<ReceiptPaymentInformation receipt={{...receipt,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,depositRequired:2000,depositHeld}}}/>);
+ expect(Boolean(screen.queryByText('Požadovaná vratná kauce'))).toBe(depositHeld===0);
+ expect(Boolean(screen.queryByText('Přijatá vratná kauce'))).toBe(depositHeld===2000);
+ expect(screen.queryByText('Držená vratná kauce')).not.toBeInTheDocument();
+ await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenCalled());
+});

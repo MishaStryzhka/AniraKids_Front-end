@@ -161,7 +161,10 @@ async function prepare(
 ) {
   await page.getByRole('button', { name: 'Zapsat platbu' }).click();
   await page.getByLabel('Druh operace').selectOption(type);
-  await page.getByLabel('Částka (Kč)').fill(amount);
+  if (type === 'deposit_received') {
+    await expect(page.getByLabel('Částka (Kč)')).toHaveValue(amount);
+    await expect(page.getByLabel('Částka (Kč)')).toHaveAttribute('readonly', '');
+  } else await page.getByLabel('Částka (Kč)').fill(amount);
   if (note) await page.getByLabel('Důvod / poznámka').fill(note);
   await page.getByRole('button', { name: 'Zkontrolovat zápis' }).click();
   const dialog = page.getByRole('dialog', {

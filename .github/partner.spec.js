@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const APP = 'http://127.0.0.1:4173';
 async function fixture(page, role = 'administrator') {
-  const state = { writes: [], errors: [], pending: false, failure: null };
+  const state = { writes: [], errors: [], pending: false, failure: null, deposit: 0 };
   page.on('pageerror', e => state.errors.push(e.message));
   await page.addInitScript(() =>
     localStorage.setItem(
@@ -106,9 +106,9 @@ async function fixture(page, role = 'administrator') {
                 },
               ],
               subtotal: 800,
-              deposit: 0,
+              deposit: state.deposit,
               source: 'partner',
-              payment: { rentalBalance: 0, revision: 1 },
+              payment: { rentalBalance: 0, revision: 1, depositHeld: 0 },
               instructions: {},
             },
           ],
@@ -290,4 +290,16 @@ for(const width of [390,1440]) test('cash form submits payment and reports failu
  await expect(page.getByRole('status').filter({hasText:'Změna byla úspěšně uložena.'})).toBeVisible();
  expect(state.writes).toHaveLength(2);expect(state.writes[1].payment.operationId).toBe(operation);
  expect(state.errors).toEqual([]);
+});
+
+test('employee deposit amount is fixed to the full required deposit',async({page})=>{
+ const state=await fixture(page);state.deposit=2000;
+ await page.goto(APP+'/partner/blaze?section=reservations');
+ await page.getByText('Platby a QR',{exact:true}).click();
+ await page.getByLabel('Druh hotovostní platby').selectOption('deposit_received');
+ await expect(page.getByLabel('Přijatá hotovost v Kč')).toHaveValue('2000');
+ await expect(page.getByLabel('Přijatá hotovost v Kč')).toHaveAttribute('readonly','');
+ await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
+ await expect(page.getByRole('status').filter({hasText:'Změna byla úspěšně uložena.'})).toBeVisible();
+ expect(state.writes[0].payment).toMatchObject({type:'deposit_received',amount:2000,method:'cash'});
 });

@@ -988,7 +988,7 @@ function CashPayment({ reservation: r, busy, act }: any) {
             operationId: operation.current,
             expectedRevision: r.payment.revision,
             type,
-            amount: Number(amount),
+            amount: type === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : Number(amount),
             method: 'cash',
           },
         });
@@ -1004,7 +1004,7 @@ function CashPayment({ reservation: r, busy, act }: any) {
       >
         <option value="rental_received">Pronájem</option>
         <option value="advance_received">Záloha</option>
-        <option value="deposit_received">Kauce</option>
+        {r.deposit > r.payment.depositHeld ? <option value="deposit_received">Kauce</option> : null}
       </SelectField>
       <Input
         label="Přijatá hotovost v Kč"
@@ -1012,12 +1012,14 @@ function CashPayment({ reservation: r, busy, act }: any) {
         min={1}
         step={1}
         required
-        value={amount}
+        value={type === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : amount}
+        readOnly={type === 'deposit_received'}
         onChange={e => {
           setAmount(e.target.value);
           operation.current = crypto.randomUUID();
         }}
       />
+      {type === 'deposit_received' ? <p>Kauci je nutné přijmout v celé uvedené výši. Záznam uložte až po skutečném převzetí peněz.</p> : null}
       <Button type="submit" disabled={busy}>Zaznamenat přijatou hotovost</Button>
     </Form>
   );

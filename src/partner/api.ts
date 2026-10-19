@@ -46,6 +46,7 @@ export async function partnerApi(
           USER_NOT_FOUND:
             'Účet s tímto e-mailem neexistuje. Nejdříve se musí zaregistrovat.',
           CONFLICT: 'Údaje se změnily. Obnovte přehled.',
+          PAYMENT_FULL_DEPOSIT_REQUIRED: 'Vratnou kauci je nutné přijmout v celé požadované výši. Načtěte aktuální stav.',
           PAYMENT_ADVANCE_REQUIRED: 'Rezervaci nelze potvrdit: nejprve zaznamenejte přijetí požadované zálohy v části Platby a QR.',
           INVALID_RESERVATION_TRANSITION: 'Tuto akci nelze provést v aktuálním stavu rezervace. Obnovte přehled.',
           RESERVATION_CONFIRMATION_CONFLICT: 'Rezervaci nelze potvrdit: oblečení již není v tomto termínu dostupné.',

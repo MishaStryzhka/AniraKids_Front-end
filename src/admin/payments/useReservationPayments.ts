@@ -283,6 +283,7 @@ export function useReservationPayments(input: {
         [
           'PAYMENT_CONFLICT',
           'PAYMENT_LIMIT_EXCEEDED',
+          'PAYMENT_FULL_DEPOSIT_REQUIRED',
           'PAYMENT_NOT_ALLOWED',
           'PAYMENT_LEGACY_RECONCILIATION_REQUIRED',
           'VALIDATION_ERROR',
@@ -299,6 +300,8 @@ export function useReservationPayments(input: {
       const message =
         code === 'PAYMENT_CONFLICT'
           ? 'Platební evidence se změnila. Načtěte aktuální stav.'
+          : code === 'PAYMENT_FULL_DEPOSIT_REQUIRED'
+            ? 'Kauci je nutné přijmout v celé zbývající požadované výši. Načtěte aktuální stav.'
           : code === 'PAYMENT_LIMIT_EXCEEDED'
             ? 'Částka přesahuje povolený zůstatek. Načtěte aktuální stav.'
             : code === 'PAYMENT_NOT_ALLOWED'
