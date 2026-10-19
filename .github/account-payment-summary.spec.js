@@ -36,7 +36,7 @@ for(const width of [375,390,430,768,1024,1440])test('paid fitting covers advance
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.locator('details').filter({hasText:'Platby a podrobnosti'}).screenshot({path:`test-evidence/account-payment/discount-${width}.png`});
  await page.getByRole('combobox',{name:'Jak chcete zaplatit?'}).selectOption('cash');
- await expect(page.getByText(/Zbývá doplatit 600 Kč hotově/)).toBeVisible();
+ await expect(page.getByText(/Zbývá doplatit 600\sKč hotově/)).toBeVisible();
  await page.getByRole('combobox',{name:'Jak chcete zaplatit?'}).selectOption('full');
  await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
  Object.assign(receipt,{status:'confirmed',expiresAt:null});
