@@ -72,7 +72,7 @@ export function paymentOperation(
   };
 }
 export type ReservationMutationLock = {
-  current: 'reservation' | 'payments' | null;
+  current: 'reservation' | 'payments' | 'discount' | null;
 };
 
 /** UI visibility only; the server remains authoritative for allowed amounts. */

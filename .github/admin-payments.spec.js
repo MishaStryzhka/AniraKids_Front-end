@@ -75,6 +75,7 @@ async function setup(page) {
           items: [],
           pagination: { page: 1, limit: 1, total: 0, pages: 0 },
         });
+      if (url.pathname.endsWith('/fitting-discount')) return json(200,{eligible:false,applied:null,items:[]});
       if (url.pathname.endsWith('/payments')) {
         if (request.method() === 'GET')
           return json(200, { payments: state.payments });
