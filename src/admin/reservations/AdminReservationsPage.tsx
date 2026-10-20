@@ -1,4 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import {Search,SlidersHorizontal,Plus} from 'lucide-react';
+import {IconButton} from '../../design-system/components/IconButton';
+import {useAdminPageAction} from '../layout/AdminLayout';
+import {ListToolbar,CountButton,FilterCount} from '../bookings/listToolbar';
+import {AdminBookingDialog} from '../bookings/AdminBookingDialog';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '../../design-system/components/Button';
@@ -50,6 +55,7 @@ import {
 const Filters = styled.form`
   display: grid;
   gap: ${t.space[4]};
+  &[hidden] { display:none; }
 `;
 const Fields = styled.div`
   display: grid;
@@ -193,6 +199,9 @@ function ReservationsView() {
     from: applied.from ?? '',
     to: applied.to ?? '',
   });
+  const [searchOpen,setSearchOpen]=useState(false),[filtersOpen,setFiltersOpen]=useState(false),[creating,setCreating]=useState(false);
+  const searchInput=useRef<HTMLInputElement>(null);
+  useEffect(()=>{if(searchOpen)searchInput.current?.focus();},[searchOpen]);
   const [formError, setFormError] = useState<string | null>(null),
     [revision, setRevision] = useState(0);
   const appliedDateError = validateReservationDates(
@@ -260,17 +269,28 @@ function ReservationsView() {
       applied.from ||
       applied.to
   );
+  const filterCount=[applied.status,applied.paymentStatus,applied.rentalMode,applied.from,applied.to].filter(Boolean).length;
+  const toolbar=useMemo(()=><ListToolbar>
+    <IconButton aria-label="Hledat rezervace" title="Hledat rezervace" aria-expanded={searchOpen} aria-controls="reservation-search" icon={<Search size={22}/>} onClick={()=>setSearchOpen(v=>!v)}/>
+    <CountButton aria-label={filterCount?`Filtry (${filterCount})`:'Filtry'} title="Filtry" aria-expanded={filtersOpen} aria-controls="reservation-filters" icon={<><SlidersHorizontal size={22}/>{filterCount?<FilterCount>{filterCount}</FilterCount>:null}</>} onClick={()=>setFiltersOpen(v=>!v)}/>
+    <Button variant="secondary" onClick={()=>setCreating(true)}><Plus size={20} aria-hidden="true"/> Nová rezervace</Button>
+  </ListToolbar>,[searchOpen,filtersOpen,filterCount]);
+  useAdminPageAction(toolbar);
   const data = state.kind === 'success' ? state.data : null;
   return (
     <ReservationPage data-admin-reservations-page>
-      <Filters onSubmit={apply}>
+      <Filters onSubmit={apply} hidden={!searchOpen&&!filtersOpen&&!appliedDateError}>
+        <div id="reservation-search" hidden={!searchOpen}>
         <Input
+          ref={searchInput}
           label="Hledat rezervaci"
           placeholder="Číslo rezervace, jméno, telefon nebo e-mail"
           maxLength={200}
           value={draft.q}
           onChange={event => setDraft({ ...draft, q: event.target.value })}
         />
+        </div>
+        <div id="reservation-filters" hidden={!filtersOpen&&!appliedDateError}>
         <Fields>
           <SelectField
             label="Stav"
@@ -344,13 +364,14 @@ function ReservationsView() {
         <ReservationCopy id="reservation-date-help">
           Datum filtruje termín pronájmu, nikoli navazující čištění.
         </ReservationCopy>
+        </div>
         {formError || appliedDateError ? (
           <ReservationError role="alert">
             {formError ?? appliedDateError}
           </ReservationError>
         ) : null}
         <ReservationActions>
-          <Button type="submit">Použít filtry</Button>
+          <Button type="submit">{filtersOpen?'Použít filtry':'Vyhledat'}</Button>
           <Button
             variant="secondary"
             onClick={() =>
@@ -363,6 +384,8 @@ function ReservationsView() {
           </Button>
         </ReservationActions>
       </Filters>
+      {activeQ?<ReservationCopy>Hledání: {activeQ} <Button variant="secondary" onClick={()=>navigate({pathname:adminRoutes.reservations,search:buildReservationSearch({...applied,page:1}).toString()},{state:{reservationSearch:''}})}>Zrušit hledání</Button></ReservationCopy>:null}
+      {creating?<AdminBookingDialog kind="reservation" onClose={()=>setCreating(false)} onCreated={result=>navigate(buildAdminReservationDetailPath(result.id))}/>:null}
       {!appliedDateError && !canonicalChanged ? (
         <>
           {state.kind === 'loading' ? (

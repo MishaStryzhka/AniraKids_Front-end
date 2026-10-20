@@ -19,6 +19,9 @@ on:
       - src/storefront/**
       - src/fittings/**
       - src/admin/fittings/**
+      - src/admin/bookings/**
+      - src/admin/reservations/**
+      - .github/admin-booking-toolbars.spec.js
       - .github/fittings.spec.js
       - src/layouts/ReservationFlowLayout.tsx
       - src/layouts/StorefrontLayout.tsx
@@ -51,7 +54,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Admin entry authorization states
-        run: CI=true npm test -- --watchAll=false --runInBand src/admin/auth/useAdminEntryAccess.test.tsx src/fittings/FittingPage.test.tsx src/pages/AccountPage/AccountReservationsPage.test.tsx src/partner
+        run: CI=true npm test -- --watchAll=false --runInBand src/admin/auth/useAdminEntryAccess.test.tsx src/fittings/FittingPage.test.tsx src/pages/AccountPage/AccountReservationsPage.test.tsx src/partner src/admin/reservations/AdminReservationsPage.test.tsx
       - name: Build against isolated browser fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test
@@ -70,7 +73,7 @@ jobs:
         env:
           # The existing Storefront Payment Guidance job builds without API env.
           BOOKING_SKIP_NO_ENV: '1'
-        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js .github/admin-entry.spec.js .github/product-gallery.spec.js .github/fittings.spec.js .github/admin-permissions.spec.js .github/site-settings.spec.js .github/partner.spec.js .github/notification-session.spec.js .github/account-payment-summary.spec.js .github/fitting-discount.spec.js .github/reservation-payment-confirmation.spec.js --workers=2 --reporter=line
+        run: npx playwright test .github/customer-booking.spec.js .github/route-scroll.spec.js .github/storefront-search.spec.js .github/marketplace-retirement.spec.js .github/admin-entry.spec.js .github/product-gallery.spec.js .github/fittings.spec.js .github/admin-permissions.spec.js .github/site-settings.spec.js .github/partner.spec.js .github/notification-session.spec.js .github/account-payment-summary.spec.js .github/fitting-discount.spec.js .github/reservation-payment-confirmation.spec.js .github/admin-booking-toolbars.spec.js --workers=2 --reporter=line
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,6 +83,7 @@ jobs:
           path: |
             test-evidence/customer-booking/
             test-evidence/admin-entry/
+            test-evidence/admin-toolbars/
             test-evidence/product-gallery/
             test-evidence/fittings/
             test-evidence/admin-permissions/

@@ -1,3 +1,5 @@
+import {useState,type ReactNode} from 'react';
+import {AdminPageActionContext} from '../layout/AdminLayout';
 import { getReservationPayments } from '../api/reservationPayments';
 import { paymentLedgerFixture } from '../payments/paymentFixtures';
 import {
@@ -55,9 +57,13 @@ function Location() {
     </output>
   );
 }
+function ActionHost({children}:{children:ReactNode}) {
+ const [action,setAction]=useState<ReactNode>(null);
+ return <AdminPageActionContext.Provider value={setAction}>{action}{children}</AdminPageActionContext.Provider>;
+}
 function setup(path = '/admin/rezervace', state?: unknown) {
-  return render(
-    <MemoryRouter
+  const view=render(
+    <ActionHost><MemoryRouter
       initialEntries={[
         {
           pathname: path.split('?')[0],
@@ -78,8 +84,14 @@ function setup(path = '/admin/rezervace', state?: unknown) {
           element={<div>Calendar destination</div>}
         />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter></ActionHost>
   );
+  if(path.split('?')[0]==='/admin/rezervace'){
+    expect(screen.getByLabelText('Hledat rezervaci')).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button',{name:'Hledat rezervace'}));
+    fireEvent.click(screen.getByRole('button',{name:/^Filtry/}));
+  }
+  return view;
 }
 beforeEach(() => {
   sessionStorage.clear();

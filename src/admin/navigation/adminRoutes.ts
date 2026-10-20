@@ -26,9 +26,9 @@ export type AdminNavigationKey = 'overview' | 'products' | 'reservations' | 'cal
 export const adminNavigationItems: ReadonlyArray<{ key: AdminNavigationKey; label: string; to: string }> = [
   { key: 'overview', label: 'Přehled', to: adminRoutes.root },
   { key: 'products', label: 'Produkty', to: adminRoutes.products },
+  { key: 'fittings', label: 'Zkoušky', to: adminRoutes.fittings },
   { key: 'reservations', label: 'Rezervace', to: adminRoutes.reservations },
   { key: 'calendar', label: 'Kalendář', to: adminRoutes.calendar },
-  { key: 'fittings', label: 'Zkoušky', to: adminRoutes.fittings },
   { key: 'invoices', label: 'Faktury', to: adminRoutes.invoices },
   { key: 'settings', label: 'Nastavení', to: adminRoutes.settings },
 ];
