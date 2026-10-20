@@ -17,7 +17,7 @@ async function paymentPushDestination(type){
 const instructions=amount=>({...policy.bank,amount,currency:'CZK',message:number,
   qrPayload:`SPD*1.0*ACC:${policy.bank.iban}*AM:${amount.toFixed(2)}*CC:CZK*MSG:${number}*PT:IP`});
 async function fixture(page,{signedIn=true}={}){
-  const state={role:'customer',paid:0,revision:0,report:null,entries:[],writes:[],errors:[],failReport:false,source:'partner',paymentStatus:null};
+  const state={role:'customer',paid:0,revision:0,report:null,entries:[],writes:[],errors:[],failReport:false,source:'partner',paymentStatus:null,endDate:'2030-10-24'};
   const paymentStatus=()=>state.paymentStatus ?? (state.paid===600?'paid':'unpaid');
   const customer={firstName:'Jana',lastName:'Nová',email:'fixture@example.test',phone:'+420777111222'};
   const item={productId:'111111111111111111111111',variantId:'222222222222222222222222',
@@ -33,7 +33,7 @@ async function fixture(page,{signedIn=true}={}){
     lastPayment:state.entries.length?{amount:state.entries.at(-1).amount,method:state.entries.at(-1).method,recordedAt:state.entries.at(-1).recordedAt}:null,
   });
   const receipt=()=>({reservationNumber:number,status:'confirmed',rentalMode:'studio',
-    startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:null,item,subtotal:600,deposit:0,totalDue:600,
+    startDate:'2030-10-24',endDate:state.endDate,expiresAt:null,item,subtotal:600,deposit:0,totalDue:600,
     paymentStatus:paymentStatus(),fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},payment:payment()});
   const record=input=>{
     state.writes.push(input);state.paid+=input.amount;state.revision++;
@@ -175,12 +175,15 @@ for(const width of [375,390,430,768,1024,1440]){
     state.entries=[{operationId:'11111111-1111-4111-8111-111111111111',type:'rental_received',amount:600,method:'bank_transfer',recordedAt:'2030-10-20T10:00:00Z',recordedBy:'admin-fixture'}];
     await page.setViewportSize({width,height:1000});
     await page.goto(APP+'/admin/rezervace');
-    const visibleList=width>=1440?page.getByRole('table'):page.getByRole('list',{name:'Seznam rezervací',exact:true});
+    const visibleList=page.getByRole('list',{name:'Seznam rezervací',exact:true});
+    await expect(visibleList.getByRole('listitem')).toHaveCount(1);
+    await expect(visibleList.getByText('24. října 2030 · Studio',{exact:true})).toBeVisible();
     await expect(visibleList.getByText('Uhrazeno',{exact:true})).toBeVisible();
     await expect(visibleList.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
     await checkWidth(page);
     await page.screenshot({path:`test-evidence/payment-confirmation/admin-list-${width}.png`,fullPage:true});
     await visibleList.getByRole('link',{name:number,exact:true}).click();
+    await expect(page.getByText('24. října 2030',{exact:true})).toBeVisible();
     await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
     await expect(page.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
     await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
@@ -192,6 +195,19 @@ for(const width of [375,390,430,768,1024,1440]){
     expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
   });
 }
+
+test('admin reservation cards preserve multi-day dates and open the same detail from the action',async({page})=>{
+  const state=await fixture(page);state.role='admin';state.endDate='2030-10-26';
+  await page.goto(APP+'/admin/rezervace');
+  const list=page.getByRole('list',{name:'Seznam rezervací',exact:true});
+  await expect(list.getByText('24. října 2030 – 26. října 2030 · Studio',{exact:true})).toBeVisible();
+  await list.getByRole('button',{name:'Otevřít rezervaci',exact:true}).click();
+  await expect(page).toHaveURL(APP+'/admin/rezervace/'+id);
+  await expect(page.getByText('24. října 2030 – 26. října 2030',{exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Zpět na rezervace',exact:true}).click();
+  await expect(page.getByRole('list',{name:'Seznam rezervací',exact:true})).toBeVisible();
+  expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
+});
 
 test('admin paid badge follows server status, including refunds and unknown client sources',async({page})=>{
   const state=await fixture(page);state.role='admin';state.paid=600;

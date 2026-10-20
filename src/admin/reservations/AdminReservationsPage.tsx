@@ -27,7 +27,6 @@ import {
   adminRoutes,
   buildAdminReservationDetailPath,
 } from '../navigation/adminRoutes';
-import { formatCalendarDay } from '../calendar/calendarDates';
 import {
   buildReservationSearch,
   parseReservationSearch,
@@ -39,17 +38,22 @@ import {
   reservationMode,
   reservationPayment,
   reservationStatus,
+  reservationDateRange,
 } from './reservationPresentation';
 import { reservationSearchFromState } from './reservationNavigation';
 import { useReservationRead } from './useReservationRead';
 import { ReservationSourceBadge } from './ReservationSourceBadge';
+import {
+  ReservationCard,
+  ReservationCardHeader,
+  ReservationCardRow,
+} from '../../components/reservations/reservationCardStyles';
 import {
   ReservationPage,
   ReservationCopy,
   ReservationPanel,
   ReservationHeading,
   ReservationBadges,
-  ReservationFacts,
   ReservationError,
   ReservationActions,
 } from './reservationStyles';
@@ -69,98 +73,21 @@ const Fields = styled.div`
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 `;
-const TableWrap = styled.div`
-  display: none;
-  @media (min-width: 1440px) {
-    display: block;
-  }
-`;
-const Table = styled.table`
-  inline-size: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: ${t.type.bodySm.size};
-  th,
-  td {
-    padding: ${t.space[3]} ${t.space[2]};
-    border-block-end: 1px solid ${t.color.border.subtle};
-    text-align: start;
-    vertical-align: top;
-    overflow-wrap: anywhere;
-  }
-  th {
-    font-weight: ${t.font.weight.semibold};
-  }
-  th:nth-child(1) {
-    inline-size: 13%;
-  }
-  th:nth-child(2) {
-    inline-size: 18%;
-  }
-  th:nth-child(3) {
-    inline-size: 18%;
-  }
-  th:nth-child(4) {
-    inline-size: 13%;
-  }
-  th:nth-child(5) {
-    inline-size: 12%;
-  }
-  th:nth-child(6) {
-    inline-size: 9%;
-  }
-  th:nth-child(7) {
-    inline-size: 8%;
-  }
-  th:nth-child(8) {
-    inline-size: 9%;
-  }
-  th,
-  td:nth-child(4),
-  td:nth-child(5),
-  td:nth-child(8),
-  td:nth-child(4) span,
-  td:nth-child(5) span {
-    overflow-wrap: normal;
-  }
-  td:nth-child(8) {
-    white-space: nowrap;
-  }
-  td > a {
-    min-block-size: 44px;
-    display: inline-flex;
-    align-items: center;
-  }
-  td > span {
-    max-inline-size: 100%;
-  }
-`;
-const MobileList = styled.ul`
+const CardList = styled.ul`
   display: grid;
-  gap: ${t.space[4]};
+  gap: 20px;
   margin: 0;
   padding: 0;
   list-style: none;
-  @media (min-width: 1440px) {
-    display: none;
-  }
 `;
-const Card = styled.li`
-  > span {
-    justify-self: start;
-  }
-  padding: ${t.space[4]};
-  border: 1px solid ${t.color.border.subtle};
-  border-radius: ${t.radius[2]};
-  background: ${t.color.bg.surface};
-  display: grid;
-  gap: ${t.space[3]};
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
+const Card = styled(ReservationCard)`
+  h2, p { margin: 0; }
+  h2 { font-size: 20px; }
+  p { line-height: 1.6; }
 `;
 const DetailLink = styled(NavigationLink)`
-  justify-self: start;
   min-block-size: 44px;
+  color: ${t.color.text.primary};
   font-weight: ${t.font.weight.semibold};
 `;
 const labels = {
@@ -429,131 +356,47 @@ function ReservationsView() {
                   ) : null}
                 </ReservationPanel>
               ) : (
-                <>
-                  <TableWrap>
-                    <Table>
-                      <caption style={{ textAlign: 'left' }}>
-                        Seznam rezervací
-                      </caption>
-                      <thead>
-                        <tr>
-                          {[
-                            'Rezervace',
-                            'Zákazník',
-                            'Termín',
-                            'Stav',
-                            'Platba',
-                            'Režim',
-                            'Položky',
-                            'Celkem',
-                          ].map(label => (
-                            <th key={label} scope="col">
-                              {label}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.items.map(row => {
-                          const payment = reservationPayment(row.paymentStatus);
-                          return (
-                            <tr key={row.id}>
-                              <td>
-                                <NavigationLink
-                                  variant="plain"
-                                  to={buildAdminReservationDetailPath(row.id)}
-                                  state={backState}
-                                >
-                                  {row.reservationNumber}
-                                </NavigationLink>
-                                <ReservationSourceBadge source={row.source} />
-                              </td>
-                              <td>
-                                {customerName(row.customer)}
-                                <ReservationCopy>
-                                  {row.customer.email || 'E-mail neuveden'}
-                                </ReservationCopy>
-                                <ReservationCopy>
-                                  {row.customer.phone || 'Telefon neuveden'}
-                                </ReservationCopy>
-                              </td>
-                              <td>
-                                {formatCalendarDay(row.startDate)} –{' '}
-                                {formatCalendarDay(row.endDate)}
-                              </td>
-                              <td>
-                                <Badges row={row} />
-                              </td>
-                              <td>
-                                <StatusBadge tone={payment.tone}>
-                                  {payment.label}
-                                </StatusBadge>
-                                {row.paymentReport?.status === 'pending' ? <ReservationCopy>
-                                  {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
-                                </ReservationCopy> : null}
-                              </td>
-                              <td>{reservationMode(row.rentalMode)}</td>
-                              <td>{row.itemCount}</td>
-                              <td>{money(row.totalDue)}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
-                  </TableWrap>
-                  <MobileList aria-label="Seznam rezervací">
-                    {data.items.map(row => {
-                      const payment = reservationPayment(row.paymentStatus);
-                      return (
-                        <Card key={row.id}>
-                          <DetailLink
-                            variant="plain"
-                            to={buildAdminReservationDetailPath(row.id)}
-                            state={backState}
-                          >
-                            {row.reservationNumber}
-                          </DetailLink>
-                          <div>{customerName(row.customer)}</div>
-                          <ReservationCopy>
-                            {row.customer.email || 'E-mail neuveden'} ·{' '}
-                            {row.customer.phone || 'Telefon neuveden'}
-                          </ReservationCopy>
-                          <Badges row={row} />
+                <CardList aria-label="Seznam rezervací">
+                  {data.items.map(row => {
+                    const payment = reservationPayment(row.paymentStatus);
+                    const detailPath = buildAdminReservationDetailPath(row.id);
+                    return (
+                      <Card as="li" key={row.id}>
+                        <ReservationCardHeader>
+                          <ReservationCardRow>
+                            <h2>
+                              <DetailLink variant="plain" to={detailPath} state={backState}>
+                                {row.reservationNumber}
+                              </DetailLink>
+                            </h2>
+                            <Badges row={row} />
+                          </ReservationCardRow>
                           <ReservationBadges>
-                            <StatusBadge tone={payment.tone}>
-                              {payment.label}
-                            </StatusBadge>
+                            <StatusBadge tone={payment.tone}>{payment.label}</StatusBadge>
                             <ReservationSourceBadge source={row.source} />
                           </ReservationBadges>
-                          {row.paymentReport?.status === 'pending' ? <ReservationCopy>
-                            {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
-                          </ReservationCopy> : null}
-                          <ReservationFacts>
-                            <div>
-                              <dt>Termín</dt>
-                              <dd>
-                                {formatCalendarDay(row.startDate)} –{' '}
-                                {formatCalendarDay(row.endDate)}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Režim pronájmu</dt>
-                              <dd>{reservationMode(row.rentalMode)}</dd>
-                            </div>
-                            <div>
-                              <dt>Položky</dt>
-                              <dd>{row.itemCount}</dd>
-                            </div>
-                            <div>
-                              <dt>Celkem</dt>
-                              <dd>{money(row.totalDue)}</dd>
-                            </div>
-                          </ReservationFacts>
-                        </Card>
-                      );
-                    })}
-                  </MobileList>
-                </>
+                        </ReservationCardHeader>
+                        <p>
+                          {reservationDateRange(row.startDate, row.endDate)} · {reservationMode(row.rentalMode)}
+                        </p>
+                        <p>
+                          {customerName(row.customer)} · {row.customer.email || 'E-mail neuveden'} ·{' '}
+                          {row.customer.phone || 'Telefon neuveden'}
+                        </p>
+                        <p>Položky: {row.itemCount}</p>
+                        <p><strong>Celkem: {money(row.totalDue)}</strong></p>
+                        {row.paymentReport?.status === 'pending' ? <ReservationCopy>
+                          {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
+                        </ReservationCopy> : null}
+                        <ReservationCardRow>
+                          <Button onClick={() => navigate(detailPath, { state: backState })}>
+                            Otevřít rezervaci
+                          </Button>
+                        </ReservationCardRow>
+                      </Card>
+                    );
+                  })}
+                </CardList>
               )}
               {data.pagination.pages > 1 &&
               applied.page <= data.pagination.pages ? (

@@ -14,7 +14,6 @@ import { designTokens as t } from '../../design-system/tokens/designTokens';
 import { useAuth } from '../../hooks/useAuth';
 import { useAdminAccess } from '../auth/AdminAccessBoundary';
 import { adminRoutes } from '../navigation/adminRoutes';
-import { formatCalendarDay } from '../calendar/calendarDates';
 import { formatPragueLoadedAt } from '../calendar/reservationCalendarModel';
 import {
   customerName,
@@ -24,6 +23,7 @@ import {
   reservationMode,
   reservationStatus,
   reservationPayment,
+  reservationDateRange,
 } from './reservationPresentation';
 import { ReservationSourceBadge } from './ReservationSourceBadge';
 import {
@@ -239,8 +239,7 @@ function ReservationDetailView({
               <div>
                 <dt>Termín</dt>
                 <dd>
-                  {formatCalendarDay(reservation.startDate)} –{' '}
-                  {formatCalendarDay(reservation.endDate)}
+                  {reservationDateRange(reservation.startDate, reservation.endDate)}
                 </dd>
               </div>
               <div>
