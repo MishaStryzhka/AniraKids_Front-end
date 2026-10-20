@@ -150,6 +150,9 @@ for(const width of [375,390,430,768,1024,1440]){
     await page.getByLabel('Přijatá hotovost v Kč').fill('600');
     await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
     await expect(page.getByText('Zbývá doplatit nájemné: 0 Kč',{exact:true})).toBeVisible();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · hotově/)).toBeVisible();
     expect(state.writes[0]).toMatchObject({type:'rental_received',amount:600,method:'cash'});
     expect(state.errors).toEqual([]);
