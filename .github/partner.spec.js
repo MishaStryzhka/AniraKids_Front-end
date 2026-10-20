@@ -129,7 +129,7 @@ async function fixture(page, role = 'administrator') {
           earned: 600,
           collected: 0,
           balance: 600,
-          lines: [{ kind: 'rental', number: 'AK-2026-BLAZE1', amount: 400 },{kind:'fitting',number:'ZK-CREDITED',amount:0,reason:'studio_rental'},{kind:'fitting',number:'ZK-EARNED',amount:200,reason:'fitting'},{kind:'fitting',number:'ZK-PENDING',amount:0,reason:'fitting'}],
+          lines: [{ kind: 'rental', number: 'AK-2026-BLAZE1', amount: 400, rentalPrice: 800, rewardBasis: 800, rewardRate: 50, status: 'returned' }, {kind:'rental',number:'AK-2026-WAIT01',amount:0,rentalPrice:900,rewardBasis:700,rewardRate:50,status:'confirmed'},{kind:'fitting',number:'ZK-CREDITED',amount:0,reason:'studio_rental'},{kind:'fitting',number:'ZK-EARNED',amount:200,reason:'fitting'},{kind:'fitting',number:'ZK-PENDING',amount:0,reason:'fitting'}],
           settlements: [],
           revision: 0,
         });
@@ -187,6 +187,13 @@ for (const width of [390, 768, 1440])
       else await expect(card.getByText(/Odečet odměny/)).toHaveCount(0);
     }
 
+    for (const [number,price,formula,total] of [['AK-2026-BLAZE1','800 Kč','800 Kč × 50 %','400 Kč'],['AK-2026-WAIT01','900 Kč','700 Kč × 50 %','0 Kč']]) {
+      const card=page.getByText(number,{exact:true}).locator('../..');
+      await expect(card.locator('dl > div').filter({hasText:'Cena pronájmu'}).locator('dd')).toHaveText(price);
+      await expect(card.locator('dl > div').filter({hasText:'Výpočet odměny Blaze'}).locator('dd')).toHaveText(formula);
+      await expect(card.locator('dl > div').filter({hasText:'Celkem'}).locator('dd')).toHaveText(total);
+    }
+    await expect(page.getByText('Odměna se započítá po vrácení oděvu.')).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - innerWidth
