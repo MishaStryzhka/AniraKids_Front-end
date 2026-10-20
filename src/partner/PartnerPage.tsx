@@ -33,6 +33,22 @@ const formatMoney = (amount: number) =>
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);
+const RewardHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: ${t.space[2]};
+  flex-wrap: wrap;
+  > strong:last-child { margin-inline-start: auto; white-space: nowrap; }
+`;
+const RewardBreakdown = styled.dl`
+  display: grid;
+  gap: ${t.space[3]};
+  margin: 0;
+  > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: ${t.space[3]}; align-items: baseline; }
+  dt { overflow-wrap: anywhere; }
+  dd { margin: 0; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+  > div:last-child { border-top: 1px solid ${t.color.border.subtle}; padding-top: ${t.space[3]}; font-weight: 600; }
+`;
 const Shell = styled.div`
   max-width: 1320px;
   margin: auto;
@@ -810,14 +826,19 @@ export function PartnerPage() {
             ) : null}
             {data.lines.map((l: any) => (
               <Card key={l.kind + l.number}>
-                <Row>
+                <RewardHeader>
                   <strong>{l.number}</strong>
                   <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
-                  <strong>{formatMoney(l.amount)}</strong>
-                </Row>
-                {l.reason === 'studio_rental' ? (
-                  <p>Odměna 200 Kč za zkoušku se odečítá: navazuje na ni potvrzený pronájem ve studiu Blaze.</p>
-                ) : null}
+                  {l.kind !== 'fitting' ? <strong>{formatMoney(l.amount)}</strong> : null}
+                </RewardHeader>
+                {l.kind === 'fitting' ? <RewardBreakdown>
+                  <div><dt>Odměna za zkoušku</dt><dd>{formatMoney(l.amount + (l.reason === 'studio_rental' ? 200 : 0))}</dd></div>
+                  {l.reason === 'studio_rental' ? <div>
+                    <dt>Odečet odměny — navazující potvrzený pronájem ve studiu Blaze</dt>
+                    <dd>−{formatMoney(200)}</dd>
+                  </div> : null}
+                  <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
+                </RewardBreakdown> : null}
               </Card>
             ))}
             <h2>Předání peněz</h2>
