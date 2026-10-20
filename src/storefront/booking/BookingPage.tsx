@@ -1,3 +1,4 @@
+import {useLiveReservation} from './useLiveReservation';
 import {FittingDiscountPicker,type FittingDiscountSelection} from '../../fittings/FittingDiscount';
 import { RentalPriceRows } from '../payments/RentalPriceRows';
 import styled from 'styled-components';
@@ -112,6 +113,9 @@ export function BookingPage() {
     navigate = useNavigate(),
     location = useLocation(),
     draft = booking.draft;
+  const receiptKey=booking.stored?.kind==='receipt' ? booking.stored.receipt.reservationNumber+':'+(booking.discountAuthToken??'guest') : null;
+  useLiveReservation(receiptKey,booking.refreshStatus);
+  const receiptReady=booking.receiptVerified && !booking.busy && !booking.error;
   const catalogueReturnTo = getCatalogueReturnTo(location.state, draft?.product.category);
   const policy = usePublicRead(
     booking.stored ? null : 'booking-policy',
@@ -282,6 +286,7 @@ export function BookingPage() {
                   </dd>
                 </div>
               </Facts>
+              {receiptReady ? <>
               <PriceSummary
                 discount={stored.receipt.fittingDiscount}
                 pricing={{
@@ -312,6 +317,7 @@ export function BookingPage() {
                 access={stored.accountId && booking.discountAuthToken
                   ? {kind:'account',token:booking.discountAuthToken}
                   : stored.receipt.guestAccessToken ? {kind:'guest',token:stored.receipt.guestAccessToken} : undefined} />
+              </> : <Copy role="status">{booking.busy ? 'Ověřujeme aktuální cenu a platební údaje…' : 'Platební údaje zobrazíme až po ověření aktuálního stavu rezervace.'}</Copy>}
               {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
               {(stored.receipt.guestAccessToken || stored.accountId) && (
                 <Actions>

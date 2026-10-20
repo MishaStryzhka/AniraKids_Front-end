@@ -51,6 +51,7 @@ type State = {
   draftStorageWarning?: boolean;
   stored: StoredBooking | null;
   busy: boolean;
+  receiptVerified?: boolean;
   storageBlocked: boolean;
   error: string | null;
 };
@@ -285,6 +286,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       commit(before => ({
         ...before,
         stored,
+        receiptVerified: true,
         draft: null,
         busy: false,
         storageBlocked,
@@ -395,10 +397,10 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       const updated: StoredBooking = { version: 1, kind: 'receipt', receipt, ...(stored.accountId ? { accountId: stored.accountId } : {}) };
       let storageBlocked = false;
       try { persistBooking(updated); } catch { storageBlocked = true; }
-      commit(v => ({ ...v, stored: updated, storageBlocked, error: storageBlocked ? storageMessage : null }));
+      commit(v => ({ ...v, stored: updated, receiptVerified: true, storageBlocked, error: storageBlocked ? storageMessage : null }));
     } catch {
       if (mounted.current && request.current === controller)
-        commit(v => ({ ...v, error: 'Aktuální stav se nepodařilo ověřit. Zobrazeny jsou poslední uložené údaje. Zkuste to znovu nebo nás kontaktujte.' }));
+        commit(v => ({ ...v, receiptVerified: false, error: 'Aktuální stav se nepodařilo ověřit. Zobrazeny jsou poslední uložené údaje. Zkuste to znovu nebo nás kontaktujte.' }));
     } finally {
       if (request.current === controller) {
         request.current = null;
