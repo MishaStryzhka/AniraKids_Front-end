@@ -131,7 +131,7 @@ async function fixture(page, role = 'administrator') {
           earned: 600,
           collected: 0,
           balance: 600,
-          lines: [{kind:'rental',number:'AK-2026-OWGBGX',amount:0,rentalPrice:900,rewardType:'fixed',rewardAmount:200,fittingDeduction:200,fittingNumber:'ZK-0FE107C67E77',status:'returned'}, {kind:'rental',number:'AK-2026-NOFIT1',amount:200,rentalPrice:900,rewardType:'fixed',rewardAmount:200,fittingDeduction:0,status:'returned'}, { kind: 'rental', number: 'AK-2026-BLAZE1', amount: 400, rentalPrice: 800, rewardBasis: 800, rewardRate: 50, status: 'returned' }, {kind:'rental',number:'AK-2026-WAIT01',amount:0,rentalPrice:900,rewardBasis:700,rewardRate:50,status:'confirmed'},{kind:'fitting',number:'ZK-CREDITED',amount:0,reason:'studio_rental'},{kind:'fitting',number:'ZK-EARNED',amount:200,reason:'fitting'},{kind:'fitting',number:'ZK-PENDING',amount:0,reason:'fitting'}],
+          lines: [{kind:'rental',number:'AK-2026-OWGBGX',source:'anirak',amount:0,rentalPrice:900,rewardType:'fixed',rewardAmount:200,fittingDeduction:200,fittingNumber:'ZK-0FE107C67E77',status:'returned'}, {kind:'rental',number:'AK-2026-NOFIT1',source:'anirak',amount:200,rentalPrice:900,rewardType:'fixed',rewardAmount:200,fittingDeduction:0,status:'returned'}, { kind: 'rental', number: 'AK-2026-BLAZE1', source:'partner', amount: 400, rentalPrice: 800, rewardBasis: 800, rewardRate: 50, status: 'returned' }, {kind:'rental',number:'AK-2026-WAIT01',amount:0,rentalPrice:900,rewardBasis:700,rewardRate:50,status:'confirmed'},{kind:'fitting',number:'ZK-CREDITED',source:'partner',amount:0,reason:'studio_rental'},{kind:'fitting',number:'ZK-EARNED',source:'anirak',amount:200,reason:'fitting'},{kind:'fitting',number:'ZK-PENDING',amount:0,reason:'fitting'}],
           settlements: [],
           revision: 0,
         });
@@ -181,8 +181,12 @@ for (const width of [390, 768, 1440])
       .getByRole('link', { name: 'Platby a vyúčtování', exact: true })
       .click();
     await expect(page.getByText('ANIRAK má předat Blaze')).toBeVisible();
+    for(const [number,source] of [['AK-2026-OWGBGX','ANIRAK'],['AK-2026-BLAZE1','Blaze'],['ZK-CREDITED','Blaze'],['ZK-EARNED','ANIRAK'],['ZK-PENDING','neuveden']]) {
+      await expect(page.getByText(number,{exact:true}).locator('xpath=ancestor::section[1]').getByLabel('Zdroj klienta: '+source,{exact:true})).toBeVisible();
+    }
+
     for(const [number,gross,total] of [['ZK-CREDITED','200 Kč','0 Kč'],['ZK-EARNED','200 Kč','200 Kč'],['ZK-PENDING','0 Kč','0 Kč']]) {
-      const card=page.getByText(number,{exact:true}).locator('../..');
+      const card=page.getByText(number,{exact:true}).locator('xpath=ancestor::section[1]');
       await expect(card.locator('dl > div').filter({hasText:'Odměna za zkoušku'}).locator('dd')).toHaveText(gross);
       await expect(card.locator('dl > div').filter({hasText:'Celkem'}).locator('dd')).toHaveText(total);
       if(number==='ZK-CREDITED')await expect(card.locator('dl > div').filter({hasText:'Odečet odměny'}).locator('dd')).toHaveText('−200 Kč');
@@ -190,14 +194,14 @@ for (const width of [390, 768, 1440])
     }
 
     for (const [number,price,formula,total] of [['AK-2026-BLAZE1','800 Kč','800 Kč × 50 %','400 Kč'],['AK-2026-WAIT01','900 Kč','700 Kč × 50 %','0 Kč']]) {
-      const card=page.getByText(number,{exact:true}).locator('../..');
+      const card=page.getByText(number,{exact:true}).locator('xpath=ancestor::section[1]');
       await expect(card.locator('dl > div').filter({hasText:'Cena pronájmu'}).locator('dd')).toHaveText(price);
       await expect(card.locator('dl > div').filter({hasText:'Výpočet odměny Blaze'}).locator('dd')).toHaveText(formula);
       await expect(card.locator('dl > div').filter({hasText:'Celkem'}).locator('dd')).toHaveText(total);
     }
     await expect(page.getByText('Odměna se započítá po vrácení oděvu.')).toBeVisible();
     for(const [number,total] of [['AK-2026-OWGBGX','0 Kč'],['AK-2026-NOFIT1','200 Kč']]) {
-      const card=page.getByText(number,{exact:true}).locator('../..');
+      const card=page.getByText(number,{exact:true}).locator('xpath=ancestor::section[1]');
       await expect(card.locator('dl > div').filter({hasText:'Odměna za pronájem'}).locator('dd')).toHaveText('200 Kč');
       await expect(card.locator('dl > div').filter({hasText:'Celkem'}).locator('dd')).toHaveText(total);
       if(number==='AK-2026-OWGBGX')await expect(card.locator('dl > div').filter({hasText:'Odměna již započtená za zkoušku ZK-0FE107C67E77'}).locator('dd')).toHaveText('−200 Kč');

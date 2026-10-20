@@ -38,13 +38,6 @@ const formatMoney = (amount: number) =>
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);
-const RewardHeader = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: ${t.space[2]};
-  flex-wrap: wrap;
-  > strong:last-child { margin-inline-start: auto; white-space: nowrap; }
-`;
 const RewardBreakdown = styled.dl`
   display: grid;
   gap: ${t.space[3]};
@@ -818,10 +811,15 @@ export function PartnerPage() {
             ) : null}
             {data.lines.map((l: any) => (
               <Card key={l.kind + l.number}>
-                <RewardHeader>
-                  <strong>{l.number}</strong>
-                  <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
-                </RewardHeader>
+                <BookingHeader>
+                  <Row>
+                    <h2>{l.number}</h2>
+                    <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
+                  </Row>
+                  <SourceBadge aria-label={`Zdroj klienta: ${l.source === 'partner' ? 'Blaze' : l.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>
+                    {l.source === 'partner' ? 'Blaze' : l.source === 'anirak' ? 'ANIRAK' : 'Zdroj neuveden'}
+                  </SourceBadge>
+                </BookingHeader>
                 {l.kind === 'fitting' ? <RewardBreakdown>
                   <div><dt>Odměna za zkoušku</dt><dd>{formatMoney(l.amount + (l.reason === 'studio_rental' ? 200 : 0))}</dd></div>
                   {l.reason === 'studio_rental' ? <div>
