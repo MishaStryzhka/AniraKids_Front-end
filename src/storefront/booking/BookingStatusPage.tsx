@@ -1,3 +1,4 @@
+import {useLiveReservation} from './useLiveReservation';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
 import { routes } from '../../navigation/routes';
@@ -20,6 +21,7 @@ export function BookingStatusPage() {
   const token = params.get('token') ?? '';
   const valid = /^AK-\d{4}-[A-Z0-9]{6}$/.test(number) && isGuestAccessToken(token);
   const result = usePublicRead(valid ? hash : null, signal => getReservationStatus(number, token, signal));
+  useLiveReservation(valid?hash:null,()=>{if(!result.loading)result.reload();},false);
   return <Page>
     <Title>Stav rezervace</Title>
     <Panel>
@@ -36,7 +38,7 @@ export function BookingStatusPage() {
           </div>)}
           <Copy>{formatCalendarDay(result.data.startDate)} – {formatCalendarDay(result.data.endDate)}</Copy>
           {result.data.fittingDiscount ? <Copy>Započtená platba za zkoušku {result.data.fittingDiscount.number}: −200 Kč</Copy> : null}
-          <ReceiptPaymentInformation receipt={result.data} access={{kind:'guest',token}} />
+          <ReceiptPaymentInformation receipt={result.data} onUpdated={result.reload} access={{kind:'guest',token}} />
           <Button onClick={result.reload}>Aktualizovat stav rezervace</Button>
           <Copy>Tento soukromý odkaz si uložte. Každý, kdo jej získá, může zobrazit stav této rezervace a platební pokyny.</Copy>
         </> : null}

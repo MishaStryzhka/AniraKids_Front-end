@@ -166,8 +166,9 @@ for (const width of [390,768,1440]) {
     expect(posted.authorization).toBe('Bearer test-session');
     expect(posted.body.customerId).toBeUndefined();
     expect(await page.evaluate(()=>sessionStorage.getItem('anirakids.booking.v1'))).not.toContain('test-session');
+    await expect.poll(()=>reads).toBe(1); // Automatic receipt refresh after creation.
     await page.getByRole('button',{name:'Aktualizovat stav rezervace'}).click();
-    await expect.poll(()=>reads).toBe(1);
+    await expect.poll(()=>reads).toBe(2);
     await page.getByRole('link',{name:'Otevřít aktuální stav rezervace'}).click();
     await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
     await capture(page,'owned-history-'+width);
