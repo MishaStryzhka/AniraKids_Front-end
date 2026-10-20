@@ -334,3 +334,20 @@ test('refund choices follow balances after refresh and never silently change an 
   await page.getByRole('button', { name: 'Aktualizovat platby' }).click();
   await expect(select.locator('option[value="deposit_refunded"]')).toHaveCount(1);
 });
+
+test('fully paid Studio hides collection controls and retains an explicit refund flow', async ({page}) => {
+ const state=await setup(page);
+ state.record.rentalMode='studio';state.record.deposit=0;state.record.totalDue=500;
+ state.payments={...state.payments,depositRequired:0,depositHeld:0,rentalReceived:500,rentalNet:500,rentalBalance:0,advanceBalance:0,refundableRental:500};
+ await page.goto('http://127.0.0.1:4173/admin/rezervace/r1');
+ const panel=page.getByRole('region',{name:'Platební evidence'});
+ await expect(panel.getByRole('heading',{name:'Nájemné'})).toBeVisible();
+ await expect(panel.getByRole('button',{name:'Zapsat platbu',exact:true})).toHaveCount(0);
+ await expect(panel.getByRole('button',{name:'Aktualizovat platby'})).toHaveCount(0);
+ await expect(panel.getByText('Zbývá uhradit',{exact:true})).toHaveCount(0);
+ await expect(panel.getByRole('heading',{name:'Vratná kauce'})).toHaveCount(0);
+ await panel.getByText('Vrácení plateb a další operace',{exact:true}).click();
+ await panel.getByRole('button',{name:'Vybrat operaci'}).click();
+ await expect(page.getByLabel('Druh operace')).toHaveValue('rental_refunded');
+ expect(state.writes).toHaveLength(0);
+});

@@ -66,7 +66,8 @@ const Summary = styled.div`
   dt { min-inline-size: 0; }
   dd { margin: 0; white-space: nowrap; font-weight: 600; }
 `;
-const Announcement = styled(ReservationCopy)<{ $quiet: boolean }>`
+const Announcement = styled(ReservationCopy)<{ $quiet: boolean; $success: boolean }>`
+  ${({ $success }) => $success ? `color: ${t.color.status.success.fg}; font-weight: 600;` : ''}
   ${({ $quiet }) => $quiet ? 'position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%);' : ''}
 `;
 const FocusPanel = styled(ReservationPanel)`
@@ -120,6 +121,8 @@ export function ReservationPaymentLedger({
     );
   const empty = Boolean(payments && isEmptyPaymentLedger(payments));
   const types = payments ? visiblePaymentTypes(payments, status) : [];
+  const settled = Boolean(payments && !payments.legacyUnreconciled && payments.rentalBalance <= 0 && payments.depositHeld >= payments.depositRequired);
+  const EntryContainer = settled ? Disclosure : 'div';
   const selectedTypeAvailable = types.includes(draft.type);
   const { focus, ownsView } = state;
   useEffect(() => {
@@ -195,10 +198,10 @@ export function ReservationPaymentLedger({
       {state.error ? (
         <ReservationError role="alert">{state.error}</ReservationError>
       ) : null}
-      <Announcement $quiet={state.announcement === 'Aktuální platební evidence byla načtena.'} role="status" aria-live="polite">
+      <Announcement $success={state.announcement.startsWith('Operace byla zaznamenána.')} $quiet={state.announcement === 'Aktuální platební evidence byla načtena.'} role="status" aria-live="polite">
         {state.announcement}
       </Announcement>
-      {!empty || state.loading || state.error || state.attempt || state.conflict || state.storageBlocked ? <ReservationActions>
+      {open || state.error || state.attempt || state.conflict || state.storageBlocked ? <ReservationActions>
         <Button
           variant="secondary"
           loading={state.loading}
@@ -263,7 +266,7 @@ export function ReservationPaymentLedger({
                   <div><dt>Cena pronájmu</dt><dd>{money(payments.rentalTotal + (payments.fittingCredit ?? 0))}</dd></div>
                   {payments.fittingCredit ? <div><dt>Uplatněna sleva za zkoušku</dt><dd>−{money(payments.fittingCredit)}</dd></div> : null}
                   {payments.rentalNet !== 0 ? <div><dt>{payments.fittingCredit ? 'Další uhrazené nájemné po vrácení plateb' : 'Uhrazeno po vrácení plateb'}</dt><dd>{money(payments.rentalNet)}</dd></div> : null}
-                  <div><dt>Zbývá uhradit</dt><dd>{money(payments.rentalBalance)}</dd></div>
+                  {payments.rentalBalance !== 0 ? <div><dt>Zbývá uhradit</dt><dd>{money(payments.rentalBalance)}</dd></div> : null}
                 </dl>
                 {payments.advanceBalance > 0 && status === 'pending' ? <ReservationCopy>
                   Z toho rezervační záloha: {money(payments.advanceBalance)}.
@@ -285,6 +288,8 @@ export function ReservationPaymentLedger({
             </ReservationError>
           ) : null}
           {!open ? (
+            <EntryContainer>
+            {settled ? <summary>Vrácení plateb a další operace</summary> : null}
             <ReservationActions
               ref={node => {
                 addButton.current = node?.querySelector('button') ?? null;
@@ -296,7 +301,7 @@ export function ReservationPaymentLedger({
                   setOpen(true);
                   setDraft({
                     ...emptyPaymentDraft(),
-                    type: types.includes('advance_received') && payments.advanceBalance > 0 ? 'advance_received' : 'rental_received',
+                    type: settled ? (types.includes('rental_refunded') ? 'rental_refunded' : types.includes('deposit_refunded') ? 'deposit_refunded' : 'rental_received') : types.includes('advance_received') && payments.advanceBalance > 0 ? 'advance_received' : 'rental_received',
                     amount: String(payments.advanceBalance > 0 && types.includes('advance_received') ? payments.advanceBalance : payments.rentalBalance),
                   });
                   requestAnimationFrame(() => {
@@ -307,9 +312,10 @@ export function ReservationPaymentLedger({
                   });
                 }}
               >
-                Zapsat platbu
+                {settled ? 'Vybrat operaci' : 'Zapsat platbu'}
               </Button>
             </ReservationActions>
+            </EntryContainer>
           ) : (
             <Stack ref={form}>
               <ReservationHeading>Zapsat platbu</ReservationHeading>
