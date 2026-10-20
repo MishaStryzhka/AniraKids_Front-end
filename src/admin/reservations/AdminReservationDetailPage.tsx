@@ -144,6 +144,7 @@ function ReservationDetailView({
     return () => cancelAnimationFrame(frame);
   }, [kind, ownsView]);
   const reservation = state.reservation;
+  const rentalPrice = reservation?.items.reduce((sum, item) => sum + item.rentalPriceSnapshot, 0) ?? 0;
   const status = reservation ? reservationStatus(reservation.status) : null;
   return (
     <ReservationPage data-admin-reservation-detail>
@@ -317,14 +318,18 @@ function ReservationDetailView({
             <DetailFacts>
               <div>
                 <dt>Cena pronájmu</dt>
-                <dd>{money(reservation.subtotal)}</dd>
+                <dd>{money(rentalPrice)}</dd>
               </div>
-              <div>
+              {rentalPrice > reservation.subtotal ? <div>
+                <dt>Uplatněna sleva za zkoušku</dt>
+                <dd>−{money(rentalPrice - reservation.subtotal)}</dd>
+              </div> : null}
+              {reservation.deposit > 0 ? <div>
                 <dt>Vratná kauce</dt>
                 <dd>{money(reservation.deposit)}</dd>
-              </div>
+              </div> : null}
               <div>
-                <dt>Celkem k úhradě podle rezervace</dt>
+                <dt>Celkem k úhradě</dt>
                 <dd>{money(reservation.totalDue)}</dd>
               </div>
             </DetailFacts>

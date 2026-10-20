@@ -3,7 +3,7 @@ import {Button} from '../../design-system/components/Button';
 import {SelectField} from '../../design-system/components/SelectField';
 import {fittingAdmin,fittingDateLabel,fittingError} from '../../fittings/fittingApi';
 import type {ReservationMutationLock} from '../payments/paymentModel';
-import {ReservationPanel,ReservationHeading,ReservationCopy,ReservationActions} from '../reservations/reservationStyles';
+import {ReservationPanel,ReservationHeading,ReservationCopy} from '../reservations/reservationStyles';
 
 type Options={eligible:boolean;applied:{number:string;amount:number;kind:'discount'|'legacy_credit'}|null;items:Array<{id:string;number:string;date:string;time:string;revision:number}>};
 export function ReservationFittingDiscount({token,reservationId,reservationNumber,version,blocked,mutationLock,onBusy,onSaved,onAccessError}:{
@@ -28,6 +28,6 @@ export function ReservationFittingDiscount({token,reservationId,reservationNumbe
  {data.items.length?<><SelectField label="Zaplacená a dokončená zkouška" value={selected} disabled={busy||blocked} onChange={e=>setSelected(e.target.value)}>{data.items.map(f=><option key={f.id} value={f.id}>{fittingDateLabel(f.date)} · {f.time} · {f.number}</option>)}</SelectField><ReservationCopy>Platba za zkoušku pokryje rezervační zálohu a sníží zbývající doplatek o 200 Kč. Nejde o novou platbu. Vratná kauce se nemění. Každou zkoušku lze využít jednou. U již uhrazeného pronájmu vznikne přeplatek; vratku zaznamenejte samostatně v platbách.</ReservationCopy><Button disabled={busy||blocked||loading||!selected} onClick={()=>void apply()}>{busy?'Ukládání…':'Započíst platbu'}</Button></>:<ReservationCopy>Klient nemá dostupnou zaplacenou a dokončenou zkoušku. Zkouška musí mít shodný e-mail a nesmí být použita u jiné rezervace.</ReservationCopy>}
  </>:data?<ReservationCopy>Platbu lze započíst u otevřené rezervace, pokud cena pronájmu dosahuje alespoň 200 Kč a platby jsou ověřené.</ReservationCopy>:null}
  {error?<ReservationCopy role="alert">{error}</ReservationCopy>:null}{notice?<ReservationCopy role="status">{notice}</ReservationCopy>:null}
- <ReservationActions><Button variant="secondary" disabled={busy||loading||blocked} onClick={()=>setRefresh(x=>x+1)}>Obnovit zkoušky</Button></ReservationActions>
+ {error?<Button variant="secondary" disabled={busy||loading||blocked} onClick={()=>{setError('');setRefresh(x=>x+1);}}>Zkusit znovu</Button>:null}
  </ReservationPanel>;
 }

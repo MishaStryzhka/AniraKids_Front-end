@@ -261,21 +261,21 @@ export function ReservationPaymentLedger({
                 <h3>Nájemné</h3>
                 <dl>
                   <div><dt>Cena pronájmu</dt><dd>{money(payments.rentalTotal + (payments.fittingCredit ?? 0))}</dd></div>
-                  {payments.fittingCredit ? <div><dt>Započtená platba za zkoušku</dt><dd>{money(payments.fittingCredit)}</dd></div> : null}
-                  <div><dt>{payments.fittingCredit ? 'Další uhrazené nájemné po vrácení plateb' : 'Uhrazeno po vrácení plateb'}</dt><dd>{money(payments.rentalNet)}</dd></div>
+                  {payments.fittingCredit ? <div><dt>Uplatněna sleva za zkoušku</dt><dd>−{money(payments.fittingCredit)}</dd></div> : null}
+                  {payments.rentalNet !== 0 ? <div><dt>{payments.fittingCredit ? 'Další uhrazené nájemné po vrácení plateb' : 'Uhrazeno po vrácení plateb'}</dt><dd>{money(payments.rentalNet)}</dd></div> : null}
                   <div><dt>Zbývá uhradit</dt><dd>{money(payments.rentalBalance)}</dd></div>
                 </dl>
                 {payments.advanceBalance > 0 && status === 'pending' ? <ReservationCopy>
                   Z toho rezervační záloha: {money(payments.advanceBalance)}.
                 </ReservationCopy> : null}
               </section>
-              <section aria-label="Vratná kauce">
+              {payments.depositRequired > 0 || payments.depositHeld > 0 ? <section aria-label="Vratná kauce">
                 <h3>Vratná kauce</h3>
                 <dl>
                   <div><dt>Požadováno</dt><dd>{money(payments.depositRequired)}</dd></div>
                   <div><dt>Držíme</dt><dd>{money(payments.depositHeld)}</dd></div>
                 </dl>
-              </section>
+              </section> : null}
             </Summary>
           ) : null}
           {payments.legacyUnreconciled ? (
@@ -296,9 +296,8 @@ export function ReservationPaymentLedger({
                   setOpen(true);
                   setDraft({
                     ...emptyPaymentDraft(),
-                    amount: payments.advanceBalance
-                      ? String(payments.advanceBalance)
-                      : '',
+                    type: types.includes('advance_received') && payments.advanceBalance > 0 ? 'advance_received' : 'rental_received',
+                    amount: String(payments.advanceBalance > 0 && types.includes('advance_received') ? payments.advanceBalance : payments.rentalBalance),
                   });
                   requestAnimationFrame(() => {
                     if (ownsView())

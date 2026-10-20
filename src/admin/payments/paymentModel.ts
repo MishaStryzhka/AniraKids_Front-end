@@ -81,6 +81,7 @@ export type ReservationMutationLock = {
 export function visiblePaymentTypes(payments: ReservationPayments, status: string): PaymentType[] {
   return paymentTypes.filter(type => {
     if (type === 'advance_received' && payments.fittingCredit && payments.advanceBalance === 0) return false;
+    if (type === 'deposit_received') return payments.depositRequired > payments.depositHeld;
     if (type === 'rental_refunded') return payments.refundableRental > 0;
     if (type === 'deposit_refunded') return payments.depositHeld > 0;
     if (type === 'cancellation_fee') return status === 'cancelled';
