@@ -811,7 +811,7 @@ export function PartnerPage() {
             <p>
               Podíl z pronájmu se započítá po vrácení oblečení podle přijaté
               platby. Za dokončenou zaplacenou zkoušku náleží Blaze 200 Kč. Odměna se odečte pouze při navazujícím potvrzeném pronájmu ve studiu Blaze. Kauce není
-              odměnou.
+              odměnou. U klienta ANIRAK činí odměna za pronájem 200 Kč; již započtená odměna za navazující zkoušku se odečte.
             </p>
             {(access.owner || access.managePartners) ? (
               <Settlement data={data} busy={busy} act={act} />
@@ -831,9 +831,13 @@ export function PartnerPage() {
                   <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
                 </RewardBreakdown> : <RewardBreakdown>
                   <div><dt>Cena pronájmu</dt><dd>{Number.isFinite(l.rentalPrice) ? formatMoney(l.rentalPrice) : '—'}</dd></div>
-                  <div><dt>Výpočet odměny Blaze
+                  <div><dt>{l.rewardType === 'fixed' ? 'Odměna za pronájem' : 'Výpočet odměny Blaze'}
                     {l.status && l.status !== 'returned' ? <small style={{display:'block'}}>{l.status === 'cancelled' ? 'Zrušená rezervace — odměna se nezapočítává.' : 'Odměna se započítá po vrácení oděvu.'}</small> : null}
-                  </dt><dd>{Number.isFinite(l.rewardBasis) && Number.isFinite(l.rewardRate) ? <>{formatMoney(l.rewardBasis)} × {l.rewardRate} %</> : '—'}</dd></div>
+                  </dt><dd>{l.rewardType === 'fixed' ? formatMoney(l.rewardAmount) : Number.isFinite(l.rewardBasis) && Number.isFinite(l.rewardRate) ? <>{formatMoney(l.rewardBasis)} × {l.rewardRate} %</> : '—'}</dd></div>
+                  {l.fittingDeduction > 0 ? <div>
+                    <dt>Odměna již započtená za zkoušku {l.fittingNumber}</dt>
+                    <dd>−{formatMoney(l.fittingDeduction)}</dd>
+                  </div> : null}
                   <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
                 </RewardBreakdown>}
               </Card>
