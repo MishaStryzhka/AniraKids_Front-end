@@ -24,6 +24,7 @@ export interface ReservationCustomer {
   phone: string;
 }
 export interface ReservationListItem {
+  source?: string;
   paymentReport?: PaymentReport | null;
   id: string;
   reservationNumber: string;
@@ -61,6 +62,7 @@ export interface ReservationDetailItem {
   };
 }
 export interface ReservationDetail {
+  source?: string;
   id: string;
   reservationNumber: string;
   customerId?: string;
@@ -132,6 +134,7 @@ function common(value: unknown) {
     !nonempty(value.reservationNumber) ||
     !nonempty(value.status) ||
     !nonempty(value.paymentStatus) ||
+    (value.source !== undefined && !nonempty(value.source)) ||
     !nonempty(value.rentalMode) ||
     !isDateOnly(value.startDate) ||
     !isDateOnly(value.endDate) ||
@@ -147,6 +150,7 @@ function common(value: unknown) {
     reservationNumber: value.reservationNumber,
     status: value.status,
     paymentStatus: value.paymentStatus,
+    ...(value.source === undefined ? {} : { source: value.source as string }),
     ...parsePaymentConfirmation(value, invalid),
     rentalMode: value.rentalMode,
     startDate: value.startDate,

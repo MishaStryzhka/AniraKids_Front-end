@@ -1,6 +1,7 @@
 import {
   appendReservationPayment,
   getReservationPayments,
+  parsePayments,
 } from './reservationPayments';
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import {
@@ -20,6 +21,10 @@ beforeEach(() => {
   (buildAdminRequestConfig as jest.Mock).mockReturnValue({
     headers: { Authorization: 'Bearer fixture' },
   });
+});
+
+test.each(['unpaid', 'paid', 'refunded', undefined])('preserves server payment status independently of balances (%s)', paymentStatus => {
+  expect(parsePayments({payments:{...recorded,paymentStatus}},'r1').paymentStatus).toBe(paymentStatus);
 });
 test('read and append keep scope, auth config and exact operation body', async () => {
   (adminApiClient.get as jest.Mock).mockResolvedValue({

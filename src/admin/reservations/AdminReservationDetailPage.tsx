@@ -23,7 +23,9 @@ import {
   money,
   reservationMode,
   reservationStatus,
+  reservationPayment,
 } from './reservationPresentation';
+import { ReservationSourceBadge } from './ReservationSourceBadge';
 import {
   reservationBackContext,
   reservationListBackLink,
@@ -146,6 +148,7 @@ function ReservationDetailView({
   const reservation = state.reservation;
   const rentalPrice = reservation?.items.reduce((sum, item) => sum + item.rentalPriceSnapshot, 0) ?? 0;
   const status = reservation ? reservationStatus(reservation.status) : null;
+  const payment = reservationPayment(payments.payments?.paymentStatus ?? reservation?.paymentStatus ?? '');
   return (
     <ReservationPage data-admin-reservation-detail>
       <ReservationActions>
@@ -194,6 +197,8 @@ function ReservationDetailView({
             aria-label="Aktuální stav rezervace"
           >
             <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+            <StatusBadge tone={payment.tone}>{payment.label}</StatusBadge>
+            <ReservationSourceBadge source={reservation.source} />
             {reservation.pendingExpired ? (
               <StatusBadge tone="warning">Čekání vypršelo</StatusBadge>
             ) : null}

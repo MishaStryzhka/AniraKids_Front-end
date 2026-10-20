@@ -10,7 +10,7 @@ const statuses: Record<string, { label: string; tone: StatusBadgeTone }> = {
 };
 const payments: Record<string, { label: string; tone: StatusBadgeTone }> = {
   unpaid: { label: 'Nezaplaceno', tone: 'warning' },
-  paid: { label: 'Zaplaceno', tone: 'success' },
+  paid: { label: 'Uhrazeno', tone: 'success' },
   refunded: { label: 'Vrácená platba', tone: 'neutral' },
 };
 export const reservationStatus = (status: string) =>
