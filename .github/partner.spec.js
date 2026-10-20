@@ -261,7 +261,10 @@ for (const width of [390,1440]) test('failed confirmation is visible at the acti
  await expect(alert).toContainText('nejprve zaznamenejte přijetí požadované zálohy');
  await expect(alert).toBeFocused();
  await expect(alert).toBeInViewport();
- await expect(alert).toContainText('12345678-1234-1234-1234-123456789abc');
+ await expect(alert).not.toContainText('12345678-1234-1234-1234-123456789abc');
+ await expect(alert).toHaveAttribute('data-request-id','12345678-1234-1234-1234-123456789abc');
+ await expect(page.getByRole('button',{name:'Obnovit stav',exact:true})).toHaveCount(0);
+ expect(await alert.evaluate((el)=>!!el.previousElementSibling?.textContent?.includes('Potvrdit rezervaci'))).toBe(true);
  await expect(confirm).toBeEnabled();
  for(const failure of ['INTERNAL_ERROR','network','html']){
   state.failure=failure;await confirm.click();await expect(alert).toBeVisible();await expect(confirm).toBeEnabled();

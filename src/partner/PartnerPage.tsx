@@ -218,13 +218,13 @@ export function LegacyPartnerRedirect() {
     <Navigate replace to={'/partner/blaze' + location.search + location.hash} />
   );
 }
-type ActionResult = {path: string; kind: 'pending'|'success'|'error'; message: string};
-function ActionFeedback({result,onRefresh}:{result:ActionResult;onRefresh:()=>void}) {
+type ActionResult = {path: string; kind: 'pending'|'success'|'error'; message: string; requestId?: string};
+function ActionFeedback({result,onRefresh}:{result:ActionResult;onRefresh?:()=>void}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { if(result.kind === 'error') ref.current?.focus(); }, [result]);
-  return <div ref={ref} tabIndex={-1} role={result.kind === 'error' ? 'alert' : 'status'}>
+  return <div ref={ref} data-request-id={result.requestId} tabIndex={-1} role={result.kind === 'error' ? 'alert' : 'status'}>
     <p>{result.message}</p>
-    {result.kind === 'error' ? <Button variant="secondary" onClick={onRefresh}>Obnovit stav</Button> : null}
+    {result.kind === 'error' && onRefresh ? <Button variant="secondary" onClick={onRefresh}>Obnovit stav</Button> : null}
   </div>;
 }
 export function PartnerPage() {
@@ -350,7 +350,7 @@ export function PartnerPage() {
       setRevision(v => v + 1);
     } catch (e) {
       const requestId = e instanceof PartnerApiError ? e.requestId : undefined;
-      setActionResult({path,kind:'error',message:(e as Error).message + (requestId ? ' Kód chyby: ' + requestId : '')});
+      setActionResult({path,kind:'error',message:(e as Error).message,requestId});
     } finally {
       mutation.current = false;
       setBusy(false);
@@ -571,7 +571,6 @@ export function PartnerPage() {
             ) : (
               rentalItems.map((r: any) => (
                 <Card key={r.id}>
-                  {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult} onRefresh={refreshResult}/> : null}
                   <Row>
                     <h2>{r.number}</h2>
                     <span>{statusLabel(r.status)}</span>
@@ -648,6 +647,7 @@ export function PartnerPage() {
                       </Button>
                     ) : null}
                   </Row>
+                  {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult}/> : null}
                   <details>
                     <summary>Platby a QR</summary>
                     <p>
