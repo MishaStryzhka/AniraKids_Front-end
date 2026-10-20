@@ -74,7 +74,7 @@ async function fixture(page,{signedIn=true}={}){
     if(p.endsWith('/partner/reservations'))return json({items:[{id,number,status:'confirmed',
       startDate:'2030-10-24',endDate:'2030-10-24',rentalMode:'studio',customer,
       items:[{productId:item.productId,name:item.productName,size:item.size}],subtotal:600,deposit:0,
-      source:'partner',payment:payment(),instructions:payment()}]});
+      source:'partner',paymentStatus:state.paid===600?'paid':'unpaid',payment:payment(),instructions:payment()}]});
     if(p.endsWith(`/partner/reservations/${id}`)){
       const body=req.postDataJSON();expect(body.action).toBe('payment');record(body.payment);return json({ok:true});
     }
@@ -116,6 +116,9 @@ for(const width of [375,390,430,768,1024,1440]){
     await page.locator('section[aria-label="Platební evidence"]').screenshot({path:`test-evidence/payment-confirmation/bank-admin-${width}.png`});
     state.role='blaze';await page.goto(APP+'/partner/blaze?section=reservations');
     await expect(page.getByText('Zbývá doplatit nájemné: 0 Kč',{exact:true})).toBeVisible();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · bankovním převodem/)).toBeVisible();
     await checkWidth(page);
     state.role='customer';await openCustomer(page);
@@ -147,6 +150,9 @@ for(const width of [375,390,430,768,1024,1440]){
     await page.getByLabel('Přijatá hotovost v Kč').fill('600');
     await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
     await expect(page.getByText('Zbývá doplatit nájemné: 0 Kč',{exact:true})).toBeVisible();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · hotově/)).toBeVisible();
     expect(state.writes[0]).toMatchObject({type:'rental_received',amount:600,method:'cash'});
     expect(state.errors).toEqual([]);

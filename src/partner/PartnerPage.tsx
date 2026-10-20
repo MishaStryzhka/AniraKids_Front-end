@@ -134,7 +134,7 @@ const Row = styled.div`
     border-radius: 8px;
   }
 `;
-const FittingHeader = styled(Row)`
+const BookingHeader = styled(Row)`
   justify-content: space-between;
   align-items: flex-start;
 `;
@@ -148,6 +148,10 @@ const SourceBadge = styled.span`
   color: ${t.color.text.secondary};
   font-size: 13px;
   font-weight: 600;
+`;
+const PaidBadge = styled(SourceBadge)`
+  color: ${t.color.status.success.fg};
+  background: ${t.color.status.success.bg};
 `;
 const Toolbar = styled(Row)`
   align-items: flex-end;
@@ -581,13 +585,22 @@ export function PartnerPage() {
             ) : (
               rentalItems.map((r: any) => (
                 <Card key={r.id}>
-                  <Row>
-                    <h2>{r.number}</h2>
-                    <span>{statusLabel(r.status)}</span>
-                  </Row>
+                  <BookingHeader>
+                    <Row>
+                      <h2>{r.number}</h2>
+                      <span>{statusLabel(r.status)}</span>
+                    </Row>
+                    <Row>
+                      {r.paymentStatus === 'paid' ? <PaidBadge>Uhrazeno</PaidBadge> : null}
+                      <SourceBadge aria-label={`Zdroj klienta: ${r.source === 'partner' ? 'Blaze' : r.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>
+                        {r.source === 'partner' ? 'Blaze' : r.source === 'anirak' ? 'ANIRAK' : 'Zdroj neuveden'}
+                      </SourceBadge>
+                    </Row>
+                  </BookingHeader>
                   <p>
-                    {String(r.startDate).slice(0, 10)} –{' '}
-                    {String(r.endDate).slice(0, 10)} ·{' '}
+                    {String(r.startDate).slice(0, 10)}
+                    {String(r.startDate).slice(0, 10) !== String(r.endDate).slice(0, 10)
+                      ? ' – ' + String(r.endDate).slice(0, 10) : ''} ·{' '}
                     {r.rentalMode === 'studio' ? 'Studio' : 'Mimo studio'}
                   </p>
                   <p>
@@ -612,19 +625,12 @@ export function PartnerPage() {
                     Cena pronájmu: {formatMoney(r.subtotal + (r.payment.fittingCredit ?? 0))}
                     {r.deposit > 0 ? ' · Kauce: ' + formatMoney(r.deposit) : ''}
                   </p>
-                  {r.payment.fittingCredit > 0 ? (
-                    <p>
-                      Rezervační záloha (součást nájemného):{' '}
-                      {formatMoney(r.payment.fittingCredit)} · uhrazeno ze zkoušky
-                    </p>
-                  ) : null}
                   <p>
                     <strong>
                       Zbývá doplatit nájemné: {formatMoney(r.payment.rentalBalance)}
                     </strong>
                   </p>
-                  <p>Klient: {r.source === 'partner' ? 'Blaze' : 'ANIRAK'}</p>
-                  <PaymentConfirmationStatus {...r.payment} />
+                  <PaymentConfirmationStatus paymentReport={r.payment.paymentReport} />
                   <Row>
                     {r.status === 'pending' && manager ? (
                       <Button
@@ -672,6 +678,13 @@ export function PartnerPage() {
                   {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult}/> : null}
                   <details>
                     <summary>Platby a QR</summary>
+                    {r.payment.fittingCredit > 0 ? (
+                      <p>
+                        Rezervační záloha (součást nájemného):{' '}
+                        {formatMoney(r.payment.fittingCredit)} · uhrazeno ze zkoušky
+                      </p>
+                    ) : null}
+                    <PaymentConfirmationStatus lastPayment={r.payment.lastPayment} />
                     {r.payment.paymentReport?.kind === 'cash' && r.payment.paymentReport.status === 'pending' ? (
                       <p>Domluvenou hotovost lze nahradit QR platbou na aktuální doplatek.</p>
                     ) : null}
@@ -748,12 +761,12 @@ export function PartnerPage() {
             {fittingItems.map((f: any) => (
               <Card key={f.id}>
                 {actionResult?.path === 'fittings/'+f.id ? <ActionFeedback result={actionResult} onRefresh={refreshResult}/> : null}
-                <FittingHeader>
+                <BookingHeader>
                   <h2>{f.date} · {f.time}</h2>
                   <SourceBadge aria-label={`Zdroj klienta: ${f.source === 'partner' ? 'Blaze' : f.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>
                     {f.source === 'partner' ? 'Blaze' : f.source === 'anirak' ? 'ANIRAK' : 'Zdroj neuveden'}
                   </SourceBadge>
-                </FittingHeader>
+                </BookingHeader>
                 <p>
                   {f.customer.name} · {f.customer.email} · {f.customer.phone}
                 </p>
