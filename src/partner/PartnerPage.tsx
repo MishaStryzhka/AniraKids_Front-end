@@ -218,13 +218,13 @@ export function LegacyPartnerRedirect() {
     <Navigate replace to={'/partner/blaze' + location.search + location.hash} />
   );
 }
-type ActionResult = {path: string; kind: 'pending'|'success'|'error'; message: string};
-function ActionFeedback({result,onRefresh}:{result:ActionResult;onRefresh:()=>void}) {
+type ActionResult = {path: string; kind: 'pending'|'success'|'error'; message: string; requestId?: string};
+function ActionFeedback({result,onRefresh}:{result:ActionResult;onRefresh?:()=>void}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { if(result.kind === 'error') ref.current?.focus(); }, [result]);
-  return <div ref={ref} tabIndex={-1} role={result.kind === 'error' ? 'alert' : 'status'}>
+  return <div ref={ref} data-request-id={result.requestId} tabIndex={-1} role={result.kind === 'error' ? 'alert' : 'status'}>
     <p>{result.message}</p>
-    {result.kind === 'error' ? <Button variant="secondary" onClick={onRefresh}>Obnovit stav</Button> : null}
+    {result.kind === 'error' && onRefresh ? <Button variant="secondary" onClick={onRefresh}>Obnovit stav</Button> : null}
   </div>;
 }
 export function PartnerPage() {
@@ -235,7 +235,6 @@ export function PartnerPage() {
     [rawData, setData] = useState<any>(null),
     [loadedKey, setLoadedKey] = useState(''),
     [catalogue, setCatalogue] = useState<any[]>([]),
-    [members, setMembers] = useState<any[]>([]),
     [revision, setRevision] = useState(0),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -304,14 +303,11 @@ export function PartnerPage() {
         token
       ),
       partnerApi('catalogue', token),
-      access.role === 'administrator'
-        ? partnerApi('members', token)
-        : Promise.resolve({ items: [] }),
       tab === 'calendar'
         ? partnerApi('fittings?month=' + month, token)
         : Promise.resolve({ items: [], truncated: false }),
     ])
-      .then(([v, c, team, fittings]) => {
+      .then(([v, c, fittings]) => {
         if (active) {
           setData(
             tab === 'calendar'
@@ -324,7 +320,6 @@ export function PartnerPage() {
           );
           setLoadedKey(dataKey);
           setCatalogue(c.items);
-          setMembers(team.items);
           setLoading(false);
         }
       })
@@ -350,7 +345,7 @@ export function PartnerPage() {
       setRevision(v => v + 1);
     } catch (e) {
       const requestId = e instanceof PartnerApiError ? e.requestId : undefined;
-      setActionResult({path,kind:'error',message:(e as Error).message + (requestId ? ' Kód chyby: ' + requestId : '')});
+      setActionResult({path,kind:'error',message:(e as Error).message,requestId});
     } finally {
       mutation.current = false;
       setBusy(false);
@@ -571,7 +566,6 @@ export function PartnerPage() {
             ) : (
               rentalItems.map((r: any) => (
                 <Card key={r.id}>
-                  {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult} onRefresh={refreshResult}/> : null}
                   <Row>
                     <h2>{r.number}</h2>
                     <span>{statusLabel(r.status)}</span>
@@ -659,6 +653,7 @@ export function PartnerPage() {
                       </Button>
                     ) : null}
                   </Row>
+                  {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult}/> : null}
                   <details>
                     <summary>Platby a QR</summary>
                     {(
@@ -678,23 +673,13 @@ export function PartnerPage() {
                       <CashPayment reservation={r} busy={busy} act={act} />
                     ) : null}
                   </details>
-                  {manager ? (
+                  {(access.owner || access.managePartners) ? (
                     <details>
-                      <summary>Obsluha rezervace</summary>
-                      <Assignment
-                        reservation={r}
-                        members={members}
-                        busy={busy}
-                        act={act}
-                      />
-                      {(access.owner || access.managePartners) ? (
-                        <>
-                          <SourceChange reservation={r} busy={busy} act={act} />
-                          <Link to={'/admin/rezervace/' + r.id}>
-                            Úplná správa a bankovní platby ANIRAK
-                          </Link>
-                        </>
-                      ) : null}
+                      <summary>Správa rezervace</summary>
+                      <SourceChange reservation={r} busy={busy} act={act} />
+                      <Link to={'/admin/rezervace/' + r.id}>
+                        Úplná správa a bankovní platby ANIRAK
+                      </Link>
                     </details>
                   ) : null}
                 </Card>
@@ -1331,34 +1316,6 @@ function NewReservation({ catalogue, token, userId, onDone }: any) {
   );
 }
 
-function Assignment({ reservation: r, members, busy, act }: any) {
-  const [userId, setUserId] = useState(r.staffId || '');
-  return (
-    <Form
-      onSubmit={e => {
-        e.preventDefault();
-        act('reservations/' + r.id, { action: 'assign', userId });
-      }}
-    >
-      <SelectField
-        label="Odpovědný člen týmu"
-        required
-        value={userId}
-        onChange={e => setUserId(e.target.value)}
-      >
-        <option value="">Vyberte člena týmu</option>
-        {members
-          .filter((m: any) => m.active)
-          .map((m: any) => (
-            <option key={m.id} value={m.id}>
-              {m.email}
-            </option>
-          ))}
-      </SelectField>
-      <Button type="submit" disabled={busy}>Přiřadit obsluhu</Button>
-    </Form>
-  );
-}
 function SourceChange({ reservation: r, busy, act }: any) {
   const [source, setSource] = useState(r.source),
     [reason, setReason] = useState('');
