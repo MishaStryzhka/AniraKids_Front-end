@@ -235,7 +235,6 @@ export function PartnerPage() {
     [rawData, setData] = useState<any>(null),
     [loadedKey, setLoadedKey] = useState(''),
     [catalogue, setCatalogue] = useState<any[]>([]),
-    [members, setMembers] = useState<any[]>([]),
     [revision, setRevision] = useState(0),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -304,14 +303,11 @@ export function PartnerPage() {
         token
       ),
       partnerApi('catalogue', token),
-      access.role === 'administrator'
-        ? partnerApi('members', token)
-        : Promise.resolve({ items: [] }),
       tab === 'calendar'
         ? partnerApi('fittings?month=' + month, token)
         : Promise.resolve({ items: [], truncated: false }),
     ])
-      .then(([v, c, team, fittings]) => {
+      .then(([v, c, fittings]) => {
         if (active) {
           setData(
             tab === 'calendar'
@@ -324,7 +320,6 @@ export function PartnerPage() {
           );
           setLoadedKey(dataKey);
           setCatalogue(c.items);
-          setMembers(team.items);
           setLoading(false);
         }
       })
