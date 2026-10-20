@@ -110,7 +110,7 @@ const Main = styled.main`
 `;
 
 type AdminPageActionSetter = Dispatch<SetStateAction<ReactNode>>;
-const AdminPageActionContext = createContext<AdminPageActionSetter | null>(null);
+export const AdminPageActionContext = createContext<AdminPageActionSetter | null>(null);
 
 export function useAdminPageAction(action: ReactNode) {
   const setPageAction = useContext(AdminPageActionContext);
