@@ -255,6 +255,8 @@ for (const width of [390,1440]) test('failed confirmation is visible at the acti
  const state=await fixture(page);state.pending=true;state.failure='PAYMENT_ADVANCE_REQUIRED';
  await page.setViewportSize({width,height:700});
  await page.goto(APP+'/partner/blaze?section=reservations');
+ await expect(page.getByLabel('Odpovědný člen týmu')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Přiřadit obsluhu',exact:true})).toHaveCount(0);
  const confirm=page.getByRole('button',{name:'Potvrdit rezervaci',exact:true});
  await confirm.click();
  const alert=page.getByRole('alert');

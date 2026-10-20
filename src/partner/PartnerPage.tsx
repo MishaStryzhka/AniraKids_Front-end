@@ -670,23 +670,13 @@ export function PartnerPage() {
                       <CashPayment reservation={r} busy={busy} act={act} />
                     ) : null}
                   </details>
-                  {manager ? (
+                  {(access.owner || access.managePartners) ? (
                     <details>
-                      <summary>Obsluha rezervace</summary>
-                      <Assignment
-                        reservation={r}
-                        members={members}
-                        busy={busy}
-                        act={act}
-                      />
-                      {(access.owner || access.managePartners) ? (
-                        <>
-                          <SourceChange reservation={r} busy={busy} act={act} />
-                          <Link to={'/admin/rezervace/' + r.id}>
-                            Úplná správa a bankovní platby ANIRAK
-                          </Link>
-                        </>
-                      ) : null}
+                      <summary>Správa rezervace</summary>
+                      <SourceChange reservation={r} busy={busy} act={act} />
+                      <Link to={'/admin/rezervace/' + r.id}>
+                        Úplná správa a bankovní platby ANIRAK
+                      </Link>
                     </details>
                   ) : null}
                 </Card>
@@ -1320,34 +1310,6 @@ function NewReservation({ catalogue, token, userId, onDone }: any) {
   );
 }
 
-function Assignment({ reservation: r, members, busy, act }: any) {
-  const [userId, setUserId] = useState(r.staffId || '');
-  return (
-    <Form
-      onSubmit={e => {
-        e.preventDefault();
-        act('reservations/' + r.id, { action: 'assign', userId });
-      }}
-    >
-      <SelectField
-        label="Odpovědný člen týmu"
-        required
-        value={userId}
-        onChange={e => setUserId(e.target.value)}
-      >
-        <option value="">Vyberte člena týmu</option>
-        {members
-          .filter((m: any) => m.active)
-          .map((m: any) => (
-            <option key={m.id} value={m.id}>
-              {m.email}
-            </option>
-          ))}
-      </SelectField>
-      <Button type="submit" disabled={busy}>Přiřadit obsluhu</Button>
-    </Form>
-  );
-}
 function SourceChange({ reservation: r, busy, act }: any) {
   const [source, setSource] = useState(r.source),
     [reason, setReason] = useState('');
