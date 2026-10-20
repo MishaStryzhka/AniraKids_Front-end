@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const APP = 'http://127.0.0.1:4173';
 async function fixture(page, role = 'administrator') {
-  const state = { writes: [], errors: [], pending: false, failure: null, deposit: 0 };
+  const state = { writes: [], errors: [], pending: false, failure: null, deposit: 0, fittingCredit: 0, rentalPaid: 800 };
   page.on('pageerror', e => state.errors.push(e.message));
   await page.addInitScript(() =>
     localStorage.setItem(
@@ -105,11 +105,21 @@ async function fixture(page, role = 'administrator') {
                   size: '74–80–86',
                 },
               ],
-              subtotal: 800,
+              subtotal: 800 - state.fittingCredit,
               deposit: state.deposit,
               source: 'partner',
-              payment: { rentalBalance: 0, revision: 1, depositHeld: 0 },
-              instructions: {},
+              payment: {
+                rentalBalance: 800 - state.fittingCredit - state.rentalPaid,
+                ...(role === 'administrator' ? {
+                  revision: 1, depositHeld: 0, fittingCredit: state.fittingCredit,
+                  advanceBalance: Math.max(0, 200 - state.fittingCredit - state.rentalPaid),
+                } : {}),
+              },
+              instructions: {
+                fullPaymentInstructions: state.fittingCredit && state.rentalPaid < 800 - state.fittingCredit ? {
+                  qrPayload: `SPD*1.0*ACC:CZ0708000000006644781399*AM:${(800 - state.fittingCredit - state.rentalPaid + state.deposit).toFixed(2)}*CC:CZK*MSG:AK-2026-BLAZE1*PT:IP`,
+                } : null,
+              },
             },
           ],
         });
@@ -302,4 +312,77 @@ test('employee deposit amount is fixed to the full required deposit',async({page
  await page.getByRole('button',{name:'Zaznamenat přijatou hotovost',exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:'Změna byla úspěšně uložena.'})).toBeVisible();
  expect(state.writes[0].payment).toMatchObject({type:'deposit_received',amount:2000,method:'cash'});
+});
+
+for (const width of [375, 390, 430, 768, 1024, 1440])
+  test('Blaze shows paid fitting as advance and only the remaining rent ' + width, async ({page}) => {
+    const state = await fixture(page);
+    state.fittingCredit = 200;
+    state.rentalPaid = 0;
+    await page.setViewportSize({width, height:1000});
+    await page.goto(APP + '/partner/blaze?section=reservations');
+    await expect(page.getByText('Cena pronájmu: 800 Kč', {exact:true})).toBeVisible();
+    await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
+    await expect(page.getByText('Zbývá doplatit nájemné: 600 Kč', {exact:true})).toBeVisible();
+    // The credit and balance are visible before opening payment controls.
+    await page.getByText('Platby a QR', {exact:true}).click();
+    const kind = page.getByLabel('Druh hotovostní platby');
+    await expect(kind.locator('option[value="advance_received"]')).toHaveCount(0);
+    await expect(kind).toHaveValue('rental_received');
+    const qr = require('qrcode');
+    const expectedQr = qr.create(
+      'SPD*1.0*ACC:CZ0708000000006644781399*AM:600.00*CC:CZK*MSG:AK-2026-BLAZE1*PT:IP'
+    ).modules;
+    const qrImage = page.getByRole('img', {name:'QR kód', exact:true});
+    await expect(qrImage).toBeVisible();
+    // Compare QR modules, independent of browser/server PNG encoding.
+    const modules = await qrImage.evaluate(async (img, size) => {
+      await img.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = img.naturalWidth;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const scale = img.naturalWidth / (size + 4);
+      return Array.from({length:size * size}, (_, index) => {
+        const x = Math.floor((index % size + 2.5) * scale);
+        const y = Math.floor((Math.floor(index / size) + 2.5) * scale);
+        return ctx.getImageData(x, y, 1, 1).data[0] < 128 ? 1 : 0;
+      });
+    }, expectedQr.size);
+    expect(modules).toEqual(Array.from(expectedQr.data));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+    await page.screenshot({path:'test-evidence/partner/fitting-advance-'+width+'.png',fullPage:true});
+    await page.getByLabel('Přijatá hotovost v Kč').fill('600');
+    await page.getByRole('button', {name:'Zaznamenat přijatou hotovost', exact:true}).click();
+    await expect.poll(() => state.writes.length).toBe(1);
+    expect(state.writes[0].payment).toMatchObject({type:'rental_received', amount:600, method:'cash'});
+    expect(state.errors).toEqual([]);
+  });
+
+test('Blaze includes other recorded rent without subtracting the fitting twice', async ({page}) => {
+  const state = await fixture(page);
+  state.fittingCredit = 200;
+  state.rentalPaid = 200;
+  await page.goto(APP + '/partner/blaze?section=reservations');
+  await expect(page.getByText('Cena pronájmu: 800 Kč', {exact:true})).toBeVisible();
+  await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
+  await expect(page.getByText('Zbývá doplatit nájemné: 400 Kč', {exact:true})).toBeVisible();
+  expect(state.errors).toEqual([]);
+});
+
+test('Blaze still accepts an unpaid advance without a fitting credit', async ({page}) => {
+  const state = await fixture(page);
+  state.pending = true;
+  state.rentalPaid = 0;
+  await page.goto(APP + '/partner/blaze?section=reservations');
+  await expect(page.getByText('Cena pronájmu: 800 Kč', {exact:true})).toBeVisible();
+  await expect(page.getByText('Zbývá doplatit nájemné: 800 Kč', {exact:true})).toBeVisible();
+  await expect(page.getByText(/uhrazeno ze zkoušky/)).toHaveCount(0);
+  await page.getByText('Platby a QR', {exact:true}).click();
+  await page.getByLabel('Druh hotovostní platby').selectOption('advance_received');
+  await page.getByLabel('Přijatá hotovost v Kč').fill('200');
+  await page.getByRole('button', {name:'Zaznamenat přijatou hotovost', exact:true}).click();
+  await expect.poll(() => state.writes.length).toBe(1);
+  expect(state.writes[0].payment).toMatchObject({type:'advance_received', amount:200, method:'cash'});
+  expect(state.errors).toEqual([]);
 });

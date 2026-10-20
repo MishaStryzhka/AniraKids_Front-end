@@ -600,8 +600,19 @@ export function PartnerPage() {
                     </Row>
                   ))}
                   <p>
-                    Cena pronájmu: {formatMoney(r.subtotal)}
+                    Cena pronájmu: {formatMoney(r.subtotal + (r.payment.fittingCredit ?? 0))}
                     {r.deposit > 0 ? ' · Kauce: ' + formatMoney(r.deposit) : ''}
+                  </p>
+                  {r.payment.fittingCredit > 0 ? (
+                    <p>
+                      Rezervační záloha (součást nájemného):{' '}
+                      {formatMoney(r.payment.fittingCredit)} · uhrazeno ze zkoušky
+                    </p>
+                  ) : null}
+                  <p>
+                    <strong>
+                      Zbývá doplatit nájemné: {formatMoney(r.payment.rentalBalance)}
+                    </strong>
                   </p>
                   <p>Klient: {r.source === 'partner' ? 'Blaze' : 'ANIRAK'}</p>
                   <Row>
@@ -650,9 +661,6 @@ export function PartnerPage() {
                   </Row>
                   <details>
                     <summary>Platby a QR</summary>
-                    <p>
-                      Zbývá pronájem: {formatMoney(r.payment.rentalBalance)}
-                    </p>
                     {(
                       r.instructions.fullPaymentInstructions ||
                       r.instructions.paymentInstructions
@@ -978,6 +986,9 @@ function CashPayment({ reservation: r, busy, act }: any) {
   const [amount, setAmount] = useState(''),
     [type, setType] = useState('rental_received');
   const operation = useRef(crypto.randomUUID());
+  const advanceAllowed = r.payment.advanceBalance > 0;
+  const paymentType =
+    type === 'advance_received' && !advanceAllowed ? 'rental_received' : type;
   return (
     <Form
       onSubmit={async e => {
@@ -987,8 +998,8 @@ function CashPayment({ reservation: r, busy, act }: any) {
           payment: {
             operationId: operation.current,
             expectedRevision: r.payment.revision,
-            type,
-            amount: type === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : Number(amount),
+            type: paymentType,
+            amount: paymentType === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : Number(amount),
             method: 'cash',
           },
         });
@@ -996,14 +1007,14 @@ function CashPayment({ reservation: r, busy, act }: any) {
     >
       <SelectField
         label="Druh hotovostní platby"
-        value={type}
+        value={paymentType}
         onChange={e => {
           setType(e.target.value);
           operation.current = crypto.randomUUID();
         }}
       >
         <option value="rental_received">Pronájem</option>
-        <option value="advance_received">Záloha</option>
+        {advanceAllowed ? <option value="advance_received">Záloha</option> : null}
         {r.deposit > r.payment.depositHeld ? <option value="deposit_received">Kauce</option> : null}
       </SelectField>
       <Input
@@ -1012,14 +1023,14 @@ function CashPayment({ reservation: r, busy, act }: any) {
         min={1}
         step={1}
         required
-        value={type === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : amount}
-        readOnly={type === 'deposit_received'}
+        value={paymentType === 'deposit_received' ? Math.max(0,r.deposit-r.payment.depositHeld) : amount}
+        readOnly={paymentType === 'deposit_received'}
         onChange={e => {
           setAmount(e.target.value);
           operation.current = crypto.randomUUID();
         }}
       />
-      {type === 'deposit_received' ? <p>Kauci je nutné přijmout v celé uvedené výši. Záznam uložte až po skutečném převzetí peněz.</p> : null}
+      {paymentType === 'deposit_received' ? <p>Kauci je nutné přijmout v celé uvedené výši. Záznam uložte až po skutečném převzetí peněz.</p> : null}
       <Button type="submit" disabled={busy}>Zaznamenat přijatou hotovost</Button>
     </Form>
   );
