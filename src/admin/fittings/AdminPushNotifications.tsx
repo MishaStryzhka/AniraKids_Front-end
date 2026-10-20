@@ -16,8 +16,10 @@ const Topics = styled.div`inline-size:100%;display:grid;gap:${t.space[2]};paddin
 const Detail = styled.p`margin:0;color:${t.color.text.secondary};font-size:14px;line-height:20px;`;
 const TopicName = styled.strong`font-size:15px;`;
 const topicOptions = [
-  {id:'fitting_created',label:'Nová rezervace zkoušky'},
-  {id:'fitting_payment_reported',label:'Klient oznámil odeslání platby za zkoušku'},
+  {id:'fitting_created',label:'Nová rezervace zkoušky',group:'Zkoušky'},
+  {id:'fitting_payment_reported',label:'Klient oznámil odeslání platby za zkoušku',group:'Zkoušky'},
+  {id:'reservation_payment_reported',label:'Klient oznámil odeslání platby za pronájem',group:'Rezervace'},
+  {id:'reservation_cash_selected',label:'Klient zvolil platbu hotově při převzetí',group:'Rezervace'},
 ];
 const defaultTopics = topicOptions.map(topic=>topic.id);
 type PushPreferences = {subscribed:boolean;topics:string[]};
@@ -140,12 +142,14 @@ export function AdminPushNotifications({token}:{token:string}) {
       {busy?'Vypínání…':'Vypnout upozornění'}
     </Button>:null}
     <Topics role="group" aria-label="Typy upozornění">
-      <TopicName>Zkoušky</TopicName>
-      {topicOptions.map(topic=><CheckboxField key={topic.id} label={topic.label}
-        checked={topics.includes(topic.id)} disabled={busy||!['on','off'].includes(state)}
-        onChange={event=>{void setTopic(topic.id,event.target.checked);}}/>)}
-      <Detail>Upozornění otevře seznam zkoušek. Oznámení o odeslání platby není potvrzením jejího přijetí — ověřte připsání 200 Kč.
-      Každý prohlížeč má vlastní odběry.</Detail>
+      {['Zkoušky','Rezervace'].map(group=><Topics role="group" aria-label={group} key={group}>
+        <TopicName>{group}</TopicName>
+        {topicOptions.filter(topic=>topic.group===group).map(topic=><CheckboxField key={topic.id} label={topic.label}
+          checked={topics.includes(topic.id)} disabled={busy||!['on','off'].includes(state)}
+          onChange={event=>{void setTopic(topic.id,event.target.checked);}}/>)}
+      </Topics>)}
+      <Detail>Upozornění otevře seznam zkoušek nebo rezervací. Oznámení převodu ani volba hotovosti nepotvrzují přijetí peněz.
+      Každý prohlížeč má vlastní odběry. Nové typy upozornění si zapněte na každém používaném zařízení.</Detail>
     </Topics>
   </Region>;
 }
