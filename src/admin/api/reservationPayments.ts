@@ -27,6 +27,7 @@ export type PaymentEntry = Omit<PaymentOperation, 'expectedRevision'> & {
   recordedBy: string;
 };
 export type ReservationPayments = PaymentConfirmation & {
+  paymentStatus?: string;
   fullPaymentInstructions?: PaymentInstructions | null;
   invoiceAutomation?: unknown;
   reservationId: string;
@@ -91,6 +92,7 @@ export function parsePayments(
   if (
     p.reservationId !== reservationId ||
     p.currency !== 'CZK' ||
+    (p.paymentStatus !== undefined && !text(p.paymentStatus)) ||
     !integer(p.revision) ||
     typeof p.legacyUnreconciled !== 'boolean' ||
     !amounts.every(key => integer(p[key])) ||
@@ -145,6 +147,7 @@ export function parsePayments(
       (p.rentalBalance as number) + Math.max(0,(p.depositRequired as number)-(p.depositHeld as number))) return invalid();
   return {
     ...parsePaymentConfirmation(p, invalid),
+    ...(p.paymentStatus === undefined ? {} : { paymentStatus: p.paymentStatus as string }),
     ...(fullPaymentInstructions === undefined ? {} : {fullPaymentInstructions}),
     ...(v.invoiceAutomation ? {invoiceAutomation:v.invoiceAutomation} : {}),
     reservationId,

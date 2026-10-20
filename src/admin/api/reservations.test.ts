@@ -102,6 +102,11 @@ test('unknown server enums remain valid data for localized presentation fallback
     }).items
   ).toHaveLength(1);
 });
+
+test.each(['partner', 'anirak', 'future', undefined])('client source is preserved for list and detail (%s)', source => {
+  expect(parseReservationList({...list,items:[{...row,source}]}).items[0].source).toBe(source);
+  expect(parseReservationDetail({...detail,source}).source).toBe(source);
+});
 test.each([
   null,
   { items: null, pagination: list.pagination },

@@ -42,6 +42,7 @@ import {
 } from './reservationPresentation';
 import { reservationSearchFromState } from './reservationNavigation';
 import { useReservationRead } from './useReservationRead';
+import { ReservationSourceBadge } from './ReservationSourceBadge';
 import {
   ReservationPage,
   ReservationCopy,
@@ -465,6 +466,7 @@ function ReservationsView() {
                                 >
                                   {row.reservationNumber}
                                 </NavigationLink>
+                                <ReservationSourceBadge source={row.source} />
                               </td>
                               <td>
                                 {customerName(row.customer)}
@@ -517,9 +519,12 @@ function ReservationsView() {
                             {row.customer.phone || 'Telefon neuveden'}
                           </ReservationCopy>
                           <Badges row={row} />
-                          <StatusBadge tone={payment.tone}>
-                            {payment.label}
-                          </StatusBadge>
+                          <ReservationBadges>
+                            <StatusBadge tone={payment.tone}>
+                              {payment.label}
+                            </StatusBadge>
+                            <ReservationSourceBadge source={row.source} />
+                          </ReservationBadges>
                           {row.paymentReport?.status === 'pending' ? <ReservationCopy>
                             {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
                           </ReservationCopy> : null}

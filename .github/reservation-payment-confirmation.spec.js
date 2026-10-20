@@ -17,12 +17,14 @@ async function paymentPushDestination(type){
 const instructions=amount=>({...policy.bank,amount,currency:'CZK',message:number,
   qrPayload:`SPD*1.0*ACC:${policy.bank.iban}*AM:${amount.toFixed(2)}*CC:CZK*MSG:${number}*PT:IP`});
 async function fixture(page,{signedIn=true}={}){
-  const state={role:'customer',paid:0,revision:0,report:null,entries:[],writes:[],errors:[],failReport:false};
+  const state={role:'customer',paid:0,revision:0,report:null,entries:[],writes:[],errors:[],failReport:false,source:'partner',paymentStatus:null};
+  const paymentStatus=()=>state.paymentStatus ?? (state.paid===600?'paid':'unpaid');
   const customer={firstName:'Jana',lastName:'Nová',email:'fixture@example.test',phone:'+420777111222'};
   const item={productId:'111111111111111111111111',variantId:'222222222222222222222222',
     productName:'Dámské šaty DAM006',size:'S-M-L',rentalPrice:800,deposit:0};
   const payment=()=>({
     reservationId:id,revision:state.revision,currency:'CZK',legacyUnreconciled:false,
+    paymentStatus:paymentStatus(),
     advanceRequired:200,advanceBalance:0,fittingCredit:200,rentalTotal:600,
     rentalReceived:state.paid,rentalRefunded:0,rentalNet:state.paid,rentalBalance:600-state.paid,
     depositRequired:0,depositReceived:0,depositRefunded:0,depositHeld:0,cancellationFee:0,refundableRental:state.paid,
@@ -32,7 +34,7 @@ async function fixture(page,{signedIn=true}={}){
   });
   const receipt=()=>({reservationNumber:number,status:'confirmed',rentalMode:'studio',
     startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:null,item,subtotal:600,deposit:0,totalDue:600,
-    paymentStatus:state.paid===600?'paid':'unpaid',fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},payment:payment()});
+    paymentStatus:paymentStatus(),fittingDiscount:{number:'ZK-ABCDEF123456',amount:200},payment:payment()});
   const record=input=>{
     state.writes.push(input);state.paid+=input.amount;state.revision++;
     state.entries.push({...input,recordedAt:'2030-10-20T10:00:00Z',recordedBy:'admin-fixture'});
@@ -65,10 +67,12 @@ async function fixture(page,{signedIn=true}={}){
       return json({payments:payment()});
     }
     if(p.endsWith(`/admin/reservations/${id}`))return json({
-      ...receipt(),id,pendingExpired:false,customerSnapshot:customer,updatedAt:'2030-10-20T10:00:00Z',
+      ...receipt(),id,source:state.source,pendingExpired:false,customerSnapshot:customer,updatedAt:'2030-10-20T10:00:00Z',
       items:[{productId:item.productId,variantId:item.variantId,inventoryItemId:'333333333333333333333333',
         productNameSnapshot:item.productName,sizeSnapshot:item.size,rentalPriceSnapshot:800,depositSnapshot:0,inventoryCurrent:null}],
     });
+    if(p.endsWith('/admin/reservations'))return json({items:[{...receipt(),id,source:state.source,expiresAt:undefined,pendingExpired:false,
+      customer,itemCount:1,createdAt:'2030-10-20T10:00:00Z',updatedAt:'2030-10-20T10:00:00Z'}],pagination:{page:1,limit:20,total:1,pages:1}});
     if(p.endsWith('/admin/products'))return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
     if(p.endsWith('/partner/catalogue')||p.endsWith('/partner/members')||p.endsWith('/partner/fittings'))return json({items:[]});
     if(p.endsWith('/partner/reservations'))return json({items:[{id,number,status:'confirmed',
@@ -100,8 +104,11 @@ for(const width of [375,390,430,768,1024,1440]){
     await checkWidth(page);
     state.role='admin';await page.goto(await paymentPushDestination('reservation_payment_reported'));
     await expect(page.getByText(/Čeká na ověření AniraKids/)).toBeVisible();
-    await page.getByText('Ukázat QR pro doplatek 600 Kč',{exact:true}).click();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
+    await expect(page.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await page.getByRole('button',{name:'Zapsat ověřenou platbu',exact:true}).click();
     await expect(page.getByLabel('Částka (Kč)',{exact:true})).toHaveValue('600');
     await expect(page.getByLabel('Způsob platby',{exact:true})).toHaveValue('bank_transfer');
@@ -111,6 +118,10 @@ for(const width of [375,390,430,768,1024,1440]){
     expect(state.paid).toBe(0);
     await dialog.getByRole('button',{name:'Potvrdit zápis',exact:true}).click();
     await expect.poll(()=>state.paid).toBe(600);
+    await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+    await expect(page.getByRole('button',{name:'Připravit rezervaci',exact:true})).toBeVisible();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · bankovním převodem/)).toBeVisible();
     await checkWidth(page);
     await page.locator('section[aria-label="Platební evidence"]').screenshot({path:`test-evidence/payment-confirmation/bank-admin-${width}.png`});
@@ -136,7 +147,9 @@ for(const width of [375,390,430,768,1024,1440]){
     await page.reload();await page.getByText('Platby a podrobnosti',{exact:true}).click();
     await expect(page.getByRole('button',{name:'Platba při převzetí je domluvena'})).toBeDisabled();
     state.role='admin';await page.goto(await paymentPushDestination('reservation_cash_selected'));
-    await page.getByText('Ukázat QR pro doplatek 600 Kč',{exact:true}).click();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
+    await expect(page.getByText(/Klient zvolil platbu hotově při převzetí/)).toBeVisible();
+    await page.getByText('Platby a QR',{exact:true}).click();
     await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
     await expect(page.getByRole('button',{name:'Zapsat přijatou hotovost',exact:true})).toBeVisible();
     await checkWidth(page);
@@ -157,7 +170,40 @@ for(const width of [375,390,430,768,1024,1440]){
     expect(state.writes[0]).toMatchObject({type:'rental_received',amount:600,method:'cash'});
     expect(state.errors).toEqual([]);
   });
+  test('AniraKids list and detail keep separate paid and source badges '+width,async({page})=>{
+    const state=await fixture(page);state.role='admin';state.paid=600;
+    state.entries=[{operationId:'11111111-1111-4111-8111-111111111111',type:'rental_received',amount:600,method:'bank_transfer',recordedAt:'2030-10-20T10:00:00Z',recordedBy:'admin-fixture'}];
+    await page.setViewportSize({width,height:1000});
+    await page.goto(APP+'/admin/rezervace');
+    const visibleList=width>=1440?page.getByRole('table'):page.getByRole('list',{name:'Seznam rezervací',exact:true});
+    await expect(visibleList.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(visibleList.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
+    await checkWidth(page);
+    await page.screenshot({path:`test-evidence/payment-confirmation/admin-list-${width}.png`,fullPage:true});
+    await visibleList.getByRole('link',{name:number,exact:true}).click();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+    await expect(page.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
+    await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+    await expect(page.getByRole('button',{name:'Připravit rezervaci',exact:true})).toBeVisible();
+    await checkWidth(page);
+    await page.screenshot({path:`test-evidence/payment-confirmation/admin-detail-${width}.png`,fullPage:true});
+    await page.getByText('Platby a QR',{exact:true}).click();
+    await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · bankovním převodem/)).toBeVisible();
+    expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
+  });
 }
+
+test('admin paid badge follows server status, including refunds and unknown client sources',async({page})=>{
+  const state=await fixture(page);state.role='admin';state.paid=600;
+  for(const [paymentStatus,source,label] of [['unpaid','anirak','ANIRAK'],['refunded','anirak','ANIRAK'],['unpaid',undefined,'Zdroj neuveden']]){
+    state.paymentStatus=paymentStatus;state.source=source;
+    await page.goto(APP+'/admin/rezervace/'+id);
+    await expect(page.getByLabel('Zdroj klienta: '+label,{exact:true})).toBeVisible();
+    await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
+    await expect(page.getByText(paymentStatus==='refunded'?'Vrácená platba':'Nezaplaceno',{exact:true})).toBeVisible();
+  }
+  expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
+});
 test('cash choice can change to reported QR transfer without recording money',async({page})=>{
   const state=await fixture(page);await openCustomer(page);
   await page.getByLabel('Jak chcete zaplatit?').selectOption('cash');

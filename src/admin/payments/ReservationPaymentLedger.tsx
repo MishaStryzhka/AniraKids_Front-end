@@ -227,7 +227,7 @@ export function ReservationPaymentLedger({
       </ReservationActions> : null}
       {payments ? (
         <>
-          <PaymentConfirmationStatus {...payments} />
+          <PaymentConfirmationStatus paymentReport={payments.paymentReport} />
           {payments.paymentReport?.status === 'pending' ? (
             <Stack>
               <ReservationCopy>
@@ -252,10 +252,13 @@ export function ReservationPaymentLedger({
               }}>{payments.paymentReport.kind === 'cash' ? 'Zapsat přijatou hotovost' : 'Zapsat ověřenou platbu'}</Button> : null}
             </Stack>
           ) : null}
-          {payments.fullPaymentInstructions ? <Disclosure>
-            <summary>Ukázat QR pro doplatek {money(payments.fullPaymentInstructions.amount)}</summary>
-            <ReservationCopy>QR zahrnuje aktuální doplatek. Je dostupný i při domluvené platbě hotově.</ReservationCopy>
-            <PaymentQr instructions={payments.fullPaymentInstructions} />
+          {payments.lastPayment || payments.fullPaymentInstructions ? <Disclosure>
+            <summary>Platby a QR</summary>
+            <PaymentConfirmationStatus lastPayment={payments.lastPayment} />
+            {payments.fullPaymentInstructions ? <>
+              <ReservationCopy>QR pro doplatek {money(payments.fullPaymentInstructions.amount)}. Je dostupný i při domluvené platbě hotově.</ReservationCopy>
+              <PaymentQr instructions={payments.fullPaymentInstructions} />
+            </> : null}
           </Disclosure> : null}
           {empty && !state.loading && !state.error && !state.attempt && !state.conflict && !state.storageBlocked ? <ReservationCopy>Zatím nebyla zaznamenána žádná platba.</ReservationCopy> : null}
           {!payments.legacyUnreconciled && !empty ? (
