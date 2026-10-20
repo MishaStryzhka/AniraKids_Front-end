@@ -10,6 +10,7 @@ import { useAdminAccess } from '../auth/AdminAccessBoundary';
 import { useReservationRead } from '../reservations/useReservationRead';
 import { getAdminOverview, type OverviewGroup, type OverviewRow } from '../api/overview';
 import { adminRoutes, buildAdminReservationDetailPath } from '../navigation/adminRoutes';
+import { reservationDateRange } from '../reservations/reservationPresentation';
 
 const Page = styled.div`max-width:1120px;display:grid;gap:24px;min-inline-size:0;padding-top:24px;@media(min-width:1024px){padding-top:32px;}`;
 const Header = styled.header`display:flex;align-items:center;justify-content:space-between;gap:12px;h1{margin:0 0 4px;font-size:28px;line-height:36px;letter-spacing:-.6px;}p{margin:0;font-size:13px;color:${t.color.text.secondary};} >div:last-child{display:grid;justify-items:center;flex-shrink:0;}small{font-size:10px;color:${t.color.text.secondary};}`;
@@ -33,14 +34,13 @@ const Rows = styled.div`padding:0 14px;border:1px solid ${t.color.border.subtle}
 const RowLink = styled(NavigationLink)`display:flex;width:100%;gap:10px;min-height:52px;padding:10px 0;font-size:13px;border-bottom:1px solid ${t.color.border.subtle};&:last-child{border-bottom:0;}strong{margin-left:auto;}svg{flex-shrink:0;}`;
 const RowButton = styled.button`display:flex;align-items:center;width:100%;gap:10px;min-height:52px;padding:10px 0;font:inherit;font-size:13px;text-align:left;color:${t.color.text.secondary};border:0;border-bottom:1px solid ${t.color.border.subtle};background:none;cursor:pointer;&:last-child{border-bottom:0;}strong{margin-left:auto;}svg{flex-shrink:0;}&:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}`;
 const SmallLink = styled(NavigationLink)`font-size:13px;justify-self:start;gap:8px;`;
-const day = (value:string) => new Intl.DateTimeFormat('cs-CZ',{day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
 const fullDay = (value:string) => new Intl.DateTimeFormat('cs-CZ',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
 const clock = (value:string) => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Prague'}).format(new Date(value));
 
 function ReservationCard({row,kind,today}:{row:OverviewRow;kind:'pending'|'pickups'|'returns'|'deposits';today:string}) {
  const late=kind==='returns'&&row.endDate<today;
  const label=kind==='pending'?'Čeká na potvrzení':kind==='deposits'?'Kauce k vypořádání':late?'Po termínu vrácení':kind==='pickups'?(row.startDate<today?'Nevyřízené předání':'K vydání'):'K vrácení';
- return <Card><Details><Meta><Badge $late={late}>{label}</Badge><small>{row.number}</small></Meta><h3>{row.name||'Jméno neuvedeno'}</h3><p>{row.product}</p><Dates><CalendarDays size={16} aria-hidden="true"/><span>{day(row.startDate)}{row.startDate.slice(0,4)!==row.endDate.slice(0,4)?' '+row.startDate.slice(0,4):''} – {day(row.endDate)} {row.endDate.slice(0,4)}</span></Dates></Details><OpenLink variant="plain" to={buildAdminReservationDetailPath(row.id)} aria-label={`Otevřít rezervaci ${row.number}`}>Otevřít rezervaci<ArrowRight size={16} aria-hidden="true"/></OpenLink></Card>;
+ return <Card><Details><Meta><Badge $late={late}>{label}</Badge><small>{row.number}</small></Meta><h3>{row.name||'Jméno neuvedeno'}</h3><p>{row.product}</p><Dates><CalendarDays size={16} aria-hidden="true"/><span>{reservationDateRange(row.startDate,row.endDate)}</span></Dates></Details><OpenLink variant="plain" to={buildAdminReservationDetailPath(row.id)} aria-label={`Otevřít rezervaci ${row.number}`}>Otevřít rezervaci<ArrowRight size={16} aria-hidden="true"/></OpenLink></Card>;
 }
 function Queue({group,kind,today}:{group:OverviewGroup;kind:'pending'|'pickups'|'returns'|'deposits';today:string}) {
  return <QueueList>{group.items.slice(0,3).map(row=><ReservationCard key={row.id} row={row} kind={kind} today={today}/>)}{group.items.length>3?<More><summary>Další rezervace ({group.items.length-3})</summary><QueueList>{group.items.slice(3).map(row=><ReservationCard key={row.id} row={row} kind={kind} today={today}/>)}</QueueList></More>:null}{group.total>group.items.length?<Copy>Zobrazeno {group.items.length} z {group.total}. <NavigationLink variant="plain" to={adminRoutes.reservations}>Všechny rezervace →</NavigationLink></Copy>:null}</QueueList>;

@@ -17,6 +17,7 @@ import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {formatCalendarDay, formatCalendarMonth, mondayWeekday, monthCalendarDays, monthCalendarGridDays, pragueToday, shiftCalendarMonth} from './calendarDates';
 import {formatPragueLoadedAt, rentalModeLabels, reservationDayCounts, reservationsForDay, reservationStatusPresentation} from './reservationCalendarModel';
 import {useReservationCalendar} from './useReservationCalendar';
+import {reservationDateRange} from '../reservations/reservationPresentation';
 
 const Announcement = styled.p`position:absolute;inline-size:1px;block-size:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;`;
 const Page = styled.div`display:grid;gap:${t.space[6]};min-inline-size:0;`;
@@ -118,7 +119,7 @@ export function AdminReservationCalendarPage() {
               <CardHeading><NavigationLink variant="plain" to={buildAdminReservationDetailPath(reservation.id)} state={{reservationBack:{kind:'calendar'}}}>{reservation.reservationNumber}</NavigationLink></CardHeading>
               <div>{reservation.customerName.trim()||'Jméno neuvedeno'}</div>
               <CardMeta><StatusBadge tone={status.tone}>{status.label}</StatusBadge><span>{rentalModeLabels[reservation.rentalMode]}</span>{selectedDay>reservation.endDate?<StatusBadge tone="neutral">Navazující obsazení / čištění</StatusBadge>:null}</CardMeta>
-              <Details><div><dt>Termín</dt><dd>{formatCalendarDay(reservation.startDate)} – {formatCalendarDay(reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
+              <Details><div><dt>Termín</dt><dd>{reservationDateRange(reservation.startDate,reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
               <ProductItems>{reservation.items.map(item=><li key={item.inventoryItemId}>{item.productName} · velikost {item.size}</li>)}</ProductItems>
             </Card>;})}</Cards>}
             {canFittings?<><AgendaTitle>Zkoušky{!fittings.loading&&!fittings.error?` (${fittingAgenda.length})`:''}</AgendaTitle>

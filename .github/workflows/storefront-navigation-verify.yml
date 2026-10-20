@@ -27,6 +27,7 @@ on:
       - src/layouts/StorefrontLayout.tsx
       - src/components/App.js
       - src/components/navigation/**
+      - src/components/reservations/**
       - src/navigation/**
       - src/admin/auth/useAdminEntryAccess*
       - .github/admin-entry.spec.js

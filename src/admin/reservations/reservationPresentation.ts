@@ -1,5 +1,11 @@
 import type { StatusBadgeTone } from '../../design-system/components/StatusBadge';
 import type { ReservationCustomer } from '../api/reservations';
+import { formatCalendarDay } from '../calendar/calendarDates';
+
+export const reservationDateRange = (startDate: string, endDate: string) =>
+  startDate === endDate
+    ? formatCalendarDay(startDate)
+    : `${formatCalendarDay(startDate)} – ${formatCalendarDay(endDate)}`;
 const statuses: Record<string, { label: string; tone: StatusBadgeTone }> = {
   pending: { label: 'Čeká na potvrzení', tone: 'warning' },
   confirmed: { label: 'Potvrzená', tone: 'info' },

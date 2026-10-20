@@ -26,6 +26,11 @@ import {
 import { PartnerCalendar } from './PartnerCalendar';
 import { rentalsOnDay, fittingsOnDay } from './partnerCalendarModel';
 import { PaymentConfirmationStatus } from '../storefront/payments/PaymentConfirmationStatus';
+import {
+  ReservationCard as Card,
+  ReservationCardRow as Row,
+  ReservationCardHeader as BookingHeader,
+} from '../components/reservations/reservationCardStyles';
 const formatMoney = (amount: number) =>
   new Intl.NumberFormat('cs-CZ', {
     style: 'currency',
@@ -111,32 +116,6 @@ const Main = styled.main`
   p {
     line-height: 1.6;
   }
-`;
-const Card = styled.section`
-  border: 1px solid ${t.color.border.subtle};
-  border-radius: 14px;
-  background: ${t.color.bg.surface};
-  padding: 20px;
-  display: grid;
-  gap: 14px;
-  min-width: 0;
-  overflow-wrap: anywhere;
-`;
-const Row = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-  > img {
-    width: 60px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-`;
-const BookingHeader = styled(Row)`
-  justify-content: space-between;
-  align-items: flex-start;
 `;
 const SourceBadge = styled.span`
   display: inline-flex;

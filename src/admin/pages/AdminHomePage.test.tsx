@@ -1,6 +1,6 @@
 jest.mock('axios',()=>({__esModule:true,default:{isCancel:()=>false},AxiosError:class extends Error{}}));
 import {MemoryRouter} from 'react-router-dom';
-import {render,screen,fireEvent} from '@testing-library/react';
+import {render,screen,fireEvent,within} from '@testing-library/react';
 import {AdminHomePage} from './AdminPlaceholders';
 import {getAdminOverview} from '../api/overview';
 jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'fixture'})}));
@@ -14,6 +14,7 @@ beforeEach(()=>jest.clearAllMocks());
 test('renders real queues, detail links and reloads without retaining stale counts on failure',async()=>{
  get.mockResolvedValueOnce(fixture);render(<MemoryRouter><AdminHomePage/></MemoryRouter>);
  expect(await screen.findByRole('link',{name:'Otevřít rezervaci AK-FIXTURE'})).toHaveAttribute('href','/admin/rezervace/r1');
+ expect(screen.getByText('10. října 2026 – 11. října 2026')).toBeInTheDocument();
  expect(screen.getByText('Žádné evidované kauce k vypořádání.')).toBeInTheDocument();
  get.mockRejectedValueOnce(new Error('private failure'));fireEvent.click(screen.getByRole('button',{name:'Obnovit'}));
  expect(await screen.findByRole('alert')).toHaveTextContent('Přehled se nepodařilo načíst');
@@ -30,6 +31,7 @@ test('switches today queues and reveals deposits without losing real detail link
  fireEvent.click(screen.getByRole('button',{name:'K vrácení 1'}));
  expect(screen.getByRole('button',{name:'K vrácení 1'})).toHaveAttribute('aria-pressed','true');
  expect(screen.getByRole('link',{name:'Otevřít rezervaci AK-RETURN'})).toHaveAttribute('href','/admin/rezervace/r2');
+ expect(within(screen.getByText('AK-RETURN').closest('article')!).getByText('10. října 2026')).toBeInTheDocument();
  expect(screen.queryByText('AK-FIXTURE')).not.toBeInTheDocument();
  expect(screen.queryByRole('link',{name:'Otevřít rezervaci AK-DEPOSIT'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Nevypořádané kauce 1'}));
