@@ -7,7 +7,7 @@ export const useAdminPermissions=()=>useContext(AdminPermissions);
 export function permissionForPath(path:string):Permission|null{
  if(path.startsWith('/admin/produkty'))return 'products';
  if(path.startsWith('/admin/rezervace')||path==='/admin/kalendar'||path==='/admin')return 'reservations';
- if(path==='/admin/zkousky')return 'fittings';
+ if(path==='/admin/zkousky'||path.startsWith('/admin/zkousky/'))return 'fittings';
  if(path==='/admin/nastaveni')return 'settings';
  return null;
 }

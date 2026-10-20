@@ -10,6 +10,7 @@ export const adminRoutes = {
   calendar: '/admin/kalendar',
   settings: '/admin/nastaveni',
   fittings: '/admin/zkousky',
+  fittingDetail: '/admin/zkousky/:fittingId',
   invoices: '/admin/faktury',
 } as const;
 
@@ -39,7 +40,7 @@ export function resolveAdminNavigation(pathname: string): AdminNavigationKey | n
   if (matchPath({ path: '/admin/rezervace/*', end: false }, pathname)) return 'reservations';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'calendar';
   if (pathname === adminRoutes.invoices) return 'invoices';
-  if (pathname === adminRoutes.fittings) return 'fittings';
+  if (matchPath({ path: '/admin/zkousky/*', end: false }, pathname)) return 'fittings';
   if (pathname === adminRoutes.settings) return 'settings';
   return null;
 }
@@ -52,6 +53,7 @@ export function resolveAdminPageTitle(pathname: string) {
   if (matchPath({ path: adminRoutes.reservations, end: true }, pathname)) return 'Rezervace';
   if (matchPath({ path: adminRoutes.calendar, end: true }, pathname)) return 'Kalendář';
   if (pathname === adminRoutes.invoices) return 'Faktury';
+  if (matchPath({ path: adminRoutes.fittingDetail, end: true }, pathname)) return 'Detail zkoušky';
   if (pathname === adminRoutes.fittings) return 'Zkoušky';
   if (pathname === adminRoutes.settings) return 'Nastavení';
   return 'Přehled';

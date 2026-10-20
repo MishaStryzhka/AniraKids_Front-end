@@ -63,5 +63,27 @@ async function dispatch(name,extra={}){let work;handlers[name]({...extra,waitUnt
     await dispatch('notificationclick',{notification:{close(){},data:{url}}});
     assert.equal(opened.at(-1),'https://anirakids.cz/admin/zkousky','click accepts only fixed admin routes or exact reservation IDs');
   }
-  console.log('PASS: exact transfer/cash reservation links, new/existing windows, legacy list fallback, unsafe ID/URL rejection and unchanged fitting navigation');
+  for(const [index,type] of ['fitting_created','fitting_payment_reported'].entries()){
+    const id=detailIds[index];
+    await dispatch('push',{data:{json:()=>({type,fittingId:id.toUpperCase(),reservationId:detailIds[1-index]})}});
+    const data=notifications.at(-1).options.data;
+    assert.equal(data.url,'/admin/zkousky/'+id);
+    await dispatch('notificationclick',{notification:{close(){},data}});
+    assert.equal(opened.at(-1),'https://anirakids.cz/admin/zkousky/'+id);
+    self.clients.matchAll=async()=>[{url:'https://anirakids.cz/admin/zkousky/000000000000000000000000',navigate:async url=>{navigated.push(url);},focus:async()=>{focused++;}}];
+    await dispatch('notificationclick',{notification:{close(){},data}});
+    assert.equal(navigated.at(-1),'https://anirakids.cz/admin/zkousky/'+id);
+    self.clients.matchAll=async()=>[];
+  }
+  for(const fittingId of [null,{},42,'../rezervace','https://example.test',detailIds[0]+'?x=1','g'.repeat(24)]){
+    await dispatch('push',{data:{json:()=>({type:'fitting_created',fittingId})}});
+    assert.equal(notifications.at(-1).options.data.url,'/admin/zkousky');
+  }
+  await dispatch('push',{data:{json:()=>({type:'unknown',fittingId:detailIds[0]})}});
+  assert.equal(notifications.at(-1).options.data.url,'/admin/zkousky');
+  for(const url of ['/admin/zkousky/../rezervace','/admin/zkousky/'+detailIds[0]+'?redirect=https://example.test','/admin/zkousky/%2e%2e']){
+    await dispatch('notificationclick',{notification:{close(){},data:{url}}});
+    assert.equal(opened.at(-1),'https://anirakids.cz/admin/zkousky');
+  }
+  console.log('PASS: exact fitting and rental links, new/existing windows, legacy list fallback and unsafe ID/URL rejection');
 })().catch(error=>{console.error(error);process.exitCode=1;});

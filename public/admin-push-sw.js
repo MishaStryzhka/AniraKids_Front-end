@@ -5,10 +5,14 @@ self.addEventListener('push', event => {
   // Empty payloads are payment alerts from subscriptions created before event types.
   let type = 'fitting_payment_reported';
   let reservationId;
+  let fittingId;
   try {
     if (event.data) {
       const payload = event.data.json();
       type = payload.type;
+      if (typeof payload.fittingId === 'string' && payload.fittingId.length === 24 && /^[a-f\d]{24}$/i.test(payload.fittingId)) {
+        fittingId = payload.fittingId.toLowerCase();
+      }
       if (typeof payload.reservationId === 'string' && /^[a-f\d]{24}$/i.test(payload.reservationId)) {
         reservationId = payload.reservationId.toLowerCase();
       }
@@ -25,14 +29,14 @@ self.addEventListener('push', event => {
       cash ? 'Klient zvolil platbu hotově při převzetí. Platba zatím není potvrzená.' :
       'Zkontrolujte aktuální stav zkoušek v administraci.',
     icon: '/logo192.png',
-    data: {url: transfer || cash ? '/admin/rezervace' + (reservationId ? '/' + reservationId : '') : '/admin/zkousky'},
+    data: {url: transfer || cash ? '/admin/rezervace' + (reservationId ? '/' + reservationId : '') : '/admin/zkousky' + ((created || payment) && fittingId ? '/' + fittingId : '')},
   }));
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const requested = event.notification.data?.url;
-  const path = typeof requested === 'string' && /^\/admin\/rezervace(?:\/[a-f\d]{24})?$/.test(requested)
+  const path = typeof requested === 'string' && /^\/admin\/(?:rezervace|zkousky)(?:\/[a-f\d]{24})?$/.test(requested)
     ? requested : '/admin/zkousky';
   const url = new URL(path, self.location.origin).href;
   event.waitUntil(self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(async windows => {
