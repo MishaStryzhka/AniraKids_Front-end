@@ -179,7 +179,7 @@ for (const width of [390, 768, 1440])
     await expect(headerEntry).toHaveAttribute('href','/partner/blaze');
     await headerEntry.click();
     await page
-      .getByRole('link', { name: 'Platby a vyúčtování', exact: true })
+      .getByRole('link', { name: 'Vyúčtování', exact: true })
       .click();
     await expect(page.getByText('ANIRAK má předat Blaze')).toBeVisible();
     for(const [number,source] of [['AK-2026-OWGBGX','ANIRAK'],['AK-2026-BLAZE1','Blaze'],['ZK-CREDITED','Blaze'],['ZK-EARNED','ANIRAK'],['ZK-PENDING','neuveden']]) {
@@ -235,12 +235,19 @@ test('photographer sees assigned work and personal referral without balances', a
   ).toBeVisible();
   const nav = page.getByRole('navigation', { name: 'Partnerské menu' });
   await expect(
-    nav.getByRole('link', { name: 'Platby a vyúčtování' })
+    nav.getByRole('link', { name: 'Vyúčtování', exact: true })
   ).toHaveCount(0);
   await expect(nav.getByRole('link', { name: 'Tým a odkazy' })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: 'Fakturační údaje' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Připraveno', exact: true }).click();
   await expect.poll(() => state.writes.length).toBe(1);
   expect(state.writes[0]).toEqual({ action: 'prepare' });
+  let billingRequests = 0;
+  page.on('request', request => { if (new URL(request.url()).pathname === '/api/v2/partner/billing') billingRequests++; });
+  await page.goto(APP + '/partner/blaze?section=billing');
+  await expect(page.getByRole('heading', { name: 'Můj doporučující odkaz' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Měsíční faktury Blaze → ANIRAK' })).toHaveCount(0);
+  expect(billingRequests).toBe(0);
   expect(state.errors).toEqual([]);
 });
 test('signed referral is captured without changing existing reservation storage', async ({
@@ -465,9 +472,18 @@ test('Blaze paid badge follows confirmed server status, preserves date ranges an
  expect(state.errors).toEqual([]);expect(state.writes).toEqual([]);
 });
 
-test('monthly invoice settings and empty report', async ({page})=>{
+for (const width of [375,390,430,768,1024,1440]) test('monthly invoice settings in a separate billing section '+width, async ({page})=>{
  const state=await fixture(page);
+ await page.setViewportSize({width,height:1000});
  await page.goto(APP+'/partner/blaze?section=balance');
+ await expect(page.getByText('ANIRAK má předat Blaze')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Měsíční faktury Blaze → ANIRAK'})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'Předání peněz'})).toHaveCount(0);
+ const billingLink=page.getByRole('link',{name:'Fakturační údaje',exact:true});
+ await billingLink.click();
+ await expect(page).toHaveURL(APP+'/partner/blaze?section=billing');
+ await expect(billingLink).toHaveAttribute('aria-current','page');
+ await expect(page.getByRole('heading',{name:'Fakturační údaje',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Měsíční faktury Blaze → ANIRAK'})).toBeVisible();
  await expect(page.getByText('Automatické vystavování vypnuto')).toBeVisible();
  await page.getByText('Nastavení fakturace',{exact:true}).click();
@@ -475,6 +491,14 @@ test('monthly invoice settings and empty report', async ({page})=>{
  await expect(page.getByLabel('Režim DPH dodavatele')).toHaveValue('');
  await expect(page.getByRole('button',{name:'Uložit nastavení fakturace'})).toBeVisible();
  await expect(page.getByText('Zatím nebylo uzavřeno žádné období.')).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.screenshot({path:`test-evidence/partner/billing-${width}.png`,fullPage:true});
+ await page.reload();
+ await expect(page.getByText('Zatím nebylo uzavřeno žádné období.')).toBeVisible();
+ await page.getByRole('link',{name:'Vyúčtování',exact:true}).click();
+ await expect(page.getByText('ANIRAK má předat Blaze')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Měsíční faktury Blaze → ANIRAK'})).toHaveCount(0);
+ expect(state.writes).toEqual([]);
  expect(state.errors).toEqual([]);
 });
 
@@ -483,7 +507,9 @@ test('monthly billing saves only confirmed supplier fields and downloads issued 
  await page.route('**/api/v2/partner/billing',route=>route.fulfill({json:{settings,cronConfigured:true,items:[{_id:'111111111111111111111111',number:'BLAZE-2026-0001',period:'2026-09',status:'issued',snapshot:{total:600,dueDate:'2026-10-14',lines:[{description:'Odměna — zkouška ZK-TEST',amount:600}]},email:{status:'sent'}}]}}));
  await page.route('**/api/v2/partner/billing-settings',route=>{saved=route.request().postDataJSON();settings={...saved,revision:1,trackingStartedAt:'2026-10-20T10:00:00Z'};return route.fulfill({json:{ok:true}});});
  await page.route('**/api/v2/partner/billing-pdf?*',route=>route.fulfill({contentType:'application/pdf',body:'%PDF-1.4\nfixture'}));
- await page.goto(APP+'/partner/blaze?section=balance');
+ await page.route('**/api/v2/partner/balance',route=>route.fulfill({status:503,json:{error:{code:'UNAVAILABLE'}}}));
+ await page.route('**/api/v2/partner/catalogue',route=>route.fulfill({status:503,json:{error:{code:'UNAVAILABLE'}}}));
+ await page.goto(APP+'/partner/blaze?section=billing');
  await page.getByText('Nastavení fakturace',{exact:true}).click();
  for(const [label,value] of [['Obchodní název dodavatele Blaze','Blaze Fixture'],['Sídlo dodavatele','Testovací 1, Praha'],['IČO dodavatele','12345678'],['IBAN (CZ)','CZ6508000000192000145399'],['Číslo účtu','19-2000145399/0800'],['E-mail odběratele ANIRAK','anirak@example.test']])await page.getByLabel(label,{exact:true}).fill(value);
  await page.getByLabel('Režim DPH dodavatele').selectOption('no');

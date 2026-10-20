@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Shirt,
   Wallet,
+  FileText,
   Users,
   Link as LinkIcon,
   Plus,
@@ -172,7 +173,8 @@ const labels: any = {
   reservations: 'Rezervace',
   calendar: 'Kalendář',
   catalogue: 'Šaty ve studiu',
-  balance: 'Platby a vyúčtování',
+  balance: 'Vyúčtování',
+  billing: 'Fakturační údaje',
   members: 'Tým a odkazy',
 };
 const icons: any = {
@@ -182,6 +184,7 @@ const icons: any = {
   catalogue: Shirt,
   fittings: CalendarDays,
   balance: Wallet,
+  billing: FileText,
   members: Users,
 };
 function PaymentQr({ payload }: { payload: string }) {
@@ -282,6 +285,13 @@ export function PartnerPage() {
   useEffect(() => {
     let active = true;
     if (!access || !token) return;
+    // The invoice component loads and refreshes its own billing data.
+    if (tab === 'billing') {
+      setData(null);
+      setError('');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setData(null);
     setError('');
@@ -372,7 +382,7 @@ export function PartnerPage() {
     );
   const manager = access.role === 'administrator';
   const sections = Object.keys(labels).filter(
-    k => manager || !['balance', 'members'].includes(k)
+    k => manager || !['balance', 'billing', 'members'].includes(k)
   );
   return (
     <Shell>
@@ -841,8 +851,7 @@ export function PartnerPage() {
                 </RewardBreakdown>}
               </Card>
             ))}
-            <PartnerInvoices token={token} />
-            <h2>Předání peněz</h2>
+            {data.settlements.length > 0 ? <h2>Předání peněz</h2> : null}
             {data.settlements.map((s: any) => (
               <Card key={s.operationId}>
                 {s.direction === 'to_partner'
@@ -854,6 +863,7 @@ export function PartnerPage() {
             ))}
           </>
         ) : null}
+        {tab === 'billing' && manager ? <PartnerInvoices token={token} /> : null}
         {tab === 'members' && data && manager ? (
           <>
             <Card>
