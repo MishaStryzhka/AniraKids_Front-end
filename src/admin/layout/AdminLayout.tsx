@@ -101,6 +101,13 @@ const Heading = styled.h1`
   font-weight: ${t.font.weight.semibold};
 `;
 
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${t.space[2]};
+  min-inline-size: 0;
+`;
+
 const Main = styled.main`
   min-inline-size: 0;
   padding: 0 ${t.container.padding.mobile} ${t.space[8]};
@@ -111,6 +118,16 @@ const Main = styled.main`
 
 type AdminPageActionSetter = Dispatch<SetStateAction<ReactNode>>;
 export const AdminPageActionContext = createContext<AdminPageActionSetter | null>(null);
+const AdminPageTitleActionContext = createContext<AdminPageActionSetter | null>(null);
+
+export function useAdminPageTitleAction(action: ReactNode) {
+  const setTitleAction = useContext(AdminPageTitleActionContext);
+  useLayoutEffect(() => {
+    if (!setTitleAction) return;
+    setTitleAction(action);
+    return () => setTitleAction(null);
+  }, [action, setTitleAction]);
+}
 
 export function useAdminPageAction(action: ReactNode) {
   const setPageAction = useContext(AdminPageActionContext);
@@ -132,6 +149,7 @@ export function AdminLayout() {
   const isDesktop = useMediaQuery(`(min-width: ${t.breakpoint.lg})`);
   const mobileNavigationOpen = !isDesktop && navigationEntry === location.key;
   const [pageAction, setPageAction] = useState<ReactNode>(null);
+  const [titleAction, setTitleAction] = useState<ReactNode>(null);
   const pageTitle = resolveAdminPageTitle(location.pathname);
 
   const closeNavigation = useCallback(() => setNavigationEntry(null), []);
@@ -160,6 +178,7 @@ export function AdminLayout() {
       </Sidebar>
 
       <AdminPageActionContext.Provider value={setPageAction}>
+      <AdminPageTitleActionContext.Provider value={setTitleAction}>
       <Content>
         <MobileHeader data-admin-mobile-header>
           <IconButton
@@ -174,12 +193,13 @@ export function AdminLayout() {
         </MobileHeader>
 
         {pageTitle!=='Přehled'?<PageHeader $compactActions={pageTitle === 'Produkty'}>
-          <Heading data-admin-page-title>{pageTitle}</Heading>
+          <TitleRow>{titleAction}<Heading data-admin-page-title>{pageTitle}</Heading></TitleRow>
           {pageAction ? <PageAction data-admin-page-action>{pageAction}</PageAction> : null}
         </PageHeader>:null}
 
         <Main>{allowed?<Outlet/>:location.pathname==='/admin'&&firstAllowed?<Navigate to={firstAllowed} replace/>:<p role="alert">Pro tuto sekci nemáte oprávnění. Vyberte dostupnou sekci v menu.</p>}</Main>
       </Content>
+      </AdminPageTitleActionContext.Provider>
       </AdminPageActionContext.Provider>
       {mobileNavigationOpen ? <AdminMobileDrawer backgroundRef={shellRef} onClose={closeNavigation}
         onNavigate={closeBeforeNavigation} resolveRestoreFocus={resolveRestoreFocus}/> : null}

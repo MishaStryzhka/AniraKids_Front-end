@@ -15,13 +15,15 @@ for(const width of [390,1440])test(`invoice preview, issue, download and explici
  if(p.endsWith('/i1/send')){sends++;items[0].email={status:'sent'};return json({sent:true});}
  return route.abort();});
  await page.goto('http://127.0.0.1:4173/admin/faktury');
+ await expect(page.getByLabel('Číslo zkoušky / rezervace')).toHaveCount(0);
+ await page.getByRole('button',{name:'Nová faktura',exact:true}).click();
  await page.getByLabel('Číslo zkoušky / rezervace').fill('ZK-TEST');await page.getByLabel('Jméno nebo firma odběratele').fill(snapshot.buyer.name);await page.getByLabel('Adresa odběratele').fill(snapshot.buyer.address);
  await page.getByRole('button',{name:'Zkontrolovat náhled'}).click();await expect(page.getByText('Náhled před vystavením')).toBeVisible();expect(writes).toBe(0);
  await page.getByRole('button',{name:'Vystavit fakturu',exact:true}).click();await expect(page.getByText('Faktura 2026-0001', {exact:true})).toBeVisible();expect(writes).toBe(1);expect(sends).toBe(0);
  const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Stáhnout PDF'}).click();expect((await downloaded).suggestedFilename()).toBe('2026-0001.pdf');
  await page.getByRole('button',{name:'Odeslat zákazníkovi'}).click();await expect(page.getByRole('dialog')).toContainText('invoice@example.test');expect(sends).toBe(0);await page.getByRole('button',{name:'Potvrdit',exact:true}).click();await expect(page.getByText('E-mail: odesláno')).toBeVisible();expect(sends).toBe(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(browserErrors).toEqual([]);
- await page.screenshot({path:`/tmp/invoices-ui-${width}.png`,fullPage:true});
+ require('fs').mkdirSync('test-evidence/payments',{recursive:true});await page.screenshot({path:`test-evidence/payments/invoices-ui-${width}.png`,fullPage:true});
 });
 for(const width of [390,1440])test(`recover automatic invoice and explicitly retry email at ${width}`,async({page})=>{
  await page.setViewportSize({width,height:1000});let pending=[{type:'fitting',number:'ZK-ABCDEF123456',errorCode:'INVOICE_AUTOMATION_FAILED'}],items=[],processed=0,retried=0;
