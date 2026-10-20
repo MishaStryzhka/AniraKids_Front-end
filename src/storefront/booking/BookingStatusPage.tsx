@@ -36,7 +36,7 @@ export function BookingStatusPage() {
           </div>)}
           <Copy>{formatCalendarDay(result.data.startDate)} – {formatCalendarDay(result.data.endDate)}</Copy>
           {result.data.fittingDiscount ? <Copy>Započtená platba za zkoušku {result.data.fittingDiscount.number}: −200 Kč</Copy> : null}
-          <ReceiptPaymentInformation receipt={result.data} />
+          <ReceiptPaymentInformation receipt={result.data} access={{kind:'guest',token}} />
           <Button onClick={result.reload}>Aktualizovat stav rezervace</Button>
           <Copy>Tento soukromý odkaz si uložte. Každý, kdo jej získá, může zobrazit stav této rezervace a platební pokyny.</Copy>
         </> : null}

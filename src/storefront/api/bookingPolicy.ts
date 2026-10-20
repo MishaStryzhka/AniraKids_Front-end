@@ -1,4 +1,5 @@
 import { object, money, string, PublicApiError } from './publicValidation';
+import { parsePaymentConfirmation, type PaymentConfirmation } from '../payments/paymentConfirmation';
 export type BookingPolicy = {
   policyVersion: 1;
   advanceAmount: number;
@@ -26,7 +27,7 @@ export type PaymentInstructions = NonNullable<BookingPolicy['bank']> & {
   message: string;
   qrPayload: string;
 };
-export type ReceiptPayment = {
+export type ReceiptPayment = PaymentConfirmation & {
   advanceRequired: number;
   advanceBalance: number;
   rentalBalance: number;
@@ -184,6 +185,7 @@ export function parseReceiptPayment(
       message: i.message as string, qrPayload: expected };
   }
   return {
+    ...parsePaymentConfirmation(value, invalid),
     advanceRequired: p.advanceRequired,
     advanceBalance: p.advanceBalance,
     rentalBalance: p.rentalBalance,
@@ -192,4 +194,13 @@ export function parseReceiptPayment(
     paymentInstructions: instructions,
     ...(value.fullPaymentInstructions !== undefined ? { fullPaymentInstructions: fullInstructions } : {}),
   };
+}
+
+export function parsePaymentInstructions(value: unknown): PaymentInstructions {
+  if (!object(value) || !money(value.amount) || value.amount <= 0 || value.currency !== 'CZK' ||
+      typeof value.message !== 'string' || !/^AK-\d{4}-[A-Z0-9]{6}$/.test(value.message)) return invalid();
+  const details = bank(value);
+  const expected = `SPD*1.0*ACC:${details.iban}*AM:${value.amount.toFixed(2)}*CC:CZK*MSG:${value.message}*PT:IP`;
+  if (value.qrPayload !== expected) return invalid();
+  return {...details,amount:value.amount,currency:'CZK',message:value.message,qrPayload:expected};
 }

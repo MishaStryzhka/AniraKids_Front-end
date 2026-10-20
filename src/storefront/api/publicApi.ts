@@ -503,6 +503,21 @@ export async function getAccountReservationStatus(number: string, token: string,
   if (receipt.reservationNumber !== number) return invalid();
   return receipt;
 }
+export type ReservationPaymentAccess = {kind:'account'|'guest';token:string};
+export async function reportReservationPayment(
+  number: string, access: ReservationPaymentAccess,
+  body: {operationId:string;kind:'advance'|'full'|'cash';amount:number}, signal?: AbortSignal
+): Promise<Receipt> {
+  if (!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !access.token ||
+      (access.kind === 'guest' && !isGuestAccessToken(access.token))) throw new PublicApiError('RESERVATION_NOT_FOUND',404);
+  const result = await request('/reservations/'+encodeURIComponent(number)+'/payment-report', {
+    method:'POST',headers:{Authorization:(access.kind === 'guest' ? 'Reservation ' : 'Bearer ')+access.token},
+    body:JSON.stringify(body),signal,cache:'no-store',
+  });
+  const receipt = parseReceipt(result.body);
+  if (receipt.reservationNumber !== number) return invalid();
+  return {...receipt,...(access.kind === 'guest' ? {guestAccessToken:access.token} : {})};
+}
 export async function claimReservation(number: string, guestAccessToken: string, token: string, signal?: AbortSignal): Promise<Receipt> {
   if (!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !isGuestAccessToken(guestAccessToken) || !token)
     throw new PublicApiError('RESERVATION_NOT_FOUND', 404);

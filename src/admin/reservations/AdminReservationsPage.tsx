@@ -463,6 +463,9 @@ function ReservationsView() {
                                 <StatusBadge tone={payment.tone}>
                                   {payment.label}
                                 </StatusBadge>
+                                {row.paymentReport?.status === 'pending' ? <ReservationCopy>
+                                  {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
+                                </ReservationCopy> : null}
                               </td>
                               <td>{reservationMode(row.rentalMode)}</td>
                               <td>{row.itemCount}</td>
@@ -494,6 +497,9 @@ function ReservationsView() {
                           <StatusBadge tone={payment.tone}>
                             {payment.label}
                           </StatusBadge>
+                          {row.paymentReport?.status === 'pending' ? <ReservationCopy>
+                            {row.paymentReport.kind === 'cash' ? 'Domluvena platba při převzetí' : 'Klient oznámil platbu — ověřit'}
+                          </ReservationCopy> : null}
                           <ReservationFacts>
                             <div>
                               <dt>Termín</dt>

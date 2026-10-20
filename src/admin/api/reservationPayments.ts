@@ -1,5 +1,7 @@
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import { AdminApiError, normalizeAdminApiError } from './errors';
+import { parsePaymentConfirmation, type PaymentConfirmation } from '../../storefront/payments/paymentConfirmation';
+import { parsePaymentInstructions, type PaymentInstructions } from '../../storefront/api/bookingPolicy';
 export const paymentTypes = [
   'advance_received',
   'rental_received',
@@ -24,7 +26,8 @@ export type PaymentEntry = Omit<PaymentOperation, 'expectedRevision'> & {
   recordedAt: string;
   recordedBy: string;
 };
-export type ReservationPayments = {
+export type ReservationPayments = PaymentConfirmation & {
+  fullPaymentInstructions?: PaymentInstructions | null;
   invoiceAutomation?: unknown;
   reservationId: string;
   revision: number;
@@ -136,7 +139,13 @@ export function parsePayments(
   });
   if (new Set(entries.map(e => e.operationId)).size !== entries.length)
     return invalid();
+  const fullPaymentInstructions = p.fullPaymentInstructions == null
+    ? p.fullPaymentInstructions : parsePaymentInstructions(p.fullPaymentInstructions);
+  if (fullPaymentInstructions && fullPaymentInstructions.amount !==
+      (p.rentalBalance as number) + Math.max(0,(p.depositRequired as number)-(p.depositHeld as number))) return invalid();
   return {
+    ...parsePaymentConfirmation(p, invalid),
+    ...(fullPaymentInstructions === undefined ? {} : {fullPaymentInstructions}),
     ...(v.invoiceAutomation ? {invoiceAutomation:v.invoiceAutomation} : {}),
     reservationId,
     revision: p.revision,

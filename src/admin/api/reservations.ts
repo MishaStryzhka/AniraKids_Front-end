@@ -1,6 +1,7 @@
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import { AdminApiError, normalizeAdminApiError } from './errors';
 import { isDateOnly } from '../calendar/calendarDates';
+import { parsePaymentConfirmation, type PaymentReport } from '../../storefront/payments/paymentConfirmation';
 export const RESERVATIONS_PAGE_SIZE = 20;
 export const reservationStatuses = [
   'pending',
@@ -23,6 +24,7 @@ export interface ReservationCustomer {
   phone: string;
 }
 export interface ReservationListItem {
+  paymentReport?: PaymentReport | null;
   id: string;
   reservationNumber: string;
   status: string;
@@ -145,6 +147,7 @@ function common(value: unknown) {
     reservationNumber: value.reservationNumber,
     status: value.status,
     paymentStatus: value.paymentStatus,
+    ...parsePaymentConfirmation(value, invalid),
     rentalMode: value.rentalMode,
     startDate: value.startDate,
     endDate: value.endDate,

@@ -307,7 +307,11 @@ export function BookingPage() {
                       ? 'Vrácená platba'
                       : 'Neznámý stav platby'}
               </Copy>
-              <ReceiptPaymentInformation receipt={stored.receipt} showRentalPrice={false} />
+              <ReceiptPaymentInformation receipt={stored.receipt} showRentalPrice={false}
+                onUpdated={() => void booking.refreshStatus()}
+                access={stored.accountId && booking.discountAuthToken
+                  ? {kind:'account',token:booking.discountAuthToken}
+                  : stored.receipt.guestAccessToken ? {kind:'guest',token:stored.receipt.guestAccessToken} : undefined} />
               {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
               {(stored.receipt.guestAccessToken || stored.accountId) && (
                 <Actions>
