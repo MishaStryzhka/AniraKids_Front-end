@@ -39,7 +39,7 @@ const product = {
 };
 function receipt(body) {
   return {
-    reservationNumber: 'AK-2030-001',
+    reservationNumber: 'AK-2030-000001',
     status: 'pending',
     rentalMode: body.rentalMode,
     startDate: body.startDate,
@@ -150,6 +150,11 @@ async function setup(page, guest = true) {
           },
         });
       }
+      if (req.method() === 'GET' && url.pathname === '/api/v2/reservations/AK-2030-000001') {
+        const saved = [...state.records.values()][0];
+        expect(req.headers().authorization).toBe(guest ? 'Reservation '+ 'a'.repeat(43) : 'Bearer legacy-token-must-not-leak');
+        return json(200, {reservation: saved});
+      }
       if (req.method() === 'POST' && url.pathname === '/api/v2/reservations') {
         const body = req.postDataJSON(),
           key = req.headers()['idempotency-key'];
@@ -219,7 +224,7 @@ async function setup(page, guest = true) {
           });
         return json(201, {
           reservation: created,
-          guestAccessToken: 'secret-never-store',
+          guestAccessToken: state.mode === 'payment' || state.discount ? 'a'.repeat(43) : 'secret-never-store',
         });
       }
       return json(404, {
@@ -312,7 +317,7 @@ for (const width of [390, 768, 1440])
         await page.evaluate(() => JSON.stringify(history.state))
       ).not.toContain('jana@example.test');
       await page.reload();
-      await expect(page.getByText('AK-2030-001')).toBeVisible();
+      await expect(page.getByText('AK-2030-000001')).toBeVisible();
       expect(state.posts).toHaveLength(1);
       await page
         .getByRole('button', { name: 'Vytvořit novou rezervaci' })
@@ -405,7 +410,7 @@ test('single-flight survives leaving route while request is pending', async ({
   await expect(page.getByText('Odesílání rezervace…')).toBeVisible();
   await page.getByRole('link', { name: 'Otevřít rezervaci', exact: true }).click();
   state.release();
-  await expect(page.getByText('AK-2030-001')).toBeVisible();
+  await expect(page.getByText('AK-2030-000001')).toBeVisible();
   expect(state.posts).toHaveLength(1);
 });
 test('late availability cannot enable changed selection; keyboard field validation works', async ({
@@ -452,7 +457,7 @@ test('session storage failure prevents POST until explicit retry', async ({
   });
   await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
   await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
-  await expect(page.getByText('AK-2030-001')).toBeVisible();
+  await expect(page.getByText('AK-2030-000001')).toBeVisible();
   expect(state.posts).toHaveLength(1);
 });
 test('catalogue route mapping, empty, search and unavailable product are honest', async ({
