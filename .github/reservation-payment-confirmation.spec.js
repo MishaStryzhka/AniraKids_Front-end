@@ -1,9 +1,22 @@
 const {test,expect}=require('@playwright/test');
 const {policy}=require('./payment-fixtures');
 const APP='http://127.0.0.1:4173', number='AK-2030-ABC123', id='555555555555555555555555';
+async function paymentPushDestination(type){
+  // Replay the deployed worker's push + click handlers without contacting a push
+  // provider; the resulting URL is then opened in the real browser UI below.
+  const handlers={};let notification,destination,work;
+  const self={location:{origin:APP},addEventListener:(name,handler)=>{handlers[name]=handler;},
+    registration:{showNotification:async(_title,options)=>{notification=options;}},
+    clients:{matchAll:async()=>[],openWindow:async url=>{destination=url;}}};
+  require('node:vm').runInNewContext(require('node:fs').readFileSync(require('node:path').join(__dirname,'../public/admin-push-sw.js'),'utf8'),{self,URL});
+  handlers.push({data:{json:()=>({type,reservationId:id})},waitUntil:promise=>{work=promise;}});await work;
+  handlers.notificationclick({notification:{close(){},data:notification.data},waitUntil:promise=>{work=promise;}});await work;
+  expect(destination).toBe(APP+'/admin/rezervace/'+id);
+  return destination;
+}
 const instructions=amount=>({...policy.bank,amount,currency:'CZK',message:number,
   qrPayload:`SPD*1.0*ACC:${policy.bank.iban}*AM:${amount.toFixed(2)}*CC:CZK*MSG:${number}*PT:IP`});
-async function fixture(page){
+async function fixture(page,{signedIn=true}={}){
   const state={role:'customer',paid:0,revision:0,report:null,entries:[],writes:[],errors:[],failReport:false};
   const customer={firstName:'Jana',lastName:'Nová',email:'fixture@example.test',phone:'+420777111222'};
   const item={productId:'111111111111111111111111',variantId:'222222222222222222222222',
@@ -25,7 +38,7 @@ async function fixture(page){
     state.entries.push({...input,recordedAt:'2030-10-20T10:00:00Z',recordedBy:'admin-fixture'});
   };
   page.on('pageerror',e=>state.errors.push(e.message));
-  await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('confirmation-fixture')})));
+  if(signedIn)await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('confirmation-fixture')})));
   await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
     const req=route.request(),p=new URL(req.url()).pathname;
     const json=(body,status=200)=>route.fulfill({status,json:body});
@@ -85,7 +98,7 @@ for(const width of [375,390,430,768,1024,1440]){
     expect(state.paid).toBe(0);expect(state.writes).toEqual([]);
     await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toHaveCount(0);
     await checkWidth(page);
-    state.role='admin';await page.goto(APP+'/admin/rezervace/'+id);
+    state.role='admin';await page.goto(await paymentPushDestination('reservation_payment_reported'));
     await expect(page.getByText(/Čeká na ověření AniraKids/)).toBeVisible();
     await page.getByText('Ukázat QR pro doplatek 600 Kč',{exact:true}).click();
     await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
@@ -119,7 +132,7 @@ for(const width of [375,390,430,768,1024,1440]){
     expect(state.paid).toBe(0);expect(state.writes).toEqual([]);
     await page.reload();await page.getByText('Platby a podrobnosti',{exact:true}).click();
     await expect(page.getByRole('button',{name:'Platba při převzetí je domluvena'})).toBeDisabled();
-    state.role='admin';await page.goto(APP+'/admin/rezervace/'+id);
+    state.role='admin';await page.goto(await paymentPushDestination('reservation_cash_selected'));
     await page.getByText('Ukázat QR pro doplatek 600 Kč',{exact:true}).click();
     await expect(page.getByRole('img',{name:'QR platba 600 Kč'})).toBeVisible();
     await expect(page.getByRole('button',{name:'Zapsat přijatou hotovost',exact:true})).toBeVisible();
@@ -157,4 +170,14 @@ test('failed customer report never presents a payment as confirmed',async({page}
   expect(state.paid).toBe(0);expect(state.report).toBeNull();
   await expect(page.getByText(/Poslední potvrzená platba/)).toHaveCount(0);
   await expect(page.getByLabel('Jak chcete zaplatit?')).toBeEnabled();
+});
+
+test('payment push detail preserves its destination while requiring admin login',async({page})=>{
+  const state=await fixture(page,{signedIn:false});state.role='admin';
+  const destination=await paymentPushDestination('reservation_payment_reported');
+  await page.goto(destination);
+  await expect(page.getByText('Pro přístup do administrace se přihlaste.')).toBeVisible();
+  await expect(page).toHaveURL(destination);
+  await expect(page.getByRole('button',{name:'Přihlásit se',exact:true})).toBeVisible();
+  expect(state.writes).toEqual([]);
 });
