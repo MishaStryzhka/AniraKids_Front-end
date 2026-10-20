@@ -126,10 +126,10 @@ async function fixture(page, role = 'administrator') {
       if (p === '/api/v2/partner/fittings') return json({ items: [] });
       if (p === '/api/v2/partner/balance')
         return json({
-          earned: 400,
+          earned: 600,
           collected: 0,
-          balance: 400,
-          lines: [{ kind: 'rental', number: 'AK-2026-BLAZE1', amount: 400 }],
+          balance: 600,
+          lines: [{ kind: 'rental', number: 'AK-2026-BLAZE1', amount: 400 },{kind:'fitting',number:'ZK-CREDITED',amount:0,reason:'studio_rental'},{kind:'fitting',number:'ZK-EARNED',amount:200,reason:'fitting'},{kind:'fitting',number:'ZK-PENDING',amount:0,reason:'fitting'}],
           settlements: [],
           revision: 0,
         });
@@ -179,6 +179,14 @@ for (const width of [390, 768, 1440])
       .getByRole('link', { name: 'Platby a vyúčtování', exact: true })
       .click();
     await expect(page.getByText('ANIRAK má předat Blaze')).toBeVisible();
+    for(const [number,gross,total] of [['ZK-CREDITED','200 Kč','0 Kč'],['ZK-EARNED','200 Kč','200 Kč'],['ZK-PENDING','0 Kč','0 Kč']]) {
+      const card=page.getByText(number,{exact:true}).locator('../..');
+      await expect(card.locator('dl > div').filter({hasText:'Odměna za zkoušku'}).locator('dd')).toHaveText(gross);
+      await expect(card.locator('dl > div').filter({hasText:'Celkem'}).locator('dd')).toHaveText(total);
+      if(number==='ZK-CREDITED')await expect(card.locator('dl > div').filter({hasText:'Odečet odměny'}).locator('dd')).toHaveText('−200 Kč');
+      else await expect(card.getByText(/Odečet odměny/)).toHaveCount(0);
+    }
+
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - innerWidth
