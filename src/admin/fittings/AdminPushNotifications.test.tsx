@@ -43,7 +43,7 @@ test('never asks notification permission on mount and subscribes only after user
   await waitFor(()=>expect(register).toHaveBeenCalledWith('/admin-push-sw.js'));
   await waitFor(()=>expect(getSubscription).toHaveBeenCalledTimes(1));
   await waitFor(()=>expect(subscribe).toHaveBeenCalledTimes(1));
-  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_created','fitting_payment_reported']}));
+  await waitFor(()=>expect(api).toHaveBeenCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_created','fitting_payment_reported','reservation_payment_reported','reservation_cash_selected']}));
   expect(subscribe).toHaveBeenCalledTimes(1);
   expect(await screen.findByRole('button',{name:'Vypnout upozornění'})).toBeEnabled();
 });
@@ -81,8 +81,29 @@ test('does not enable push when all topic subscriptions are off', async()=>{
   const checkbox=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});
   fireEvent.click(screen.getByRole('checkbox',{name:'Nová rezervace zkoušky'}));
   fireEvent.click(checkbox);
+  fireEvent.click(screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za pronájem'}));
+  fireEvent.click(screen.getByRole('checkbox',{name:'Klient zvolil platbu hotově při převzetí'}));
   expect(checkbox).not.toBeChecked();
   expect(screen.getByRole('button',{name:'Zapnout upozornění'})).toBeDisabled();
+  expect(permission).not.toHaveBeenCalled();
+});
+
+test('reservation transfer and cash subscriptions are independent and preserve saved fitting preferences',async()=>{
+  getRegistration.mockResolvedValue({pushManager:{getSubscription,subscribe}});
+  getSubscription.mockResolvedValue(pushSubscription);
+  api.mockImplementation((_token:string,path:string)=>Promise.resolve(path==='/admin/push/config'?{enabled:true,publicKey}:path==='/admin/push/preferences'?{subscribed:true,topics:['fitting_payment_reported']}:{ok:true}));
+  render(<AdminPushNotifications token="t"/>);
+  await screen.findByRole('button',{name:'Vypnout upozornění'});
+  const transfer=screen.getByRole('checkbox',{name:'Klient oznámil odeslání platby za pronájem'});
+  const cash=screen.getByRole('checkbox',{name:'Klient zvolil platbu hotově při převzetí'});
+  expect(transfer).not.toBeChecked();expect(cash).not.toBeChecked();
+  fireEvent.click(transfer);await waitFor(()=>expect(transfer).toBeChecked());
+  expect(api).toHaveBeenLastCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_payment_reported','reservation_payment_reported']});
+  fireEvent.click(cash);await waitFor(()=>expect(cash).toBeChecked());
+  expect(api).toHaveBeenLastCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_payment_reported','reservation_payment_reported','reservation_cash_selected']});
+  fireEvent.click(transfer);await waitFor(()=>expect(transfer).not.toBeChecked());
+  expect(cash).toBeChecked();
+  expect(api).toHaveBeenLastCalledWith('t','/admin/push/subscribe',{endpoint,keys,topics:['fitting_payment_reported','reservation_cash_selected']});
   expect(permission).not.toHaveBeenCalled();
 });
 

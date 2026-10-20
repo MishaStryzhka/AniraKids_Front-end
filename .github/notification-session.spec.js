@@ -40,6 +40,9 @@ for(const width of [375,390,430,768,1024,1440])test('notification settings prese
  await region.getByRole('button',{name:'Zkusit znovu'}).click();
  const checkbox=region.getByRole('checkbox',{name:'Klient oznámil odeslání platby za zkoušku'});await expect(checkbox).toBeChecked();
  const created=region.getByRole('checkbox',{name:'Nová rezervace zkoušky'});await expect(created).not.toBeChecked();
+ const transfer=region.getByRole('checkbox',{name:'Klient oznámil odeslání platby za pronájem'});
+ const cash=region.getByRole('checkbox',{name:'Klient zvolil platbu hotově při převzetí'});
+ await expect(transfer).not.toBeChecked();await expect(cash).not.toBeChecked();
  await created.click();await expect(created).toBeChecked();
  expect(state.topics).toEqual(['fitting_created','fitting_payment_reported']);
  state.saveFail=true;await checkbox.click();await expect(region).toContainText('Původní nastavení zůstalo zachované.');await expect(checkbox).toBeChecked();
@@ -48,9 +51,17 @@ for(const width of [375,390,430,768,1024,1440])test('notification settings prese
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('persist:auth')).token)).toBe(JSON.stringify('session-fixture'));
  expect(await page.evaluate(()=>window.permissionRequests)).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
- await page.screenshot({path:'test-evidence/notification-session/settings-'+width+'.png'});
  await page.reload();await page.locator('summary').filter({hasText:'Upozornění'}).click();await expect(checkbox).not.toBeChecked();await expect(created).toBeChecked();
  expect(state.topics).toEqual(['fitting_created']);
+ await cash.click();await expect(cash).toBeChecked();await expect(transfer).not.toBeChecked();
+ state.saveFail=true;await transfer.click();await expect(region).toContainText('Původní nastavení zůstalo zachované.');await expect(transfer).not.toBeChecked();await expect(cash).toBeChecked();
+ state.saveFail=false;await transfer.click();await expect(transfer).toBeChecked();
+ expect(state.topics).toEqual(['fitting_created','reservation_payment_reported','reservation_cash_selected']);
+ await page.reload();await page.locator('summary').filter({hasText:'Upozornění'}).click();await expect(transfer).toBeChecked();await expect(cash).toBeChecked();await expect(checkbox).not.toBeChecked();
+ expect(await page.evaluate(()=>window.permissionRequests)).toBe(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await region.scrollIntoViewIfNeeded();
+ await page.screenshot({path:'test-evidence/notification-session/settings-'+width+'.png'});
  expect(errors).toEqual([]);
 });
 test('cold admin session retries after 503 without losing persisted login',async({page})=>{
