@@ -180,6 +180,7 @@ function App() {
                 <Route index element={<AdminHomePage />} />
                 <Route path={adminRoutes.invoices} element={<AdminInvoicesPage/>}/>
                 <Route path={adminRoutes.fittings} element={<AdminFittingsPage/>}/>
+                <Route path={adminRoutes.fittingDetail} element={<AdminFittingsPage/>}/>
                 <Route path={adminRoutes.settings} element={<AdminSettingsPage />} />
                 <Route
                   path={adminRoutes.products}
