@@ -24,3 +24,10 @@ jest.mock('axios', () => ({
   default: { isCancel: () => false },
   AxiosError: class extends Error {},
 }));
+
+test('deposit receipt is unavailable without an outstanding deposit, but held funds remain refundable', () => {
+  const p = {...paymentLedgerFixture, depositRequired:0, depositHeld:0};
+  expect(visiblePaymentTypes(p, 'confirmed')).not.toContain('deposit_received');
+  expect(visiblePaymentTypes({...p, depositHeld:2000}, 'confirmed')).toContain('deposit_refunded');
+  expect(visiblePaymentTypes({...p, depositRequired:2000,depositHeld:2000}, 'confirmed')).not.toContain('deposit_received');
+});
