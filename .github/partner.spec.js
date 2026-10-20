@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const APP = 'http://127.0.0.1:4173';
 async function fixture(page, role = 'administrator') {
-  const state = { writes: [], errors: [], pending: false, failure: null, deposit: 0, fittingCredit: 0, rentalPaid: 800 };
+  const state = { writes: [], errors: [], pending: false, failure: null, deposit: 0, fittingCredit: 0, rentalPaid: 800, paymentStatus: null, source: 'partner', endDate: '2026-10-20', lastPayment: null, paymentReport: null };
   page.on('pageerror', e => state.errors.push(e.message));
   await page.addInitScript(() =>
     localStorage.setItem(
@@ -89,8 +89,9 @@ async function fixture(page, role = 'administrator') {
               id: '555555555555555555555555',
               number: 'AK-2026-BLAZE1',
               status: state.pending ? 'pending' : 'confirmed',
+              paymentStatus: state.paymentStatus ?? (state.rentalPaid >= 800 - state.fittingCredit && state.deposit === 0 ? 'paid' : 'unpaid'),
               startDate: '2026-10-20',
-              endDate: '2026-10-20',
+              endDate: state.endDate,
               rentalMode: 'studio',
               customer: {
                 firstName: 'Jana',
@@ -107,9 +108,10 @@ async function fixture(page, role = 'administrator') {
               ],
               subtotal: 800 - state.fittingCredit,
               deposit: state.deposit,
-              source: 'partner',
+              source: state.source,
               payment: {
                 rentalBalance: 800 - state.fittingCredit - state.rentalPaid,
+                lastPayment: state.lastPayment, paymentReport: state.paymentReport,
                 ...(role === 'administrator' ? {
                   revision: 1, depositHeld: 0, fittingCredit: state.fittingCredit,
                   advanceBalance: Math.max(0, 200 - state.fittingCredit - state.rentalPaid),
@@ -335,10 +337,11 @@ for (const width of [375, 390, 430, 768, 1024, 1440])
     await page.setViewportSize({width, height:1000});
     await page.goto(APP + '/partner/blaze?section=reservations');
     await expect(page.getByText('Cena pronájmu: 800 Kč', {exact:true})).toBeVisible();
-    await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
+    await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeHidden();
     await expect(page.getByText('Zbývá doplatit nájemné: 600 Kč', {exact:true})).toBeVisible();
-    // The credit and balance are visible before opening payment controls.
+    // Keep the balance visible and place the credited advance in payment details.
     await page.getByText('Platby a QR', {exact:true}).click();
+    await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
     const kind = page.getByLabel('Druh hotovostní platby');
     await expect(kind.locator('option[value="advance_received"]')).toHaveCount(0);
     await expect(kind).toHaveValue('rental_received');
@@ -378,8 +381,10 @@ test('Blaze includes other recorded rent without subtracting the fitting twice',
   state.rentalPaid = 200;
   await page.goto(APP + '/partner/blaze?section=reservations');
   await expect(page.getByText('Cena pronájmu: 800 Kč', {exact:true})).toBeVisible();
-  await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
+  await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeHidden();
   await expect(page.getByText('Zbývá doplatit nájemné: 400 Kč', {exact:true})).toBeVisible();
+  await page.getByText('Platby a QR', {exact:true}).click();
+  await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky', {exact:true})).toBeVisible();
   expect(state.errors).toEqual([]);
 });
 
@@ -398,4 +403,44 @@ test('Blaze still accepts an unpaid advance without a fitting credit', async ({p
   await expect.poll(() => state.writes.length).toBe(1);
   expect(state.writes[0].payment).toMatchObject({type:'advance_received', amount:200, method:'cash'});
   expect(state.errors).toEqual([]);
+});
+
+for(const width of [375,390,430,768,1024,1440])test('compact Blaze reservation card keeps payment details and actions '+width,async({page})=>{
+ const state=await fixture(page);state.fittingCredit=200;state.rentalPaid=600;
+ state.lastPayment={amount:600,method:'bank_transfer',recordedAt:'2026-10-20T20:50:51Z'};
+ await page.setViewportSize({width,height:1000});await page.goto(APP+'/partner/blaze?section=reservations');
+ await expect(page.getByText('Uhrazeno',{exact:true})).toBeVisible();
+ await expect(page.getByLabel('Zdroj klienta: Blaze',{exact:true})).toBeVisible();
+ await expect(page.getByText('Klient: Blaze',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('2026-10-20 · Studio',{exact:true})).toBeVisible();
+ await expect(page.getByText('Cena pronájmu: 800 Kč',{exact:true})).toBeVisible();
+ await expect(page.getByText('Zbývá doplatit nájemné: 0 Kč',{exact:true})).toBeVisible();
+ await expect(page.getByText(/Rezervační záloha \(součást nájemného\)/)).toBeHidden();
+ await expect(page.getByText(/Poslední potvrzená platba/)).toBeHidden();
+ await expect(page.getByRole('button',{name:'Připraveno',exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.screenshot({path:`test-evidence/partner/reservation-compact-${width}.png`,fullPage:true});
+ await page.getByText('Platby a QR',{exact:true}).click();
+ await expect(page.getByText('Rezervační záloha (součást nájemného): 200 Kč · uhrazeno ze zkoušky',{exact:true})).toBeVisible();
+ await expect(page.getByText(/Poslední potvrzená platba: 600\sKč · bankovním převodem/)).toBeVisible();
+ expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
+});
+test('Blaze paid badge follows confirmed server status, preserves date ranges and shows pending reports',async({page})=>{
+ const state=await fixture(page);state.endDate='2026-10-23';state.source='anirak';
+ await page.goto(APP+'/partner/blaze?section=reservations');
+ await expect(page.getByText('2026-10-20 – 2026-10-23 · Studio',{exact:true})).toBeVisible();
+ await expect(page.getByLabel('Zdroj klienta: ANIRAK',{exact:true})).toBeVisible();
+ for(const status of ['unpaid','refunded']){
+  state.paymentStatus=status;await page.reload();
+  await expect(page.getByText('Zbývá doplatit nájemné: 0 Kč',{exact:true})).toBeVisible();
+  await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
+ }
+ state.rentalPaid=0;state.paymentStatus='unpaid';
+ for(const kind of ['full','cash']){
+  state.paymentReport={kind,status:'pending',amount:800,reportedAt:'2026-10-20T20:50:51Z',pendingRental:800,pendingDeposit:0};
+  await page.reload();
+  await expect(page.getByRole('status').filter({hasText:kind==='cash'?'Klient zvolil platbu hotově':'Klient oznámil odeslání platby'})).toBeVisible();
+  await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
+ }
+ expect(state.errors).toEqual([]);expect(state.writes).toEqual([]);
 });
