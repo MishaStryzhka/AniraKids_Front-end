@@ -842,7 +842,6 @@ export function PartnerPage() {
                 <RewardHeader>
                   <strong>{l.number}</strong>
                   <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
-                  {l.kind !== 'fitting' ? <strong>{formatMoney(l.amount)}</strong> : null}
                 </RewardHeader>
                 {l.kind === 'fitting' ? <RewardBreakdown>
                   <div><dt>Odměna za zkoušku</dt><dd>{formatMoney(l.amount + (l.reason === 'studio_rental' ? 200 : 0))}</dd></div>
@@ -851,7 +850,13 @@ export function PartnerPage() {
                     <dd>−{formatMoney(200)}</dd>
                   </div> : null}
                   <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
-                </RewardBreakdown> : null}
+                </RewardBreakdown> : <RewardBreakdown>
+                  <div><dt>Cena pronájmu</dt><dd>{Number.isFinite(l.rentalPrice) ? formatMoney(l.rentalPrice) : '—'}</dd></div>
+                  <div><dt>Výpočet odměny Blaze
+                    {l.status && l.status !== 'returned' ? <small style={{display:'block'}}>{l.status === 'cancelled' ? 'Zrušená rezervace — odměna se nezapočítává.' : 'Odměna se započítá po vrácení oděvu.'}</small> : null}
+                  </dt><dd>{Number.isFinite(l.rewardBasis) && Number.isFinite(l.rewardRate) ? <>{formatMoney(l.rewardBasis)} × {l.rewardRate} %</> : '—'}</dd></div>
+                  <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
+                </RewardBreakdown>}
               </Card>
             ))}
             <h2>Předání peněz</h2>
