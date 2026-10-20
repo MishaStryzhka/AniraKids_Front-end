@@ -27,6 +27,7 @@ import {
 } from '../admin/calendar/calendarDates';
 import { PartnerCalendar } from './PartnerCalendar';
 import { rentalsOnDay, fittingsOnDay } from './partnerCalendarModel';
+import { PaymentConfirmationStatus } from '../storefront/payments/PaymentConfirmationStatus';
 const formatMoney = (amount: number) =>
   new Intl.NumberFormat('cs-CZ', {
     style: 'currency',
@@ -609,6 +610,7 @@ export function PartnerPage() {
                     </strong>
                   </p>
                   <p>Klient: {r.source === 'partner' ? 'Blaze' : 'ANIRAK'}</p>
+                  <PaymentConfirmationStatus {...r.payment} />
                   <Row>
                     {r.status === 'pending' && manager ? (
                       <Button
@@ -656,6 +658,9 @@ export function PartnerPage() {
                   {actionResult?.path === 'reservations/'+r.id ? <ActionFeedback result={actionResult}/> : null}
                   <details>
                     <summary>Platby a QR</summary>
+                    {r.payment.paymentReport?.kind === 'cash' && r.payment.paymentReport.status === 'pending' ? (
+                      <p>Domluvenou hotovost lze nahradit QR platbou na aktuální doplatek.</p>
+                    ) : null}
                     {(
                       r.instructions.fullPaymentInstructions ||
                       r.instructions.paymentInstructions

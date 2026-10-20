@@ -30,6 +30,8 @@ import {
   paymentTypeLabels,
 } from './paymentModel';
 import type { useReservationPayments } from './useReservationPayments';
+import { PaymentConfirmationStatus } from '../../storefront/payments/PaymentConfirmationStatus';
+import { PaymentQr } from '../../storefront/payments/PaymentInformation';
 const Stack = styled.div`
   display: grid;
   gap: ${t.space[3]};
@@ -222,6 +224,36 @@ export function ReservationPaymentLedger({
       </ReservationActions> : null}
       {payments ? (
         <>
+          <PaymentConfirmationStatus {...payments} />
+          {payments.paymentReport?.status === 'pending' ? (
+            <Stack>
+              <ReservationCopy>
+                {payments.paymentReport.kind === 'cash'
+                  ? 'Hotovost zapište až po skutečném převzetí peněz.'
+                  : 'Nejdříve ověřte příjem na bankovním účtu, potom platbu zapište.'}
+                {payments.paymentReport.pendingRental > 0 && payments.paymentReport.pendingDeposit > 0
+                  ? ' Nájemné a vratnou kauci zapište samostatně.' : ''}
+              </ReservationCopy>
+              {!open ? <Button disabled={blocked} onClick={() => {
+                const report = payments.paymentReport!;
+                const rental = Math.min(report.pendingRental,payments.rentalBalance);
+                setDraft({...emptyPaymentDraft(),
+                  type:rental > 0 ? (report.kind === 'advance' && payments.advanceBalance > 0 ? 'advance_received' : 'rental_received') : 'deposit_received',
+                  amount:String(rental > 0 ? rental : Math.max(0,payments.depositRequired-payments.depositHeld)),
+                  method:report.kind === 'cash' ? 'cash' : 'bank_transfer',
+                });
+                setErrors({}); setOpen(true);
+                requestAnimationFrame(() => {
+                  if (ownsView()) form.current?.querySelector<HTMLElement>('[name="type"]')?.focus();
+                });
+              }}>{payments.paymentReport.kind === 'cash' ? 'Zapsat přijatou hotovost' : 'Zapsat ověřenou platbu'}</Button> : null}
+            </Stack>
+          ) : null}
+          {payments.fullPaymentInstructions ? <Disclosure>
+            <summary>Ukázat QR pro doplatek {money(payments.fullPaymentInstructions.amount)}</summary>
+            <ReservationCopy>QR zahrnuje aktuální doplatek. Je dostupný i při domluvené platbě hotově.</ReservationCopy>
+            <PaymentQr instructions={payments.fullPaymentInstructions} />
+          </Disclosure> : null}
           {empty && !state.loading && !state.error && !state.attempt && !state.conflict && !state.storageBlocked ? <ReservationCopy>Zatím nebyla zaznamenána žádná platba.</ReservationCopy> : null}
           {!payments.legacyUnreconciled && !empty ? (
             <Summary>

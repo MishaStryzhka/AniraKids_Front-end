@@ -120,7 +120,7 @@ export function AccountReservationsPage() {
         {receiptItems(receipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
         <Copy>{modeLabel(receipt.rentalMode)}</Copy>
         <Copy>{formatCalendarDay(receipt.startDate)} – {formatCalendarDay(receipt.endDate)}</Copy>
-        <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} /></details>
+        <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} access={{kind:'account',token}} /></details>
       </Panel>)}
       {(result.data.total > 20 || page > 1) && <Actions aria-label="Stránkování rezervací"><Button variant="secondary" disabled={page === 1} onClick={() => setPage(value => value - 1)}>Předchozí</Button><Copy>Strana {page}</Copy><Button variant="secondary" disabled={page * 20 >= result.data.total} onClick={() => setPage(value => value + 1)}>Další</Button></Actions>}
       {hasGuestReservation ? <details>

@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { SelectField } from '../../design-system/components/SelectField';
 import styled from 'styled-components';
 import type { BookingPolicy, PaymentInstructions } from '../api/bookingPolicy';
-import type { Receipt } from '../api/publicApi';
+import { getAccountReservationStatus, getReservationStatus, reportReservationPayment, type Receipt, type ReservationPaymentAccess } from '../api/publicApi';
+import { Button } from '../../design-system/components/Button';
+import { PaymentConfirmationStatus } from './PaymentConfirmationStatus';
 import { Copy, Facts, Heading, Stack } from '../storefrontStyles';
 import { formatMoney } from '../booking/bookingModel';
 import { RentalPriceRows } from './RentalPriceRows';
@@ -79,7 +81,7 @@ export function BookingPaymentExplanation({
     </Stack>
   );
 }
-function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
+export function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
   const [image, setImage] = useState<{ payload: string; url: string } | null>(
     null
   );
@@ -110,13 +112,48 @@ function PaymentQr({ instructions }: { instructions: PaymentInstructions }) {
     <Copy>Pro platbu můžete použít níže uvedené bankovní údaje.</Copy>
   );
 }
-export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: { receipt: Receipt; showRentalPrice?: boolean }) {
+export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = true, access, onUpdated }: {
+  receipt: Receipt; showRentalPrice?: boolean; access?: ReservationPaymentAccess; onUpdated?: () => void;
+}) {
+  const [updated, setUpdated] = useState<{source:Receipt;token?:string;receipt:Receipt}|null>(null);
+  const receipt = updated?.source === source && updated.token === access?.token ? updated.receipt : source;
+  const request = useRef<AbortController|null>(null);
+  const attempt = useRef<{operationId:string;kind:'advance'|'full'|'cash';amount:number}|null>(null);
+  const [busy,setBusy] = useState(false), [error,setError] = useState('');
+  useEffect(() => {
+    setBusy(false); setError(''); attempt.current = null;
+    return () => {request.current?.abort();request.current = null;};
+  }, [source.reservationNumber,access?.token]);
+  const update = async (kind?:'advance'|'full'|'cash', amount?:number) => {
+    if (!access || request.current) return;
+    const controller = new AbortController(); request.current = controller;
+    setBusy(true); setError('');
+    try {
+      let next: Receipt;
+      if (kind && amount) {
+        if (attempt.current?.kind !== kind || attempt.current.amount !== amount)
+          attempt.current = {operationId:crypto.randomUUID(),kind,amount};
+        next = await reportReservationPayment(receipt.reservationNumber,access,attempt.current,controller.signal);
+      } else {
+        next = await (access.kind === 'guest' ? getReservationStatus : getAccountReservationStatus)(
+          receipt.reservationNumber,access.token,controller.signal);
+      }
+      if (!controller.signal.aborted) {
+        setUpdated({source,token:access.token,receipt:next});
+        onUpdated?.();
+      }
+    } catch {
+      if (!controller.signal.aborted) setError('Výsledek se nepodařilo ověřit. Aktualizujte stav platby před dalším pokusem. Peníze znovu neposílejte.');
+    } finally {
+      if (request.current === controller) {request.current = null;setBusy(false);}
+    }
+  };
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
   useEffect(() => {
-    setChoice('advance');
-  }, [receipt.reservationNumber, payment?.advanceBalance, payment?.rentalBalance, payment?.depositHeld]);
+    setChoice(payment?.paymentReport?.kind === 'cash' && payment.paymentReport.status === 'pending' ? 'cash' : 'advance');
+  }, [receipt.reservationNumber, payment?.advanceBalance, payment?.rentalBalance, payment?.depositHeld, payment?.paymentReport?.kind, payment?.paymentReport?.status]);
   useEffect(() => {
     if (!receipt.expiresAt) return;
     const delay = Date.parse(receipt.expiresAt) - Date.now();
@@ -143,6 +180,8 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
   const remaining = payment.rentalBalance + payment.depositRequired - payment.depositHeld;
+  const pendingTransfer = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind !== 'cash';
+  const cashPlanned = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind === 'cash';
   return (
     <Stack>
       <Heading>Platba rezervace</Heading>
@@ -169,8 +208,10 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
           <dd>{formatMoney(payment.depositHeld)}</dd>
         </div> : null}
       </PaymentFacts>
-      {payable && (advanceInstructions || fullInstructions) ? (
+      <PaymentConfirmationStatus {...payment} />
+      {payable && !pendingTransfer && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
+          disabled={busy}
           onChange={event => setChoice(event.target.value)}>
           {advanceInstructions ? <option value="advance">
             Povinná záloha – {formatMoney(advanceInstructions.amount)}
@@ -189,6 +230,8 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
           Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
           nás s číslem rezervace; ověříme platbu a dostupnost termínu.
         </Copy>
+      ) : pendingTransfer ? (
+        <Copy>Platbu ověří AniraKids. Oznámení samo o sobě neznamená přijetí peněz ani potvrzení rezervace.</Copy>
       ) : cash ? (
         <Copy role="status">
           Zbývá doplatit {formatMoney(remaining)} hotově při převzetí{hasDeposit ? `: nájemné ${formatMoney(payment.rentalBalance)} a vratná kauce ${formatMoney(payment.depositRequired - payment.depositHeld)}` : ''}.
@@ -254,6 +297,15 @@ export function ReceiptPaymentInformation({ receipt, showRentalPrice = true }: {
           Neodesílejte platbu podle dřívějšího QR kódu.
         </Copy>
       )}
+      {access && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
+        <Button disabled={busy || (cash && cashPlanned)} loading={busy}
+          onClick={() => void update(cash ? 'cash' : selected === 'advance' ? 'advance' : 'full',
+            (cash ? fullInstructions : instructions)!.amount)}>
+          {cash ? (cashPlanned ? 'Platba při převzetí je domluvena' : 'Zaplatím hotově při převzetí') : 'Platbu jsem odeslal/a'}
+        </Button>
+      ) : null}
+      {error ? <Copy role="alert">{error}</Copy> : null}
+      {access ? <Button variant="secondary" disabled={busy} onClick={() => void update()}>Aktualizovat stav platby</Button> : null}
     </Stack>
   );
 }
