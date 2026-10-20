@@ -37,6 +37,7 @@ async function fixture(page, role = 'administrator') {
         });
       if (p === '/api/v2/admin/access')
         return json({ error: { code: 'ADMIN_FORBIDDEN' } }, 403);
+      if (p === '/api/v2/partner/billing') return json({settings:null,items:[],cronConfigured:true});
       if (p === '/api/v2/partner/access')
         return json({
           userId: '111111111111111111111111',
@@ -462,4 +463,35 @@ test('Blaze paid badge follows confirmed server status, preserves date ranges an
   await expect(page.getByText('Uhrazeno',{exact:true})).toHaveCount(0);
  }
  expect(state.errors).toEqual([]);expect(state.writes).toEqual([]);
+});
+
+test('monthly invoice settings and empty report', async ({page})=>{
+ const state=await fixture(page);
+ await page.goto(APP+'/partner/blaze?section=balance');
+ await expect(page.getByRole('heading',{name:'Měsíční faktury Blaze → ANIRAK'})).toBeVisible();
+ await expect(page.getByText('Automatické vystavování vypnuto')).toBeVisible();
+ await page.getByText('Nastavení fakturace',{exact:true}).click();
+ await expect(page.getByLabel('Obchodní název dodavatele Blaze')).toHaveValue('');
+ await expect(page.getByLabel('Režim DPH dodavatele')).toHaveValue('');
+ await expect(page.getByRole('button',{name:'Uložit nastavení fakturace'})).toBeVisible();
+ await expect(page.getByText('Zatím nebylo uzavřeno žádné období.')).toBeVisible();
+ expect(state.errors).toEqual([]);
+});
+
+test('monthly billing saves only confirmed supplier fields and downloads issued PDF',async({page})=>{
+ const state=await fixture(page);let settings=null,saved;
+ await page.route('**/api/v2/partner/billing',route=>route.fulfill({json:{settings,cronConfigured:true,items:[{_id:'111111111111111111111111',number:'BLAZE-2026-0001',period:'2026-09',status:'issued',snapshot:{total:600,dueDate:'2026-10-14',lines:[{description:'Odměna — zkouška ZK-TEST',amount:600}]},email:{status:'sent'}}]}}));
+ await page.route('**/api/v2/partner/billing-settings',route=>{saved=route.request().postDataJSON();settings={...saved,revision:1,trackingStartedAt:'2026-10-20T10:00:00Z'};return route.fulfill({json:{ok:true}});});
+ await page.route('**/api/v2/partner/billing-pdf?*',route=>route.fulfill({contentType:'application/pdf',body:'%PDF-1.4\nfixture'}));
+ await page.goto(APP+'/partner/blaze?section=balance');
+ await page.getByText('Nastavení fakturace',{exact:true}).click();
+ for(const [label,value] of [['Obchodní název dodavatele Blaze','Blaze Fixture'],['Sídlo dodavatele','Testovací 1, Praha'],['IČO dodavatele','12345678'],['IBAN (CZ)','CZ6508000000192000145399'],['Číslo účtu','19-2000145399/0800'],['E-mail odběratele ANIRAK','anirak@example.test']])await page.getByLabel(label,{exact:true}).fill(value);
+ await page.getByLabel('Režim DPH dodavatele').selectOption('no');
+ await page.getByLabel('Potvrzuji správnost údajů',{exact:false}).check();
+ await page.getByLabel('Zapnout automatické vystavování',{exact:false}).check();
+ await page.getByRole('button',{name:'Uložit nastavení fakturace'}).click();
+ await expect(page.getByText('Automatické vystavování zapnuto',{exact:true})).toBeVisible();
+ expect(saved.name).toBe('Blaze Fixture');expect(saved.consentConfirmed).toBe(true);expect(saved.vatRate).toBe(0);expect(saved.revision).toBe(0);expect(saved.trackingStartedAt).toBeUndefined();
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Stáhnout PDF'}).click();expect((await download).suggestedFilename()).toBe('BLAZE-2026-0001.pdf');
+ expect(state.errors).toEqual([]);
 });

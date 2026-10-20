@@ -1,3 +1,4 @@
+import { PartnerInvoices } from './PartnerInvoices';
 import {NewReservation,NewFitting} from './BookingForms';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -840,6 +841,7 @@ export function PartnerPage() {
                 </RewardBreakdown>}
               </Card>
             ))}
+            <PartnerInvoices token={token} />
             <h2>Předání peněz</h2>
             {data.settlements.map((s: any) => (
               <Card key={s.operationId}>

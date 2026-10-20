@@ -41,6 +41,17 @@ export async function partnerApi(
     throw new PartnerApiError(
       (
         {
+          BILLING_START_PERIOD_PAST: 'První období nesmí být před aktuálním měsícem.',
+          BILLING_CHANGED: 'Nastavení změnil jiný uživatel. Obnovte faktury.',
+          BILLING_SERIES_LOCKED: 'Po zahájení evidence nelze měnit řadu ani první období.',
+          BILLING_PERIOD_OPEN: 'Tento měsíc ještě neskončil.',
+          BILLING_NOT_ENABLED: 'Nejprve nastavte a zapněte fakturaci.',
+          BILLING_TRACKING_ERROR: 'Evidence odměn obsahuje chybu. Kontaktujte správce.',
+          BILLING_BEFORE_START: 'Toto období předchází zahájení evidence.',
+          BILLING_PREVIOUS_PERIOD_MISSING: 'Nejprve uzavřete předchozí období.',
+          BILLING_EMAIL_CHANGED: 'Stav odeslání se změnil. Obnovte faktury.',
+          BILLING_EMAIL_IN_PROGRESS: 'Odesílání ještě probíhá. Zkontrolujte stav za 10 minut.',
+          BILLING_EMAIL_UNCERTAIN: 'Doručení není potvrzeno. Před opakováním zkontrolujte poštu příjemce.',
           UNAUTHORIZED: 'Přihlaste se ke svému účtu.',
           FORBIDDEN: 'K této funkci nemáte přístup.',
           USER_NOT_FOUND:
@@ -64,4 +75,11 @@ export async function partnerApi(
     );
   }
   return data;
+}
+
+export async function downloadPartnerInvoice(token:string,id:string,number:string){
+ const base=getAdminApiBaseUrl();if(!base)throw new Error('Připojení není nastavené.');
+ const response=await fetch(base+'/partner/billing-pdf?id='+encodeURIComponent(id),{cache:'no-store',headers:{Authorization:'Bearer '+token}});
+ if(!response.ok)throw new Error('Fakturu se nepodařilo stáhnout. Obnovte přehled.');
+ const blob=await response.blob();const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=number+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
