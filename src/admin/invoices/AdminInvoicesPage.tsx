@@ -37,7 +37,8 @@ export function AdminInvoicesPage(){
  const [intent,setIntent]=useState<{action:'send'|'correct';item:Invoice}|null>(null),[reason,setReason]=useState('');const lock=useRef(false);
  const selectedPeriod=annual?period.slice(0,4):period;
  const query=normalizeSearch(search.trim());
- const visibleItems=query?items.filter(i=>normalizeSearch([i.number,i.sourceNumber,i.snapshot.buyer.name,i.snapshot.buyer.email,i.snapshot.buyer.ico].join(' ')).includes(query)):items;
+ const newestFirst=useMemo(()=>[...items].sort((a,b)=>Date.parse(b.issuedAt)-Date.parse(a.issuedAt)||b.number.localeCompare(a.number,'cs-CZ',{numeric:true})),[items]);
+ const visibleItems=query?newestFirst.filter(i=>normalizeSearch([i.number,i.sourceNumber,i.snapshot.buyer.name,i.snapshot.buyer.email,i.snapshot.buyer.ico].join(' ')).includes(query)):newestFirst;
  const filterCount=Number(annual||period!==pragueToday().slice(0,7));
  const toolbar=useMemo(()=><ListToolbar ref={toolbarRef}>
   <IconButton aria-label="Hledat faktury" title="Hledat faktury" aria-expanded={searchOpen} aria-controls="invoice-search" icon={<Search aria-hidden="true"/>} onClick={()=>setSearchOpen(v=>!v)}/>

@@ -4,8 +4,8 @@ const APP='http://127.0.0.1:4173';
 async function fixture(page){
  const state={reads:[],exports:[],writes:[],errors:[],processed:0};
  const snapshot={buyer:{name:'Žofie Černá',address:'Praha',email:'zofie@example.test',ico:''},lines:[{description:'Zkouška',amount:200}],total:200,paid:200,balance:0,deposit:0,serviceDate:'2030-04-10'};
- const items=[{_id:'i1',number:'2030-0001',sourceType:'fitting',sourceNumber:'ZK-FIRST',issuedAt:'2030-04-10',snapshot},
-  {_id:'i2',number:'2030-0002',sourceType:'reservation',sourceNumber:'AK-SECOND',issuedAt:'2030-04-11',snapshot:{...snapshot,buyer:{...snapshot.buyer,name:'Jana Nová',email:'jana@example.test'}}}];
+ const items=[{_id:'i1',number:'2030-0001',sourceType:'fitting',sourceNumber:'ZK-FIRST',issuedAt:'2030-04-10T08:00:00Z',snapshot},
+  {_id:'i2',number:'2030-0002',sourceType:'reservation',sourceNumber:'AK-SECOND',issuedAt:'2030-04-10T09:00:00Z',snapshot:{...snapshot,buyer:{...snapshot.buyer,name:'Jana Nová',email:'jana@example.test'}}}];
  await page.clock.setFixedTime(new Date('2030-04-15T12:00:00Z'));
  page.on('pageerror',e=>state.errors.push(e.message));
  await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('fixture-admin')})));
@@ -17,7 +17,7 @@ async function fixture(page){
   if(p.endsWith('/admin/access'))return json({owner:true,permissions:[]});
   if(p.endsWith('/invoices/pending'))return json({items:[]});
   if(p.endsWith('/invoices/export')){state.exports.push(url.searchParams.get('period'));return route.fulfill({contentType:'application/zip',body:'fixture ZIP'});}
-  if(p.endsWith('/invoices/process')){state.processed++;return json({status:'issued',number:'2030-0001',emailStatus:'sent'});}
+  if(p.endsWith('/invoices/process')){state.processed++;items.push({_id:'i3',number:'2030-0003',sourceType:'fitting',sourceNumber:'ZK-NEW',issuedAt:'2030-04-15T12:00:00Z',snapshot});return json({status:'issued',number:'2030-0003',emailStatus:'sent'});}
   if(p.endsWith('/invoices')){state.reads.push(url.searchParams.get('period'));return json({items});}
   return route.abort();
  });
@@ -27,6 +27,7 @@ for(const width of [375,390,430,768,1024,1440])test(`compact invoice toolbar, se
  await page.setViewportSize({width,height:1000});const state=await fixture(page);
  await page.goto(APP+'/admin/faktury');
  await expect(page.getByText('Faktura 2030-0001',{exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/^Faktura /})).toHaveText(['Faktura 2030-0002','Faktura 2030-0001']);
  await expect(page.getByLabel('Měsíc vystavení')).toBeHidden();
  await expect(page.getByLabel('Číslo zkoušky / rezervace')).toHaveCount(0);
  const refresh=page.getByRole('button',{name:'Obnovit faktury',exact:true});
@@ -46,6 +47,7 @@ for(const width of [375,390,430,768,1024,1440])test(`compact invoice toolbar, se
  await page.getByLabel('Celý rok').check();await expect.poll(()=>state.reads.at(-1)).toBe('2029');
  await page.getByRole('button',{name:'Filtry (1)',exact:true}).click();await expect(page.getByLabel('Měsíc vystavení')).toBeHidden();await expect(page.getByText('Období: 2029',{exact:true})).toBeVisible();
  const count=state.reads.length;await refresh.click();await expect.poll(()=>state.reads.length).toBe(count+1);expect(state.reads.at(-1)).toBe('2029');
+ await expect(page.getByRole('heading',{name:/^Faktura /})).toHaveText(['Faktura 2030-0002','Faktura 2030-0001']);
  const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Export pro účetní (ZIP)'}).click();expect((await downloaded).suggestedFilename()).toBe('faktury-2029.zip');expect(state.exports).toEqual(['2029']);
  const create=page.getByRole('button',{name:'Nová faktura',exact:true});await create.click();
  const dialog=page.getByRole('dialog',{name:'Nová faktura',exact:true});await expect(dialog).toBeVisible();
@@ -64,4 +66,5 @@ test('new invoice switches to automatic confirmation without stacked dialogs or 
  await page.getByRole('button',{name:'Zpět',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(1);await expect(page.getByLabel('Číslo zkoušky / rezervace')).toHaveValue('ZK-FIRST');
  await page.getByRole('button',{name:'Vystavit a odeslat z přijaté platby'}).click();await page.getByRole('button',{name:'Potvrdit vystavení a odeslání'}).click();
  await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('button',{name:'Nová faktura',exact:true})).toBeFocused();expect(state.processed).toBe(1);expect(state.errors).toEqual([]);
+ await expect(page.getByRole('heading',{name:/^Faktura /})).toHaveText(['Faktura 2030-0003','Faktura 2030-0002','Faktura 2030-0001']);
 });
