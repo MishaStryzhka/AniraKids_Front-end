@@ -1,6 +1,11 @@
+import {Search,SlidersHorizontal,Plus,ArrowUpDown} from 'lucide-react';
+import {IconButton} from '../../design-system/components/IconButton';
+import {useAdminPageAction} from '../layout/AdminLayout';
+import {ListToolbar,CountButton,FilterCount} from '../bookings/listToolbar';
+import {AdminBookingDialog} from '../bookings/AdminBookingDialog';
 import {invoiceAutomationMessage} from '../invoices/automationStatus';
 import {useSearchParams} from 'react-router-dom';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '../../design-system/components/Button';
 import {Input} from '../../design-system/components/Input';
@@ -15,6 +20,7 @@ import {Panel,Stack,Heading,Copy,Actions,RouteLink} from '../../storefront/store
 import {designTokens as t} from '../../design-system/tokens/designTokens';
 const Page=styled.div`display:grid;gap:24px;min-width:0;`;
 const Toolbar=styled(Actions)`align-items:flex-end;>button,>a{min-height:44px;}@media(max-width:767px){align-items:stretch;}`;
+const SettingsRow=styled.div`display:flex;align-items:center;justify-content:space-between;gap:12px;>a{width:auto;} >button{flex-shrink:0;}`;
 const Badge=styled.span`border-radius:20px;background:${t.color.bg.subtle};color:${t.color.text.secondary};font-size:13px;padding:5px 10px;`;
 const Card=styled(Panel)`overflow-wrap:anywhere;`;
 const labels:Record<string,string>={confirm:'Potvrdit přijetí 200 Kč',complete:'Označit jako proběhlou',cancel:'Zrušit zkoušku',refund:'Zaznamenat vrácení 200 Kč','late-payment':'Zaznamenat pozdní platbu 200 Kč',reschedule:'Přesunout termín',credit:'Započíst platbu 200 Kč'};
@@ -23,6 +29,9 @@ export function AdminFittingsPage(){
  const requestedDay=search.get('date')??'';
  const initialDay=/^20\d{2}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(requestedDay)?requestedDay:'';
  const access=useAdminPermissions();
+ const [searchOpen,setSearchOpen]=useState(false),[filtersOpen,setFiltersOpen]=useState(false),[creating,setCreating]=useState(false),[query,setQuery]=useState(''),[descending,setDescending]=useState(false);
+ const searchInput=useRef<HTMLInputElement>(null);
+ useEffect(()=>{if(searchOpen)searchInput.current?.focus();},[searchOpen]);
  const {token}=useAuth(),{handleRequestError}=useAdminAccess();
  const today=pragueToday(),[month,setMonth]=useState((initialDay||today).slice(0,7)),[day,setDay]=useState(initialDay),[filter,setFilter]=useState('all');
  const [items,setItems]=useState<AdminFitting[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false),[success,setSuccess]=useState('');
@@ -33,8 +42,26 @@ export function AdminFittingsPage(){
  useEffect(()=>{if(intent?.action!=='reschedule')return;const c=new AbortController();setSlots(null);setNewTime('');fittingApi<Slots>('/fittings/slots?date='+newDate,{signal:c.signal}).then(setSlots).catch(e=>{if(!c.signal.aborted)setError(fittingError(e));});return()=>c.abort();},[newDate,intent?.action]);
  async function act(){if(!intent||lock.current)return;lock.current=true;setBusy(true);setError('');setSuccess('');try{const result=await fittingAdmin<{invoiceAutomation?:unknown}>(token??'',`/admin/fittings/${intent.item.id}/actions`,{action:intent.action,revision:intent.item.revision,...(intent.action==='reschedule'?{date:newDate,time:newTime}:{}),...(intent.action==='credit'?{reservationNumber}:{} )});if(active.current){setSuccess('Změna byla uložena.'+invoiceAutomationMessage(result.invoiceAutomation));setIntent(null);setRevision(x=>x+1);}}
  catch(e){if(active.current&&!handleRequestError(e))setError(fittingError(e));}finally{lock.current=false;if(active.current)setBusy(false);}}
- const visible=items.filter(i=>filter==='all'||(filter==='review'?i.status==='review':filter==='refund'?(i.status==='cancelled'||i.status==='expired')&&i.paymentStatus==='paid':i.status===filter));
- return <Page><Toolbar><Input label="Měsíc" type="month" value={month} disabled={busy} onChange={e=>{if(e.target.value){setMonth(e.target.value);setDay('');}}}/><Input label="Den (volitelné)" type="date" value={day} disabled={busy} onChange={e=>{setDay(e.target.value);if(e.target.value)setMonth(e.target.value.slice(0,7));}}/><SelectField label="Stav zkoušky" value={filter} onChange={e=>setFilter(e.target.value)} ><option value="all">Vše</option><option value="pending">Čeká na platbu</option><option value="review">Ověřit platbu</option><option value="confirmed">Potvrzené</option><option value="completed">Proběhlé</option><option value="refund">Zrušené s přijatou platbou</option></SelectField>{access.owner||access.permissions.includes('settings')?<RouteLink to="/admin/nastaveni#zkousky">Nastavení zkoušek</RouteLink>:null}</Toolbar>
+ const normalize=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs-CZ');
+ const visible=items.filter(i=>filter==='all'||(filter==='review'?i.status==='review':filter==='refund'?(i.status==='cancelled'||i.status==='expired')&&i.paymentStatus==='paid':i.status===filter)).filter(i=>normalize([i.number,i.customer.name,i.customer.email,i.customer.phone].join(' ')).includes(normalize(query.trim()))).sort((a,b)=>(a.date+'T'+a.time).localeCompare(b.date+'T'+b.time)*(descending?-1:1));
+ const filterCount=Number(month!==today.slice(0,7))+Number(!!day)+Number(filter!=='all');
+ const toolbar=useMemo(()=><ListToolbar>
+  <IconButton aria-label="Hledat zkoušky" title="Hledat zkoušky" aria-expanded={searchOpen} aria-controls="fitting-search" icon={<Search size={22}/>} onClick={()=>setSearchOpen(v=>!v)}/>
+  <CountButton aria-label={filterCount?`Filtry (${filterCount})`:'Filtry'} title="Filtry" aria-expanded={filtersOpen} aria-controls="fitting-filters" icon={<><SlidersHorizontal size={22}/>{filterCount?<FilterCount>{filterCount}</FilterCount>:null}</>} onClick={()=>setFiltersOpen(v=>!v)}/>
+  <Button variant="secondary" disabled={busy} onClick={()=>setCreating(true)}><Plus size={20} aria-hidden="true"/> Nová zkouška</Button>
+ </ListToolbar>,[searchOpen,filtersOpen,filterCount,busy]);
+ useAdminPageAction(toolbar);
+ return <Page>
+ {searchOpen?<div id="fitting-search"><Input ref={searchInput} label="Hledat zkoušky ve vybraném období" type="search" placeholder="Číslo zkoušky, jméno, telefon nebo e-mail" value={query} maxLength={200} onChange={e=>setQuery(e.target.value)}/></div>:null}
+ {query?<Copy>Hledání: {query} <Button variant="secondary" onClick={()=>setQuery('')}>Zrušit hledání</Button></Copy>:null}
+ {filtersOpen?<Panel id="fitting-filters"><Toolbar><Input label="Měsíc" type="month" value={month} disabled={busy} onChange={e=>{if(e.target.value){setMonth(e.target.value);setDay('');}}}/><Input label="Den (volitelné)" type="date" value={day} disabled={busy} onChange={e=>{setDay(e.target.value);if(e.target.value)setMonth(e.target.value.slice(0,7));}}/><SelectField label="Stav zkoušky" value={filter} onChange={e=>setFilter(e.target.value)} ><option value="all">Vše</option><option value="pending">Čeká na platbu</option><option value="review">Ověřit platbu</option><option value="confirmed">Potvrzené</option><option value="completed">Proběhlé</option><option value="refund">Zrušené s přijatou platbou</option></SelectField><Button variant="secondary" onClick={()=>{setMonth(today.slice(0,7));setDay('');setFilter('all');}}>Vyčistit filtry</Button></Toolbar></Panel>:null}
+ <SettingsRow>
+  {access.owner||access.permissions.includes('settings')?<RouteLink to="/admin/nastaveni#zkousky">Nastavení zkoušek</RouteLink>:<span/>}
+  <IconButton aria-label={descending?'Řazení: od nejpozdějších. Seřadit od nejbližších':'Řazení: od nejbližších. Seřadit od nejpozdějších'} title={descending?'Od nejpozdějších':'Od nejbližších'} aria-pressed={descending} icon={<ArrowUpDown size={22}/>} onClick={()=>setDescending(v=>!v)}/>
+ </SettingsRow>
+ <Copy>Období: {day?fittingDateLabel(day):new Intl.DateTimeFormat('cs-CZ',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))} · Počet zkoušek: {visible.length}</Copy>
+ {creating?<AdminBookingDialog kind="fitting" onClose={()=>setCreating(false)} onCreated={result=>{setCreating(false);setMonth(result.date.slice(0,7));setDay(result.date);setFilter('all');setQuery('');setRevision(v=>v+1);setSuccess('Zkouška byla vytvořena.');}}/>:null}
+
 
 
  {error&&!intent?<Copy role="alert">{error}</Copy>:null}{success?<Copy role="status">{success}</Copy>:null}{loading?<Copy role="status">Načítání zkoušek…</Copy>:null}{truncated?<Copy role="alert">Přehled je příliš rozsáhlý. Vyberte konkrétní den pro úplný seznam.</Copy>:null}
