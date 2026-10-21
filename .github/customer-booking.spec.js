@@ -730,8 +730,8 @@ for (const guest of [true,false]) test('fitting discount customer redemption '+(
  const state=await setup(page,guest);state.discount=true;
  if(guest){await page.goto(APP+'/saty#fitting=ZK-ABCDEF123456&token='+ 'a'.repeat(64));await expect(page).toHaveURL(APP+'/saty');}
  await begin(page);await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
- await page.getByRole('button',{name:'Započíst platbu',exact:true}).click();
- await expect(page.getByText('Započtena platba 200 Kč · ZK-ABCDEF123456')).toBeVisible();
+ await page.getByRole('button',{name:'Uplatnit slevu',exact:true}).click();
+ await expect(page.getByText('Uplatněna sleva 200 Kč · ZK-ABCDEF123456')).toBeVisible();
  await contact(page);await capture(page,'fitting-discount-'+(guest?'link':'account'));
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
