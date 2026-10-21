@@ -20,5 +20,48 @@ const questions=[
  ['Co když potřebuji změnit nebo zrušit rezervaci?','Napište nám co nejdříve a uveďte číslo rezervace. Dostupnost jiného termínu ověříme. Případný storno poplatek posuzujeme individuálně podle podmínek rezervace.'],
 ];
 export function FaqPage(){return <Page><Title>Časté dotazy</Title><Questions>{questions.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</Questions><Actions><RouteLink to={routes.rental}>Pronájem a platby</RouteLink><RouteLink to={routes.contact}>Mám jiný dotaz</RouteLink></Actions></Page>;}
-export function ContactPage(){return <Page><Title>Kontakt</Title><Copy>Poradíme s výběrem, termínem i vaší rezervací.</Copy><Panel><Heading>Napište nám</Heading><Copy><a href="mailto:glamgarbrentals@seznam.cz">glamgarbrentals@seznam.cz</a></Copy><Copy>U existující rezervace prosím připojte její číslo.</Copy><Copy><a href="https://www.instagram.com/anirakids_cz/" target="_blank" rel="noreferrer">Instagram · @anirakids_cz</a></Copy></Panel><Panel><Heading>Provozovatel ANIRAK</Heading><Copy>GlamGarb Rentals s.r.o. · IČO 19970561</Copy><Copy>Bílkova 855/19, Staré Město, 110 00 Praha 1</Copy><Copy>Zapsaná u Městského soudu v Praze, sp. zn. C 394851.</Copy><Copy>Nejsme plátci DPH.</Copy><Copy>Místo a čas předání domlouváme individuálně. Na adresu sídla prosím nejezděte bez předchozí domluvy.</Copy></Panel></Page>;}
+const ContactLinks = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    max-inline-size: 100%;
+    color: inherit;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    text-underline-offset: 3px;
+  }
+`;
+export function ContactPage() {
+  return <Page>
+    <Title>Kontakt</Title>
+    <Copy>Poradíme s výběrem, termínem i vaší rezervací.</Copy>
+    <Panel>
+      <Heading>Napište nám nebo zavolejte</Heading>
+      <ContactLinks>
+        <a href="mailto:glamgarbrentals@seznam.cz">glamgarbrentals@seznam.cz</a>
+      </ContactLinks>
+      <ContactLinks>
+        <a href="tel:+420774032738">+420 774 032 738</a>
+        <a href="tel:+420774032705">+420 774 032 705</a>
+      </ContactLinks>
+      <ContactLinks>
+        <a href="https://www.instagram.com/anirakids_cz/" target="_blank" rel="noreferrer">Instagram · @anirakids_cz</a>
+        <a href="https://wa.me/420774032738" target="_blank" rel="noreferrer">WhatsApp</a>
+      </ContactLinks>
+      <Copy>U existující rezervace prosím připojte její číslo.</Copy>
+    </Panel>
+    <Panel>
+      <Heading>Provozovatel ANIRAK</Heading>
+      <Copy>GlamGarb Rentals s.r.o. · IČO 19970561</Copy>
+      <Copy>Bílkova 855/19, Staré Město, 110 00 Praha 1</Copy>
+      <Copy>Zapsaná u Městského soudu v Praze, sp. zn. C 394851.</Copy>
+      <Copy>Nejsme plátci DPH.</Copy>
+      <Copy>Místo a čas předání domlouváme individuálně. Na adresu sídla prosím nejezděte bez předchozí domluvy.</Copy>
+    </Panel>
+  </Page>;
+}
 export function CookiesPage(){return <Page><Title>Cookies a úložiště prohlížeče</Title><Copy>Web používá úložiště prohlížeče, aby si pamatoval přihlášení, vaše volby a průběh rezervace.</Copy><Panel><Heading>Co si web pamatuje</Heading><Copy>Oblíbené položky bez účtu a informaci, zda jste se na zařízení již přihlásili, ukládáme místně. Dočasné údaje o rozpracované rezervaci a návratu z přihlášení pomáhají pokračovat ve stejné návštěvě.</Copy><Copy>Při přihlášení přes Google nebo Seznam se použije také služba zvoleného poskytovatele a jeho vlastní pravidla pro cookies a ochranu údajů.</Copy></Panel><Panel><Heading>Jak údaje odstranit</Heading><Copy>Uložená data webu můžete vymazat v nastavení prohlížeče pro anirakids.cz. Tím můžete ztratit místně uložené oblíbené, rozpracovanou rezervaci a přihlášení. Vymazání prohlížeče samo o sobě neruší rezervaci ani uživatelský účet.</Copy><RouteLink to={routes.privacy}>Ochrana osobních údajů</RouteLink></Panel></Page>;}
