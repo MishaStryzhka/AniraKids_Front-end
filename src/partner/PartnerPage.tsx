@@ -773,17 +773,7 @@ export function PartnerPage() {
                   </Button>
                 ) : null}
                 {f.status === 'confirmed' ? (
-                  <Button
-                    disabled={busy}
-                    onClick={() =>
-                      act('fittings/' + f.id, {
-                        action: 'complete',
-                        revision: f.revision,
-                      })
-                    }
-                  >
-                    Zkouška proběhla
-                  </Button>
+                  <CompleteFitting fitting={f} busy={busy} act={act} />
                 ) : null}
                 {f.status === 'completed' && f.paymentStatus === 'paid' ? (
                   <FittingCredit fitting={f} busy={busy} act={act} />
@@ -813,9 +803,13 @@ export function PartnerPage() {
               </Card>
             </Grid>
             <p>
-              Podíl z pronájmu se započítá po vrácení oblečení podle přijaté
-              platby. Za dokončenou zaplacenou zkoušku náleží Blaze 200 Kč. Odměna se odečte pouze při navazujícím potvrzeném pronájmu ve studiu Blaze. Kauce není
-              odměnou. U klienta ANIRAK činí odměna za pronájem 200 Kč; již započtená odměna za navazující zkoušku se odečte.
+              Nové rezervace: klienti Blaze — 50 % ve studiu a 20 % mimo studio;
+              klienti ANIRAK — 0 % ve studiu a 20 % mimo studio. Zkoušku klientů
+              ANIRAK zajišťuje ANIRAK ve studiu, zkoušku klientů Blaze zajišťuje
+              Malchenko Tetiana. Odměna 200 Kč za zkoušku náleží jejímu poskytovateli.
+              Již započtená odměna Blaze za propojenou zkoušku je součástí podílu
+              z dokončeného pronájmu. Rozdíl může být záporný a opraví předchozí
+              odměnu. Kauce se nezapočítává. Starší rezervace zachovávají původní pravidla.
             </p>
             {(access.owner || access.managePartners) ? (
               <Settlement data={data} busy={busy} act={act} />
@@ -825,13 +819,14 @@ export function PartnerPage() {
                 <BookingHeader>
                   <Row>
                     <h2>{l.number}</h2>
-                    <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'}</span>
+                    <span>{l.kind === 'fitting' ? 'Zkouška' : 'Pronájem'} · {l.policyVersion===2?'Nová pravidla':'Původní pravidla'}</span>
                   </Row>
                   <SourceBadge aria-label={`Zdroj klienta: ${l.source === 'partner' ? 'Blaze' : l.source === 'anirak' ? 'ANIRAK' : 'neuveden'}`}>
                     {l.source === 'partner' ? 'Blaze' : l.source === 'anirak' ? 'ANIRAK' : 'Zdroj neuveden'}
                   </SourceBadge>
                 </BookingHeader>
                 {l.kind === 'fitting' ? <RewardBreakdown>
+                  {l.policyVersion===2?<div><dt>Poskytovatel zkoušky</dt><dd>{l.performedBy==='partner'?'Malchenko Tetiana / Blaze':'ANIRAK'}</dd></div>:null}
                   <div><dt>Odměna za zkoušku</dt><dd>{formatMoney(l.amount + (l.reason === 'studio_rental' ? 200 : 0))}</dd></div>
                   {l.reason === 'studio_rental' ? <div>
                     <dt>Odečet odměny — navazující potvrzený pronájem ve studiu Blaze</dt>
@@ -839,6 +834,7 @@ export function PartnerPage() {
                   </div> : null}
                   <div><dt>Celkem</dt><dd>{formatMoney(l.amount)}</dd></div>
                 </RewardBreakdown> : <RewardBreakdown>
+                  <div><dt>Místo pronájmu</dt><dd>{l.rentalMode==='studio'?'Studio Blaze':'Mimo studio'}</dd></div>
                   <div><dt>Cena pronájmu</dt><dd>{Number.isFinite(l.rentalPrice) ? formatMoney(l.rentalPrice) : '—'}</dd></div>
                   <div><dt>{l.rewardType === 'fixed' ? 'Odměna za pronájem' : 'Výpočet odměny Blaze'}
                     {l.status && l.status !== 'returned' ? <small style={{display:'block'}}>{l.status === 'cancelled' ? 'Zrušená rezervace — odměna se nezapočítává.' : 'Odměna se započítá po vrácení oděvu.'}</small> : null}
@@ -979,26 +975,36 @@ function MemberForm({ busy, act }: any) {
     </Card>
   );
 }
-function FittingCredit({ fitting: f, busy, act }: any) {
+export function CompleteFitting({fitting:f,busy,act}:any){
+ const [performedBy,setPerformedBy]=useState(f.source==='partner'?'partner':'anirak');
+ return <Form onSubmit={e=>{e.preventDefault();act('fittings/'+f.id,{action:'complete',revision:f.revision,performedBy});}}>
+  <SelectField label="Kdo provedl zkoušku" disabled={busy} value={performedBy} onChange={e=>setPerformedBy(e.target.value)}><option value="anirak">ANIRAK</option><option value="partner">Malchenko Tetiana / Blaze</option></SelectField>
+  <Button type="submit" disabled={busy}>Označit jako proběhlou</Button>
+ </Form>;
+}
+export function FittingCredit({ fitting: f, busy, act }: any) {
   const [number, setNumber] = useState('');
+  const [action,setAction]=useState('credit');
   return (
     <Form
       onSubmit={e => {
         e.preventDefault();
         act('fittings/' + f.id, {
-          action: 'credit',
+          action,
           revision: f.revision,
           reservationNumber: number.trim().toUpperCase(),
         });
       }}
     >
       <Input
-        label="Číslo rezervace pro započtení 200 Kč"
+        label="Číslo rezervace"
         value={number}
         required
         onChange={e => setNumber(e.target.value)}
       />
-      <Button type="submit" disabled={busy}>Započítat zkoušku</Button>
+      {f.rewardPolicyVersion===2?<SelectField label="Způsob propojení" disabled={busy} value={action} onChange={e=>setAction(e.target.value)}><option value="credit">Sleva 200 Kč — pouze Studio Blaze</option><option value="link-reward">Pouze výpočet odměny — cena klienta se nemění</option></SelectField>:null}
+      {f.rewardReservationNumber?<p>Propojeno pro odměnu: {f.rewardReservationNumber}</p>:null}
+      <Button type="submit" disabled={busy}>Propojit zkoušku</Button>
     </Form>
   );
 }

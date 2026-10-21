@@ -18,7 +18,7 @@ export function ReservationFittingDiscount({token,reservationId,reservationNumbe
  },[token,reservationId,version,refresh]);
  const apply=useCallback(async()=>{const item=data?.items.find(x=>x.id===selected);if(!item||blocked||loading||working.current||mutationLock.current)return;
  working.current=true;mutationLock.current='discount';setBusy(true);callbacks.current.onBusy(true);setError('');setNotice('');
- try{await fittingAdmin(token,`/admin/fittings/${item.id}/actions`,{action:'credit',revision:item.revision,reservationNumber});if(active.current)setNotice('Platba 200 Kč byla započtena jako záloha.');}
+ try{await fittingAdmin(token,`/admin/fittings/${item.id}/actions`,{action:'credit',revision:item.revision,reservationNumber});if(active.current)setNotice('Sleva 200 Kč za zkoušku byla uplatněna.');}
  catch(e){if(active.current){callbacks.current.onAccessError(e);setError(fittingError(e));}}
  finally{if(mutationLock.current==='discount')mutationLock.current=null;try{if(active.current)await callbacks.current.onSaved();}finally{working.current=false;if(mutationLock.current==='discount')mutationLock.current=null;if(active.current){setBusy(false);callbacks.current.onBusy(false);setRefresh(x=>x+1);}}}
  },[data,selected,blocked,loading,mutationLock,token,reservationNumber]);

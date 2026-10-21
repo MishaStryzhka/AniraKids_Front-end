@@ -122,6 +122,7 @@ export function BookingPage() {
     getBookingPolicy
   );
   const [fittingDiscount,setFittingDiscount]=useState<FittingDiscountSelection>();
+  useEffect(()=>{if(draft?.selection.rentalMode!=='studio')setFittingDiscount(undefined);},[draft?.selection.rentalMode]);
   const [requested, setRequested] = useState<Selection[] | null>(null),
     [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
@@ -644,7 +645,7 @@ export function BookingPage() {
                       Volitelné. Maximálně 1500 znaků.
                     </Copy>
                     {errorFor('notes', contactValidation)}
-                    <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/>
+                    {draft.selection.rentalMode === 'studio' ? <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/> : <Copy>Sleva za zkoušku platí pouze pro pronájem ve studiu Blaze. Pokud jste zkoušku absolvovali, sdělte nám její číslo pro propojení rezervace.</Copy>}
                     {policy.loading ? (
                       <Copy role="status">Načítání informací o platbě…</Copy>
                     ) : policy.error ? (
