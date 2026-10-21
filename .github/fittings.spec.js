@@ -57,7 +57,7 @@ for(const width of [390,768,1440])test('fitting settings, booking QR and adminis
  await page.goto(APP+'/admin/zkousky');await page.getByRole('button',{name:'Potvrdit přijetí 200 Kč',exact:true}).click();
  await page.getByRole('dialog').getByRole('button',{name:'Potvrdit',exact:true}).click();await expect(page.getByText('Potvrzená',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Označit jako proběhlou'}).click();await page.getByRole('dialog').getByRole('button',{name:'Potvrdit',exact:true}).click();
- await page.getByRole('button',{name:'Započíst platbu 200 Kč'}).click();await page.getByLabel('Číslo rezervace').fill('AK-2030-ABC123');await page.getByRole('dialog').getByRole('button',{name:'Potvrdit',exact:true}).click();
+ await page.getByRole('button',{name:'Uplatnit slevu za zkoušku'}).click();await page.getByLabel('Číslo rezervace').fill('AK-2030-ABC123');await page.getByRole('dialog').getByRole('button',{name:'Potvrdit',exact:true}).click();
  await expect(page.getByRole('link',{name:'AK-2030-ABC123'})).toBeVisible();
  await page.screenshot({path:`test-evidence/fittings/admin-${width}.png`,fullPage:true});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
