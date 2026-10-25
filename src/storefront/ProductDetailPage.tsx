@@ -37,7 +37,7 @@ export function ProductDetailPage() {
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
   const product = result.data;
   useProductSeo(product);
-  const {sections}=useSiteSettings();
+  const {sections,cooperationActive}=useSiteSettings();
   const previousCatalogue=getCatalogueReturnTo(location.state, product?.category);
   const previousPath=previousCatalogue.split('?')[0];
   const catalogueReturnTo=(previousPath===routes.dresses&&!sections.girlsDresses)||(previousPath==='/forWomen'&&new URLSearchParams(previousCatalogue.split('?')[1]).get('category')==='dress'&&!sections.womenDresses)||(previousPath===routes.suits&&!sections.suits)||(previousPath===routes.familyLooks&&!sections.familyLooks)
@@ -102,7 +102,7 @@ export function ProductDetailPage() {
             product.variants.map(variant => (
               <Panel key={variant.id}>
                 <Heading>Velikost {variant.size}</Heading>
-                {(['studio', 'external'] as const).map(mode => (
+                {(['studio', 'external'] as const).filter(mode=>mode!=='studio'||cooperationActive).map(mode => (
                   <Stack key={mode}>
                     <strong>{mode === 'studio' ? 'Studio (Blaze)' : modeLabel(mode)}</strong>
                     {variant.pricing[mode] ? (

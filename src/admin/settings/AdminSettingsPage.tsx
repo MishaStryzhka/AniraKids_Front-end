@@ -1,3 +1,4 @@
+import {PartnerCooperationSection} from './PartnerCooperationSection';
 import {FittingSettingsSection} from '../fittings/FittingSettingsSection';
 import {Link} from 'react-router-dom';
 import {AdministratorsSection} from './AdministratorsSection';
@@ -107,7 +108,7 @@ export function AdminSettingsPage() {
     {access.owner&&token?<SettingsDisclosure id="upozorneni" title="Upozornění" icon={<Bell size={22} aria-hidden="true"/>}><AdminPushNotifications token={token}/></SettingsDisclosure>:null}
 
     {access.owner?<SettingsDisclosure title="Administrátoři" icon={<Users size={22} aria-hidden="true"/>} dirty={administratorsDirty}><AdministratorsSection key={token} onDirty={setAdministratorsDirty}/></SettingsDisclosure>:null}
-    {canPartners?<SettingsDisclosure title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
+    {canPartners?<SettingsDisclosure id="partneri" title="Partneři" icon={<Users size={22} aria-hidden="true"/>}><PartnerCooperationSection/><Copy>Blaze Photostudio · společný zůstatek, tým a doporučující odkazy.</Copy><Link to="/partner/blaze?section=members" style={{display:'inline-flex',minHeight:44,alignItems:'center'}}>Spravovat spolupráci Blaze</Link></SettingsDisclosure>:null}
     <Dialog open={blocker.state==='blocked'} title="Neuložené změny" description={saving?'Uložení probíhá. Opuštění stránky jej nemusí zastavit.':'Máte neuložené změny nastavení. Chcete je zahodit a odejít?'} initialFocusRef={cancelButton} onEscape={()=>blocker.state==='blocked'&&blocker.reset()}>
       <Actions ref={node=>{cancelButton.current=node?.querySelector<HTMLButtonElement>('button')??null;}}><Button onClick={()=>blocker.state==='blocked'&&blocker.reset()}>Zůstat</Button><Button variant="secondary" onClick={()=>blocker.state==='blocked'&&blocker.proceed()}>Odejít</Button></Actions>
     </Dialog>

@@ -1,3 +1,4 @@
+import {useSiteSettings} from '../../siteSettings/SiteSettingsProvider';
 import {useLiveReservation} from './useLiveReservation';
 import {FittingDiscountPicker,type FittingDiscountSelection} from '../../fittings/FittingDiscount';
 import { RentalPriceRows } from '../payments/RentalPriceRows';
@@ -109,6 +110,7 @@ const formatInstant = (value: string) =>
     timeStyle: 'short',
   }).format(new Date(value));
 export function BookingPage() {
+  const {cooperationActive}=useSiteSettings();
   const booking = useBooking(),
     navigate = useNavigate(),
     location = useLocation(),
@@ -123,6 +125,12 @@ export function BookingPage() {
   );
   const [fittingDiscount,setFittingDiscount]=useState<FittingDiscountSelection>();
   useEffect(()=>{if(draft?.selection.rentalMode!=='studio')setFittingDiscount(undefined);},[draft?.selection.rentalMode]);
+  useEffect(()=>{
+    if(cooperationActive===false && draft?.selection.rentalMode==='studio' && !booking.stored){
+      booking.updateDraft({...draft,selection:{...draft.selection,rentalMode:'external'}});
+      setRequested(null);
+    }
+  },[cooperationActive,draft,booking]);
   const [requested, setRequested] = useState<Selection[] | null>(null),
     [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
@@ -453,12 +461,12 @@ export function BookingPage() {
                       changeSelection('rentalMode', event.target.value)
                     }
                   >
-                    <option
+                    {cooperationActive && <option
                       value="studio"
                       disabled={Boolean(variant && !variant.pricing.studio)}
                     >
-                      Studio
-                    </option>
+                      Studio (Blaze)
+                    </option>}
                     <option
                       value="external"
                       disabled={Boolean(variant && !variant.pricing.external)}

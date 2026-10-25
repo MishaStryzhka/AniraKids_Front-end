@@ -195,7 +195,8 @@ function CatalogueContent() {
         root === '/forMen' ? { title: 'Pánské oblečení', gender: 'men' } :
             root === '/forChildren' ? { title: 'Dětské oblečení', gender: 'children' } : null;
     const isWomenDresses = root === '/forWomen' && params.get('category') === 'dress';
-    const {filters}=useSiteSettings();
+    const {filters,cooperationActive}=useSiteSettings();
+    const defaultMode=cooperationActive?'studio':'external';
     const section=sectionFor(pathname,search);
     const allowed=section?filters[section]:['category','gender','price','rentalMode','color','size'];
     const visible=(key:string)=>allowed.includes((key==='minPrice'||key==='maxPrice'?'price':key) as FilterKey);
@@ -216,12 +217,12 @@ function CatalogueContent() {
     useEffect(()=>{const next=new URLSearchParams(params);let changed=false;for(const key of filterKeys){if(!visible(key)&&!(key==='category'&&isWomenDresses)&&next.has(key)){next.delete(key);changed=true;}}if(changed)setParams(next,{replace:true});},[params,setParams,allowedKey,isWomenDresses]); // eslint-disable-line react-hooks/exhaustive-deps
     const sort = params.get('sort') || (title === 'Novinky' ? 'newest' : 'name');
     const serialized = params.toString();
-    const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, (visible(key)?params.get(key):'') || (key === 'rentalMode' ? 'studio' : '')]));
+    const readFilters = () => Object.fromEntries(filterKeys.map(key => [key, (visible(key)?params.get(key):'') || (key === 'rentalMode' ? defaultMode : '')]));
     const [draft, setDraft] = useState(readFilters);
     const [query, setQuery] = useState(q);
     const [open, setOpen] = useState(false);
     const [formError, setFormError] = useState('');
-    useEffect(() => { setDraft(Object.fromEntries(filterKeys.map(key => [key, new URLSearchParams(serialized).get(key) || (key === 'rentalMode' ? 'studio' : '')]))); setFormError(''); }, [serialized, pathname]);
+    useEffect(() => { setDraft(Object.fromEntries(filterKeys.map(key => [key, new URLSearchParams(serialized).get(key) || (key === 'rentalMode' ? defaultMode : '')]))); setFormError(''); }, [serialized, pathname, defaultMode]);
     useEffect(() => setQuery(q), [q]);
     const request: CatalogueQuery = { sort: sort as CatalogueQuery['sort'], page: 1, limit: 12 };
     for (const key of filterKeys) {
@@ -229,6 +230,7 @@ function CatalogueContent() {
         if (value && visible(key))
             Object.assign(request, { [key]: key === 'minPrice' || key === 'maxPrice' ? Number(value) : value });
     }
+    if(!cooperationActive)request.rentalMode='external';
     if (isFamily) request.familyLook = 'true';
     if (fixedCategory)
         request.category = fixedCategory;
@@ -268,7 +270,7 @@ function CatalogueContent() {
 
     const update = (key: string, value: string) => setDraft(previous => ({ ...previous, [key]: value }));
     const reset = () => { const next = new URLSearchParams(); if(isWomenDresses)next.set('category','dress'); if (q)
-        next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? 'studio' : '']))); setFormError(''); };
+        next.set('q', q); setParams(next); setDraft(Object.fromEntries(filterKeys.map(key => [key, key === 'rentalMode' ? defaultMode : '']))); setFormError(''); };
     const options = (values: string[], selected: string) => Array.from(new Set([...values, ...(selected ? [selected] : [])])).map(value => <option key={value} value={value}>{value}</option>);
     return <CataloguePageLayout>
     <Breadcrumbs items={[{ label: 'Domů', to: routes.home }, { label: title }]}/>
@@ -313,7 +315,7 @@ function CatalogueContent() {
           {!fixedGender && visible('gender') && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
         </details>}
         {(visible('price')||visible('rentalMode'))&&<details><summary>CENA</summary>
-          {visible('rentalMode')&&<label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Ve studiu</option><option value="external">Mimo studio</option></Select></label>}
+          {visible('rentalMode')&&<label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}>{cooperationActive?<option value="studio">Ve studiu</option>:null}<option value="external">Mimo studio</option></Select></label>}
           {visible('price')&&<><Input label="Cena od (Kč)" type="number" min="0" max="9999999" step="1" value={draft.minPrice} onChange={event => update('minPrice', event.target.value)}/>
           <Input label="Cena do (Kč)" type="number" min="0" max="9999999" step="1" value={draft.maxPrice} onChange={event => update('maxPrice', event.target.value)}/>
           <Copy>Cena pronájmu bez vratné kauce.</Copy></>}

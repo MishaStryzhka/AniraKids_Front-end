@@ -14,7 +14,7 @@ async function setup(page, { guest = false, status = 200, delayed = false } = {}
   });
   await page.route('http://admin-api.test/**', async route => {
     const request = route.request(), pathname = new URL(request.url()).pathname;
-    if (pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
+    if (pathname === '/api/v2/site-settings') return route.fulfill({json:{cooperationActive:true,sections:{suits:true,familyLooks:false}}});
     if (request.method() !== 'GET') state.writes.push(pathname);
     if (pathname === '/api/v2/admin/access') {
       state.probes++;

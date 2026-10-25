@@ -10,7 +10,7 @@ async function fixture(page,owner=true){
   if(p==='/api/users/current')return json({user:{_id:owner?'111111111111111111111111':staffId}});
   if(p.endsWith('/favorites/storefront'))return json({ids:[]});
   if(p==='/maps/api/js'||p==='/gsi/client')return route.fulfill({contentType:'application/javascript',body:''});
-  if(p==='/api/v2/site-settings')return json({sections:{suits:true,familyLooks:false}});
+  if(p==='/api/v2/site-settings')return json({cooperationActive:true,sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/admin/access')return json({owner,permissions:owner?['products','reservations','fittings','settings']:['fittings']});
   if(p==='/api/v2/admin/settings')return json({sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/admin/fitting-settings')return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});

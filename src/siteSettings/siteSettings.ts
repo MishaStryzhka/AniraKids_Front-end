@@ -4,13 +4,13 @@ export type SiteSections=Record<SectionKey,boolean>;
 export const filterLabels={category:'Kategorie',gender:'Pro koho',price:'Cena',rentalMode:'Způsob pronájmu',color:'Barva',size:'Velikost'};
 export type FilterKey=keyof typeof filterLabels;
 export type CatalogueFilters=Record<SectionKey,FilterKey[]>;
-export interface SiteSettings {sections:SiteSections;filters:CatalogueFilters;}
+export interface SiteSettings {cooperationActive?:boolean;sections:SiteSections;filters:CatalogueFilters;}
 export const defaultSiteSections:SiteSections={girlsDresses:true,womenDresses:true,suits:true,familyLooks:false};
 export const defaultCatalogueFilters:CatalogueFilters={girlsDresses:['price','rentalMode','color','size'],womenDresses:['price','rentalMode','color','size'],suits:['gender','price','rentalMode','color','size'],familyLooks:['category','gender','price','rentalMode','color','size']};
 export function parseSiteSettings(value:unknown):SiteSettings{
  const data=value as Partial<SiteSettings>|null,sections=data?.sections;
  if(!sections||typeof sections.suits!=='boolean'||typeof sections.familyLooks!=='boolean')throw new Error('Invalid site settings response');
- const result:SiteSettings={sections:{...defaultSiteSections},filters:{...defaultCatalogueFilters}};
+ const result:SiteSettings={cooperationActive:data?.cooperationActive===true,sections:{...defaultSiteSections},filters:{...defaultCatalogueFilters}};
  for(const key of Object.keys(sectionLabels) as SectionKey[]){
   if(sections[key]!==undefined){if(typeof sections[key]!=='boolean')throw new Error('Invalid section');result.sections[key]=sections[key];}
   const filters=data?.filters?.[key];
