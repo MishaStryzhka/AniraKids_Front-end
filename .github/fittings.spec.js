@@ -177,3 +177,22 @@ test('fitting detail handles missing IDs and transient failure without showing a
  state.failure=null;await page.reload();await expect(page.getByText('Klient nové zkoušky',{exact:true})).toBeVisible();
  expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
 });
+
+for(const width of [390,1440])test('fitting conflict is visible and focused after submission '+width,async({page})=>{
+ await setup(page);await page.setViewportSize({width,height:700});
+ await page.route('**/api/v2/fittings',route=>route.fulfill({status:409,json:{error:{code:'SLOT_OR_PENDING_CONFLICT'}}}));
+ await page.goto(APP+'/zkouska');
+ await page.getByRole('button',{name:'11:00',exact:true}).click();
+ await page.getByLabel('Jméno a příjmení').fill('Jana Nová');
+ await page.getByLabel('E-mail',{exact:true}).fill('jana@example.test');
+ await page.getByLabel('Telefon',{exact:true}).fill('+420123456789');
+ await page.getByRole('button',{name:'Rezervovat a přejít k platbě 200 Kč'}).click();
+ const alert=page.getByRole('alert');await expect(alert).toBeFocused();await expect(alert).toBeInViewport();
+ await expect(alert).toContainText('pro tento e-mail existuje jiná aktivní zkouška');
+ await expect(page.getByLabel('E-mail',{exact:true})).toHaveValue('jana@example.test');
+ await expect(page.getByText('Pro pokračování vyberte čas zkoušky výše.')).toBeVisible();
+ await page.screenshot({path:`test-evidence/fittings/conflict-${width}.png`,fullPage:true});
+ await page.getByRole('button',{name:'Obnovit nabídku'}).click();
+ await page.getByRole('button',{name:'11:30',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Rezervovat a přejít k platbě 200 Kč'})).toBeEnabled();
+});
