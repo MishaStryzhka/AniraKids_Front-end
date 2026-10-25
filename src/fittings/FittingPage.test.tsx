@@ -2,7 +2,7 @@ import {fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {MemoryRouter,Route,Routes} from 'react-router-dom';
 import {FittingPage,FittingStatusPage} from './FittingPage';
 import {AccountFittings} from './AccountFittings';
-import {fittingApi} from './fittingApi';
+import {fittingApi,FittingApiError} from './fittingApi';
 const mockAuth={token:'owner-session',isLoggedIn:true,isRefreshing:false,user:{_id:'owner',firstName:'Jana',lastName:'Nová',email:'jana@example.test',primaryPhoneNumber:'+420123456789'}};
 jest.mock('../hooks/useAuth',()=>({useAuth:()=>mockAuth}));
 jest.mock('./fittingApi',()=>({...jest.requireActual('./fittingApi'),fittingApi:jest.fn()}));
@@ -63,4 +63,37 @@ test.each([true,false])('private link management is only shown to guests: signed
  expect(screen.queryByRole('link',{name:'Moje rezervace'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Zrušit zkoušku',exact:true}));
  expect(screen.getByRole('dialog')).toBeInTheDocument();
+});
+
+ test.each([409,503])('submission failure is focused and preserves contacts or retry identity: %s',async(status)=>{
+ const request={token:'a'.repeat(64),operationId:'operation',date:'2030-01-07',time:'11:00',name:'Edited Name',email:'edited@example.test',phone:'+420987654321',accountId:'owner'};
+ sessionStorage.setItem('anirakids.fitting-attempt.v1',JSON.stringify(request));
+ api.mockImplementation((_path,options)=>options?.method==='POST'?Promise.reject(new FittingApiError(status===409?'SLOT_OR_PENDING_CONFLICT':'UNAVAILABLE',status)):Promise.resolve({enabled:true,slots:['11:00']}));
+ render(<MemoryRouter><FittingPage/></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button',{name:'Ověřit a pokračovat'}));
+ const alert=await screen.findByRole('alert');
+ await waitFor(()=>expect(alert).toHaveFocus());
+ expect(screen.getByRole('link',{name:'Kontaktovat ANIRAK'})).toBeInTheDocument();
+ if(status===409){
+ expect(alert).toHaveTextContent('pro tento e-mail existuje jiná aktivní zkouška');
+ expect(screen.getByLabelText('Jméno a příjmení')).toHaveValue(request.name);
+ expect(screen.getByLabelText('E-mail')).toHaveValue(request.email);
+ expect(screen.getByLabelText('Telefon')).toHaveValue(request.phone);
+ expect(sessionStorage.getItem('anirakids.fitting-attempt.v1')).toBeNull();
+ expect(screen.getByText('Pro pokračování vyberte čas zkoušky výše.')).toBeInTheDocument();
+ }else{
+ expect(alert).toHaveTextContent('Ověřte výsledek odeslání');
+ expect(JSON.parse(sessionStorage.getItem('anirakids.fitting-attempt.v1')!)).toEqual(request);
+ expect(screen.getByRole('button',{name:'Ověřit a pokračovat'})).toBeEnabled();
+ }
+ });
+
+test('pending email conflict explains why changing dates cannot help',async()=>{
+ sessionStorage.setItem('anirakids.fitting-attempt.v1',JSON.stringify({token:'a'.repeat(64),operationId:'operation',date:'2030-01-07',time:'11:00',name:'Jana Nová',email:'jana@example.test',phone:'+420123456789',accountId:'owner'}));
+ api.mockImplementation((_path,options)=>options?.method==='POST'?Promise.reject(new FittingApiError('PENDING_FITTING_EXISTS',409)):Promise.resolve({enabled:true,slots:['11:00']}));
+ render(<MemoryRouter><FittingPage/></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button',{name:'Ověřit a pokračovat'}));
+ expect(await screen.findByRole('alert')).toHaveTextContent('Změna data ani času nevytvoří další zápis');
+ expect(screen.queryByRole('button',{name:'Obnovit nabídku'})).not.toBeInTheDocument();
+ expect(screen.getByRole('link',{name:'Moje zkoušky'})).toHaveAttribute('href','/ucet/rezervace');
 });

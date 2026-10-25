@@ -15,6 +15,7 @@ import {fittingApi,fittingError,fittingStatusLabels,fittingDateLabel,FittingApiE
 const Content=styled.div`width:100%;max-width:720px;margin:auto;display:grid;gap:24px;min-width:0;`;
 const Times=styled.div`display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;`;
 const Fields=styled.div`display:grid;gap:16px;@media(min-width:768px){grid-template-columns:1fr 1fr;}`;
+const ErrorPanel=styled(Panel)`border:2px solid #a32929;background:#fff5f5;color:#702020;scroll-margin-top:100px;`;
 const QR=styled.img`display:block;width:min(100%,260px);height:auto;margin:auto;background:white;`;
 const STORAGE='anirakids.fitting-attempt.v1';
 function savedAttempt():FittingRequest|null{try{const v=JSON.parse(sessionStorage.getItem(STORAGE)||'null');return v&&/^[a-f0-9]{64}$/.test(v.token)&&v.operationId&&v.date&&v.email?v:null;}catch{return null;}}
@@ -37,6 +38,9 @@ function FittingForm(){
  const accountBlocked=Boolean(attempt&&(attempt.accountId||'')!==accountId);
  const [slots,setSlots]=useState<Slots|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0);
  const busyRef=useRef(false);
+ const [errorCode,setErrorCode]=useState('');
+ const errorRef=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(error){errorRef.current?.focus({preventScroll:true});errorRef.current?.scrollIntoView?.({block:'center'});}},[error]);
  const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
  useEffect(()=>{const c=new AbortController();setSlots(null);setLoading(true);setError('');fittingApi<Slots>('/fittings/slots?date='+date,{signal:c.signal}).then(v=>{setSlots(v);setLoading(false);}).catch(e=>{if(!c.signal.aborted){setError(fittingError(e));setLoading(false);}});return()=>c.abort();},[date,revision]);
@@ -52,19 +56,20 @@ function FittingForm(){
    navigate('/zkouska/'+result.number+'#'+request.token,{replace:true});
   }catch(e){
    if(!mounted.current)return;
-   if(e instanceof FittingApiError&&[400,409,404].includes(e.status)){sessionStorage.removeItem(STORAGE);attemptRef.current=null;setAttempt(null);setTime('');}
+   if(e instanceof FittingApiError&&[400,409,404].includes(e.status)){setContact(contact);sessionStorage.removeItem(STORAGE);attemptRef.current=null;setAttempt(null);setTime('');}
+   setErrorCode(e instanceof FittingApiError?e.code:'');
    setError(fittingError(e));
   }finally{busyRef.current=false;setBusy(false);}
  }
  return <Page><Content><Title>Rezervovat zkoušku</Title><Copy>30 minut · 200 Kč · jeden zákazník v daném čase</Copy><Copy>Po absolvování zaplacené zkoušky můžete 200 Kč jednou započíst jako zálohu na pronájem oblečení. Zkouška sama o sobě nerezervuje oblečení na termín pronájmu.</Copy>
  {sessionPending?<Copy role="status">Načítáme účet…</Copy>:null}{accountBlocked?<Copy role="alert">Tento zápis patří jiné relaci. Přihlaste se k účtu, ze kterého jste jej odeslali.</Copy>:null}
+ {error?<ErrorPanel ref={errorRef} role="alert" tabIndex={-1} aria-labelledby="fitting-error-title"><Heading id="fitting-error-title">{attempt?'Ověřte výsledek odeslání':'Zkoušku se nepodařilo rezervovat'}</Heading><Copy>{error}</Copy><Actions>{!attempt&&errorCode!=='PENDING_FITTING_EXISTS'?<Button variant="secondary" onClick={()=>setRevision(x=>x+1)}>Obnovit nabídku</Button>:null}{isLoggedIn?<RouteLink to="/ucet/rezervace">Moje zkoušky</RouteLink>:null}<RouteLink to="/kontakt">Kontaktovat ANIRAK</RouteLink></Actions></ErrorPanel>:null}
  {attempt?<Panel><Heading>Rozpracovaný zápis</Heading><Copy>{fittingDateLabel(attempt.date)} v {attempt.time}. Nejprve ověřte výsledek předchozího odeslání.</Copy><Button onClick={submit} disabled={busy||sessionPending||accountBlocked}>{busy?'Ověřování…':'Ověřit a pokračovat'}</Button></Panel>:<form onSubmit={e=>{e.preventDefault();void submit();}}><Stack>
  <Panel>{slots?.address?<Copy><strong>{slots.placeName}</strong><br/>{slots.address}</Copy>:null}<Heading><CalendarClock size={22} aria-hidden="true"/> Vyberte termín</Heading><Input label="Datum zkoušky" type="date" min={pragueToday()} max={addCalendarDays(pragueToday(),90)} value={date} disabled={busy} required onChange={e=>{setDate(e.target.value);setTime('');}}/>
  {loading?<Copy role="status">Načítání volných časů…</Copy>:slots?.enabled?<><Copy>Časy jsou uvedené v českém čase. Zápis je možný nejméně 2 hodiny předem, až 90 dní dopředu.</Copy>{slots.slots.length?<Times aria-label="Volné časy">{slots.slots.map(value=><Button key={value} type="button" variant={time===value?'primary':'secondary'} aria-pressed={time===value} disabled={busy} onClick={()=>setTime(value)}>{value}</Button>)}</Times>:<Copy>Na tento den nejsou volné časy. Vyberte jiné datum.</Copy>}</>:slots?<Copy>Termíny zkoušek právě připravujeme. Pro domluvení nás prosím kontaktujte.</Copy>:null}
  </Panel>
- {slots?.enabled?<Panel><Heading>Kontaktní údaje</Heading><Fields><Input label="Jméno a příjmení" autoComplete="name" required minLength={2} maxLength={160} value={contact.name} disabled={busy} onChange={e=>setContact({...contact,name:e.target.value})}/><Input label="E-mail" type="email" autoComplete="email" required maxLength={254} value={contact.email} disabled={busy} onChange={e=>setContact({...contact,email:e.target.value})}/><Input label="Telefon" type="tel" autoComplete="tel" required minLength={5} maxLength={32} value={contact.phone} disabled={busy} onChange={e=>setContact({...contact,phone:e.target.value})}/></Fields><Copy>Použijte stejný e-mail i pro následnou rezervaci oblečení.</Copy><Copy>Po odeslání zaplaťte 200 Kč QR převodem do 60 minut a zvolte „Platba odeslána“. Termín potvrdíme po ověření platby.</Copy><Copy>Odesláním objednáváte placenou zkoušku za 200 Kč. <RouteLink to="/ochrana-osobnich-udaju">Ochrana osobních údajů</RouteLink></Copy><Button type="submit" disabled={!time||busy||loading||sessionPending}>{busy?'Odesílání…':'Rezervovat a přejít k platbě 200 Kč'}</Button></Panel>:null}
+ {slots?.enabled?<Panel><Heading>Kontaktní údaje</Heading><Fields><Input label="Jméno a příjmení" autoComplete="name" required minLength={2} maxLength={160} value={contact.name} disabled={busy} onChange={e=>setContact({...contact,name:e.target.value})}/><Input label="E-mail" type="email" autoComplete="email" required maxLength={254} value={contact.email} disabled={busy} onChange={e=>setContact({...contact,email:e.target.value})}/><Input label="Telefon" type="tel" autoComplete="tel" required minLength={5} maxLength={32} value={contact.phone} disabled={busy} onChange={e=>setContact({...contact,phone:e.target.value})}/></Fields><Copy>Použijte stejný e-mail i pro následnou rezervaci oblečení.</Copy><Copy>Po odeslání zaplaťte 200 Kč QR převodem do 60 minut a zvolte „Platba odeslána“. Termín potvrdíme po ověření platby.</Copy><Copy>Odesláním objednáváte placenou zkoušku za 200 Kč. <RouteLink to="/ochrana-osobnich-udaju">Ochrana osobních údajů</RouteLink></Copy>{!time&&!busy&&!loading?<Copy>Pro pokračování vyberte čas zkoušky výše.</Copy>:null}<Button type="submit" disabled={!time||busy||loading||sessionPending}>{busy?'Odesílání…':'Rezervovat a přejít k platbě 200 Kč'}</Button></Panel>:null}
  </Stack></form>}
- {error?<Panel role="alert"><Copy>{error}</Copy>{!attempt?<Button variant="secondary" onClick={()=>setRevision(x=>x+1)}>Obnovit nabídku</Button>:null}</Panel>:null}
  <Actions><RouteLink to="/kontakt">Kontakt</RouteLink><RouteLink to="/novinky">Zpět na nabídku</RouteLink></Actions></Content></Page>;
 }
 export function FittingStatusPage(){
