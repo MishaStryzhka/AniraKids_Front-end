@@ -45,7 +45,7 @@ async function fixture(page, role = 'administrator') {
           role,
           partnerId: 'blaze',
           name: 'Blaze Photostudio',
-          enabled: true,
+          enabled: true, cooperationActive:true,
           referralCode: 'blaze-photographer',
         });
       if (p === '/api/v2/referrals/blaze')

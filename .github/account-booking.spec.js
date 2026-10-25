@@ -29,7 +29,7 @@ async function setup(page, { guest = false, delayProfile = false } = {}) {
   });
   await page.route(url => url.origin === API, async route => {
     const request = route.request(), url = new URL(request.url());
-    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
+    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{cooperationActive:true,sections:{suits:true,familyLooks:false}}});
     const json = body => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
     // This POST is a capability-safe read; booking mutations remain forbidden here.
     if (request.method() === 'POST' && url.pathname === '/api/v2/fitting-discounts/options') {

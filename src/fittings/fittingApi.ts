@@ -1,7 +1,7 @@
 import {adminApiClient,buildAdminRequestConfig} from '../admin/api/client';
 import {normalizeAdminApiError} from '../admin/api/errors';
 export interface FittingSettings {enabled:boolean;address:string;weekly:Array<{day:number;enabled:boolean;start:string;end:string}>;blockedDates:string[];}
-export interface Slots {enabled:boolean;date:string;slots:string[];price:number;durationMinutes:number;}
+export interface Slots {address?:string;placeName?:string;enabled:boolean;date:string;slots:string[];price:number;durationMinutes:number;}
 export interface Fitting {number:string;date:string;time:string;durationMinutes:number;price:number;address:string;status:'pending'|'review'|'confirmed'|'completed'|'cancelled'|'expired';paymentStatus:'unpaid'|'paid'|'refunded';expiresAt:string;product?:{id:string;name:string;slug:string};paymentInstructions:{amount:number;accountNumber:string;message:string;qrPayload:string}|null;}
 export interface AdminFitting extends Fitting {source?:string;performedBy?:string;rewardPolicyVersion?:number;rewardReservationNumber?:string;id:string;revision:number;customer:{name:string;email:string;phone:string};audit:Array<{action:string;at:string;by:string}>;credit:{reservationId:string;reservationNumber:string}|null;}
 export interface FittingRequest {operationId:string;token:string;date:string;time:string;name:string;email:string;phone:string;productId?:string;accountId?:string;}

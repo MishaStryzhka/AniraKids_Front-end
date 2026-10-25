@@ -15,7 +15,7 @@ async function setup(page, { count = 4, broken = false, name = 'Sofia' } = {}) {
     description: 'Slavnostní šaty pro výjimečné chvíle.', color: 'Krémová', photos, variants: [] };
   await page.route(url => /^https?:$/.test(url.protocol) && url.origin !== APP, async route => {
     const url = new URL(route.request().url());
-    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{sections:{suits:true,familyLooks:false}}});
+    if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{cooperationActive:true,sections:{suits:true,familyLooks:false}}});
     if (route.request().method() === 'GET') {
       if ((url.origin === 'https://maps.googleapis.com' && url.pathname === '/maps/api/js') ||
           (url.origin === 'https://accounts.google.com' && url.pathname === '/gsi/client'))

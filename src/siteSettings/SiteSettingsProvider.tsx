@@ -5,7 +5,7 @@ import {primaryNavigationItems, routes} from '../navigation/routes';
 import {Page, Title, Copy, Actions, RouteLink} from '../storefront/storefrontStyles';
 import {defaultSiteSections, defaultCatalogueFilters, readPublicSiteSettings, type SiteSections, type CatalogueFilters} from './siteSettings';
 
-interface SettingsState {sections: SiteSections; filters:CatalogueFilters; loading: boolean; error: boolean; reload(): void;}
+interface SettingsState {cooperationActive?:boolean;sections: SiteSections; filters:CatalogueFilters; loading: boolean; error: boolean; reload(): void;}
 const closed: SiteSections = {girlsDresses:false,womenDresses:false,suits: false, familyLooks: false};
 const Context = createContext<SettingsState>({sections: defaultSiteSections, filters:defaultCatalogueFilters, loading: false, error: false, reload() {}});
 export const useSiteSettings = () => useContext(Context);

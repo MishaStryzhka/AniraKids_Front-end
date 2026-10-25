@@ -406,18 +406,17 @@ export function PartnerPage() {
           <p>ANIRAK · {access.name}</p>
           <h1>{labels[tab] || 'Partnerský kabinet'}</h1>
         </div>
-        {!access.enabled ? (
+        {!access.cooperationActive ? (
           <Card>
             <p>
-              Kabinet čeká na aktivaci. Po aktivaci se nové rezervace a zkoušky
-              zahrnou do evidence Blaze.
+              Spolupráce zatím není aktivní. Nové zkoušky probíhají u ANIRAK.
             </p>
             {(access.owner || access.managePartners) ? (
               <Button
                 disabled={busy}
-                onClick={() => act('setup', { enabled: true })}
+                onClick={() => {window.location.href='/admin/nastaveni#partneri';}}
               >
-                Aktivovat spolupráci Blaze
+                Nastavení spolupráce
               </Button>
             ) : null}
           </Card>
@@ -472,14 +471,14 @@ export function PartnerPage() {
                 </Button>
                 {tab !== 'fittings' ? (
                   <Button
-                    disabled={!access.enabled}
+                    disabled={!access.cooperationActive}
                     onClick={() => setCreating(v => !v)}
                   >
                     <Plus size={18} /> Nová rezervace
                   </Button>
                 ) : (
                   <Button
-                    disabled={!access.enabled}
+                    disabled={!access.cooperationActive}
                     onClick={() => setCreatingFitting(v => !v)}
                   >
                     <Plus size={18} aria-hidden="true" /> Nová zkouška

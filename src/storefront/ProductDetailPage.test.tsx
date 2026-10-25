@@ -6,6 +6,8 @@ import { body, product, receipt } from './booking/bookingFixtures';
 import { newAttempt, persistBooking, SESSION_KEY } from './booking/bookingModel';
 import { loadGuestReservationLinks } from './booking/guestReservationLinks';
 
+let mockCooperationActive=true;
+jest.mock('../siteSettings/SiteSettingsProvider',()=>({useSiteSettings:()=>({sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false},cooperationActive:mockCooperationActive})}));
 const mockSetCategory = jest.fn();
 const mockProduct = product;
 jest.mock('../layouts/StorefrontLayout', () => ({ useStorefrontOutletContext: () => ({ setProductPrimaryCategory: mockSetCategory }) }));
@@ -58,4 +60,10 @@ test('studio price has no deposit row while external price retains its deposit',
   expect(within(studio).queryByText('Vratná kauce')).not.toBeInTheDocument();
   expect(within(studio).getByText('Cena pronájmu')).toBeInTheDocument();
   expect(within(external).getByText('Vratná kauce')).toBeInTheDocument();
+});
+
+test('studio offer is hidden before cooperation activation',()=>{
+  mockCooperationActive=false;
+  try{view();expect(screen.queryByText('Studio (Blaze)')).not.toBeInTheDocument();expect(screen.getAllByText('Mimo studio').length).toBeGreaterThan(0);}
+  finally{mockCooperationActive=true;}
 });

@@ -18,7 +18,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/account/fittings/'+number+'/payment-sent'){state.receipt={...state.receipt,status:'review',paymentInstructions:null};return json(state.receipt);}
   if(p==='/api/v2/account/fittings/'+number+'/cancel'){state.receipt={...state.receipt,status:'cancelled',paymentInstructions:null};return json(state.receipt);}
   if(p.endsWith('/favorites/storefront'))return json({ids:[]});
-  if(p==='/api/v2/site-settings')return json({sections:{suits:true,familyLooks:false}});
+  if(p==='/api/v2/site-settings')return json({cooperationActive:true,sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/partner/access')return json({error:{code:'FORBIDDEN'}},403);
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
   if(p==='/api/v2/admin/settings')return json({sections:{suits:true,familyLooks:false}});
@@ -40,7 +40,8 @@ async function setup(page,{admin=false,lost=false}={}){
 for(const width of [390,768,1440])test('fitting settings, booking QR and administration '+width,async({page})=>{
  const state=await setup(page,{admin:true});await page.setViewportSize({width,height:1000});
  await page.goto(APP+'/admin/nastaveni');await page.locator('summary').filter({hasText:'Zkoušky'}).click();const card=page.getByRole('region',{name:'Zkoušky',exact:true});
- await card.getByLabel('Adresa zkoušky').fill('Adresa zkoušky 22, Praha');
+ await expect(card.getByLabel('Adresa zkoušky (podle stavu spolupráce)')).toHaveAttribute('readonly','');
+ await card.getByLabel('Pondělí od').fill('10:00');
  await card.getByRole('button',{name:'Uložit zkoušky',exact:true}).click();await expect(card.getByRole('status')).toHaveText('Nastavení zkoušek bylo uloženo.');
  await page.screenshot({path:`test-evidence/fittings/settings-${width}.png`,fullPage:true});
  await page.goto(APP+'/zkouska?product=333333333333333333333333');await page.getByRole('button',{name:'11:00',exact:true}).click();

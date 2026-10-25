@@ -18,7 +18,7 @@ async function fixture(page){
   if(p==='/api/v2/admin/fittings'&&req.method()==='POST'){const b=req.postDataJSON();state.writes.push({body:b});return json({number:'ZK-ABCDEF123456',date:b.date,time:b.time},201);}
   if(p==='/api/v2/admin/fittings')return json({items:[7,9].map(day=>({id:'fit'+day,number:'ZK-ABCDEF12345'+day,date:'2030-01-0'+day,time:'11:00',durationMinutes:30,price:200,address:'Praha',status:'confirmed',paymentStatus:'paid',revision:0,customer:{name:day===7?'Jana Nová':'Eva Malá',email:day===7?'jana@example.test':'eva@example.test',phone:'+420123456789'},audit:[],credit:null}))});
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
-  if(p==='/api/v2/site-settings')return json({sections:{suits:true,familyLooks:false}});
+  if(p==='/api/v2/site-settings')return json({cooperationActive:true,sections:{suits:true,familyLooks:false}});
   if(p==='/gsi/client')return route.fulfill({contentType:'application/javascript',body:''});
   return json({error:{code:'NOT_FOUND'}},404);
  });return state;
