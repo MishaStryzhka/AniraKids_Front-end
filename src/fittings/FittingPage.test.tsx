@@ -93,7 +93,7 @@ test('pending email conflict explains why changing dates cannot help',async()=>{
  api.mockImplementation((_path,options)=>options?.method==='POST'?Promise.reject(new FittingApiError('PENDING_FITTING_EXISTS',409)):Promise.resolve({enabled:true,slots:['11:00']}));
  render(<MemoryRouter><FittingPage/></MemoryRouter>);
  fireEvent.click(screen.getByRole('button',{name:'Ověřit a pokračovat'}));
- expect(await screen.findByRole('alert')).toHaveTextContent('Změna data ani času nevytvoří další zápis');
+ expect(await screen.findByRole('alert')).toHaveTextContent('zkouška vytvořená bez přihlášení');
  expect(screen.queryByRole('button',{name:'Obnovit nabídku'})).not.toBeInTheDocument();
  expect(screen.getByRole('link',{name:'Moje zkoušky'})).toHaveAttribute('href','/ucet/rezervace');
 });

@@ -56,7 +56,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Admin entry authorization states
-        run: CI=true npm test -- --watchAll=false --runInBand src/admin/auth/useAdminEntryAccess.test.tsx src/fittings/FittingPage.test.tsx src/pages/AccountPage/AccountReservationsPage.test.tsx src/partner src/admin/reservations/AdminReservationsPage.test.tsx
+        run: CI=true npm test -- --watchAll=false --runInBand src/admin/auth/useAdminEntryAccess.test.tsx src/fittings/FittingPage.test.tsx src/fittings/FittingLinkRecovery.test.tsx src/pages/AccountPage/AccountReservationsPage.test.tsx src/partner src/admin/reservations/AdminReservationsPage.test.tsx
       - name: Build against isolated browser fixtures
         env:
           REACT_APP_LEGACY_API_BASE_URL: https://example.test

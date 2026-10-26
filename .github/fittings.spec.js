@@ -196,3 +196,26 @@ for(const width of [390,1440])test('fitting conflict is visible and focused afte
  await page.getByRole('button',{name:'11:30',exact:true}).click();
  await expect(page.getByRole('button',{name:'Rezervovat a přejít k platbě 200 Kč'})).toBeEnabled();
 });
+
+for(const width of [375,390,430,768,1024,1440])test('guest fitting recovery refreshes account history '+width,async({page})=>{
+ const state=await setup(page,{admin:true});await page.setViewportSize({width,height:900});
+ await page.route('**/api/v2/account/fittings/'+number+'/claim',async route=>{
+  expect(route.request().headers().authorization).toBe('Bearer test-admin-token');
+  expect(route.request().postDataJSON()).toEqual({token:'a'.repeat(64)});
+  state.receipt={number,date:'2030-01-07',time:'11:00',status:'review',paymentStatus:'unpaid',address:'Testovací 12, Praha',paymentInstructions:null};
+  return route.fulfill({json:state.receipt});
+ });
+ await page.goto(APP+'/ucet/rezervace');
+ await expect(page.getByText('Zatím zde nejsou žádné zkoušky.')).toBeVisible();
+ await page.getByText('Chybí zkouška vytvořená bez přihlášení?',{exact:true}).click();
+ await expect(page.getByRole('link',{name:'Ověřit e-mail v profilu'})).toBeVisible();
+ await page.getByLabel('Soukromý odkaz na zkoušku').fill('https://anirakids.cz/zkouska/'+number+'#'+'a'.repeat(64));
+ await page.getByRole('button',{name:'Připojit zkoušku',exact:true}).click();
+ await expect(page.getByText(number,{exact:false})).toBeVisible();
+ await expect(page.getByText('Zatím zde nejsou žádné zkoušky.')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.screenshot({path:`test-evidence/fittings/recovery-${width}.png`,fullPage:true});
+ await page.getByRole('link',{name:'Platby a podrobnosti zkoušky'}).click();
+ await expect(page.getByRole('heading',{name:'Ověřujeme vaši platbu'})).toBeVisible();
+ expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
+});
