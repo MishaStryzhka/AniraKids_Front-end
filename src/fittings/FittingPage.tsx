@@ -1,3 +1,4 @@
+import {trackBookingCreated} from '../analytics/analytics';
 import {useEffect,useRef,useState} from 'react';
 import {getReferralToken} from '../partner/referral';
 import {useLocation,useNavigate,useParams,useSearchParams} from 'react-router-dom';
@@ -52,6 +53,7 @@ function FittingForm(){
    const {accountId:requestOwner,...body}=request;
    const result=await fittingApi<Fitting>('/fittings',{method:'POST',body,token:requestOwner?authToken:undefined});
    if(!mounted.current)return;
+   trackBookingCreated('fitting', request.operationId);
    sessionStorage.removeItem(STORAGE);
    navigate('/zkouska/'+result.number+'#'+request.token,{replace:true});
   }catch(e){

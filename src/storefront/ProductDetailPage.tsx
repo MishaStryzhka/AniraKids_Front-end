@@ -1,3 +1,4 @@
+import {trackProduct, CONSENT_EVENT} from '../analytics/analytics';
 import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import { useProductSeo } from '../seo/useProductSeo';
 import { draftItems } from './booking/bookingModel';
@@ -37,6 +38,12 @@ export function ProductDetailPage() {
   const result = usePublicRead(slug, signal => getPublicProduct(slug, signal));
   const product = result.data;
   useProductSeo(product);
+  const analyticsProductId = product?.id;
+  useEffect(() => {
+    const track = () => { if (analyticsProductId) trackProduct('view_item', analyticsProductId); };
+    track(); window.addEventListener(CONSENT_EVENT, track);
+    return () => window.removeEventListener(CONSENT_EVENT, track);
+  }, [analyticsProductId]);
   const {sections,cooperationActive}=useSiteSettings();
   const previousCatalogue=getCatalogueReturnTo(location.state, product?.category);
   const previousPath=previousCatalogue.split('?')[0];
@@ -152,7 +159,7 @@ export function ProductDetailPage() {
               <Actions>
                 <Button disabled={!rentable || booking.busy} onClick={() => {
                   if (booking.startNew() && booking.chooseProduct(product))
-                    navigate(routes.reservation, { state: { catalogueReturnTo } });
+                    { trackProduct('begin_checkout', product.id); navigate(routes.reservation, { state: { catalogueReturnTo } }); }
                 }}>Vytvořit novou rezervaci</Button>
                 <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Zobrazit předchozí rezervaci</RouteLink>
               </Actions>
@@ -165,7 +172,7 @@ export function ProductDetailPage() {
                 disabled={!rentable || Boolean(booking.draft && draftItems(booking.draft).length >= 20)}
                 onClick={() => {
                   if (booking.chooseProduct(product))
-                    navigate(routes.reservation, { state: { catalogueReturnTo } });
+                    { trackProduct('begin_checkout', product.id); navigate(routes.reservation, { state: { catalogueReturnTo } }); }
                 }}
               >
                 Rezervovat

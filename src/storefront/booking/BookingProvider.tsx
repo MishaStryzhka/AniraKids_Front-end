@@ -1,3 +1,4 @@
+import {trackBookingCreated} from '../../analytics/analytics';
 import { parseBookingPolicy, type BookingPolicy } from '../api/bookingPolicy';
 import { preserveGuestReservationLink } from './guestReservationLinks';
 import {
@@ -276,6 +277,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
         attempt.accountId ? auth.session!.token : undefined
       );
       if (!mounted.current || request.current !== controller) return;
+      trackBookingCreated('rental', attempt.key);
       const stored: StoredBooking = { version: 1, kind: 'receipt', receipt, ...(attempt.accountId ? { accountId: attempt.accountId } : {}) };
       let storageBlocked = false;
       try {

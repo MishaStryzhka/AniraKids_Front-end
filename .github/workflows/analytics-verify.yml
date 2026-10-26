@@ -1,0 +1,31 @@
+name: Analytics consent verify
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/analytics/**'
+      - '.github/analytics-consent.spec.js'
+      - '.github/workflows/analytics-verify.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test -- --watchAll=false --runInBand src/analytics src/storefront/ProductDetailPage.test.tsx src/storefront/booking/BookingProvider.test.tsx
+      - run: npm run build
+        env:
+          REACT_APP_LEGACY_API_BASE_URL: https://example.test
+          REACT_APP_V2_API_BASE_URL: https://admin-api.test/api/v2
+      - run: |
+          npm install --no-save --no-package-lock --legacy-peer-deps @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+          npx playwright test .github/analytics-consent.spec.js --workers=2 --reporter=line
