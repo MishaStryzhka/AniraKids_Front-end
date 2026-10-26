@@ -61,6 +61,8 @@ function receipt(body) {
 }
 async function setup(page, guest = true) {
   const state = {
+    cooperationActive: true,
+    settingsFailure: false,
     posts: [],
     reads: [],
     errors: [],
@@ -93,7 +95,7 @@ async function setup(page, guest = true) {
     async route => {
       const req = route.request(),
         url = new URL(req.url());
-      if (url.pathname === '/api/v2/site-settings') return route.fulfill({json:{cooperationActive:true,sections:{suits:true,familyLooks:false}}});
+      if (url.pathname === '/api/v2/site-settings') return state.settingsFailure ? route.fulfill({status:503,json:{error:'unavailable'}}) : route.fulfill({json:{cooperationActive:state.cooperationActive,sections:{suits:true,familyLooks:false}}});
       const json = (status, body) =>
         route.fulfill({
           status,
@@ -136,6 +138,14 @@ async function setup(page, guest = true) {
         url.pathname === '/api/v2/catalogue/products/sofia'
       )
         return json(200, { product });
+      if (req.method() === 'GET' && url.pathname.endsWith('/availability-calendar')) {
+        const query=Object.fromEntries(url.searchParams),[year,month]=query.month.split('-').map(Number);
+        const days=Array.from({length:new Date(Date.UTC(year,month,0)).getUTCDate()},(_,i)=>{
+          const date=query.month+'-'+String(i+1).padStart(2,'0');
+          return {date,available:date>='2030-10-07'&&(!query.startDate||date>=query.startDate)};
+        });
+        return json(200,{calendar:{...query,productId:P,startDate:query.startDate??null,today:'2030-10-07',checkedAt:'2030-10-07T12:00:00Z',days}});
+      }
       if (req.method() === 'GET' && url.pathname.endsWith('/availability')) {
         const selection = Object.fromEntries(url.searchParams);
         if (state.deferQuote)
@@ -268,7 +278,7 @@ async function capture(page, name) {
     fullPage: true,
   });
 }
-for (const width of [390, 768, 1440])
+for (const width of [375, 390, 430, 768, 1024, 1440])
   test(
     'guest catalogue to receipt and deliberate new booking ' + width,
     async ({ page }) => {
@@ -743,4 +753,44 @@ for (const guest of [true,false]) test('fitting discount customer redemption '+(
  await expect(page.getByRole('option',{name:/Povinná záloha/})).toHaveCount(0);
  await expect(page.getByRole('img',{name:'QR platba 1 300 Kč'})).toBeVisible();
  expect(state.errors).toEqual([]);
+});
+
+for (const width of [375,390,430]) test('inactive cooperation books external rental through QR receipt '+width, async({page})=>{
+ const state=await setup(page);state.cooperationActive=false;state.mode='payment';
+ await page.setViewportSize({width,height:844});
+ await begin(page);
+ await expect(page.getByLabel('Způsob pronájmu')).toHaveValue('external');
+ await expect(page.getByRole('option',{name:'Studio (Blaze)'})).toHaveCount(0);
+ await expect(page.getByText(/Rezervační záloha činí 0/)).toHaveCount(0);
+ await expect(page.getByText(/zbývá z nájemného/)).toHaveCount(0);
+ const first=page.locator('[data-date="2030-10-10"]'),last=page.locator('[data-date="2030-10-11"]');
+ await expect(first).toHaveAttribute('aria-disabled','false');await first.click();
+ await expect(last).toHaveAttribute('aria-disabled','false');await last.click();
+ await expect(page.getByLabel('Od',{exact:true})).toHaveValue('2030-10-10');
+ await expect(page.getByLabel('Do',{exact:true})).toHaveValue('2030-10-11');
+ await quote(page);
+ expect(state.reads.filter(r=>r.url.endsWith('/availability')).every(r=>new URLSearchParams(r.query).get('rentalMode')==='external')).toBe(true);
+ await contact(page);
+ await capture(page,'external-booking-'+width);
+ await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
+ await expect(page.getByRole('img',{name:/QR platba 200/})).toBeVisible();
+ expect(state.posts).toHaveLength(1);expect(state.posts[0].body.rentalMode).toBe('external');
+ await capture(page,'external-receipt-'+width);
+ state.settingsFailure=true; // Existing receipts remain accessible even when settings fail.
+ await page.reload();
+ await expect(page.getByRole('img',{name:/QR platba 200/})).toBeVisible();
+ expect(state.posts).toHaveLength(1);expect(state.errors).toEqual([]);
+});
+test('booking settings failure blocks draft and recovers without losing selection',async({page})=>{
+ const state=await setup(page);await begin(page);
+ state.settingsFailure=true;await page.reload();
+ await expect(page.getByText('Nastavení pronájmu se nepodařilo načíst.')).toBeVisible();
+ await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toHaveCount(0);
+ state.settingsFailure=false;state.cooperationActive=false;
+ await page.getByRole('button',{name:'Načíst nastavení znovu'}).click();
+ await expect(page.getByLabel('Způsob pronájmu')).toHaveValue('external');
+ await expect(page.getByLabel('Velikost',{exact:true})).toHaveValue(V);
+ await expect(page.getByLabel('Od',{exact:true})).toHaveValue('2030-10-10');
+ expect(state.posts).toHaveLength(0);
 });

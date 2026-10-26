@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { SiteSettingsProvider } from '../siteSettings/SiteSettingsProvider';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useBookingOptional } from '../storefront/booking/BookingProvider';
 import { productPath } from '../navigation/routes';
@@ -38,7 +39,7 @@ export function ReservationFlowLayout({
       />
       <main>
         <Suspense fallback={null}>
-          <Outlet />
+          <SiteSettingsProvider><Outlet /></SiteSettingsProvider>
         </Suspense>
       </main>
     </>
