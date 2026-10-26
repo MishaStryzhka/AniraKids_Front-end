@@ -75,6 +75,17 @@ function selection() {
     target: { value: body.endDate },
   });
 }
+test('payment amounts wait for the current availability quote instead of assuming a zero price', async () => {
+  setup();
+  await screen.findByText(/Rezervační záloha činí 200/);
+  expect(screen.queryByText(/zbývá z nájemného/)).not.toBeInTheDocument();
+  selection();
+  fireEvent.click(screen.getByRole('button', {name: 'Ověřit dostupnost'}));
+  await screen.findByText('Termín je aktuálně dostupný');
+  expect(screen.getByText(/zbývá z nájemného/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Do'), {target: {value: '2030-10-12'}});
+  expect(screen.queryByText(/zbývá z nájemného/)).not.toBeInTheDocument();
+});
 test('selection and contact field errors focus; observed available summary enables submit', async () => {
   setup();
   fireEvent.click(screen.getByRole('button', { name: 'Ověřit dostupnost' }));

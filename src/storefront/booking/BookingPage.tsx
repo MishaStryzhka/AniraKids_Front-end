@@ -110,7 +110,7 @@ const formatInstant = (value: string) =>
     timeStyle: 'short',
   }).format(new Date(value));
 export function BookingPage() {
-  const {cooperationActive}=useSiteSettings();
+  const {cooperationActive, loading: settingsLoading, error: settingsError, reload: reloadSettings}=useSiteSettings();
   const booking = useBooking(),
     navigate = useNavigate(),
     location = useLocation(),
@@ -170,13 +170,14 @@ export function BookingPage() {
       ? 'pending'
       : (booking.stored?.kind ?? (booking.error ? 'error' : 'draft'));
   useLayoutEffect(() => {
+    if (!booking.stored && (settingsLoading || settingsError)) return;
     if (previousEntry.current === location.key) return;
     previousEntry.current = location.key;
     if (view === 'draft') {
       title.current?.focus({ preventScroll: true });
       window.scrollTo(0, 0);
     }
-  }, [location.key, view]);
+  }, [location.key, view, booking.stored, settingsLoading, settingsError]);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       if (view === 'attempt' || view === 'storage' || view === 'error')
@@ -248,6 +249,10 @@ export function BookingPage() {
       <ErrorCopy id={`booking-${field}-error`}>{errors[field]}</ErrorCopy>
     ) : null;
   const stored = booking.stored;
+  if (!stored && (settingsLoading || settingsError)) return <Page><Title>Rezervace</Title>
+    {settingsError ? <Alert role="alert"><Copy>Nastavení pronájmu se nepodařilo načíst.</Copy><Button onClick={reloadSettings}>Načíst nastavení znovu</Button></Alert>
+      : <Copy role="status">Načítáme možnosti pronájmu…</Copy>}
+  </Page>;
   if (booking.accountBlocked) return <Page><Title>Rezervace vašeho účtu</Title>
     <Panel><Copy>Pro zobrazení nebo ověření této rezervace se přihlaste ke stejnému účtu, ze kterého byla vytvořena.</Copy>
       <RouteLink to={routes.account}>Přejít k přihlášení</RouteLink>
@@ -673,8 +678,7 @@ export function BookingPage() {
                           hasDeposit={draft.selection.rentalMode !== 'studio'}
                           fittingCredit={fittingDiscount ? 200 : 0}
                           rentalPrice={
-                            (quote?.pricing.rentalPrice ??
-                            draftItems(draft).reduce((sum, item) => sum + (item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode]?.rentalPrice ?? 0), 0)) - (fittingDiscount ? 200 : 0)
+                            quote ? quote.pricing.rentalPrice - (fittingDiscount ? 200 : 0) : undefined
                           }
                         />
                         <CompanyInformation company={policy.data.company} />
