@@ -19,5 +19,5 @@ jobs:
         with: {node-version: 20, cache: npm}
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run typecheck
-      - run: npm test -- --watchAll=false --runInBand src/admin/pages/AdminHomePage.test.tsx src/admin/api/reservationCalendar.test.ts src/admin/calendar
+      - run: npm test -- --watchAll=false --runInBand src/admin/pages/AdminHomePage.test.tsx src/admin/api/overview.test.ts src/admin/api/reservationCalendar.test.ts src/admin/calendar
       - run: npm run build

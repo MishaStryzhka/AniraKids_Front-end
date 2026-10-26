@@ -6,10 +6,11 @@ import {getAdminOverview} from '../api/overview';
 jest.mock('../../hooks/useAuth',()=>({useAuth:()=>({token:'fixture'})}));
 const mockAccess=jest.fn(()=>false);
 jest.mock('../auth/AdminAccessBoundary',()=>({useAdminAccess:()=>({handleRequestError:mockAccess})}));
+jest.mock('../api/client',()=>({}));
 jest.mock('../api/overview',()=>({getAdminOverview:jest.fn()}));
 const get=getAdminOverview as jest.Mock;
 const empty={total:0,items:[]};
-const fixture={today:'2026-10-10',loadedAt:'2026-10-10T10:00:00Z',pickups:{total:1,items:[{id:'r1',number:'AK-FIXTURE',name:'Jana',product:'Šaty',startDate:'2026-10-10',endDate:'2026-10-11',status:'confirmed'}]},returns:empty,pending:empty,deposits:empty,unpaid:1,overdue:0,maintenance:0,drafts:0};
+const fixture={fittings:{review:empty,pending:empty,today:empty},today:'2026-10-10',loadedAt:'2026-10-10T10:00:00Z',pickups:{total:1,items:[{id:'r1',number:'AK-FIXTURE',name:'Jana',product:'Šaty',startDate:'2026-10-10',endDate:'2026-10-11',status:'confirmed'}]},returns:empty,pending:empty,deposits:empty,unpaid:1,overdue:0,maintenance:0,drafts:0};
 beforeEach(()=>jest.clearAllMocks());
 test('renders real queues, detail links and reloads without retaining stale counts on failure',async()=>{
  get.mockResolvedValueOnce(fixture);render(<MemoryRouter><AdminHomePage/></MemoryRouter>);
@@ -48,4 +49,26 @@ test('overdue alert precedes pending reservations and opens returns; empty count
  expect(screen.getByRole('link',{name:'Otevřít rezervaci AK-LATE'})).toBeInTheDocument();
  expect(screen.queryByText('K vyřízení')).not.toBeInTheDocument();
  expect(screen.getByRole('link',{name:'Rozpracované 0'})).toHaveAttribute('href','/admin/produkty?status=draft');
+});
+
+test('future fitting payment review prevents all-clear and links to the exact fitting',async()=>{
+ const fitting={id:'aaaaaaaaaaaaaaaaaaaaaaaa',number:'ZK-FITTING',name:'Guest customer',product:'Dětské šaty',date:'2026-10-11',time:'09:00',status:'review'};
+ get.mockResolvedValueOnce({...fixture,pickups:empty,unpaid:0,fittings:{review:{total:1,items:[fitting]},pending:empty,today:empty}});
+ render(<MemoryRouter><AdminHomePage/></MemoryRouter>);
+ expect(await screen.findByText('Platby za zkoušky k ověření: 1')).toBeInTheDocument();
+ expect(screen.queryByText('Vše je vyřízeno')).not.toBeInTheDocument();
+ expect(screen.getByRole('link',{name:'Otevřít zkoušku ZK-FITTING'})).toHaveAttribute('href','/admin/zkousky/aaaaaaaaaaaaaaaaaaaaaaaa');
+ expect(screen.getByText('11. října 2026 · 09:00')).toBeInTheDocument();
+ get.mockResolvedValueOnce({...fixture,pickups:empty,unpaid:0});fireEvent.click(screen.getByRole('button',{name:'Obnovit'}));
+ expect(await screen.findByText('Vše je vyřízeno')).toBeInTheDocument();
+ expect(screen.queryByText('ZK-FITTING')).not.toBeInTheDocument();
+});
+test('pending fittings and today schedule are visible without claiming payment is received',async()=>{
+ const fitting={id:'bbbbbbbbbbbbbbbbbbbbbbbb',number:'ZK-PENDING',name:'Pending guest',product:'Šaty',date:fixture.today,time:'14:00',status:'pending'};
+ get.mockResolvedValue({...fixture,unpaid:0,fittings:{review:empty,pending:{total:1,items:[fitting]},today:{total:1,items:[fitting]}}});
+ render(<MemoryRouter><AdminHomePage/></MemoryRouter>);
+ expect(await screen.findByRole('heading',{name:'Dnešní zkoušky (1)'})).toBeInTheDocument();
+ expect(screen.getByText('Zkoušky čekající na platbu: 1')).toBeInTheDocument();
+ expect(screen.queryByText('Vše je vyřízeno')).not.toBeInTheDocument();
+ expect(within(screen.getByRole('region',{name:'Dnešní zkoušky (1)'})).getByText('Čeká na platbu')).toBeInTheDocument();
 });
