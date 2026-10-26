@@ -1,3 +1,4 @@
+import {AnalyticsConsent} from '../analytics/AnalyticsConsent';
 import {FittingDiscountCapture} from '../fittings/FittingDiscount';
 import {AdminInvoicesPage} from '../admin/invoices/AdminInvoicesPage';
 import {FittingPage,FittingStatusPage} from '../fittings/FittingPage';
@@ -74,6 +75,7 @@ function App() {
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <GlobalStyles />
+      <AnalyticsConsent />
       <ModalAuthContext.Provider
         value={{ isOpenModalAuth, setIsOpenModalAuth, setAuthNotice }}
       >

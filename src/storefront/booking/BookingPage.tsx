@@ -1,3 +1,4 @@
+import {trackAvailability} from '../../analytics/analytics';
 import {useSiteSettings} from '../../siteSettings/SiteSettingsProvider';
 import {useLiveReservation} from './useLiveReservation';
 import {FittingDiscountPicker,type FittingDiscountSelection} from '../../fittings/FittingDiscount';
@@ -153,6 +154,7 @@ export function BookingPage() {
       : null;
   const availability = usePublicRead(key, async signal => {
     const items = discountQuotes(await Promise.all(requested!.map(selection => getAvailability(selection, signal))));
+    trackAvailability(items.every(item => item.available));
     return { ...items[0], items, available: items.every(item => item.available),
       pricing: items.reduce((sum, item) => ({
         rentalPrice: sum.rentalPrice + item.pricing.rentalPrice,

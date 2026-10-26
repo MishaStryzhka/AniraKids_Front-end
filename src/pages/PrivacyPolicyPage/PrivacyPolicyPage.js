@@ -9,7 +9,7 @@ const PrivacyPolicyPage = () => {
       <PageTitle>Zásady ochrany osobních údajů</PageTitle>
       <Border />
       <Text style={{ textAlign: 'right' }}>
-        Poslední aktualizace: 28.02.2024
+        Poslední aktualizace: 26.10.2026
       </Text>
 
       <Text style={{ marginTop: 20 }}>
@@ -63,6 +63,17 @@ const PrivacyPolicyPage = () => {
         základě našich oprávněných zájmů.
       </Text>
 
+      <Title>Analytika návštěvnosti</Title>
+      <Text>
+        S vaším souhlasem používáme Google Analytics k měření návštěvnosti a
+        používání veřejných stránek, produktů a rezervačního procesu. Google
+        zpracovává online identifikátory, údaje o zařízení a událostech na webu.
+        Analytiku nespouštíme před udělením souhlasu. Nepředáváme jí jména,
+        e-mailové adresy, telefonní čísla ani soukromé odkazy k rezervacím.
+        Souhlas můžete kdykoli změnit nebo odvolat na stránce <a href="/cookies">Cookies</a>.
+        Další informace o zpracování dat společností Google jsou v jejích{' '}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">zásadách ochrany soukromí</a>.
+      </Text>
       <Title>5. Ochrana osobních údajů</Title>
       <Text>
         Podnikáme veškerá opatření k ochraně vašich osobních údajů před
