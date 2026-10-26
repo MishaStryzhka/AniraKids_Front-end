@@ -53,3 +53,37 @@ for (const width of [390,768,1440]) test(`workday overview and menu at ${width}`
   await expect(page.getByRole('link',{name:'Otevřít rezervaci AK-LATE'})).toBeVisible();
   expect(unexpected).toEqual([]);expect(errors).toEqual([]);
 });
+
+for(const width of [375,390,430,768,1024,1440])test(`overview includes tomorrow's fitting payment at ${width}`,async({page})=>{
+ const id='aaaaaaaaaaaaaaaaaaaaaaaa',number='ZK-123456ABCDEF',empty={total:0,items:[]};
+ const fitting={id,number,name:'Guest fitting customer',product:'Dětské šaty DET027',date:'2030-01-02',time:'09:00',status:'review'};
+ let review={total:1,items:[fitting]};
+ const errors=[],unexpected=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('test-admin')})));
+ await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
+  const req=route.request(),p=new URL(req.url()).pathname,json=body=>route.fulfill({json:body});
+  if(p==='/gsi/client'||p==='/maps/api/js')return route.fulfill({contentType:'application/javascript',body:''});
+  if(p==='/api/users/current')return json({user:{_id:'admin'}});
+  if(p.endsWith('/favorites/storefront'))return json({ids:[]});
+  if(p==='/api/v2/site-settings')return json({cooperationActive:false,sections:{suits:true,familyLooks:false}});
+  if(p==='/api/v2/admin/access')return json({owner:true,permissions:['products','reservations','fittings','settings']});
+  if(p==='/api/v2/partner/access')return route.fulfill({status:403,json:{error:{code:'FORBIDDEN'}}});
+  if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
+  if(p==='/api/v2/admin/overview')return json({today:'2030-01-01',loadedAt:'2030-01-01T12:00:00Z',pending:empty,pickups:empty,returns:empty,deposits:empty,unpaid:0,overdue:0,maintenance:0,drafts:0,fittings:{review,pending:empty,today:empty}});
+  if(p==='/api/v2/admin/fittings/'+id)return json({...fitting,customer:{name:fitting.name,email:'test@example.test',phone:'+420123456789'},product:{name:fitting.product},paymentStatus:'unpaid',address:'Kytlická 862/2, Praha',revision:0,audit:[],price:200});
+  unexpected.push({method:req.method(),path:p});return route.abort();
+ });
+ await page.setViewportSize({width,height:1000});await page.goto(APP+'/admin');
+ await expect(page.getByText('Platby za zkoušky k ověření: 1')).toBeVisible();
+ await expect(page.getByText('Vše je vyřízeno',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('2. ledna 2030 · 09:00')).toBeVisible();
+ const open=page.getByRole('link',{name:'Otevřít zkoušku '+number});
+ await expect(open).toHaveAttribute('href','/admin/zkousky/'+id);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.screenshot({path:`${evidence}/fitting-${width}.png`,fullPage:true});
+ await open.click();await expect(page.getByRole('heading',{name:'Detail zkoušky',exact:true})).toBeVisible();
+ await expect(page.getByText(number,{exact:false})).toBeVisible();
+ review=empty;await page.goto(APP+'/admin');
+ await expect(page.getByText('Vše je vyřízeno',{exact:true})).toBeVisible();
+ expect(unexpected).toEqual([]);expect(errors).toEqual([]);
+});
