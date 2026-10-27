@@ -294,6 +294,8 @@ export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { 
   const r = v.reservation;
   let fulfillment: Fulfillment;
   try { fulfillment = parseFulfillment(r); } catch { return invalid(); }
+  const shippingPrice=r.shippingPrice===undefined?0:r.shippingPrice;
+  if(!money(shippingPrice))return invalid();
   const discount=r.fittingDiscount;
   if(discount!==undefined&&(!object(discount)||discount.amount!==200||typeof discount.number!=='string'||!/^ZK-[A-F0-9]{12}$/.test(discount.number)))return invalid();
   const fittingDiscount=discount as {number:string;amount:number}|undefined;
@@ -306,12 +308,13 @@ export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { 
       !isMode(r.rentalMode) || !isDateOnly(r.startDate) || !isDateOnly(r.endDate) ||
       r.endDate < r.startDate || (r.expiresAt !== null && !instant(r.expiresAt)) ||
       !string(r.paymentStatus, 100) || !money(r.subtotal) || !money(r.deposit) ||
-      !money(r.totalDue) || r.subtotal !== items.reduce((n, i) => n + i.rentalPrice, 0)-(fittingDiscount?.amount||0) ||
+      !money(r.totalDue) || r.subtotal !== items.reduce((n, i) => n + i.rentalPrice, 0)-(fittingDiscount?.amount||0)+shippingPrice ||
       r.deposit !== items.reduce((n, i) => n + i.deposit, 0) ||
       r.totalDue !== r.subtotal + r.deposit) return invalid();
   const selection = { productId: item.productId, variantId: item.variantId,
     rentalMode: r.rentalMode, startDate: r.startDate, endDate: r.endDate };
   if (expected) {
+    if(expected.fulfillmentMethod === 'balikovna_address' && (fulfillment.fulfillmentMethod!=='balikovna_address'||JSON.stringify(fulfillment.deliveryAddress)!==JSON.stringify(parseFulfillment(expected).deliveryAddress)))return invalid();
     if (expected.fulfillmentMethod === 'balikovna' &&
         (fulfillment.fulfillmentMethod !== 'balikovna' || JSON.stringify(fulfillment.balikovnaPoint) !== JSON.stringify(parseFulfillment(expected).balikovnaPoint))) return invalid();
     const expectedItems = expected.items ?? [expected];
@@ -320,7 +323,7 @@ export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { 
           i.variantId !== items[index].variantId)) return invalid();
   }
   return {
-    ...fulfillment,
+    ...fulfillment,...(r.shippingPrice===undefined?{}:{shippingPrice}),
     ...(isGuestAccessToken(v.guestAccessToken) ? { guestAccessToken: v.guestAccessToken } : {}),
     reservationNumber: r.reservationNumber, status: r.status, rentalMode: r.rentalMode,
     startDate: r.startDate, endDate: r.endDate, expiresAt: r.expiresAt as string | null,
@@ -428,6 +431,8 @@ export async function postReservation(
       ...(body.fittingDiscount?{fittingDiscount:body.fittingDiscount}:{}),
       ...(body.referralToken?{referralToken:body.referralToken}:{}),
       ...(body.fulfillmentMethod ? {fulfillmentMethod:body.fulfillmentMethod} : {}),
+      ...(body.deliveryTariff ? {deliveryTariff:body.deliveryTariff} : {}),
+      ...(body.deliveryAddress ? {deliveryAddress:body.deliveryAddress} : {}),
       ...(body.balikovnaPoint ? {balikovnaPoint:body.balikovnaPoint} : {}),
       endDate: body.endDate, customer: body.customer, ...(body.notes === undefined ? {} : { notes: body.notes }),
     } : body),

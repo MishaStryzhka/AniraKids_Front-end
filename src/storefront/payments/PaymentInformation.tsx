@@ -42,11 +42,13 @@ export function BookingPaymentExplanation({
   rentalPrice,
   hasDeposit = true,
   fittingCredit = 0,
+  delivery = 0,
 }: {
   policy: BookingPolicy;
   rentalPrice?: number;
   hasDeposit?: boolean;
   fittingCredit?: number;
+  delivery?: number;
 }) {
   const advance =
     rentalPrice === undefined
@@ -63,9 +65,9 @@ export function BookingPaymentExplanation({
       </Copy>
       {rentalPrice !== undefined ? (
         <Copy>
-          {fittingCredit > 0 ? 'Po započtení zkoušky zbývá doplatit ' : 'Po uhrazení zálohy zbývá z nájemného '}
-          {formatMoney(fittingCredit > 0 ? rentalPrice : rentalPrice - advance)}. Před předáním je třeba uhradit
-          celé nájemné{hasDeposit ? ' a vratnou kauci' : ''}.
+          {fittingCredit > 0 ? 'Po započtení zkoušky zbývá doplatit ' : delivery ? 'Po uhrazení zálohy zbývá za pronájem a dopravu ' : 'Po uhrazení zálohy zbývá z nájemného '}
+          {formatMoney((fittingCredit > 0 ? rentalPrice : rentalPrice - advance)+delivery)}. Před předáním je třeba uhradit
+          celé nájemné{delivery ? ' a dopravu' : ''}{hasDeposit ? ' a vratnou kauci' : ''}.
         </Copy>
       ) : null}
       <Copy>
@@ -186,7 +188,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
     <Stack>
       <Heading>Platba rezervace</Heading>
       <PaymentFacts>
-        {showRentalPrice ? <RentalPriceRows rentalPrice={receipt.subtotal} discount={receipt.fittingDiscount} /> : null}
+        {showRentalPrice ? <RentalPriceRows rentalPrice={receipt.subtotal-(receipt.shippingPrice||0)} discount={receipt.fittingDiscount} /> : null}
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
           <dd>{formatMoney(payment.advanceRequired)}{receipt.fittingDiscount && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
@@ -195,8 +197,9 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           <dt>Zbývá uhradit ze zálohy</dt>
           <dd>{formatMoney(payment.advanceBalance)}</dd>
         </div> : null}
+        {showRentalPrice && (receipt.shippingPrice||0)>0 ? <div><dt>Doprava</dt><dd>{formatMoney(receipt.shippingPrice!)}</dd></div> : null}
         {receipt.fittingDiscount || payment.rentalBalance !== receipt.subtotal ? <div>
-          <dt>Zbývá uhradit nájemné</dt>
+          <dt>{receipt.shippingPrice ? 'Zbývá uhradit pronájem a dopravu' : 'Zbývá uhradit nájemné'}</dt>
           <dd>{formatMoney(payment.rentalBalance)}</dd>
         </div> : null}
         {payment.depositRequired > payment.depositHeld ? <div>

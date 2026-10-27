@@ -1,4 +1,4 @@
-import {parsePoint, type BalikovnaPoint} from '../../storefront/booking/fulfillment';
+import {parseAddress,parsePoint, type BalikovnaPoint} from '../../storefront/booking/fulfillment';
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import { AdminApiError, normalizeAdminApiError } from './errors';
 import { isDateOnly } from '../calendar/calendarDates';
@@ -79,6 +79,8 @@ export interface ReservationDetail {
   subtotal: number;
   deposit: number;
   totalDue: number;
+  deliveryAddress?: import('../../storefront/booking/fulfillment').DeliveryAddress;
+  shippingPrice?:number;
   fulfillmentMethod?: string;
   balikovnaPoint?: BalikovnaPoint;
   notes?: string;
@@ -268,6 +270,8 @@ export function parseReservationDetail(value: unknown): ReservationDetail {
     };
   });
   const optional: Partial<ReservationDetail> = {};
+  if(value.deliveryAddress !== undefined){try{optional.deliveryAddress=parseAddress(value.deliveryAddress);}catch{return invalid();}}
+  if(value.shippingPrice !== undefined){if(typeof value.shippingPrice!=='number'||!Number.isSafeInteger(value.shippingPrice)||value.shippingPrice<0)return invalid();optional.shippingPrice=value.shippingPrice;}
   if(value.balikovnaPoint !== undefined){try{optional.balikovnaPoint=parsePoint(value.balikovnaPoint);}catch{return invalid();}}
   for (const key of [
     'customerId',

@@ -1,5 +1,5 @@
 import {FulfillmentChoice, FulfillmentSummary} from './FulfillmentChoice';
-import {fulfillmentError} from './fulfillment';
+import {fulfillmentError, shippingPrice} from './fulfillment';
 import {trackAvailability} from '../../analytics/analytics';
 import {useSiteSettings} from '../../siteSettings/SiteSettingsProvider';
 import {useLiveReservation} from './useLiveReservation';
@@ -102,17 +102,18 @@ const PriceFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
 `;
-export function PriceSummary({ pricing, discount }: { pricing: Pricing; discount?: {number: string; amount: number} }) {
+export function PriceSummary({ pricing, discount, delivery=0 }: { delivery?:number; pricing: Pricing; discount?: {number: string; amount: number} }) {
   return (
     <PriceFacts>
       <RentalPriceRows rentalPrice={pricing.rentalPrice} discount={discount} />
+      {delivery > 0 ? <div><dt>Doprava</dt><dd>{formatMoney(delivery)}</dd></div> : null}
       {pricing.deposit > 0 ? <div>
         <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
       </div> : null}
       <div>
         <dt>Celkem k úhradě</dt>
-        <dd>{formatMoney(pricing.totalDue)}</dd>
+        <dd>{formatMoney(pricing.totalDue + delivery)}</dd>
       </div>
     </PriceFacts>
   );
@@ -321,12 +322,12 @@ export function BookingPage() {
               </Facts>
               <FulfillmentSummary value={stored.receipt}/>
               {receiptReady ? <>
-              <PriceSummary
+              <PriceSummary delivery={stored?.kind === 'receipt' ? stored.receipt.shippingPrice : 0}
                 discount={stored.receipt.fittingDiscount}
                 pricing={{
-                  rentalPrice: stored.receipt.subtotal,
+                  rentalPrice: stored.receipt.subtotal - (stored.receipt.shippingPrice || 0),
                   deposit: stored.receipt.deposit,
-                  totalDue: stored.receipt.totalDue,
+                  totalDue: stored.receipt.totalDue - (stored.receipt.shippingPrice || 0),
                 }}
               />
               {stored.receipt.status === 'pending' &&
@@ -567,6 +568,7 @@ export function BookingPage() {
                     </Button>
                   </Alert>
                 ) : quote && !quote.available ? <Copy>Vyberte prosím jiný termín.</Copy> : null}
+                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint,deliveryAddress:value.deliveryAddress});}}/></div> : null}
               </Stack>
               <Stack>
                 <form
@@ -577,7 +579,6 @@ export function BookingPage() {
                   }}
                 >
                   <Stack>
-                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint});}}/></div> : null}
                     <Heading>Kontaktní údaje</Heading>
                     {(['firstName', 'lastName', 'email', 'phone'] as const).map(
                       field => (
@@ -669,7 +670,7 @@ export function BookingPage() {
                       </Alert>
                     ) : policy.data ? (
                       <>
-                        <BookingPaymentExplanation
+                        <BookingPaymentExplanation delivery={shippingPrice(draft,draft.selection.rentalMode)}
                           policy={policy.data}
                           hasDeposit={draft.selection.rentalMode !== 'studio'}
                           fittingCredit={fittingDiscount ? 200 : 0}
@@ -684,7 +685,7 @@ export function BookingPage() {
                       <Heading>Souhrn rezervace</Heading>
                       <Copy>{draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}</Copy>
                       <Copy>{modeLabel(quote.rentalMode)} · {formatCalendarDay(quote.startDate)} – {formatCalendarDay(quote.endDate)}</Copy>
-                      <PriceSummary discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
+                      <PriceSummary delivery={shippingPrice(draft,draft.selection.rentalMode)} discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
                       <Copy>Cena pronájmu je za rezervaci, nikoli za den. Dostupnost a konečnou cenu ověříme při odeslání rezervace.</Copy>
                     </Panel> : null}
                     <Copy>
