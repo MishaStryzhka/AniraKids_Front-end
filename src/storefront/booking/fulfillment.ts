@@ -4,7 +4,7 @@ export type DeliveryAddress = {street:string;city:string;zip:string;country:'CZ'
 export type Fulfillment = { deliveryTariff?: '2026-10'; fulfillmentMethod?: 'pickup' | 'balikovna' | 'balikovna_address'; balikovnaPoint?: BalikovnaPoint; deliveryAddress?: DeliveryAddress; shippingPrice?:number };
 export const shippingPrice = (v:Fulfillment,mode:string) => mode !== 'external' ? 0 : v.fulfillmentMethod === 'balikovna' ? 89 : v.fulfillmentMethod === 'balikovna_address' ? 119 : 0;
 export function parseAddress(v:unknown):DeliveryAddress {if(!object(v)||typeof v.street!=='string'||!v.street.trim()||v.street.length>200||typeof v.city!=='string'||!v.city.trim()||v.city.length>100||typeof v.zip!=='string'||!/^\d{5}$/.test(v.zip)||v.country!=='CZ')throw new Error('Invalid address');return {street:v.street.trim(),city:v.city.trim(),zip:v.zip,country:'CZ'};}
-export const deliveryNotice = 'Cena zahrnuje doručení k vám. Způsob a cenu vrácení domluvíme před potvrzením rezervace.';
+export const deliveryNotice = 'V součtu rezervace je zahrnuto doručení k vám. Zpětná doprava se hradí zvlášť.';
 export function parsePoint(v: unknown): BalikovnaPoint {
   if (!object(v) || typeof v.id !== 'string' || !/^B?[0-9]{1,20}$/.test(v.id) ||
       typeof v.zip !== 'string' || !/^[0-9]{5}$/.test(v.zip) ||
