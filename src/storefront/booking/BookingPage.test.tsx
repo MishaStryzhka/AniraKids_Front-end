@@ -199,3 +199,15 @@ test('studio summary shows gross rent then fitting discount and net total withou
   expect(rows.map(row=>row.querySelector('dt')?.textContent)).toEqual(['Cena pronájmu','Započtená platba za zkoušku ZK-123456ABCDEF','Celkem k úhradě']);
   expect(rows.map(row=>row.querySelector('dd')?.textContent?.replace(/\s/g,''))).toEqual(['800Kč','−200Kč','600Kč']);
 });
+
+test('external delivery requires a point before creating a reservation',async()=>{
+ setup();selection();
+ fireEvent.change(screen.getByLabelText('Způsob pronájmu'),{target:{value:'external'}});
+ get.mockResolvedValue({...quote,rentalMode:'external'});
+ fireEvent.click(screen.getByRole('button',{name:'Ověřit dostupnost'}));
+ await screen.findByText('Termín je aktuálně dostupný');
+ fireEvent.click(screen.getByLabelText('Balíkovna'));
+ fireEvent.click(screen.getByRole('button',{name:'Rezervovat',exact:true}));
+ expect(await screen.findByText('Vyberte výdejní místo Balíkovny.')).toBeInTheDocument();
+ expect(post).not.toHaveBeenCalled();
+});

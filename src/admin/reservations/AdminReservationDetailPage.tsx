@@ -260,10 +260,11 @@ function ReservationDetailView({
                   <dd>
                     {reservation.fulfillmentMethod === 'pickup'
                       ? 'Osobní vyzvednutí'
-                      : 'Jiný způsob předání'}
+                      : reservation.fulfillmentMethod === 'balikovna' ? 'Balíkovna' : 'Jiný způsob předání'}
                   </dd>
                 </div>
               ) : null}
+              {reservation.fulfillmentMethod === 'balikovna' ? <div><dt>Výdejní místo Balíkovny</dt><dd>{reservation.balikovnaPoint?.name}<br/>{reservation.balikovnaPoint?.address}<br/>PSČ Balíkovny: {reservation.balikovnaPoint?.zip}<br/>ID: {reservation.balikovnaPoint?.id}<br/>Doprava není zahrnuta v ceně. Před potvrzením domluvte s klientem cenu, odeslání a vrácení a ověřte dostupnost oděvu po celou dobu přepravy.</dd></div> : null}
             </DetailFacts>
           </ReservationPanel>
           <ReservationPanel>

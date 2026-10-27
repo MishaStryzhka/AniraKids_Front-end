@@ -1,3 +1,4 @@
+import {FulfillmentSummary} from '../../storefront/booking/FulfillmentChoice';
 import { StatusBadge } from '../../design-system/components/StatusBadge';
 import { AccountFittings } from '../../fittings/AccountFittings';
 import { loadGuestReservationLinks } from '../../storefront/booking/guestReservationLinks';
@@ -119,6 +120,7 @@ export function AccountReservationsPage() {
         <Heading>{receipt.reservationNumber} · {statusLabel(receipt.status)}</Heading>
         {receiptItems(receipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
         <Copy>{modeLabel(receipt.rentalMode)}</Copy>
+        <FulfillmentSummary value={receipt}/>
         <Copy>{formatCalendarDay(receipt.startDate)} – {formatCalendarDay(receipt.endDate)}</Copy>
         <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} access={{kind:'account',token}} /></details>
       </Panel>)}

@@ -1,3 +1,4 @@
+import {parsePoint, type BalikovnaPoint} from '../../storefront/booking/fulfillment';
 import { adminApiClient, buildAdminRequestConfig } from './client';
 import { AdminApiError, normalizeAdminApiError } from './errors';
 import { isDateOnly } from '../calendar/calendarDates';
@@ -79,6 +80,7 @@ export interface ReservationDetail {
   deposit: number;
   totalDue: number;
   fulfillmentMethod?: string;
+  balikovnaPoint?: BalikovnaPoint;
   notes?: string;
   cancelledAt?: string;
   cancellationReason?: string;
@@ -266,6 +268,7 @@ export function parseReservationDetail(value: unknown): ReservationDetail {
     };
   });
   const optional: Partial<ReservationDetail> = {};
+  if(value.balikovnaPoint !== undefined){try{optional.balikovnaPoint=parsePoint(value.balikovnaPoint);}catch{return invalid();}}
   for (const key of [
     'customerId',
     'fulfillmentMethod',

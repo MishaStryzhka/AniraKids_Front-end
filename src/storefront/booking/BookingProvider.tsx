@@ -1,3 +1,4 @@
+import {fulfillmentError} from './fulfillment';
 import {trackBookingCreated} from '../../analytics/analytics';
 import { parseBookingPolicy, type BookingPolicy } from '../api/bookingPolicy';
 import { preserveGuestReservationLink } from './guestReservationLinks';
@@ -357,6 +358,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       !draftSelectionsValid(draft) ||
       (draft.additionalItems?.length ? !quote.items || quote.items.length !== draftSelections(draft).length ||
         draftSelections(draft).some((selection, index) => !quote.items![index].available || !sameSelection(quote.items![index], selection)) : false) ||
+      fulfillmentError(draft, draft.selection.rentalMode) ||
       Object.keys(contactErrors(draft.contact)).length
     ) {
       commit(v => ({
