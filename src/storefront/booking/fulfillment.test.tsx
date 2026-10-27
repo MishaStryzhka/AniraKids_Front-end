@@ -5,7 +5,7 @@ import {parseFulfillment,pointFromMessage,type Fulfillment} from './fulfillment'
 import {initialDraft,reservationBody,newAttempt,parseStored,persistDraft,loadDraft} from './bookingModel';
 import {parseReceipt,postReservation} from '../api/publicApi';
 import {product,body,receipt} from './bookingFixtures';
-const point={id:'123',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
+const point={id:'B10103',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
 const delivery={fulfillmentMethod:'balikovna' as const,balikovnaPoint:point};
 function Form(){const [value,setValue]=useState<Fulfillment>({});return <FulfillmentChoice value={value} onChange={setValue}/>;}
 test('map loads only after request, ignores untrusted messages, retains selection and clears it for pickup',()=>{
@@ -15,7 +15,7 @@ test('map loads only after request, ignores untrusted messages, retains selectio
  expect(screen.queryByTitle('Výběr výdejního místa Balíkovny')).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Vybrat výdejní místo'}));
  const frame=screen.getByTitle('Výběr výdejního místa Balíkovny') as HTMLIFrameElement;
- const data={message:'pickerResult',point:{...point,id:123,type:'BALIKOVNY'}};
+ const data={message:'pickerResult',point:{...point,id:'B10103',type:'BALIKOVNY'}};
  fireEvent(window,new MessageEvent('message',{data,source:frame.contentWindow,origin:'https://evil.test'}));
  expect(screen.queryByText(point.name)).not.toBeInTheDocument();
  fireEvent(window,new MessageEvent('message',{data,source:window,origin:'https://b2c.cpost.cz'}));

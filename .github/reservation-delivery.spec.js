@@ -4,7 +4,7 @@ const {policy}=require('./payment-fixtures');
 const APP='https://anirakids.cz';
 const product={id:'111111111111111111111111',slug:'sofia',name:'Sofia',category:'dress',photos:[],variants:[{id:'222222222222222222222222',size:'98',pricing:{studio:null,external:{rentalPrice:800,deposit:2000,totalDue:2800}}}]};
 const selection={productId:product.id,variantId:product.variants[0].id,rentalMode:'external',startDate:'2032-06-10',endDate:'2032-06-12'};
-const point={id:'123',type:'BALIKOVNY',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
+const point={id:'B10103',type:'BALIKOVNY',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
 fs.mkdirSync('test-evidence/delivery',{recursive:true});
 for(const width of [375,768,1440])test('delivery choice, point, submit and receipt '+width,async({page})=>{
  const posts=[],errors=[];let maps=0;
@@ -43,6 +43,6 @@ for(const width of [375,768,1440])test('delivery choice, point, submit and recei
  await page.getByLabel('Jméno',{exact:true}).fill('Jana');await page.getByLabel('Příjmení').fill('Test');await page.getByLabel('E-mail',{exact:true}).fill('test@example.test');await page.getByLabel('Telefon',{exact:true}).fill('+420777123456');
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'AK-2032-ABC123'})).toBeVisible();
- expect(posts).toHaveLength(1);expect(posts[0]).toMatchObject({fulfillmentMethod:'balikovna',balikovnaPoint:{id:'123',zip:'10030'}});
+ expect(posts).toHaveLength(1);expect(posts[0]).toMatchObject({fulfillmentMethod:'balikovna',balikovnaPoint:{id:'B10103',zip:'10030'}});
  await expect(page.getByText(/Způsob převzetí:/)).toBeVisible();expect(errors).toEqual([]);
 });
