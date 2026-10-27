@@ -584,7 +584,6 @@ export function BookingPage() {
                 ) : null}
               </Stack>
               <Stack>
-                <Heading>Kontaktní údaje</Heading>
                 <form
                   noValidate
                   onSubmit={event => {
@@ -594,6 +593,7 @@ export function BookingPage() {
                 >
                   <Stack>
                     {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint});}}/></div> : null}
+                    <Heading>Kontaktní údaje</Heading>
                     {(['firstName', 'lastName', 'email', 'phone'] as const).map(
                       field => (
                         <Stack key={field}>
