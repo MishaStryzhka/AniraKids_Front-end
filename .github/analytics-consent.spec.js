@@ -21,7 +21,13 @@ for(const width of [375,390,430,768,1024,1440])test('consent, withdrawal and pri
  await expect(page.getByRole('heading',{name:'Vaše soukromí'})).toBeVisible();expect(state.tags).toEqual([]);
  await expect(page.getByRole('heading',{name:'Sekci se nepodařilo načíst'})).toHaveCount(0);
  await expect(page.locator('footer a[href="/saty"]')).toBeVisible();
- await page.screenshot({path:`test-evidence/analytics/banner-${width}.png`,fullPage:true});
+ const banner=page.getByRole('region',{name:'Vaše soukromí'});
+ const bounds=await banner.boundingBox();
+ expect(bounds.y+bounds.height).toBeLessThanOrEqual(1000);
+ expect(1000-bounds.y-bounds.height).toBeLessThanOrEqual(25);
+ expect(bounds.width).toBeLessThanOrEqual(480);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.screenshot({path:`test-evidence/analytics/banner-${width}.png`});
  await page.getByRole('button',{name:'Pouze nezbytné',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Vaše soukromí'})).toHaveCount(0);expect(state.tags).toEqual([]);
  await page.reload();await expect(page.getByRole('heading',{name:'Vaše soukromí'})).toHaveCount(0);expect(state.tags).toEqual([]);
