@@ -1,7 +1,10 @@
 import { object } from '../api/publicValidation';
 export type BalikovnaPoint = { id: string; name: string; address: string; zip: string };
-export type Fulfillment = { fulfillmentMethod?: 'pickup' | 'balikovna'; balikovnaPoint?: BalikovnaPoint };
-export const deliveryNotice = 'Dopravu hradí zákazník. Cena dopravy není zahrnuta v uvedeném součtu. Cenu, termín odeslání a způsob vrácení potvrdíme před potvrzením rezervace.';
+export type DeliveryAddress = {street:string;city:string;zip:string;country:'CZ'};
+export type Fulfillment = { deliveryTariff?: '2026-10'; fulfillmentMethod?: 'pickup' | 'balikovna' | 'balikovna_address'; balikovnaPoint?: BalikovnaPoint; deliveryAddress?: DeliveryAddress; shippingPrice?:number };
+export const shippingPrice = (v:Fulfillment,mode:string) => mode !== 'external' ? 0 : v.fulfillmentMethod === 'balikovna' ? 89 : v.fulfillmentMethod === 'balikovna_address' ? 119 : 0;
+export function parseAddress(v:unknown):DeliveryAddress {if(!object(v)||typeof v.street!=='string'||!v.street.trim()||v.street.length>200||typeof v.city!=='string'||!v.city.trim()||v.city.length>100||typeof v.zip!=='string'||!/^\d{5}$/.test(v.zip)||v.country!=='CZ')throw new Error('Invalid address');return {street:v.street.trim(),city:v.city.trim(),zip:v.zip,country:'CZ'};}
+export const deliveryNotice = 'Cena zahrnuje doručení k vám. Způsob a cenu vrácení domluvíme před potvrzením rezervace.';
 export function parsePoint(v: unknown): BalikovnaPoint {
   if (!object(v) || typeof v.id !== 'string' || !/^B?[0-9]{1,20}$/.test(v.id) ||
       typeof v.zip !== 'string' || !/^[0-9]{5}$/.test(v.zip) ||
@@ -13,10 +16,12 @@ export function parseFulfillment(v: Record<string, unknown>): Fulfillment {
   if (v.fulfillmentMethod === undefined && v.balikovnaPoint === undefined) return {};
   if (v.rentalMode !== 'external') throw new Error('Delivery is only available outside the studio');
   if (v.fulfillmentMethod === 'pickup' && v.balikovnaPoint === undefined) return { fulfillmentMethod: 'pickup' };
+  if (v.fulfillmentMethod === 'balikovna_address') return {fulfillmentMethod:'balikovna_address',deliveryAddress:parseAddress(v.deliveryAddress)};
   if (v.fulfillmentMethod === 'balikovna') return { fulfillmentMethod: 'balikovna', balikovnaPoint: parsePoint(v.balikovnaPoint) };
   throw new Error('Invalid delivery');
 }
 export function fulfillmentError(v: Fulfillment, rentalMode: string): string | undefined {
+  if(rentalMode === 'external' && v.fulfillmentMethod === 'balikovna_address'){try{parseAddress(v.deliveryAddress);return;}catch{return 'Vyplňte ulici a číslo domu, město a platné PSČ.';}}
   if (rentalMode !== 'external' || v.fulfillmentMethod !== 'balikovna') return;
   try { parsePoint(v.balikovnaPoint); } catch { return 'Vyberte výdejní místo Balíkovny.'; }
 }

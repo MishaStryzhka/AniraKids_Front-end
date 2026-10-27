@@ -83,7 +83,7 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
-    ...(selection.rentalMode === 'external' ? {fulfillmentMethod: draft.fulfillmentMethod ?? 'pickup', ...(draft.fulfillmentMethod === 'balikovna' ? {balikovnaPoint:draft.balikovnaPoint} : {})} : {}),
+    ...(selection.rentalMode === 'external' ? {deliveryTariff:'2026-10' as const,fulfillmentMethod: draft.fulfillmentMethod ?? 'pickup', ...(draft.fulfillmentMethod === 'balikovna' ? {balikovnaPoint:draft.balikovnaPoint} : draft.fulfillmentMethod === 'balikovna_address' ? {deliveryAddress:draft.deliveryAddress} : {})} : {}),
     ...(getReferralToken()?{referralToken:getReferralToken()}:{}),
     ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
       productId: item.product.id, variantId: item.variantId,
@@ -130,6 +130,7 @@ export function parseBody(v: unknown): ReservationBody {
     throw new Error('Invalid attempt');
   return {
     ...parseFulfillment(v),
+    ...(v.deliveryTariff==='2026-10'?{deliveryTariff:'2026-10' as const}:{}),
     ...(items ? { items } : {}),
     productId: v.productId,
     variantId: v.variantId,
@@ -243,7 +244,7 @@ export function persistDraft(draft: BookingDraft | null) {
     return;
   }
   const raw = JSON.stringify({ version: 1, selection: draft.selection,
-    ...(draft.selection.rentalMode === 'external' ? {fulfillmentMethod:draft.fulfillmentMethod,balikovnaPoint:draft.balikovnaPoint} : {}),
+    ...(draft.selection.rentalMode === 'external' ? {fulfillmentMethod:draft.fulfillmentMethod,balikovnaPoint:draft.balikovnaPoint,deliveryAddress:draft.deliveryAddress} : {}),
     items: draftItems(draft).map(item => ({ product: item.product, variantId: item.variantId })) });
   if (raw.length > 500000) throw new Error('Draft too large');
   sessionStorage.setItem(DRAFT_SESSION_KEY, raw);
@@ -266,7 +267,7 @@ export function loadDraft(): BookingDraft | null {
       !isMode(selection.rentalMode) ||
       (selection.startDate !== '' && !isDateOnly(selection.startDate)) ||
       (selection.endDate !== '' && !isDateOnly(selection.endDate))) throw new Error('Invalid draft selection');
-  const fulfillment = value.fulfillmentMethod === 'balikovna' && value.balikovnaPoint === undefined ? {fulfillmentMethod:'balikovna' as const} : parseFulfillment({...value,rentalMode:selection.rentalMode});
+  const fulfillment = value.fulfillmentMethod === 'balikovna_address' ? {fulfillmentMethod:'balikovna_address' as const,deliveryAddress:typeof value.deliveryAddress==='object' && value.deliveryAddress ? value.deliveryAddress as import('./fulfillment').DeliveryAddress : undefined} : value.fulfillmentMethod === 'balikovna' && value.balikovnaPoint === undefined ? {fulfillmentMethod:'balikovna' as const} : parseFulfillment({...value,rentalMode:selection.rentalMode});
   return { ...fulfillment, product: items[0].product, additionalItems: items.slice(1), contact: emptyContact(),
     selection: { productId: items[0].product.id, variantId: items[0].variantId,
       rentalMode: selection.rentalMode, startDate: selection.startDate as string, endDate: selection.endDate as string } };

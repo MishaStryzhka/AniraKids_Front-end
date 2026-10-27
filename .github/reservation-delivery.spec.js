@@ -6,7 +6,7 @@ const product={id:'111111111111111111111111',slug:'sofia',name:'Sofia',category:
 const selection={productId:product.id,variantId:product.variants[0].id,rentalMode:'external',startDate:'2032-06-10',endDate:'2032-06-12'};
 const point={id:'B10103',type:'BALIKOVNY',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
 fs.mkdirSync('test-evidence/delivery',{recursive:true});
-for(const width of [375,768,1440])test('delivery choice, point, submit and receipt '+width,async({page})=>{
+for(const method of ['balikovna','balikovna_address'])for(const width of [375,768,1440])test(method+' choice, submit and receipt '+width,async({page})=>{
  const posts=[],errors=[];let maps=0;
  page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
@@ -25,7 +25,7 @@ for(const width of [375,768,1440])test('delivery choice, point, submit and recei
   if(u.pathname==='/api/v2/reservations'&&route.request().method()==='POST'){
    const body=route.request().postDataJSON();posts.push(body);
    const item={productId:product.id,variantId:selection.variantId,productName:'Sofia',size:'98',rentalPrice:800,deposit:2000};
-   return route.fulfill({status:201,json:{guestAccessToken:'x'.repeat(43),reservation:{reservationNumber:'AK-2032-ABC123',status:'pending',rentalMode:'external',startDate:selection.startDate,endDate:selection.endDate,expiresAt:'2032-06-01T12:00:00Z',item,items:[item],subtotal:800,deposit:2000,totalDue:2800,paymentStatus:'unpaid',fulfillmentMethod:body.fulfillmentMethod,balikovnaPoint:body.balikovnaPoint}}});
+   return route.fulfill({status:201,json:{guestAccessToken:'x'.repeat(43),reservation:{reservationNumber:'AK-2032-ABC123',status:'pending',rentalMode:'external',startDate:selection.startDate,endDate:selection.endDate,expiresAt:'2032-06-01T12:00:00Z',item,items:[item],subtotal:800+(method==='balikovna'?89:119),shippingPrice:method==='balikovna'?89:119,deposit:2000,totalDue:2800+(method==='balikovna'?89:119),paymentStatus:'unpaid',fulfillmentMethod:body.fulfillmentMethod,balikovnaPoint:body.balikovnaPoint,deliveryAddress:body.deliveryAddress}}});
   }
   return route.fulfill({status:401,json:{error:{code:'UNAUTHORIZED'}}});
  });
@@ -38,17 +38,29 @@ for(const width of [375,768,1440])test('delivery choice, point, submit and recei
  expect(addBox.x).toBeGreaterThan(headingBox.x);expect(Math.abs(addBox.y-headingBox.y)).toBeLessThan(25);
  await expect(page.getByRole('heading',{name:'Souhrn rezervace'})).toBeVisible();
  await page.screenshot({path:`test-evidence/delivery/layout-${width}.png`,fullPage:true});
+ if(method==='balikovna'){
  await page.getByLabel('Balíkovna',{exact:true}).check();expect(maps).toBe(0);
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByText('Vyberte výdejní místo Balíkovny.')).toBeVisible();expect(posts).toEqual([]);
  await page.getByRole('button',{name:'Vybrat výdejní místo',exact:true}).click();
+ await expect(page.getByRole('dialog')).toBeVisible();
  await page.frameLocator('iframe[title="Výběr výdejního místa Balíkovny"]').getByRole('button').click();
  await expect(page.getByText('Praha 10',{exact:true})).toBeVisible();
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ }else{
+ await page.getByLabel('Balíkovna na adresu',{exact:true}).check();
+ await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await expect(page.getByText('Vyplňte ulici a číslo domu, město a platné PSČ.')).toBeVisible();expect(posts).toEqual([]);
+ await page.getByLabel('Ulice a číslo domu',{exact:true}).fill('Testovací 12');
+ await page.getByLabel('Město',{exact:true}).fill('Praha');
+ await page.getByLabel('PSČ',{exact:true}).fill('190 00');
+ }
+ await expect(page.getByText(method==='balikovna'?'2 889 Kč':'2 919 Kč',{exact:true})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
- await page.getByRole('group',{name:'Způsob převzetí'}).screenshot({path:`test-evidence/delivery/choice-${width}.png`});
+ await page.getByRole('group',{name:'Způsob převzetí'}).screenshot({path:`test-evidence/delivery/choice-${method}-${width}.png`});
  await page.getByLabel('Jméno',{exact:true}).fill('Jana');await page.getByLabel('Příjmení').fill('Test');await page.getByLabel('E-mail',{exact:true}).fill('test@example.test');await page.getByLabel('Telefon',{exact:true}).fill('+420777123456');
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'AK-2032-ABC123'})).toBeVisible();
- expect(posts).toHaveLength(1);expect(posts[0]).toMatchObject({fulfillmentMethod:'balikovna',balikovnaPoint:{id:'B10103',zip:'10030'}});
+ expect(posts).toHaveLength(1);expect(posts[0].fulfillmentMethod).toBe(method);if(method==='balikovna')expect(posts[0].balikovnaPoint).toMatchObject({id:'B10103',zip:'10030'});else expect(posts[0].deliveryAddress).toEqual({street:'Testovací 12',city:'Praha',zip:'19000',country:'CZ'});
  await expect(page.getByText(/Způsob převzetí:/)).toBeVisible();expect(errors).toEqual([]);
 });

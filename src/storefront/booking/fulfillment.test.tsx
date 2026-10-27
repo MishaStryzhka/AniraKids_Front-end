@@ -7,6 +7,7 @@ import {parseReceipt,postReservation} from '../api/publicApi';
 import {product,body,receipt} from './bookingFixtures';
 const point={id:'B10103',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
 const delivery={fulfillmentMethod:'balikovna' as const,balikovnaPoint:point};
+beforeAll(()=>{HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};});
 function Form(){const [value,setValue]=useState<Fulfillment>({});return <FulfillmentChoice value={value} onChange={setValue}/>;}
 test('map loads only after request, ignores untrusted messages, retains selection and clears it for pickup',()=>{
  render(<Form/>);
@@ -32,7 +33,7 @@ test('delivery persists across retry and draft reload, but is excluded for studi
  const payload=reservationBody(draft);
  expect(payload).toMatchObject(delivery);
  Object.defineProperty(globalThis,'crypto',{value:require('crypto').webcrypto,configurable:true});
- expect(parseStored(JSON.stringify(newAttempt(payload)))).toMatchObject({body:delivery});
+ expect(parseStored(JSON.stringify(newAttempt(payload)))).toMatchObject({body:{...delivery,deliveryTariff:'2026-10'}});
  persistDraft(draft);expect(loadDraft()).toMatchObject(delivery);
  expect(reservationBody({...draft,selection:{...draft.selection,rentalMode:'studio'}})).not.toHaveProperty('balikovnaPoint');
  expect(()=>parseFulfillment({...delivery,rentalMode:'studio'})).toThrow();
@@ -47,4 +48,14 @@ test('multi-item POST retains delivery and response point',async()=>{
  global.fetch=fetchMock;
  await postReservation({...body,rentalMode:'external',...delivery,items:[{productId:body.productId,variantId:body.variantId}]},'key');
  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject(delivery);
+});
+
+test('home delivery requires an address and retains it through draft and request',()=>{
+ const address={street:'Testovací 12',city:'Praha',zip:'19000',country:'CZ' as const};
+ const draft={...initialDraft(product),fulfillmentMethod:'balikovna_address' as const,deliveryAddress:address,selection:{...body,rentalMode:'external' as const}};
+ persistDraft(draft);expect(loadDraft()?.deliveryAddress).toEqual(address);
+ expect(reservationBody(draft).deliveryAddress).toEqual(address);
+ expect(()=>parseFulfillment({...draft,deliveryAddress:{...address,zip:'abc'},rentalMode:'external'})).toThrow();
+ const result=parseReceipt({reservation:{...receipt,rentalMode:'external',fulfillmentMethod:'balikovna_address',deliveryAddress:address,shippingPrice:119,subtotal:receipt.subtotal+119,totalDue:receipt.totalDue+119}});
+ expect(result.shippingPrice).toBe(119);expect(result.deliveryAddress).toEqual(address);
 });

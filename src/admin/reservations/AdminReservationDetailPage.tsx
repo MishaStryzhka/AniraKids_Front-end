@@ -260,11 +260,13 @@ function ReservationDetailView({
                   <dd>
                     {reservation.fulfillmentMethod === 'pickup'
                       ? 'Osobní vyzvednutí'
-                      : reservation.fulfillmentMethod === 'balikovna' ? 'Balíkovna' : 'Jiný způsob předání'}
+                      : reservation.fulfillmentMethod === 'balikovna' ? 'Balíkovna' : reservation.fulfillmentMethod === 'balikovna_address' ? 'Balíkovna na adresu' : 'Jiný způsob předání'}
                   </dd>
                 </div>
               ) : null}
-              {reservation.fulfillmentMethod === 'balikovna' ? <div><dt>Výdejní místo Balíkovny</dt><dd>{reservation.balikovnaPoint?.name}<br/>{reservation.balikovnaPoint?.address}<br/>PSČ Balíkovny: {reservation.balikovnaPoint?.zip}<br/>ID: {reservation.balikovnaPoint?.id}<br/>Doprava není zahrnuta v ceně. Před potvrzením domluvte s klientem cenu, odeslání a vrácení a ověřte dostupnost oděvu po celou dobu přepravy.</dd></div> : null}
+              {reservation.deliveryAddress ? <div><dt>Doručovací adresa</dt><dd>{reservation.deliveryAddress.street}, {reservation.deliveryAddress.zip} {reservation.deliveryAddress.city}</dd></div> : null}
+              {reservation.shippingPrice ? <div><dt>Doprava</dt><dd>{money(reservation.shippingPrice)}</dd></div> : null}
+              {reservation.fulfillmentMethod === 'balikovna' ? <div><dt>Výdejní místo Balíkovny</dt><dd>{reservation.balikovnaPoint?.name}<br/>{reservation.balikovnaPoint?.address}<br/>PSČ Balíkovny: {reservation.balikovnaPoint?.zip}<br/>ID: {reservation.balikovnaPoint?.id}<br/>Před potvrzením domluvte odeslání a vrácení a ověřte dostupnost oděvu po celou dobu přepravy.</dd></div> : null}
             </DetailFacts>
           </ReservationPanel>
           <ReservationPanel>
@@ -325,9 +327,9 @@ function ReservationDetailView({
                 <dt>Cena pronájmu</dt>
                 <dd>{money(rentalPrice)}</dd>
               </div>
-              {rentalPrice > reservation.subtotal ? <div>
+              {rentalPrice > reservation.subtotal-(reservation.shippingPrice||0) ? <div>
                 <dt>Uplatněna sleva za zkoušku</dt>
-                <dd>−{money(rentalPrice - reservation.subtotal)}</dd>
+                <dd>−{money(rentalPrice - reservation.subtotal+(reservation.shippingPrice||0))}</dd>
               </div> : null}
               {reservation.deposit > 0 ? <div>
                 <dt>Vratná kauce</dt>
