@@ -1,3 +1,4 @@
+import {FulfillmentSummary} from './FulfillmentChoice';
 import {useLiveReservation} from './useLiveReservation';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
@@ -38,6 +39,7 @@ export function BookingStatusPage() {
           </div>)}
           <Copy>{formatCalendarDay(result.data.startDate)} – {formatCalendarDay(result.data.endDate)}</Copy>
           {result.data.fittingDiscount ? <Copy>Započtená platba za zkoušku {result.data.fittingDiscount.number}: −200 Kč</Copy> : null}
+          <FulfillmentSummary value={result.data}/>
           <ReceiptPaymentInformation receipt={result.data} onUpdated={result.reload} access={{kind:'guest',token}} />
           <Button onClick={result.reload}>Aktualizovat stav rezervace</Button>
           <Copy>Tento soukromý odkaz si uložte. Každý, kdo jej získá, může zobrazit stav této rezervace a platební pokyny.</Copy>

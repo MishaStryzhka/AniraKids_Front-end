@@ -1,3 +1,4 @@
+import {parseFulfillment, type Fulfillment} from './fulfillment';
 import {validFittingDiscount} from '../../fittings/fittingDiscountModel';
 import { isDateOnly, pragueToday } from '../../admin/calendar/calendarDates';
 import {getReferralToken} from '../../partner/referral';
@@ -15,7 +16,7 @@ import {
 } from '../api/publicApi';
 export type ContactDraft = Customer & { notes: string };
 export type DraftItem = { product: PublicProduct; variantId: string };
-export type BookingDraft = {
+export type BookingDraft = Fulfillment & {
   additionalItems?: DraftItem[];
   product: PublicProduct;
   selection: Selection;
@@ -82,6 +83,7 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
+    ...(selection.rentalMode === 'external' ? {fulfillmentMethod: draft.fulfillmentMethod ?? 'pickup', ...(draft.fulfillmentMethod === 'balikovna' ? {balikovnaPoint:draft.balikovnaPoint} : {})} : {}),
     ...(getReferralToken()?{referralToken:getReferralToken()}:{}),
     ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
       productId: item.product.id, variantId: item.variantId,
@@ -127,6 +129,7 @@ export function parseBody(v: unknown): ReservationBody {
   if (Object.keys(contactErrors(contact)).length)
     throw new Error('Invalid attempt');
   return {
+    ...parseFulfillment(v),
     ...(items ? { items } : {}),
     productId: v.productId,
     variantId: v.variantId,
@@ -240,6 +243,7 @@ export function persistDraft(draft: BookingDraft | null) {
     return;
   }
   const raw = JSON.stringify({ version: 1, selection: draft.selection,
+    ...(draft.selection.rentalMode === 'external' ? {fulfillmentMethod:draft.fulfillmentMethod,balikovnaPoint:draft.balikovnaPoint} : {}),
     items: draftItems(draft).map(item => ({ product: item.product, variantId: item.variantId })) });
   if (raw.length > 500000) throw new Error('Draft too large');
   sessionStorage.setItem(DRAFT_SESSION_KEY, raw);
@@ -262,7 +266,8 @@ export function loadDraft(): BookingDraft | null {
       !isMode(selection.rentalMode) ||
       (selection.startDate !== '' && !isDateOnly(selection.startDate)) ||
       (selection.endDate !== '' && !isDateOnly(selection.endDate))) throw new Error('Invalid draft selection');
-  return { product: items[0].product, additionalItems: items.slice(1), contact: emptyContact(),
+  const fulfillment = value.fulfillmentMethod === 'balikovna' && value.balikovnaPoint === undefined ? {fulfillmentMethod:'balikovna' as const} : parseFulfillment({...value,rentalMode:selection.rentalMode});
+  return { ...fulfillment, product: items[0].product, additionalItems: items.slice(1), contact: emptyContact(),
     selection: { productId: items[0].product.id, variantId: items[0].variantId,
       rentalMode: selection.rentalMode, startDate: selection.startDate as string, endDate: selection.endDate as string } };
 }

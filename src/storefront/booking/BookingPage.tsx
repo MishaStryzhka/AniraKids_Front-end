@@ -1,3 +1,5 @@
+import {FulfillmentChoice, FulfillmentSummary} from './FulfillmentChoice';
+import {fulfillmentError} from './fulfillment';
 import {trackAvailability} from '../../analytics/analytics';
 import {useSiteSettings} from '../../siteSettings/SiteSettingsProvider';
 import {useLiveReservation} from './useLiveReservation';
@@ -231,8 +233,12 @@ export function BookingPage() {
     setRequested(draftSelections(draft));
     availability.reload();
   };
+  const [deliveryError,setDeliveryError] = useState<string>();
   const submit = async () => {
     if (!draft) return;
+    const deliveryError = fulfillmentError(draft, draft.selection.rentalMode);
+    setDeliveryError(deliveryError);
+    if(deliveryError){document.querySelector<HTMLButtonElement>('[data-delivery] button')?.focus();return;}
     const errors = contactErrors(draft.contact);
     setContactValidation(errors);
     const first = Object.keys(errors)[0];
@@ -302,6 +308,7 @@ export function BookingPage() {
                   </dd>
                 </div>
               </Facts>
+              <FulfillmentSummary value={stored.receipt}/>
               {receiptReady ? <>
               <PriceSummary
                 discount={stored.receipt.fittingDiscount}
@@ -378,6 +385,7 @@ export function BookingPage() {
                 {formatCalendarDay(stored.body.startDate)} –{' '}
                 {formatCalendarDay(stored.body.endDate)}
               </Copy>
+              <FulfillmentSummary value={stored.body}/>
               {booking.error && !booking.storageBlocked ? (
                 <Copy>{booking.error}</Copy>
               ) : null}
@@ -585,6 +593,7 @@ export function BookingPage() {
                   }}
                 >
                   <Stack>
+                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint});}}/></div> : null}
                     {(['firstName', 'lastName', 'email', 'phone'] as const).map(
                       field => (
                         <Stack key={field}>

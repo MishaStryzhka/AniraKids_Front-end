@@ -1,3 +1,4 @@
+import {parseFulfillment, type Fulfillment} from '../booking/fulfillment';
 import { PublicApiError, object, string, money } from './publicValidation';
 import {
   parseBookingPolicy,
@@ -53,14 +54,14 @@ export type Customer = {
 };
 export type ReservationSelection = Pick<Selection, 'productId' | 'variantId'>;
 export type BookingQuote = Availability & { items?: Availability[] };
-export type ReservationBody = Selection & {
+export type ReservationBody = Selection & Fulfillment & {
   fittingDiscount?: import('../../fittings/FittingDiscount').FittingDiscountSelection;
   referralToken?: string;
   items?: ReservationSelection[];
   customer: Customer;
   notes?: string;
 };
-export type Receipt = {
+export type Receipt = Fulfillment & {
   fittingDiscount?: {number:string;amount:number};
   guestAccessToken?: string;
   payment?: ReceiptPayment | null;
@@ -288,9 +289,11 @@ function parseReservationItem(item: unknown): ReservationItem {
   return { productId: item.productId, variantId: item.variantId, productName: item.productName,
     size: item.size, rentalPrice: item.rentalPrice, deposit: item.deposit };
 }
-export function parseReceipt(v: unknown, expected?: Selection & { items?: ReservationSelection[] }): Receipt {
+export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { items?: ReservationSelection[] }): Receipt {
   if (!object(v) || !object(v.reservation)) return invalid();
   const r = v.reservation;
+  let fulfillment: Fulfillment;
+  try { fulfillment = parseFulfillment(r); } catch { return invalid(); }
   const discount=r.fittingDiscount;
   if(discount!==undefined&&(!object(discount)||discount.amount!==200||typeof discount.number!=='string'||!/^ZK-[A-F0-9]{12}$/.test(discount.number)))return invalid();
   const fittingDiscount=discount as {number:string;amount:number}|undefined;
@@ -309,12 +312,15 @@ export function parseReceipt(v: unknown, expected?: Selection & { items?: Reserv
   const selection = { productId: item.productId, variantId: item.variantId,
     rentalMode: r.rentalMode, startDate: r.startDate, endDate: r.endDate };
   if (expected) {
+    if (expected.fulfillmentMethod === 'balikovna' &&
+        (fulfillment.fulfillmentMethod !== 'balikovna' || JSON.stringify(fulfillment.balikovnaPoint) !== JSON.stringify(parseFulfillment(expected).balikovnaPoint))) return invalid();
     const expectedItems = expected.items ?? [expected];
     if (!sameSelection(selection, expected) || expectedItems.length !== items.length ||
         expectedItems.some((i, index) => i.productId !== items[index].productId ||
           i.variantId !== items[index].variantId)) return invalid();
   }
   return {
+    ...fulfillment,
     ...(isGuestAccessToken(v.guestAccessToken) ? { guestAccessToken: v.guestAccessToken } : {}),
     reservationNumber: r.reservationNumber, status: r.status, rentalMode: r.rentalMode,
     startDate: r.startDate, endDate: r.endDate, expiresAt: r.expiresAt as string | null,
@@ -421,6 +427,8 @@ export async function postReservation(
       items: body.items, rentalMode: body.rentalMode, startDate: body.startDate,
       ...(body.fittingDiscount?{fittingDiscount:body.fittingDiscount}:{}),
       ...(body.referralToken?{referralToken:body.referralToken}:{}),
+      ...(body.fulfillmentMethod ? {fulfillmentMethod:body.fulfillmentMethod} : {}),
+      ...(body.balikovnaPoint ? {balikovnaPoint:body.balikovnaPoint} : {}),
       endDate: body.endDate, customer: body.customer, ...(body.notes === undefined ? {} : { notes: body.notes }),
     } : body),
     headers: { 'Idempotency-Key': key, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
