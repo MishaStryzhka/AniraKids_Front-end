@@ -87,6 +87,17 @@ const ItemHeader = styled.div`
   min-inline-size: 0;
   > h3 { min-inline-size: 0; align-self: center; }
 `;
+const SectionHeader = styled.div`
+  display:flex;align-items:center;justify-content:space-between;gap:${t.space[3]};
+`;
+const DateFields = styled.div`
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:${t.space[3]};
+  input {min-inline-size:0;inline-size:100%;}
+`;
+const AvailabilityActions = styled.div`
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:${t.space[3]};
+  > p {flex:1;min-inline-size:140px;font-size:${t.type.bodySm.size};font-weight:600;}
+`;
 const PriceFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
@@ -402,7 +413,7 @@ export function BookingPage() {
           ) : draft ? (
             <Columns>
               <Stack>
-                <Heading>Položky rezervace</Heading>
+                <SectionHeader><Heading>Položky</Heading><RouteLink to={catalogueReturnTo} aria-label="Přidat další produkt">Přidat</RouteLink></SectionHeader>
                 <ItemCard role="group" aria-label={draft.product.name}>
                   <BookingThumbnail key={draft.product.photos[0]?.url||draft.product.id} url={draft.product.photos[0]?.url} name={draft.product.name}/>
                   <ItemHeader>
@@ -457,7 +468,6 @@ export function BookingPage() {
                   </SelectField>
                   {itemValidation[item.product.id] ? <ErrorCopy id={'booking-variant-' + item.product.id + '-error'}>{itemValidation[item.product.id]}</ErrorCopy> : null}
                 </ItemCard>)}
-                <Actions><RouteLink to={catalogueReturnTo}>Přidat další produkt</RouteLink></Actions>
 
                 <Stack>
                   <SelectField
@@ -501,6 +511,7 @@ export function BookingPage() {
                     setRequested(startDate && endDate ? draftSelections({ ...draft, selection }) : null);
                   }}
                 />
+                <DateFields>
                 {(['startDate', 'endDate'] as const).map(field => (
                   <Stack key={field}>
                     <Input
@@ -527,7 +538,8 @@ export function BookingPage() {
                     {errorFor(field, selectionValidation)}
                   </Stack>
                 ))}
-                <Actions>
+                </DateFields>
+                <AvailabilityActions>
                   <Button
                     variant="secondary"
                     loading={availability.loading}
@@ -536,7 +548,8 @@ export function BookingPage() {
                   >
                     Ověřit dostupnost
                   </Button>
-                </Actions>
+                  {quote ? <Copy role="status">{quote.available ? 'Termín je aktuálně dostupný' : 'Tento termín není dostupný'}</Copy> : null}
+                </AvailabilityActions>
                 {availability.error ? (
                   <Alert role="alert">
                     <Copy>
@@ -553,35 +566,7 @@ export function BookingPage() {
                       Zkusit znovu
                     </Button>
                   </Alert>
-                ) : quote ? (
-                  <Panel role="status">
-                    <Heading>
-                      {quote.available
-                        ? 'Termín je aktuálně dostupný'
-                        : 'Tento termín není dostupný'}
-                    </Heading>
-                    {quote.available ? (
-                      <>
-                        <Copy>
-                          {draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}
-                        </Copy>
-                        <Copy>
-                          {modeLabel(quote.rentalMode)} ·{' '}
-                          {formatCalendarDay(quote.startDate)} –{' '}
-                          {formatCalendarDay(quote.endDate)}
-                        </Copy>
-                        <PriceSummary discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
-                        <Copy>
-                          Cena pronájmu je za rezervaci, nikoli za den.
-                          Dostupnost a konečnou cenu ověříme při odeslání
-                          rezervace.
-                        </Copy>
-                      </>
-                    ) : (
-                      <Copy>Vyberte prosím jiný termín.</Copy>
-                    )}
-                  </Panel>
-                ) : null}
+                ) : quote && !quote.available ? <Copy>Vyberte prosím jiný termín.</Copy> : null}
               </Stack>
               <Stack>
                 <form
@@ -695,6 +680,13 @@ export function BookingPage() {
                         <CompanyInformation company={policy.data.company} />
                       </>
                     ) : null}
+                    {quote?.available ? <Panel aria-label="Souhrn rezervace">
+                      <Heading>Souhrn rezervace</Heading>
+                      <Copy>{draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}</Copy>
+                      <Copy>{modeLabel(quote.rentalMode)} · {formatCalendarDay(quote.startDate)} – {formatCalendarDay(quote.endDate)}</Copy>
+                      <PriceSummary discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
+                      <Copy>Cena pronájmu je za rezervaci, nikoli za den. Dostupnost a konečnou cenu ověříme při odeslání rezervace.</Copy>
+                    </Panel> : null}
                     <Copy>
                       Odesláním vytvoříte rezervaci čekající na potvrzení.
                     </Copy>

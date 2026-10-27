@@ -56,11 +56,6 @@ const Day = styled.button<{ $selected: boolean; $range: boolean }>`
   &[data-unavailable='true'] { text-decoration: line-through; }
   &:focus-visible { outline: 2px solid ${t.color.focus.ring}; outline-offset: 1px; z-index: 1; }
 `;
-const Legend = styled(Copy)`
-  font-size: ${t.type.bodySm.size};
-  color: ${t.color.text.secondary};
-`;
-
 export function RentalCalendar({ selection, selections, enabled, onChange }: {
   selections?: Selection[];
   selection: Selection;
@@ -117,7 +112,7 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
       <Nav type="button" aria-label="Následující měsíc"
         disabled={visibleMonth >= '9998-12'} onClick={() => move(1)}>›</Nav>
     </Header>
-    <Copy role="status">{read.loading ? 'Načítání dostupných dnů…' : prompt}</Copy>
+    {read.loading || !enabled || choosingEnd || !selection.startDate || !selection.endDate ? <Copy role="status">{read.loading ? 'Načítání dostupných dnů…' : prompt}</Copy> : null}
     {read.error ? <div role="alert">
       <Copy>Dostupné dny se nepodařilo načíst.</Copy>
       <Button variant="secondary" onClick={read.reload}>Načíst dostupné dny znovu</Button>
@@ -153,10 +148,6 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
           }}>{Number(date.slice(-2))}</Day>;
       })}
     </Grid>
-    <Legend>Volné dny lze vybrat. Přeškrtnuté dny nejsou dostupné.</Legend>
     {choosingEnd ? <Button variant="ghost" onClick={() => onChange('', '')}>Změnit začátek pronájmu</Button> : null}
-    <Legend>{selection.rentalMode === 'studio'
-      ? 'Pronájem ve studiu neblokuje další dny na dopravu ani čištění.'
-      : 'Dostupnost zahrnuje čas na čištění.'} Termín potvrdíme při odeslání rezervace.</Legend>
   </Shell>;
 }

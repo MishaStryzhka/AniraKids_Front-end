@@ -32,6 +32,12 @@ for(const width of [375,768,1440])test('delivery choice, point, submit and recei
  await page.goto(APP+'/rezervace');
  await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
  await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
+ const startBox=await page.getByLabel('Od',{exact:true}).boundingBox(),endBox=await page.getByLabel('Do',{exact:true}).boundingBox();
+ expect(Math.abs(startBox.y-endBox.y)).toBeLessThan(2);expect(endBox.x).toBeGreaterThan(startBox.x+startBox.width);
+ const addBox=await page.getByRole('link',{name:'Přidat další produkt'}).boundingBox(),headingBox=await page.getByRole('heading',{name:'Položky',exact:true}).boundingBox();
+ expect(addBox.x).toBeGreaterThan(headingBox.x);expect(Math.abs(addBox.y-headingBox.y)).toBeLessThan(25);
+ await expect(page.getByRole('heading',{name:'Souhrn rezervace'})).toBeVisible();
+ await page.screenshot({path:`test-evidence/delivery/layout-${width}.png`,fullPage:true});
  await page.getByLabel('Balíkovna',{exact:true}).check();expect(maps).toBe(0);
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByText('Vyberte výdejní místo Balíkovny.')).toBeVisible();expect(posts).toEqual([]);
