@@ -3,7 +3,7 @@ export type BalikovnaPoint = { id: string; name: string; address: string; zip: s
 export type Fulfillment = { fulfillmentMethod?: 'pickup' | 'balikovna'; balikovnaPoint?: BalikovnaPoint };
 export const deliveryNotice = 'Dopravu hradí zákazník. Cena dopravy není zahrnuta v uvedeném součtu. Cenu, termín odeslání a způsob vrácení potvrdíme před potvrzením rezervace.';
 export function parsePoint(v: unknown): BalikovnaPoint {
-  if (!object(v) || typeof v.id !== 'string' || !/^[0-9]{1,20}$/.test(v.id) ||
+  if (!object(v) || typeof v.id !== 'string' || !/^B?[0-9]{1,20}$/.test(v.id) ||
       typeof v.zip !== 'string' || !/^[0-9]{5}$/.test(v.zip) ||
       typeof v.name !== 'string' || !v.name.trim() || v.name.length > 200 ||
       typeof v.address !== 'string' || !v.address.trim() || v.address.length > 400) throw new Error('Invalid pickup point');
