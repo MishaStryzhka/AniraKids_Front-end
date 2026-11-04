@@ -53,17 +53,17 @@ test('unresolved submission still requires recovery before a new booking', () =>
   expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
 });
 
-test('studio price has no deposit row while external price retains its deposit', () => {
+test('photoshoot and external prices both display their configured deposit', () => {
   view();
-  const studio = screen.getAllByText('Studio (Blaze)')[0].parentElement!;
-  const external = screen.getAllByText('Mimo studio')[0].parentElement!;
-  expect(within(studio).queryByText('Vratná kauce')).not.toBeInTheDocument();
-  expect(within(studio).getByText('Cena pronájmu')).toBeInTheDocument();
+  const studio = screen.getAllByText('Na focení')[0].parentElement!;
+  const external = screen.getAllByText('Na libovolnou příležitost')[0].parentElement!;
+  expect(within(studio).getByText('Vratná kauce')).toBeInTheDocument();
+  expect(within(studio).getByText('Cena za focení')).toBeInTheDocument();
   expect(within(external).getByText('Vratná kauce')).toBeInTheDocument();
 });
 
-test('studio offer is hidden before cooperation activation',()=>{
+test('photoshoot offer is independent of cooperation activation',()=>{
   mockCooperationActive=false;
-  try{view();expect(screen.queryByText('Studio (Blaze)')).not.toBeInTheDocument();expect(screen.getAllByText('Mimo studio').length).toBeGreaterThan(0);}
+  try{view();expect(screen.getAllByText('Na focení').length).toBeGreaterThan(0);expect(screen.getAllByText('Na libovolnou příležitost').length).toBeGreaterThan(0);}
   finally{mockCooperationActive=true;}
 });

@@ -66,10 +66,11 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
   const [month, setMonth] = useState(() => (selection.startDate || today).slice(0, 7));
   const [focused, setFocused] = useState('');
   const root = useRef<HTMLDivElement>(null);
-  const choosingEnd = Boolean(selection.startDate && !selection.endDate);
+  const choosingEnd = selection.rentalMode!=='studio' && Boolean(selection.startDate && !selection.endDate);
   const query = {
     productId: selection.productId, variantId: selection.variantId,
     rentalMode: selection.rentalMode, month,
+    ...(selection.fulfillmentMethod?{fulfillmentMethod:selection.fulfillmentMethod}:{}),
     ...(choosingEnd ? { startDate: selection.startDate } : {}),
   };
   // A manually entered start can move forward beyond the visible month.
@@ -143,7 +144,8 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
           }}
           onClick={() => {
             if (!available) return;
-            if (choosingEnd) onChange(selection.startDate, date);
+            if(selection.rentalMode==='studio') onChange(date,date);
+            else if (choosingEnd) onChange(selection.startDate, date);
             else onChange(date, '');
           }}>{Number(date.slice(-2))}</Day>;
       })}

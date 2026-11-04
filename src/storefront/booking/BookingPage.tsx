@@ -102,11 +102,11 @@ const PriceFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
 `;
-export function PriceSummary({ pricing, discount, delivery=0 }: { delivery?:number; pricing: Pricing; discount?: {number: string; amount: number} }) {
+export function PriceSummary({ pricing, discount, delivery=0, roundTrip=false }: { roundTrip?:boolean; delivery?:number; pricing: Pricing; discount?: {number: string; amount: number} }) {
   return (
     <PriceFacts>
       <RentalPriceRows rentalPrice={pricing.rentalPrice} discount={discount} />
-      {delivery > 0 ? <div><dt>Doprava</dt><dd>{formatMoney(delivery)}</dd></div> : null}
+      {delivery > 0 ? <div><dt>{roundTrip?'Doprava tam i zpět':'Doprava'}</dt><dd>{formatMoney(delivery)}</dd></div> : null}
       {pricing.deposit > 0 ? <div>
         <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
@@ -140,12 +140,6 @@ export function BookingPage() {
   );
   const [fittingDiscount,setFittingDiscount]=useState<FittingDiscountSelection>();
   useEffect(()=>{if(draft?.selection.rentalMode!=='studio')setFittingDiscount(undefined);},[draft?.selection.rentalMode]);
-  useEffect(()=>{
-    if(cooperationActive===false && draft?.selection.rentalMode==='studio' && !booking.stored){
-      booking.updateDraft({...draft,selection:{...draft.selection,rentalMode:'external'}});
-      setRequested(null);
-    }
-  },[cooperationActive,draft,booking]);
   const [requested, setRequested] = useState<Selection[] | null>(null),
     [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
@@ -211,7 +205,7 @@ export function BookingPage() {
     setItemValidation({});
     booking.updateDraft({
       ...draft,
-      selection: { ...draft.selection, [field]: value },
+      selection: { ...draft.selection, [field]: value, ...((field==='rentalMode'&&value==='studio')?{endDate:draft.selection.startDate}:field==='startDate'&&draft.selection.rentalMode==='studio'?{endDate:value}:{}) },
     });
   };
   const checkEditedDates = () => {
@@ -322,7 +316,7 @@ export function BookingPage() {
               </Facts>
               <FulfillmentSummary value={stored.receipt}/>
               {receiptReady ? <>
-              <PriceSummary delivery={stored?.kind === 'receipt' ? stored.receipt.shippingPrice : 0}
+              <PriceSummary roundTrip={stored.receipt.rentalPolicyVersion==='2026-11'} delivery={stored?.kind === 'receipt' ? stored.receipt.shippingPrice : 0}
                 discount={stored.receipt.fittingDiscount}
                 pricing={{
                   rentalPrice: stored.receipt.subtotal - (stored.receipt.shippingPrice || 0),
@@ -472,7 +466,7 @@ export function BookingPage() {
 
                 <Stack>
                   <SelectField
-                    label="Způsob pronájmu"
+                    label="Varianta pronájmu"
                     name="rentalMode"
                     value={draft.selection.rentalMode}
                     aria-invalid={
@@ -487,23 +481,24 @@ export function BookingPage() {
                       changeSelection('rentalMode', event.target.value)
                     }
                   >
-                    {cooperationActive && <option
+                    {<option
                       value="studio"
                       disabled={Boolean(variant && !variant.pricing.studio)}
                     >
-                      Studio (Blaze)
+                      Na focení
                     </option>}
                     <option
                       value="external"
                       disabled={Boolean(variant && !variant.pricing.external)}
                     >
-                      Mimo studio
+                      Na libovolnou příležitost
                     </option>
                   </SelectField>
                   {errorFor('rentalMode', selectionValidation)}
+                  <Copy>{draft.selection.rentalMode==='studio'?'Vyzvednutí a vrácení ve stejný den. Pouze osobně: Kytlická 682/2.':'Cena za první den + příplatek za každý další den. Online 1–7 dní, delší pronájem po domluvě.'}</Copy>
                 </Stack>
                 <Heading>{draft.additionalItems?.length ? 'Společný termín pronájmu' : 'Termín pronájmu'}</Heading>
-                <RentalCalendar selection={draft.selection} selections={draftSelections(draft)}
+                <RentalCalendar selection={draftSelections(draft)[0]} selections={draftSelections(draft)}
                   enabled={draftItems(draft).every(item => Boolean(item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode])) && !booking.storageBlocked}
                   onChange={(startDate, endDate) => {
                     const selection = { ...draft.selection, startDate, endDate };
@@ -513,11 +508,11 @@ export function BookingPage() {
                   }}
                 />
                 <DateFields>
-                {(['startDate', 'endDate'] as const).map(field => (
+                {(['startDate', 'endDate'] as const).filter(field=>draft.selection.rentalMode!=='studio'||field==='startDate').map(field => (
                   <Stack key={field}>
                     <Input
                       name={field}
-                      label={field === 'startDate' ? 'Od' : 'Do'}
+                      label={draft.selection.rentalMode==='studio'?'Datum focení':field === 'startDate' ? 'Od' : 'Do'}
                       onBlur={checkEditedDates}
                       type="date"
                       min={
@@ -561,14 +556,14 @@ export function BookingPage() {
                             availability.error.code ===
                               'RENTAL_MODE_UNAVAILABLE'
                           ? 'Tento způsob pronájmu není dostupný.'
-                          : 'Dostupnost se nepodařilo ověřit. Zkuste to prosím znovu.'}
+                          : availability.error instanceof PublicApiError && availability.error.code==='PAST_START_DATE' ? 'Pro doručení vyberte začátek alespoň 2 pracovní dny předem.' : 'Dostupnost se nepodařilo ověřit. Zkuste to prosím znovu.'}
                     </Copy>
                     <Button variant="secondary" onClick={check}>
                       Zkusit znovu
                     </Button>
                   </Alert>
                 ) : quote && !quote.available ? <Copy>Vyberte prosím jiný termín.</Copy> : null}
-                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint,deliveryAddress:value.deliveryAddress});}}/></div> : null}
+                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{if(value.fulfillmentMethod!==draft.fulfillmentMethod)setRequested(null);setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint,deliveryAddress:value.deliveryAddress});}}/></div> : null}
               </Stack>
               <Stack>
                 <form
@@ -655,7 +650,7 @@ export function BookingPage() {
                       Volitelné. Maximálně 1500 znaků.
                     </Copy>
                     {errorFor('notes', contactValidation)}
-                    {draft.selection.rentalMode === 'studio' ? <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/> : <Copy>Sleva za zkoušku platí pouze pro pronájem ve studiu Blaze. Pokud jste zkoušku absolvovali, sdělte nám její číslo pro propojení rezervace.</Copy>}
+                    {cooperationActive && draft.selection.rentalMode === 'studio' ? <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/> : null}
                     {policy.loading ? (
                       <Copy role="status">Načítání informací o platbě…</Copy>
                     ) : policy.error ? (
@@ -672,7 +667,7 @@ export function BookingPage() {
                       <>
                         <BookingPaymentExplanation delivery={shippingPrice(draft,draft.selection.rentalMode)}
                           policy={policy.data}
-                          hasDeposit={draft.selection.rentalMode !== 'studio'}
+                          hasDeposit={quote ? quote.pricing.deposit>0 : true}
                           fittingCredit={fittingDiscount ? 200 : 0}
                           rentalPrice={
                             quote ? quote.pricing.rentalPrice - (fittingDiscount ? 200 : 0) : undefined
@@ -685,8 +680,9 @@ export function BookingPage() {
                       <Heading>Souhrn rezervace</Heading>
                       <Copy>{draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}</Copy>
                       <Copy>{modeLabel(quote.rentalMode)} · {formatCalendarDay(quote.startDate)} – {formatCalendarDay(quote.endDate)}</Copy>
-                      <PriceSummary delivery={shippingPrice(draft,draft.selection.rentalMode)} discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
-                      <Copy>Cena pronájmu je za rezervaci, nikoli za den. Dostupnost a konečnou cenu ověříme při odeslání rezervace.</Copy>
+                      {quote.items.map((item,index)=>item.pricing.firstDayPrice!==undefined && item.pricing.rentalDays!==undefined ? <Copy key={item.productId}>{draftItems(draft)[index].product.name}: {formatMoney(item.pricing.firstDayPrice)}{item.pricing.rentalDays>1 ? ` + ${item.pricing.rentalDays-1} × ${formatMoney(item.pricing.additionalDayPrice??0)}` : ''}</Copy>:null)}
+                      <PriceSummary roundTrip delivery={shippingPrice(draft,draft.selection.rentalMode)} discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
+                      <Copy>Cena zahrnuje vybrané kalendářní dny včetně prvního a posledního dne. Dny přepravy a čištění neúčtujeme. Dostupnost a cenu ověříme při odeslání.</Copy>
                     </Panel> : null}
                     <Copy>
                       Odesláním vytvoříte rezervaci čekající na potvrzení.

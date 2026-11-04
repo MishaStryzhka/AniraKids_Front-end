@@ -44,7 +44,7 @@ export function ProductDetailPage() {
     track(); window.addEventListener(CONSENT_EVENT, track);
     return () => window.removeEventListener(CONSENT_EVENT, track);
   }, [analyticsProductId]);
-  const {sections,cooperationActive}=useSiteSettings();
+  const {sections}=useSiteSettings();
   const previousCatalogue=getCatalogueReturnTo(location.state, product?.category);
   const previousPath=previousCatalogue.split('?')[0];
   const catalogueReturnTo=(previousPath===routes.dresses&&!sections.girlsDresses)||(previousPath==='/forWomen'&&new URLSearchParams(previousCatalogue.split('?')[1]).get('category')==='dress'&&!sections.womenDresses)||(previousPath===routes.suits&&!sections.suits)||(previousPath===routes.familyLooks&&!sections.familyLooks)
@@ -109,18 +109,19 @@ export function ProductDetailPage() {
             product.variants.map(variant => (
               <Panel key={variant.id}>
                 <Heading>Velikost {variant.size}</Heading>
-                {(['studio', 'external'] as const).filter(mode=>mode!=='studio'||cooperationActive).map(mode => (
+                {(['studio', 'external'] as const).map(mode => (
                   <Stack key={mode}>
-                    <strong>{mode === 'studio' ? 'Studio (Blaze)' : modeLabel(mode)}</strong>
+                    <strong>{modeLabel(mode)}</strong>
                     {variant.pricing[mode] ? (
                       <Facts>
                         <div>
-                          <dt>Cena pronájmu</dt>
+                          <dt>{mode==='studio'?'Cena za focení':'První den'}</dt>
                           <dd>
                             {formatMoney(variant.pricing[mode]!.rentalPrice)}
                           </dd>
                         </div>
-                        {mode === 'external' && (
+                        {mode === 'external' && <div><dt>Každý další den</dt><dd>{formatMoney(variant.pricing[mode]!.additionalDayPrice ?? 200)}</dd></div>}
+                        {variant.pricing[mode]!.deposit>0 && (
                           <div>
                             <dt>Vratná kauce</dt>
                             <dd>{formatMoney(variant.pricing[mode]!.deposit)}</dd>
@@ -139,8 +140,7 @@ export function ProductDetailPage() {
           )}
           <Actions><RouteLink to={"/zkouska?product="+encodeURIComponent(product.id)}>Rezervovat zkoušku</RouteLink></Actions>
           <Copy>
-            Cena pronájmu je za rezervaci, nikoli za den. Dostupnost ověříme pro
-            vybraný termín.
+            Na focení: vyzvednutí a vrácení ve stejný den, pouze osobně. Na libovolnou příležitost: 1–7 dní, s možností dopravy. Dostupnost a celkovou cenu uvidíte po výběru termínu.
           </Copy>
           {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
           {booking.stored?.kind === 'attempt' || booking.storageBlocked || booking.accountBlocked ? (

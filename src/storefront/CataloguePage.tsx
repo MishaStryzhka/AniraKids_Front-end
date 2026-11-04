@@ -195,8 +195,8 @@ function CatalogueContent() {
         root === '/forMen' ? { title: 'Pánské oblečení', gender: 'men' } :
             root === '/forChildren' ? { title: 'Dětské oblečení', gender: 'children' } : null;
     const isWomenDresses = root === '/forWomen' && params.get('category') === 'dress';
-    const {filters,cooperationActive}=useSiteSettings();
-    const defaultMode=cooperationActive?'studio':'external';
+    const {filters}=useSiteSettings();
+    const defaultMode='studio';
     const section=sectionFor(pathname,search);
     const allowed=section?filters[section]:['category','gender','price','rentalMode','color','size'];
     const visible=(key:string)=>allowed.includes((key==='minPrice'||key==='maxPrice'?'price':key) as FilterKey);
@@ -230,7 +230,6 @@ function CatalogueContent() {
         if (value && visible(key))
             Object.assign(request, { [key]: key === 'minPrice' || key === 'maxPrice' ? Number(value) : value });
     }
-    if(!cooperationActive)request.rentalMode='external';
     if (isFamily) request.familyLook = 'true';
     if (fixedCategory)
         request.category = fixedCategory;
@@ -315,7 +314,7 @@ function CatalogueContent() {
           {!fixedGender && visible('gender') && <label>Pro koho<Select value={draft.gender} onChange={event => update('gender', event.target.value)}><option value="">Všichni</option>{genders.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>}
         </details>}
         {(visible('price')||visible('rentalMode'))&&<details><summary>CENA</summary>
-          {visible('rentalMode')&&<label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}>{cooperationActive?<option value="studio">Ve studiu</option>:null}<option value="external">Mimo studio</option></Select></label>}
+          {visible('rentalMode')&&<label>Způsob pronájmu<Select value={draft.rentalMode} onChange={event => update('rentalMode', event.target.value)}><option value="studio">Na focení</option><option value="external">Na libovolnou příležitost</option></Select></label>}
           {visible('price')&&<><Input label="Cena od (Kč)" type="number" min="0" max="9999999" step="1" value={draft.minPrice} onChange={event => update('minPrice', event.target.value)}/>
           <Input label="Cena do (Kč)" type="number" min="0" max="9999999" step="1" value={draft.maxPrice} onChange={event => update('maxPrice', event.target.value)}/>
           <Copy>Cena pronájmu bez vratné kauce.</Copy></>}
