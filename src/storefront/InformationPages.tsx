@@ -1,3 +1,4 @@
+import { cancellationSummary, depositRefundSummary } from './payments/rentalPolicyCopy';
 import {AnalyticsPreferences} from '../analytics/AnalyticsConsent';
 import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import styled from 'styled-components';
@@ -10,17 +11,18 @@ import { BookingPaymentExplanation, CompanyInformation } from './payments/Paymen
 import { routes } from '../navigation/routes';
 const Questions=styled.div`display:grid;gap:16px;details{padding:20px;border:1px solid #e6ded8;border-radius:8px;}summary{cursor:pointer;font-weight:600;min-height:24px;}p{margin-top:16px;line-height:1.7;}`;
 function PaymentDetails(){const policy=usePublicRead('information-policy',getBookingPolicy);return <Panel>{policy.loading?<Copy role="status">Načítání informací…</Copy>:policy.error?<><Copy role="alert">Informace se nepodařilo načíst.</Copy><Button onClick={policy.reload}>Zkusit znovu</Button></>:policy.data?<><BookingPaymentExplanation policy={policy.data}/><CompanyInformation company={policy.data.company}/></>:null}</Panel>;}
-export function HowRentalPage(){const {sections}=useSiteSettings();return <Page><Title>Pronájem pro vaše výjimečné chvíle</Title><Copy>Od výběru oblečení až po jeho vrácení. Cenu konkrétního kousku a kauci vždy uvidíte před odesláním rezervace.</Copy><Panel id="jak-funguje-pronajem"><Heading>Jak funguje pronájem</Heading><RentalSteps/></Panel><PaymentDetails/><Actions>{sections.girlsDresses?<RouteLink to={routes.dresses}>Vybrat šaty</RouteLink>:null}{sections.womenDresses?<RouteLink to={routes.womenDresses}>Dámské šaty</RouteLink>:null}{sections.suits?<RouteLink to={routes.suits}>Vybrat oblek</RouteLink>:null}<RouteLink to="/zkouska">Rezervovat zkoušku</RouteLink><RouteLink to={routes.faq}>Časté dotazy</RouteLink></Actions></Page>;}
+export function HowRentalPage(){const {sections}=useSiteSettings();return <Page><Title>Pronájem pro vaše výjimečné chvíle</Title><Copy>Od výběru oblečení až po jeho vrácení. Cenu konkrétního kousku a kauci vždy uvidíte před odesláním rezervace.</Copy><Panel id="jak-funguje-pronajem"><Heading>Jak funguje pronájem</Heading><RentalSteps/></Panel><PaymentDetails/><Actions><RouteLink to={routes.terms}>Obchodní podmínky</RouteLink><RouteLink to={routes.rentalTerms}>Doprava, storno a vrácení</RouteLink>{sections.girlsDresses?<RouteLink to={routes.dresses}>Vybrat šaty</RouteLink>:null}{sections.womenDresses?<RouteLink to={routes.womenDresses}>Dámské šaty</RouteLink>:null}{sections.suits?<RouteLink to={routes.suits}>Vybrat oblek</RouteLink>:null}<RouteLink to="/zkouska">Rezervovat zkoušku</RouteLink><RouteLink to={routes.faq}>Časté dotazy</RouteLink></Actions></Page>;}
 const questions=[
  ['Musím mít účet?','Rezervaci můžete vytvořit i bez registrace. Pro sledování si uschovejte soukromý odkaz na její stav. Rezervace vytvořené během přihlášení najdete také v části Můj účet → Moje rezervace.'],
  ['Je rezervace po odeslání potvrzená?','Ne. Po odeslání se zobrazí pokyny k platbě a platnost dočasné rezervace. Po přijetí zálohy rezervaci potvrdíme ručně. Před platbou vždy zkontrolujte aktuální stav a platnost pokynů.'],
  ['Jak mohu zaplatit?','Bankovním převodem pomocí QR kódu z rezervace nebo po předchozí domluvě osobně v hotovosti. Platba kartou přes platební bránu zatím není k dispozici.'],
  ['Je rezervační záloha totéž co kauce?','Ne. Záloha se započítá do nájemného. Vratná kauce je samostatná částka uvedená u vybraného oblečení a v souhrnu rezervace.'],
  ['Mohu si uložit oblíbené bez přihlášení?','Ano, pomocí srdíčka u oblečení. Bez přihlášení se seznam ukládá v tomto prohlížeči. Po přihlášení se propojí s oblíbenými ve vašem účtu.'],
- ['Kde probíhá předání a vrácení?','Konkrétní místo a čas si předem domluvíme. Sídlo společnosti uvedené v kontaktech není automaticky místem vyzvednutí.'],
- ['Co když potřebuji změnit nebo zrušit rezervaci?','Napište nám co nejdříve a uveďte číslo rezervace. Dostupnost jiného termínu ověříme. Případný storno poplatek posuzujeme individuálně podle podmínek rezervace.'],
+ ['Kde probíhá předání a vrácení?','Osobní předání je po domluvě na adrese Kytlická 682/2. Nabízíme také doručení Balíkovnou v ČR; cena a zpětná doprava jsou uvedeny před rezervací. Při zasílání zpět předejte balík dopravci nejpozději v poslední den pronájmu. Sídlo společnosti není výdejním místem.'],
+ ['Co když potřebuji změnit nebo zrušit rezervaci?', 'Napište nám a uveďte číslo rezervace. ' + cancellationSummary],
+ ['Kdy dostanu zpět kauci?', depositRefundSummary],
 ];
-export function FaqPage(){return <Page><Title>Časté dotazy</Title><Questions>{questions.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</Questions><Actions><RouteLink to={routes.rental}>Pronájem a platby</RouteLink><RouteLink to={routes.contact}>Mám jiný dotaz</RouteLink></Actions></Page>;}
+export function FaqPage(){return <Page><Title>Časté dotazy</Title><Questions>{questions.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</Questions><Actions><RouteLink to={routes.rental}>Pronájem a platby</RouteLink><RouteLink to={routes.terms}>Obchodní podmínky</RouteLink><RouteLink to={routes.rentalTerms}>Doprava a vrácení</RouteLink><RouteLink to={routes.contact}>Mám jiný dotaz</RouteLink></Actions></Page>;}
 const ContactLinks = styled.div`
   display: flex;
   flex-wrap: wrap;

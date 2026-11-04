@@ -687,9 +687,11 @@ export function BookingPage() {
                     <Copy>
                       Odesláním vytvoříte rezervaci čekající na potvrzení.
                     </Copy>
-                    <RouteLink to={routes.privacy}>
-                      Ochrana osobních údajů
-                    </RouteLink>
+                    <Actions>
+                      <RouteLink to={routes.terms} target="_blank" rel="noreferrer">Obchodní podmínky</RouteLink>
+                      <RouteLink to={routes.rentalTerms} target="_blank" rel="noreferrer">Doprava, storno a vrácení</RouteLink>
+                      <RouteLink to={routes.privacy} target="_blank" rel="noreferrer">Ochrana osobních údajů</RouteLink>
+                    </Actions>
                     {booking.error && !booking.storageBlocked ? (
                       <Alert ref={notice} role="alert" tabIndex={-1}>
                         {booking.error}
