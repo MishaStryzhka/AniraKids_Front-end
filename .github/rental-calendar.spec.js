@@ -6,8 +6,8 @@ const EVIDENCE = 'test-evidence/rental-calendar';
 fs.mkdirSync(EVIDENCE, { recursive: true });
 const product = {
   id:'111111111111111111111111', slug:'sofia', name:'Sofia', category:'dress', photos:[],
-  variants:[{id:'222222222222222222222222',size:'98',pricing:{studio:{rentalPrice:500,deposit:1000,totalDue:1500},external:null}},
-    {id:'333333333333333333333333',size:'104',pricing:{studio:{rentalPrice:500,deposit:1000,totalDue:1500},external:null}}],
+  variants:[{id:'222222222222222222222222',size:'98',pricing:{studio:{rentalPrice:500,deposit:1000,totalDue:1500},external:{rentalPrice:500,deposit:1000,totalDue:1500}}},
+    {id:'333333333333333333333333',size:'104',pricing:{studio:{rentalPrice:500,deposit:1000,totalDue:1500},external:{rentalPrice:500,deposit:1000,totalDue:1500}}}],
 };
 async function setup(page) {
   const state={posts:[],errors:[],reads:[],fail:false};
@@ -37,6 +37,7 @@ async function setup(page) {
   });
   await page.goto(APP+'/produkt/sofia');
   await page.getByRole('button',{name:'Rezervovat'}).click();
+  await page.getByLabel('Varianta pronájmu').selectOption('external');
   return state;
 }
 const day=(page,date)=>page.locator('[data-date="'+date+'"]');
@@ -235,7 +236,7 @@ for(const width of [390,768,1440])test('reservation shows photos for every item 
  await page.route(APP+'/fixtures/booking-photo.jpg',route=>route.fulfill({contentType:'image/jpeg',body:fs.readFileSync('src/images/product-card-1.jpg')}));
  await page.evaluate(({product,photo})=>{
   const second={...product,id:'444444444444444444444444',slug:'second',name:'Dámské šaty DAM011',photos:[{url:photo}]};
-  sessionStorage.setItem('anirakids.draft.v1',JSON.stringify({version:1,selection:{rentalMode:'studio',startDate:'',endDate:''},items:[{product:{...product,name:'Dětské šaty DET30',photos:[{url:photo}]},variantId:''},{product:second,variantId:''}]}));
+  sessionStorage.setItem('anirakids.draft.v1',JSON.stringify({version:1,selection:{rentalMode:'external',startDate:'',endDate:''},items:[{product:{...product,name:'Dětské šaty DET30',photos:[{url:photo}]},variantId:''},{product:second,variantId:''}]}));
  },{product,photo:APP+'/fixtures/booking-photo.jpg'});
  await page.reload();
  for(const name of ['Dětské šaty DET30','Dámské šaty DAM011']){

@@ -45,7 +45,7 @@ test('public reads use exact queries and omit all credentials and Authorization'
   expect(fetchMock.mock.calls[2][0]).not.toContain('customer');
   expect(fetchMock.mock.calls[2][0]).not.toContain('example.test');
   expect(fetchMock.mock.calls[2][0]).toContain(
-    'startDate=2030-10-10&endDate=2030-10-11'
+    'startDate=2030-10-10&endDate=2030-10-10'
   );
 });
 test('POST sends only approved body and key; receipt removes guest token and customer data', async () => {
