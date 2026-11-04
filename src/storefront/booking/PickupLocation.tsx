@@ -20,8 +20,8 @@ export function PickupLocation() {
     <div>
       <strong>Místo vyzvednutí a vrácení</strong>
       <address>Kytlická 862/2<br/>190 00 Praha 9 – Prosek<br/>Česká republika</address>
-      <p>Předání po předchozí domluvě.</p>
-      <a href="https://www.google.com/maps/search/?api=1&query=Kytlick%C3%A1%20862%2F2%2C%20190%2000%20Praha%209%2C%20%C4%8Cesko" aria-label="Zobrazit na mapě (otevře se v nové kartě)" target="_blank" rel="noopener noreferrer">Zobrazit na mapě <ExternalLink size={16} aria-hidden="true"/></a>
+      <p>Vchod č. 2. Předání po předchozí domluvě.</p>
+      <a href="https://www.google.com/maps/search/?api=1&query=Kytlick%C3%A1%202%2C%20190%2000%20Praha%209%2C%20%C4%8Cesko" aria-label="Zobrazit na mapě (otevře se v nové kartě)" target="_blank" rel="noopener noreferrer">Zobrazit na mapě <ExternalLink size={16} aria-hidden="true"/></a>
     </div>
   </Card>;
 }
