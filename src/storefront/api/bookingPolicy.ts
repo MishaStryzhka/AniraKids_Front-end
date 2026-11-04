@@ -28,6 +28,7 @@ export type PaymentInstructions = NonNullable<BookingPolicy['bank']> & {
   qrPayload: string;
 };
 export type ReceiptPayment = PaymentConfirmation & {
+  cardPayment?: {active:boolean;reviewRequired:boolean;kind:'advance'|'full'|null};
   advanceRequired: number;
   advanceBalance: number;
   rentalBalance: number;
@@ -140,10 +141,12 @@ export function parseReceiptPayment(
     p.advanceRequired > receipt.subtotal ||
     p.advanceBalance > p.advanceRequired ||
     p.rentalBalance > receipt.subtotal ||
-    p.depositRequired !== receipt.deposit ||
-    p.depositHeld > p.depositRequired
+    p.depositRequired !== receipt.deposit
   )
     return invalid();
+  const card=value.cardPayment;
+  if(card!==undefined && (!object(card) || typeof card.active!=='boolean' || typeof card.reviewRequired!=='boolean' || ![null,'advance','full'].includes(card.kind as null|'advance'|'full')))return invalid();
+  if(p.depositHeld>p.depositRequired && (!object(card) || card.reviewRequired!==true))return invalid();
   let instructions: PaymentInstructions | null = null;
   if (value.paymentInstructions !== null) {
     const i = value.paymentInstructions;
@@ -174,7 +177,7 @@ export function parseReceiptPayment(
     const i = value.fullPaymentInstructions;
     const payable = (receipt.status === 'pending' && Boolean(receipt.expiresAt)) ||
       receipt.status === 'confirmed' || receipt.status === 'prepared';
-    const remaining = p.rentalBalance + p.depositRequired - p.depositHeld;
+    const remaining = p.rentalBalance + Math.max(0,p.depositRequired - p.depositHeld);
     if (!object(i) || !money(i.amount) || i.amount <= 0 ||
         i.amount !== remaining || i.currency !== 'CZK' ||
         i.message !== receipt.reservationNumber || !payable) return invalid();
@@ -186,6 +189,7 @@ export function parseReceiptPayment(
   }
   return {
     ...parsePaymentConfirmation(value, invalid),
+    ...(card!==undefined ? {cardPayment:card as ReceiptPayment['cardPayment']} : {}),
     advanceRequired: p.advanceRequired,
     advanceBalance: p.advanceBalance,
     rentalBalance: p.rentalBalance,

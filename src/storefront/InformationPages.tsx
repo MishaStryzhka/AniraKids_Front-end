@@ -15,7 +15,7 @@ export function HowRentalPage(){const {sections}=useSiteSettings();return <Page>
 const questions=[
  ['Musím mít účet?','Rezervaci můžete vytvořit i bez registrace. Pro sledování si uschovejte soukromý odkaz na její stav. Rezervace vytvořené během přihlášení najdete také v části Můj účet → Moje rezervace.'],
  ['Je rezervace po odeslání potvrzená?','Ne. Po odeslání se zobrazí pokyny k platbě a platnost dočasné rezervace. Po přijetí zálohy rezervaci potvrdíme ručně. Před platbou vždy zkontrolujte aktuální stav a platnost pokynů.'],
- ['Jak mohu zaplatit?','Bankovním převodem pomocí QR kódu z rezervace nebo po předchozí domluvě osobně v hotovosti. Platba kartou přes platební bránu zatím není k dispozici.'],
+ ['Jak mohu zaplatit?','Bankovním převodem pomocí QR kódu z rezervace nebo po předchozí domluvě osobně v hotovosti. Pokud je v rezervaci nabídnuta online platba, můžete zaplatit kartou nebo dostupnou digitální peněženkou přes Revolut.'],
  ['Je rezervační záloha totéž co kauce?','Ne. Záloha se započítá do nájemného. Vratná kauce je samostatná částka uvedená u vybraného oblečení a v souhrnu rezervace.'],
  ['Mohu si uložit oblíbené bez přihlášení?','Ano, pomocí srdíčka u oblečení. Bez přihlášení se seznam ukládá v tomto prohlížeči. Po přihlášení se propojí s oblíbenými ve vašem účtu.'],
  ['Kde probíhá předání a vrácení?','Osobní předání je po domluvě na adrese Kytlická 682/2. Nabízíme také doručení Balíkovnou v ČR; cena a zpětná doprava jsou uvedeny před rezervací. Při zasílání zpět předejte balík dopravci nejpozději v poslední den pronájmu. Sídlo společnosti není výdejním místem.'],

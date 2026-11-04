@@ -1,6 +1,8 @@
+import {loadGuestReservationLinks} from './guestReservationLinks';
 import {FulfillmentSummary} from './FulfillmentChoice';
 import {useLiveReservation} from './useLiveReservation';
-import { useLocation } from 'react-router-dom';
+import {useEffect} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
 import { routes } from '../../navigation/routes';
 import { receiptItems, getReservationStatus, isGuestAccessToken } from '../api/publicApi';
@@ -16,13 +18,19 @@ export function reservationStatusPath(number: string, token: string) {
 }
 
 export function BookingStatusPage() {
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
+  const navigate=useNavigate();
   const params = new URLSearchParams(hash.slice(1));
-  const number = params.get('reservation') ?? '';
-  const token = params.get('token') ?? '';
+  const number = params.get('reservation') ?? new URLSearchParams(search).get('paymentReservation') ?? '';
+  let savedToken='';
+  try { savedToken=loadGuestReservationLinks().find(link=>link.reservationNumber===number)?.guestAccessToken ?? ''; } catch { /* The saved private link still works if storage is unavailable. */ }
+  const token = params.get('token') ?? savedToken;
   const valid = /^AK-\d{4}-[A-Z0-9]{6}$/.test(number) && isGuestAccessToken(token);
-  const result = usePublicRead(valid ? hash : null, signal => getReservationStatus(number, token, signal));
-  useLiveReservation(valid?hash:null,()=>{if(!result.loading)result.reload();},false);
+  useEffect(()=>{
+    if(valid && !hash)navigate(reservationStatusPath(number,token),{replace:true});
+  },[valid,hash,number,token,navigate]);
+  const result = usePublicRead(valid ? number+token : null, signal => getReservationStatus(number, token, signal));
+  useLiveReservation(valid?number+token:null,()=>{if(!result.loading)result.reload();},false);
   return <Page>
     <Title>Stav rezervace</Title>
     <Panel>

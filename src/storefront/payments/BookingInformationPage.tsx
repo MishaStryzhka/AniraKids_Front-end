@@ -44,7 +44,7 @@ export function BookingInformationPage() {
       <Heading>Cena a platební možnosti</Heading>
       <Copy>Ceny jsou v Kč. Cena pronájmu, doprava, sleva a vratná kauce jsou uvedeny samostatně v souhrnu před odesláním. Kauce není cenou pronájmu. Nájemné se skládá z ceny prvního dne a případných dalších dnů podle tarifu vybraného oblečení; přesný rozpis uvidíte před odesláním. Pronájem na focení ve studiu je na jeden den.</Copy>
       {policy.loading ? <Copy role="status">Načítání platebních informací…</Copy> : policy.error ? <><Copy role="alert">Aktuální platební údaje se nepodařilo načíst. Ostatní podmínky jsou dostupné níže.</Copy><Actions><Button onClick={policy.reload}>Zkusit znovu</Button></Actions></> : policy.data ? <BookingPaymentExplanation policy={policy.data} /> : null}
-      <Copy>Online platba kartou přes platební bránu zatím není dostupná. Dostupné způsoby platby uvádíme při rezervaci. O přijaté platbě vystavujeme příslušný doklad.</Copy>
+      <Copy>Dostupné způsoby platby uvádíme u rezervace. Pokud je nabídnuta online platba, údaje karty bezpečně zpracovává Revolut; dostupnost Apple Pay a Google Pay závisí na zařízení a nastavení peněženky. O přijaté platbě vystavujeme příslušný doklad.</Copy>
     </Panel>
     <Panel as="section" id="doprava">
       <Heading>Převzetí, doručení a vrácení oblečení</Heading>

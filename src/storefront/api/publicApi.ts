@@ -553,3 +553,29 @@ export async function claimReservation(number: string, guestAccessToken: string,
   if (receipt.reservationNumber !== number) return invalid();
   return receipt;
 }
+
+export type RevolutConfig = {mode:'sandbox'|'prod';publicKey:string};
+export async function getRevolutConfig(signal?:AbortSignal):Promise<RevolutConfig|null> {
+  const {body}=await request('/payments/revolut/config',{signal,cache:'no-store'});
+  if(body===null)return null;
+  if(!object(body) || !['sandbox','prod'].includes(String(body.mode)) || typeof body.publicKey!=='string' || !body.publicKey)return invalid();
+  return {mode:body.mode as 'sandbox'|'prod',publicKey:body.publicKey};
+}
+async function revolutAction(number:string,access:ReservationPaymentAccess,action:'create'|'sync'|'cancel',kind?:'advance'|'full',signal?:AbortSignal) {
+  if(!/^AK-\d{4}-[A-Z0-9]{6}$/.test(number) || !access.token || (access.kind==='guest' && !isGuestAccessToken(access.token)))throw new PublicApiError('RESERVATION_NOT_FOUND',404);
+  return request('/reservations/'+encodeURIComponent(number)+'/revolut/'+action,{
+    method:'POST',headers:{Authorization:(access.kind==='guest'?'Reservation ':'Bearer ')+access.token},
+    body:JSON.stringify(kind?{kind}:{}),cache:'no-store',signal,
+  });
+}
+export async function createRevolutOrder(number:string,access:ReservationPaymentAccess,kind:'advance'|'full',signal?:AbortSignal):Promise<{publicId:string}> {
+  const {body}=await revolutAction(number,access,'create',kind,signal);
+  if(!object(body) || typeof body.publicId!=='string' || !body.publicId || body.publicId.length>200)return invalid();
+  return {publicId:body.publicId};
+}
+export async function syncRevolutPayment(number:string,access:ReservationPaymentAccess,cancel=false,signal?:AbortSignal):Promise<Receipt> {
+  const {body}=await revolutAction(number,access,cancel?'cancel':'sync',undefined,signal);
+  const receipt=parseReceipt(body);
+  if(receipt.reservationNumber!==number)return invalid();
+  return {...receipt,...(access.kind==='guest'?{guestAccessToken:access.token}:{})};
+}

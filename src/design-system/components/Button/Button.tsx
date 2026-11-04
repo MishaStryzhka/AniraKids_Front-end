@@ -135,9 +135,7 @@ export function Button({
       $loading={loading}
     >
       <Label $hidden={loading}>
-        {startIcon}
-        {children}
-        {endIcon}
+        <>{startIcon}{children}{endIcon}</>
       </Label>
       {loading ? (
         <LoadingSpinner aria-hidden="true">

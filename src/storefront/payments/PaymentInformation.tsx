@@ -1,3 +1,5 @@
+import {RevolutPayment} from './RevolutPayment';
+import {getRevolutConfig,type RevolutConfig} from '../api/publicApi';
 import { cancellationSummary } from './rentalPolicyCopy';
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
@@ -148,6 +150,14 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       if (request.current === controller) {request.current = null;setBusy(false);}
     }
   };
+  const [cardConfig,setCardConfig]=useState<RevolutConfig|null>(null);
+  const [cardSelected,setCardSelected]=useState(false);
+  useEffect(()=>{
+    const controller=new AbortController();
+    void getRevolutConfig(controller.signal).then(setCardConfig,()=>{});
+    return ()=>controller.abort();
+  },[]);
+  useEffect(()=>{setCardSelected(false);},[source.reservationNumber,access?.token]);
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
@@ -179,7 +189,8 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
   const selected = cash ? 'cash' : choice === 'advance' && advanceInstructions ? 'advance' : 'full';
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
-  const remaining = payment.rentalBalance + payment.depositRequired - payment.depositHeld;
+  const remaining = payment.rentalBalance + Math.max(0,payment.depositRequired - payment.depositHeld);
+  const cardOpen=Boolean(access && (cardSelected || payment.cardPayment?.active));
   const pendingTransfer = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind !== 'cash';
   const cashPlanned = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind === 'cash';
   return (
@@ -212,7 +223,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       <PaymentConfirmationStatus {...payment} />
       {payable && !pendingTransfer && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
-          disabled={busy}
+          disabled={busy || cardOpen}
           onChange={event => setChoice(event.target.value)}>
           {advanceInstructions ? <option value="advance">
             Povinná záloha – {formatMoney(advanceInstructions.amount)}
@@ -225,7 +236,15 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           </option> : null}
         </SelectField>
       ) : null}
-      {expired ? (
+      {payment.cardPayment?.reviewRequired ? <Copy role="alert">Platbu jsme přijali, ale potřebujeme ji zkontrolovat. Další platbu neposílejte; kontaktujte nás s číslem rezervace.</Copy> : null}
+      {cardOpen && access ? <RevolutPayment number={receipt.reservationNumber} access={access}
+        kind={payment.cardPayment?.kind ?? (selected==='advance'?'advance':'full')}
+        config={cardConfig} canPay={payable && !payment.cardPayment?.reviewRequired}
+        onReceipt={next=>{setUpdated({source,token:access.token,receipt:next});}}
+        onClose={()=>{setCardSelected(false);onUpdated?.();}} /> : null}
+      {!cardOpen && !payment.cardPayment?.reviewRequired && access && cardConfig && payable && !pendingTransfer && !cash && instructions ?
+        <Button disabled={busy} onClick={()=>setCardSelected(true)}>Zaplatit online – {formatMoney(instructions.amount)}</Button> : null}
+      {cardOpen || payment.cardPayment?.reviewRequired ? null : expired ? (
         <Copy role="status">
           Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.
           Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
@@ -298,7 +317,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           Neodesílejte platbu podle dřívějšího QR kódu.
         </Copy>
       )}
-      {access && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
+      {access && !cardOpen && !payment.cardPayment?.reviewRequired && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
         <Button disabled={busy || (cash && cashPlanned)} loading={busy}
           onClick={() => void update(cash ? 'cash' : selected === 'advance' ? 'advance' : 'full',
             (cash ? fullInstructions : instructions)!.amount)}>
@@ -306,7 +325,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         </Button>
       ) : null}
       {error ? <Copy role="alert">{error}</Copy> : null}
-      {access ? <Button variant="secondary" disabled={busy} onClick={() => void update()}>Aktualizovat stav platby</Button> : null}
+      {access && !cardOpen ? <Button variant="secondary" disabled={busy} onClick={() => void update()}>Aktualizovat stav platby</Button> : null}
     </Stack>
   );
 }
