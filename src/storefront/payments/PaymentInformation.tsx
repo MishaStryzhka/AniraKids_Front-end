@@ -1,3 +1,4 @@
+import { cancellationSummary } from './rentalPolicyCopy';
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { SelectField } from '../../design-system/components/SelectField';
@@ -76,10 +77,7 @@ export function BookingPaymentExplanation({
         ani platby neznamená potvrzení.
       </Copy>
       <Copy>Po absolvování zaplacené zkoušky můžete při rezervaci uplatnit slevu ve výši 200 Kč přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste slevu neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
-      <Copy>
-        Případný storno poplatek až {formatMoney(policy.cancellation.feeAmount)}{' '}
-        se posuzuje individuálně; neúčtuje se automaticky.
-      </Copy>
+      <Copy>{cancellationSummary}</Copy>
     </Stack>
   );
 }

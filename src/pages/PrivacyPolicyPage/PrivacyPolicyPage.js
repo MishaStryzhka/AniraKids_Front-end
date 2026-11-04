@@ -1,15 +1,23 @@
 import { Container } from 'components/Container/Container';
 import { Item, List, Text, Title } from './PrivacyPolicyPage.styled';
-import PageTitle from 'components/PageTitle/PageTitle';
+import { Title as PageHeading } from 'components/PageTitle/PageTitle.styled';
 import Border from 'components/Border/Border';
+import styled from 'styled-components';
+
+const PrivacyContainer = styled(Container)`
+  padding: 30px 20px 80px;
+  max-width: 960px;
+  overflow-wrap: anywhere;
+  @media (min-width: 768px) { padding: 40px 48px 100px; }
+`;
 
 const PrivacyPolicyPage = () => {
   return (
-    <Container style={{ padding: '30px 70px 100px' }}>
-      <PageTitle>Zásady ochrany osobních údajů</PageTitle>
+    <PrivacyContainer>
+      <PageHeading as="h1">Zásady ochrany osobních údajů</PageHeading>
       <Border />
       <Text style={{ textAlign: 'right' }}>
-        Poslední aktualizace: 26.10.2026
+        Poslední aktualizace: 04.11.2026
       </Text>
 
       <Text style={{ marginTop: 20 }}>
@@ -28,7 +36,7 @@ const PrivacyPolicyPage = () => {
       </Text>
       <Text>
         Pro jakékoliv otázky ohledně ochrany osobních údajů můžete kontaktovat
-        našeho zástupce pro ochranu osobních údajů: mykhailo.stryzhka@seznam.cz
+        společnost na e-mailu glamgarbrentals@seznam.cz
       </Text>
 
       <Title>2. Jaké osobní údaje shromažďujeme</Title>
@@ -43,25 +51,11 @@ const PrivacyPolicyPage = () => {
         </Item>
       </List>
 
-      <Title>3. Jak používáme shromážděné osobní údaje</Title>
-      <Text>Vaše osobní údaje používáme pro následující účely:</Text>
-      <List>
-        <Item>Zajištění a správu našich služeb</Item>
-        <Item>
-          Komunikaci s vámi ohledně našich služeb a aktuálních nabídek
-        </Item>
-        <Item>
-          Vylepšení našich služeb a nabídek na základě vašich preferencí
-        </Item>
-        <Item>Splnění našich právních povinností</Item>
-      </List>
-
-      <Title>4. Předávání osobních údajů třetím stranám</Title>
-      <Text>
-        Vaše osobní údaje nepředáváme žádným třetím stranám bez vašeho souhlasu,
-        s výjimkou případů, kdy to vyžaduje zákon nebo jsme k tomu oprávněni na
-        základě našich oprávněných zájmů.
-      </Text>
+      <Title>3. Účely a právní důvody zpracování</Title>
+      <Text>Kontaktní, rezervační a doručovací údaje používáme k vyřízení vaší žádosti a plnění smlouvy. Bez nezbytných údajů nemůžeme rezervaci nebo doručení zajistit. Údaje o platbách a dokladech zpracováváme také kvůli zákonným účetním povinnostem. Pro ochranu právních nároků a bezpečnost služby využíváme oprávněný zájem.</Text>
+      <Title>4. Příjemci a uchování údajů</Title>
+      <Text>V nezbytném rozsahu údaje zpřístupňujeme poskytovatelům provozu webu a komunikace, účetních a platebních služeb a při zvoleném doručení dopravci. Předání potřebné pro smlouvu nebo zákonnou povinnost nevyžaduje samostatný souhlas.</Text>
+      <Text>Údaje uchováváme po dobu vyřízení rezervace a trvání souvisejících nároků; účetní doklady po dobu vyžadovanou příslušnými předpisy. Údaje zpracovávané pouze na základě souhlasu uchováváme do jeho odvolání nebo skončení příslušného účelu.</Text>
 
       <Title>Analytika návštěvnosti</Title>
       <Text>
@@ -75,12 +69,7 @@ const PrivacyPolicyPage = () => {
         <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">zásadách ochrany soukromí</a>.
       </Text>
       <Title>5. Ochrana osobních údajů</Title>
-      <Text>
-        Podnikáme veškerá opatření k ochraně vašich osobních údajů před
-        neoprávněným přístupem, ztrátou, zneužitím nebo zničením. Vaše údaje
-        jsou chráněny proti neoprávněnému přístupu šifrováním a dalšími
-        bezpečnostními opatřeními.
-      </Text>
+      <Text>Přístup k údajům omezujeme na osoby, které je potřebují pro vyřízení služby. Soukromý odkaz k rezervaci nesdílejte s dalšími osobami.</Text>
 
       <Title>6. Vaše práva ohledně osobních údajů</Title>
       <Text>Máte právo:</Text>
@@ -89,16 +78,18 @@ const PrivacyPolicyPage = () => {
         <Item>Opravit nebo doplnit vaše osobní údaje</Item>
         <Item>Omezit zpracování vašich osobních údajů</Item>
         <Item>Odvolat souhlas se zpracováním osobních údajů</Item>
-        <Item>Požadovat vymazání vašich osobních údajů</Item>
+        <Item>Požadovat vymazání vašich osobních údajů, jsou-li splněny zákonné podmínky</Item>
+        <Item>Požadovat přenositelnost údajů a vznést námitku proti zpracování založenému na oprávněném zájmu</Item>
       </List>
 
+      <Text>Se žádostí nás kontaktujte na glamgarbrentals@seznam.cz. Můžete podat stížnost u <a href="https://uoou.gov.cz/" target="_blank" rel="noreferrer">Úřadu pro ochranu osobních údajů</a>.</Text>
       <Title>7. Změny těchto zásad ochrany osobních údajů</Title>
       <Text>
         Tato zásada ochrany osobních údajů může být pravidelně aktualizována.
         Nové verze budou zveřejněny na našem webovém místě s uvedením data
         účinnosti.
       </Text>
-    </Container>
+    </PrivacyContainer>
   );
 };
 
