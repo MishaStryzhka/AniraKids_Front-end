@@ -1,3 +1,4 @@
+import {PickupLocation} from './PickupLocation';
 import { useEffect, useId, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Store } from 'lucide-react';
@@ -48,7 +49,8 @@ const Point = styled.div`padding:${t.space[4]};border-radius:${t.radius[2]};back
 export function FulfillmentSummary({value}:{value:Fulfillment}) {
   if (!value.fulfillmentMethod) return null;
   return <Stack>
-    <Copy><strong>Způsob převzetí: </strong>{value.fulfillmentMethod==='balikovna'?'Balíkovna':value.fulfillmentMethod==='balikovna_address'?'Balíkovna na adresu':'Osobní vyzvednutí – Kytlická 682/2'}</Copy>
+    <Copy><strong>Způsob převzetí: </strong>{value.fulfillmentMethod==='balikovna'?'Balíkovna':value.fulfillmentMethod==='balikovna_address'?'Balíkovna na adresu':'Osobní vyzvednutí'}</Copy>
+    {value.fulfillmentMethod==='pickup'?<PickupLocation/>:null}
     {value.deliveryAddress ? <Copy>{value.deliveryAddress.street}, {value.deliveryAddress.zip} {value.deliveryAddress.city}, Česká republika</Copy> : null}
     {value.fulfillmentMethod==='balikovna' ? <>
       {value.balikovnaPoint ? <Copy>{value.balikovnaPoint.name} · {value.balikovnaPoint.address}<br/>PSČ Balíkovny: {value.balikovnaPoint.zip}</Copy>:null}
@@ -76,7 +78,7 @@ export function FulfillmentChoice({value,onChange,disabled,error}:{value:Fulfill
       <DeliveryChoice $selected={method==='balikovna_address'}><input type="radio" name="fulfillmentMethod" value="balikovna_address" aria-label="Balíkovna na adresu" checked={method==='balikovna_address'} onChange={()=>{setOpen(false);onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ'}});}}/><img src="/delivery/balikovna-address.svg" alt="Balíkovna na adresu"/><span className="description">Doručíme i na vámi vybranou adresu. <strong>Balíkovna je všude!</strong></span><span className="prices"><strong>238 Kč</strong><small>Doručení: 119 Kč</small><small>Vrácení: 119 Kč</small></span></DeliveryChoice>
     </Choices>
     {method!=='pickup'?<Copy>Pro přepravu počítáme se 2 pracovními dny v každém směru. Tyto dny nejsou součástí placeného pronájmu.</Copy>:null}
-    {method==='balikovna_address'?<Stack><Copy>Doručení na adresu v České republice.</Copy>{(['street','city','zip'] as const).map(field=><Input key={field} label={{street:'Ulice a číslo domu',city:'Město',zip:'PSČ'}[field]} name={'delivery-'+field} autoComplete={{street:'shipping address-line1',city:'shipping address-level2',zip:'shipping postal-code'}[field]} value={value.deliveryAddress?.[field]??''} onChange={event=>onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ',...value.deliveryAddress,[field]:field==='zip'?event.target.value.replace(/\s/g,''):event.target.value}})}/>) }<Copy>{deliveryNotice}</Copy>{error?<ErrorCopy role="alert" id={id}>{error}</ErrorCopy>:null}</Stack>:method==='pickup'?<Copy>Osobní vyzvednutí: Kytlická 682/2. Čas předání si domluvíme.</Copy>:<>
+    {method==='balikovna_address'?<Stack><Copy>Doručení na adresu v České republice.</Copy>{(['street','city','zip'] as const).map(field=><Input key={field} label={{street:'Ulice a číslo domu',city:'Město',zip:'PSČ'}[field]} name={'delivery-'+field} autoComplete={{street:'shipping address-line1',city:'shipping address-level2',zip:'shipping postal-code'}[field]} value={value.deliveryAddress?.[field]??''} onChange={event=>onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ',...value.deliveryAddress,[field]:field==='zip'?event.target.value.replace(/\s/g,''):event.target.value}})}/>) }<Copy>{deliveryNotice}</Copy>{error?<ErrorCopy role="alert" id={id}>{error}</ErrorCopy>:null}</Stack>:method==='pickup'?<PickupLocation/>:<>
       <Copy>{deliveryNotice}</Copy>
       {value.balikovnaPoint?<Point role="status"><strong>{value.balikovnaPoint.name}</strong><br/>{value.balikovnaPoint.address}<br/>PSČ Balíkovny: {value.balikovnaPoint.zip}</Point>:null}
       <Actions ref={button}><Button type="button" variant="secondary" aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?'Zavřít mapu':value.balikovnaPoint?'Změnit výdejní místo':'Vybrat výdejní místo'}</Button></Actions>

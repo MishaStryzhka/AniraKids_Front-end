@@ -1,3 +1,4 @@
+import {PickupLocation} from './PickupLocation';
 import {FulfillmentChoice, FulfillmentSummary} from './FulfillmentChoice';
 import {fulfillmentError, shippingPrice} from './fulfillment';
 import {trackAvailability} from '../../analytics/analytics';
@@ -495,7 +496,8 @@ export function BookingPage() {
                     </option>
                   </SelectField>
                   {errorFor('rentalMode', selectionValidation)}
-                  <Copy>{draft.selection.rentalMode==='studio'?'Vyzvednutí a vrácení ve stejný den. Pouze osobně: Kytlická 682/2.':'Cena za první den + příplatek za každý další den. Online 1–7 dní, delší pronájem po domluvě.'}</Copy>
+                  <Copy>{draft.selection.rentalMode==='studio'?'Vyzvednutí a vrácení ve stejný den. Pouze osobní převzetí.':'Cena za první den + příplatek za každý další den. Online 1–7 dní, delší pronájem po domluvě.'}</Copy>
+                  {draft.selection.rentalMode==='studio'?<PickupLocation/>:null}
                 </Stack>
                 <Heading>{draft.additionalItems?.length ? 'Společný termín pronájmu' : 'Termín pronájmu'}</Heading>
                 <RentalCalendar selection={draftSelections(draft)[0]} selections={draftSelections(draft)}
