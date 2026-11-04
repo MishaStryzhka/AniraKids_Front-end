@@ -75,7 +75,7 @@ export function BookingPaymentExplanation({
       ) : null}
       <Copy>
         {fittingCredit > 0 ? 'Po vytvoření rezervace můžete doplatek uhradit QR platbou nebo při převzetí.' : `Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé částky${hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc. Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze po domluvě uhradit také osobně v hotovosti.`}
-        {' '}Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
+        {' '}Při online platbě přes Revolut platnou rezervaci po ověření platby a dostupnosti potvrdíme automaticky. Převod a hotovost ověřujeme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
       <Copy>Po absolvování zaplacené zkoušky můžete při rezervaci uplatnit slevu ve výši 200 Kč přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste slevu neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>

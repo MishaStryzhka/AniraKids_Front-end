@@ -4,7 +4,7 @@ const APP=process.env.REVOLUT_TEST_APP||'http://127.0.0.1:4173',number='AK-2030-
 const item={productId:'111111111111111111111111',variantId:'222222222222222222222222',productName:'Slavnostní šaty',size:'98',rentalPrice:500,deposit:1000};
 async function fixture(page){
  const state={active:false,paid:false,creates:0,syncs:0,errors:[]};
- const receipt=()=>({reservationNumber:number,status:'pending',rentalMode:'studio',startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:'2099-01-01T00:00:00Z',item,subtotal:500,deposit:1000,totalDue:1500,paymentStatus:'unpaid',payment:{...receiptPayment(number),advanceBalance:state.paid?0:200,rentalBalance:state.paid?300:500,paymentInstructions:state.paid||state.active?null:receiptPayment(number).paymentInstructions,cardPayment:{active:state.active,reviewRequired:false,kind:state.active?'advance':null}}});
+ const receipt=()=>({reservationNumber:number,status:state.paid?'confirmed':'pending',rentalMode:'studio',startDate:'2030-10-24',endDate:'2030-10-24',expiresAt:state.paid?null:'2099-01-01T00:00:00Z',item,subtotal:500,deposit:1000,totalDue:1500,paymentStatus:'unpaid',payment:{...receiptPayment(number),advanceBalance:state.paid?0:200,rentalBalance:state.paid?300:500,paymentInstructions:state.paid||state.active?null:receiptPayment(number).paymentInstructions,cardPayment:{active:state.active,reviewRequired:false,kind:state.active?'advance':null}}});
  page.on('pageerror',e=>state.errors.push(e.message));
  await page.route(url=>/^https?:$/.test(url.protocol)&&url.origin!==APP,async route=>{
   const req=route.request(),url=new URL(req.url()),p=url.pathname;
@@ -43,5 +43,6 @@ for(const width of [375,390,430,768,1024,1440])test('embedded payment stays on s
  state.active=false;state.paid=true;
  await page.getByRole('button',{name:'Ověřit platbu',exact:true}).click();
  await expect(page.getByRole('button',{name:'Potvrdit testovací platbu'})).toHaveCount(0);
+ await expect(page.getByText('Stav: Potvrzená',{exact:true})).toBeVisible();
  expect(state.errors).toEqual([]);
 });

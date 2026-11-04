@@ -37,7 +37,7 @@ export function BookingInformationPage() {
     <Panel as="section">
       <Heading>Rezervace a uzavření smlouvy</Heading>
       <Copy>Vyberte oblečení, velikost, termín a způsob převzetí. Před odesláním můžete údaje zkontrolovat a opravit. Odeslání rezervace je žádostí o pronájem; přijetí žádosti ani platby samo o sobě není potvrzením pronájmu.</Copy>
-      <Copy>Smlouva o pronájmu vzniká naším výslovným potvrzením rezervace. Potvrzení a údaje o rezervaci obdržíte e-mailem. Rezervace je sjednána na uvedený termín, v českém jazyce. Zprávy si uschovejte; kopii potvrzení si můžete vyžádat na našem e-mailu.</Copy>
+      <Copy>Smlouva o pronájmu vzniká naším výslovným potvrzením rezervace. U online platby přes Revolut může potvrzení proběhnout automaticky po ověření platby, platnosti rezervace a dostupnosti oděvu. Potvrzení a údaje o rezervaci obdržíte e-mailem. Rezervace je sjednána na uvedený termín, v českém jazyce. Zprávy si uschovejte; kopii potvrzení si můžete vyžádat na našem e-mailu.</Copy>
       <Copy>Plaťte pouze podle aktuálních pokynů a ve lhůtě uvedené u rezervace. Platba po vypršení dočasné rezervace nezaručuje dostupnost. Pokud pronájem nepotvrdíme, vrátíme všechny částky přijaté k této rezervaci.</Copy>
     </Panel>
     <Panel as="section" id="platby">

@@ -67,7 +67,7 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
   return <Stack>
     <Copy role="status">{message}</Copy>
     <div ref={target} style={{width:'100%',minWidth:0}} />
-    <Copy>Údaje karty zpracovává Revolut. Přijetí platby ověříme automaticky; rezervaci potvrdí AniraKids ručně.</Copy>
+    <Copy>Údaje karty zpracovává Revolut. Po ověření platby automaticky potvrdíme platnou rezervaci, pokud je termín stále dostupný. Případnou výjimku s vámi vyřešíme osobně.</Copy>
     <Button disabled={busy || preparing} onClick={()=>void syncRef.current()}>Ověřit platbu</Button>
     <Button variant="secondary" disabled={busy || preparing} onClick={()=>void syncRef.current(true)}>Zrušit rozpracovanou platbu a změnit způsob</Button>
   </Stack>;
