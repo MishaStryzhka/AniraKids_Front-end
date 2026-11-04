@@ -9,6 +9,9 @@ import { isDateOnly, monthCalendarDays } from '../../admin/calendar/calendarDate
 export { PublicApiError, object, string, money } from './publicValidation';
 export type RentalMode = 'studio' | 'external';
 export type Pricing = {
+  firstDayPrice?: number;
+  additionalDayPrice?: number;
+  rentalDays?: number;
   rentalPrice: number;
   deposit: number;
   totalDue: number;
@@ -34,6 +37,7 @@ export type PublicProduct = ProductCard & {
   variants: PublicVariant[];
 };
 export type Selection = {
+  fulfillmentMethod?: Fulfillment['fulfillmentMethod'];
   productId: string;
   variantId: string;
   rentalMode: RentalMode;
@@ -108,6 +112,9 @@ export function parsePricing(v: unknown): Pricing {
   )
     return invalid();
   return {
+    ...(money(v.firstDayPrice) ? {firstDayPrice:v.firstDayPrice} : {}),
+    ...(money(v.additionalDayPrice) ? {additionalDayPrice:v.additionalDayPrice} : {}),
+    ...(typeof v.rentalDays==='number' && Number.isInteger(v.rentalDays) && v.rentalDays>=1 && v.rentalDays<=7 ? {rentalDays:v.rentalDays} : {}),
     rentalPrice: v.rentalPrice,
     deposit: v.deposit,
     totalDue: v.totalDue,
@@ -254,6 +261,7 @@ export function sameSelection(a: Selection, b: Selection) {
     a.productId === b.productId &&
     a.variantId === b.variantId &&
     a.rentalMode === b.rentalMode &&
+    (a.fulfillmentMethod ?? 'pickup') === (b.fulfillmentMethod ?? 'pickup') &&
     a.startDate === b.startDate &&
     a.endDate === b.endDate
   );
@@ -274,6 +282,7 @@ export function parseAvailability(
     productId: expected.productId,
     variantId: expected.variantId,
     rentalMode: expected.rentalMode,
+    ...(expected.fulfillmentMethod ? {fulfillmentMethod:expected.fulfillmentMethod} : {}),
     startDate: expected.startDate,
     endDate: expected.endDate,
     available: a.available,
@@ -312,7 +321,7 @@ export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { 
       r.deposit !== items.reduce((n, i) => n + i.deposit, 0) ||
       r.totalDue !== r.subtotal + r.deposit) return invalid();
   const selection = { productId: item.productId, variantId: item.variantId,
-    rentalMode: r.rentalMode, startDate: r.startDate, endDate: r.endDate };
+    rentalMode: r.rentalMode, startDate: r.startDate, endDate: r.endDate, ...fulfillment };
   if (expected) {
     if(expected.fulfillmentMethod === 'balikovna_address' && (fulfillment.fulfillmentMethod!=='balikovna_address'||JSON.stringify(fulfillment.deliveryAddress)!==JSON.stringify(parseFulfillment(expected).deliveryAddress)))return invalid();
     if (expected.fulfillmentMethod === 'balikovna' &&
@@ -323,6 +332,7 @@ export function parseReceipt(v: unknown, expected?: Selection & Fulfillment & { 
           i.variantId !== items[index].variantId)) return invalid();
   }
   return {
+    ...(r.rentalPolicyVersion==='2026-11'?{rentalPolicyVersion:'2026-11' as const}:{}),
     ...fulfillment,...(r.shippingPrice===undefined?{}:{shippingPrice}),
     ...(isGuestAccessToken(v.guestAccessToken) ? { guestAccessToken: v.guestAccessToken } : {}),
     reservationNumber: r.reservationNumber, status: r.status, rentalMode: r.rentalMode,
@@ -403,8 +413,8 @@ export async function getAvailability(
   selection: Selection,
   signal?: AbortSignal
 ) {
-  const { productId, variantId, rentalMode, startDate, endDate } = selection;
-  const query = { variantId, rentalMode, startDate, endDate };
+  const { productId, variantId, rentalMode, startDate, endDate, fulfillmentMethod } = selection;
+  const query = { variantId, rentalMode, startDate, endDate, ...(fulfillmentMethod ? {fulfillmentMethod} : {}) };
   return parseAvailability(
     (
       await request(
@@ -428,6 +438,7 @@ export async function postReservation(
     method: 'POST',
     body: JSON.stringify(body.items ? {
       items: body.items, rentalMode: body.rentalMode, startDate: body.startDate,
+      rentalPolicyVersion: body.rentalPolicyVersion,
       ...(body.fittingDiscount?{fittingDiscount:body.fittingDiscount}:{}),
       ...(body.referralToken?{referralToken:body.referralToken}:{}),
       ...(body.fulfillmentMethod ? {fulfillmentMethod:body.fulfillmentMethod} : {}),
@@ -471,7 +482,7 @@ export async function getAccountReservations(token: string, page: number, signal
   return { items: data.items.map(item => parseReceipt(item)), total: data.total as number, page };
 }
 
-export type CalendarQuery = Pick<Selection, 'productId' | 'variantId' | 'rentalMode'> & {
+export type CalendarQuery = Pick<Selection, 'productId' | 'variantId' | 'rentalMode' | 'fulfillmentMethod'> & {
   month: string;
   startDate?: string;
 };

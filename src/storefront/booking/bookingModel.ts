@@ -26,7 +26,7 @@ export const draftItems = (draft: BookingDraft): DraftItem[] => [
   { product: draft.product, variantId: draft.selection.variantId }, ...(draft.additionalItems ?? []),
 ];
 export const draftSelections = (draft: BookingDraft): Selection[] =>
-  draftItems(draft).map(item => ({ ...draft.selection, productId: item.product.id, variantId: item.variantId }));
+  draftItems(draft).map(item => ({ ...draft.selection, ...(draft.selection.rentalMode==='external'?{fulfillmentMethod:draft.fulfillmentMethod??'pickup'}:{fulfillmentMethod:undefined}), productId: item.product.id, variantId: item.variantId }));
 export function draftSelectionsValid(draft: BookingDraft) {
   return draftSelections(draft).every((selection, index) =>
     Object.keys(selectionErrors(selection)).length === 0 &&
@@ -61,6 +61,11 @@ export function selectionErrors(v: Selection, today = pragueToday()) {
   if (!isDateOnly(v.endDate)) errors.endDate = 'Zadejte platné datum konce.';
   else if (isDateOnly(v.startDate) && v.endDate < v.startDate)
     errors.endDate = 'Konec nesmí být dříve než začátek.';
+  if(isDateOnly(v.startDate) && isDateOnly(v.endDate) && v.endDate>=v.startDate){
+    const days=(Date.parse(v.endDate)-Date.parse(v.startDate))/86400000+1;
+    if(v.rentalMode==='studio' && days!==1) errors.endDate='Na focení: vyzvednutí a vrácení ve stejný den.';
+    else if(days>7) errors.endDate='Online lze rezervovat nejvýše 7 dní. Pro delší pronájem nás kontaktujte.';
+  }
   return errors;
 }
 export function contactErrors(v: ContactDraft) {
@@ -83,6 +88,7 @@ export function reservationBody(draft: BookingDraft): ReservationBody {
   const { selection, contact } = draft;
   return {
     ...selection,
+    rentalPolicyVersion:'2026-11',
     ...(selection.rentalMode === 'external' ? {deliveryTariff:'2026-10' as const,fulfillmentMethod: draft.fulfillmentMethod ?? 'pickup', ...(draft.fulfillmentMethod === 'balikovna' ? {balikovnaPoint:draft.balikovnaPoint} : draft.fulfillmentMethod === 'balikovna_address' ? {deliveryAddress:draft.deliveryAddress} : {})} : {}),
     ...(getReferralToken()?{referralToken:getReferralToken()}:{}),
     ...(draft.additionalItems?.length ? { items: draftItems(draft).map(item => ({
@@ -130,6 +136,7 @@ export function parseBody(v: unknown): ReservationBody {
     throw new Error('Invalid attempt');
   return {
     ...parseFulfillment(v),
+    ...(v.rentalPolicyVersion==='2026-11'?{rentalPolicyVersion:'2026-11' as const}:{}),
     ...(v.deliveryTariff==='2026-10'?{deliveryTariff:'2026-10' as const}:{}),
     ...(items ? { items } : {}),
     productId: v.productId,
@@ -211,9 +218,9 @@ export function newAttempt(body: ReservationBody, accountId?: string): Attempt {
 }
 export const modeLabel = (mode: string) =>
   mode === 'studio'
-    ? 'Studio'
+    ? 'Na focení'
     : mode === 'external'
-      ? 'Mimo studio'
+      ? 'Na libovolnou příležitost'
       : 'Neznámý režim';
 export function statusLabel(status: string) {
   const labels: Record<string, string> = {

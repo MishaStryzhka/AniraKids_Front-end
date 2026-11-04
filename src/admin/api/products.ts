@@ -84,7 +84,7 @@ export interface AdminProduct {
   category?: AdminProductCategory; gender?: AdminProductGender; color?: string;
   occasion: AdminProductOccasion[]; ageTags: string[]; brand?: string; familyLookGroup?: string;
   rentalEnabled: boolean; saleEnabled: boolean; rentalPrices?: AdminProductRentalPrices;
-  defaultSalePrice?: number; defaultDeposit: number; seo: AdminProductSeo;
+  additionalDayPrice?:number;defaultSalePrice?: number; defaultDeposit: number; seo: AdminProductSeo;
   status: AdminProductStatus; photos: AdminProductPhoto[];
   createdAt: string; updatedAt: string;
 }
@@ -92,12 +92,12 @@ export interface AdminProductDetailResponse { product: AdminProduct; variants: A
 export interface CreateAdminProductRequest {
  name:string;slug?:string;description?:string;category?:AdminProductCategory;gender?:AdminProductGender;color?:string;
  occasion?:AdminProductOccasion[];ageTags?:string[];brand?:string;familyLookGroup?:string;rentalEnabled?:boolean;saleEnabled?:boolean;
- rentalPrices?:AdminProductRentalPrices;defaultSalePrice?:number;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
+ rentalPrices?:AdminProductRentalPrices;additionalDayPrice?:number;defaultSalePrice?:number;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
 }
 export interface UpdateAdminProductRequest {
  name?:string;slug?:string;description?:string;category?:AdminProductCategory|null;gender?:AdminProductGender|null;color?:string;
  occasion?:AdminProductOccasion[];ageTags?:string[];brand?:string;familyLookGroup?:string;rentalEnabled?:boolean;saleEnabled?:boolean;
- rentalPrices?:{studio?:number|null;external?:number|null};defaultSalePrice?:number|null;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
+ rentalPrices?:{studio?:number|null;external?:number|null};additionalDayPrice?:number;defaultSalePrice?:number|null;defaultDeposit?:number;seo?:Omit<AdminProductSeo,'noIndex'>;
 }
 
 export interface AdminProductListItem {

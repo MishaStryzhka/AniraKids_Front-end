@@ -16,7 +16,10 @@ import {
   postReservation,
   PublicApiError,
 } from '../api/publicApi';
-import { product, quote, body, receipt, deferred } from './bookingFixtures';
+import { product, quote as oldQuote, body as oldBody, receipt as oldReceipt, deferred } from './bookingFixtures';
+const body={...oldBody,rentalMode:'external' as const};
+const quote={...oldQuote,rentalMode:'external' as const};
+const receipt={...oldReceipt,rentalMode:'external' as const};
 import { SESSION_KEY } from './bookingModel';
 jest.mock('../api/publicApi', () => ({
   ...jest.requireActual('../api/publicApi'),
@@ -45,6 +48,7 @@ function setup() {
     </MemoryRouter>
   );
   fireEvent.click(screen.getByRole('button', { name: 'Choose product' }));
+  fireEvent.change(screen.getByLabelText('Varianta pronájmu'),{target:{value:'external'}});
 }
 beforeEach(() => {
   jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
@@ -202,11 +206,15 @@ test('studio summary shows gross rent then fitting discount and net total withou
 
 test('external delivery requires a point before creating a reservation',async()=>{
  setup();selection();
- fireEvent.change(screen.getByLabelText('Způsob pronájmu'),{target:{value:'external'}});
+ fireEvent.change(screen.getByLabelText('Varianta pronájmu'),{target:{value:'external'}});
  get.mockResolvedValue({...quote,rentalMode:'external'});
  fireEvent.click(screen.getByRole('button',{name:'Ověřit dostupnost'}));
  await screen.findByText('Termín je aktuálně dostupný');
  fireEvent.click(screen.getByLabelText('Balíkovna'));
+ expect(screen.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
+ get.mockResolvedValue({...quote,fulfillmentMethod:'balikovna'});
+ fireEvent.click(screen.getByRole('button',{name:'Ověřit dostupnost'}));
+ await screen.findByText('Termín je aktuálně dostupný');
  fireEvent.click(screen.getByRole('button',{name:'Rezervovat',exact:true}));
  expect(await screen.findByText('Vyberte výdejní místo Balíkovny.')).toBeInTheDocument();
  expect(post).not.toHaveBeenCalled();

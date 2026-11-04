@@ -17,6 +17,7 @@ export interface CalendarReservation {
   startDate: DateOnly;
   endDate: DateOnly;
   occupiedThrough: DateOnly;
+  occupiedFrom?: DateOnly;
   customerName: string;
   items: CalendarReservationItem[];
   expiresAt?: string;
@@ -35,6 +36,7 @@ export function parseReservationCalendarResponse(value: unknown): ReservationCal
     if (!isRecord(row) || !isText(row.id) || ids.has(row.id) || !isText(row.reservationNumber) ||
       !isText(row.status) || !['studio', 'external'].includes(row.rentalMode as string) ||
       !isDateOnly(row.startDate) || !isDateOnly(row.endDate) || !isDateOnly(row.occupiedThrough) ||
+      (row.occupiedFrom!==undefined&&(!isDateOnly(row.occupiedFrom)||row.occupiedFrom>row.startDate)) ||
       row.startDate > row.endDate || row.endDate > row.occupiedThrough || typeof row.customerName !== 'string' || !Array.isArray(row.items)) return invalidResponse();
     ids.add(row.id);
     const inventoryIds = new Set<string>();
@@ -47,6 +49,7 @@ export function parseReservationCalendarResponse(value: unknown): ReservationCal
     if (row.expiresAt !== undefined && (typeof row.expiresAt !== 'string' || !Number.isFinite(Date.parse(row.expiresAt)))) return invalidResponse();
     return {id: row.id, reservationNumber: row.reservationNumber, status: row.status as CalendarReservationStatus,
       rentalMode: row.rentalMode as CalendarRentalMode, startDate: row.startDate, endDate: row.endDate,
+      ...(isDateOnly(row.occupiedFrom)?{occupiedFrom:row.occupiedFrom}:{}),
       occupiedThrough: row.occupiedThrough, customerName: row.customerName, items: products,
       ...(row.expiresAt === undefined ? {} : {expiresAt: row.expiresAt as string})};
   });

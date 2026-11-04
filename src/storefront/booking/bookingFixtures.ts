@@ -36,7 +36,7 @@ export const body: ReservationBody = {
   variantId: product.variants[0].id,
   rentalMode: 'studio',
   startDate: '2030-10-10',
-  endDate: '2030-10-11',
+  endDate: '2030-10-10',
   customer: {
     firstName: 'Jana',
     lastName: 'Nováková',
