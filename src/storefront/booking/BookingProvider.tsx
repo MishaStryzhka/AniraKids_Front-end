@@ -94,6 +94,7 @@ function knownRejection(error: unknown) {
       'FITTING_DISCOUNT_MINIMUM',
       'VALIDATION_ERROR',
       'INVALID_DATE',
+      'RENTAL_POLICY_CHANGED',
       'PAST_START_DATE',
       'VARIANT_PRODUCT_MISMATCH',
       'PRODUCT_NOT_FOUND',
@@ -107,6 +108,8 @@ function knownRejection(error: unknown) {
   );
 }
 function rejectionCopy(error: PublicApiError) {
+  if(error.code==='RENTAL_POLICY_CHANGED')return 'Podmínky pronájmu se změnily. Obnovte stránku a znovu ověřte termín a cenu.';
+  if(error.code==='PAST_START_DATE')return 'Vyberte pozdější začátek. Pro doručení potřebujeme 2 pracovní dny před začátkem pronájmu.';
   if(error.code==='FITTING_DISCOUNT_UNAVAILABLE')return 'Platbu za zkoušku nelze započíst nebo kontaktní e-mail neodpovídá zkoušce. Ověřte údaje a platbu znovu.';
   if(error.code==='FITTING_DISCOUNT_MINIMUM')return 'Pro započtení platby za zkoušku musí cena pronájmu dosahovat alespoň 200 Kč.';
   if (
@@ -353,7 +356,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     );
     if (
       !quote?.available ||
-      !sameSelection(quote, draft.selection) ||
+      !sameSelection(quote, draftSelections(draft)[0]) ||
       !variant?.pricing[draft.selection.rentalMode] ||
       !draftSelectionsValid(draft) ||
       (draft.additionalItems?.length ? !quote.items || quote.items.length !== draftSelections(draft).length ||

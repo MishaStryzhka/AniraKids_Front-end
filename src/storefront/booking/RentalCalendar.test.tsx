@@ -6,7 +6,7 @@ import { monthCalendarDays } from '../../admin/calendar/calendarDates';
 jest.mock('../api/publicApi', () => ({...jest.requireActual('../api/publicApi'), getRentalCalendar: jest.fn()}));
 jest.mock('../../admin/calendar/calendarDates', () => ({...jest.requireActual('../../admin/calendar/calendarDates'), pragueToday: () => '2032-02-01'}));
 const get = getRentalCalendar as jest.MockedFunction<typeof getRentalCalendar>;
-const initial: Selection = {productId:'a'.repeat(24), variantId:'b'.repeat(24), rentalMode:'studio', startDate:'', endDate:''};
+const initial: Selection = {productId:'a'.repeat(24), variantId:'b'.repeat(24), rentalMode:'external', startDate:'', endDate:''};
 const data = (q: CalendarQuery): CalendarData => ({...q, today:'2032-02-01', checkedAt:'2032-02-01T12:00:00Z',
   days:monthCalendarDays(q.month).map(date=>({date, available: date !== '2032-02-04' && (!q.startDate || date >= q.startDate)}))});
 function Harness({enabled=true}: {enabled?:boolean}) {
@@ -92,4 +92,10 @@ test('strict public calendar contract rejects missing days, wrong selection and 
     {days:valid.calendar.days.slice(1)}, {today:'2032-02-02'},
     {days:valid.calendar.days.map((day,i)=>i===0?{...day,date:'2032-02-02'}:day)},
   ]) expect(()=>parseRentalCalendar({calendar:{...valid.calendar,...change}},query)).toThrow();
+});
+
+test('photoshoot selects pickup and return together in one click',async()=>{
+ const change=jest.fn();render(<RentalCalendar selection={{...initial,rentalMode:'studio'}} enabled onChange={change}/>);
+ await waitFor(()=>expect(day('2032-02-03')).toHaveAttribute('aria-disabled','false'));
+ fireEvent.click(day('2032-02-03'));expect(change).toHaveBeenCalledWith('2032-02-03','2032-02-03');
 });

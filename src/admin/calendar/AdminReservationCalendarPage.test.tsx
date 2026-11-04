@@ -21,7 +21,7 @@ test('returned reservation includes full source range, authoritative cleaning da
 test('day selection changes only agenda, counts distinguish rental/cleaning and unknown status survives',async()=>{
  get.mockResolvedValue({items:[{...row,endDate:row.startDate,status:'future',customerName:''}]});render(<MemoryRouter><AdminReservationCalendarPage/></MemoryRouter>);await screen.findByText('AK-001');expect(screen.getByText('Neznámý stav')).toBeInTheDocument();expect(screen.getByText('Jméno neuvedeno')).toBeInTheDocument();
  expect(screen.getByText('Termín').nextElementSibling).toHaveTextContent(/^5\. října 2026$/);
- fireEvent.change(screen.getByLabelText('Vybraný den'),{target:{value:'2026-10-05'}});expect(screen.queryByText('Navazující obsazení / čištění')).not.toBeInTheDocument();expect(screen.getByRole('button',{name:/pondělí 5. října 2026. Pronájmy: 1. Čištění: 0/})).toHaveAttribute('aria-pressed','true');
+ fireEvent.change(screen.getByLabelText('Vybraný den'),{target:{value:'2026-10-05'}});expect(screen.queryByText('Navazující obsazení / čištění')).not.toBeInTheDocument();expect(screen.getByRole('button',{name:/pondělí 5. října 2026. Pronájmy: 1. Přeprava \/ čištění: 0/})).toHaveAttribute('aria-pressed','true');
  fireEvent.change(screen.getByLabelText('Vybraný den'),{target:{value:'2026-10-10'}});expect(screen.getByText('Žádné rezervace pro vybraný den')).toBeInTheDocument();expect(get).toHaveBeenCalledTimes(1);
 });
 test('month navigation immediately clears previous calendar and uses correct complete month range',async()=>{

@@ -96,6 +96,7 @@ export function NewReservation({ catalogue, token, userId, onDone, scope='partne
     try {
       const body = {
         items,
+        rentalPolicyVersion:'2026-11',
         rentalMode: mode,
         startDate: start,
         endDate: mode === 'studio' ? start : end,
@@ -219,8 +220,8 @@ export function NewReservation({ catalogue, token, userId, onDone, scope='partne
           value={mode}
           onChange={e => setMode(e.target.value)}
         >
-          <option value="studio">Studio</option>
-          <option value="external">Mimo studio</option>
+          <option value="studio">Na focení</option>
+          <option value="external">Na libovolnou příležitost</option>
         </SelectField>
         <Grid>
           <Input

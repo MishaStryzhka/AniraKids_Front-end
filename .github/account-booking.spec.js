@@ -14,7 +14,7 @@ const product = {
   category: 'dress', description: 'Slavnostní šaty.', color: 'Bílá', photos: [],
   variants: [{
     id: '222222222222222222222222', size: '98',
-    pricing: { studio: { rentalPrice: 500, deposit: 1000, totalDue: 1500 }, external: null },
+    pricing: { studio: { rentalPrice: 500, deposit: 1000, totalDue: 1500 }, external: { rentalPrice: 500, deposit: 1000, totalDue: 1500 } },
   }],
 };
 async function setup(page, { guest = false, delayProfile = false } = {}) {
@@ -56,6 +56,7 @@ async function setup(page, { guest = false, delayProfile = false } = {}) {
 async function enterBooking(page) {
   await page.goto(APP + '/produkt/sofia');
   await page.getByRole('button', { name: 'Rezervovat' }).click();
+  await page.getByLabel('Varianta pronájmu').selectOption('external');
 }
 async function capture(page, name) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
@@ -126,7 +127,7 @@ test('guest booking remains editable with empty contacts', async ({ page }) => {
 });
 
 const ownedReceipt = {
-  reservationNumber:'AK-2030-OWN001',status:'pending',rentalMode:'studio',
+  reservationNumber:'AK-2030-OWN001',status:'pending',rentalMode:'external',
   startDate:'2030-10-10',endDate:'2030-10-11',expiresAt:'2030-10-08T13:00:00Z',
   item:{productId:product.id,variantId:product.variants[0].id,productName:'Sofia',size:'98',rentalPrice:500,deposit:1000},
   subtotal:500,deposit:1000,totalDue:1500,paymentStatus:'unpaid',
@@ -261,7 +262,7 @@ for (const width of [390, 768, 1440]) {
     const state = await setup(page);
     const second = { ...product, id: '444444444444444444444444', slug: 'ema', name: 'Ema',
       variants: [{ id: '555555555555555555555555', size: 'M',
-        pricing: { studio: { rentalPrice: 700, deposit: 1500, totalDue: 2200 }, external: null } }] };
+        pricing: { studio: { rentalPrice: 700, deposit: 1500, totalDue: 2200 }, external: { rentalPrice: 700, deposit: 1500, totalDue: 2200 } } }] };
     await page.route(API + '/api/v2/catalogue/products?**', route => route.fulfill({
       status: 200, contentType: 'application/json', body: JSON.stringify({ items: [product, second], page: 1, limit: 12, total: 2, totalPages: 1 })
     }));

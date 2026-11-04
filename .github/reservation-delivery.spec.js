@@ -2,11 +2,11 @@ const {test,expect}=require('@playwright/test');
 const fs=require('fs'),path=require('path');
 const {policy}=require('./payment-fixtures');
 const APP='https://anirakids.cz';
-const product={id:'111111111111111111111111',slug:'sofia',name:'Sofia',category:'dress',photos:[],variants:[{id:'222222222222222222222222',size:'98',pricing:{studio:null,external:{rentalPrice:800,deposit:2000,totalDue:2800}}}]};
+const product={id:'111111111111111111111111',slug:'sofia',name:'Sofia',category:'dress',photos:[],variants:[{id:'222222222222222222222222',size:'98',pricing:{studio:{rentalPrice:500,deposit:2000,totalDue:2500},external:{rentalPrice:800,deposit:2000,totalDue:2800}}}]};
 const selection={productId:product.id,variantId:product.variants[0].id,rentalMode:'external',startDate:'2032-06-10',endDate:'2032-06-12'};
 const point={id:'B10103',type:'BALIKOVNY',name:'Praha 10',address:'Černokostelecká 2020/20, Praha',zip:'10030'};
 fs.mkdirSync('test-evidence/delivery',{recursive:true});
-for(const method of ['balikovna','balikovna_address'])for(const width of [375,768,1440])test(method+' choice, submit and receipt '+width,async({page})=>{
+for(const method of ['balikovna','balikovna_address'])for(const width of [375,390,430,768,1024,1440])test(method+' choice, submit and receipt '+width,async({page})=>{
  const posts=[],errors=[];let maps=0;
  page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
@@ -21,15 +21,21 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,76
   if(u.pathname==='/api/v2/site-settings')return route.fulfill({json:{cooperationActive:false,sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false}}});
   if(u.pathname==='/api/v2/booking-policy')return route.fulfill({json:policy});
   if(u.pathname.endsWith('/availability-calendar')){const q=Object.fromEntries(u.searchParams);return route.fulfill({json:{calendar:{...q,productId:product.id,startDate:q.startDate||null,today:'2026-10-27',checkedAt:new Date().toISOString(),days:Array.from({length:new Date(Number(q.month.slice(0,4)),Number(q.month.slice(5)),0).getDate()},(_,i)=>({date:q.month+'-'+String(i+1).padStart(2,'0'),available:true}))}}});}
-  if(u.pathname.endsWith('/availability'))return route.fulfill({json:{availability:{...selection,available:true,checkedAt:new Date().toISOString(),pricing:product.variants[0].pricing.external}}});
+  if(u.pathname.endsWith('/availability'))return route.fulfill({json:{availability:{...selection,fulfillmentMethod:u.searchParams.get('fulfillmentMethod')||'pickup',available:true,checkedAt:new Date().toISOString(),pricing:{rentalPrice:1200,deposit:2000,totalDue:3200,firstDayPrice:800,additionalDayPrice:200,rentalDays:3}}}});
   if(u.pathname==='/api/v2/reservations'&&route.request().method()==='POST'){
    const body=route.request().postDataJSON();posts.push(body);
-   const item={productId:product.id,variantId:selection.variantId,productName:'Sofia',size:'98',rentalPrice:800,deposit:2000};
-   return route.fulfill({status:201,json:{guestAccessToken:'x'.repeat(43),reservation:{reservationNumber:'AK-2032-ABC123',status:'pending',rentalMode:'external',startDate:selection.startDate,endDate:selection.endDate,expiresAt:'2032-06-01T12:00:00Z',item,items:[item],subtotal:800+(method==='balikovna'?89:119),shippingPrice:method==='balikovna'?89:119,deposit:2000,totalDue:2800+(method==='balikovna'?89:119),paymentStatus:'unpaid',fulfillmentMethod:body.fulfillmentMethod,balikovnaPoint:body.balikovnaPoint,deliveryAddress:body.deliveryAddress}}});
+   const item={productId:product.id,variantId:selection.variantId,productName:'Sofia',size:'98',rentalPrice:1200,deposit:2000};
+   return route.fulfill({status:201,json:{guestAccessToken:'x'.repeat(43),reservation:{reservationNumber:'AK-2032-ABC123',status:'pending',rentalPolicyVersion:'2026-11',rentalMode:'external',startDate:selection.startDate,endDate:selection.endDate,expiresAt:'2032-06-01T12:00:00Z',item,items:[item],subtotal:1200+(method==='balikovna'?178:238),shippingPrice:method==='balikovna'?178:238,deposit:2000,totalDue:3200+(method==='balikovna'?178:238),paymentStatus:'unpaid',fulfillmentMethod:body.fulfillmentMethod,balikovnaPoint:body.balikovnaPoint,deliveryAddress:body.deliveryAddress}}});
   }
   return route.fulfill({status:401,json:{error:{code:'UNAUTHORIZED'}}});
  });
  await page.goto(APP+'/rezervace');
+ await page.getByLabel('Varianta pronájmu').selectOption('studio');
+ await expect(page.getByLabel('Datum focení')).toHaveValue(selection.startDate);
+ await expect(page.getByLabel('Do',{exact:true})).toHaveCount(0);
+ await expect(page.getByRole('group',{name:'Způsob převzetí'})).toHaveCount(0);
+ await page.getByLabel('Varianta pronájmu').selectOption('external');
+ await page.getByLabel('Do',{exact:true}).fill(selection.endDate);
  await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
  await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
  const startBox=await page.getByLabel('Od',{exact:true}).boundingBox(),endBox=await page.getByLabel('Do',{exact:true}).boundingBox();
@@ -40,6 +46,8 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,76
  await page.screenshot({path:`test-evidence/delivery/layout-${width}.png`,fullPage:true});
  if(method==='balikovna'){
  await page.getByLabel('Balíkovna',{exact:true}).check();expect(maps).toBe(0);
+ await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
+ await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByText('Vyberte výdejní místo Balíkovny.')).toBeVisible();expect(posts).toEqual([]);
  await page.getByRole('button',{name:'Vybrat výdejní místo',exact:true}).click();
@@ -49,18 +57,20 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,76
  await expect(page.getByRole('dialog')).toHaveCount(0);
  }else{
  await page.getByLabel('Balíkovna na adresu',{exact:true}).check();
+ await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
+ await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByText('Vyplňte ulici a číslo domu, město a platné PSČ.')).toBeVisible();expect(posts).toEqual([]);
  await page.getByLabel('Ulice a číslo domu',{exact:true}).fill('Testovací 12');
  await page.getByLabel('Město',{exact:true}).fill('Praha');
  await page.getByLabel('PSČ',{exact:true}).fill('190 00');
  }
- await expect(page.getByText(method==='balikovna'?'2 889 Kč':'2 919 Kč',{exact:true})).toBeVisible();
+ await expect(page.getByText(method==='balikovna'?'3 378 Kč':'3 438 Kč',{exact:true})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.getByRole('group',{name:'Způsob převzetí'}).screenshot({path:`test-evidence/delivery/choice-${method}-${width}.png`});
  await page.getByLabel('Jméno',{exact:true}).fill('Jana');await page.getByLabel('Příjmení').fill('Test');await page.getByLabel('E-mail',{exact:true}).fill('test@example.test');await page.getByLabel('Telefon',{exact:true}).fill('+420777123456');
  await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await expect(page.getByRole('heading',{name:'AK-2032-ABC123'})).toBeVisible();
- expect(posts).toHaveLength(1);expect(posts[0].fulfillmentMethod).toBe(method);if(method==='balikovna')expect(posts[0].balikovnaPoint).toMatchObject({id:'B10103',zip:'10030'});else expect(posts[0].deliveryAddress).toEqual({street:'Testovací 12',city:'Praha',zip:'19000',country:'CZ'});
+ expect(posts).toHaveLength(1);expect(posts[0].rentalPolicyVersion).toBe('2026-11');expect(posts[0].fulfillmentMethod).toBe(method);if(method==='balikovna')expect(posts[0].balikovnaPoint).toMatchObject({id:'B10103',zip:'10030'});else expect(posts[0].deliveryAddress).toEqual({street:'Testovací 12',city:'Praha',zip:'19000',country:'CZ'});
  await expect(page.getByText(/Způsob převzetí:/)).toBeVisible();expect(errors).toEqual([]);
 });

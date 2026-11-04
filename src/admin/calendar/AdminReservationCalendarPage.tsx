@@ -107,8 +107,8 @@ export function AdminReservationCalendarPage() {
                 if (!day) return <div aria-hidden="true" key={`boundary-${index}`}/>;
                 if (!day.startsWith(month+'-')) return <DayButton key={day} size="compact" variant="secondary" disabled data-calendar-adjacent={day} aria-label={`${formatCalendarDay(day,true)}. Mimo zobrazený měsíc.`}><DayNumber>{Number(day.slice(-2))}</DayNumber></DayButton>;
                 const counts=reservationDayCounts(state.items,day);const blocked=blocks.filter(b=>b.startDate<=day && b.endDate>=day).length;return <DayButton key={day} size="compact" variant={day===selectedDay?'primary':'secondary'} data-weekend={mondayWeekday(day)>=5?'true':undefined} aria-pressed={day===selectedDay} aria-current={day===today?'date':undefined}
-                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Čištění: ${counts.cleaning}. Blokace: ${blocked}.${canFittings?` Zkoušky: ${fittings.loading||fittings.error?'nedostupné':fittingsOnDay(fittings.items,day).length}.`:''}`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
-                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount>{canFittings?<DayCount>Zkoušky: {fittings.loading||fittings.error?'–':fittingsOnDay(fittings.items,day).length}</DayCount>:null}<DayCount>Čištění: {counts.cleaning}</DayCount>{blocked?<DayCount>Blokace: {blocked}</DayCount>:null}
+                aria-label={`${formatCalendarDay(day,true)}. Pronájmy: ${counts.rental}. Přeprava / čištění: ${counts.cleaning}. Blokace: ${blocked}.${canFittings?` Zkoušky: ${fittings.loading||fittings.error?'nedostupné':fittingsOnDay(fittings.items,day).length}.`:''}`} onClick={()=>setSelectedDay(day)} data-calendar-day={day}>
+                <DayNumber>{Number(day.slice(-2))}</DayNumber><DayCount>Pronájmy: {counts.rental}</DayCount>{canFittings?<DayCount>Zkoušky: {fittings.loading||fittings.error?'–':fittingsOnDay(fittings.items,day).length}</DayCount>:null}<DayCount>Přeprava / čištění: {counts.cleaning}</DayCount>{blocked?<DayCount>Blokace: {blocked}</DayCount>:null}
               </DayButton>;})}
             </Days>
           </Calendar>
@@ -119,7 +119,7 @@ export function AdminReservationCalendarPage() {
               <CardHeading><NavigationLink variant="plain" to={buildAdminReservationDetailPath(reservation.id)} state={{reservationBack:{kind:'calendar'}}}>{reservation.reservationNumber}</NavigationLink></CardHeading>
               <div>{reservation.customerName.trim()||'Jméno neuvedeno'}</div>
               <CardMeta><StatusBadge tone={status.tone}>{status.label}</StatusBadge><span>{rentalModeLabels[reservation.rentalMode]}</span>{selectedDay>reservation.endDate?<StatusBadge tone="neutral">Navazující obsazení / čištění</StatusBadge>:null}</CardMeta>
-              <Details><div><dt>Termín</dt><dd>{reservationDateRange(reservation.startDate,reservation.endDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
+              <Details><div><dt>Termín</dt><dd>{reservationDateRange(reservation.startDate,reservation.endDate)}</dd></div><div><dt>Obsazeno od</dt><dd>{formatCalendarDay(reservation.occupiedFrom??reservation.startDate)}</dd></div><div><dt>Obsazeno do</dt><dd>{formatCalendarDay(reservation.occupiedThrough)}</dd></div></Details>
               <ProductItems>{reservation.items.map(item=><li key={item.inventoryItemId}>{item.productName} · velikost {item.size}</li>)}</ProductItems>
             </Card>;})}</Cards>}
             {canFittings?<><AgendaTitle>Zkoušky{!fittings.loading&&!fittings.error?` (${fittingAgenda.length})`:''}</AgendaTitle>

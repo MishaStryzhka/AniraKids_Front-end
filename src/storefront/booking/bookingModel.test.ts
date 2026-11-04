@@ -136,3 +136,13 @@ test('multi-product draft restores shared selections without persisting contact 
   persistDraft(null);
   expect(loadDraft()).toBeNull();
 });
+
+test('tariffs restrict inclusive duration and preserve the accepted policy on retries',()=>{
+ const selection={...quote,rentalMode:'external' as const,startDate:'2030-10-10',endDate:'2030-10-16'};
+ expect(selectionErrors(selection,'2030-01-01')).toEqual({});
+ expect(selectionErrors({...selection,endDate:'2030-10-17'},'2030-01-01')).toHaveProperty('endDate');
+ expect(selectionErrors({...selection,rentalMode:'studio'},'2030-01-01')).toHaveProperty('endDate');
+ const request=reservationBody({...initialDraft(product),selection,contact:{...body.customer,notes:''}});
+ expect(request.rentalPolicyVersion).toBe('2026-11');
+ expect(newAttempt(request).body.rentalPolicyVersion).toBe('2026-11');
+});

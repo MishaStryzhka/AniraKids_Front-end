@@ -253,6 +253,7 @@ async function begin(page, captureProduct = false) {
   if (captureProduct)
     await capture(page, 'product-' + page.viewportSize().width);
   await page.getByRole('button', { name: 'Rezervovat' }).click();
+  await page.getByLabel('Varianta pronájmu').selectOption('external');
   await page.getByLabel('Velikost', { exact: true }).selectOption(V);
   await page.getByLabel('Od', { exact: true }).fill('2030-10-10');
   await page.getByLabel('Do', { exact: true }).fill('2030-10-11');
@@ -624,7 +625,8 @@ for (const width of [390, 768, 1440]) {
       expect(box.height).toBeGreaterThanOrEqual(44);
     }
     await capture(page, 'navigation-entry-' + width);
-    await page.getByLabel('Velikost', { exact: true }).selectOption(V);
+    await page.getByLabel('Varianta pronájmu').selectOption('external');
+  await page.getByLabel('Velikost', { exact: true }).selectOption(V);
     await page.getByLabel('Jméno', { exact: true }).fill('Jana');
     await expect(page.getByLabel('Jméno', { exact: true })).toBeFocused();
     await page.getByRole('button', { name: 'Zpět', exact: true }).click();
@@ -739,7 +741,7 @@ test('signed-in catalogue and availability stay public without bearer', async ({
 for (const guest of [true,false]) test('fitting discount customer redemption '+(guest?'private link':'account'),async({page})=>{
  const state=await setup(page,guest);state.discount=true;
  if(guest){await page.goto(APP+'/saty#fitting=ZK-ABCDEF123456&token='+ 'a'.repeat(64));await expect(page).toHaveURL(APP+'/saty');}
- await begin(page);await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await begin(page);await page.getByLabel('Varianta pronájmu').selectOption('studio');await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
  await page.getByRole('button',{name:'Uplatnit slevu',exact:true}).click();
  await expect(page.getByText('Uplatněna sleva 200 Kč · ZK-ABCDEF123456')).toBeVisible();
  await contact(page);await capture(page,'fitting-discount-'+(guest?'link':'account'));
@@ -759,8 +761,8 @@ for (const width of [375,390,430]) test('inactive cooperation books external ren
  const state=await setup(page);state.cooperationActive=false;state.mode='payment';
  await page.setViewportSize({width,height:844});
  await begin(page);
- await expect(page.getByLabel('Způsob pronájmu')).toHaveValue('external');
- await expect(page.getByRole('option',{name:'Studio (Blaze)'})).toHaveCount(0);
+ await expect(page.getByLabel('Varianta pronájmu')).toHaveValue('external');
+ await expect(page.getByRole('option',{name:'Na focení'})).toHaveCount(1);
  await expect(page.getByText(/Rezervační záloha činí 0/)).toHaveCount(0);
  await expect(page.getByText(/zbývá z nájemného/)).toHaveCount(0);
  const first=page.locator('[data-date="2030-10-10"]'),last=page.locator('[data-date="2030-10-11"]');
@@ -789,7 +791,7 @@ test('booking settings failure blocks draft and recovers without losing selectio
  await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toHaveCount(0);
  state.settingsFailure=false;state.cooperationActive=false;
  await page.getByRole('button',{name:'Načíst nastavení znovu'}).click();
- await expect(page.getByLabel('Způsob pronájmu')).toHaveValue('external');
+ await expect(page.getByLabel('Varianta pronájmu')).toHaveValue('external');
  await expect(page.getByLabel('Velikost',{exact:true})).toHaveValue(V);
  await expect(page.getByLabel('Od',{exact:true})).toHaveValue('2030-10-10');
  expect(state.posts).toHaveLength(0);

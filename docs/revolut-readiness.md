@@ -6,7 +6,7 @@ This change prepares public customer information; it does not activate acquiring
 
 - Owner confirmed: free cancellation at least 48 hours before rental; otherwise individually assessed fee up to CZK 200; cash deposit returned immediately after in-person inspection; other deposit refunds initiated within three working days.
 - This draft also applies three working days to cancellation refunds. Confirm operational capacity for this deadline before publishing.
-- Delivery is available; the last rental day is the carrier handover date, not arrival at the studio. Backend currently adds only one cleaning day (`src/v2/utils/availability.ts`). Until shipping-aware availability is implemented, manually block each physical item for outbound/return transit and inspection before confirming delivery reservations. Do not promise adjacent bookings based only on the calendar.
+- Delivery is available; the last rental day is the carrier handover date, not arrival at the studio. The latest main adds two working days in each direction and round-trip shipping (CZK 178/238). Ensure the matching backend release is deployed before publishing these terms; handle carrier delays with item-level availability blocks.
 - For services starting within 14 days of distance contract conclusion, obtain and retain the customer's explicit early-start request and the required explanation before performance. The booking links do not collect that consent.
 - Send the accepted terms with the reservation confirmation (durable copy), and retain the applicable version. These UI changes do not add version snapshots to backend emails.
 - Verify privacy recipient/retention information against actual processor agreements; update it when the gateway is activated. This is a focused improvement, not a completed processor inventory.
@@ -23,4 +23,4 @@ This change prepares public customer information; it does not activate acquiring
 
 ## Scope
 
-Rental terms, delivery/returns, deposit/cancellation disclosures, complaints and ADR, privacy wording/mobile spacing, and links immediately before booking submission. Sale-specific checkout/terms are outside this rental flow.
+Reconciled with frontend main PR #329 (daily rental tariffs and round-trip delivery). Rental terms, delivery/returns, deposit/cancellation disclosures, complaints and ADR, privacy wording/mobile spacing, and links immediately before booking submission. Sale-specific checkout/terms are outside this rental flow.

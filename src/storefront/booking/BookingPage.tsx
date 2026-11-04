@@ -102,11 +102,11 @@ const PriceFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
 `;
-export function PriceSummary({ pricing, discount, delivery=0 }: { delivery?:number; pricing: Pricing; discount?: {number: string; amount: number} }) {
+export function PriceSummary({ pricing, discount, delivery=0, roundTrip=false }: { roundTrip?:boolean; delivery?:number; pricing: Pricing; discount?: {number: string; amount: number} }) {
   return (
     <PriceFacts>
       <RentalPriceRows rentalPrice={pricing.rentalPrice} discount={discount} />
-      {delivery > 0 ? <div><dt>Doprava</dt><dd>{formatMoney(delivery)}</dd></div> : null}
+      {delivery > 0 ? <div><dt>{roundTrip?'Doprava tam i zpět':'Doprava'}</dt><dd>{formatMoney(delivery)}</dd></div> : null}
       {pricing.deposit > 0 ? <div>
         <dt>Vratná kauce</dt>
         <dd>{formatMoney(pricing.deposit)}</dd>
@@ -140,12 +140,6 @@ export function BookingPage() {
   );
   const [fittingDiscount,setFittingDiscount]=useState<FittingDiscountSelection>();
   useEffect(()=>{if(draft?.selection.rentalMode!=='studio')setFittingDiscount(undefined);},[draft?.selection.rentalMode]);
-  useEffect(()=>{
-    if(cooperationActive===false && draft?.selection.rentalMode==='studio' && !booking.stored){
-      booking.updateDraft({...draft,selection:{...draft.selection,rentalMode:'external'}});
-      setRequested(null);
-    }
-  },[cooperationActive,draft,booking]);
   const [requested, setRequested] = useState<Selection[] | null>(null),
     [itemValidation, setItemValidation] = useState<Record<string, string>>({}),
     [selectionValidation, setSelectionValidation] = useState<
@@ -209,44 +203,535 @@ export function BookingPage() {
     setRequested(null);
     setSelectionValidation({});
     setItemValidation({});
-    booking.updateDraft({…8381 tokens truncated…ní vám předáme před expedicí. Neodesílejte balík na sídlo společnosti bez domluvy.</Copy>
-      <Copy>Termín expedice a předpokládaného doručení potvrdíme před odesláním s ohledem na sjednaný termín použití. Pokud jej nelze zajistit, nabídneme změnu, nebo rezervaci zrušíme a vrátíme přijaté platby. Změna termínu nebo ceny vyžaduje váš souhlas.</Copy>
-      <Copy>Při osobním vrácení předejte oblečení nejpozději v poslední sjednaný den ve smluvený čas. Při vracení dopravcem zásilku nejpozději v poslední den pronájmu předejte dopravci, uschovejte potvrzení a pošlete nám sledovací číslo. Pouhé vytvoření štítku není předáním zásilky.</Copy>
-      <Copy>Oblečení bezpečně zabalte a vraťte se všemi zapůjčenými součástmi. Při převzetí nám oznamte zjištěné vady; pozdější oznámení samo o sobě nevylučuje vaše zákonná práva. O zpoždění nebo problému s dopravou nás informujte co nejdříve.</Copy>
-    </Panel>
-    <Panel as="section" id="kauce">
-      <Heading>Vratná kauce a péče o oblečení</Heading>
-      <Copy>{depositRefundSummary}</Copy>
-      <Copy>Při vrácení přepravou se lhůta počítá od doručení k nám. Připsání bankovního nebo karetního vrácení může navíc záviset na zpracování poskytovatelem platby.</Copy>
-      <Copy>Případné zadržení části kauce musí odpovídat konkrétnímu doloženému nároku, například poškození nad rámec běžného opotřebení nebo chybějící součásti. Důvod, podklady a vyčíslení vám sdělíme; nezadrženou část vrátíme ve výše uvedené lhůtě. Běžné opotřebení při řádném užívání není důvodem ke srážce.</Copy>
-      <Copy>Oblečení používejte šetrně a dodržujte předané pokyny. Bez dohody neprovádějte úpravy ani opravy; při poškození nás kontaktujte.</Copy>
-    </Panel>
-    <Panel as="section" id="storno">
-      <Heading>Změna, zrušení a vrácení plateb</Heading>
-      <Copy>{cancellationSummary}</Copy>
-      <Copy>Žádost pošlete na náš kontaktní e-mail. Rozhoduje okamžik doručení žádosti a sjednaný začátek pronájmu v českém místním čase. Není-li čas začátku sjednán, počítáme jej pro storno od 00:00 prvního dne pronájmu. Změnu termínu potvrdíme podle dostupnosti.</Copy>
-      <Copy>Storno poplatek není automatický. Před případným započtením vám sdělíme důvod a výši; nesmí převýšit cenu pronájmu. Zbytek přijatých plateb včetně kauce vrátíme. Již absolvovaná placená zkouška je samostatně poskytnutou službou.</Copy>
-      <Copy>Pokud rezervaci zrušíme my nebo ji nemůžeme potvrdit, vrátíme všechny platby za neposkytnutý pronájem včetně dopravy a kauce, bez storno poplatku. Vrácení plateb po zrušení zadáme nejpozději do 3 pracovních dnů od zrušení. Vaše další zákonná práva tím nejsou dotčena.</Copy>
-      <Copy>Peníze vracíme původním způsobem platby. Platby provedené kartou nebo přes Revolut vracíme přes původního poskytovatele platby, nikoli v hotovosti. Hotovostní kauci lze při osobním vrácení a kontrole vrátit ihned v hotovosti. Bankovní připsání není totéž co den zadání vrácení.</Copy>
-    </Panel>
-    {fullTerms ? <>
-      <Panel as="section" id="odstoupeni">
-        <Heading>Odstoupení spotřebitele od smlouvy</Heading>
-        <Copy>Spotřebitel má u smlouvy uzavřené na dálku právo odstoupit do 14 dnů od jejího uzavření, pokud se neuplatní zákonná výjimka. Samotné sjednání termínu pronájmu nepovažujeme za automatické vyloučení tohoto práva. Za uplatnění zákonného práva neúčtujeme storno poplatek.</Copy>
-        <Copy>Odstoupení stačí v této lhůtě odeslat e-mailem nebo písemně na sídlo společnosti. Můžete použít níže uvedený vzor, není to povinné. Přijetí potvrdíme e-mailem a vrátíme peníze nejpozději do 14 dnů od doručení odstoupení, zpravidla dříve podle našich pravidel vrácení plateb.</Copy>
-        <Copy>Má-li služba začít před uplynutím 14 dnů, vyžádáme si před zahájením vaši výslovnou žádost a poučíme vás o jejích důsledcích. Při následném odstoupení lze požadovat jen zákonnou poměrnou úhradu skutečně poskytnutého plnění, jsou-li splněny zákonné podmínky. Právo zaniká úplným poskytnutím služby pouze při splnění zákonných podmínek včetně předchozího výslovného souhlasu a poučení.</Copy>
-        <Copy>Pokud už máte oblečení u sebe, kontaktujte nás pro jeho vrácení. Běžné náklady na odeslání zpět nese zákazník; tím nejsou omezena práva při vadném plnění. Storno pravidla a odstoupení jsou odlišné postupy.</Copy>
-        <Heading as="h3">Vzor oznámení o odstoupení</Heading>
-        <Copy>Adresát: GlamGarb Rentals s.r.o., Bílkova 855/19, Staré Město, 110 00 Praha 1, glamgarbrentals@seznam.cz.</Copy>
-        <Copy>Oznamuji, že odstupuji od smlouvy o pronájmu / poskytnutí služby. Číslo rezervace: … Datum uzavření smlouvy: … Jméno a příjmení: … Adresa: … Datum: … Podpis (pouze při zaslání v listinné podobě): …</Copy>
-      </Panel>
-      <Panel as="section" id="reklamace">
-        <Heading>Reklamace a řešení sporů</Heading>
-        <Copy>Pokud oblečení nebo služba neodpovídá dohodě, napište na glamgarbrentals@seznam.cz nebo nás kontaktujte na výše uvedeném telefonu. Reklamaci lze uplatnit také písemně na adrese sídla. Popište problém a požadovaný způsob řešení; číslo rezervace a fotografie pomohou, nejsou však podmínkou přijetí reklamace.</Copy>
-        <Copy>Potvrdíme přijetí reklamace, její obsah a požadovaný způsob vyřízení. O výsledku vás informujeme. Reklamaci spotřebitele vyřídíme a oznámíme výsledek nejpozději do 30 dnů, pokud se výslovně nedohodneme na delší lhůtě. Zákonná práva na nápravu, slevu nebo odstoupení zůstávají zachována.</Copy>
-        <Copy>Pokud spor nevyřešíme přímo, můžete se obrátit na Českou obchodní inspekci, která je příslušným subjektem mimosoudního řešení spotřebitelských sporů: <a href="https://coi.gov.cz/informace-o-adr/" target="_blank" rel="noreferrer">coi.gov.cz/informace-o-adr/</a>. Tím není dotčeno právo obrátit se na soud.</Copy>
-      </Panel>
-    </> : <Panel><Heading>Vaše spotřebitelská práva</Heading><Copy>Pravidla odstoupení do 14 dnů, vzor oznámení, reklamace a mimosoudní řešení sporů najdete v obchodních podmínkách. Zákonná práva mají přednost před storno pravidly.</Copy><RouteLink to={routes.terms}>Úplné obchodní podmínky</RouteLink></Panel>}
-    <Actions><RouteLink to={routes.contact}>Kontakt</RouteLink><RouteLink to={routes.privacy}>Ochrana osobních údajů</RouteLink><RouteLink to={routes.rental}>Jak funguje pronájem</RouteLink></Actions>
-  </Terms>;
+    booking.updateDraft({
+      ...draft,
+      selection: { ...draft.selection, [field]: value, ...((field==='rentalMode'&&value==='studio')?{endDate:draft.selection.startDate}:field==='startDate'&&draft.selection.rentalMode==='studio'?{endDate:value}:{}) },
+    });
+  };
+  const checkEditedDates = () => {
+    if (!draft || booking.stored || booking.storageBlocked) return;
+    if (!draftSelectionsValid(draft)) return;
+    setRequested(draftSelections(draft));
+  };
+  const check = () => {
+    if (!draft) return;
+    const errors = selectionErrors(draft.selection);
+    if (!variant?.pricing[draft.selection.rentalMode])
+      errors.rentalMode =
+        'Tento způsob pronájmu není dostupný pro vybranou velikost.';
+    const itemErrors: Record<string, string> = {};
+    for (const item of draft.additionalItems ?? []) {
+      if (!item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode])
+        itemErrors[item.product.id] = 'Vyberte dostupnou velikost pro tento způsob pronájmu.';
+    }
+    setItemValidation(itemErrors);
+    setSelectionValidation(errors);
+    const first = Object.keys(errors)[0];
+    if (first) {
+      focusField(first);
+      return;
+    }
+    if (Object.keys(itemErrors).length) {
+      focusField('variant-' + Object.keys(itemErrors)[0]);
+      return;
+    }
+    booking.updateDraft(draft); // Explicit recheck clears a known rejection, never a frozen attempt.
+    setRequested(draftSelections(draft));
+    availability.reload();
+  };
+  const [deliveryError,setDeliveryError] = useState<string>();
+  const submit = async () => {
+    if (!draft) return;
+    const deliveryError = fulfillmentError(draft, draft.selection.rentalMode);
+    setDeliveryError(deliveryError);
+    if(deliveryError){document.querySelector<HTMLButtonElement>('[data-delivery] button')?.focus();return;}
+    const errors = contactErrors(draft.contact);
+    setContactValidation(errors);
+    const first = Object.keys(errors)[0];
+    if (first) {
+      focusField(first);
+      return;
+    }
+    if(fittingDiscount&&(quote?.pricing.rentalPrice??0)<200){setFittingDiscount(undefined);return;}
+    await booking.submit(quote, policy.data, fittingDiscount);
+  };
+  const errorFor = (
+    field: string,
+    errors: Record<string, string | undefined>
+  ) =>
+    errors[field] ? (
+      <ErrorCopy id={`booking-${field}-error`}>{errors[field]}</ErrorCopy>
+    ) : null;
+  const stored = booking.stored;
+  if (!stored && (settingsLoading || settingsError)) return <Page><Title>Rezervace</Title>
+    {settingsError ? <Alert role="alert"><Copy>Nastavení pronájmu se nepodařilo načíst.</Copy><Button onClick={reloadSettings}>Načíst nastavení znovu</Button></Alert>
+      : <Copy role="status">Načítáme možnosti pronájmu…</Copy>}
+  </Page>;
+  if (booking.accountBlocked) return <Page><Title>Rezervace vašeho účtu</Title>
+    <Panel><Copy>Pro zobrazení nebo ověření této rezervace se přihlaste ke stejnému účtu, ze kterého byla vytvořena.</Copy>
+      <RouteLink to={routes.account}>Přejít k přihlášení</RouteLink>
+    </Panel></Page>;
+  return (
+    <Page>
+      <div ref={root}>
+        <Stack>
+          <Title ref={title} tabIndex={-1}>
+            {stored?.kind === 'receipt'
+              ? 'Rezervace byla vytvořena'
+              : 'Rezervace'}
+          </Title>
+          {booking.draftStorageWarning && !booking.stored ? <Copy role="alert">
+            Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
+          </Copy> : null}
+          {booking.storageBlocked ? (
+            <Alert ref={notice} role="alert" tabIndex={-1}>
+              <Heading>Rezervaci nyní nelze bezpečně odeslat</Heading>
+              <Copy>{booking.error}</Copy>
+              <Actions>
+                <Button onClick={booking.retryStorage}>Zkusit znovu</Button>
+              </Actions>
+            </Alert>
+          ) : null}
+          {stored?.kind === 'receipt' ? (
+            <Panel>
+              <Heading>{stored.receipt.reservationNumber}</Heading>
+              <Copy role="status">
+                Stav: {statusLabel(stored.receipt.status)}
+              </Copy>
+              {receiptItems(stored.receipt).map((item, index) => <div key={index}>
+                <Heading>{item.productName}</Heading><Copy>Velikost {item.size}</Copy>
+              </div>)}
+              <Facts>
+                <div>
+                  <dt>Způsob pronájmu</dt>
+                  <dd>{modeLabel(stored.receipt.rentalMode)}</dd>
+                </div>
+                <div>
+                  <dt>Termín pronájmu</dt>
+                  <dd>
+                    {formatCalendarDay(stored.receipt.startDate)} –{' '}
+                    {formatCalendarDay(stored.receipt.endDate)}
+                  </dd>
+                </div>
+              </Facts>
+              <FulfillmentSummary value={stored.receipt}/>
+              {receiptReady ? <>
+              <PriceSummary roundTrip={stored.receipt.rentalPolicyVersion==='2026-11'} delivery={stored?.kind === 'receipt' ? stored.receipt.shippingPrice : 0}
+                discount={stored.receipt.fittingDiscount}
+                pricing={{
+                  rentalPrice: stored.receipt.subtotal - (stored.receipt.shippingPrice || 0),
+                  deposit: stored.receipt.deposit,
+                  totalDue: stored.receipt.totalDue - (stored.receipt.shippingPrice || 0),
+                }}
+              />
+              {stored.receipt.status === 'pending' &&
+              stored.receipt.expiresAt ? (
+                <Copy>
+                  Předběžná rezervace platí do{' '}
+                  {formatInstant(stored.receipt.expiresAt)} (Praha).
+                </Copy>
+              ) : null}
+              <Copy>
+                Platba:{' '}
+                {stored.receipt.paymentStatus === 'paid'
+                  ? 'Zaplaceno'
+                  : stored.receipt.paymentStatus === 'unpaid'
+                    ? 'Nezaplaceno'
+                    : stored.receipt.paymentStatus === 'refunded'
+                      ? 'Vrácená platba'
+                      : 'Neznámý stav platby'}
+              </Copy>
+              <ReceiptPaymentInformation receipt={stored.receipt} showRentalPrice={false}
+                onUpdated={() => void booking.refreshStatus()}
+                access={stored.accountId && booking.discountAuthToken
+                  ? {kind:'account',token:booking.discountAuthToken}
+                  : stored.receipt.guestAccessToken ? {kind:'guest',token:stored.receipt.guestAccessToken} : undefined} />
+              </> : <Copy role="status">{booking.busy ? 'Ověřujeme aktuální cenu a platební údaje…' : 'Platební údaje zobrazíme až po ověření aktuálního stavu rezervace.'}</Copy>}
+              {booking.error && !booking.storageBlocked ? <Copy role="alert">{booking.error}</Copy> : null}
+              {(stored.receipt.guestAccessToken || stored.accountId) && (
+                <Actions>
+                  <Button disabled={booking.busy} onClick={booking.refreshStatus}>
+                    {booking.busy ? 'Ověřování stavu…' : 'Aktualizovat stav rezervace'}
+                  </Button>
+                  <RouteLink to={stored.accountId ? routes.accountReservations : reservationStatusPath(stored.receipt.reservationNumber, stored.receipt.guestAccessToken!)}>
+                    Otevřít aktuální stav rezervace
+                  </RouteLink>
+                </Actions>
+              )}
+              <Actions>
+                <Button
+                  disabled={booking.storageBlocked}
+                  onClick={() => {
+                    if (booking.startNew()) navigate(catalogueReturnTo);
+                  }}
+                >
+                  Vytvořit novou rezervaci
+                </Button>
+                <RouteLink to={catalogueReturnTo}>Zpět na produkty</RouteLink>
+              </Actions>
+            </Panel>
+          ) : stored?.kind === 'attempt' ? (
+            <Alert
+              ref={notice}
+              role={booking.busy ? 'status' : 'alert'}
+              tabIndex={-1}
+            >
+              <Heading>
+                {booking.busy
+                  ? 'Odesílání rezervace…'
+                  : 'Výsledek rezervace není potvrzený'}
+              </Heading>
+              <Copy>
+                Požadavek mohl být zpracován. Ověřte stav původní rezervace před
+                vytvořením nové. Ověření používá stejný požadavek, aby nevznikla
+                duplicitní rezervace.
+              </Copy>
+              <Copy>
+                {modeLabel(stored.body.rentalMode)} ·{' '}
+                {formatCalendarDay(stored.body.startDate)} –{' '}
+                {formatCalendarDay(stored.body.endDate)}
+              </Copy>
+              <FulfillmentSummary value={stored.body}/>
+              {booking.error && !booking.storageBlocked ? (
+                <Copy>{booking.error}</Copy>
+              ) : null}
+              <Actions>
+                <Button
+                  disabled={booking.busy || booking.storageBlocked}
+                  loading={booking.busy}
+                  onClick={() => void booking.recover()}
+                >
+                  Ověřit stav rezervace
+                </Button>
+              </Actions>
+            </Alert>
+          ) : draft ? (
+            <Columns>
+              <Stack>
+                <SectionHeader><Heading>Položky</Heading><RouteLink to={catalogueReturnTo} aria-label="Přidat další produkt">Přidat</RouteLink></SectionHeader>
+                <ItemCard role="group" aria-label={draft.product.name}>
+                  <BookingThumbnail key={draft.product.photos[0]?.url||draft.product.id} url={draft.product.photos[0]?.url} name={draft.product.name}/>
+                  <ItemHeader>
+                    <Heading as="h3">{draft.product.name}</Heading>
+                    <IconButton aria-label={'Odebrat ' + draft.product.name} icon={<X aria-hidden="true" />}
+                      onClick={() => { setRequested(null); booking.removeProduct(draft.product.id); }} />
+                  </ItemHeader>
+                <Stack>
+                  <SelectField
+                    label="Velikost"
+                    name="variantId"
+                    value={draft.selection.variantId}
+                    aria-invalid={
+                      Boolean(selectionValidation.variantId) || undefined
+                    }
+                    aria-describedby={
+                      selectionValidation.variantId
+                        ? 'booking-variantId-error'
+                        : undefined
+                    }
+                    onChange={event =>
+                      changeSelection('variantId', event.target.value)
+                    }
+                  >
+                    <option value="">Vyberte velikost</option>
+                    {draft.product.variants.map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.size}
+                      </option>
+                    ))}
+                  </SelectField>
+                  {errorFor('variantId', selectionValidation)}
+                </Stack>
+                </ItemCard>
+                {(draft.additionalItems ?? []).map(item => <ItemCard key={item.product.id} role="group" aria-label={item.product.name}>
+                  <BookingThumbnail key={item.product.photos[0]?.url||item.product.id} url={item.product.photos[0]?.url} name={item.product.name}/>
+                  <ItemHeader>
+                    <Heading as="h3">{item.product.name}</Heading>
+                    <IconButton aria-label={'Odebrat ' + item.product.name} icon={<X aria-hidden="true" />}
+                      onClick={() => { setRequested(null); booking.removeProduct(item.product.id); }} />
+                  </ItemHeader>
+                  <SelectField label="Velikost" name={'variant-' + item.product.id}
+                    value={item.variantId} aria-invalid={Boolean(itemValidation[item.product.id]) || undefined}
+                    aria-describedby={itemValidation[item.product.id] ? 'booking-variant-' + item.product.id + '-error' : undefined}
+                    onChange={event => {
+                      setRequested(null); setItemValidation({});
+                      booking.updateDraft({ ...draft, additionalItems: draft.additionalItems!.map(row =>
+                        row.product.id === item.product.id ? { ...row, variantId: event.target.value } : row) });
+                    }}>
+                    <option value="">Vyberte velikost</option>
+                    {item.product.variants.map(v => <option key={v.id} value={v.id}>{v.size}</option>)}
+                  </SelectField>
+                  {itemValidation[item.product.id] ? <ErrorCopy id={'booking-variant-' + item.product.id + '-error'}>{itemValidation[item.product.id]}</ErrorCopy> : null}
+                </ItemCard>)}
+
+                <Stack>
+                  <SelectField
+                    label="Varianta pronájmu"
+                    name="rentalMode"
+                    value={draft.selection.rentalMode}
+                    aria-invalid={
+                      Boolean(selectionValidation.rentalMode) || undefined
+                    }
+                    aria-describedby={
+                      selectionValidation.rentalMode
+                        ? 'booking-rentalMode-error'
+                        : undefined
+                    }
+                    onChange={event =>
+                      changeSelection('rentalMode', event.target.value)
+                    }
+                  >
+                    {<option
+                      value="studio"
+                      disabled={Boolean(variant && !variant.pricing.studio)}
+                    >
+                      Na focení
+                    </option>}
+                    <option
+                      value="external"
+                      disabled={Boolean(variant && !variant.pricing.external)}
+                    >
+                      Na libovolnou příležitost
+                    </option>
+                  </SelectField>
+                  {errorFor('rentalMode', selectionValidation)}
+                  <Copy>{draft.selection.rentalMode==='studio'?'Vyzvednutí a vrácení ve stejný den. Pouze osobně: Kytlická 682/2.':'Cena za první den + příplatek za každý další den. Online 1–7 dní, delší pronájem po domluvě.'}</Copy>
+                </Stack>
+                <Heading>{draft.additionalItems?.length ? 'Společný termín pronájmu' : 'Termín pronájmu'}</Heading>
+                <RentalCalendar selection={draftSelections(draft)[0]} selections={draftSelections(draft)}
+                  enabled={draftItems(draft).every(item => Boolean(item.product.variants.find(v => v.id === item.variantId)?.pricing[draft.selection.rentalMode])) && !booking.storageBlocked}
+                  onChange={(startDate, endDate) => {
+                    const selection = { ...draft.selection, startDate, endDate };
+                    setSelectionValidation({});
+                    booking.updateDraft({ ...draft, selection });
+                    setRequested(startDate && endDate ? draftSelections({ ...draft, selection }) : null);
+                  }}
+                />
+                <DateFields>
+                {(['startDate', 'endDate'] as const).filter(field=>draft.selection.rentalMode!=='studio'||field==='startDate').map(field => (
+                  <Stack key={field}>
+                    <Input
+                      name={field}
+                      label={draft.selection.rentalMode==='studio'?'Datum focení':field === 'startDate' ? 'Od' : 'Do'}
+                      onBlur={checkEditedDates}
+                      type="date"
+                      min={
+                        field === 'endDate'
+                          ? draft.selection.startDate || pragueToday()
+                          : pragueToday()
+                      }
+                      value={draft.selection[field]}
+                      error={Boolean(selectionValidation[field])}
+                      aria-describedby={
+                        selectionValidation[field]
+                          ? `booking-${field}-error`
+                          : undefined
+                      }
+                      onChange={event =>
+                        changeSelection(field, event.target.value)
+                      }
+                    />
+                    {errorFor(field, selectionValidation)}
+                  </Stack>
+                ))}
+                </DateFields>
+                <AvailabilityActions>
+                  <Button
+                    variant="secondary"
+                    loading={availability.loading}
+                    disabled={booking.storageBlocked}
+                    onClick={check}
+                  >
+                    Ověřit dostupnost
+                  </Button>
+                  {quote ? <Copy role="status">{quote.available ? 'Termín je aktuálně dostupný' : 'Tento termín není dostupný'}</Copy> : null}
+                </AvailabilityActions>
+                {availability.error ? (
+                  <Alert role="alert">
+                    <Copy>
+                      {availability.error instanceof PublicApiError &&
+                      availability.error.status === 404
+                        ? 'Produkt není dostupný.'
+                        : availability.error instanceof PublicApiError &&
+                            availability.error.code ===
+                              'RENTAL_MODE_UNAVAILABLE'
+                          ? 'Tento způsob pronájmu není dostupný.'
+                          : availability.error instanceof PublicApiError && availability.error.code==='PAST_START_DATE' ? 'Pro doručení vyberte začátek alespoň 2 pracovní dny předem.' : 'Dostupnost se nepodařilo ověřit. Zkuste to prosím znovu.'}
+                    </Copy>
+                    <Button variant="secondary" onClick={check}>
+                      Zkusit znovu
+                    </Button>
+                  </Alert>
+                ) : quote && !quote.available ? <Copy>Vyberte prosím jiný termín.</Copy> : null}
+                    {draft.selection.rentalMode === 'external' ? <div data-delivery><FulfillmentChoice value={draft} disabled={booking.busy} error={deliveryError} onChange={value=>{if(value.fulfillmentMethod!==draft.fulfillmentMethod)setRequested(null);setDeliveryError(undefined);booking.updateDraft({...draft,fulfillmentMethod:value.fulfillmentMethod,balikovnaPoint:value.balikovnaPoint,deliveryAddress:value.deliveryAddress});}}/></div> : null}
+              </Stack>
+              <Stack>
+                <form
+                  noValidate
+                  onSubmit={event => {
+                    event.preventDefault();
+                    void submit();
+                  }}
+                >
+                  <Stack>
+                    <Heading>Kontaktní údaje</Heading>
+                    {(['firstName', 'lastName', 'email', 'phone'] as const).map(
+                      field => (
+                        <Stack key={field}>
+                          <Input
+                            name={field}
+                            label={
+                              {
+                                firstName: 'Jméno',
+                                lastName: 'Příjmení',
+                                email: 'E-mail',
+                                phone: 'Telefon',
+                              }[field]
+                            }
+                            type={
+                              field === 'email'
+                                ? 'email'
+                                : field === 'phone'
+                                  ? 'tel'
+                                  : 'text'
+                            }
+                            autoComplete={
+                              {
+                                firstName: 'given-name',
+                                lastName: 'family-name',
+                                email: 'email',
+                                phone: 'tel',
+                              }[field]
+                            }
+                            value={draft.contact[field]}
+                            error={Boolean(contactValidation[field])}
+                            aria-describedby={
+                              contactValidation[field]
+                                ? `booking-${field}-error`
+                                : undefined
+                            }
+                            onChange={event => {
+                              setContactValidation({});
+                              booking.updateDraft({
+                                ...draft,
+                                contact: {
+                                  ...draft.contact,
+                                  [field]: event.target.value,
+                                },
+                              });
+                            }}
+                          />
+                          {errorFor(field, contactValidation)}
+                        </Stack>
+                      )
+                    )}
+                    <TextareaField
+                      name="notes"
+                      label="Poznámka"
+                      value={draft.contact.notes}
+                      error={Boolean(contactValidation.notes)}
+                      aria-describedby={
+                        contactValidation.notes
+                          ? 'booking-notes-error'
+                          : 'booking-notes-help'
+                      }
+                      onChange={event => {
+                        setContactValidation({});
+                        booking.updateDraft({
+                          ...draft,
+                          contact: {
+                            ...draft.contact,
+                            notes: event.target.value,
+                          },
+                        });
+                      }}
+                    />
+                    <Copy id="booking-notes-help">
+                      Volitelné. Maximálně 1500 znaků.
+                    </Copy>
+                    {errorFor('notes', contactValidation)}
+                    {cooperationActive && draft.selection.rentalMode === 'studio' ? <FittingDiscountPicker token={booking.discountAuthToken} disabled={booking.busy} total={quote?.pricing.rentalPrice??0} selected={fittingDiscount} onChange={setFittingDiscount}/> : null}
+                    {policy.loading ? (
+                      <Copy role="status">Načítání informací o platbě…</Copy>
+                    ) : policy.error ? (
+                      <Alert role="alert">
+                        <Copy>
+                          Informace o platbě se nepodařilo načíst. Před
+                          odesláním rezervace je načtěte znovu.
+                        </Copy>
+                        <Button variant="secondary" onClick={policy.reload}>
+                          Načíst informace o platbě
+                        </Button>
+                      </Alert>
+                    ) : policy.data ? (
+                      <>
+                        <BookingPaymentExplanation delivery={shippingPrice(draft,draft.selection.rentalMode)}
+                          policy={policy.data}
+                          hasDeposit={quote ? quote.pricing.deposit>0 : true}
+                          fittingCredit={fittingDiscount ? 200 : 0}
+                          rentalPrice={
+                            quote ? quote.pricing.rentalPrice - (fittingDiscount ? 200 : 0) : undefined
+                          }
+                        />
+                        <CompanyInformation company={policy.data.company} />
+                      </>
+                    ) : null}
+                    {quote?.available ? <Panel aria-label="Souhrn rezervace">
+                      <Heading>Souhrn rezervace</Heading>
+                      <Copy>{draftItems(draft).map(item => item.product.name + ' · velikost ' + item.product.variants.find(v => v.id === item.variantId)?.size).join(', ')}</Copy>
+                      <Copy>{modeLabel(quote.rentalMode)} · {formatCalendarDay(quote.startDate)} – {formatCalendarDay(quote.endDate)}</Copy>
+                      {quote.items.map((item,index)=>item.pricing.firstDayPrice!==undefined && item.pricing.rentalDays!==undefined ? <Copy key={item.productId}>{draftItems(draft)[index].product.name}: {formatMoney(item.pricing.firstDayPrice)}{item.pricing.rentalDays>1 ? ` + ${item.pricing.rentalDays-1} × ${formatMoney(item.pricing.additionalDayPrice??0)}` : ''}</Copy>:null)}
+                      <PriceSummary roundTrip delivery={shippingPrice(draft,draft.selection.rentalMode)} discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
+                      <Copy>Cena zahrnuje vybrané kalendářní dny včetně prvního a posledního dne. Dny přepravy a čištění neúčtujeme. Dostupnost a cenu ověříme při odeslání.</Copy>
+                    </Panel> : null}
+                    <Copy>
+                      Odesláním vytvoříte rezervaci čekající na potvrzení.
+                    </Copy>
+                    <Actions>
+                      <RouteLink to={routes.terms} target="_blank" rel="noreferrer">Obchodní podmínky</RouteLink>
+                      <RouteLink to={routes.rentalTerms} target="_blank" rel="noreferrer">Doprava, storno a vrácení</RouteLink>
+                      <RouteLink to={routes.privacy} target="_blank" rel="noreferrer">Ochrana osobních údajů</RouteLink>
+                    </Actions>
+                    {booking.error && !booking.storageBlocked ? (
+                      <Alert ref={notice} role="alert" tabIndex={-1}>
+                        {booking.error}
+                      </Alert>
+                    ) : null}
+                    <Button
+                      type="submit"
+                      disabled={
+                        !quote?.available ||
+                        booking.storageBlocked ||
+                        !policy.data
+                      }
+                      loading={booking.busy}
+                    >
+                      Rezervovat
+                    </Button>
+                    {!quote?.available ? (
+                      <Copy>
+                        Nejprve ověřte dostupnost vybrané velikosti a termínu.
+                      </Copy>
+                    ) : null}
+                  </Stack>
+                </form>
+              </Stack>
+            </Columns>
+          ) : !booking.storageBlocked ? (
+            <Panel>
+              <Heading>Vyberte produkt k pronájmu</Heading>
+              <Copy>
+                V katalogu si vyberte produkt a pokračujte výběrem velikosti a
+                termínu.
+              </Copy>
+              {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
+              <Actions>
+                <RouteLink to={catalogueReturnTo}>Prohlédnout produkty</RouteLink>
+              </Actions>
+            </Panel>
+          ) : null}
+        </Stack>
+      </div>
+    </Page>
+  );
 }
