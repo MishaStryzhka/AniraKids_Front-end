@@ -1,3 +1,5 @@
+import {RevolutPayment} from './RevolutPayment';
+import {getRevolutConfig,type RevolutConfig} from '../api/publicApi';
 import { cancellationSummary } from './rentalPolicyCopy';
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
@@ -73,7 +75,7 @@ export function BookingPaymentExplanation({
       ) : null}
       <Copy>
         {fittingCredit > 0 ? 'Po vytvoření rezervace můžete doplatek uhradit QR platbou nebo při převzetí.' : `Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé částky${hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc. Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze po domluvě uhradit také osobně v hotovosti.`}
-        {' '}Po přijetí zálohy rezervaci potvrdíme ručně. Samotné odeslání rezervace
+        {' '}Při online platbě přes Revolut platnou rezervaci po ověření platby a dostupnosti potvrdíme automaticky. Převod a hotovost ověřujeme ručně. Samotné odeslání rezervace
         ani platby neznamená potvrzení.
       </Copy>
       <Copy>Po absolvování zaplacené zkoušky můžete při rezervaci uplatnit slevu ve výši 200 Kč přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste slevu neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
@@ -148,6 +150,14 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       if (request.current === controller) {request.current = null;setBusy(false);}
     }
   };
+  const [cardConfig,setCardConfig]=useState<RevolutConfig|null>(null);
+  const [cardSelected,setCardSelected]=useState<{balanceKey:string;kind:'advance'|'full'}|null>(null);
+  useEffect(()=>{
+    const controller=new AbortController();
+    void getRevolutConfig(controller.signal).then(setCardConfig,()=>{});
+    return ()=>controller.abort();
+  },[]);
+  useEffect(()=>{setCardSelected(null);},[source.reservationNumber,access?.token]);
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
@@ -179,7 +189,12 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
   const selected = cash ? 'cash' : choice === 'advance' && advanceInstructions ? 'advance' : 'full';
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
-  const remaining = payment.rentalBalance + payment.depositRequired - payment.depositHeld;
+  const remaining = payment.rentalBalance + Math.max(0,payment.depositRequired - payment.depositHeld);
+  // A webhook can update the receipt after the SDK callback. Never carry the
+  // customer's advance-payment selection over to a new balance payment.
+  const balanceKey=JSON.stringify([receipt.reservationNumber,access?.token,payment.advanceBalance,payment.rentalBalance,payment.depositHeld]);
+  const selectedCard=cardSelected?.balanceKey===balanceKey?cardSelected:null;
+  const cardOpen=Boolean(access && (selectedCard || payment.cardPayment?.active));
   const pendingTransfer = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind !== 'cash';
   const cashPlanned = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind === 'cash';
   return (
@@ -189,7 +204,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         {showRentalPrice ? <RentalPriceRows rentalPrice={receipt.subtotal-(receipt.shippingPrice||0)} discount={receipt.fittingDiscount} /> : null}
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
-          <dd>{formatMoney(payment.advanceRequired)}{receipt.fittingDiscount && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
+          <dd>{formatMoney(payment.advanceRequired)}{payment.advanceRequired > 0 && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
         </div>
         {payment.advanceBalance > 0 && payment.advanceBalance < payment.advanceRequired ? <div>
           <dt>Zbývá uhradit ze zálohy</dt>
@@ -212,7 +227,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       <PaymentConfirmationStatus {...payment} />
       {payable && !pendingTransfer && (advanceInstructions || fullInstructions) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
-          disabled={busy}
+          disabled={busy || cardOpen}
           onChange={event => setChoice(event.target.value)}>
           {advanceInstructions ? <option value="advance">
             Povinná záloha – {formatMoney(advanceInstructions.amount)}
@@ -225,7 +240,15 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           </option> : null}
         </SelectField>
       ) : null}
-      {expired ? (
+      {payment.cardPayment?.reviewRequired ? <Copy role="alert">Platbu jsme přijali, ale potřebujeme ji zkontrolovat. Další platbu neposílejte; kontaktujte nás s číslem rezervace.</Copy> : null}
+      {cardOpen && access ? <RevolutPayment number={receipt.reservationNumber} access={access}
+        kind={payment.cardPayment?.kind ?? selectedCard?.kind ?? (selected==='advance'?'advance':'full')}
+        config={cardConfig} canPay={payable && !payment.cardPayment?.reviewRequired}
+        onReceipt={next=>{setUpdated({source,token:access.token,receipt:next});}}
+        onClose={()=>{setCardSelected(null);onUpdated?.();}} /> : null}
+      {!cardOpen && !payment.cardPayment?.reviewRequired && access && cardConfig && payable && !pendingTransfer && !cash && instructions ?
+        <Button disabled={busy} onClick={()=>setCardSelected({balanceKey,kind:selected==='advance'?'advance':'full'})}>Zaplatit online – {formatMoney(instructions.amount)}</Button> : null}
+      {cardOpen || payment.cardPayment?.reviewRequired ? null : expired ? (
         <Copy role="status">
           Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.
           Neplaťte podle původního QR kódu. Pokud jste již zaplatili, kontaktujte
@@ -298,7 +321,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           Neodesílejte platbu podle dřívějšího QR kódu.
         </Copy>
       )}
-      {access && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
+      {access && !cardOpen && !payment.cardPayment?.reviewRequired && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
         <Button disabled={busy || (cash && cashPlanned)} loading={busy}
           onClick={() => void update(cash ? 'cash' : selected === 'advance' ? 'advance' : 'full',
             (cash ? fullInstructions : instructions)!.amount)}>
@@ -306,7 +329,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         </Button>
       ) : null}
       {error ? <Copy role="alert">{error}</Copy> : null}
-      {access ? <Button variant="secondary" disabled={busy} onClick={() => void update()}>Aktualizovat stav platby</Button> : null}
+      {access && !cardOpen ? <Button variant="secondary" disabled={busy} onClick={() => void update()}>Aktualizovat stav platby</Button> : null}
     </Stack>
   );
 }

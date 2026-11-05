@@ -37,14 +37,14 @@ export function BookingInformationPage() {
     <Panel as="section">
       <Heading>Rezervace a uzavření smlouvy</Heading>
       <Copy>Vyberte oblečení, velikost, termín a způsob převzetí. Před odesláním můžete údaje zkontrolovat a opravit. Odeslání rezervace je žádostí o pronájem; přijetí žádosti ani platby samo o sobě není potvrzením pronájmu.</Copy>
-      <Copy>Smlouva o pronájmu vzniká naším výslovným potvrzením rezervace. Potvrzení a údaje o rezervaci obdržíte e-mailem. Rezervace je sjednána na uvedený termín, v českém jazyce. Zprávy si uschovejte; kopii potvrzení si můžete vyžádat na našem e-mailu.</Copy>
+      <Copy>Smlouva o pronájmu vzniká naším výslovným potvrzením rezervace. U online platby přes Revolut může potvrzení proběhnout automaticky po ověření platby, platnosti rezervace a dostupnosti oděvu. Potvrzení a údaje o rezervaci obdržíte e-mailem. Rezervace je sjednána na uvedený termín, v českém jazyce. Zprávy si uschovejte; kopii potvrzení si můžete vyžádat na našem e-mailu.</Copy>
       <Copy>Plaťte pouze podle aktuálních pokynů a ve lhůtě uvedené u rezervace. Platba po vypršení dočasné rezervace nezaručuje dostupnost. Pokud pronájem nepotvrdíme, vrátíme všechny částky přijaté k této rezervaci.</Copy>
     </Panel>
     <Panel as="section" id="platby">
       <Heading>Cena a platební možnosti</Heading>
       <Copy>Ceny jsou v Kč. Cena pronájmu, doprava, sleva a vratná kauce jsou uvedeny samostatně v souhrnu před odesláním. Kauce není cenou pronájmu. Nájemné se skládá z ceny prvního dne a případných dalších dnů podle tarifu vybraného oblečení; přesný rozpis uvidíte před odesláním. Pronájem na focení ve studiu je na jeden den.</Copy>
       {policy.loading ? <Copy role="status">Načítání platebních informací…</Copy> : policy.error ? <><Copy role="alert">Aktuální platební údaje se nepodařilo načíst. Ostatní podmínky jsou dostupné níže.</Copy><Actions><Button onClick={policy.reload}>Zkusit znovu</Button></Actions></> : policy.data ? <BookingPaymentExplanation policy={policy.data} /> : null}
-      <Copy>Online platba kartou přes platební bránu zatím není dostupná. Dostupné způsoby platby uvádíme při rezervaci. O přijaté platbě vystavujeme příslušný doklad.</Copy>
+      <Copy>Dostupné způsoby platby uvádíme u rezervace. Pokud je nabídnuta online platba, údaje karty bezpečně zpracovává Revolut; dostupnost Apple Pay a Google Pay závisí na zařízení a nastavení peněženky. O přijaté platbě vystavujeme příslušný doklad.</Copy>
     </Panel>
     <Panel as="section" id="doprava">
       <Heading>Převzetí, doručení a vrácení oblečení</Heading>
