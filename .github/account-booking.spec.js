@@ -348,3 +348,18 @@ for (const width of [390, 768, 1440]) {
     expect(state.errors).toEqual([]);
   });
 }
+
+for(const width of [375,390,430,768,1024,1440]) test('account search and filter controls fit '+width,async({page})=>{
+ await page.setViewportSize({width,height:900});await setup(page);await page.goto(APP+'/ucet/rezervace');
+ await page.getByRole('button',{name:'Hledat rezervace',exact:true}).click();
+ await expect(page.getByRole('textbox',{name:'Hledat rezervaci'})).toBeFocused();
+ await page.getByRole('textbox',{name:'Hledat rezervaci'}).fill('AK-2026');
+ await page.getByRole('button',{name:'Filtrovat rezervace'}).click();
+ await page.getByRole('button',{name:'Seřadit rezervace'}).click();
+ await page.getByLabel('Stav rezervace',{exact:true}).selectOption('active');
+ await page.getByLabel('Řazení rezervací').selectOption('date_asc');
+ await expect(page.getByText('Žádná rezervace neodpovídá hledání nebo filtrům.')).toBeVisible();
+ await capture(page,'toolbar-'+width);
+ await page.getByLabel('Typ rezervace',{exact:true}).selectOption('fitting');
+ await expect(page.getByRole('region',{name:'Pronájmy',exact:true})).toBeHidden();
+});

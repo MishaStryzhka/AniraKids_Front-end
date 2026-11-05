@@ -5,9 +5,9 @@ import {fittingApi,fittingDateLabel,fittingStatusLabels,type Fitting} from './fi
 import {Button} from '../design-system/components/Button';
 import {Actions,Copy,Heading,Panel,RouteLink,Stack} from '../storefront/storefrontStyles';
 
-export function AccountFittings({token}:{token:string}){
+export function AccountFittings({token,query=''}:{token:string;query?:string}){
  const [page,setPage]=useState(1);
- const result=usePublicRead(token+':fittings:'+page,signal=>fittingApi<{items:Fitting[];total:number;guestEmailAccess?:boolean}>('/account/fittings?page='+page,{token,signal}));
+ const result=usePublicRead(token+':fittings:'+page+':'+query,signal=>fittingApi<{items:Fitting[];total:number;guestEmailAccess?:boolean}>('/account/fittings?page='+page+'&'+query,{token,signal}));
  return <section aria-label="Zkoušky"><Stack><Heading>Zkoušky</Heading>
  {result.loading?<Copy role="status">Načítáme zkoušky…</Copy>:result.error?<Panel><Copy role="alert">Zkoušky se nepodařilo načíst.</Copy><Button onClick={result.reload}>Načíst zkoušky znovu</Button></Panel>:result.data?<>
  <FittingLinkRecovery key={token} token={token} guestEmailAccess={result.data.guestEmailAccess} onConnected={()=>{setPage(1);result.reload();}}/>
