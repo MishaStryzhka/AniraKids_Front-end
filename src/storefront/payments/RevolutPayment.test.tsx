@@ -77,3 +77,17 @@ test('webhook refresh after paid advance closes checkout and requires explicit c
  await waitFor(()=>expect(api.createRevolutOrder).toHaveBeenCalledTimes(2));
  expect((api.createRevolutOrder as jest.Mock).mock.calls[1][2]).toBe('full');
 });
+
+test('checkout failure retains safe provider code while server still reports pending',async()=>{
+ render(<RevolutPayment number={receipt.reservationNumber} access={access} kind="advance" config={config} canPay onReceipt={jest.fn()} onClose={jest.fn()}/>);
+ await waitFor(()=>expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalled());
+ const options=(RevolutCheckout.embeddedCheckout as unknown as jest.Mock).mock.calls[0][0];
+ await act(async()=>{options.onError({error:{type:'error.payment-gateway',code:42,message:'private-token-and-card-data'},orderId:'private-order-token'});});
+ expect(screen.getByRole('alert')).toHaveTextContent('error.payment-gateway (42)');
+ expect(document.body).not.toHaveTextContent('private-token-and-card-data');
+ expect(document.body).not.toHaveTextContent('private-order-token');
+ expect(api.syncRevolutPayment).toHaveBeenCalledTimes(1);
+ await act(async()=>{options.onError({error:{type:'private@example.com',code:'secret'}});});
+ expect(screen.getByRole('alert')).toHaveTextContent('error.unknown');
+ expect(document.body).not.toHaveTextContent('private@example.com');
+});

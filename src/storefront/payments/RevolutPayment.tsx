@@ -29,6 +29,7 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
   const callbacks=useRef({onReceipt,onClose});callbacks.current={onReceipt,onClose};
   const [message,setMessage]=useState('Připravujeme bezpečnou platbu…');
   const [busy,setBusy]=useState(false);
+  const [checkoutError,setCheckoutError]=useState<string|null>(null);
   const [preparing,setPreparing]=useState(Boolean(config && canPay));
   const action=useRef(false);
   const generation=useRef(0);
@@ -55,7 +56,7 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
     const controller=new AbortController();
     const initialise=async()=>{
       if(!config || !canPay){setPreparing(false);setMessage('Ověřte stav rozpracované platby.');return;}
-      setPreparing(true);
+      setPreparing(true);setCheckoutError(null);
       try {
         // Persist guest access locally, never send the capability to Revolut.
         if(accessKind==='guest')preserveGuestReservationLink({reservationNumber:number,guestAccessToken:accessToken} as Receipt);
@@ -68,9 +69,13 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
         const options={publicToken:config.publicKey,mode:config.mode,locale:'cs',target:target.current,
           createOrder:async()=>order,
           revolutPayOptions:{mobileRedirectUrls:{success:returnUrl,failure:returnUrl,cancel:returnUrl}},
-          onSuccess:()=>{if(live)void syncRef.current();},
+          onSuccess:()=>{if(live){setCheckoutError(null);void syncRef.current();}},
           onCancel:()=>{if(live)void syncRef.current();},
-          onError:()=>{if(live)void syncRef.current();},
+          onError:({error}:{error:{type?:unknown;code?:unknown}})=>{if(live){
+            const type=typeof error?.type==='string' && /^error\.[a-z-]{1,64}$/.test(error.type)?error.type:'error.unknown';
+            const code=typeof error?.code==='number' && Number.isSafeInteger(error.code)?` (${error.code})`:'';
+            setCheckoutError(type+code);void syncRef.current();
+          }},
         };
         widget=await RevolutCheckout.embeddedCheckout(options);
         if(!live)widget.destroy();else setMessage('Vyberte způsob platby. Dostupné peněženky se zobrazí podle vašeho zařízení.');
@@ -83,6 +88,10 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
   return <PaymentStack>
     <Copy role="status">{message}</Copy>
     <CheckoutHost ref={target} />
+    {checkoutError && <div role="alert">
+      <Copy>Platební brána oznámila chybu. Nejprve ověřte stav platby tlačítkem níže.</Copy>
+      <details><summary>Podrobnosti pro podporu</summary><Copy>{checkoutError}</Copy></details>
+    </div>}
     <Copy>Údaje karty zpracovává Revolut. Po ověření platby automaticky potvrdíme platnou rezervaci, pokud je termín stále dostupný. Případnou výjimku s vámi vyřešíme osobně.</Copy>
     <Button disabled={busy || preparing} onClick={()=>void syncRef.current()}>Ověřit platbu</Button>
     <Button variant="secondary" disabled={busy || preparing} onClick={()=>void syncRef.current(true)}>Zrušit rozpracovanou platbu a změnit způsob</Button>
