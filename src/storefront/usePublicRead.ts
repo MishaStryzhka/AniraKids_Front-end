@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 export function usePublicRead<T>(
   key: string | null,
-  read: (signal: AbortSignal) => Promise<T>
+  read: (signal: AbortSignal) => Promise<T>,
+  keepDataWhileRefreshing = false
 ) {
   const [revision, setRevision] = useState(0),
     [state, setState] = useState<{
@@ -23,7 +24,9 @@ export function usePublicRead<T>(
       sequence.current === generation &&
       latest.current.key === key &&
       latest.current.revision === revision;
-    setState({ key, revision, data: null, error: null, loading: true });
+    setState(previous => ({ key, revision,
+      data: keepDataWhileRefreshing && previous.key === key ? previous.data : null,
+      error: null, loading: true }));
     latest.current.read(controller.signal).then(
       data => {
         if (owns())
@@ -35,11 +38,11 @@ export function usePublicRead<T>(
       }
     );
     return () => controller.abort();
-  }, [key, revision]);
+  }, [key, revision, keepDataWhileRefreshing]);
   const owned =
     key !== null && state.key === key && state.revision === revision;
   return {
-    data: owned ? state.data : null,
+    data: owned || (keepDataWhileRefreshing && key !== null && state.key === key) ? state.data : null,
     error: owned ? state.error : null,
     loading: key !== null && (!owned || state.loading),
     reload: () => setRevision(value => value + 1),

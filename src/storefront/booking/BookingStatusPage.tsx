@@ -29,13 +29,13 @@ export function BookingStatusPage() {
   useEffect(()=>{
     if(valid && !hash)navigate(reservationStatusPath(number,token),{replace:true});
   },[valid,hash,number,token,navigate]);
-  const result = usePublicRead(valid ? number+token : null, signal => getReservationStatus(number, token, signal));
+  const result = usePublicRead(valid ? number+token : null, signal => getReservationStatus(number, token, signal), true);
   useLiveReservation(valid?number+token:null,()=>{if(!result.loading)result.reload();},false);
   return <Page>
     <Title>Stav rezervace</Title>
     <Panel>
       {!valid ? <Copy role="alert">Odkaz na rezervaci není úplný. Otevřete svůj uložený odkaz nebo nás kontaktujte.</Copy>
-        : result.loading ? <Copy role="status">Ověřování aktuálního stavu…</Copy>
+        : result.loading && !result.data ? <Copy role="status">Ověřování aktuálního stavu…</Copy>
         : result.error ? <>
           <Copy role="alert">Rezervaci se nepodařilo načíst. Zkontrolujte odkaz nebo nás kontaktujte. Nevytvářejte kvůli tomu novou rezervaci.</Copy>
           <Button onClick={result.reload}>Zkusit znovu</Button>
@@ -49,7 +49,7 @@ export function BookingStatusPage() {
           {result.data.fittingDiscount ? <Copy>Započtená platba za zkoušku {result.data.fittingDiscount.number}: −200 Kč</Copy> : null}
           <FulfillmentSummary value={result.data}/>
           <ReceiptPaymentInformation receipt={result.data} onUpdated={result.reload} access={{kind:'guest',token}} />
-          <Button onClick={result.reload}>Aktualizovat stav rezervace</Button>
+          <Button disabled={result.loading} onClick={result.reload}>{result.loading ? 'Ověřování stavu…' : 'Aktualizovat stav rezervace'}</Button>
           <Copy>Tento soukromý odkaz si uložte. Každý, kdo jej získá, může zobrazit stav této rezervace a platební pokyny.</Copy>
         </> : null}
       <Actions><RouteLink to={routes.contact}>Kontaktovat ANIRAK</RouteLink></Actions>

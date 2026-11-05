@@ -133,7 +133,8 @@ export function BookingPage() {
     draft = booking.draft;
   const receiptKey=booking.stored?.kind==='receipt' ? booking.stored.receipt.reservationNumber+':'+(booking.discountAuthToken??'guest') : null;
   useLiveReservation(receiptKey,booking.refreshStatus);
-  const receiptReady=booking.receiptVerified && !booking.busy && !booking.error;
+  // Keep an already verified checkout mounted during background refreshes.
+  const receiptReady=booking.receiptVerified && !booking.error;
   const catalogueReturnTo = getCatalogueReturnTo(location.state, draft?.product.category);
   const policy = usePublicRead(
     booking.stored ? null : 'booking-policy',
@@ -177,7 +178,7 @@ export function BookingPage() {
   const previousEntry = useRef<string | null>(null);
   const view = booking.storageBlocked
     ? 'storage'
-    : booking.busy
+    : booking.busy && booking.stored?.kind !== 'receipt'
       ? 'pending'
       : (booking.stored?.kind ?? (booking.error ? 'error' : 'draft'));
   useLayoutEffect(() => {
