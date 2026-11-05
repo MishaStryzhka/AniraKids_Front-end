@@ -22,7 +22,7 @@ for(const width of [375,390,430,768,1024,1440])test('cooperation activation and 
   return json({items:[],total:0});
  });
  await page.goto(APP+'/zkouska');
- await expect(page.getByText('Kytlická 862/2, Praha',{exact:false})).toBeVisible();
+ await expect(page.locator('address').filter({hasText:'Kytlická 862/2'})).toBeVisible();
  await page.goto(APP+'/admin/nastaveni#partneri');
  const activate=page.getByRole('button',{name:'Aktivovat spolupráci',exact:true});
  await expect(activate).toBeEnabled();expect(writes).toEqual([]);
@@ -32,6 +32,6 @@ for(const width of [375,390,430,768,1024,1440])test('cooperation activation and 
  await page.goto(APP+'/zkouska');await expect(page.getByText('Plzeňská 782/112, 150 00 Praha',{exact:false})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.goto(APP+'/admin/nastaveni#partneri');await page.getByRole('button',{name:'Deaktivovat spolupráci',exact:true}).click();await expect(page.getByRole('button',{name:'Aktivovat spolupráci',exact:true})).toBeEnabled();
- await page.goto(APP+'/zkouska');await expect(page.getByText('Kytlická 862/2, Praha',{exact:false})).toBeVisible();
+ await page.goto(APP+'/zkouska');await expect(page.locator('address').filter({hasText:'Kytlická 862/2'})).toBeVisible();
  expect(errors).toEqual([]);
 });
