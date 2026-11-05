@@ -151,13 +151,13 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
     }
   };
   const [cardConfig,setCardConfig]=useState<RevolutConfig|null>(null);
-  const [cardSelected,setCardSelected]=useState(false);
+  const [cardSelected,setCardSelected]=useState<{balanceKey:string;kind:'advance'|'full'}|null>(null);
   useEffect(()=>{
     const controller=new AbortController();
     void getRevolutConfig(controller.signal).then(setCardConfig,()=>{});
     return ()=>controller.abort();
   },[]);
-  useEffect(()=>{setCardSelected(false);},[source.reservationNumber,access?.token]);
+  useEffect(()=>{setCardSelected(null);},[source.reservationNumber,access?.token]);
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
@@ -190,7 +190,11 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
   const remaining = payment.rentalBalance + Math.max(0,payment.depositRequired - payment.depositHeld);
-  const cardOpen=Boolean(access && (cardSelected || payment.cardPayment?.active));
+  // A webhook can update the receipt after the SDK callback. Never carry the
+  // customer's advance-payment selection over to a new balance payment.
+  const balanceKey=JSON.stringify([receipt.reservationNumber,access?.token,payment.advanceBalance,payment.rentalBalance,payment.depositHeld]);
+  const selectedCard=cardSelected?.balanceKey===balanceKey?cardSelected:null;
+  const cardOpen=Boolean(access && (selectedCard || payment.cardPayment?.active));
   const pendingTransfer = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind !== 'cash';
   const cashPlanned = payment.paymentReport?.status === 'pending' && payment.paymentReport.kind === 'cash';
   return (
@@ -200,7 +204,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         {showRentalPrice ? <RentalPriceRows rentalPrice={receipt.subtotal-(receipt.shippingPrice||0)} discount={receipt.fittingDiscount} /> : null}
         <div>
           <dt>Rezervační záloha (součást nájemného)</dt>
-          <dd>{formatMoney(payment.advanceRequired)}{receipt.fittingDiscount && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
+          <dd>{formatMoney(payment.advanceRequired)}{payment.advanceRequired > 0 && payment.advanceBalance === 0 ? ' · uhrazeno' : ''}</dd>
         </div>
         {payment.advanceBalance > 0 && payment.advanceBalance < payment.advanceRequired ? <div>
           <dt>Zbývá uhradit ze zálohy</dt>
@@ -238,12 +242,12 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       ) : null}
       {payment.cardPayment?.reviewRequired ? <Copy role="alert">Platbu jsme přijali, ale potřebujeme ji zkontrolovat. Další platbu neposílejte; kontaktujte nás s číslem rezervace.</Copy> : null}
       {cardOpen && access ? <RevolutPayment number={receipt.reservationNumber} access={access}
-        kind={payment.cardPayment?.kind ?? (selected==='advance'?'advance':'full')}
+        kind={payment.cardPayment?.kind ?? selectedCard?.kind ?? (selected==='advance'?'advance':'full')}
         config={cardConfig} canPay={payable && !payment.cardPayment?.reviewRequired}
         onReceipt={next=>{setUpdated({source,token:access.token,receipt:next});}}
-        onClose={()=>{setCardSelected(false);onUpdated?.();}} /> : null}
+        onClose={()=>{setCardSelected(null);onUpdated?.();}} /> : null}
       {!cardOpen && !payment.cardPayment?.reviewRequired && access && cardConfig && payable && !pendingTransfer && !cash && instructions ?
-        <Button disabled={busy} onClick={()=>setCardSelected(true)}>Zaplatit online – {formatMoney(instructions.amount)}</Button> : null}
+        <Button disabled={busy} onClick={()=>setCardSelected({balanceKey,kind:selected==='advance'?'advance':'full'})}>Zaplatit online – {formatMoney(instructions.amount)}</Button> : null}
       {cardOpen || payment.cardPayment?.reviewRequired ? null : expired ? (
         <Copy role="status">
           Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.

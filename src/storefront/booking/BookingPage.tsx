@@ -338,7 +338,8 @@ export function BookingPage() {
                 {stored.receipt.paymentStatus === 'paid'
                   ? 'Zaplaceno'
                   : stored.receipt.paymentStatus === 'unpaid'
-                    ? 'Nezaplaceno'
+                    ? stored.receipt.payment && (stored.receipt.payment.rentalBalance < stored.receipt.subtotal || stored.receipt.payment.depositHeld > 0)
+                      ? 'Částečně uhrazeno' : 'Nezaplaceno'
                     : stored.receipt.paymentStatus === 'refunded'
                       ? 'Vrácená platba'
                       : 'Neznámý stav platby'}

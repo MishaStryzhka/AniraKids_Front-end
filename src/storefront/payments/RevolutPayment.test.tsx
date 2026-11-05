@@ -62,3 +62,18 @@ test('disabled gateway retains QR and never offers online payment',async()=>{
  await screen.findByRole('img',{name:/QR platba/});
  expect(screen.queryByRole('button',{name:/Zaplatit online/})).not.toBeInTheDocument();
 });
+
+test('webhook refresh after paid advance closes checkout and requires explicit consent for balance',async()=>{
+ const initial={...receipt,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,fullPaymentInstructions:{...payment.paymentInstructions,amount:1500}}};
+ const view=render(<ReceiptPaymentInformation receipt={initial} access={access}/>);
+ fireEvent.click(await screen.findByRole('button',{name:/Zaplatit online/}));
+ await waitFor(()=>expect(api.createRevolutOrder).toHaveBeenCalledTimes(1));
+ // The SDK returns before capture; the later receipt refresh observes the webhook.
+ view.rerender(<ReceiptPaymentInformation receipt={{...initial,payment:{...initial.payment,cardPayment:{active:true,reviewRequired:false,kind:'advance'}}}} access={access}/>);
+ view.rerender(<ReceiptPaymentInformation receipt={{...initial,status:'confirmed',expiresAt:null,payment:{...initial.payment,advanceBalance:0,rentalBalance:300,paymentInstructions:null,fullPaymentInstructions:{...payment.paymentInstructions,amount:1300},cardPayment:{active:false,reviewRequired:false,kind:null}}}} access={access}/>);
+ await waitFor(()=>expect(screen.queryByRole('button',{name:'Ověřit platbu'})).not.toBeInTheDocument());
+ expect(api.createRevolutOrder).toHaveBeenCalledTimes(1);
+ fireEvent.click(screen.getByRole('button',{name:/Zaplatit online/}));
+ await waitFor(()=>expect(api.createRevolutOrder).toHaveBeenCalledTimes(2));
+ expect((api.createRevolutOrder as jest.Mock).mock.calls[1][2]).toBe('full');
+});
