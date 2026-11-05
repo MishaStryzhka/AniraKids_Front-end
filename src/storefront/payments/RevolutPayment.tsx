@@ -1,3 +1,4 @@
+import styled from 'styled-components';
 import {useEffect,useRef,useState} from 'react';
 import {Button} from '../../design-system/components/Button';
 import {Copy,Stack} from '../storefrontStyles';
@@ -5,6 +6,21 @@ import {createRevolutOrder,syncRevolutPayment,type Receipt,type ReservationPayme
 import {preserveGuestReservationLink} from '../booking/guestReservationLinks';
 import {routes} from '../../navigation/routes';
 
+// Keep the provider iframe's intrinsic width out of the surrounding grid.
+const PaymentStack = styled(Stack)`
+  grid-template-columns: minmax(0, 1fr);
+`;
+const CheckoutHost = styled.div`
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  contain: inline-size;
+  iframe {
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+`;
 export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClose}:{
   number:string;access:ReservationPaymentAccess;kind:'advance'|'full';config:RevolutConfig|null;canPay:boolean;
   onReceipt:(receipt:Receipt)=>void;onClose:()=>void;
@@ -64,11 +80,11 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
     void initialise();
     return ()=>{live=false;generation.current=version+1;controller.abort();widget?.destroy();};
   },[number,accessKind,accessToken,kind,config,canPay]);
-  return <Stack>
+  return <PaymentStack>
     <Copy role="status">{message}</Copy>
-    <div ref={target} style={{width:'100%',minWidth:0}} />
+    <CheckoutHost ref={target} />
     <Copy>Údaje karty zpracovává Revolut. Po ověření platby automaticky potvrdíme platnou rezervaci, pokud je termín stále dostupný. Případnou výjimku s vámi vyřešíme osobně.</Copy>
     <Button disabled={busy || preparing} onClick={()=>void syncRef.current()}>Ověřit platbu</Button>
     <Button variant="secondary" disabled={busy || preparing} onClick={()=>void syncRef.current(true)}>Zrušit rozpracovanou platbu a změnit způsob</Button>
-  </Stack>;
+  </PaymentStack>;
 }
