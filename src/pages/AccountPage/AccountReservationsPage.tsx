@@ -1,3 +1,4 @@
+import {ReservationToolbar, initialReservationFilters} from './ReservationToolbar';
 import {FulfillmentSummary} from '../../storefront/booking/FulfillmentChoice';
 import { StatusBadge } from '../../design-system/components/StatusBadge';
 import { AccountFittings } from '../../fittings/AccountFittings';
@@ -36,7 +37,11 @@ export function AccountReservationsPage() {
   const [claimState, setClaimState] = useState<{ token: string; busy: boolean; error?: string; claimed?: string } | null>(null);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; claimRequest.current?.abort(); }; }, []);
   const [page, setPage] = useState(1);
-  const result = usePublicRead(isLoggedIn && token && !isRefreshing ? `${token}:${page}` : null, signal => getAccountReservations(token, page, signal));
+  const [filters,setFilters] = useState(initialReservationFilters);
+  const [search,setSearch] = useState('');
+  useEffect(()=>{const timer=setTimeout(()=>{setSearch(filters.q);setPage(1);},250);return()=>clearTimeout(timer);},[filters.q]);
+  const query=new URLSearchParams({q:search,status:filters.status,sort:filters.sort}).toString();
+  const result = usePublicRead(isLoggedIn && token && !isRefreshing ? `${token}:${page}:${query}` : null, signal => getAccountReservations(token, page, signal, query));
   const claim = async () => {
     if (!localReceipt?.guestAccessToken || !currentToken.current || claimRequest.current) return;
     const ownerToken = currentToken.current;
@@ -60,9 +65,12 @@ export function AccountReservationsPage() {
   const hasGuestReservation = Boolean(localReceipt && result.data &&
     !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) &&
     ownClaim?.claimed !== localReceipt.reservationNumber);
-  return <Page><Title>Moje rezervace</Title>
-    {isLoggedIn&&!isRefreshing&&token?<AccountFittings key={token} token={token}/>:null}
+  return <Page><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap'}}><Title>Moje rezervace</Title>
+    <ReservationToolbar value={filters} onChange={value=>{setFilters(value);setPage(1);}}/></div>
+    {isLoggedIn&&!isRefreshing&&token&&filters.kind!=='rental'?<AccountFittings key={token+query} token={token} query={query}/>:null}
+    <section hidden={filters.kind==='fitting'} aria-label="Pronájmy">
     <Heading>Pronájmy</Heading>
+    {isLoggedIn&&result.data?<details style={{marginBottom:16}}><summary style={{minHeight:44,cursor:'pointer'}}>Chybí rezervace vytvořená bez přihlášení?</summary><Copy>{result.data.guestEmailAccess?'Zobrazujeme také nepřiřazené rezervace se stejným ověřeným e-mailem. Pokud rezervaci nevidíte, zkontrolujte e-mail uvedený v objednávce.':'Rezervace vytvořené bez přihlášení zobrazíme po ověření stejného e-mailu v profilu.'}</Copy>{!result.data.guestEmailAccess?<RouteLink to="/ucet">Ověřit e-mail v profilu</RouteLink>:null}</details>:null}
     {booking?.draftStorageWarning && !booking.stored ? <Copy role="alert">
       Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
     </Copy> : null}
@@ -112,7 +120,7 @@ export function AccountReservationsPage() {
       {ownClaim?.claimed ? <Copy role="status">Rezervace byla připojena k vašemu účtu.</Copy> : null}
       {result.data.total > 0 && <Copy>Celkem rezervací: {result.data.total}.</Copy>}
       {result.data.items.length === 0 && (!draft || page > 1) && !needsRecovery && !localReceipt && savedGuestLinks.length === 0 && <Panel>
-        <Copy>{page === 1 ? 'Zatím zde nejsou žádné rezervace.' : 'Na této stránce už nejsou žádné rezervace.'}</Copy>
+        <Copy>{page === 1 ? (search||filters.status!=='all'?'Žádná rezervace neodpovídá hledání nebo filtrům.':'Zatím zde nejsou žádné rezervace.') : 'Na této stránce už nejsou žádné rezervace.'}</Copy>
         {page === 1 ? <Actions><RouteLink to={routes.newArrivals}>Prohlédnout nabídku</RouteLink></Actions>
           : <Button variant="secondary" onClick={() => setPage(1)}>Zpět na první stránku</Button>}
       </Panel>}
@@ -130,5 +138,5 @@ export function AccountReservationsPage() {
         <Copy>Rezervace vytvořené bez přihlášení otevřete jejich soukromým odkazem.</Copy>
       </details> : null}
     </Stack> : null}
-  </Page>;
+  </section></Page>;
 }

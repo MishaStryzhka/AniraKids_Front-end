@@ -15,10 +15,14 @@ const CheckoutHost = styled.div`
   min-inline-size: 0;
   max-inline-size: 100%;
   contain: inline-size;
+  // Revolut sets min-width:400px inline. Override only this embedded iframe;
+  // leave its dynamic height and the provider's body-level auth popups intact.
   iframe {
-    inline-size: 100%;
-    min-inline-size: 0;
-    max-inline-size: 100%;
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 `;
 export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClose}:{
