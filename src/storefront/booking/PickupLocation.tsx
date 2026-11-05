@@ -14,13 +14,13 @@ const Card = styled.div`
   a:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}
 `;
 
-export function PickupLocation() {
+export function PickupLocation({title='Místo vyzvednutí a vrácení',note='Předání po předchozí domluvě.'}:{title?:string;note?:string}) {
   return <Card>
     <MapPin size={20} aria-hidden="true"/>
     <div>
-      <strong>Místo vyzvednutí a vrácení</strong>
+      <strong>{title}</strong>
       <address>Kytlická 862/2<br/>190 00 Praha 9 – Prosek<br/>Česká republika</address>
-      <p>Vchod č. 2. Předání po předchozí domluvě.</p>
+      <p>Vchod č. 2. {note}</p>
       <a href="https://www.google.com/maps/search/?api=1&query=Kytlick%C3%A1%202%2C%20190%2000%20Praha%209%2C%20%C4%8Cesko" aria-label="Zobrazit na mapě (otevře se v nové kartě)" target="_blank" rel="noopener noreferrer">Zobrazit na mapě <ExternalLink size={16} aria-hidden="true"/></a>
     </div>
   </Card>;
