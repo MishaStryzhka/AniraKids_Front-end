@@ -54,7 +54,17 @@ const Day = styled.button<{ $selected: boolean; $range: boolean }>`
     cursor: default;
   }
   &[data-unavailable='true'] { text-decoration: line-through; }
+  &[data-conflict='true'] {
+    color: ${t.primitive.status.danger.strong};
+    background: ${t.primitive.status.danger.bg};
+    border-color: ${t.primitive.status.danger.fg};
+    font-weight: 600;
+  }
   &:focus-visible { outline: 2px solid ${t.color.focus.ring}; outline-offset: 1px; z-index: 1; }
+`;
+const ConflictNotice = styled(Copy)`
+  color: ${t.primitive.status.danger.strong};
+  font-size: 14px;
 `;
 export function RentalCalendar({ selection, selections, enabled, onChange }: {
   selections?: Selection[];
@@ -94,6 +104,8 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
     return () => window.removeEventListener('focus', refresh);
   }, []);
   const dates = monthCalendarDays(visibleMonth);
+  const conflicts = read.data?.days.filter(day => !day.available && selection.startDate && selection.endDate &&
+    day.date >= selection.startDate && day.date <= selection.endDate) ?? [];
   const first = read.data?.days.find(day => day.available)?.date || dates[0];
   const tabDay = dates.includes(focused) ? focused : first;
   const move = (offset: number) => {
@@ -129,9 +141,10 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
           tabIndex={date === tabDay ? 0 : -1}
           aria-disabled={!available}
           data-unavailable={Boolean(read.data && !available)}
+          data-conflict={conflicts.some(day => day.date === date)}
           aria-pressed={selected}
           aria-current={date === (read.data?.today || today) ? 'date' : undefined}
-          aria-label={formatCalendarDay(date, true) + ', ' + state + (selected ? ', vybráno' : '')}
+          aria-label={formatCalendarDay(date, true) + ', ' + state + (selected ? ', vybráno' : '') + (conflicts.some(day => day.date === date) ? ', vybraný den není dostupný' : '')}
           $selected={selected} $range={Boolean(selection.startDate && selection.endDate && date > selection.startDate && date < selection.endDate)}
           onFocus={() => setFocused(date)}
           onKeyDown={event => {
@@ -150,6 +163,9 @@ export function RentalCalendar({ selection, selections, enabled, onChange }: {
           }}>{Number(date.slice(-2))}</Day>;
       })}
     </Grid>
+    {conflicts.length > 0 ? <ConflictNotice role="status">
+      Červeně označené dny ve vybraném termínu nejsou pro zvolený způsob převzetí dostupné. Upravte termín nebo způsob převzetí.
+    </ConflictNotice> : null}
     {choosingEnd ? <Button variant="ghost" onClick={() => onChange('', '')}>Změnit začátek pronájmu</Button> : null}
   </Shell>;
 }

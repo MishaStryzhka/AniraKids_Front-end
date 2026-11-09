@@ -825,3 +825,32 @@ for(const width of [375,390,430,768,1024,1440]) test('compact booking informatio
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
  await capture(page,'compact-booking-'+width);
 });
+
+for(const width of [375,390,430,768,1024,1440]) test('selected delivery conflicts '+width,async({page})=>{
+ await page.setViewportSize({width,height:1000});
+ await setup(page);
+ await page.route(API+'/**/availability-calendar?*',async route=>{
+  const q=Object.fromEntries(new URL(route.request().url()).searchParams);
+  const [y,m]=q.month.split('-').map(Number);
+  const days=Array.from({length:new Date(Date.UTC(y,m,0)).getUTCDate()},(_,i)=>{
+   const date=q.month+'-'+String(i+1).padStart(2,'0');
+   return {date,available:date>='2030-10-07'&&!(q.fulfillmentMethod==='balikovna'&&date>='2030-10-16'&&date<='2030-10-20')};
+  });
+  await route.fulfill({json:{calendar:{...q,productId:P,startDate:q.startDate??null,today:'2030-10-07',checkedAt:'2030-10-07T12:00:00Z',days}}});
+ });
+ await begin(page);
+ await page.getByLabel('Od',{exact:true}).fill('2030-10-12');
+ await page.getByLabel('Do',{exact:true}).fill('2030-10-17');
+ await page.locator('input[value="balikovna"]').check();
+ const end=page.locator('[data-date="2030-10-17"]');
+ await expect(end).toHaveAttribute('data-conflict','true');
+ await expect(page.locator('[data-date="2030-10-16"]')).toHaveAttribute('data-conflict','true');
+ await expect(page.locator('[data-date="2030-10-18"]')).toHaveAttribute('data-conflict','false');
+ await expect(end).toHaveCSS('color','rgb(137, 60, 60)');
+ await expect(page.getByText(/Červeně označené dny/)).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await capture(page,'delivery-conflict-'+width);
+ await page.locator('input[value="pickup"]').check();
+ await expect(end).toHaveAttribute('data-conflict','false');
+ await expect(page.getByText(/Červeně označené dny/)).toHaveCount(0);
+});

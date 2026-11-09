@@ -99,3 +99,21 @@ test('photoshoot selects pickup and return together in one click',async()=>{
  await waitFor(()=>expect(day('2032-02-03')).toHaveAttribute('aria-disabled','false'));
  fireEvent.click(day('2032-02-03'));expect(change).toHaveBeenCalledWith('2032-02-03','2032-02-03');
 });
+
+test('delivery change marks only unavailable selected days, then clears conflicts on pickup', async()=>{
+ const selection={...initial,startDate:'2032-02-12',endDate:'2032-02-17',fulfillmentMethod:'pickup' as const};
+ get.mockImplementation(async q=>({...data(q),days:monthCalendarDays(q.month).map(date=>({date,available:!(q.fulfillmentMethod==='balikovna' && date>='2032-02-16' && date<='2032-02-20')}))}));
+ const view=render(<RentalCalendar enabled selection={selection} onChange={jest.fn()}/>);
+ await waitFor(()=>expect(day('2032-02-17')).toHaveAttribute('aria-disabled','false'));
+ view.rerender(<RentalCalendar enabled selection={{...selection,fulfillmentMethod:'balikovna'}} onChange={jest.fn()}/>);
+ await waitFor(()=>expect(day('2032-02-16')).toHaveAttribute('data-conflict','true'));
+ expect(day('2032-02-17')).toHaveAttribute('data-conflict','true');
+ expect(day('2032-02-15')).toHaveAttribute('data-conflict','false');
+ expect(day('2032-02-18')).toHaveAttribute('data-conflict','false');
+ expect(day('2032-02-17')).toHaveAttribute('aria-disabled','true');
+ expect(screen.getByText(/Červeně označené dny/)).toBeInTheDocument();
+ view.rerender(<RentalCalendar enabled selection={selection} onChange={jest.fn()}/>);
+ await waitFor(()=>expect(day('2032-02-17')).toHaveAttribute('aria-disabled','false'));
+ expect(day('2032-02-17')).toHaveAttribute('data-conflict','false');
+ expect(screen.queryByText(/Červeně označené dny/)).not.toBeInTheDocument();
+});
