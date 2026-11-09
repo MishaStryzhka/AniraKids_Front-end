@@ -806,3 +806,20 @@ test('booking settings failure blocks draft and recovers without losing selectio
  await expect(page.getByLabel('Od',{exact:true})).toHaveValue('2030-10-10');
  expect(state.posts).toHaveLength(0);
 });
+
+for(const width of [375,390,430,768,1024,1440]) test('compact booking information '+width,async({page})=>{
+ await page.setViewportSize({width,height:1000});
+ await setup(page);await begin(page);
+ const note=page.getByLabel('Poznámka',{exact:true});
+ expect((await note.boundingBox()).height).toBeLessThanOrEqual(56);
+ await expect(page.getByText(/Rezervační záloha činí/)).toBeVisible();
+ const payment=page.locator('details').filter({has:page.locator('summary',{hasText:'Podrobnosti platby a storna'})});
+ const company=page.locator('details').filter({has:page.locator('summary',{hasText:'Údaje o provozovateli'})});
+ await expect(payment).not.toHaveAttribute('open','');await expect(company).not.toHaveAttribute('open','');
+ await payment.locator('summary').click();await expect(payment.getByText(/Po vytvoření rezervace/)).toBeVisible();
+ await company.locator('summary').click();await expect(company.getByText(/Nejsme plátci DPH/)).toBeVisible();
+ await payment.locator('summary').click();await company.locator('summary').click();
+ await expect(page.getByRole('link',{name:'Obchodní podmínky',exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await capture(page,'compact-booking-'+width);
+});

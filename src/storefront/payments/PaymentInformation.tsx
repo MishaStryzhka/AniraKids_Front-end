@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { SelectField } from '../../design-system/components/SelectField';
 import styled from 'styled-components';
+import {designTokens as t} from '../../design-system/tokens/designTokens';
 import type { BookingPolicy, PaymentInstructions } from '../api/bookingPolicy';
 import { getAccountReservationStatus, getReservationStatus, reportReservationPayment, type Receipt, type ReservationPaymentAccess } from '../api/publicApi';
 import { Button } from '../../design-system/components/Button';
@@ -12,6 +13,12 @@ import { PaymentConfirmationStatus } from './PaymentConfirmationStatus';
 import { Copy, Facts, Heading, Stack } from '../storefrontStyles';
 import { formatMoney } from '../booking/bookingModel';
 import { RentalPriceRows } from './RentalPriceRows';
+const BookingDetails=styled.details`
+  border-top:1px solid ${t.color.border.subtle};
+  summary{display:list-item;cursor:pointer;min-height:44px;padding:12px 0;color:${t.color.text.brand};font-weight:600;font-size:14px;}
+  summary:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:3px;}
+  > div{padding:4px 0 12px;font-size:14px;line-height:1.6;}
+`;
 const PaymentFacts = styled(Facts)`
   > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; }
   dd { white-space: nowrap; }
@@ -24,10 +31,12 @@ const Qr = styled.img`
   background: white;
 `;
 export function CompanyInformation({
-  company,
+  company, compact=false,
 }: {
+  compact?:boolean;
   company: BookingPolicy['company'];
 }) {
+  if(compact)return <BookingDetails><summary>Údaje o provozovateli</summary><div>{company.name} · IČO {company.ico}<br/>{company.address}<br/>{company.register}<br/>Nejsme plátci DPH.</div></BookingDetails>;
   return (
     <Stack>
       <Heading>Provozovatel</Heading>
@@ -73,11 +82,13 @@ export function BookingPaymentExplanation({
           celé nájemné{delivery ? ' a dopravu' : ''}{hasDeposit ? ' a vratnou kauci' : ''}.
         </Copy>
       ) : null}
+      <BookingDetails><summary>Podrobnosti platby a storna</summary><Stack>
       <Copy>
         Po vytvoření rezervace si vyberete z dostupných způsobů platby. Zaplatit můžete zálohu nebo celou částku; záloha se při plné platbě nepřičítá navíc. Online platbu ověříme automaticky a platnou rezervaci potvrdíme po kontrole dostupnosti. Převod a hotovost ověřuje administrátor.
       </Copy>
       <Copy>Po absolvování zaplacené zkoušky můžete při rezervaci uplatnit slevu ve výši 200 Kč přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste slevu neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
       <Copy>{cancellationSummary}</Copy>
+      </Stack></BookingDetails>
     </Stack>
   );
 }

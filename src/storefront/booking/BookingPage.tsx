@@ -65,6 +65,11 @@ import {
   selectionErrors,
   statusLabel,
 } from './bookingModel';
+const BookingNotes=styled(TextareaField)`textarea{min-block-size:48px;}`;
+const LegalLinks=styled(Actions)`
+  &&{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:0 16px;}
+  a{border:0;background:none;padding:8px 0;min-height:44px;font-size:13px;font-weight:500;text-decoration:underline;text-underline-offset:3px;}
+`;
 const ItemCard = styled(Stack)`
   gap: ${t.space[2]} ${t.space[3]};
   grid-template-columns:72px minmax(0,1fr);
@@ -627,7 +632,9 @@ export function BookingPage() {
                         </Stack>
                       )
                     )}
-                    <TextareaField
+                    <BookingNotes
+                      rows={1}
+                      maxLength={1500}
                       name="notes"
                       label="Poznámka"
                       value={draft.contact.notes}
@@ -648,7 +655,7 @@ export function BookingPage() {
                         });
                       }}
                     />
-                    <Copy id="booking-notes-help">
+                    <Copy id="booking-notes-help" style={{fontSize:13}}>
                       Volitelné. Maximálně 1500 znaků.
                     </Copy>
                     {errorFor('notes', contactValidation)}
@@ -675,7 +682,7 @@ export function BookingPage() {
                             quote ? quote.pricing.rentalPrice - (fittingDiscount ? 200 : 0) : undefined
                           }
                         />
-                        <CompanyInformation company={policy.data.company} />
+                        <CompanyInformation compact company={policy.data.company} />
                       </>
                     ) : null}
                     {quote?.available ? <Panel aria-label="Souhrn rezervace">
@@ -689,11 +696,11 @@ export function BookingPage() {
                     <Copy>
                       Odesláním vytvoříte rezervaci čekající na potvrzení.
                     </Copy>
-                    <Actions>
+                    <LegalLinks>
                       <RouteLink to={routes.terms} target="_blank" rel="noreferrer">Obchodní podmínky</RouteLink>
                       <RouteLink to={routes.rentalTerms} target="_blank" rel="noreferrer">Doprava, storno a vrácení</RouteLink>
                       <RouteLink to={routes.privacy} target="_blank" rel="noreferrer">Ochrana osobních údajů</RouteLink>
-                    </Actions>
+                    </LegalLinks>
                     {booking.error && !booking.storageBlocked ? (
                       <Alert ref={notice} role="alert" tabIndex={-1}>
                         {booking.error}
