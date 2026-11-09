@@ -36,7 +36,7 @@ async function setup(page) {
     return route.fulfill({status:404,contentType:'application/json',body:'{"error":{"code":"NOT_FOUND"}}'});
   });
   await page.goto(APP+'/produkt/sofia');
-  await page.getByRole('button',{name:'Rezervovat'}).click();
+  await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/}).click();
   await page.getByLabel('Varianta pronájmu').selectOption('external');
   return state;
 }
@@ -109,12 +109,12 @@ for (const width of [390,768,1440]) {
     await page.getByLabel('Jméno',{exact:true}).focus();
     await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
     await page.getByLabel('Do',{exact:true}).fill('2032-02-09');
-    await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true})).toBeDisabled();
     await page.getByLabel('Jméno',{exact:true}).focus();
     await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
     await page.getByLabel('Do',{exact:true}).fill('2032-02-05');
     await page.getByLabel('Jméno',{exact:true}).focus();
-    await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true})).toBeDisabled();
     expect(state.posts).toEqual([]);
     expect(state.errors).toEqual([]);
   });

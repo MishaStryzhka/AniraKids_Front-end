@@ -48,7 +48,7 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,39
  await page.getByLabel('Balíkovna',{exact:true}).check();expect(maps).toBe(0);
  await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
  await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await expect(page.getByText('Vyberte výdejní místo Balíkovny.')).toBeVisible();expect(posts).toEqual([]);
  await page.getByRole('button',{name:'Vybrat výdejní místo',exact:true}).click();
  await expect(page.getByRole('dialog')).toBeVisible();
@@ -59,7 +59,7 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,39
  await page.getByLabel('Balíkovna na adresu',{exact:true}).check();
  await page.getByRole('button',{name:'Ověřit dostupnost'}).click();
  await expect(page.getByText('Termín je aktuálně dostupný',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await expect(page.getByText('Vyplňte ulici a číslo domu, město a platné PSČ.')).toBeVisible();expect(posts).toEqual([]);
  await page.getByLabel('Ulice a číslo domu',{exact:true}).fill('Testovací 12');
  await page.getByLabel('Město',{exact:true}).fill('Praha');
@@ -69,7 +69,7 @@ for(const method of ['balikovna','balikovna_address'])for(const width of [375,39
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.getByRole('group',{name:'Způsob převzetí'}).screenshot({path:`test-evidence/delivery/choice-${method}-${width}.png`});
  await page.getByLabel('Jméno',{exact:true}).fill('Jana');await page.getByLabel('Příjmení').fill('Test');await page.getByLabel('E-mail',{exact:true}).fill('test@example.test');await page.getByLabel('Telefon',{exact:true}).fill('+420777123456');
- await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await expect(page.getByRole('heading',{name:'AK-2032-ABC123'})).toBeVisible();
  expect(posts).toHaveLength(1);expect(posts[0].rentalPolicyVersion).toBe('2026-11');expect(posts[0].fulfillmentMethod).toBe(method);if(method==='balikovna')expect(posts[0].balikovnaPoint).toMatchObject({id:'B10103',zip:'10030'});else expect(posts[0].deliveryAddress).toEqual({street:'Testovací 12',city:'Praha',zip:'19000',country:'CZ'});
  await expect(page.getByText(/Způsob převzetí:/)).toBeVisible();expect(errors).toEqual([]);
