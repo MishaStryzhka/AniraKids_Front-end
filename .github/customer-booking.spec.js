@@ -555,6 +555,7 @@ for (const width of [390, 1440])
     await begin(page);
     await quote(page);
     await contact(page);
+    await page.locator('summary',{hasText:'Podrobnosti platby a storna'}).click();
     await expect(page.getByText(/Rezervační záloha činí 200/)).toBeVisible();
     await expect(page.getByText(/zbývá z nájemného 300/)).toBeVisible();
     await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
@@ -812,11 +813,12 @@ for(const width of [375,390,430,768,1024,1440]) test('compact booking informatio
  await setup(page);await begin(page);
  const note=page.getByLabel('Poznámka',{exact:true});
  expect((await note.boundingBox()).height).toBeLessThanOrEqual(56);
- await expect(page.getByText(/Rezervační záloha činí/)).toBeVisible();
+ await expect(page.getByText(/Rezervační záloha činí/)).not.toBeVisible();
  const payment=page.locator('details').filter({has:page.locator('summary',{hasText:'Podrobnosti platby a storna'})});
  const company=page.locator('details').filter({has:page.locator('summary',{hasText:'Údaje o provozovateli'})});
  await expect(payment).not.toHaveAttribute('open','');await expect(company).not.toHaveAttribute('open','');
  await payment.locator('summary').click();await expect(payment.getByText(/Po vytvoření rezervace/)).toBeVisible();
+ await expect(payment.getByText(/Rezervační záloha činí/)).toBeVisible();
  await company.locator('summary').click();await expect(company.getByText(/Nejsme plátci DPH/)).toBeVisible();
  await payment.locator('summary').click();await company.locator('summary').click();
  await expect(page.getByRole('link',{name:'Obchodní podmínky',exact:true})).toBeVisible();

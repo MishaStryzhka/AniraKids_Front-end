@@ -693,9 +693,6 @@ export function BookingPage() {
                       <PriceSummary roundTrip delivery={shippingPrice(draft,draft.selection.rentalMode)} discount={fittingDiscount ? {number:fittingDiscount.number,amount:200} : undefined} pricing={fittingDiscount?{...quote.pricing,rentalPrice:quote.pricing.rentalPrice-200,totalDue:quote.pricing.totalDue-200}:quote.pricing} />
                       <Copy>Cena zahrnuje vybrané kalendářní dny včetně prvního a posledního dne. Dny přepravy a čištění neúčtujeme. Dostupnost a cenu ověříme při odeslání.</Copy>
                     </Panel> : null}
-                    <Copy>
-                      Odesláním vytvoříte rezervaci čekající na potvrzení.
-                    </Copy>
                     <LegalLinks>
                       <RouteLink to={routes.terms} target="_blank" rel="noreferrer">Obchodní podmínky</RouteLink>
                       <RouteLink to={routes.rentalTerms} target="_blank" rel="noreferrer">Doprava, storno a vrácení</RouteLink>

@@ -68,7 +68,7 @@ export function BookingPaymentExplanation({
       : Math.min(policy.advanceAmount, rentalPrice);
   return (
     <Stack>
-      <Heading>Platba a potvrzení rezervace</Heading>
+      <BookingDetails><summary>Podrobnosti platby a storna</summary><Stack>
       <Copy>
         {fittingCredit > 0
           ? `Zaplacenou zkoušku ${formatMoney(fittingCredit)} započteme jako rezervační zálohu. Zálohu znovu neplatíte.`
@@ -82,7 +82,6 @@ export function BookingPaymentExplanation({
           celé nájemné{delivery ? ' a dopravu' : ''}{hasDeposit ? ' a vratnou kauci' : ''}.
         </Copy>
       ) : null}
-      <BookingDetails><summary>Podrobnosti platby a storna</summary><Stack>
       <Copy>
         Po vytvoření rezervace si vyberete z dostupných způsobů platby. Zaplatit můžete zálohu nebo celou částku; záloha se při plné platbě nepřičítá navíc. Online platbu ověříme automaticky a platnou rezervaci potvrdíme po kontrole dostupnosti. Převod a hotovost ověřuje administrátor.
       </Copy>
