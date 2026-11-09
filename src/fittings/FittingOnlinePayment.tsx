@@ -20,7 +20,7 @@ export function FittingOnlinePayment({data,endpoint,token,onUpdate,onMethod}:{da
  };
  return <Panel><Heading>Platba zkoušky</Heading>
  {review?<Copy role="alert">Platbu jsme přijali, ale termín vyžaduje kontrolu. Další platbu neposílejte. Kontaktujte nás s číslem zkoušky.</Copy>:null}
- {!active&&payable&&online?<SelectField label="Způsob platby" value={method} onChange={e=>setMethod(e.target.value as 'online'|'qr')}><option value="online">Online platba – karta, Apple Pay, Revolut Pay</option>{data.paymentOptions?.qrEnabled?<option value="qr">Bankovní převod s QR kódem</option>:null}</SelectField>:null}
+ {!active&&payable&&online?<SelectField label="Způsob platby" value={method} onChange={e=>setMethod(e.target.value as 'online'|'qr')}><option value="online">Online platba</option>{data.paymentOptions?.qrEnabled?<option value="qr">Bankovní převod s QR kódem</option>:null}</SelectField>:null}
  {active?<EmbeddedRevolutPayment adapter={adapter} config={config} canPay={payable} onReceipt={()=>onUpdate()} onClose={()=>{setOpen(false);onUpdate();}}/>:payable&&online&&method==='online'?config?<Button onClick={()=>setOpen(true)}>Zaplatit online – 200 Kč</Button>:<Copy role="status">Online platba momentálně není dostupná. Obnovte stránku nebo nás kontaktujte.</Copy>:null}
  </Panel>;
 }

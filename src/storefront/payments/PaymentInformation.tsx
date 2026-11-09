@@ -247,7 +247,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
       ) : null}
       {payment.paymentOptions && payable && !cardOpen && !pendingTransfer && !cash && !payment.cardPayment?.reviewRequired ?
        <SelectField label="Způsob platby" value={selectedMethod} disabled={busy} onChange={e=>setMethod(e.target.value as 'online'|'qr')}>
-        {onlineEnabled?<option value="online">Online platba – karta, Apple Pay, Revolut Pay</option>:null}
+        {onlineEnabled?<option value="online">Online platba</option>:null}
         {qrEnabled?<option value="qr">Bankovní převod s QR kódem</option>:null}
        </SelectField>:null}
       {payable && selectedMethod==='online' && onlineEnabled && !cardConfig && !cardOpen ? <Copy role="status">Online platba momentálně není dostupná. Obnovte stránku{qrEnabled?' nebo zvolte QR převod':', případně nás kontaktujte'}.</Copy>:null}
