@@ -12,6 +12,7 @@ for(const width of [375,390,430,768,1024,1440])test('cooperation activation and 
   if(p==='/api/users/current')return json({user:{_id:'admin-user',firstName:'Jana',lastName:'Nová',email:'jana@example.test'}});
   if(p==='/api/v2/admin/access')return json({owner:true,permissions:['settings','partners','fittings']});
   if(p==='/api/v2/admin/administrators')return json({owners:[],items:[],total:0});
+  if(p==='/api/v2/admin/payment-settings')return json({gateway:'off',qrEnabled:true,defaultMethod:'qr',revision:0,configured:false,providers:{revolut:false,globalpayments:false}});
   if(p==='/api/v2/site-settings'||p==='/api/v2/admin/settings')return json({sections:{suits:true,familyLooks:false},cooperationActive:active});
   if(p==='/api/v2/partner/access')return json({owner:true,role:'administrator',partnerId:'blaze',enabled:true,cooperationActive:active});
   if(p==='/api/v2/partner/cooperation'){writes.push(req.postDataJSON());active=req.postDataJSON().active;return json({ok:true});}

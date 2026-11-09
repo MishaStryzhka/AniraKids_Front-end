@@ -97,3 +97,14 @@ test('pending email conflict explains why changing dates cannot help',async()=>{
  expect(screen.queryByRole('button',{name:'Obnovit nabídku'})).not.toBeInTheDocument();
  expect(screen.getByRole('link',{name:'Moje zkoušky'})).toHaveAttribute('href','/ucet/rezervace');
 });
+
+test('wallet return restores private access and offers a complete reusable private link',async()=>{
+ mockAuth.isLoggedIn=false;mockAuth.token='';
+ const number='ZK-123456ABCDEF',privateToken='a'.repeat(64);
+ sessionStorage.setItem('anirakids.fitting-return.'+number,privateToken);
+ api.mockResolvedValue({number,date:'2030-01-07',time:'11:00',status:'confirmed',paymentStatus:'paid',address:'Private address'});
+ render(<MemoryRouter initialEntries={['/zkouska/'+number+'?paymentReturn=1']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
+ const field=await screen.findByLabelText('Soukromý odkaz na zkoušku');
+ expect(field).toHaveValue(window.location.origin+'/zkouska/'+number+'#'+privateToken);
+ expect(api).toHaveBeenCalledWith('/fittings/'+number,expect.objectContaining({token:privateToken}));
+});

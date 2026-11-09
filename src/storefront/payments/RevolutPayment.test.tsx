@@ -91,3 +91,16 @@ test('checkout failure retains safe provider code while server still reports pen
  expect(screen.getByRole('alert')).toHaveTextContent('error.unknown');
  expect(document.body).not.toHaveTextContent('private@example.com');
 });
+test('online-only settings keep the amount selector and hide QR transfer actions',async()=>{
+ render(<ReceiptPaymentInformation access={access} receipt={{...receipt,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,paymentOptions:{gateway:'revolut',qrEnabled:false,defaultMethod:'online'},paymentInstructions:null,fullPaymentInstructions:null}}}/>);
+ expect(await screen.findByRole('button',{name:/Zaplatit online/})).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Platbu jsem odeslal/a'})).not.toBeInTheDocument();
+ expect(screen.queryByRole('img',{name:/QR platba/})).not.toBeInTheDocument();
+ expect(screen.getByLabelText('Jak chcete zaplatit?')).toHaveValue('advance');
+});
+test('QR-only settings never offer Revolut even when provider credentials exist',async()=>{
+ render(<ReceiptPaymentInformation access={access} receipt={{...receipt,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,paymentOptions:{gateway:'off',qrEnabled:true,defaultMethod:'qr'}}}}/>);
+ await screen.findByRole('img',{name:/QR platba/});
+ expect(screen.queryByRole('button',{name:/Zaplatit online/})).not.toBeInTheDocument();
+ expect(screen.getByRole('button',{name:'Platbu jsem odeslal/a'})).toBeInTheDocument();
+});

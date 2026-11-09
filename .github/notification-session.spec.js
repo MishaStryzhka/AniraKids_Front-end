@@ -17,6 +17,7 @@ async function setup(page,{authFail=false}={}){
   if(p.endsWith('/admin/push/config'))return json({enabled:true,publicKey:'fixture'});
   if(p.endsWith('/admin/push/preferences'))return state.pushFail?json({},503):json({subscribed:true,topics:state.topics});
   if(p.endsWith('/admin/push/subscribe')){state.writes.push(route.request().postDataJSON());if(state.saveFail)return json({},503);state.topics=route.request().postDataJSON().topics;return json({ok:true});}
+  if(p==='/api/v2/admin/payment-settings')return json({gateway:'off',qrEnabled:true,defaultMethod:'qr',revision:0,configured:false,providers:{revolut:false,globalpayments:false}});
   if(p.endsWith('/admin/settings')||p.endsWith('/site-settings'))return json({sections:{girlsDresses:true,womenDresses:true,suits:true,familyLooks:false}});
   if(p.endsWith('/admin/fitting-settings'))return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});
   if(p.endsWith('/admin/administrators'))return json({owners:[],items:[],total:0});

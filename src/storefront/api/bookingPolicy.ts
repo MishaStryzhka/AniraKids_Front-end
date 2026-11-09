@@ -1,3 +1,4 @@
+import {parsePaymentOptions,type PaymentOptions} from '../payments/paymentOptions';
 import { object, money, string, PublicApiError } from './publicValidation';
 import { parsePaymentConfirmation, type PaymentConfirmation } from '../payments/paymentConfirmation';
 export type BookingPolicy = {
@@ -28,6 +29,7 @@ export type PaymentInstructions = NonNullable<BookingPolicy['bank']> & {
   qrPayload: string;
 };
 export type ReceiptPayment = PaymentConfirmation & {
+  paymentOptions?:PaymentOptions;
   cardPayment?: {active:boolean;reviewRequired:boolean;kind:'advance'|'full'|null};
   advanceRequired: number;
   advanceBalance: number;
@@ -189,6 +191,7 @@ export function parseReceiptPayment(
   }
   return {
     ...parsePaymentConfirmation(value, invalid),
+    paymentOptions:parsePaymentOptions(value.paymentOptions),
     ...(card!==undefined ? {cardPayment:card as ReceiptPayment['cardPayment']} : {}),
     advanceRequired: p.advanceRequired,
     advanceBalance: p.advanceBalance,

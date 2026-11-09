@@ -9,6 +9,10 @@ on:
       - .github/invoice-toolbar.spec.js
       - src/admin/fittings/**
       - src/admin/reservations/**
+      - src/admin/settings/**
+      - src/fittings/**
+      - src/storefront/payments/**
+      - .github/payment-settings.verify.js
       - .github/fitting-discount.spec.js
       - .github/admin-payments.spec.js
       - .github/workflows/payment-ui-verify.yml
@@ -46,6 +50,7 @@ jobs:
           npx --yes serve@14.2.4 -s build -l 4173 >test-evidence/payments/server.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
       - run: npx playwright test .github/admin-payments.spec.js .github/fitting-discount.spec.js .github/invoices.spec.js .github/invoice-toolbar.spec.js --workers=2 --reporter=line
+      - run: node .github/payment-settings.verify.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:

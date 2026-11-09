@@ -13,6 +13,7 @@ async function fixture(page,options={}){
   if(p==='/api/v2/admin/fitting-settings')return json({enabled:false,address:'',weekly:Array.from({length:7},(_,day)=>({day,enabled:false,start:'09:00',end:'17:00'})),blockedDates:[]});
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
   if(p==='/api/v2/site-settings')return state.readFail?json({},503):json({cooperationActive:true,sections:state.sections,filters:state.filters});
+  if(p==='/api/v2/admin/payment-settings')return json({gateway:'off',qrEnabled:true,defaultMethod:'qr',revision:0,configured:false,providers:{revolut:false,globalpayments:false}});
   if(p==='/api/v2/admin/settings'){
    if(req.method()==='PATCH'){
     state.patches.push(req.postDataJSON());

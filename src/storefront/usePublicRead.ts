@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 export function usePublicRead<T>(
   key: string | null,
   read: (signal: AbortSignal) => Promise<T>,
@@ -41,10 +41,11 @@ export function usePublicRead<T>(
   }, [key, revision, keepDataWhileRefreshing]);
   const owned =
     key !== null && state.key === key && state.revision === revision;
+  const reload = useCallback(() => setRevision(value => value + 1), []);
   return {
     data: owned || (keepDataWhileRefreshing && key !== null && state.key === key) ? state.data : null,
     error: owned ? state.error : null,
     loading: key !== null && (!owned || state.loading),
-    reload: () => setRevision(value => value + 1),
+    reload,
   };
 }
