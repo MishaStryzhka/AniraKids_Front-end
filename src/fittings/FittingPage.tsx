@@ -23,7 +23,7 @@ const PrivacyLink=styled(Link)`
  &:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:3px;border-radius:2px;}
 `;
 const SummaryHeader=styled.div`display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0;h2{min-width:0;}`;
-const CancelIcon=styled(IconButton)`color:#7A6254;inline-size:44px;block-size:44px;&& > svg{inline-size:40px;block-size:40px;}`;
+const CancelIcon=styled(IconButton)`color:#7A6254;inline-size:44px;block-size:44px;&& > svg{inline-size:30px;block-size:30px;}`;
 const Content=styled.div`width:100%;max-width:720px;margin:auto;display:grid;gap:24px;min-width:0;`;
 const Times=styled.div`display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;`;
 const Fields=styled.div`display:grid;gap:16px;@media(min-width:768px){grid-template-columns:1fr 1fr;}`;
