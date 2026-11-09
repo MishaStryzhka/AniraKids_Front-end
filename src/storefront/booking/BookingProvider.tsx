@@ -491,7 +491,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     ...state,
     stored: accountBlocked ? null : state.stored,
     draft: accountBlocked ? null : state.draft,
-    accountBlocked: sessionPending,
+    accountBlocked: accountBlocked && sessionPending,
     error: accountBlocked ? null : state.error,
     busy: accountBlocked ? sessionPending : state.busy,
     chooseProduct,

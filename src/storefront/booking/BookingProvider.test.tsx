@@ -366,7 +366,7 @@ test('foreign receipt is hidden without blocking a new booking and restored only
   expect(JSON.parse(sessionStorage.getItem(SESSION_KEY + '.account.' + ownerSession.accountId)!)).toEqual(JSON.parse(saved!));
   act(() => { expect(view.result.current.chooseProduct(product)).toBe(true); });
   view.changeSession(ownerSession, true);
-  expect(view.result.current.accountBlocked).toBe(true);
+  expect(view.result.current.accountBlocked).toBe(false);
   view.changeSession(ownerSession);
   expect(view.result.current.stored?.kind).toBe('receipt');
   act(() => { expect(view.result.current.startNew()).toBe(true); });
