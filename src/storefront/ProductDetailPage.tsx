@@ -133,11 +133,13 @@ export function ProductDetailPage() {
                     )}
                   </Stack>
                 ))}
+                <Facts><div><dt>Zkouška</dt><dd>{formatMoney(200)}</dd></div></Facts>
               </Panel>
             ))
           ) : (
             <Copy>Momentálně nejsou dostupné žádné velikosti.</Copy>
           )}
+          <Copy>Zkouška je placená. Po jejím absolvování můžete získat slevu 200 Kč na pronájem.</Copy>
           <Actions><RouteLink to={"/zkouska?product="+encodeURIComponent(product.id)}>Rezervovat zkoušku</RouteLink></Actions>
           <Copy>
             Na focení: vyzvednutí a vrácení ve stejný den, pouze osobně. Na libovolnou příležitost: 1–7 dní, s možností dopravy. Dostupnost a celkovou cenu uvidíte po výběru termínu.
@@ -175,7 +177,7 @@ export function ProductDetailPage() {
                     { trackProduct('begin_checkout', product.id); navigate(routes.reservation, { state: { catalogueReturnTo } }); }
                 }}
               >
-                Rezervovat
+                {product.category === 'dress' ? 'Rezervovat šaty' : product.category === 'suit' ? 'Rezervovat oblek' : 'Rezervovat oblečení'}
               </Button>
             </Actions>
           )}

@@ -252,7 +252,7 @@ async function begin(page, captureProduct = false) {
   ).toBeVisible();
   if (captureProduct)
     await capture(page, 'product-' + page.viewportSize().width);
-  await page.getByRole('button', { name: 'Rezervovat' }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/ }).click();
   await page.getByLabel('Varianta pronájmu').selectOption('external');
   await page.getByLabel('Velikost', { exact: true }).selectOption(V);
   await page.getByLabel('Od', { exact: true }).fill('2030-10-10');
@@ -293,7 +293,7 @@ for (const width of [375, 390, 430, 768, 1024, 1440])
       await begin(page, true);
       await quote(page);
       await page
-        .getByRole('button', { name: 'Rezervovat', exact: true })
+        .getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
         .click();
       await expect(page.getByLabel('Jméno', { exact: true })).toBeFocused();
       const fieldBox = await page
@@ -306,7 +306,7 @@ for (const width of [375, 390, 430, 768, 1024, 1440])
       await contact(page);
       await capture(page, 'booking-' + width);
       await page
-        .getByRole('button', { name: 'Rezervovat', exact: true })
+        .getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
         .click();
       await expect(
         page.getByRole('heading', { name: 'Rezervace byla vytvořena' })
@@ -353,7 +353,7 @@ for (const mode of ['network', 'malformed'])
       await contact(page);
       state.mode = mode;
       await page
-        .getByRole('button', { name: 'Rezervovat', exact: true })
+        .getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
         .click();
       await expect(
         page.getByRole('heading', { name: 'Výsledek rezervace není potvrzený' })
@@ -387,13 +387,13 @@ test('409 inventory conflict preserves contact, invalidates quote and allows res
   await quote(page);
   await contact(page);
   state.mode = 'conflict';
-  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
   await expect(
     page.getByText('Tento termín není dostupný. Vyberte prosím jiný termín.')
   ).toBeVisible();
   await expect(page.getByLabel('E-mail')).toHaveValue('jana@example.test');
   await expect(
-    page.getByRole('button', { name: 'Rezervovat', exact: true })
+    page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
   ).toBeDisabled();
   await expect(page.getByText('private server detail')).toHaveCount(0);
   expect(state.posts).toHaveLength(1);
@@ -410,7 +410,7 @@ test('single-flight survives leaving route while request is pending', async ({
   await contact(page);
   state.defer = true;
   await page
-    .getByRole('button', { name: 'Rezervovat', exact: true })
+    .getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
     .evaluate(button => {
       button.click();
       button.click();
@@ -436,7 +436,7 @@ test('late availability cannot enable changed selection; keyboard field validati
   state.releaseQuote();
   await expect(page.getByText('Termín je aktuálně dostupný')).toHaveCount(0);
   await expect(
-    page.getByRole('button', { name: 'Rezervovat', exact: true })
+    page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
   ).toBeDisabled();
   await page.getByLabel('Od', { exact: true }).fill('2030-10-15');
   await page.getByRole('button', { name: 'Ověřit dostupnost' }).focus();
@@ -458,7 +458,7 @@ test('session storage failure prevents POST until explicit retry', async ({
       return window.bookingOriginalSet.call(this, key, value);
     };
   });
-  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
   await expect(
     page.getByText('Rezervaci nyní nelze bezpečně odeslat')
   ).toBeVisible();
@@ -467,7 +467,7 @@ test('session storage failure prevents POST until explicit retry', async ({
     Storage.prototype.setItem = window.bookingOriginalSet;
   });
   await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
-  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
   await expect(page.getByText('AK-2030-000001')).toBeVisible();
   expect(state.posts).toHaveLength(1);
 });
@@ -505,13 +505,13 @@ test('unavailable quote and idempotency mismatch never claim success or enable n
     page.getByText('Tento termín není dostupný', { exact: true })
   ).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Rezervovat', exact: true })
+    page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
   ).toBeDisabled();
   state.mode = 'normal';
   await quote(page);
   await contact(page);
   state.mode = 'mismatch';
-  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Výsledek rezervace není potvrzený' })
   ).toBeVisible();
@@ -547,7 +547,7 @@ for (const width of [390, 1440])
     await contact(page);
     await expect(page.getByText(/Rezervační záloha činí 200/)).toBeVisible();
     await expect(page.getByText(/zbývá z nájemného 300/)).toBeVisible();
-    await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+    await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
     const qr = page.getByRole('img', { name: /QR platba 200/ });
     await expect(qr).toBeVisible();
     await expect(qr).toHaveAttribute('src', /^data:image\/png;base64,/);
@@ -576,16 +576,16 @@ test('unavailable policy prevents booking and malformed payment receipt stays re
   await quote(page);
   await contact(page);
   await expect(
-    page.getByRole('button', { name: 'Rezervovat', exact: true })
+    page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
   ).toBeDisabled();
   expect(state.posts).toHaveLength(0);
   state.policyFailure = false;
   await page.getByRole('button', { name: 'Načíst informace o platbě' }).click();
   await expect(
-    page.getByRole('button', { name: 'Rezervovat', exact: true })
+    page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true })
   ).toBeEnabled();
   state.mode = 'payment-malformed';
-  await page.getByRole('button', { name: 'Rezervovat', exact: true }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/, exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Výsledek rezervace není potvrzený' })
   ).toBeVisible();
@@ -611,7 +611,7 @@ for (const width of [390, 768, 1440]) {
     await page.getByRole('link', { name: 'Zpět na produkty' }).click();
     await expect(page).toHaveURL(APP + source);
     await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
-    await page.getByRole('button', { name: 'Rezervovat' }).click();
+    await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/ }).click();
     const title = page.getByRole('heading', { name: 'Rezervace', exact: true });
     await expect(title).toBeFocused();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
@@ -680,7 +680,7 @@ test('favorites offer the catalogue and retain their source through booking', as
   await page.goto(APP + '/oblibene');
   await page.getByRole('link', { name: 'Prohlédnout Sofia' }).click();
   await expect(page.getByRole('link', { name: 'Zpět na produkty' })).toHaveAttribute('href', '/oblibene');
-  await page.getByRole('button', { name: 'Rezervovat' }).click();
+  await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/ }).click();
   await page.getByRole('button', { name: /^Ukončit/ }).click();
   await expect(page).toHaveURL(APP + '/oblibene');
   await expect(page.getByRole('link', { name: 'Prohlédnout Sofia' })).toBeVisible();
@@ -741,11 +741,11 @@ test('signed-in catalogue and availability stay public without bearer', async ({
 for (const guest of [true,false]) test('fitting discount customer redemption '+(guest?'private link':'account'),async({page})=>{
  const state=await setup(page,guest);state.discount=true;
  if(guest){await page.goto(APP+'/saty#fitting=ZK-ABCDEF123456&token='+ 'a'.repeat(64));await expect(page).toHaveURL(APP+'/saty');}
- await begin(page);await page.getByLabel('Varianta pronájmu').selectOption('studio');await quote(page);await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await begin(page);await page.getByLabel('Varianta pronájmu').selectOption('studio');await quote(page);await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await page.getByRole('button',{name:'Uplatnit slevu',exact:true}).click();
  await expect(page.getByText('Uplatněna sleva 200 Kč · ZK-ABCDEF123456')).toBeVisible();
  await contact(page);await capture(page,'fitting-discount-'+(guest?'link':'account'));
- await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
  expect(state.posts).toHaveLength(1);expect(state.posts[0].body.fittingDiscount).toEqual({number:'ZK-ABCDEF123456',...(guest?{token:'a'.repeat(64)}:{})});
  const discountRow = page.locator('dl > div').filter({ has: page.getByText('Započtená platba za zkoušku ZK-ABCDEF123456', { exact: true }) });
@@ -774,7 +774,7 @@ for (const width of [375,390,430]) test('inactive cooperation books external ren
  expect(state.reads.filter(r=>r.url.endsWith('/availability')).every(r=>new URLSearchParams(r.query).get('rentalMode')==='external')).toBe(true);
  await contact(page);
  await capture(page,'external-booking-'+width);
- await page.getByRole('button',{name:'Rezervovat',exact:true}).click();
+ await page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true}).click();
  await expect(page.getByRole('heading',{name:'Rezervace byla vytvořena'})).toBeVisible();
  await expect(page.getByRole('img',{name:/QR platba 200/})).toBeVisible();
  expect(state.posts).toHaveLength(1);expect(state.posts[0].body.rentalMode).toBe('external');
@@ -788,7 +788,7 @@ test('booking settings failure blocks draft and recovers without losing selectio
  const state=await setup(page);await begin(page);
  state.settingsFailure=true;await page.reload();
  await expect(page.getByText('Nastavení pronájmu se nepodařilo načíst.')).toBeVisible();
- await expect(page.getByRole('button',{name:'Rezervovat',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name: /^Rezervovat(?: šaty| oblek| oblečení)?$/,exact:true})).toHaveCount(0);
  state.settingsFailure=false;state.cooperationActive=false;
  await page.getByRole('button',{name:'Načíst nastavení znovu'}).click();
  await expect(page.getByLabel('Varianta pronájmu')).toHaveValue('external');
