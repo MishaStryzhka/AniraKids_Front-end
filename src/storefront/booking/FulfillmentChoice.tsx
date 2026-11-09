@@ -23,6 +23,10 @@ const Choice = styled.label<{$selected:boolean}>`
   input{accent-color:${t.color.text.brand};} svg{flex-shrink:0;}
   &:focus-within{outline:2px solid ${t.color.focus.ring};outline-offset:2px;}
 `;
+const PickupLabel = styled.span`
+  display:grid;gap:4px;min-width:0;
+  small{font-size:13px;line-height:1.5;color:${t.color.text.secondary};overflow-wrap:anywhere;}
+`;
 const DeliveryChoice = styled(Choice)`
   display:grid;grid-template-columns:20px 112px minmax(0,1fr) auto;
   padding:${t.space[4]};gap:${t.space[3]};
@@ -73,7 +77,7 @@ export function FulfillmentChoice({value,onChange,disabled,error}:{value:Fulfill
   return <Fieldset disabled={disabled} aria-describedby={error?id:undefined}>
     <legend>Způsob převzetí</legend><Stack>
     <Choices>
-      <Choice $selected={method==='pickup'}><input type="radio" name="fulfillmentMethod" value="pickup" aria-label="Osobní vyzvednutí" checked={method==='pickup'} onChange={()=>{setOpen(false);onChange({fulfillmentMethod:'pickup'});}}/><Store size={20} aria-hidden="true"/><span>Osobní vyzvednutí</span><strong>Zdarma</strong></Choice>
+      <Choice $selected={method==='pickup'}><input type="radio" name="fulfillmentMethod" value="pickup" aria-label="Osobní vyzvednutí" checked={method==='pickup'} onChange={()=>{setOpen(false);onChange({fulfillmentMethod:'pickup'});}}/><Store size={20} aria-hidden="true"/><PickupLabel>Osobní vyzvednutí<small>Kytlická 862/2, 190 00 Praha 9</small></PickupLabel><strong>Zdarma</strong></Choice>
       <DeliveryChoice $selected={method==='balikovna'}><input type="radio" name="fulfillmentMethod" value="balikovna" aria-label="Balíkovna" checked={method==='balikovna'} onChange={()=>onChange({fulfillmentMethod:'balikovna'})}/><img src="/delivery/balikovna.svg" alt="Balíkovna"/><span className="description">Vyberte si box nebo výdejní místo, které vám vyhovuje. <strong>Balíkovna je všude!</strong></span><span className="prices"><strong>178 Kč</strong><small>Doručení: 89 Kč</small><small>Vrácení: 89 Kč</small></span></DeliveryChoice>
       <DeliveryChoice $selected={method==='balikovna_address'}><input type="radio" name="fulfillmentMethod" value="balikovna_address" aria-label="Balíkovna na adresu" checked={method==='balikovna_address'} onChange={()=>{setOpen(false);onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ'}});}}/><img src="/delivery/balikovna-address.svg" alt="Balíkovna na adresu"/><span className="description">Doručíme i na vámi vybranou adresu. <strong>Balíkovna je všude!</strong></span><span className="prices"><strong>238 Kč</strong><small>Doručení: 119 Kč</small><small>Vrácení: 119 Kč</small></span></DeliveryChoice>
     </Choices>
