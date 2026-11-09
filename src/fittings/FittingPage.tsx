@@ -2,8 +2,9 @@ import {PickupLocation} from '../storefront/booking/PickupLocation';
 import {trackBookingCreated} from '../analytics/analytics';
 import {useEffect,useRef,useState} from 'react';
 import {getReferralToken} from '../partner/referral';
-import {useLocation,useNavigate,useParams,useSearchParams} from 'react-router-dom';
+import {Link,useLocation,useNavigate,useParams,useSearchParams} from 'react-router-dom';
 import styled from 'styled-components';
+import {designTokens as t} from '../design-system/tokens/designTokens';
 import {CalendarClock} from 'lucide-react';
 import {useAuth} from '../hooks/useAuth';
 import {usePublicRead} from '../storefront/usePublicRead';
@@ -14,6 +15,11 @@ import {Dialog} from '../design-system/components/Dialog';
 import {Page,Panel,Stack,Title,Copy,Actions,RouteLink,Heading} from '../storefront/storefrontStyles';
 import {pragueToday,addCalendarDays} from '../admin/calendar/calendarDates';
 import {fittingApi,fittingError,fittingStatusLabels,fittingDateLabel,FittingApiError,type Slots,type Fitting,type FittingRequest} from './fittingApi';
+const PrivacyLink=styled(Link)`
+ color:${t.color.text.brand};font-weight:600;text-decoration:underline;text-underline-offset:3px;
+ &:hover{text-decoration-thickness:2px;}
+ &:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:3px;border-radius:2px;}
+`;
 const Content=styled.div`width:100%;max-width:720px;margin:auto;display:grid;gap:24px;min-width:0;`;
 const Times=styled.div`display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;`;
 const Fields=styled.div`display:grid;gap:16px;@media(min-width:768px){grid-template-columns:1fr 1fr;}`;
@@ -75,7 +81,7 @@ function FittingForm(){
  <Panel>{slots?.address?<FittingLocation address={slots.address} placeName={slots.placeName}/>:null}<Heading><CalendarClock size={22} aria-hidden="true"/> Vyberte termín</Heading><Input label="Datum zkoušky" type="date" min={pragueToday()} max={addCalendarDays(pragueToday(),90)} value={date} disabled={busy} required onChange={e=>{setDate(e.target.value);setTime('');}}/>
  {loading?<Copy role="status">Načítání volných časů…</Copy>:slots?.enabled?<><Copy>Časy jsou uvedené v českém čase. Zápis je možný nejméně 2 hodiny předem, až 90 dní dopředu.</Copy>{slots.slots.length?<Times aria-label="Volné časy">{slots.slots.map(value=><Button key={value} type="button" variant={time===value?'primary':'secondary'} aria-pressed={time===value} disabled={busy} onClick={()=>setTime(value)}>{value}</Button>)}</Times>:<Copy>Na tento den nejsou volné časy. Vyberte jiné datum.</Copy>}</>:slots?<Copy>Termíny zkoušek právě připravujeme. Pro domluvení nás prosím kontaktujte.</Copy>:null}
  </Panel>
- {slots?.enabled?<Panel><Heading>Kontaktní údaje</Heading><Fields><Input label="Jméno a příjmení" autoComplete="name" required minLength={2} maxLength={160} value={contact.name} disabled={busy} onChange={e=>setContact({...contact,name:e.target.value})}/><Input label="E-mail" type="email" autoComplete="email" required maxLength={254} value={contact.email} disabled={busy} onChange={e=>setContact({...contact,email:e.target.value})}/><Input label="Telefon" type="tel" autoComplete="tel" required minLength={5} maxLength={32} value={contact.phone} disabled={busy} onChange={e=>setContact({...contact,phone:e.target.value})}/></Fields><Copy>Použijte stejný e-mail i pro následnou rezervaci oblečení.</Copy><Copy>Po odeslání zaplaťte 200 Kč QR převodem do 60 minut a zvolte „Platba odeslána“. Termín potvrdíme po ověření platby.</Copy><Copy>Odesláním objednáváte placenou zkoušku za 200 Kč. <RouteLink to="/ochrana-osobnich-udaju">Ochrana osobních údajů</RouteLink></Copy>{!time&&!busy&&!loading?<Copy style={{color: '#7A6254', fontWeight: 600}}>Pro pokračování vyberte čas zkoušky výše.</Copy>:null}<Button type="submit" disabled={!time||busy||loading||sessionPending}>{busy?'Odesílání…':'Rezervovat a přejít k platbě 200 Kč'}</Button></Panel>:null}
+ {slots?.enabled?<Panel><Heading>Kontaktní údaje</Heading><Fields><Input label="Jméno a příjmení" autoComplete="name" required minLength={2} maxLength={160} value={contact.name} disabled={busy} onChange={e=>setContact({...contact,name:e.target.value})}/><Input label="E-mail" type="email" autoComplete="email" required maxLength={254} value={contact.email} disabled={busy} onChange={e=>setContact({...contact,email:e.target.value})}/><Input label="Telefon" type="tel" autoComplete="tel" required minLength={5} maxLength={32} value={contact.phone} disabled={busy} onChange={e=>setContact({...contact,phone:e.target.value})}/></Fields><Copy>Použijte stejný e-mail i pro následnou rezervaci oblečení.</Copy><Copy>Po odeslání zaplaťte 200 Kč QR převodem do 60 minut a zvolte „Platba odeslána“. Termín potvrdíme po ověření platby.</Copy><Copy>Odesláním objednáváte placenou zkoušku za 200 Kč. <PrivacyLink to="/ochrana-osobnich-udaju">Ochrana osobních údajů</PrivacyLink></Copy>{!time&&!busy&&!loading?<Copy style={{color: '#7A6254', fontWeight: 600}}>Pro pokračování vyberte čas zkoušky výše.</Copy>:null}<Button type="submit" disabled={!time||busy||loading||sessionPending}>{busy?'Odesílání…':'Rezervovat a přejít k platbě 200 Kč'}</Button></Panel>:null}
  </Stack></form>}
  <Actions><RouteLink to="/kontakt">Kontakt</RouteLink><RouteLink to="/novinky">Zpět na nabídku</RouteLink></Actions></Content></Page>;
 }
