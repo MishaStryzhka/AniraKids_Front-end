@@ -826,7 +826,7 @@ for(const width of [375,390,430,768,1024,1440]) test('compact booking informatio
  await capture(page,'compact-booking-'+width);
 });
 
-for(const width of [375,390,430,768,1024,1440]) test('selected delivery conflicts '+width,async({page})=>{
+for(const width of [375,390,430,768,1024,1440,2560]) test('selected delivery conflicts '+width,async({page})=>{
  await page.setViewportSize({width,height:1000});
  await setup(page);
  await page.route(API+'/**/availability-calendar?*',async route=>{
@@ -849,6 +849,8 @@ for(const width of [375,390,430,768,1024,1440]) test('selected delivery conflict
  await expect(end).toHaveCSS('color','rgb(137, 60, 60)');
  await expect(page.getByText(/Červeně označené dny/)).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ const calendar=page.getByLabel('Kalendář dostupnosti',{exact:true});
+ expect(await calendar.evaluate(el=>Math.abs(el.getBoundingClientRect().width-el.parentElement.getBoundingClientRect().width))).toBeLessThanOrEqual(1);
  await capture(page,'delivery-conflict-'+width);
  await page.locator('input[value="pickup"]').check();
  await expect(end).toHaveAttribute('data-conflict','false');

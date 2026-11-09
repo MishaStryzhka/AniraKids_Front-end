@@ -11,7 +11,6 @@ import {
 } from '../../admin/calendar/calendarDates';
 
 const Shell = styled(Stack)`
-  max-inline-size: 440px;
   inline-size: 100%;
   min-inline-size: 0;
 `;
