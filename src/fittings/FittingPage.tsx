@@ -84,7 +84,7 @@ function FittingForm(){
  </Panel>
  {slots?.enabled?<Panel><Heading>Kontaktní údaje</Heading><Fields><Input label="Jméno a příjmení" autoComplete="name" required minLength={2} maxLength={160} value={contact.name} disabled={busy} onChange={e=>setContact({...contact,name:e.target.value})}/><Input label="E-mail" type="email" autoComplete="email" required maxLength={254} value={contact.email} disabled={busy} onChange={e=>setContact({...contact,email:e.target.value})}/><Input label="Telefon" type="tel" autoComplete="tel" required minLength={5} maxLength={32} value={contact.phone} disabled={busy} onChange={e=>setContact({...contact,phone:e.target.value})}/></Fields><Copy>Použijte stejný e-mail i pro následnou rezervaci oblečení.</Copy><Copy>Po odeslání zaplaťte 200 Kč do 60 minut. Dostupné způsoby platby uvidíte v následujícím kroku. Termín potvrdíme po ověření platby.</Copy><Copy>Odesláním objednáváte placenou zkoušku za 200 Kč. <PrivacyLink to="/ochrana-osobnich-udaju">Ochrana osobních údajů</PrivacyLink></Copy>{!time&&!busy&&!loading?<Copy style={{color: '#7A6254', fontWeight: 600}}>Pro pokračování vyberte čas zkoušky výše.</Copy>:null}<Button type="submit" disabled={!time||busy||loading||sessionPending}>{busy?'Odesílání…':'Rezervovat a přejít k platbě 200 Kč'}</Button></Panel>:null}
  </Stack></form>}
- <Actions><RouteLink to="/kontakt">Kontakt</RouteLink><RouteLink to="/novinky">Zpět na nabídku</RouteLink></Actions></Content></Page>;
+ </Content></Page>;
 }
 export function FittingStatusPage(){
  const {number=''}=useParams(),location=useLocation();
