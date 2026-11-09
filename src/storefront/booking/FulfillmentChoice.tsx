@@ -62,6 +62,11 @@ export function FulfillmentSummary({value}:{value:Fulfillment}) {
     </>:null}
   </Stack>;
 }
+const DeliveryError = styled(ErrorCopy)`
+  color: #E30000;
+  font-size: 14px;
+  font-weight: 500;
+`;
 export function FulfillmentChoice({value,onChange,disabled,error}:{value:Fulfillment;onChange(value:Fulfillment):void;disabled?:boolean;error?:string}) {
   const id=useId(), frame=useRef<HTMLIFrameElement>(null), button=useRef<HTMLDivElement>(null);
   const [open,setOpen]=useState(false);
@@ -82,11 +87,11 @@ export function FulfillmentChoice({value,onChange,disabled,error}:{value:Fulfill
       <DeliveryChoice $selected={method==='balikovna_address'}><input type="radio" name="fulfillmentMethod" value="balikovna_address" aria-label="Balíkovna na adresu" checked={method==='balikovna_address'} onChange={()=>{setOpen(false);onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ'}});}}/><img src="/delivery/balikovna-address.svg" alt="Balíkovna na adresu"/><span className="description">Doručíme i na vámi vybranou adresu. <strong>Balíkovna je všude!</strong></span><span className="prices"><strong>238 Kč</strong><small>Doručení: 119 Kč</small><small>Vrácení: 119 Kč</small></span></DeliveryChoice>
     </Choices>
     {method!=='pickup'?<Copy>Pro přepravu počítáme se 2 pracovními dny v každém směru. Tyto dny nejsou součástí placeného pronájmu.</Copy>:null}
-    {method==='balikovna_address'?<Stack><Copy>Doručení na adresu v České republice.</Copy>{(['street','city','zip'] as const).map(field=><Input key={field} label={{street:'Ulice a číslo domu',city:'Město',zip:'PSČ'}[field]} name={'delivery-'+field} autoComplete={{street:'shipping address-line1',city:'shipping address-level2',zip:'shipping postal-code'}[field]} value={value.deliveryAddress?.[field]??''} onChange={event=>onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ',...value.deliveryAddress,[field]:field==='zip'?event.target.value.replace(/\s/g,''):event.target.value}})}/>) }<Copy>{deliveryNotice}</Copy>{error?<ErrorCopy role="alert" id={id}>{error}</ErrorCopy>:null}</Stack>:method==='pickup'?<PickupLocation/>:<>
+    {method==='balikovna_address'?<Stack><Copy>Doručení na adresu v České republice.</Copy>{(['street','city','zip'] as const).map(field=><Input key={field} label={{street:'Ulice a číslo domu',city:'Město',zip:'PSČ'}[field]} name={'delivery-'+field} autoComplete={{street:'shipping address-line1',city:'shipping address-level2',zip:'shipping postal-code'}[field]} value={value.deliveryAddress?.[field]??''} onChange={event=>onChange({fulfillmentMethod:'balikovna_address',deliveryAddress:{street:'',city:'',zip:'',country:'CZ',...value.deliveryAddress,[field]:field==='zip'?event.target.value.replace(/\s/g,''):event.target.value}})}/>) }<Copy>{deliveryNotice}</Copy>{error?<DeliveryError role="alert" id={id}>{error}</DeliveryError>:null}</Stack>:method==='pickup'?<PickupLocation/>:<>
       <Copy>{deliveryNotice}</Copy>
       {value.balikovnaPoint?<Point role="status"><strong>{value.balikovnaPoint.name}</strong><br/>{value.balikovnaPoint.address}<br/>PSČ Balíkovny: {value.balikovnaPoint.zip}</Point>:null}
       <Actions ref={button}><Button type="button" variant="secondary" aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?'Zavřít mapu':value.balikovnaPoint?'Změnit výdejní místo':'Vybrat výdejní místo'}</Button></Actions>
-      {error?<ErrorCopy id={id} role="alert">{error}</ErrorCopy>:null}
+      {error?<DeliveryError id={id} role="alert">{error}</DeliveryError>:null}
       {open?<MapDialog ref={dialog} aria-label="Vybrat výdejní místo Balíkovny" onCancel={()=>setOpen(false)}><Button type="button" variant="secondary" onClick={()=>setOpen(false)}>Zavřít mapu</Button><Copy>Pokud se mapa nenačte, zavřete ji a zkuste znovu. Případně nás kontaktujte pro domluvu dopravy.</Copy><Map ref={frame} title="Výběr výdejního místa Balíkovny" src="https://b2c.cpost.cz/locations/?type=BALIKOVNY&skipLocation=true" allow="geolocation" referrerPolicy="no-referrer"/><Button type="button" variant="secondary" onClick={()=>{setOpen(false);button.current?.querySelector('button')?.focus();}}>Zavřít mapu</Button></MapDialog>:null}
     </>}
     </Stack>
