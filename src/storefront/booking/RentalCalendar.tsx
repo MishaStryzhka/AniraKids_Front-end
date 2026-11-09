@@ -63,8 +63,9 @@ const Day = styled.button<{ $selected: boolean; $range: boolean }>`
   &:focus-visible { outline: 2px solid ${t.color.focus.ring}; outline-offset: 1px; z-index: 1; }
 `;
 const ConflictNotice = styled(Copy)`
-  color: ${t.primitive.status.danger.strong};
+  color: #E30000;
   font-size: 14px;
+  font-weight: 500;
 `;
 export function RentalCalendar({ selection, selections, enabled, onChange }: {
   selections?: Selection[];
