@@ -25,7 +25,7 @@ function randomToken(){return Array.from(crypto.getRandomValues(new Uint8Array(3
 
 function FittingLocation({address,placeName}:{address:string;placeName?:string}){
  const home=/^Kytlická\s+862\s*\/\s*2(?:\s|,|$)/i.test(address.trim());
- return home?<PickupLocation title="Místo zkoušky · ANIRAK" note="Přijďte prosím v rezervovaný čas."/>:<Copy>{placeName?<><strong>{placeName}</strong><br/></>:'Adresa: '}{address}</Copy>;
+ return home?<PickupLocation title="Místo zkoušky · ANIRAK" note=""/>:<Copy>{placeName?<><strong>{placeName}</strong><br/></>:'Adresa: '}{address}</Copy>;
 }
 export function FittingPage(){
  const {isLoggedIn,user}=useAuth();
