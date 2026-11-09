@@ -269,10 +269,8 @@ export function BookingPage() {
     {settingsError ? <Alert role="alert"><Copy>Nastavení pronájmu se nepodařilo načíst.</Copy><Button onClick={reloadSettings}>Načíst nastavení znovu</Button></Alert>
       : <Copy role="status">Načítáme možnosti pronájmu…</Copy>}
   </Page>;
-  if (booking.accountBlocked) return <Page><Title>Rezervace vašeho účtu</Title>
-    <Panel><Copy>Pro zobrazení nebo ověření této rezervace se přihlaste ke stejnému účtu, ze kterého byla vytvořena.</Copy>
-      <RouteLink to={routes.account}>Přejít k přihlášení</RouteLink>
-    </Panel></Page>;
+  if (booking.accountBlocked) return <Page><Title>Rezervace</Title>
+    <Copy role="status">Ověřujeme přihlášení…</Copy></Page>;
   return (
     <Page>
       <div ref={root}>

@@ -27,6 +27,8 @@ import {
   draftSelectionsValid,
   initialDraft,
   loadBooking,
+  parseStored,
+  SESSION_KEY,
   loadDraft,
   persistDraft,
   newAttempt,
@@ -162,6 +164,40 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
       request.current?.abort();
     };
   }, []);
+  useEffect(() => {
+    if (sessionPending) return;
+    const stored = current.current.stored;
+    const owner = session?.accountId;
+    const archiveKey = (id: string) => SESSION_KEY + '.account.' + id;
+    try {
+      if (stored?.accountId && stored.accountId !== owner) {
+        // Keep uncertain submissions with their owner and original idempotency key.
+        const raw = JSON.stringify(stored);
+        sessionStorage.setItem(archiveKey(stored.accountId), raw);
+        if (sessionStorage.getItem(archiveKey(stored.accountId)) !== raw)
+          throw new Error('Storage unavailable');
+        request.current?.abort();
+        request.current = null;
+        persistBooking(null);
+        prefill.current = emptyPrefill();
+        commit(() => ({ draft: null, stored: null, busy: false, storageBlocked: false, error: null }));
+      }
+      if (owner && !current.current.stored) {
+        const key = archiveKey(owner);
+        const raw = sessionStorage.getItem(key);
+        if (raw) {
+          const restored = parseStored(raw);
+          if (restored.accountId !== owner) throw new Error('Invalid booking owner');
+          persistBooking(restored);
+          sessionStorage.removeItem(key);
+          commit(before => ({ ...before, draft: null, stored: restored, busy: false, storageBlocked: false, error: null }));
+        }
+      }
+    } catch {
+      // Storage failure must not reveal whether a different account has a booking.
+      commit(before => ({ ...before, storageBlocked: true, error: storageMessage }));
+    }
+  }, [session?.accountId, sessionPending, commit]);
   useEffect(() => {
     if (!state.busy && state.stored?.kind !== 'attempt') return;
     const guard = (event: BeforeUnloadEvent) => {
@@ -455,7 +491,9 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     ...state,
     stored: accountBlocked ? null : state.stored,
     draft: accountBlocked ? null : state.draft,
-    accountBlocked,
+    accountBlocked: sessionPending,
+    error: accountBlocked ? null : state.error,
+    busy: accountBlocked ? sessionPending : state.busy,
     chooseProduct,
     updateDraft,
     removeProduct,
@@ -465,7 +503,7 @@ function useBookingController(contactProfile?: ContactProfile | null, session: B
     retryStorage,
     refreshStatus,
     startNew,
-    hasActiveDraft: Boolean(state.draft || state.stored?.kind === 'attempt'),
+    hasActiveDraft: !accountBlocked && Boolean(state.draft || state.stored?.kind === 'attempt'),
   };
 }
 type BookingContextValue = ReturnType<typeof useBookingController>;

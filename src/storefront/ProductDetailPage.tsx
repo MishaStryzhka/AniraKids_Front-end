@@ -148,7 +148,7 @@ export function ProductDetailPage() {
           {booking.stored?.kind === 'attempt' || booking.storageBlocked || booking.accountBlocked ? (
             <Alert>
               <Copy>
-                {booking.accountBlocked ? 'Pro zobrazení rezervace se přihlaste ke stejnému účtu.' :
+                {booking.accountBlocked ? 'Ověřujeme přihlášení…' :
                   booking.storageBlocked ? 'Uložení rezervace vyžaduje kontrolu. Otevřete rezervaci a zkuste obnovení.' :
                   'Nejprve ověřte výsledek předchozího odeslání rezervace.'}
               </Copy>
