@@ -1,4 +1,4 @@
-import {fireEvent,render,screen,waitFor} from '@testing-library/react';
+import {act,fireEvent,render,screen,waitFor,within} from '@testing-library/react';
 import {MemoryRouter,Route,Routes} from 'react-router-dom';
 import {FittingPage,FittingStatusPage} from './FittingPage';
 import {AccountFittings} from './AccountFittings';
@@ -107,4 +107,20 @@ test('wallet return restores private access and offers a complete reusable priva
  const field=await screen.findByLabelText('Soukromý odkaz na zkoušku');
  expect(field).toHaveValue(window.location.origin+'/zkouska/'+number+'#'+privateToken);
  expect(api).toHaveBeenCalledWith('/fittings/'+number,expect.objectContaining({token:privateToken}));
+});
+
+test('summary cancel icon requires explicit confirmation and keeping fitting sends no write',async()=>{
+ api.mockResolvedValue({number:'ZK-123456ABCDEF',date:'2030-01-07',time:'11:00',status:'pending',paymentStatus:'unpaid',address:'Praha'});
+ render(<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
+ const icon=await screen.findByRole('button',{name:'Zrušit zkoušku'});
+ expect(icon).toHaveAttribute('title','Zrušit zkoušku');
+ expect(icon.querySelector('svg')).not.toBeNull();
+ fireEvent.click(icon);
+ const dialog=screen.getByRole('dialog',{name:'Opravdu chcete zrušit zkoušku?'});
+ fireEvent.click(within(dialog).getByRole('button',{name:'Ponechat zkoušku'}));
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+ expect(api.mock.calls.some(([,options])=>options.method==='POST')).toBe(false);
+ fireEvent.click(icon);
+ await act(async()=>{fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Zrušit zkoušku'}));});
+ await waitFor(()=>expect(api).toHaveBeenCalledWith('/account/fittings/ZK-123456ABCDEF/cancel',expect.objectContaining({method:'POST',token:'owner-session'})));
 });

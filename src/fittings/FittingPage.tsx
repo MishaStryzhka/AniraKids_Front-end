@@ -6,7 +6,8 @@ import {getReferralToken} from '../partner/referral';
 import {Link,useLocation,useNavigate,useParams,useSearchParams} from 'react-router-dom';
 import styled from 'styled-components';
 import {designTokens as t} from '../design-system/tokens/designTokens';
-import {CalendarClock} from 'lucide-react';
+import {CalendarClock,X} from 'lucide-react';
+import {IconButton} from '../design-system/components/IconButton';
 import {useAuth} from '../hooks/useAuth';
 import {usePublicRead} from '../storefront/usePublicRead';
 import {FittingAccountClaim} from './FittingAccountClaim';
@@ -21,6 +22,8 @@ const PrivacyLink=styled(Link)`
  &:hover{text-decoration-thickness:2px;}
  &:focus-visible{outline:2px solid ${t.color.focus.ring};outline-offset:3px;border-radius:2px;}
 `;
+const SummaryHeader=styled.div`display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0;h2{min-width:0;}`;
+const CancelIcon=styled(IconButton)`color:#7A6254;inline-size:44px;block-size:44px;`;
 const Content=styled.div`width:100%;max-width:720px;margin:auto;display:grid;gap:24px;min-width:0;`;
 const Times=styled.div`display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;`;
 const Fields=styled.div`display:grid;gap:16px;@media(min-width:768px){grid-template-columns:1fr 1fr;}`;
@@ -110,7 +113,7 @@ function FittingStatus(){
  useEffect(()=>{let active=true;setQr('');setQrError(false);if(payload)import('qrcode').then(({default:QRCode})=>QRCode.toDataURL(payload,{width:520,margin:4})).then(url=>{if(active)setQr(url);}).catch(()=>{if(active)setQrError(true);});return()=>{active=false;};},[payload,revision]);
  async function action(path:string){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await fittingApi<Fitting>(endpoint+'/'+path,{method:'POST',token:accessToken});setRevision(x=>x+1);setCancel(false);}catch(e){setError(fittingError(e));}finally{lock.current=false;setBusy(false);}}
  return <Page><Content><Title>Vaše zkouška</Title>{!accessToken?<Panel><Copy>Pro otevření zkoušky se přihlaste ke svému účtu nebo použijte celý soukromý odkaz.</Copy><RouteLink to="/ucet">Přihlásit se</RouteLink></Panel>:null}{error||read.error?<Panel role="alert"><Copy>{error||fittingError(read.error)}</Copy><Button onClick={()=>setRevision(x=>x+1)}>Obnovit stav</Button></Panel>:null}{data?<>
- <Panel><Heading>{fittingDateLabel(data.date)} · {data.time}</Heading><Copy>30 minut · {data.number}</Copy><strong>{fittingStatusLabels[data.status]}</strong><FittingLocation address={data.address}/>{data.product?<Copy>Vybraný produkt: {data.product.name}</Copy>:null}</Panel>
+ <Panel><SummaryHeader><Heading>{fittingDateLabel(data.date)} · {data.time}</Heading>{['pending','review','confirmed'].includes(data.status)?<CancelIcon aria-label="Zrušit zkoušku" title="Zrušit zkoušku" icon={<X aria-hidden="true"/>} disabled={busy} onClick={()=>setCancel(true)}/>:null}</SummaryHeader><Copy>30 minut · {data.number}</Copy><strong>{fittingStatusLabels[data.status]}</strong><FittingLocation address={data.address}/>{data.product?<Copy>Vybraný produkt: {data.product.name}</Copy>:null}</Panel>
  {data.paymentOptions?.gateway==='revolut'||data.cardPayment?.active||data.cardPayment?.reviewRequired?<FittingOnlinePayment data={data} endpoint={endpoint} token={accessToken||''} onUpdate={()=>setRevision(x=>x+1)} onMethod={setOnlineSelected}/>:null}
  {data.paymentInstructions&&!onlineSelected?<Panel><Heading>Zaplaťte 200 Kč QR převodem</Heading>{qr?<QR src={qr} alt="QR platba za zkoušku 200 Kč"/>:qrError?<Copy>QR kód se nepodařilo načíst. Použijte údaje k převodu níže.</Copy>:<Copy role="status">Vytváření QR kódu…</Copy>}<Copy>Účet: <strong>{data.paymentInstructions.accountNumber}</strong><br/>Částka: <strong>200 Kč</strong><br/>Zpráva pro příjemce: <strong>{data.number}</strong></Copy><Copy>Platbu odešlete a nahlaste do {new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',hour:'2-digit',minute:'2-digit'}).format(new Date(data.expiresAt))}. Jinak se čas uvolní.</Copy><Button disabled={busy} onClick={()=>action('payment-sent')}>Platba odeslána</Button><Copy>Tlačítko pouze nahlásí převod. Přijetí platby ověří administrátor.</Copy></Panel>:null}
  {data.status==='review'?<Panel><Heading>Ověřujeme vaši platbu</Heading><Copy>Termín pro vás držíme. Po ověření převodu se zde zobrazí potvrzení. Stav můžete kdykoli obnovit.</Copy></Panel>:null}
@@ -118,9 +121,8 @@ function FittingStatus(){
  {['expired','cancelled'].includes(data.status)?<Panel><Copy>Zápis již není aktivní. Pokud jste odeslali platbu, kontaktujte nás s číslem {data.number}, abychom ji mohli dohledat a domluvit další postup.</Copy>{data.paymentStatus==='refunded'?<Copy>Vrácení platby bylo zaznamenáno.</Copy>:null}<RouteLink to="/kontakt">Kontakt</RouteLink></Panel>:null}
  {data.status==='completed'&&data.paymentStatus==='paid'?<Panel><Copy>Zkouška proběhla. Při rezervaci oblečení můžete zaplacených 200 Kč jednou započíst jako zálohu. Pokud už rezervaci máte, kontaktujte nás a platbu prověříme ručně.</Copy><RouteLink to={token?'/saty#fitting='+number+'&token='+token:'/saty'}>Vybrat šaty a započíst 200 Kč</RouteLink></Panel>:null}
  {!isLoggedIn&&token?<Panel><Heading>Uschovejte si soukromý odkaz</Heading><Copy>{token?'Potvrzení sledujte na této stránce. Odkaz umožňuje spravovat váš zápis; nesdílejte ho s dalšími osobami.':'Tato zkouška je dostupná po přihlášení k vašemu účtu.'}</Copy><Input label="Soukromý odkaz na zkoušku" readOnly value={privateUrl} onFocus={e=>e.currentTarget.select()}/><Actions><Button variant="secondary" onClick={async()=>{try{await navigator.clipboard.writeText(privateUrl);setNotice('Odkaz byl zkopírován.');}catch{setNotice('Odkaz vyberte a zkopírujte z pole výše.');}}}>Kopírovat odkaz</Button><Button variant="secondary" disabled={busy} onClick={()=>setRevision(x=>x+1)}>Obnovit stav</Button></Actions>{notice?<Copy role="status">{notice}</Copy>:null}</Panel>:null}
- <Actions>{['pending','review','confirmed'].includes(data.status)?<Button variant="ghost" disabled={busy} onClick={()=>setCancel(true)}>Zrušit zkoušku</Button>:null}</Actions>
  {token?<FittingAccountClaim number={number} privateToken={token}/>:null}
  </>:!error&&!read.error&&accessToken?<Copy role="status">Načítání zápisu…</Copy>:null}
- <Dialog open={cancel} title="Zrušit zkoušku?" description="Termín se uvolní pro další zákazníky. Pokud jste již zaplatili, další postup vyřešíme individuálně. Zrušení samo nevrací peníze." onEscape={()=>!busy&&setCancel(false)}><Actions><Button disabled={busy} onClick={()=>setCancel(false)}>Ponechat termín</Button><Button variant="secondary" disabled={busy} onClick={()=>action('cancel')}>Zrušit zkoušku</Button></Actions></Dialog>
+ <Dialog open={cancel} title="Opravdu chcete zrušit zkoušku?" description="Termín se uvolní pro další zákazníky. Pokud jste již zaplatili, další postup vyřešíme individuálně. Zrušení samo nevrací peníze." onEscape={()=>!busy&&setCancel(false)}><Actions><Button disabled={busy} onClick={()=>setCancel(false)}>Ponechat zkoušku</Button><Button variant="secondary" disabled={busy} onClick={()=>action('cancel')}>Zrušit zkoušku</Button></Actions></Dialog>
  </Content></Page>;
 }
