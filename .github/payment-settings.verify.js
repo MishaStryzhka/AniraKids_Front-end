@@ -7,7 +7,7 @@ const APP='http://127.0.0.1:4173';
  const browser=await chromium.launch({headless:true});
  try{
  for(const width of [375,390,430,768,1024,1440]){
-  const page=await browser.newPage({viewport:{width,height:1000}}),errors=[],writes=[];
+  const page=await browser.newPage({viewport:{width,height:1000}}),errors=[],writes=[],paymentCreates=[];
   page.on('pageerror',e=>errors.push(e.message));
   let settings={gateway:'revolut',qrEnabled:true,defaultMethod:'qr',revision:0,configured:false,providers:{revolut:true,globalpayments:false}};
   await page.addInitScript(()=>localStorage.setItem('persist:auth',JSON.stringify({token:JSON.stringify('fixture-admin')})));
@@ -24,6 +24,7 @@ const APP='http://127.0.0.1:4173';
    }
    if(p==='/api/v2/payments/revolut/config')return json({mode:'sandbox',publicKey:'pk_fixture'});
    if(p==='/api/v2/fittings/ZK-123456789ABC')return json({number:'ZK-123456789ABC',date:'2030-01-01',time:'10:00',durationMinutes:30,price:200,address:'Praha',status:'pending',paymentStatus:'unpaid',expiresAt:'2099-01-01T00:00:00Z',paymentOptions:{gateway:'revolut',qrEnabled:false,defaultMethod:'online'},cardPayment:{active:false,reviewRequired:false},paymentInstructions:null});
+   if(p==='/api/v2/fittings/ZK-123456789ABC/revolut/create'){paymentCreates.push(req.method());return route.fulfill({status:503,json:{error:{code:'FIXTURE_PROVIDER_UNAVAILABLE'}}});}
    if(p==='/api/v2/account/fittings/ZK-123456789ABC')return json({number:'ZK-123456789ABC'});
    return route.fulfill({status:404,json:{error:{code:'NOT_FOUND'}}});
   });
@@ -39,7 +40,10 @@ const APP='http://127.0.0.1:4173';
   fs.mkdirSync('test-evidence/payments',{recursive:true});
   await page.screenshot({path:`test-evidence/payments/settings-${width}.png`,fullPage:true});
   await page.goto(APP+'/zkouska/ZK-123456789ABC#'+'a'.repeat(64));
-  await page.getByRole('button',{name:'Zaplatit online – 200 Kč',exact:true}).waitFor();
+  await page.getByText('Platební formulář se nepodařilo připravit.',{exact:false}).waitFor();
+  assert.deepEqual(paymentCreates,['POST']);
+  assert.equal(await page.getByRole('button',{name:'Zaplatit online – 200 Kč',exact:true}).count(),0);
+  assert.equal(await page.getByLabel('Způsob platby',{exact:true}).count(),0);
   assert.equal(await page.getByRole('button',{name:'Platba odeslána',exact:true}).count(),0);
   assert.equal(await page.getByRole('button',{name:'Připojit k účtu',exact:true}).count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
