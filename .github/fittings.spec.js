@@ -64,7 +64,7 @@ for(const width of [390,768,1440])test('fitting settings, booking QR and adminis
  await page.screenshot({path:`test-evidence/fittings/admin-${width}.png`,fullPage:true});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
 });
-for(const width of [390,768,1440])test('account profile, fitting history and claim '+width,async({page})=>{
+for(const width of [390,768,1440])test('account profile, fitting history and existing access '+width,async({page})=>{
  const state=await setup(page,{admin:true});await page.setViewportSize({width,height:1000});
  await page.goto(APP+'/zkouska');
  await expect(page.getByLabel('Jméno a příjmení')).toHaveValue('Jana Nová');
@@ -85,9 +85,10 @@ for(const width of [390,768,1440])test('account profile, fitting history and cla
  await expect(page).toHaveURL(APP+'/zkouska/'+number);
  await page.getByRole('button',{name:'Platba odeslána',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Ověřujeme vaši platbu'})).toBeVisible();
- await page.goto(privateUrl);await page.getByRole('button',{name:'Připojit k účtu',exact:true}).click();
- await expect(page.getByText('Zkouška je uložená ve vašem účtu.')).toBeVisible();
- expect(state.claim.token).toBe(new URL(privateUrl).hash.slice(1));
+ await page.goto(privateUrl);
+ await expect(page.getByRole('heading',{name:'Ověřujeme vaši platbu'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Připojit k účtu',exact:true})).toHaveCount(0);
+ expect(state.claim).toBeUndefined();
  expect(state.errors).toEqual([]);expect(state.unexpected).toEqual([]);
 });
 test('fitting unknown create outcome survives reload and retries same private identity',async({page})=>{
