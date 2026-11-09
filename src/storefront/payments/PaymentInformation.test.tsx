@@ -183,3 +183,13 @@ test.each([0,2000])('deposit label follows confirmed receipt, held %s',async(dep
  expect(screen.queryByText('Držená vratná kauce')).not.toBeInTheDocument();
  await waitFor(()=>expect(QRCode.toDataURL).toHaveBeenCalled());
 });
+
+test('delivery offers online payment without a redundant method selector or cash',()=>{
+ const source={...receipt,fulfillmentMethod:'balikovna' as const,expiresAt:'2099-01-01T00:00:00Z',payment:{...payment,paymentOptions:{gateway:'revolut' as const,qrEnabled:true,defaultMethod:'qr' as const}}};
+ const view=render(<ReceiptPaymentInformation receipt={source}/>);
+ expect(screen.queryByLabelText('Způsob platby')).not.toBeInTheDocument();
+ expect(screen.queryByRole('img',{name:/QR platba/})).not.toBeInTheDocument();
+ expect(screen.getByText(/Při doručení platíte online/)).toBeInTheDocument();
+ view.rerender(<ReceiptPaymentInformation receipt={{...source,payment:{...source.payment,advanceBalance:0,paymentInstructions:null}}}/>);
+ expect(screen.queryByRole('option',{name:'Hotově při převzetí'})).not.toBeInTheDocument();
+});

@@ -197,10 +197,11 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
   const fullInstructions = payable ? payment.fullPaymentInstructions : null;
   const advanceAmount=payable&&receipt.status==='pending'?payment.advanceBalance:0;
   const fullAmount=payable?payment.rentalBalance+Math.max(0,payment.depositRequired-payment.depositHeld):0;
-  const qrEnabled=payment.paymentOptions?.qrEnabled!==false;
+  const delivery=receipt.fulfillmentMethod==='balikovna'||receipt.fulfillmentMethod==='balikovna_address';
+  const qrEnabled=!delivery&&payment.paymentOptions?.qrEnabled!==false;
   const onlineEnabled=payment.paymentOptions?.gateway!=='off';
-  const selectedMethod=method??payment.paymentOptions?.defaultMethod??'qr';
-  const cash = choice === 'cash' && payment.advanceBalance === 0 && fullAmount>0;
+  const selectedMethod=delivery?'online':method??payment.paymentOptions?.defaultMethod??'qr';
+  const cash = !delivery && choice === 'cash' && payment.advanceBalance === 0 && fullAmount>0;
   const selected = cash ? 'cash' : choice === 'advance' && advanceAmount>0 ? 'advance' : 'full';
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
@@ -250,12 +251,15 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           {fullAmount>0 ? <option value="full">
             {payment.advanceBalance > 0 ? (hasDeposit ? 'Vše včetně kauce' : 'Celé nájemné') : (hasDeposit ? 'Doplatit včetně kauce' : 'Doplatit nájemné')} – {formatMoney(fullAmount)}
           </option> : null}
-          {fullAmount>0 && payment.advanceBalance === 0 ? <option value="cash">
+          {!delivery && fullAmount>0 && payment.advanceBalance === 0 ? <option value="cash">
             Hotově při převzetí
           </option> : null}
         </SelectField>
       ) : null}
-      {payment.paymentOptions && payable && !cardOpen && !pendingTransfer && !cash && !payment.cardPayment?.reviewRequired ?
+      {delivery && payable && fullAmount>0 ? <Copy style={{fontSize:14}}>
+        Při doručení platíte online. Před odesláním je nutné uhradit celou částku včetně kauce.
+      </Copy> : null}
+      {payment.paymentOptions && onlineEnabled && qrEnabled && payable && !cardOpen && !pendingTransfer && !cash && !payment.cardPayment?.reviewRequired ?
        <SelectField label="Způsob platby" value={selectedMethod} disabled={busy} onChange={e=>setMethod(e.target.value as 'online'|'qr')}>
         {onlineEnabled?<option value="online">Online platba</option>:null}
         {qrEnabled?<option value="qr">Bankovní převod s QR kódem</option>:null}
