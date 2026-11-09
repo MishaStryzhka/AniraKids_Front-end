@@ -21,6 +21,7 @@ async function setup(page,{admin=false,lost=false}={}){
   if(p==='/api/v2/site-settings')return json({cooperationActive:true,sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/partner/access')return json({error:{code:'FORBIDDEN'}},403);
   if(p==='/api/v2/admin/products')return json({items:[],pagination:{page:1,limit:1,total:0,pages:0}});
+  if(p==='/api/v2/admin/payment-settings')return json({gateway:'off',qrEnabled:true,defaultMethod:'qr',revision:0,configured:false,providers:{revolut:false,globalpayments:false}});
   if(p==='/api/v2/admin/settings')return json({sections:{suits:true,familyLooks:false}});
   if(p==='/api/v2/admin/fitting-settings'){if(req.method()==='PATCH')state.settings=req.postDataJSON();return json(state.settings);}
   if(p==='/api/v2/fittings/slots')return json({enabled:state.settings.enabled,date:u.searchParams.get('date'),slots:['11:00','11:30','12:00'],durationMinutes:30,price:200});

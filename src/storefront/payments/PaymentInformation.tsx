@@ -74,9 +74,7 @@ export function BookingPaymentExplanation({
         </Copy>
       ) : null}
       <Copy>
-        {fittingCredit > 0 ? 'Po vytvoření rezervace můžete doplatek uhradit QR platbou nebo při převzetí.' : `Po vytvoření rezervace si vyberete QR platbu povinné zálohy, nebo celé částky${hasDeposit ? ' včetně vratné kauce' : ''}. Záloha se při plné platbě nepřičítá navíc. Zbytek můžete doplatit QR platbou nebo hotově při převzetí. Zálohu lze po domluvě uhradit také osobně v hotovosti.`}
-        {' '}Při online platbě přes Revolut platnou rezervaci po ověření platby a dostupnosti potvrdíme automaticky. Převod a hotovost ověřujeme ručně. Samotné odeslání rezervace
-        ani platby neznamená potvrzení.
+        Po vytvoření rezervace si vyberete z dostupných způsobů platby. Zaplatit můžete zálohu nebo celou částku; záloha se při plné platbě nepřičítá navíc. Online platbu ověříme automaticky a platnou rezervaci potvrdíme po kontrole dostupnosti. Převod a hotovost ověřuje administrátor.
       </Copy>
       <Copy>Po absolvování zaplacené zkoušky můžete při rezervaci uplatnit slevu ve výši 200 Kč přes svůj účet nebo osobní odkaz z e-mailu. Pokud jste slevu neuplatnili, kontaktujte nás. Doplatek na místě lze uhradit také kartou.</Copy>
       <Copy>{cancellationSummary}</Copy>
@@ -161,6 +159,8 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
   const payment = receipt.payment;
   const [now, setNow] = useState(Date.now);
   const [choice, setChoice] = useState('advance');
+  const [method,setMethod]=useState<'online'|'qr'|null>(null);
+  useEffect(()=>setMethod(null),[source.reservationNumber,access?.token]);
   useEffect(() => {
     setChoice(payment?.paymentReport?.kind === 'cash' && payment.paymentReport.status === 'pending' ? 'cash' : 'advance');
   }, [receipt.reservationNumber, payment?.advanceBalance, payment?.rentalBalance, payment?.depositHeld, payment?.paymentReport?.kind, payment?.paymentReport?.status]);
@@ -185,8 +185,13 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
     receipt.status === 'confirmed' || receipt.status === 'prepared';
   const advanceInstructions = payable && receipt.status === 'pending' ? payment.paymentInstructions : null;
   const fullInstructions = payable ? payment.fullPaymentInstructions : null;
-  const cash = choice === 'cash' && payment.advanceBalance === 0 && Boolean(fullInstructions);
-  const selected = cash ? 'cash' : choice === 'advance' && advanceInstructions ? 'advance' : 'full';
+  const advanceAmount=payable&&receipt.status==='pending'?payment.advanceBalance:0;
+  const fullAmount=payable?payment.rentalBalance+Math.max(0,payment.depositRequired-payment.depositHeld):0;
+  const qrEnabled=payment.paymentOptions?.qrEnabled!==false;
+  const onlineEnabled=payment.paymentOptions?.gateway!=='off';
+  const selectedMethod=method??payment.paymentOptions?.defaultMethod??'qr';
+  const cash = choice === 'cash' && payment.advanceBalance === 0 && fullAmount>0;
+  const selected = cash ? 'cash' : choice === 'advance' && advanceAmount>0 ? 'advance' : 'full';
   const instructions = cash ? null : selected === 'advance' ? advanceInstructions : fullInstructions;
   const hasDeposit = payment.depositRequired > 0 || payment.depositHeld > 0;
   const remaining = payment.rentalBalance + Math.max(0,payment.depositRequired - payment.depositHeld);
@@ -225,29 +230,35 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         </div> : null}
       </PaymentFacts>
       <PaymentConfirmationStatus {...payment} />
-      {payable && !pendingTransfer && (advanceInstructions || fullInstructions) ? (
+      {payable && !pendingTransfer && (advanceAmount>0 || fullAmount>0) ? (
         <SelectField label="Jak chcete zaplatit?" value={selected}
           disabled={busy || cardOpen}
           onChange={event => setChoice(event.target.value)}>
-          {advanceInstructions ? <option value="advance">
-            Povinná záloha – {formatMoney(advanceInstructions.amount)}
+          {advanceAmount>0 ? <option value="advance">
+            Povinná záloha – {formatMoney(advanceAmount)}
           </option> : null}
-          {fullInstructions ? <option value="full">
-            {payment.advanceBalance > 0 ? (hasDeposit ? 'Vše včetně kauce' : 'Celé nájemné') : (hasDeposit ? 'Doplatit včetně kauce' : 'Doplatit nájemné')} – {formatMoney(fullInstructions.amount)}
+          {fullAmount>0 ? <option value="full">
+            {payment.advanceBalance > 0 ? (hasDeposit ? 'Vše včetně kauce' : 'Celé nájemné') : (hasDeposit ? 'Doplatit včetně kauce' : 'Doplatit nájemné')} – {formatMoney(fullAmount)}
           </option> : null}
-          {fullInstructions && payment.advanceBalance === 0 ? <option value="cash">
+          {fullAmount>0 && payment.advanceBalance === 0 ? <option value="cash">
             Hotově při převzetí
           </option> : null}
         </SelectField>
       ) : null}
+      {payment.paymentOptions && payable && !cardOpen && !pendingTransfer && !cash && !payment.cardPayment?.reviewRequired ?
+       <SelectField label="Způsob platby" value={selectedMethod} disabled={busy} onChange={e=>setMethod(e.target.value as 'online'|'qr')}>
+        {onlineEnabled?<option value="online">Online platba – karta, Apple Pay, Revolut Pay</option>:null}
+        {qrEnabled?<option value="qr">Bankovní převod s QR kódem</option>:null}
+       </SelectField>:null}
+      {payable && selectedMethod==='online' && onlineEnabled && !cardConfig && !cardOpen ? <Copy role="status">Online platba momentálně není dostupná. Obnovte stránku{qrEnabled?' nebo zvolte QR převod':', případně nás kontaktujte'}.</Copy>:null}
       {payment.cardPayment?.reviewRequired ? <Copy role="alert">Platbu jsme přijali, ale potřebujeme ji zkontrolovat. Další platbu neposílejte; kontaktujte nás s číslem rezervace.</Copy> : null}
       {cardOpen && access ? <RevolutPayment number={receipt.reservationNumber} access={access}
         kind={payment.cardPayment?.kind ?? selectedCard?.kind ?? (selected==='advance'?'advance':'full')}
         config={cardConfig} canPay={payable && !payment.cardPayment?.reviewRequired}
         onReceipt={next=>{setUpdated({source,token:access.token,receipt:next});}}
         onClose={()=>{setCardSelected(null);onUpdated?.();}} /> : null}
-      {!cardOpen && !payment.cardPayment?.reviewRequired && access && cardConfig && payable && !pendingTransfer && !cash && instructions ?
-        <Button disabled={busy} onClick={()=>setCardSelected({balanceKey,kind:selected==='advance'?'advance':'full'})}>Zaplatit online – {formatMoney(instructions.amount)}</Button> : null}
+      {!cardOpen && !payment.cardPayment?.reviewRequired && access && cardConfig && onlineEnabled && (!payment.paymentOptions||selectedMethod==='online') && payable && !pendingTransfer && !cash && (selected==='advance'?advanceAmount:fullAmount)>0 ?
+        <Button disabled={busy} onClick={()=>setCardSelected({balanceKey,kind:selected==='advance'?'advance':'full'})}>Zaplatit online – {formatMoney(selected==='advance'?advanceAmount:fullAmount)}</Button> : null}
       {cardOpen || payment.cardPayment?.reviewRequired ? null : expired ? (
         <Copy role="status">
           Lhůta předběžné rezervace uplynula. Bez našeho potvrzení již termín není blokovaný.
@@ -260,7 +271,7 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
         <Copy role="status">
           Zbývá doplatit {formatMoney(remaining)} hotově při převzetí{hasDeposit ? `: nájemné ${formatMoney(payment.rentalBalance)} a vratná kauce ${formatMoney(payment.depositRequired - payment.depositHeld)}` : ''}.
         </Copy>
-      ) : instructions ? (
+      ) : payment.paymentOptions && selectedMethod==='online' ? null : qrEnabled && instructions ? (
         <>
           <Heading>{selected === 'advance' ? 'Úhrada rezervační zálohy' : (hasDeposit ? 'Úhrada nájemného a vratné kauce' : 'Úhrada nájemného')}</Heading>
           <Copy role="status">
@@ -321,10 +332,10 @@ export function ReceiptPaymentInformation({ receipt: source, showRentalPrice = t
           Neodesílejte platbu podle dřívějšího QR kódu.
         </Copy>
       )}
-      {access && !cardOpen && !payment.cardPayment?.reviewRequired && payable && !pendingTransfer && (cash ? fullInstructions : instructions) ? (
+      {access && !cardOpen && !payment.cardPayment?.reviewRequired && payable && !pendingTransfer && (cash ? fullAmount>0 : qrEnabled&&selectedMethod==='qr'&&instructions) ? (
         <Button disabled={busy || (cash && cashPlanned)} loading={busy}
           onClick={() => void update(cash ? 'cash' : selected === 'advance' ? 'advance' : 'full',
-            (cash ? fullInstructions : instructions)!.amount)}>
+            cash ? fullAmount : instructions!.amount)}>
           {cash ? (cashPlanned ? 'Platba při převzetí je domluvena' : 'Zaplatím hotově při převzetí') : 'Platbu jsem odeslal/a'}
         </Button>
       ) : null}

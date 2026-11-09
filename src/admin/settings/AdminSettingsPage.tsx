@@ -1,4 +1,5 @@
 import {PartnerCooperationSection} from './PartnerCooperationSection';
+import {PaymentSettingsSection} from './PaymentSettingsSection';
 import {FittingSettingsSection} from '../fittings/FittingSettingsSection';
 import {Link} from 'react-router-dom';
 import {AdministratorsSection} from './AdministratorsSection';
@@ -7,7 +8,7 @@ import {useAdminPermissions} from '../auth/permissions';
 import {useEffect, useRef, useState} from 'react';
 import {useBlocker} from 'react-router-dom';
 import styled from 'styled-components';
-import {Eye, Users, Shirt, CalendarClock, Bell} from 'lucide-react';
+import {Eye, Users, Shirt, CalendarClock, Bell, CreditCard} from 'lucide-react';
 import {useAuth} from '../../hooks/useAuth';
 import {useAdminAccess} from '../auth/AdminAccessBoundary';
 import {getAdminSettings, saveAdminSettings} from '../api/settings';
@@ -44,15 +45,16 @@ export function AdminSettingsPage() {
   const request = useRef<AbortController | null>(null);
   const busy = useRef(false);
   const cancelButton = useRef<HTMLButtonElement | null>(null);
+  const [paymentDirty,setPaymentDirty]=useState(false);
   const [fittingDirty,setFittingDirty]=useState(false);
   const dirty = Boolean(draft && baseline && JSON.stringify(draft)!==JSON.stringify(baseline));
-  const blocker = useBlocker(dirty || saving || fittingDirty || administratorsDirty);
+  const blocker = useBlocker(dirty || saving || fittingDirty || paymentDirty || administratorsDirty);
   useEffect(() => {
-    if (!dirty && !saving && !fittingDirty && !administratorsDirty) return;
+    if (!dirty && !saving && !fittingDirty && !paymentDirty && !administratorsDirty) return;
     const warn = (event: BeforeUnloadEvent) => {event.preventDefault();event.returnValue='';};
     window.addEventListener('beforeunload',warn);
     return () => window.removeEventListener('beforeunload',warn);
-  }, [dirty,saving,fittingDirty,administratorsDirty]);
+  }, [dirty,saving,fittingDirty,paymentDirty,administratorsDirty]);
   useEffect(() => {
     const controller = new AbortController();request.current=controller;
     setLoading(true);setError('');setBaseline(null);setDraft(null);
@@ -104,6 +106,7 @@ export function AdminSettingsPage() {
     {error?<Feedback role="alert">{error}</Feedback>:null}
     {success?<Feedback role="status">Nastavení bylo uloženo. Změny se projeví při dalším otevření nebo obnovení webu.</Feedback>:null}
     </SettingsDisclosure>
+    <SettingsDisclosure id="platby" title="Platby" icon={<CreditCard size={22} aria-hidden="true"/>} dirty={paymentDirty}><PaymentSettingsSection onDirty={setPaymentDirty}/></SettingsDisclosure>
     <SettingsDisclosure id="zkousky" title="Zkoušky" icon={<CalendarClock size={22} aria-hidden="true"/>} dirty={fittingDirty}><FittingSettingsSection onDirty={setFittingDirty}/></SettingsDisclosure></> : null}
     {access.owner&&token?<SettingsDisclosure id="upozorneni" title="Upozornění" icon={<Bell size={22} aria-hidden="true"/>}><AdminPushNotifications token={token}/></SettingsDisclosure>:null}
 

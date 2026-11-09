@@ -25,10 +25,28 @@ const CheckoutHost = styled.div`
     max-width: 100% !important;
   }
 `;
+export interface CheckoutAdapter<T> {
+ identity:string;
+ create:(signal:AbortSignal)=>Promise<{publicId:string}>;
+ sync:(cancel:boolean)=>Promise<T>;
+ active:(result:T)=>boolean;
+ returnUrl:string;
+}
 export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClose}:{
-  number:string;access:ReservationPaymentAccess;kind:'advance'|'full';config:RevolutConfig|null;canPay:boolean;
-  onReceipt:(receipt:Receipt)=>void;onClose:()=>void;
+ number:string;access:ReservationPaymentAccess;kind:'advance'|'full';config:RevolutConfig|null;canPay:boolean;
+ onReceipt:(receipt:Receipt)=>void;onClose:()=>void;
 }) {
+ const adapter:CheckoutAdapter<Receipt>={
+  identity:JSON.stringify([number,access.kind,access.token,kind]),
+  create:signal=>{if(access.kind==='guest')preserveGuestReservationLink({reservationNumber:number,guestAccessToken:access.token} as Receipt);return createRevolutOrder(number,access,kind,signal);},
+  sync:cancel=>syncRevolutPayment(number,access,cancel),
+  active:r=>Boolean(r.payment?.cardPayment?.active),
+  returnUrl:window.location.origin+(access.kind==='guest'?routes.reservationStatus+'?paymentReservation='+encodeURIComponent(number):routes.accountReservations),
+ };
+ return <EmbeddedRevolutPayment adapter={adapter} config={config} canPay={canPay} onReceipt={onReceipt} onClose={onClose}/>;
+}
+export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClose}:{adapter:CheckoutAdapter<T>;config:RevolutConfig|null;canPay:boolean;onReceipt:(receipt:T)=>void;onClose:()=>void;}) {
+ const adapterRef=useRef(adapter);adapterRef.current=adapter;
   const target=useRef<HTMLDivElement>(null);
   const callbacks=useRef({onReceipt,onClose});callbacks.current={onReceipt,onClose};
   const [message,setMessage]=useState('Připravujeme bezpečnou platbu…');
@@ -43,18 +61,18 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
     action.current=true;setBusy(true);
     const current=generation.current;
     try {
-      const receipt=await syncRevolutPayment(number,access,cancel);
+      const receipt=await adapterRef.current.sync(cancel);
       if(current!==generation.current)return;
       callbacks.current.onReceipt(receipt);
-      if(!receipt.payment?.cardPayment?.active)callbacks.current.onClose();
+      if(!adapterRef.current.active(receipt))callbacks.current.onClose();
       else setMessage('Platba zatím není dokončena. Pokud jste platbu potvrdili, peníze znovu neposílejte a aktualizujte stav.');
     }catch {if(current===generation.current)setMessage('Stav platby se nepodařilo ověřit. Peníze znovu neposílejte. Zkuste aktualizovat stav nebo nás kontaktujte.');}
     finally{action.current=false;if(current===generation.current)setBusy(false);}
   };
-  const accessKind=access.kind,accessToken=access.token;
+  const identity=adapter.identity;
   useEffect(()=>{
     const version=generation.current;
-    const paymentAccess={kind:accessKind,token:accessToken};
+    const paymentAdapter=adapterRef.current;
     let live=true;
     let widget:{destroy:()=>void}|undefined;
     const controller=new AbortController();
@@ -62,13 +80,11 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
       if(!config || !canPay){setPreparing(false);setMessage('Ověřte stav rozpracované platby.');return;}
       setPreparing(true);setCheckoutError(null);
       try {
-        // Persist guest access locally, never send the capability to Revolut.
-        if(accessKind==='guest')preserveGuestReservationLink({reservationNumber:number,guestAccessToken:accessToken} as Receipt);
-        const returnUrl=window.location.origin+(accessKind==='guest'?routes.reservationStatus+'?paymentReservation='+encodeURIComponent(number):routes.accountReservations);
+        const returnUrl=paymentAdapter.returnUrl;
         const {default:RevolutCheckout}=await import('@revolut/checkout');
         if(!live)return;
         // Prepare before the wallet button tap so Apple Pay retains user activation.
-        const order=await createRevolutOrder(number,paymentAccess,kind,controller.signal);
+        const order=await paymentAdapter.create(controller.signal);
         if(!live || !target.current)return;
         const options={publicToken:config.publicKey,mode:config.mode,locale:'cs',target:target.current,
           createOrder:async()=>order,
@@ -88,7 +104,7 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
     };
     void initialise();
     return ()=>{live=false;generation.current=version+1;controller.abort();widget?.destroy();};
-  },[number,accessKind,accessToken,kind,config,canPay]);
+  },[identity,config,canPay]);
   return <PaymentStack>
     <Copy role="status">{message}</Copy>
     <CheckoutHost ref={target} />
