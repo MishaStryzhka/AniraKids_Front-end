@@ -16,6 +16,8 @@ test('online fitting opens checkout immediately and never sends private access t
  expect(screen.queryByRole('button',{name:'Zaplatit online – 200 Kč'})).not.toBeInTheDocument();
  expect(screen.queryByLabelText('Způsob platby')).not.toBeInTheDocument();
  await waitFor(()=>expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalledTimes(1));
+ expect(screen.queryByRole('button',{name:'Ověřit platbu'})).not.toBeInTheDocument();
+ expect(screen.getByRole('heading')).toHaveTextContent('Platba zkoušky 200 Kč');
  const options=(RevolutCheckout.embeddedCheckout as unknown as jest.Mock).mock.calls[0][0];
  expect(JSON.stringify({...options,target:null})).not.toContain(privateToken);
  expect(sessionStorage.getItem('anirakids.fitting-return.'+data.number)).toBe(privateToken);
@@ -54,4 +56,29 @@ test('QR-only fitting never creates an online payment',async()=>{
  await act(async()=>{});
  expect(fittingApi).not.toHaveBeenCalled();
  expect(RevolutCheckout.embeddedCheckout).not.toHaveBeenCalled();
+});
+
+test('pending verification reveals recovery actions without starting another order',async()=>{
+ (fittingApi as jest.Mock).mockResolvedValueOnce({publicId:'fixture'}).mockResolvedValue({...data,cardPayment:{active:true,reviewRequired:false}});
+ render(<FittingOnlinePayment data={data} endpoint="/fittings/fixture" token={privateToken} onUpdate={jest.fn()} onMethod={jest.fn()}/>);
+ await waitFor(()=>expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalledTimes(1));
+ const options=(RevolutCheckout.embeddedCheckout as unknown as jest.Mock).mock.calls[0][0];
+ await act(async()=>options.onSuccess());
+ expect(screen.getByRole('button',{name:'Ověřit platbu'})).toBeEnabled();
+ expect(screen.getByRole('button',{name:/Zrušit rozpracovanou/})).toBeEnabled();
+ expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalledTimes(1);
+});
+test('confirmed payment from refresh removes checkout without another payment',async()=>{
+ const props={endpoint:'/fittings/fixture',token:privateToken,onUpdate:jest.fn(),onMethod:jest.fn()};
+ const view=render(<FittingOnlinePayment {...props} data={data}/>);
+ await waitFor(()=>expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalledTimes(1));
+ view.rerender(<FittingOnlinePayment {...props} data={{...data,status:'confirmed',paymentStatus:'paid'}}/>);
+ expect(screen.queryByText(/Platba zkoušky/)).not.toBeInTheDocument();
+ expect(fittingApi).toHaveBeenCalledTimes(1);
+});
+test('preparation failure offers safe recovery',async()=>{
+ (fittingApi as jest.Mock).mockRejectedValue(new Error('network'));
+ render(<FittingOnlinePayment data={data} endpoint="/fittings/fixture" token={privateToken} onUpdate={jest.fn()} onMethod={jest.fn()}/>);
+ expect(await screen.findByRole('button',{name:'Ověřit platbu'})).toBeEnabled();
+ expect(screen.getByText(/Platební formulář se nepodařilo/)).toBeInTheDocument();
 });

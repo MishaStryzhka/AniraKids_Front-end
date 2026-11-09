@@ -45,12 +45,13 @@ export function RevolutPayment({number,access,kind,config,canPay,onReceipt,onClo
  };
  return <EmbeddedRevolutPayment adapter={adapter} config={config} canPay={canPay} onReceipt={onReceipt} onClose={onClose}/>;
 }
-export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClose}:{adapter:CheckoutAdapter<T>;config:RevolutConfig|null;canPay:boolean;onReceipt:(receipt:T)=>void;onClose:()=>void;}) {
+export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClose,compact=false}:{compact?:boolean;adapter:CheckoutAdapter<T>;config:RevolutConfig|null;canPay:boolean;onReceipt:(receipt:T)=>void;onClose:()=>void;}) {
  const adapterRef=useRef(adapter);adapterRef.current=adapter;
   const target=useRef<HTMLDivElement>(null);
   const callbacks=useRef({onReceipt,onClose});callbacks.current={onReceipt,onClose};
   const [message,setMessage]=useState('Připravujeme bezpečnou platbu…');
   const [busy,setBusy]=useState(false);
+  const [recovery,setRecovery]=useState(false);
   const [checkoutError,setCheckoutError]=useState<string|null>(null);
   const [preparing,setPreparing]=useState(Boolean(config && canPay));
   const action=useRef(false);
@@ -60,14 +61,15 @@ export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClo
     if(action.current)return;
     action.current=true;setBusy(true);
     const current=generation.current;
+    const timeout=setTimeout(()=>{if(current===generation.current)setRecovery(true);},10000);
     try {
       const receipt=await adapterRef.current.sync(cancel);
       if(current!==generation.current)return;
       callbacks.current.onReceipt(receipt);
       if(!adapterRef.current.active(receipt))callbacks.current.onClose();
-      else setMessage('Platba zatím není dokončena. Pokud jste platbu potvrdili, peníze znovu neposílejte a aktualizujte stav.');
-    }catch {if(current===generation.current)setMessage('Stav platby se nepodařilo ověřit. Peníze znovu neposílejte. Zkuste aktualizovat stav nebo nás kontaktujte.');}
-    finally{action.current=false;if(current===generation.current)setBusy(false);}
+      else {setRecovery(true);setMessage('Platba zatím není dokončena. Pokud jste platbu potvrdili, peníze znovu neposílejte a aktualizujte stav.');}
+    }catch {if(current===generation.current){setRecovery(true);setMessage('Stav platby se nepodařilo ověřit. Peníze znovu neposílejte. Zkuste aktualizovat stav nebo nás kontaktujte.');}}
+    finally{clearTimeout(timeout);action.current=false;if(current===generation.current)setBusy(false);}
   };
   const identity=adapter.identity;
   useEffect(()=>{
@@ -77,8 +79,8 @@ export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClo
     let widget:{destroy:()=>void}|undefined;
     const controller=new AbortController();
     const initialise=async()=>{
-      if(!config || !canPay){setPreparing(false);setMessage('Ověřte stav rozpracované platby.');return;}
-      setPreparing(true);setCheckoutError(null);
+      if(!config || !canPay){setRecovery(true);setPreparing(false);setMessage('Ověřte stav rozpracované platby.');return;}
+      setPreparing(true);setRecovery(false);setCheckoutError(null);
       try {
         const returnUrl=paymentAdapter.returnUrl;
         const {default:RevolutCheckout}=await import('@revolut/checkout');
@@ -94,26 +96,27 @@ export function EmbeddedRevolutPayment<T>({adapter,config,canPay,onReceipt,onClo
           onError:({error}:{error:{type?:unknown;code?:unknown}})=>{if(live){
             const type=typeof error?.type==='string' && /^error\.[a-z-]{1,64}$/.test(error.type)?error.type:'error.unknown';
             const code=typeof error?.code==='number' && Number.isSafeInteger(error.code)?` (${error.code})`:'';
-            setCheckoutError(type+code);void syncRef.current();
+            setRecovery(true);setCheckoutError(type+code);void syncRef.current();
           }},
         };
         widget=await RevolutCheckout.embeddedCheckout(options);
-        if(!live)widget.destroy();else setMessage('Vyberte způsob platby. Dostupné peněženky se zobrazí podle vašeho zařízení.');
-      }catch{if(live)setMessage('Platební formulář se nepodařilo připravit. Nejprve ověřte stav platby. Před změnou způsobu platby zrušte rozpracovanou platbu.');}
+        if(!live)widget.destroy();else setMessage(compact?'':'Vyberte způsob platby. Dostupné peněženky se zobrazí podle vašeho zařízení.');
+      }catch{if(live){setRecovery(true);setMessage('Platební formulář se nepodařilo připravit. Nejprve ověřte stav platby. Před změnou způsobu platby zrušte rozpracovanou platbu.');}}
       finally{if(live)setPreparing(false);}
     };
     void initialise();
     return ()=>{live=false;generation.current=version+1;controller.abort();widget?.destroy();};
-  },[identity,config,canPay]);
+  },[identity,config,canPay,compact]);
   return <PaymentStack>
-    <Copy role="status">{message}</Copy>
+    {message?<Copy role="status">{message}</Copy>:null}
     <CheckoutHost ref={target} />
     {checkoutError && <div role="alert">
       <Copy>Platební brána oznámila chybu. Nejprve ověřte stav platby tlačítkem níže.</Copy>
       <details><summary>Podrobnosti pro podporu</summary><Copy>{checkoutError}</Copy></details>
     </div>}
-    <Copy>Údaje karty zpracovává Revolut. Po ověření platby automaticky potvrdíme platnou rezervaci, pokud je termín stále dostupný. Případnou výjimku s vámi vyřešíme osobně.</Copy>
+    {compact?<Copy>Po zaplacení vám termín automaticky potvrdíme.</Copy>:<Copy>Údaje karty zpracovává Revolut. Po ověření platby automaticky potvrdíme platnou rezervaci, pokud je termín stále dostupný. Případnou výjimku s vámi vyřešíme osobně.</Copy>}
+    {(!compact||recovery)?<>
     <Button disabled={busy || preparing} onClick={()=>void syncRef.current()}>Ověřit platbu</Button>
-    <Button variant="secondary" disabled={busy || preparing} onClick={()=>void syncRef.current(true)}>Zrušit rozpracovanou platbu a změnit způsob</Button>
+    <Button variant="secondary" disabled={busy || preparing} onClick={()=>void syncRef.current(true)}>Zrušit rozpracovanou platbu a změnit způsob</Button></>:null}
   </PaymentStack>;
 }
