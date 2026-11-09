@@ -363,3 +363,25 @@ for(const width of [375,390,430,768,1024,1440]) test('account search and filter 
  await page.getByLabel('Typ rezervace',{exact:true}).selectOption('fitting');
  await expect(page.getByRole('region',{name:'Pronájmy',exact:true})).toBeHidden();
 });
+
+for (const width of [375,390,430,768,1024,1440]) {
+  for (const guest of [true,false]) {
+    test('foreign account booking stays private and allows booking '+width+' guest='+guest,async({page})=>{
+      await page.setViewportSize({width,height:1000});
+      const state=await setup(page,{guest});
+      await page.addInitScript(receipt=>{
+        sessionStorage.setItem('anirakids.booking.v1',JSON.stringify({version:1,kind:'receipt',accountId:'bbbbbbbbbbbbbbbbbbbbbbbb',receipt}));
+      },ownedReceipt);
+      await page.goto(APP+'/produkt/sofia');
+      await expect(page.getByRole('button',{name:'Rezervovat šaty',exact:true})).toBeVisible();
+      await expect(page.getByText(/ke stejnému účtu|Předchozí rezervace/)).toHaveCount(0);
+      await expect(page.getByText(ownedReceipt.reservationNumber,{exact:false})).toHaveCount(0);
+      await expect(page.getByRole('link',{name:'Otevřít rezervaci',exact:true})).toHaveCount(0);
+      await capture(page,'private-product-'+width+'-'+guest);
+      await page.getByRole('button',{name:'Rezervovat šaty',exact:true}).click();
+      await expect(page.getByLabel('Varianta pronájmu')).toBeVisible();
+      expect(state.posts).toEqual([]);
+      expect(state.errors).toEqual([]);
+    });
+  }
+}

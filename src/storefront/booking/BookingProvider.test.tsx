@@ -355,15 +355,20 @@ function fill(view: ReturnType<typeof sessionView>) {
   act(() => { view.result.current.updateDraft({ ...initialDraft(product), selection: quote,
     contact: { ...body.customer, notes: body.notes! } }); });
 }
-test('starting new cannot clear a receipt belonging to another or refreshing account', () => {
+test('foreign receipt is hidden without blocking a new booking and restored only for its owner', () => {
   persistBooking({ version: 1, kind: 'receipt', receipt, accountId: ownerSession.accountId });
   const saved = sessionStorage.getItem(SESSION_KEY);
   const view = sessionView(null);
-  expect(view.result.current.startNew()).toBe(false);
+  expect(view.result.current.accountBlocked).toBe(false);
+  expect(view.result.current.hasActiveDraft).toBe(false);
+  expect(view.result.current.stored).toBeNull();
+  expect(sessionStorage.getItem(SESSION_KEY)).toBeNull();
+  expect(JSON.parse(sessionStorage.getItem(SESSION_KEY + '.account.' + ownerSession.accountId)!)).toEqual(JSON.parse(saved!));
+  act(() => { expect(view.result.current.chooseProduct(product)).toBe(true); });
   view.changeSession(ownerSession, true);
-  expect(view.result.current.startNew()).toBe(false);
-  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  expect(view.result.current.accountBlocked).toBe(false);
   view.changeSession(ownerSession);
+  expect(view.result.current.stored?.kind).toBe('receipt');
   act(() => { expect(view.result.current.startNew()).toBe(true); });
   expect(loadGuestReservationLinks()).toEqual([]);
 });
@@ -379,7 +384,7 @@ test('signed-in booking sends bearer, persists owner but never token, and refres
   expect(read).toHaveBeenCalledWith(receipt.reservationNumber, ownerSession.token, expect.anything());
   expect(view.result.current.stored).toMatchObject({ accountId: ownerSession.accountId, receipt: { status: 'confirmed' } });
   view.changeSession(null);
-  expect(view.result.current.accountBlocked).toBe(true);
+  expect(view.result.current.accountBlocked).toBe(false);
   expect(view.result.current.stored).toBeNull();
   view.changeSession(ownerSession);
   expect(view.result.current.stored?.kind).toBe('receipt');
@@ -394,7 +399,8 @@ test('unknown authenticated attempt remains bound after account switch and reloa
   expect(view.result.current.stored).toBeNull();
   await act(async () => { await view.result.current.recover(); });
   expect(post).toHaveBeenCalledTimes(1);
-  expect(sessionStorage.getItem(SESSION_KEY)).toBe(saved);
+  expect(JSON.parse(sessionStorage.getItem(SESSION_KEY + '.account.' + ownerSession.accountId)!)).toEqual(JSON.parse(saved!));
+  expect(sessionStorage.getItem(SESSION_KEY)).toBeNull();
   view.unmount();
   const restored = sessionView({ ...ownerSession, token: 'refreshed-session' });
   await act(async () => { await restored.result.current.recover(); });
@@ -422,9 +428,9 @@ test('late authenticated response remains hidden from a switched account', async
   view.changeSession({ accountId: 'bbbbbbbbbbbbbbbbbbbbbbbb', token: 'other' });
   await act(async () => { pending.resolve(receipt); await operation; });
   expect(view.result.current.stored).toBeNull();
-  expect(JSON.parse(sessionStorage.getItem(SESSION_KEY)!).accountId).toBe(ownerSession.accountId);
+  expect(JSON.parse(sessionStorage.getItem(SESSION_KEY + '.account.' + ownerSession.accountId)!).accountId).toBe(ownerSession.accountId);
   view.changeSession(ownerSession);
-  expect(view.result.current.stored?.kind).toBe('receipt');
+  expect(view.result.current.stored?.kind).toBe('attempt');
 });
 
 test('adding products retains shared dates and contacts; selecting again does not duplicate; removing primary promotes next', () => {
@@ -471,3 +477,20 @@ test('all-item quote required; unknown multi-item request freezes and replays co
   expect(post.mock.calls[1][0]).toEqual(post.mock.calls[0][0]);
   expect(post.mock.calls[1][1]).toBe(post.mock.calls[0][1]);
 });
+
+ test('another account can create its own booking without losing the first account recovery key', async () => {
+  const first = newAttempt(body, ownerSession.accountId);
+  persistBooking(first);
+  const second = { accountId: 'bbbbbbbbbbbbbbbbbbbbbbbb', token: 'second-token' };
+  const view = sessionView(second);
+  expect(view.result.current.accountBlocked).toBe(false);
+  expect(view.result.current.error).toBeNull();
+  fill(view);
+  await act(async () => { await view.result.current.submit(quote, policy); });
+  expect(post.mock.calls[0][3]).toBe(second.token);
+  expect(view.result.current.stored?.accountId).toBe(second.accountId);
+  view.changeSession(ownerSession);
+  expect(view.result.current.stored).toMatchObject({ kind: 'attempt', key: first.key, accountId: ownerSession.accountId });
+  view.changeSession(second);
+  expect(view.result.current.stored).toMatchObject({ kind: 'receipt', accountId: second.accountId });
+ });
