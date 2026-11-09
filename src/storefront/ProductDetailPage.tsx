@@ -1,3 +1,5 @@
+import styled from 'styled-components';
+import { designTokens as t } from '../design-system/tokens/designTokens';
 import {trackProduct, CONSENT_EVENT} from '../analytics/analytics';
 import {useSiteSettings} from '../siteSettings/SiteSettingsProvider';
 import { useProductSeo } from '../seo/useProductSeo';
@@ -29,6 +31,37 @@ import {
   Title,
 } from './storefrontStyles';
 import { usePublicRead } from './usePublicRead';
+const FittingPrice = styled(Facts)`
+  padding-block-start: ${t.space[4]};
+  border-block-start: 1px solid ${t.color.border.subtle};
+  font-weight: 600;
+`;
+const BookingSection = styled(Stack)`
+  gap: ${t.space[3]};
+`;
+const RentalSection = styled(BookingSection)`
+  margin-block-start: ${t.space[2]};
+  padding-block-start: ${t.space[6]};
+  border-block-start: 1px solid ${t.color.border.subtle};
+`;
+const ProductActions = styled(Actions)`
+  > button, > a {
+    box-sizing: border-box;
+    inline-size: 240px;
+    max-inline-size: 100%;
+    min-block-size: ${t.control.height.default};
+    padding: ${t.space[3]} ${t.component.button.paddingInline.default};
+    font-family: ${t.font.family.ui};
+    font-size: ${t.type.button.size};
+    line-height: ${t.type.button.lineHeight};
+    font-weight: ${t.type.button.weight};
+    letter-spacing: ${t.type.button.letterSpacing};
+    border-radius: ${t.component.button.radius};
+  }
+  @media (max-width: 767px) {
+    > button, > a { inline-size: 100%; }
+  }
+`;
 export function ProductDetailPage() {
   const { slug = '' } = useParams(),
     navigate = useNavigate(),
@@ -133,17 +166,20 @@ export function ProductDetailPage() {
                     )}
                   </Stack>
                 ))}
-                <Facts><div><dt>Zkouška</dt><dd>{formatMoney(200)}</dd></div></Facts>
+                <FittingPrice><div><dt>Zkouška</dt><dd>{formatMoney(200)}</dd></div></FittingPrice>
               </Panel>
             ))
           ) : (
             <Copy>Momentálně nejsou dostupné žádné velikosti.</Copy>
           )}
-          <Copy>Zkouška je placená. Po jejím absolvování můžete získat slevu 200 Kč na pronájem.</Copy>
-          <Actions><RouteLink to={"/zkouska?product="+encodeURIComponent(product.id)}>Rezervovat zkoušku</RouteLink></Actions>
-          <Copy>
-            Na focení: vyzvednutí a vrácení ve stejný den, pouze osobně. Na libovolnou příležitost: 1–7 dní, s možností dopravy. Dostupnost a celkovou cenu uvidíte po výběru termínu.
-          </Copy>
+          <BookingSection>
+            <Copy>Zkouška je placená. Po jejím absolvování můžete získat slevu 200 Kč na pronájem.</Copy>
+            <ProductActions><RouteLink to={"/zkouska?product="+encodeURIComponent(product.id)}>Rezervovat zkoušku</RouteLink></ProductActions>
+          </BookingSection>
+          <RentalSection>
+            <Copy><strong>Na focení:</strong> vyzvednutí a vrácení ve stejný den, pouze osobně.</Copy>
+            <Copy><strong>Na libovolnou příležitost:</strong> 1–7 dní, s možností dopravy.</Copy>
+            <Copy>Dostupnost a celkovou cenu uvidíte po výběru termínu.</Copy>
           {booking.error ? <Copy role="alert">{booking.error}</Copy> : null}
           {booking.stored?.kind === 'attempt' || booking.storageBlocked || booking.accountBlocked ? (
             <Alert>
@@ -158,18 +194,18 @@ export function ProductDetailPage() {
             <Stack>
               <Copy>Předchozí rezervace {booking.stored.receipt.reservationNumber} již byla vytvořena.
                 {' '}Stav: {statusLabel(booking.stored.receipt.status)}. Můžete vytvořit další rezervaci.</Copy>
-              <Actions>
+              <ProductActions>
                 <Button disabled={!rentable || booking.busy} onClick={() => {
                   if (booking.startNew() && booking.chooseProduct(product))
                     { trackProduct('begin_checkout', product.id); navigate(routes.reservation, { state: { catalogueReturnTo } }); }
                 }}>Vytvořit novou rezervaci</Button>
                 <RouteLink to={routes.reservation} state={{ catalogueReturnTo }}>Zobrazit předchozí rezervaci</RouteLink>
-              </Actions>
+              </ProductActions>
             </Stack>
           ) : booking.draft && draftItems(booking.draft).some(item => item.product.id === product.id) ? (
-            <Actions><ResumeReservationLink productId={product.id} catalogueReturnTo={catalogueReturnTo} /></Actions>
+            <ProductActions><ResumeReservationLink productId={product.id} catalogueReturnTo={catalogueReturnTo} /></ProductActions>
           ) : (
-            <Actions>
+            <ProductActions>
               <Button
                 disabled={!rentable || Boolean(booking.draft && draftItems(booking.draft).length >= 20)}
                 onClick={() => {
@@ -179,8 +215,9 @@ export function ProductDetailPage() {
               >
                 {product.category === 'dress' ? 'Rezervovat šaty' : product.category === 'suit' ? 'Rezervovat oblek' : 'Rezervovat oblečení'}
               </Button>
-            </Actions>
+            </ProductActions>
           )}
+          </RentalSection>
         </Stack>
       </Columns>
     </Page>
