@@ -250,8 +250,18 @@ async function begin(page, captureProduct = false) {
   await expect(
     page.getByRole('heading', { name: 'Sofia', exact: true })
   ).toBeVisible();
-  if (captureProduct)
+  if (captureProduct) {
+    const fitting = page.getByRole('link', { name: 'Rezervovat zkoušku', exact: true });
+    const rental = page.getByRole('button', { name: 'Rezervovat šaty', exact: true });
+    const a = await fitting.boundingBox(), b = await rental.boundingBox();
+    expect(a.width).toBeCloseTo(b.width, 0);
+    expect(a.height).toBeCloseTo(b.height, 0);
+    expect(a.x).toBeCloseTo(b.x, 0);
+    expect(a.height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('p').filter({has: page.locator('strong', {hasText: 'Na focení:'})})).toHaveCount(1);
+    await expect(page.locator('p').filter({has: page.locator('strong', {hasText: 'Na libovolnou příležitost:'})})).toHaveCount(1);
     await capture(page, 'product-' + page.viewportSize().width);
+  }
   await page.getByRole('button', { name: /^Rezervovat(?: šaty| oblek| oblečení)?$/ }).click();
   await page.getByLabel('Varianta pronájmu').selectOption('external');
   await page.getByLabel('Velikost', { exact: true }).selectOption(V);
