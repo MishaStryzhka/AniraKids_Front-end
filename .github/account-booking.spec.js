@@ -350,18 +350,41 @@ for (const width of [390, 768, 1440]) {
 }
 
 for(const width of [375,390,430,768,1024,1440]) test('account search and filter controls fit '+width,async({page})=>{
- await page.setViewportSize({width,height:900});await setup(page);await page.goto(APP+'/ucet/rezervace');
- await page.getByRole('button',{name:'Hledat rezervace',exact:true}).click();
- await expect(page.getByRole('textbox',{name:'Hledat rezervaci'})).toBeFocused();
- await page.getByRole('textbox',{name:'Hledat rezervaci'}).fill('AK-2026');
- await page.getByRole('button',{name:'Filtrovat rezervace'}).click();
- await page.getByRole('button',{name:'Seřadit rezervace'}).click();
+ await page.setViewportSize({width,height:900});const state=await setup(page);await page.goto(APP+'/ucet/rezervace');
+ const search=page.getByRole('button',{name:'Hledat rezervace',exact:true});
+ const filter=page.getByRole('button',{name:'Filtrovat rezervace'});
+ const title=page.getByRole('heading',{name:'Moje rezervace',exact:true});
+ await expect(search).toBeVisible();
+ const before=await search.boundingBox(), titleBefore=await title.boundingBox();
+ await search.click();
+ const field=page.getByRole('textbox',{name:'Hledat rezervaci'});
+ await expect(field).toBeFocused();
+ await expect.poll(async()=>Math.round((await page.getByRole('button',{name:'Zavřít hledání'}).boundingBox()).x)).toBe(Math.round(before.x));
+ expect((await title.boundingBox()).y).toBe(titleBefore.y);
+ const region=page.getByRole('region',{name:'Pronájmy',exact:true});
+ const regionBefore=await region.boundingBox();
+ await filter.click();
+ await expect(page.getByLabel('Typ rezervace',{exact:true})).toBeFocused();
+ expect((await region.boundingBox()).y).toBe(regionBefore.y);
+ await capture(page,'toolbar-menu-'+width);
+ await page.keyboard.press('Escape');
+ await expect(filter).toBeFocused();
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ await field.fill('AK-2026');
+ await filter.click();
  await page.getByLabel('Stav rezervace',{exact:true}).selectOption('active');
+ await page.getByRole('button',{name:'Seřadit rezervace'}).click();
+ await expect(page.getByRole('dialog',{name:'Filtry rezervací'})).toHaveCount(0);
  await page.getByLabel('Řazení rezervací').selectOption('date_asc');
+ await expect(page.getByRole('dialog')).toHaveCount(0);
  await expect(page.getByText('Žádná rezervace neodpovídá hledání nebo filtrům.')).toBeVisible();
  await capture(page,'toolbar-'+width);
- await page.getByLabel('Typ rezervace',{exact:true}).selectOption('fitting');
- await expect(page.getByRole('region',{name:'Pronájmy',exact:true})).toBeHidden();
+ await filter.click();await title.click();await expect(page.getByRole('dialog')).toHaveCount(0);
+ await filter.click();await page.getByLabel('Typ rezervace',{exact:true}).selectOption('fitting');
+ await expect(region).toBeHidden();
+ await page.getByRole('button',{name:'Zavřít hledání'}).click();
+ await expect(field).toBeHidden();await expect(search).toBeFocused();
+ expect(state.errors).toEqual([]);
 });
 
 for (const width of [375,390,430,768,1024,1440]) {
