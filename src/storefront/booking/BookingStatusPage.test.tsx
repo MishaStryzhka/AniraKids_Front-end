@@ -1,9 +1,11 @@
+const mockAuth={token:'account-session',isLoggedIn:true,isRefreshing:false};
+jest.mock('../../hooks/useAuth',()=>({useAuth:()=>mockAuth}));
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BookingStatusPage, reservationStatusPath } from './BookingStatusPage';
-import { getReservationStatus } from '../api/publicApi';
+import { getReservationStatus, getAccountReservationStatus } from '../api/publicApi';
 import { receipt } from './bookingFixtures';
-jest.mock('../api/publicApi', () => ({ ...jest.requireActual('../api/publicApi'), getReservationStatus: jest.fn() }));
+jest.mock('../api/publicApi', () => ({ ...jest.requireActual('../api/publicApi'), getReservationStatus: jest.fn(), getAccountReservationStatus: jest.fn() }));
 const read = getReservationStatus as jest.MockedFunction<typeof getReservationStatus>;
 const number = 'AK-2030-ABC123', token = 'a'.repeat(43);
 beforeEach(() => read.mockReset());
@@ -26,4 +28,13 @@ test('failed refresh hides payment instructions rather than claiming current sta
   render(<MemoryRouter initialEntries={[reservationStatusPath(number, token)]}><BookingStatusPage /></MemoryRouter>);
   expect(await screen.findByRole('alert')).toHaveTextContent('nepodařilo načíst');
   expect(screen.queryByText('Stav: Čeká na potvrzení')).not.toBeInTheDocument();
+});
+
+test('account detail uses bearer access and never creates a guest capability',async()=>{
+ (getAccountReservationStatus as jest.Mock).mockResolvedValue({...receipt,reservationNumber:number});
+ render(<MemoryRouter initialEntries={['/stav-rezervace?reservation='+number]}><BookingStatusPage/></MemoryRouter>);
+ expect(await screen.findByRole('heading',{name:number})).toBeInTheDocument();
+ expect(getAccountReservationStatus).toHaveBeenCalledWith(number,'account-session',expect.any(AbortSignal));
+ expect(read).not.toHaveBeenCalled();
+ expect(screen.queryByText(/Tento soukromý odkaz/)).not.toBeInTheDocument();
 });

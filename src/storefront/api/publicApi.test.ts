@@ -1,4 +1,5 @@
 import {
+  getAccountBookings,
   getCatalogue,
   getPublicProduct,
   getAvailability,
@@ -227,4 +228,16 @@ test('multi-item request sends one basket and requires all receipt items and sum
   expect(() => parseReceipt({ reservation: receipt }, request)).toThrow();
   expect(() => parseReceipt({ reservation: { ...basket, totalDue: 1 } }, request)).toThrow();
   expect(() => parseReceipt({ reservation: { ...basket, items: [receipt.item, { ...second, variantId: product.variants[1].id }] } }, request)).toThrow();
+});
+
+test('combined history preserves the server order and passes type filters with account authorization',async()=>{
+ const fitting={number:'ZK-123456ABCDEF',date:'2030-10-09',time:'16:00'};
+ fetchMock.mockResolvedValueOnce(response({items:[{kind:'fitting',fitting},{kind:'rental',reservation:{reservation:receipt}}],total:21,page:2,guestEmailAccess:true}));
+ const data=await getAccountBookings('session',2,undefined,'kind=all&sort=date_asc');
+ expect(data.items.map(item=>item.kind)).toEqual(['fitting','rental']);
+ expect(data.total).toBe(21);
+ expect(fetchMock.mock.calls[0][0]).toBe('https://public.test/api/v2/account/bookings?page=2&kind=all&sort=date_asc');
+ expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer session');
+ fetchMock.mockResolvedValueOnce(response({items:[{kind:'unknown'}],total:1,page:1}));
+ await expect(getAccountBookings('session',1)).rejects.toMatchObject({code:'INVALID_RESPONSE'});
 });

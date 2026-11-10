@@ -45,7 +45,7 @@ async function setup(page, { guest = false, delayProfile = false } = {}) {
     if (url.pathname === '/api/v2/account/fittings') return json({items:[],total:0,page:1,limit:20});
     if (url.pathname === '/api/v2/catalogue/products/sofia') return json({ product });
     if (url.pathname === '/api/v2/catalogue/products') return json({ items: [product], page: 1, limit: 12, total: 1, totalPages: 1 });
-    if (url.pathname === '/api/v2/account/reservations') {
+    if (url.pathname === '/api/v2/account/bookings') {
       state.historyReads++;
       return json({ items: [], total: 0, page: Number(url.searchParams.get('page')) });
     }
@@ -151,9 +151,9 @@ for (const width of [390,768,1440]) {
       expect(route.request().headers().authorization).toBe('Bearer test-session'); reads++;
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reservation:ownedReceipt})});
     });
-    await page.route(API+'/api/v2/account/reservations?**',route=>{
+    await page.route(API+'/api/v2/account/bookings?**',route=>{
       expect(route.request().headers().authorization).toBe('Bearer test-session');
-      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:posted?[{reservation:ownedReceipt}]:[],total:posted?1:0,page:1})});
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:posted?[{kind:'rental',reservation:{reservation:ownedReceipt}}]:[],total:posted?1:0,page:1})});
     });
     await enterBooking(page);
     await expect(page.getByLabel('E-mail',{exact:true})).toHaveValue(profile.email);
@@ -171,7 +171,7 @@ for (const width of [390,768,1440]) {
     await page.getByRole('button',{name:'Aktualizovat stav rezervace'}).click();
     await expect.poll(()=>reads).toBe(2);
     await page.getByRole('link',{name:'Otevřít aktuální stav rezervace'}).click();
-    await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
+    await expect(page.getByText('AK-2030-OWN001',{exact:true})).toBeVisible();
     await capture(page,'owned-history-'+width);
     expect(state.errors).toEqual([]);
   });
@@ -182,8 +182,8 @@ for (const width of [390,768,1440]) {
       version:1,kind:'receipt',receipt:{...r,guestAccessToken:'g'.repeat(43)}
     })),ownedReceipt);
     let linked=false, claims=0;
-    await page.route(API+'/api/v2/account/reservations?**',route=>route.fulfill({status:200,
-      contentType:'application/json',body:JSON.stringify({items:linked?[{reservation:ownedReceipt}]:[],total:linked?1:0,page:1})}));
+    await page.route(API+'/api/v2/account/bookings?**',route=>route.fulfill({status:200,
+      contentType:'application/json',body:JSON.stringify({items:linked?[{kind:'rental',reservation:{reservation:ownedReceipt}}]:[],total:linked?1:0,page:1})}));
     await page.route(API+'/api/v2/account/reservations/'+ownedReceipt.reservationNumber+'/claim',route=>{
       expect(route.request().headers().authorization).toBe('Bearer test-session');
       expect(route.request().postDataJSON()).toEqual({guestAccessToken:'g'.repeat(43)});
@@ -197,7 +197,7 @@ for (const width of [390,768,1440]) {
     expect(claims).toBe(0);
     expect((await claim.boundingBox()).height).toBeGreaterThanOrEqual(44);
     await claim.click();
-    await expect(page.getByRole('heading',{name:/AK-2030-OWN001/})).toBeVisible();
+    await expect(page.getByText('AK-2030-OWN001',{exact:true})).toBeVisible();
     await expect(page.locator('summary', { hasText: 'Rezervace bez přihlášení' })).toHaveCount(0);
     expect(claims).toBe(1);
     expect(state.posts).toEqual([]);
@@ -300,8 +300,8 @@ for (const width of [390, 768, 1440]) {
       expect(route.request().headers().authorization).toBe('Bearer test-session');
       return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ reservation: basketReceipt }) });
     });
-    await page.route(API + '/api/v2/account/reservations?**', route => route.fulfill({
-      status: 200, contentType: 'application/json', body: JSON.stringify({ items: posted.length ? [{ reservation: basketReceipt }] : [], total: posted.length ? 1 : 0, page: 1 })
+    await page.route(API + '/api/v2/account/bookings?**', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ items: posted.length ? [{kind:'rental',reservation:{reservation:basketReceipt}}] : [], total: posted.length ? 1 : 0, page: 1 })
     }));
     await enterBooking(page);
     await page.getByLabel('Velikost', { exact: true }).selectOption(product.variants[0].id);
@@ -361,7 +361,7 @@ for(const width of [375,390,430,768,1024,1440]) test('account search and filter 
  await expect(field).toBeFocused();
  await expect.poll(async()=>Math.round((await page.getByRole('button',{name:'Zavřít hledání'}).boundingBox()).x)).toBe(Math.round(before.x));
  expect((await title.boundingBox()).y).toBe(titleBefore.y);
- const region=page.getByRole('region',{name:'Pronájmy',exact:true});
+ const region=page.getByRole('region',{name:'Rezervace',exact:true});
  const regionBefore=await region.boundingBox();
  await filter.click();
  await expect(page.getByLabel('Typ rezervace',{exact:true})).toBeFocused();
@@ -381,7 +381,7 @@ for(const width of [375,390,430,768,1024,1440]) test('account search and filter 
  await capture(page,'toolbar-'+width);
  await filter.click();await title.click();await expect(page.getByRole('dialog')).toHaveCount(0);
  await filter.click();await page.getByLabel('Typ rezervace',{exact:true}).selectOption('fitting');
- await expect(region).toBeHidden();
+ await expect(region).toBeVisible();
  await page.getByRole('button',{name:'Zavřít hledání'}).click();
  await expect(field).toBeHidden();await expect(search).toBeFocused();
  expect(state.errors).toEqual([]);
@@ -408,3 +408,32 @@ for (const width of [375,390,430,768,1024,1440]) {
     });
   }
 }
+
+for(const width of [375,390,430,768,1024,1440]) test('unified history links and type filter '+width,async({page})=>{
+ await page.setViewportSize({width,height:1000});await setup(page);
+ const fitting={number:'ZK-123456ABCDEF',date:'2030-10-09',time:'16:00',durationMinutes:30,price:200,status:'confirmed',paymentStatus:'paid',product:{name:'Sofia'}};
+ await page.route(API+'/api/v2/account/bookings?**',route=>{
+  const kind=new URL(route.request().url()).searchParams.get('kind');
+  const items=[{kind:'fitting',fitting},{kind:'rental',reservation:{reservation:ownedReceipt}}].filter(x=>kind==='all'||x.kind===kind);
+  return route.fulfill({json:{items,total:items.length,page:1,guestEmailAccess:true}});
+ });
+ await page.route(API+'/api/v2/reservations/'+ownedReceipt.reservationNumber,route=>{
+  expect(route.request().headers().authorization).toBe('Bearer test-session');
+  return route.fulfill({json:{reservation:ownedReceipt}});
+ });
+ await page.goto(APP+'/ucet/rezervace');
+ const links=page.getByRole('link',{name:'Podrobnosti a platba',exact:true});
+ await expect(links).toHaveCount(2);
+ await expect(links.nth(0)).toHaveAttribute('href','/zkouska/'+fitting.number);
+ await expect(links.nth(1)).toHaveAttribute('href','/stav-rezervace?reservation='+ownedReceipt.reservationNumber);
+ await expect(page.getByRole('heading',{name:'Zkoušky',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'Pronájmy',exact:true})).toHaveCount(0);
+ await capture(page,'unified-history-'+width);
+ await page.getByRole('button',{name:'Filtrovat rezervace'}).click();
+ await page.getByLabel('Typ rezervace',{exact:true}).selectOption('rental');
+ await expect(links).toHaveCount(1);
+ await page.keyboard.press('Escape');await links.click();
+ await expect(page.getByRole('heading',{name:ownedReceipt.reservationNumber,exact:true})).toBeVisible();
+ await expect(page.getByText(/Tento soukromý odkaz/)).toHaveCount(0);
+ await capture(page,'account-detail-'+width);
+});

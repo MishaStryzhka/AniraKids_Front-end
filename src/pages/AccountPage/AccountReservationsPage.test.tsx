@@ -1,3 +1,5 @@
+jest.mock('../../admin/api/errors',()=>({}));
+jest.mock('../../admin/api/client',()=>({}));
 import { product, receipt, body } from '../../storefront/booking/bookingFixtures';
 import { initialDraft, type BookingDraft, type StoredBooking } from '../../storefront/booking/bookingModel';
 import { claimReservation } from '../../storefront/api/publicApi';
@@ -65,12 +67,12 @@ test('multiple pages remain reachable and an emptied later page can return to pa
   const rendered = view();
   expect(screen.getByRole('button', { name: 'Předchozí' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: 'Další' }));
-  expect(mockRead).toHaveBeenLastCalledWith('test-session:2:q=&status=all&sort=newest', expect.any(Function));
+  expect(mockRead).toHaveBeenLastCalledWith('test-session:2:q=&status=all&sort=newest&kind=all', expect.any(Function));
   mockRead.mockReturnValue({ data: { items: [], total: 0 }, loading: false, reload: jest.fn() });
   rendered.rerender(<MemoryRouter><AccountReservationsPage /></MemoryRouter>);
   expect(screen.getByRole('button', { name: 'Předchozí' })).toBeEnabled();
   fireEvent.click(screen.getByRole('button', { name: 'Zpět na první stránku' }));
-  expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=&status=all&sort=newest', expect.any(Function));
+  expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=&status=all&sort=newest&kind=all', expect.any(Function));
   expect(screen.queryByRole('button', { name: 'Předchozí' })).not.toBeInTheDocument();
 });
 
@@ -131,13 +133,26 @@ test('search opens from icon and filters reset pagination across the complete hi
  fireEvent.click(screen.getByRole('button',{name:'Další'}));
  fireEvent.click(screen.getByRole('button',{name:'Hledat rezervace'}));
  fireEvent.change(screen.getByRole('textbox',{name:'Hledat rezervaci'}),{target:{value:'AK-2026'}});
- await waitFor(()=>expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=all&sort=newest',expect.any(Function)));
+ await waitFor(()=>expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=all&sort=newest&kind=all',expect.any(Function)));
  fireEvent.click(screen.getByRole('button',{name:'Filtrovat rezervace'}));
  fireEvent.change(screen.getByLabelText('Stav rezervace'),{target:{value:'active'}});
- expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=active&sort=newest',expect.any(Function));
+ expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=active&sort=newest&kind=all',expect.any(Function));
  fireEvent.click(screen.getByRole('button',{name:'Seřadit rezervace'}));
  fireEvent.change(screen.getByLabelText('Řazení rezervací'),{target:{value:'date_asc'}});
- expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=active&sort=date_asc',expect.any(Function));
+ expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=AK-2026&status=active&sort=date_asc&kind=all',expect.any(Function));
  fireEvent.keyDown(screen.getByRole('textbox',{name:'Hledat rezervaci'}),{key:'Escape'});
  expect(screen.queryByRole('textbox',{name:'Hledat rezervaci'})).not.toBeInTheDocument();
+});
+
+test('fittings and rentals share one ordered list and navigate to their own details',()=>{
+ const fitting={number:'ZK-123456ABCDEF',date:'2030-10-09',time:'16:00',durationMinutes:30,price:200,status:'confirmed',paymentStatus:'paid'};
+ mockRead.mockReturnValue({data:{items:[{kind:'fitting',fitting},{kind:'rental',reservation:receipt}],total:2,guestEmailAccess:true},loading:false});view();
+ const links=screen.getAllByRole('link',{name:'Podrobnosti a platba'});
+ expect(links[0]).toHaveAttribute('href','/zkouska/'+fitting.number);
+ expect(links[1]).toHaveAttribute('href','/stav-rezervace?reservation='+receipt.reservationNumber);
+ expect(screen.queryByRole('heading',{name:'Zkoušky'})).not.toBeInTheDocument();
+ expect(screen.queryByRole('heading',{name:'Pronájmy'})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Filtrovat rezervace'}));
+ fireEvent.change(screen.getByLabelText('Typ rezervace'),{target:{value:'rental'}});
+ expect(mockRead).toHaveBeenLastCalledWith('test-session:1:q=&status=all&sort=newest&kind=rental',expect.any(Function));
 });

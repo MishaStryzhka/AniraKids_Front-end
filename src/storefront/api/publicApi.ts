@@ -475,6 +475,19 @@ export async function getReservationStatus(number: string, token: string, signal
   return { ...receipt, guestAccessToken: token };
 }
 
+export type AccountBooking = {kind:'rental';reservation:Receipt}|{kind:'fitting';fitting:import('../../fittings/fittingApi').Fitting};
+export async function getAccountBookings(token:string,page:number,signal?:AbortSignal,filters=''):Promise<{items:AccountBooking[];total:number;page:number;guestEmailAccess:boolean}>{
+ const {body:data}=await request(`/account/bookings?page=${page}${filters?'&'+filters:''}`,{signal,headers:{Authorization:`Bearer ${token}`}});
+ if(!object(data)||!Array.isArray(data.items)||!Number.isSafeInteger(data.total)||(data.total as number)<0||data.page!==page)throw new PublicApiError('INVALID_RESPONSE');
+ const items:AccountBooking[]=data.items.map(row=>{
+  if(!object(row))throw new PublicApiError('INVALID_RESPONSE');
+  if(row.kind==='rental')return {kind:'rental',reservation:parseReceipt(row.reservation)};
+  if(row.kind==='fitting'&&object(row.fitting)&&typeof row.fitting.number==='string'&&/^ZK-[A-F0-9]{12}$/.test(row.fitting.number)&&typeof row.fitting.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(row.fitting.date)&&typeof row.fitting.time==='string')return {kind:'fitting',fitting:row.fitting as unknown as import('../../fittings/fittingApi').Fitting};
+  throw new PublicApiError('INVALID_RESPONSE');
+ });
+ return {items,total:data.total as number,page,guestEmailAccess:data.guestEmailAccess===true};
+}
+
 export async function getAccountReservations(token: string, page: number, signal?: AbortSignal, filters = ''): Promise<{ items: Receipt[]; total: number; page: number; guestEmailAccess?: boolean }> {
   const result = await request(`/account/reservations?page=${page}${filters ? '&' + filters : ''}`, { signal, headers: { Authorization: `Bearer ${token}` } });
   const data = result.body;

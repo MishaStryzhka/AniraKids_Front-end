@@ -1,7 +1,8 @@
 import {ReservationToolbar, initialReservationFilters} from './ReservationToolbar';
 import {FulfillmentSummary} from '../../storefront/booking/FulfillmentChoice';
 import { StatusBadge } from '../../design-system/components/StatusBadge';
-import { AccountFittings } from '../../fittings/AccountFittings';
+import {fittingDateLabel,fittingStatusLabels} from '../../fittings/fittingApi';
+import {FittingLinkRecovery} from '../../fittings/FittingLinkRecovery';
 import { loadGuestReservationLinks } from '../../storefront/booking/guestReservationLinks';
 import { reservationStatusPath } from '../../storefront/booking/BookingStatusPage';
 import { draftItems, modeLabel } from '../../storefront/booking/bookingModel';
@@ -11,9 +12,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { ModalAuthContext } from '../../context/ModalAuthContext';
 import { routes } from '../../navigation/routes';
 import { Button } from '../../design-system/components/Button';
-import { getAccountReservations, claimReservation, receiptItems } from '../../storefront/api/publicApi';
+import { getAccountBookings, claimReservation, receiptItems } from '../../storefront/api/publicApi';
 import { usePublicRead } from '../../storefront/usePublicRead';
-import { ReceiptPaymentInformation } from '../../storefront/payments/PaymentInformation';
 import { statusLabel } from '../../storefront/booking/bookingModel';
 import { formatCalendarDay } from '../../admin/calendar/calendarDates';
 import { Page, Title, Panel, Copy, Heading, Stack, Actions, RouteLink } from '../../storefront/storefrontStyles';
@@ -40,8 +40,8 @@ export function AccountReservationsPage() {
   const [filters,setFilters] = useState(initialReservationFilters);
   const [search,setSearch] = useState('');
   useEffect(()=>{const timer=setTimeout(()=>{setSearch(filters.q);setPage(1);},250);return()=>clearTimeout(timer);},[filters.q]);
-  const query=new URLSearchParams({q:search,status:filters.status,sort:filters.sort}).toString();
-  const result = usePublicRead(isLoggedIn && token && !isRefreshing ? `${token}:${page}:${query}` : null, signal => getAccountReservations(token, page, signal, query));
+  const query=new URLSearchParams({q:search,status:filters.status,sort:filters.sort,kind:filters.kind}).toString();
+  const result = usePublicRead(isLoggedIn && token && !isRefreshing ? `${token}:${page}:${query}` : null, signal => getAccountBookings(token, page, signal, query));
   const claim = async () => {
     if (!localReceipt?.guestAccessToken || !currentToken.current || claimRequest.current) return;
     const ownerToken = currentToken.current;
@@ -63,14 +63,13 @@ export function AccountReservationsPage() {
   };
   const ownClaim = claimState?.token === token ? claimState : null;
   const hasGuestReservation = Boolean(localReceipt && result.data &&
-    !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) &&
+    !result.data.items.some(item => item.kind==='rental' && item.reservation.reservationNumber === localReceipt.reservationNumber) &&
     ownClaim?.claimed !== localReceipt.reservationNumber);
   return <Page><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap'}}><Title>Moje rezervace</Title>
     <ReservationToolbar value={filters} onChange={value=>{setFilters(value);setPage(1);}}/></div>
-    {isLoggedIn&&!isRefreshing&&token&&filters.kind!=='rental'?<AccountFittings key={token+query} token={token} query={query}/>:null}
-    <section hidden={filters.kind==='fitting'} aria-label="Pronájmy">
-    <Heading>Pronájmy</Heading>
-    {isLoggedIn&&result.data?<details style={{marginBottom:16}}><summary style={{minHeight:44,cursor:'pointer'}}>Chybí rezervace vytvořená bez přihlášení?</summary><Copy>{result.data.guestEmailAccess?'Zobrazujeme také nepřiřazené rezervace se stejným ověřeným e-mailem. Pokud rezervaci nevidíte, zkontrolujte e-mail uvedený v objednávce.':'Rezervace vytvořené bez přihlášení zobrazíme po ověření stejného e-mailu v profilu.'}</Copy>{!result.data.guestEmailAccess?<RouteLink to="/ucet">Ověřit e-mail v profilu</RouteLink>:null}</details>:null}
+    <section aria-label="Rezervace">
+    {isLoggedIn&&result.data&&!result.data.guestEmailAccess?<FittingLinkRecovery token={token} guestEmailAccess={false} onConnected={()=>{setPage(1);result.reload();}}/>:null}
+    {isLoggedIn&&result.data&&!result.data.guestEmailAccess?<details style={{marginBottom:16}}><summary style={{minHeight:44,cursor:'pointer'}}>Chybí rezervace vytvořená bez přihlášení?</summary><Copy>{result.data.guestEmailAccess?'Zobrazujeme také nepřiřazené rezervace se stejným ověřeným e-mailem. Pokud rezervaci nevidíte, zkontrolujte e-mail uvedený v objednávce.':'Rezervace vytvořené bez přihlášení zobrazíme po ověření stejného e-mailu v profilu.'}</Copy>{!result.data.guestEmailAccess?<RouteLink to="/ucet">Ověřit e-mail v profilu</RouteLink>:null}</details>:null}
     {booking?.draftStorageWarning && !booking.stored ? <Copy role="alert">
       Rozpracovaný výběr se nepodařilo uložit v tomto prohlížeči. Před dokončením nezavírejte ani neobnovujte stránku.
     </Copy> : null}
@@ -109,7 +108,7 @@ export function AccountReservationsPage() {
     {isRefreshing ? <Copy role="status">Načítáme účet…</Copy> : !isLoggedIn ? <Panel><Copy>Pro zobrazení rezervací uložených v účtu se přihlaste.</Copy><Button onClick={() => auth?.setIsOpenModalAuth(true)}>Přihlásit se</Button></Panel>
     : result.loading ? <Copy role="status">Načítáme rezervace…</Copy> : result.error ? <Panel><Copy role="alert">Rezervace se nepodařilo načíst. Zkuste to znovu; pokud přihlášení vypršelo, přihlaste se znovu.</Copy><Button onClick={result.reload}>Zkusit znovu</Button></Panel>
     : result.data ? <Stack>
-      {localReceipt && !result.data.items.some(item => item.reservationNumber === localReceipt.reservationNumber) && ownClaim?.claimed !== localReceipt.reservationNumber ? <Panel>
+      {localReceipt && !result.data.items.some(item => item.kind==='rental' && item.reservation.reservationNumber === localReceipt.reservationNumber) && ownClaim?.claimed !== localReceipt.reservationNumber ? <Panel>
         <Heading>Rezervace z tohoto prohlížeče</Heading>
         <Copy>{localReceipt.reservationNumber} byla vytvořena jako host. Můžete ji připojit k právě přihlášenému účtu.</Copy>
         <Copy>{modeLabel(localReceipt.rentalMode)}</Copy>
@@ -124,14 +123,30 @@ export function AccountReservationsPage() {
         {page === 1 ? <Actions><RouteLink to={routes.newArrivals}>Prohlédnout nabídku</RouteLink></Actions>
           : <Button variant="secondary" onClick={() => setPage(1)}>Zpět na první stránku</Button>}
       </Panel>}
-      {result.data.items.map(receipt => <Panel key={receipt.reservationNumber}>
-        <Heading>{receipt.reservationNumber} · {statusLabel(receipt.status)}</Heading>
-        {receiptItems(receipt).map((item, index) => <Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
+      {result.data.items.map(entry => {
+       if(entry.kind==='fitting'){
+        const item=entry.fitting;
+        return <Panel key={item.number}>
+         <Copy>Zkouška · {fittingStatusLabels[item.status]}</Copy>
+         <Heading>{fittingDateLabel(item.date)} · {item.time}</Heading>
+         <Copy>{item.number}</Copy>
+         <Copy>{item.durationMinutes} minut · {item.price} Kč · {item.paymentStatus==='paid'?'Zaplaceno':item.paymentStatus==='refunded'?'Platba vrácena':'Nezaplaceno'}</Copy>
+         {item.product?<Copy>{item.product.name}</Copy>:null}
+         {item.status==='completed'&&item.paymentStatus==='paid'?<Copy>Zaplacených 200 Kč za zkoušku můžete uplatnit při rezervaci šatů.</Copy>:null}
+         <Actions><RouteLink to={'/zkouska/'+item.number}>Podrobnosti a platba</RouteLink></Actions>
+        </Panel>;
+       }
+       const receipt=entry.reservation;
+       return <Panel key={receipt.reservationNumber}>
+        <Copy>Pronájem · {statusLabel(receipt.status)}</Copy>
+        <Heading>{formatCalendarDay(receipt.startDate)} – {formatCalendarDay(receipt.endDate)}</Heading>
+        <Copy>{receipt.reservationNumber}</Copy>
+        {receiptItems(receipt).map((item,index)=><Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
         <Copy>{modeLabel(receipt.rentalMode)}</Copy>
         <FulfillmentSummary value={receipt}/>
-        <Copy>{formatCalendarDay(receipt.startDate)} – {formatCalendarDay(receipt.endDate)}</Copy>
-        <details><summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Platby a podrobnosti</summary><ReceiptPaymentInformation receipt={receipt} access={{kind:'account',token}} /></details>
-      </Panel>)}
+        <Actions><RouteLink to={routes.reservationStatus+'?reservation='+encodeURIComponent(receipt.reservationNumber)}>Podrobnosti a platba</RouteLink></Actions>
+       </Panel>;
+      })}
       {(result.data.total > 20 || page > 1) && <Actions aria-label="Stránkování rezervací"><Button variant="secondary" disabled={page === 1} onClick={() => setPage(value => value - 1)}>Předchozí</Button><Copy>Strana {page}</Copy><Button variant="secondary" disabled={page * 20 >= result.data.total} onClick={() => setPage(value => value + 1)}>Další</Button></Actions>}
       {hasGuestReservation ? <details>
         <summary style={{ minHeight: 44, cursor: 'pointer', padding: '12px 0' }}>Rezervace bez přihlášení</summary>
