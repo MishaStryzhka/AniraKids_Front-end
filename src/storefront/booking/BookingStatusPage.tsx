@@ -36,7 +36,7 @@ export function BookingStatusPage() {
   const result = usePublicRead(valid ? number+(accountMode?auth.token:token) : null, signal => accountMode?getAccountReservationStatus(number,auth.token,signal):getReservationStatus(number, token, signal), true);
   useLiveReservation(valid?number+(accountMode?auth.token:token):null,()=>{if(!result.loading)result.reload();},false);
   return <Page>
-    <Title>Stav rezervace</Title>
+    <Title>Vaše rezervace</Title>
     <Panel>
       {accountMode&&!auth.isLoggedIn?<Copy>Pro zobrazení rezervace se <RouteLink to="/ucet">přihlaste</RouteLink>.</Copy>:!valid ? <Copy role="alert">Odkaz na rezervaci není úplný. Otevřete svůj uložený odkaz nebo nás kontaktujte.</Copy>
         : result.loading && !result.data ? <Copy role="status">Ověřování aktuálního stavu…</Copy>
