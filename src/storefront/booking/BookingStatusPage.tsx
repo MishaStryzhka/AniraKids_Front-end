@@ -3,7 +3,7 @@ import {loadGuestReservationLinks} from './guestReservationLinks';
 import {FulfillmentSummary} from './FulfillmentChoice';
 import {useLiveReservation} from './useLiveReservation';
 import {useEffect} from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../design-system/components/Button';
 import { routes } from '../../navigation/routes';
 import { receiptItems, getAccountReservationStatus, getReservationStatus, isGuestAccessToken } from '../api/publicApi';
@@ -15,24 +15,27 @@ import { statusLabel } from './bookingModel';
 
 // The capability stays in the fragment: it is not sent in HTTP URLs/referrers.
 export function reservationStatusPath(number: string, token: string) {
-  return routes.reservationStatus + '#' + new URLSearchParams({ reservation: number, token });
+  return routes.reservation + '/' + encodeURIComponent(number) + '#' + new URLSearchParams({ token });
 }
 
 export function BookingStatusPage() {
-  const { hash, search } = useLocation();
+  const { hash, search, pathname } = useLocation();
+  const {reservationNumber}=useParams();
   const auth=useAuth();
-  const accountNumber=new URLSearchParams(search).get('reservation')??'';
-  const accountMode=!hash&&Boolean(accountNumber);
+  const accountNumber=reservationNumber??new URLSearchParams(search).get('reservation')??'';
   const navigate=useNavigate();
   const params = new URLSearchParams(hash.slice(1));
-  const number = params.get('reservation') ?? new URLSearchParams(search).get('paymentReservation') ?? accountNumber;
+  const number = reservationNumber ?? params.get('reservation') ?? new URLSearchParams(search).get('paymentReservation') ?? accountNumber;
   let savedToken='';
   try { savedToken=loadGuestReservationLinks().find(link=>link.reservationNumber===number)?.guestAccessToken ?? ''; } catch { /* The saved private link still works if storage is unavailable. */ }
   const token = params.get('token') ?? savedToken;
+  const accountMode=Boolean(accountNumber)&&!isGuestAccessToken(token);
   const valid = /^AK-\d{4}-[A-Z0-9]{6}$/.test(number) && (accountMode?auth.isLoggedIn&&!auth.isRefreshing&&Boolean(auth.token):isGuestAccessToken(token));
   useEffect(()=>{
-    if(valid && !hash && !accountMode)navigate(reservationStatusPath(number,token),{replace:true});
-  },[valid,hash,number,token,navigate,accountMode]);
+    if(!valid)return;
+    const canonical=accountMode?routes.reservation+'/'+encodeURIComponent(number):reservationStatusPath(number,token);
+    if(pathname+search+hash!==canonical)navigate(canonical,{replace:true});
+  },[valid,hash,search,pathname,number,token,navigate,accountMode]);
   const result = usePublicRead(valid ? number+(accountMode?auth.token:token) : null, signal => accountMode?getAccountReservationStatus(number,auth.token,signal):getReservationStatus(number, token, signal), true);
   useLiveReservation(valid?number+(accountMode?auth.token:token):null,()=>{if(!result.loading)result.reload();},false);
   return <Page>

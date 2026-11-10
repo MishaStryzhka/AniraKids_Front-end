@@ -220,6 +220,7 @@ function App() {
               element={<ReservationFlowLayout />}
             >
               <Route index element={<BookingPage />} />
+              <Route path=":reservationNumber" element={<BookingStatusPage />} />
             </Route>
           </Routes>
           <RouteScrollRestoration />

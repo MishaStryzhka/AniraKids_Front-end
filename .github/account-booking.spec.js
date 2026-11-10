@@ -425,7 +425,7 @@ for(const width of [375,390,430,768,1024,1440]) test('unified history links and 
  const links=page.getByRole('link',{name:'Podrobnosti a platba',exact:true});
  await expect(links).toHaveCount(2);
  await expect(links.nth(0)).toHaveAttribute('href','/zkouska/'+fitting.number);
- await expect(links.nth(1)).toHaveAttribute('href','/stav-rezervace?reservation='+ownedReceipt.reservationNumber);
+ await expect(links.nth(1)).toHaveAttribute('href','/rezervace/'+ownedReceipt.reservationNumber);
  await expect(page.getByRole('heading',{name:'Zkoušky',exact:true})).toHaveCount(0);
  await expect(page.getByRole('heading',{name:'Pronájmy',exact:true})).toHaveCount(0);
  await capture(page,'unified-history-'+width);

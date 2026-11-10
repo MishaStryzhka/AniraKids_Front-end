@@ -149,7 +149,7 @@ test('fittings and rentals share one ordered list and navigate to their own deta
  mockRead.mockReturnValue({data:{items:[{kind:'fitting',fitting},{kind:'rental',reservation:receipt}],total:2,guestEmailAccess:true},loading:false});view();
  const links=screen.getAllByRole('link',{name:'Podrobnosti a platba'});
  expect(links[0]).toHaveAttribute('href','/zkouska/'+fitting.number);
- expect(links[1]).toHaveAttribute('href','/stav-rezervace?reservation='+receipt.reservationNumber);
+ expect(links[1]).toHaveAttribute('href','/rezervace/'+receipt.reservationNumber);
  expect(screen.queryByRole('heading',{name:'Zkoušky'})).not.toBeInTheDocument();
  expect(screen.queryByRole('heading',{name:'Pronájmy'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Filtrovat rezervace'}));

@@ -144,7 +144,7 @@ export function AccountReservationsPage() {
         {receiptItems(receipt).map((item,index)=><Copy key={index}>{item.productName} · Velikost {item.size}</Copy>)}
         <Copy>{modeLabel(receipt.rentalMode)}</Copy>
         <FulfillmentSummary value={receipt}/>
-        <Actions><RouteLink to={routes.reservationStatus+'?reservation='+encodeURIComponent(receipt.reservationNumber)}>Podrobnosti a platba</RouteLink></Actions>
+        <Actions><RouteLink to={routes.reservation+'/'+encodeURIComponent(receipt.reservationNumber)}>Podrobnosti a platba</RouteLink></Actions>
        </Panel>;
       })}
       {(result.data.total > 20 || page > 1) && <Actions aria-label="Stránkování rezervací"><Button variant="secondary" disabled={page === 1} onClick={() => setPage(value => value - 1)}>Předchozí</Button><Copy>Strana {page}</Copy><Button variant="secondary" disabled={page * 20 >= result.data.total} onClick={() => setPage(value => value + 1)}>Další</Button></Actions>}
