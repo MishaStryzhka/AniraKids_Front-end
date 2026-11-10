@@ -435,5 +435,9 @@ for(const width of [375,390,430,768,1024,1440]) test('unified history links and 
  await page.keyboard.press('Escape');await links.click();
  await expect(page.getByRole('heading',{name:ownedReceipt.reservationNumber,exact:true})).toBeVisible();
  await expect(page.getByText(/Tento soukromý odkaz/)).toHaveCount(0);
+ await expect(page.getByRole('contentinfo')).toBeVisible();
+ await expect(page.locator('[data-focused-reservation-header]')).toHaveCount(0);
+ const content=await page.getByRole('heading',{name:'Vaše rezervace',exact:true}).evaluate(el=>el.parentElement.getBoundingClientRect().width);
+ expect(content).toBeLessThanOrEqual(720);
  await capture(page,'account-detail-'+width);
 });

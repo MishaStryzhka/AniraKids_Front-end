@@ -18,16 +18,16 @@ test('private link reads current state and refreshes without creating a booking'
   read.mockResolvedValueOnce({ ...receipt, reservationNumber: number, status: 'pending' })
     .mockResolvedValueOnce({ ...receipt, reservationNumber: number, status: 'confirmed', expiresAt: null });
   render(<MemoryRouter initialEntries={[reservationStatusPath(number, token)]}><Routes><Route path="/stav-rezervace" element={<BookingStatusPage/>}/><Route path="/rezervace/:reservationNumber" element={<BookingStatusPage/>}/></Routes></MemoryRouter>);
-  expect(await screen.findByText('Stav: Čeká na potvrzení')).toBeInTheDocument();
+  expect(await screen.findByText('Čeká na potvrzení')).toBeInTheDocument();
   expect(read).toHaveBeenCalledWith(number, token, expect.any(AbortSignal));
   fireEvent.click(screen.getByRole('button', { name: 'Aktualizovat stav rezervace' }));
-  expect(await screen.findByText('Stav: Potvrzená')).toBeInTheDocument();
+  expect(await screen.findByText('Potvrzená')).toBeInTheDocument();
 });
 test('failed refresh hides payment instructions rather than claiming current state', async () => {
   read.mockRejectedValue(new Error('offline'));
   render(<MemoryRouter initialEntries={[reservationStatusPath(number, token)]}><Routes><Route path="/stav-rezervace" element={<BookingStatusPage/>}/><Route path="/rezervace/:reservationNumber" element={<BookingStatusPage/>}/></Routes></MemoryRouter>);
   expect(await screen.findByRole('alert')).toHaveTextContent('nepodařilo načíst');
-  expect(screen.queryByText('Stav: Čeká na potvrzení')).not.toBeInTheDocument();
+  expect(screen.queryByText('Čeká na potvrzení')).not.toBeInTheDocument();
 });
 
 test('account detail uses bearer access and never creates a guest capability',async()=>{

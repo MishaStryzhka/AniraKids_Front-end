@@ -1,3 +1,4 @@
+import styled from 'styled-components';
 import {useAuth} from '../../hooks/useAuth';
 import {loadGuestReservationLinks} from './guestReservationLinks';
 import {FulfillmentSummary} from './FulfillmentChoice';
@@ -8,10 +9,12 @@ import { Button } from '../../design-system/components/Button';
 import { routes } from '../../navigation/routes';
 import { receiptItems, getAccountReservationStatus, getReservationStatus, isGuestAccessToken } from '../api/publicApi';
 import { ReceiptPaymentInformation } from '../payments/PaymentInformation';
-import { Actions, Copy, Heading, Page, Panel, RouteLink, Title } from '../storefrontStyles';
+import { Copy, Heading, Page, Panel, RouteLink, Title } from '../storefrontStyles';
 import { usePublicRead } from '../usePublicRead';
 import { formatCalendarDay } from '../../admin/calendar/calendarDates';
 import { statusLabel } from './bookingModel';
+
+const Content = styled.div`width:100%;max-width:720px;margin:auto;display:grid;gap:24px;min-width:0;`;
 
 // The capability stays in the fragment: it is not sent in HTTP URLs/referrers.
 export function reservationStatusPath(number: string, token: string) {
@@ -38,7 +41,7 @@ export function BookingStatusPage() {
   },[valid,hash,search,pathname,number,token,navigate,accountMode]);
   const result = usePublicRead(valid ? number+(accountMode?auth.token:token) : null, signal => accountMode?getAccountReservationStatus(number,auth.token,signal):getReservationStatus(number, token, signal), true);
   useLiveReservation(valid?number+(accountMode?auth.token:token):null,()=>{if(!result.loading)result.reload();},false);
-  return <Page>
+  return <Page><Content>
     <Title>Vaše rezervace</Title>
     <Panel>
       {accountMode&&!auth.isLoggedIn?<Copy>Pro zobrazení rezervace se <RouteLink to="/ucet">přihlaste</RouteLink>.</Copy>:!valid ? <Copy role="alert">Odkaz na rezervaci není úplný. Otevřete svůj uložený odkaz nebo nás kontaktujte.</Copy>
@@ -48,18 +51,22 @@ export function BookingStatusPage() {
           <Button onClick={result.reload}>Zkusit znovu</Button>
         </> : result.data ? <>
           <Heading>{result.data.reservationNumber}</Heading>
-          <Copy>Stav: {statusLabel(result.data.status)}</Copy>
+          <Copy><strong>{statusLabel(result.data.status)}</strong></Copy>
           {receiptItems(result.data).map((item, index) => <div key={index}>
             <Heading>{item.productName}</Heading><Copy>Velikost: {item.size}</Copy>
           </div>)}
           <Copy>{formatCalendarDay(result.data.startDate)} – {formatCalendarDay(result.data.endDate)}</Copy>
           {result.data.fittingDiscount ? <Copy>Započtená platba za zkoušku {result.data.fittingDiscount.number}: −200 Kč</Copy> : null}
           <FulfillmentSummary value={result.data}/>
+        </> : null}
+    </Panel>
+    {result.data && !result.error && valid ? <Panel>
           <ReceiptPaymentInformation receipt={result.data} onUpdated={result.reload} access={accountMode?{kind:'account',token:auth.token}:{kind:'guest',token}} />
           <Button disabled={result.loading} onClick={result.reload}>{result.loading ? 'Ověřování stavu…' : 'Aktualizovat stav rezervace'}</Button>
           {!accountMode?<Copy>Tento soukromý odkaz si uložte. Každý, kdo jej získá, může zobrazit stav této rezervace a platební pokyny.</Copy>:null}
-        </> : null}
-      <Actions><RouteLink to={routes.contact}>Kontaktovat ANIRAK</RouteLink></Actions>
+    </Panel> : null}
+    <Panel>
+      <RouteLink to={routes.contact}>Kontakt</RouteLink>
     </Panel>
-  </Page>;
+  </Content></Page>;
 }

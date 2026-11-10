@@ -124,3 +124,12 @@ test('summary cancel icon requires explicit confirmation and keeping fitting sen
  await act(async()=>{fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Zrušit zkoušku'}));});
  await waitFor(()=>expect(api).toHaveBeenCalledWith('/account/fittings/ZK-123456ABCDEF/cancel',expect.objectContaining({method:'POST',token:'owner-session'})));
 });
+
+test.each(['cancelled','expired'])('inactive %s page hides stale QR and online payments',async status=>{
+ api.mockResolvedValue({number:'ZK-123456ABCDEF',date:'2030-10-10',time:'16:00',status,paymentStatus:'unpaid',expiresAt:'2099-01-01',address:'Kytlická 862/2',paymentOptions:{gateway:'revolut',qrEnabled:true,defaultMethod:'online'},cardPayment:{active:true,reviewRequired:true},paymentInstructions:{amount:200,accountNumber:'123/0800',message:'test',qrPayload:'test'}});
+ render(<MemoryRouter initialEntries={['/zkouska/ZK-123456ABCDEF']}><Routes><Route path="/zkouska/:number" element={<FittingStatusPage/>}/></Routes></MemoryRouter>);
+ expect(await screen.findByText(/Zápis již není aktivní/)).toBeInTheDocument();
+ expect(screen.queryByRole('heading',{name:/Platba zkoušky|Zaplaťte/})).not.toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:/Ověřit platbu|Platba odeslána|Zrušit rozpracovanou/})).not.toBeInTheDocument();
+ expect(screen.getByRole('link',{name:'Kontakt'})).toBeInTheDocument();
+});

@@ -8,17 +8,18 @@ import {Copy,Heading,Panel} from '../storefront/storefrontStyles';
 import {fittingApi,type Fitting} from './fittingApi';
 const PaymentHeading=styled(Heading)`display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;span{white-space:nowrap;}`;
 export function FittingOnlinePayment({data,endpoint,token,onUpdate,onMethod}:{data:Fitting;endpoint:string;token:string;onUpdate:()=>void;onMethod:(online:boolean)=>void}){
+ const inactive=data.status==='cancelled'||data.status==='expired';
  const startOnline=data.paymentOptions?.gateway==='revolut'&&data.status==='pending'&&data.paymentStatus==='unpaid'&&new Date(data.expiresAt).getTime()>Date.now()&&!data.cardPayment?.reviewRequired;
  const [configLoading,setConfigLoading]=useState(true);
  const [config,setConfig]=useState<RevolutConfig|null>(null),[open,setOpen]=useState(startOnline),[method,setMethod]=useState<'online'|'qr'>(startOnline?'online':'qr');
- useEffect(()=>{const c=new AbortController();void getRevolutConfig(c.signal).then(setConfig,()=>{}).finally(()=>{if(!c.signal.aborted)setConfigLoading(false);});return()=>c.abort();},[]);
+ useEffect(()=>{if(inactive)return;const c=new AbortController();void getRevolutConfig(c.signal).then(setConfig,()=>{}).finally(()=>{if(!c.signal.aborted)setConfigLoading(false);});return()=>c.abort();},[inactive]);
  const review=Boolean(data.cardPayment?.reviewRequired);
  const payable=data.status==='pending'&&data.paymentStatus==='unpaid'&&new Date(data.expiresAt).getTime()>Date.now()&&!review;
  const active=Boolean((open&&payable)||data.cardPayment?.active);
- useEffect(()=>{onMethod(active||method==='online'||review);},[active,method,review,onMethod]);
+ useEffect(()=>{onMethod(!inactive&&(active||method==='online'||review));},[active,method,review,onMethod,inactive]);
 
  const online=data.paymentOptions?.gateway==='revolut';
- if(!payable&&!active&&!review)return null;
+ if(inactive||(!payable&&!active&&!review))return null;
  const adapter:CheckoutAdapter<Fitting>={identity:endpoint+token,
   create:signal=>{if(endpoint.startsWith('/fittings/')){try{sessionStorage.setItem('anirakids.fitting-return.'+data.number,token);}catch{throw new Error('Private return link unavailable');}}return fittingApi(endpoint+'/revolut/create',{method:'POST',token,signal});},
   sync:cancel=>fittingApi(endpoint+'/revolut/'+(cancel?'cancel':'sync'),{method:'POST',token}),active:r=>Boolean(r.cardPayment?.active),

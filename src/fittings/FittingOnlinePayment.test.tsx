@@ -82,3 +82,20 @@ test('preparation failure offers safe recovery',async()=>{
  expect(await screen.findByRole('button',{name:'Ověřit platbu'})).toBeEnabled();
  expect(screen.getByText(/Platební formulář se nepodařilo/)).toBeInTheDocument();
 });
+
+test.each(['cancelled','expired'] as const)('inactive %s fitting hides stale active payment and review controls',async status=>{
+ const view=render(<FittingOnlinePayment data={{...data,status,cardPayment:{active:true,reviewRequired:true}}} endpoint="/fittings/fixture" token={privateToken} onUpdate={jest.fn()} onMethod={jest.fn()}/>);
+ await act(async()=>{});
+ expect(view.container).toBeEmptyDOMElement();
+ expect(getRevolutConfig).not.toHaveBeenCalled();
+ expect(fittingApi).not.toHaveBeenCalled();
+ expect(RevolutCheckout.embeddedCheckout).not.toHaveBeenCalled();
+});
+test('cancellation unmounts an already open checkout',async()=>{
+ const destroy=jest.fn();(RevolutCheckout.embeddedCheckout as unknown as jest.Mock).mockResolvedValue({destroy});
+ const props={endpoint:'/fittings/fixture',token:privateToken,onUpdate:jest.fn(),onMethod:jest.fn()};
+ const view=render(<FittingOnlinePayment {...props} data={data}/>);
+ await waitFor(()=>expect(RevolutCheckout.embeddedCheckout).toHaveBeenCalledTimes(1));
+ view.rerender(<FittingOnlinePayment {...props} data={{...data,status:'cancelled',cardPayment:{active:true,reviewRequired:false}}}/>);
+ expect(view.container).toBeEmptyDOMElement();expect(destroy).toHaveBeenCalled();
+});

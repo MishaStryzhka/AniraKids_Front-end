@@ -106,6 +106,8 @@ function App() {
               <Route path="/partner" element={<LegacyPartnerRedirect/>}/>
               <Route path="/partner/blaze" element={<PartnerPage/>}/>
               <Route path="/zkouska/:number" element={<FittingStatusPage/>}/>
+              <Route path={routes.reservation + "/:reservationNumber"} element={<BookingStatusPage />} />
+              <Route path={routes.reservationStatus} element={<BookingStatusPage />} />
               <Route path={routes.home} element={<MainPage />} />
 
               {/* Canonical storefront routes. */}
@@ -211,16 +213,12 @@ function App() {
               </Route>
             </Route>
 
-            <Route path={routes.reservationStatus} element={<ReservationFlowLayout />}>
-              <Route index element={<BookingStatusPage />} />
-            </Route>
             {/* Focused customer reservation flow. */}
             <Route
               path={routes.reservation}
               element={<ReservationFlowLayout />}
             >
               <Route index element={<BookingPage />} />
-              <Route path=":reservationNumber" element={<BookingStatusPage />} />
             </Route>
           </Routes>
           <RouteScrollRestoration />
